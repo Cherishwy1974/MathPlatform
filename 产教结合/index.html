@@ -1101,104 +1101,46 @@ function runPythonCode(codeId, outputId) {
     
     <!-- AI助手样式 -->
     <style>
-        /* AI助手按钮样式 */
-        .ai-assistant-btn {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #4f46e5, #9333ea);
+        /* AI 功能按钮统一样式 */
+        .ai-feature-btn {
+            width: 70px;
+            height: 70px;
+            border-radius: 16px;
             color: white;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
             cursor: pointer;
-            z-index: 1000;
-            border: none;
-            transition: all 0.3s ease;
-        }
-        
-        .ai-assistant-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 6px 16px rgba(79, 70, 229, 0.5);
-        }
-
-        .ai-assistant-btn svg {
-            width: 30px;
-            height: 30px;
-        }
-
-        /* AI 语音助手按钮 */
-        .voice-assistant-btn {
-            position: fixed;
-            bottom: 180px;
-            right: 30px;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #f093fb, #f5576c);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 20px rgba(245, 87, 108, 0.5);
-            cursor: pointer;
-            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
             transition: all 0.3s ease;
             border: none;
+            font-weight: 600;
         }
 
-        .voice-assistant-btn:hover {
-            transform: scale(1.1);
-            box-shadow: 0 6px 30px rgba(245, 87, 108, 0.7);
+        .ai-feature-btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
         }
 
-        .voice-assistant-btn.recording {
-            background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
-            animation: pulse-voice 1.5s ease-in-out infinite;
+        .ai-feature-btn:active {
+            transform: translateY(-1px) scale(1.02);
         }
 
-        @keyframes pulse-voice {
-            0%, 100% { transform: scale(1); box-shadow: 0 4px 20px rgba(255, 107, 107, 0.5); }
-            50% { transform: scale(1.1); box-shadow: 0 6px 30px rgba(255, 107, 107, 0.8); }
+        /* 录音状态动画 */
+        .ai-feature-btn.recording {
+            animation: pulse-recording 1.5s ease-in-out infinite;
         }
 
-        .voice-assistant-btn svg {
-            width: 24px;
-            height: 24px;
-        }
-
-        /* 留言板按钮 */
-        .message-board-btn {
-            position: fixed;
-            bottom: 110px;
-            right: 30px;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #8b5cf6, #6366f1);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.5);
-            cursor: pointer;
-            z-index: 1000;
-            transition: all 0.3s ease;
-            border: none;
-        }
-
-        .message-board-btn:hover {
-            transform: scale(1.1);
-            box-shadow: 0 6px 30px rgba(139, 92, 246, 0.7);
-        }
-
-        .message-board-btn svg {
-            width: 24px;
-            height: 24px;
+        @keyframes pulse-recording {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 4px 15px rgba(255, 107, 107, 0.5);
+            }
+            50% {
+                transform: scale(1.1);
+                box-shadow: 0 8px 30px rgba(255, 107, 107, 0.8);
+            }
         }
 
         /* 模态框遮罩 */
@@ -1752,29 +1694,44 @@ function runPythonCode(codeId, outputId) {
         </div>
     </footer>
 
-    <!-- AI助手按钮 -->
-    <button class="ai-assistant-btn" id="ai-assistant-btn" aria-label="打开AI助手">
-        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
-        </svg>
-    </button>
+    <!-- AI 功能区 -->
+    <div style="position: fixed; bottom: 30px; right: 30px; z-index: 1000; display: flex; flex-direction: column; gap: 15px; align-items: flex-end;">
 
-    <!-- AI 语音助手按钮 -->
-    <button class="voice-assistant-btn" id="voice-assistant-btn" aria-label="打开AI语音助手">
-        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/>
-        </svg>
-    </button>
+        <!-- AI 功能标签 -->
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);">
+            🤖 AI 助手
+        </div>
 
-    <!-- 留言板按钮 -->
-    <button class="message-board-btn" id="message-board-btn" aria-label="打开留言板">
-        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/>
-        </svg>
-    </button>
+        <!-- 文生视频按钮 -->
+        <button class="ai-feature-btn" id="text-to-video-btn" aria-label="文生视频" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+            <span style="font-size: 24px;">🎬</span>
+            <span style="font-size: 11px; margin-top: 2px;">文生视频</span>
+        </button>
+
+        <!-- 文生图按钮 -->
+        <button class="ai-feature-btn" id="text-to-image-btn" aria-label="文生图" style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);">
+            <span style="font-size: 24px;">🎨</span>
+            <span style="font-size: 11px; margin-top: 2px;">文生图</span>
+        </button>
+
+        <!-- AI 语音助手按钮 -->
+        <button class="ai-feature-btn" id="voice-assistant-btn" aria-label="AI语音助手" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+            <span style="font-size: 24px;">🎤</span>
+            <span style="font-size: 11px; margin-top: 2px;">语音助手</span>
+        </button>
+
+        <!-- AI 对话按钮 -->
+        <button class="ai-feature-btn" id="ai-assistant-btn" aria-label="AI对话" style="background: linear-gradient(135deg, #4f46e5 0%, #9333ea 100%);">
+            <span style="font-size: 24px;">💬</span>
+            <span style="font-size: 11px; margin-top: 2px;">AI对话</span>
+        </button>
+
+        <!-- 留言板按钮 -->
+        <button class="ai-feature-btn" id="message-board-btn" aria-label="留言板" style="background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);">
+            <span style="font-size: 24px;">📝</span>
+            <span style="font-size: 11px; margin-top: 2px;">留言板</span>
+        </button>
+    </div>
 
     <!-- 模态框遮罩 -->
     <div class="modal-overlay" id="modal-overlay"></div>
@@ -3534,8 +3491,9 @@ ${issueBody}
 
                 recognition = new SpeechRecognition();
                 recognition.lang = 'zh-CN';
-                recognition.continuous = false;
-                recognition.interimResults = true;
+                recognition.continuous = true;  // 持续识别
+                recognition.interimResults = true;  // 显示中间结果
+                recognition.maxAlternatives = 1;
 
                 recognition.onstart = () => {
                     console.log('语音识别已启动');
@@ -3607,6 +3565,28 @@ ${issueBody}
                     initSpeechRecognition();
                 }
             });
+
+            // 文生图按钮
+            const textToImageBtn = document.getElementById('text-to-image-btn');
+            if (textToImageBtn) {
+                textToImageBtn.addEventListener('click', async () => {
+                    const prompt = window.prompt('🎨 请输入图像描述：\n\n例如：一只可爱的小猫在草地上玩耍');
+                    if (prompt && prompt.trim()) {
+                        await generateImage(prompt.trim());
+                    }
+                });
+            }
+
+            // 文生视频按钮
+            const textToVideoBtn = document.getElementById('text-to-video-btn');
+            if (textToVideoBtn) {
+                textToVideoBtn.addEventListener('click', async () => {
+                    const prompt = window.prompt('🎬 请输入视频描述：\n\n例如：小猫在草地上追逐蝴蝶');
+                    if (prompt && prompt.trim()) {
+                        await generateVideo(prompt.trim());
+                    }
+                });
+            }
 
             // 关闭语音助手
             closeVoiceAssistant.addEventListener('click', () => {
@@ -3764,13 +3744,19 @@ ${issueBody}
 
             // 生成图像
             async function generateImage(prompt) {
-                voiceStatus.textContent = '🎨 正在生成图像...';
-                addMessage('assistant', '🎨 正在为您生成图像，请稍候...');
+                // 提取图像描述
+                const cleanPrompt = prompt.replace(/画|生成图片|生成图像|画一个|画一张|帮我画|图片|图像|绘制/g, '').trim();
+
+                // 如果在语音助手中，显示状态
+                if (voiceStatus) {
+                    voiceStatus.textContent = '🎨 正在生成图像...';
+                    addMessage('assistant', '🎨 正在为您生成图像，请稍候...');
+                } else {
+                    // 在主页面显示提示
+                    alert('🎨 正在生成图像，请稍候...');
+                }
 
                 try {
-                    // 提取图像描述
-                    const cleanPrompt = prompt.replace(/画|生成图片|生成图像|画一个|画一张|帮我画|图片|图像|绘制/g, '').trim();
-
                     const response = await fetch(`${VOLCENGINE_BASE_URL}/images/generations`, {
                         method: 'POST',
                         headers: {
@@ -3795,34 +3781,52 @@ ${issueBody}
 
                     if (data.data && data.data[0] && data.data[0].url) {
                         const imageUrl = data.data[0].url;
-                        const imgHtml = `<div style="margin-top: 10px;">
-                            <img src="${imageUrl}" style="max-width: 100%; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" alt="生成的图像">
-                            <p style="margin-top: 8px; font-size: 12px; color: #666;">✨ 图像生成完成</p>
-                        </div>`;
-                        addMessage('assistant', imgHtml, true);
-                        voiceStatus.textContent = '✅ 图像生成完成';
-                        speakText('图像已生成完成，请查看');
+
+                        if (voiceStatus) {
+                            // 在语音助手中显示
+                            const imgHtml = `<div style="margin-top: 10px;">
+                                <img src="${imageUrl}" style="max-width: 100%; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" alt="生成的图像">
+                                <p style="margin-top: 8px; font-size: 12px; color: #666;">✨ 图像生成完成</p>
+                            </div>`;
+                            addMessage('assistant', imgHtml, true);
+                            voiceStatus.textContent = '✅ 图像生成完成';
+                            speakText('图像已生成完成，请查看');
+                        } else {
+                            // 在新窗口打开图像
+                            window.open(imageUrl, '_blank');
+                            alert('✅ 图像生成完成！已在新窗口打开');
+                        }
                     } else {
                         throw new Error('未返回图像 URL');
                     }
 
                 } catch (error) {
                     console.error('图像生成失败:', error);
-                    voiceStatus.textContent = '准备就绪';
-                    addMessage('assistant', `❌ 图像生成失败：${error.message}`);
-                    speakText('抱歉，图像生成失败');
+                    if (voiceStatus) {
+                        voiceStatus.textContent = '准备就绪';
+                        addMessage('assistant', `❌ 图像生成失败：${error.message}`);
+                        speakText('抱歉，图像生成失败');
+                    } else {
+                        alert(`❌ 图像生成失败：${error.message}`);
+                    }
                 }
             }
 
             // 生成视频
             async function generateVideo(prompt) {
-                voiceStatus.textContent = '🎬 正在生成视频...';
-                addMessage('assistant', '🎬 正在为您生成视频，这可能需要几分钟时间，请稍候...');
+                // 提取视频描述
+                const cleanPrompt = prompt.replace(/生成视频|做个视频|制作视频|视频|动画|动起来|视频化/g, '').trim();
+
+                // 如果在语音助手中，显示状态
+                if (voiceStatus) {
+                    voiceStatus.textContent = '🎬 正在生成视频...';
+                    addMessage('assistant', '🎬 正在为您生成视频，这可能需要几分钟时间，请稍候...');
+                } else {
+                    // 在主页面显示提示
+                    alert('🎬 正在生成视频，这可能需要几分钟时间，请稍候...');
+                }
 
                 try {
-                    // 提取视频描述
-                    const cleanPrompt = prompt.replace(/生成视频|做个视频|制作视频|视频|动画|动起来|视频化/g, '').trim();
-
                     const response = await fetch(`${VOLCENGINE_BASE_URL}/videos/generations`, {
                         method: 'POST',
                         headers: {
@@ -3845,35 +3849,51 @@ ${issueBody}
                     console.log('视频生成返回:', data);
 
                     if (data.task_id) {
-                        const taskHtml = `<div style="margin-top: 10px; padding: 12px; background: #f0f9ff; border-radius: 8px; border-left: 4px solid #3b82f6;">
-                            <p style="margin: 0; color: #1e40af;">📋 视频生成任务已提交</p>
-                            <p style="margin: 8px 0 0 0; font-size: 12px; color: #64748b;">任务ID: ${data.task_id}</p>
-                            <p style="margin: 4px 0 0 0; font-size: 12px; color: #64748b;">请稍后在火山引擎控制台查看结果</p>
-                        </div>`;
-                        addMessage('assistant', taskHtml, true);
-                        voiceStatus.textContent = '✅ 视频生成任务已提交';
-                        speakText('视频生成任务已提交，请稍后查看结果');
+                        const message = `📋 视频生成任务已提交\n任务ID: ${data.task_id}\n请稍后在火山引擎控制台查看结果`;
+
+                        if (voiceStatus) {
+                            const taskHtml = `<div style="margin-top: 10px; padding: 12px; background: #f0f9ff; border-radius: 8px; border-left: 4px solid #3b82f6;">
+                                <p style="margin: 0; color: #1e40af;">📋 视频生成任务已提交</p>
+                                <p style="margin: 8px 0 0 0; font-size: 12px; color: #64748b;">任务ID: ${data.task_id}</p>
+                                <p style="margin: 4px 0 0 0; font-size: 12px; color: #64748b;">请稍后在火山引擎控制台查看结果</p>
+                            </div>`;
+                            addMessage('assistant', taskHtml, true);
+                            voiceStatus.textContent = '✅ 视频生成任务已提交';
+                            speakText('视频生成任务已提交，请稍后查看结果');
+                        } else {
+                            alert(message);
+                        }
                     } else if (data.data && data.data[0] && data.data[0].url) {
                         const videoUrl = data.data[0].url;
-                        const videoHtml = `<div style="margin-top: 10px;">
-                            <video controls style="max-width: 100%; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                                <source src="${videoUrl}" type="video/mp4">
-                                您的浏览器不支持视频播放
-                            </video>
-                            <p style="margin-top: 8px; font-size: 12px; color: #666;">✨ 视频生成完成</p>
-                        </div>`;
-                        addMessage('assistant', videoHtml, true);
-                        voiceStatus.textContent = '✅ 视频生成完成';
-                        speakText('视频已生成完成，请查看');
+
+                        if (voiceStatus) {
+                            const videoHtml = `<div style="margin-top: 10px;">
+                                <video controls style="max-width: 100%; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                                    <source src="${videoUrl}" type="video/mp4">
+                                    您的浏览器不支持视频播放
+                                </video>
+                                <p style="margin-top: 8px; font-size: 12px; color: #666;">✨ 视频生成完成</p>
+                            </div>`;
+                            addMessage('assistant', videoHtml, true);
+                            voiceStatus.textContent = '✅ 视频生成完成';
+                            speakText('视频已生成完成，请查看');
+                        } else {
+                            window.open(videoUrl, '_blank');
+                            alert('✅ 视频生成完成！已在新窗口打开');
+                        }
                     } else {
                         throw new Error('未返回视频URL或任务ID');
                     }
 
                 } catch (error) {
                     console.error('视频生成失败:', error);
-                    voiceStatus.textContent = '准备就绪';
-                    addMessage('assistant', `❌ 视频生成失败：${error.message}`);
-                    speakText('抱歉，视频生成失败');
+                    if (voiceStatus) {
+                        voiceStatus.textContent = '准备就绪';
+                        addMessage('assistant', `❌ 视频生成失败：${error.message}`);
+                        speakText('抱歉，视频生成失败');
+                    } else {
+                        alert(`❌ 视频生成失败：${error.message}`);
+                    }
                 }
             }
 
