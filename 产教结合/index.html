@@ -3555,25 +3555,43 @@ ${issueBody}
                     }
 
                     if (interimTranscript) {
-                        voiceStatus.textContent = `识别中: ${interimTranscript}`;
+                        voiceStatus.textContent = `🎤 识别中: ${interimTranscript}`;
                     }
 
                     if (finalTranscript) {
-                        voiceStatus.textContent = `识别完成: ${finalTranscript}`;
+                        console.log('识别完成:', finalTranscript);
+                        voiceStatus.textContent = `✅ 识别完成: ${finalTranscript}`;
                         addMessage('user', finalTranscript);
+
+                        // 自动停止录音
+                        stopRecording();
+
+                        // 发送请求
                         sendChatRequest(finalTranscript);
                     }
                 };
 
                 recognition.onerror = (event) => {
                     console.error('语音识别错误:', event.error);
-                    voiceStatus.textContent = `识别错误: ${event.error}`;
+
+                    // 忽略 no-speech 和 aborted 错误（这些是正常的）
+                    if (event.error === 'no-speech') {
+                        voiceStatus.textContent = '⚠️ 未检测到语音，请重试';
+                    } else if (event.error === 'aborted') {
+                        voiceStatus.textContent = '✅ 准备就绪';
+                    } else {
+                        voiceStatus.textContent = `❌ 识别错误: ${event.error}`;
+                    }
+
                     stopRecording();
                 };
 
                 recognition.onend = () => {
                     console.log('语音识别已结束');
-                    stopRecording();
+                    // 识别结束后自动停止录音状态
+                    if (isRecording) {
+                        stopRecording();
+                    }
                 };
 
                 return true;
@@ -3654,7 +3672,8 @@ ${issueBody}
 
             // 发送对话请求（直接调用火山引擎 API）
             async function sendChatRequest(text) {
-                voiceStatus.textContent = 'AI 正在思考...';
+                console.log('收到请求:', text);
+                voiceStatus.textContent = '🤔 AI 正在思考...';
                 chatMessages.push({ role: 'user', content: text });
 
                 try {
@@ -3663,6 +3682,7 @@ ${issueBody}
                     const is3DRequest = model3DKeywords.some(keyword => text.includes(keyword));
 
                     if (is3DRequest) {
+                        console.log('检测到3D生成请求');
                         await generate3D(text);
                         return;
                     }
@@ -3672,6 +3692,7 @@ ${issueBody}
                     const isVideoRequest = videoKeywords.some(keyword => text.includes(keyword));
 
                     if (isVideoRequest) {
+                        console.log('检测到视频生成请求');
                         await generateVideo(text);
                         return;
                     }
@@ -3681,9 +3702,12 @@ ${issueBody}
                     const isImageRequest = imageKeywords.some(keyword => text.includes(keyword));
 
                     if (isImageRequest) {
+                        console.log('检测到图像生成请求');
                         await generateImage(text);
                         return;
                     }
+
+                    console.log('普通对话请求');
 
                     // 调用火山引擎 LLM API（通过 veFaaS 代理）
                     const response = await fetch(`${VOLCENGINE_BASE_URL}/chat/completions`, {
@@ -3696,7 +3720,8 @@ ${issueBody}
                             messages: chatMessages,
                             stream: false,  // veFaaS 不支持流式响应
                             temperature: 0.7,
-                            max_tokens: 2000
+                            max_tokens: 1000,  // 减少 token 数量，加快响应
+                            top_p: 0.9
                         })
                     });
 
@@ -3724,15 +3749,16 @@ ${issueBody}
                     addMessage('assistant', assistantText);
 
                     chatMessages.push({ role: 'assistant', content: assistantText });
-                    voiceStatus.textContent = '正在合成语音...';
+                    voiceStatus.textContent = '🔊 正在合成语音...';
 
                     // 使用浏览器 TTS
                     speakText(assistantText);
 
                 } catch (error) {
                     console.error('对话请求失败:', error);
-                    voiceStatus.textContent = '准备就绪';
-                    addMessage('assistant', `抱歉，出现错误：${error.message}`);
+                    voiceStatus.textContent = '✅ 准备就绪';
+                    addMessage('assistant', `❌ 抱歉，出现错误：${error.message}`);
+                    speakText('抱歉，出现错误');
                 }
             }
 
