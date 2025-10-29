@@ -3654,17 +3654,16 @@ ${issueBody}
                         return;
                     }
 
-                    // 调用火山引擎 LLM API
+                    // 调用火山引擎 LLM API（通过 veFaaS 代理）
                     const response = await fetch(`${VOLCENGINE_BASE_URL}/chat/completions`, {
                         method: 'POST',
                         headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${VOLCENGINE_API_KEY}`
+                            'Content-Type': 'application/json'
                         },
                         body: JSON.stringify({
                             model: LLM_MODEL,
                             messages: chatMessages,
-                            stream: true,
+                            stream: false,  // veFaaS 不支持流式响应
                             temperature: 0.7,
                             max_tokens: 2000
                         })
@@ -3676,41 +3675,22 @@ ${issueBody}
                         throw new Error(`API 调用失败: ${response.status}`);
                     }
 
-                    // 读取流式响应
-                    const reader = response.body.getReader();
-                    const decoder = new TextDecoder();
-                    let assistantText = '';
+                    // 读取非流式响应
+                    const data = await response.json();
+                    console.log('API 返回:', data);
 
-                    const assistantMsgDiv = addMessage('assistant', '...');
-
-                    while (true) {
-                        const { done, value } = await reader.read();
-                        if (done) break;
-
-                        const chunk = decoder.decode(value);
-                        const lines = chunk.split('\n');
-
-                        for (const line of lines) {
-                            if (line.startsWith('data:')) {
-                                const data = line.substring(5).trim();
-                                if (data === '[DONE]') continue;
-
-                                try {
-                                    const jsonData = JSON.parse(data);
-                                    if (jsonData.choices && jsonData.choices[0].delta && jsonData.choices[0].delta.content) {
-                                        assistantText += jsonData.choices[0].delta.content;
-                                        assistantMsgDiv.textContent = assistantText;
-                                    }
-                                } catch (e) {
-                                    // 忽略解析错误
-                                }
-                            }
-                        }
+                    if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+                        throw new Error('API 返回格式错误');
                     }
+
+                    const assistantText = data.choices[0].message.content;
 
                     if (!assistantText) {
                         throw new Error('AI 未返回内容');
                     }
+
+                    // 显示 AI 回复
+                    addMessage('assistant', assistantText);
 
                     chatMessages.push({ role: 'assistant', content: assistantText });
                     voiceStatus.textContent = '正在合成语音...';
@@ -3733,8 +3713,7 @@ ${issueBody}
                     const response = await fetch(`${VOLCENGINE_BASE_URL}/images/generations`, {
                         method: 'POST',
                         headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${VOLCENGINE_API_KEY}`
+                            'Content-Type': 'application/json'
                         },
                         body: JSON.stringify({
                             model: 'Doubao-文生图模型-智能绘图-通用2.0L',

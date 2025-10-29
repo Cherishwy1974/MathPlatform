@@ -15,7 +15,7 @@ const VOLCENGINE_BASE_URL = 'https://ark.cn-beijing.volces.com/api/v3';
 
 exports.handler = async (event, context) => {
     console.log('收到请求:', JSON.stringify(event));
-    
+
     // CORS 响应头
     const corsHeaders = {
         'Access-Control-Allow-Origin': '*',
@@ -23,31 +23,41 @@ exports.handler = async (event, context) => {
         'Access-Control-Allow-Headers': 'Content-Type, Authorization',
         'Content-Type': 'application/json'
     };
-    
+
+    // 获取 HTTP 方法（兼容不同的 event 结构）
+    const httpMethod = event.httpMethod || event.method || event.requestContext?.http?.method || 'POST';
+
     // 处理 OPTIONS 预检请求
-    if (event.httpMethod === 'OPTIONS') {
+    if (httpMethod === 'OPTIONS') {
         return {
             statusCode: 200,
             headers: corsHeaders,
             body: ''
         };
     }
-    
+
     // 只允许 POST 请求
-    if (event.httpMethod !== 'POST') {
+    if (httpMethod !== 'POST') {
         return {
             statusCode: 405,
             headers: corsHeaders,
             body: JSON.stringify({ error: 'Method not allowed' })
         };
     }
-    
+
     try {
-        // 解析请求体
-        const requestBody = JSON.parse(event.body || '{}');
-        
+        // 解析请求体（兼容不同的 event 结构）
+        let requestBody;
+        if (typeof event.body === 'string') {
+            requestBody = JSON.parse(event.body);
+        } else if (typeof event.body === 'object') {
+            requestBody = event.body;
+        } else {
+            requestBody = event;
+        }
+
         // 获取请求路径（默认为 /chat/completions）
-        const path = event.path || '/chat/completions';
+        const path = event.path || event.rawPath || '/chat/completions';
         
         console.log('转发请求到:', `${VOLCENGINE_BASE_URL}${path}`);
         console.log('请求体:', JSON.stringify(requestBody));
