@@ -1,34 +1,28 @@
 /**
- * 火山引擎函数服务 - API 代理函数
- * 
- * 部署方式：
- * 1. 访问 https://console.volcengine.com/vefaas
- * 2. 创建函数 → 选择 Node.js 18 运行时
- * 3. 添加 HTTP 触发器（认证方式：无需认证）
- * 4. 复制此代码到函数编辑器
- * 5. 点击"部署"
- * 6. 复制函数 URL 到前端代码中
+ * 火山引擎 veFaaS 函数 - API 代理
+ * 用于解决前端 CORS 问题
  */
 
-const VOLCENGINE_API_KEY = 'sk-7bebb94a632541f8b6751ddf80925832k7o9dakrh50jcai5';
+const VOLCENGINE_API_KEY = '348522f9-6a1b-4d0b-ad6b-8faab8ea09c0';
 const VOLCENGINE_BASE_URL = 'https://ark.cn-beijing.volces.com/api/v3';
 
 exports.handler = async (event, context) => {
-    console.log('收到请求:', JSON.stringify(event));
+    // 打印完整的 event 对象用于调试
+    console.log('=== 收到请求 ===');
+    console.log('Event:', JSON.stringify(event, null, 2));
 
     // CORS 响应头
     const corsHeaders = {
         'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type',
         'Content-Type': 'application/json'
     };
 
-    // 获取 HTTP 方法（兼容不同的 event 结构）
-    const httpMethod = event.httpMethod || event.method || event.requestContext?.http?.method || 'POST';
-
     // 处理 OPTIONS 预检请求
-    if (httpMethod === 'OPTIONS') {
+    const method = event.httpMethod || event.method || 'POST';
+    if (method === 'OPTIONS') {
+        console.log('处理 OPTIONS 请求');
         return {
             statusCode: 200,
             headers: corsHeaders,
@@ -36,28 +30,38 @@ exports.handler = async (event, context) => {
         };
     }
 
-    // 只允许 POST 请求
-    if (httpMethod !== 'POST') {
-        return {
-            statusCode: 405,
-            headers: corsHeaders,
-            body: JSON.stringify({ error: 'Method not allowed' })
-        };
-    }
-
     try {
-        // 解析请求体（兼容不同的 event 结构）
+        // 解析请求体
         let requestBody;
-        if (typeof event.body === 'string') {
-            requestBody = JSON.parse(event.body);
-        } else if (typeof event.body === 'object') {
-            requestBody = event.body;
+        if (event.body) {
+            if (typeof event.body === 'string') {
+                try {
+                    requestBody = JSON.parse(event.body);
+                } catch (e) {
+                    console.error('解析 body 失败:', e);
+                    requestBody = event.body;
+                }
+            } else {
+                requestBody = event.body;
+            }
         } else {
             requestBody = event;
         }
 
-        // 获取请求路径（默认为 /chat/completions）
-        const path = event.path || event.rawPath || '/chat/completions';
+        console.log('解析后的请求体:', JSON.stringify(requestBody, null, 2));
+
+        // 确定 API 路径
+        let apiPath = '/chat/completions';
+        if (event.path && event.path !== '/') {
+            apiPath = event.path;
+        } else if (event.rawPath && event.rawPath !== '/') {
+            apiPath = event.rawPath;
+        }
+
+        // 如果请求体中包含图像生成相关字段，使用图像生成端点
+        if (requestBody.prompt && requestBody.size) {
+            apiPath = '/images/generations';
+        }
         
         console.log('转发请求到:', `${VOLCENGINE_BASE_URL}${path}`);
         console.log('请求体:', JSON.stringify(requestBody));
@@ -114,29 +118,4 @@ exports.handler = async (event, context) => {
         };
     }
 };
-
-/**
- * 本地测试（可选）
- * 
- * 如果需要本地测试，可以使用以下代码：
- */
-if (require.main === module) {
-    const testEvent = {
-        httpMethod: 'POST',
-        path: '/chat/completions',
-        body: JSON.stringify({
-            model: 'Doubao-Seed-1.6-vision',
-            messages: [
-                { role: 'user', content: '你好' }
-            ],
-            stream: false
-        })
-    };
-    
-    exports.handler(testEvent, {}).then(result => {
-        console.log('测试结果:', JSON.stringify(result, null, 2));
-    }).catch(error => {
-        console.error('测试失败:', error);
-    });
-}
 

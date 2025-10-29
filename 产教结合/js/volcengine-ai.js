@@ -7,18 +7,18 @@
 const VOLCENGINE_CONFIG = {
     // veFaaS 函数 URL（已配置）
     baseUrl: 'https://sd413i7v6n5j6uua1gn70.apigateway-cn-beijing.volceapi.com',
-    apiKey: 'sk-7bebb94a632541f8b6751ddf80925832k7o9dakrh50jcai5',
+    apiKey: '348522f9-6a1b-4d0b-ad6b-8faab8ea09c0',
 
-    // 文本生成模型配置
+    // 文本生成模型配置（使用正确的接入点 ID）
     textModel: {
-        modelId: 'doubao-seed-1-6-251015',
-        endpointId: '348522f9-6a1b-4d0b-ad6b-8faab8ea09c0',
-        modelName: 'Doubao-Seed-1.6-thinking'
+        endpointId: 'ep-20251030004119-7c4wk',  // Doubao-1.5-thinking-pro
+        modelName: 'Doubao-1.5-thinking-pro'
     },
 
-    // 图像生成模型配置
+    // 图像生成模型配置（使用正确的接入点 ID）
     imageModel: {
-        modelName: 'Doubao Seedream 4.0'
+        endpointId: 'ep-20251030004015-v4jzb',  // Doubao-Seedream-4.0
+        modelName: 'Doubao-Seedream-4.0'
     },
 
     // 账号信息
@@ -107,7 +107,7 @@ async function generateImage(prompt, options = {}) {
                 // Authorization 由 veFaaS 函数添加
             },
             body: JSON.stringify({
-                model: VOLCENGINE_CONFIG.imageModel.modelName,
+                model: VOLCENGINE_CONFIG.imageModel.endpointId,
                 prompt: prompt,
                 n: numImages,
                 size: `${width}x${height}`
