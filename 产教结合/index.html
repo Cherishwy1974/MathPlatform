@@ -2742,38 +2742,30 @@ function runPythonCode(codeId, outputId) {
                     content: userMessage
                 });
 
-                // 检查是否配置了API密钥
-                if (!window.aiConfig.apiKey) {
-                    throw new Error("未配置API密钥");
+                // 检查是否配置了火山引擎 API
+                if (!window.VolcengineAI || !window.volcengineConfig || !window.volcengineConfig.apiKey) {
+                    throw new Error("未配置火山引擎 API");
                 }
 
                 try {
                     let aiResponse;
 
-                    // 优先尝试使用火山引擎 API
-                    if (window.VolcengineAI && window.volcengineConfig.apiKey !== 'YOUR_VOLCENGINE_API_KEY') {
-                        console.log('正在调用火山引擎 API...');
-                        try {
-                            // 构建提示词
-                            let prompt = userMessage;
-                            if (currentCase && currentCase.content) {
-                                prompt = `基于以下教学案例回答问题：\n\n案例：${currentCase.title}\n内容：${currentCase.content.substring(0, 500)}...\n\n问题：${userMessage}`;
-                            }
+                    console.log('正在调用火山引擎 API...');
 
-                            aiResponse = await window.VolcengineAI.generateText(prompt, {
-                                temperature: 0.7,
-                                maxTokens: 2000
-                            });
-                            console.log('火山引擎 API 调用成功');
-                        } catch (volcError) {
-                            console.warn('火山引擎 API 调用失败:', volcError);
-                            aiResponse = null;
-                        }
+                    // 构建提示词
+                    let prompt = userMessage;
+                    if (currentCase && currentCase.content) {
+                        prompt = `基于以下教学案例回答问题：\n\n案例：${currentCase.title}\n内容：${currentCase.content.substring(0, 500)}...\n\n问题：${userMessage}`;
                     }
 
-                    // 如果火山引擎失败或未配置
+                    aiResponse = await window.VolcengineAI.generateText(prompt, {
+                        temperature: 0.7,
+                        maxTokens: 2000
+                    });
+                    console.log('火山引擎 API 调用成功');
+
                     if (!aiResponse) {
-                        throw new Error('火山引擎 API 未配置或调用失败');
+                        throw new Error('AI 未返回内容');
                     }
 
                     // 移除"正在输入"指示器

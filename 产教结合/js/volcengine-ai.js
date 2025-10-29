@@ -45,8 +45,8 @@ async function generateText(prompt, options = {}) {
         const response = await fetch(`${VOLCENGINE_CONFIG.baseUrl}/chat/completions`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${VOLCENGINE_CONFIG.apiKey}`
+                'Content-Type': 'application/json'
+                // Authorization 由 veFaaS 函数添加
             },
             body: JSON.stringify({
                 model: VOLCENGINE_CONFIG.textModel.endpointId,
@@ -103,8 +103,8 @@ async function generateImage(prompt, options = {}) {
         const response = await fetch(`${VOLCENGINE_CONFIG.baseUrl}/images/generations`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${VOLCENGINE_CONFIG.apiKey}`
+                'Content-Type': 'application/json'
+                // Authorization 由 veFaaS 函数添加
             },
             body: JSON.stringify({
                 model: VOLCENGINE_CONFIG.imageModel.modelName,
