@@ -1610,15 +1610,32 @@ function runPythonCode(codeId, outputId) {
         // 4. 将 API Key 粘贴到下方 apiKey 字段
         window.volcengineConfig = {
             apiKey: "348522f9-6a1b-4d0b-ad6b-8faab8ea09c0",
-            baseUrl: "https://ark.cn-beijing.volces.com/api/v3",
+            baseUrl: "https://sd413i7v6n5j6uua1gn70.apigateway-cn-beijing.volceapi.com",
             accountId: "2100415977",  // 账号ID
             username: "jianghui",     // 用户名
+
+            // 文本对话模型（快速）
             textModel: {
-                endpointId: "348522f9-6a1b-4d0b-ad6b-8faab8ea09c0",
-                modelName: "Doubao-Seed-1.6-thinking"
+                endpointId: "ep-20251030011739-pxv56",  // Doubao-lite-32k（快速模型）
+                modelName: "Doubao-lite-32k"
             },
+
+            // 图像生成模型
             imageModel: {
-                modelName: "Doubao Seedream 4.0"
+                endpointId: "ep-20251030011616-nrd29",  // Doubao-Seedream-4.0
+                modelName: "Doubao-Seedream-4.0"
+            },
+
+            // 视频生成模型
+            videoModel: {
+                endpointId: "ep-20251030004255-jhlf6",  // Doubao-Seedance-1.0-lite-i2v（图生视频）
+                modelName: "Doubao-Seedance-1.0-lite-i2v"
+            },
+
+            // 3D生成模型
+            model3D: {
+                endpointId: "ep-20251030011539-w2822",  // Doubao-Seed3D-1.0
+                modelName: "Doubao-Seed3D-1.0"
             }
         };
 
@@ -3495,9 +3512,10 @@ ${issueBody}
             // 火山引擎配置（已配置 veFaaS 函数 URL）
             const VOLCENGINE_API_KEY = window.volcengineConfig?.apiKey || '348522f9-6a1b-4d0b-ad6b-8faab8ea09c0';
             const VOLCENGINE_BASE_URL = 'https://sd413i7v6n5j6uua1gn70.apigateway-cn-beijing.volceapi.com';
-            const LLM_MODEL = 'ep-20251030004119-7c4wk';  // Doubao-1.5-thinking-pro
-            const IMAGE_MODEL = 'ep-20251030004015-v4jzb';  // Doubao-Seedream-4.0
-            const VIDEO_MODEL = 'ep-20251030004255-jhlf6';  // Doubao-Seedance-1.0-lite-i2v（图生视频 - 便宜）
+            const LLM_MODEL = 'ep-20251030011739-pxv56';  // Doubao-lite-32k（快速模型）
+            const IMAGE_MODEL = 'ep-20251030011616-nrd29';  // Doubao-Seedream-4.0
+            const VIDEO_MODEL = 'ep-20251030004255-jhlf6';  // Doubao-Seedance-1.0-lite-i2v（图生视频）
+            const MODEL_3D = 'ep-20251030011539-w2822';  // Doubao-Seed3D-1.0（3D生成）
 
             let isRecording = false;
             let recognition = null;
@@ -3600,20 +3618,20 @@ ${issueBody}
             // 开始录音（使用浏览器语音识别）
             function startRecording() {
                 if (!recognition) {
-                    voiceStatus.textContent = '语音识别未初始化';
+                    voiceStatus.textContent = '❌ 语音识别未初始化';
                     return;
                 }
 
                 try {
                     isRecording = true;
                     voiceRecordBtn.classList.add('recording');
-                    voiceBtnText.textContent = '停止录音';
-                    voiceStatus.textContent = '正在听，请说话...';
+                    voiceBtnText.textContent = '⏹️ 停止录音';
+                    voiceStatus.textContent = '🎤 正在听，请说话...';
 
                     recognition.start();
                 } catch (error) {
                     console.error('启动语音识别失败:', error);
-                    voiceStatus.textContent = '启动失败，请重试';
+                    voiceStatus.textContent = '❌ 启动失败，请重试';
                     stopRecording();
                 }
             }
@@ -3622,7 +3640,8 @@ ${issueBody}
             function stopRecording() {
                 isRecording = false;
                 voiceRecordBtn.classList.remove('recording');
-                voiceBtnText.textContent = '开始语音';
+                voiceBtnText.textContent = '🎤 开始语音';
+                voiceStatus.textContent = '✅ 准备就绪';
 
                 if (recognition) {
                     try {
@@ -3639,8 +3658,17 @@ ${issueBody}
                 chatMessages.push({ role: 'user', content: text });
 
                 try {
+                    // 检查是否是3D生成请求
+                    const model3DKeywords = ['生成3D', '做个3D', '3D模型', '三维模型', '立体模型'];
+                    const is3DRequest = model3DKeywords.some(keyword => text.includes(keyword));
+
+                    if (is3DRequest) {
+                        await generate3D(text);
+                        return;
+                    }
+
                     // 检查是否是视频生成请求
-                    const videoKeywords = ['生成视频', '做个视频', '制作视频', '视频', '动画', '动起来'];
+                    const videoKeywords = ['生成视频', '做个视频', '制作视频', '视频', '动画', '动起来', '视频化'];
                     const isVideoRequest = videoKeywords.some(keyword => text.includes(keyword));
 
                     if (isVideoRequest) {
@@ -3649,7 +3677,7 @@ ${issueBody}
                     }
 
                     // 检查是否是图像生成请求
-                    const imageKeywords = ['画', '生成图片', '生成图像', '画一个', '画一张', '帮我画', '图片', '图像'];
+                    const imageKeywords = ['画', '生成图片', '生成图像', '画一个', '画一张', '帮我画', '图片', '图像', '绘制'];
                     const isImageRequest = imageKeywords.some(keyword => text.includes(keyword));
 
                     if (isImageRequest) {
@@ -3710,9 +3738,13 @@ ${issueBody}
 
             // 生成图像
             async function generateImage(prompt) {
-                voiceStatus.textContent = '正在生成图像...';
+                voiceStatus.textContent = '🎨 正在生成图像...';
+                addMessage('assistant', '🎨 正在为您生成图像，请稍候...');
 
                 try {
+                    // 提取图像描述
+                    const cleanPrompt = prompt.replace(/画|生成图片|生成图像|画一个|画一张|帮我画|图片|图像|绘制/g, '').trim();
+
                     const response = await fetch(`${VOLCENGINE_BASE_URL}/images/generations`, {
                         method: 'POST',
                         headers: {
@@ -3720,24 +3752,30 @@ ${issueBody}
                         },
                         body: JSON.stringify({
                             model: IMAGE_MODEL,
-                            prompt: prompt,
+                            prompt: cleanPrompt,
                             size: '1024x1024',
                             n: 1
                         })
                     });
 
                     if (!response.ok) {
+                        const errorText = await response.text();
+                        console.error('图像生成错误:', errorText);
                         throw new Error(`图像生成失败: ${response.status}`);
                     }
 
                     const data = await response.json();
+                    console.log('图像生成返回:', data);
 
                     if (data.data && data.data[0] && data.data[0].url) {
                         const imageUrl = data.data[0].url;
-                        const imgHtml = `<img src="${imageUrl}" style="max-width: 100%; border-radius: 8px; margin-top: 8px;" alt="生成的图像">`;
-                        addMessage('assistant', `图像已生成：${imgHtml}`, true);
-                        voiceStatus.textContent = '准备就绪';
-                        speakText('图像已生成完成');
+                        const imgHtml = `<div style="margin-top: 10px;">
+                            <img src="${imageUrl}" style="max-width: 100%; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" alt="生成的图像">
+                            <p style="margin-top: 8px; font-size: 12px; color: #666;">✨ 图像生成完成</p>
+                        </div>`;
+                        addMessage('assistant', imgHtml, true);
+                        voiceStatus.textContent = '✅ 图像生成完成';
+                        speakText('图像已生成完成，请查看');
                     } else {
                         throw new Error('未返回图像 URL');
                     }
@@ -3745,16 +3783,20 @@ ${issueBody}
                 } catch (error) {
                     console.error('图像生成失败:', error);
                     voiceStatus.textContent = '准备就绪';
-                    addMessage('assistant', `图像生成失败：${error.message}`);
+                    addMessage('assistant', `❌ 图像生成失败：${error.message}`);
+                    speakText('抱歉，图像生成失败');
                 }
             }
 
             // 生成视频
             async function generateVideo(prompt) {
-                voiceStatus.textContent = '正在生成视频...';
-                addMessage('assistant', '正在为您生成视频，这可能需要几分钟时间，请稍候...');
+                voiceStatus.textContent = '🎬 正在生成视频...';
+                addMessage('assistant', '🎬 正在为您生成视频，这可能需要几分钟时间，请稍候...');
 
                 try {
+                    // 提取视频描述
+                    const cleanPrompt = prompt.replace(/生成视频|做个视频|制作视频|视频|动画|动起来|视频化/g, '').trim();
+
                     const response = await fetch(`${VOLCENGINE_BASE_URL}/videos/generations`, {
                         method: 'POST',
                         headers: {
@@ -3762,7 +3804,7 @@ ${issueBody}
                         },
                         body: JSON.stringify({
                             model: VIDEO_MODEL,
-                            prompt: prompt,
+                            prompt: cleanPrompt,
                             duration: 5
                         })
                     });
@@ -3777,15 +3819,26 @@ ${issueBody}
                     console.log('视频生成返回:', data);
 
                     if (data.task_id) {
-                        addMessage('assistant', `视频生成任务已提交，任务ID: ${data.task_id}。请稍后在火山引擎控制台查看结果。`);
-                        voiceStatus.textContent = '视频生成任务已提交';
+                        const taskHtml = `<div style="margin-top: 10px; padding: 12px; background: #f0f9ff; border-radius: 8px; border-left: 4px solid #3b82f6;">
+                            <p style="margin: 0; color: #1e40af;">📋 视频生成任务已提交</p>
+                            <p style="margin: 8px 0 0 0; font-size: 12px; color: #64748b;">任务ID: ${data.task_id}</p>
+                            <p style="margin: 4px 0 0 0; font-size: 12px; color: #64748b;">请稍后在火山引擎控制台查看结果</p>
+                        </div>`;
+                        addMessage('assistant', taskHtml, true);
+                        voiceStatus.textContent = '✅ 视频生成任务已提交';
                         speakText('视频生成任务已提交，请稍后查看结果');
                     } else if (data.data && data.data[0] && data.data[0].url) {
                         const videoUrl = data.data[0].url;
-                        const videoHtml = `<video controls style="max-width: 100%; border-radius: 8px; margin-top: 8px;"><source src="${videoUrl}" type="video/mp4">您的浏览器不支持视频播放</video>`;
-                        addMessage('assistant', `视频已生成：${videoHtml}`, true);
-                        voiceStatus.textContent = '准备就绪';
-                        speakText('视频已生成完成');
+                        const videoHtml = `<div style="margin-top: 10px;">
+                            <video controls style="max-width: 100%; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                                <source src="${videoUrl}" type="video/mp4">
+                                您的浏览器不支持视频播放
+                            </video>
+                            <p style="margin-top: 8px; font-size: 12px; color: #666;">✨ 视频生成完成</p>
+                        </div>`;
+                        addMessage('assistant', videoHtml, true);
+                        voiceStatus.textContent = '✅ 视频生成完成';
+                        speakText('视频已生成完成，请查看');
                     } else {
                         throw new Error('未返回视频URL或任务ID');
                     }
@@ -3793,7 +3846,67 @@ ${issueBody}
                 } catch (error) {
                     console.error('视频生成失败:', error);
                     voiceStatus.textContent = '准备就绪';
-                    addMessage('assistant', `视频生成失败：${error.message}`);
+                    addMessage('assistant', `❌ 视频生成失败：${error.message}`);
+                    speakText('抱歉，视频生成失败');
+                }
+            }
+
+            // 生成3D模型
+            async function generate3D(prompt) {
+                voiceStatus.textContent = '🎲 正在生成3D模型...';
+                addMessage('assistant', '🎲 正在为您生成3D模型，这可能需要几分钟时间，请稍候...');
+
+                try {
+                    // 提取3D描述
+                    const cleanPrompt = prompt.replace(/生成3D|做个3D|3D模型|三维模型|立体模型/g, '').trim();
+
+                    const response = await fetch(`${VOLCENGINE_BASE_URL}/3d/generations`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            model: MODEL_3D,
+                            prompt: cleanPrompt
+                        })
+                    });
+
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        console.error('3D生成错误:', errorText);
+                        throw new Error(`3D生成失败: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    console.log('3D生成返回:', data);
+
+                    if (data.task_id) {
+                        const taskHtml = `<div style="margin-top: 10px; padding: 12px; background: #f0fdf4; border-radius: 8px; border-left: 4px solid #10b981;">
+                            <p style="margin: 0; color: #065f46;">📋 3D模型生成任务已提交</p>
+                            <p style="margin: 8px 0 0 0; font-size: 12px; color: #64748b;">任务ID: ${data.task_id}</p>
+                            <p style="margin: 4px 0 0 0; font-size: 12px; color: #64748b;">请稍后在火山引擎控制台查看结果</p>
+                        </div>`;
+                        addMessage('assistant', taskHtml, true);
+                        voiceStatus.textContent = '✅ 3D生成任务已提交';
+                        speakText('3D模型生成任务已提交，请稍后查看结果');
+                    } else if (data.data && data.data[0] && data.data[0].url) {
+                        const modelUrl = data.data[0].url;
+                        const modelHtml = `<div style="margin-top: 10px; padding: 12px; background: #f0fdf4; border-radius: 8px;">
+                            <p style="margin: 0; color: #065f46;">✨ 3D模型已生成</p>
+                            <a href="${modelUrl}" target="_blank" style="display: inline-block; margin-top: 8px; padding: 8px 16px; background: #10b981; color: white; text-decoration: none; border-radius: 6px; font-size: 14px;">下载3D模型</a>
+                        </div>`;
+                        addMessage('assistant', modelHtml, true);
+                        voiceStatus.textContent = '✅ 3D模型生成完成';
+                        speakText('3D模型已生成完成，请下载查看');
+                    } else {
+                        throw new Error('未返回3D模型URL或任务ID');
+                    }
+
+                } catch (error) {
+                    console.error('3D生成失败:', error);
+                    voiceStatus.textContent = '准备就绪';
+                    addMessage('assistant', `❌ 3D生成失败：${error.message}`);
+                    speakText('抱歉，3D模型生成失败');
                 }
             }
 
@@ -3803,26 +3916,31 @@ ${issueBody}
                     window.speechSynthesis.cancel();
                 }
 
-                const utterance = new SpeechSynthesisUtterance(text);
+                // 清理文本中的 HTML 标签和特殊字符
+                const cleanText = text.replace(/<[^>]*>/g, '').replace(/[🎨🎬🎲✨✅❌📋]/g, '').trim();
+
+                if (!cleanText) return;
+
+                const utterance = new SpeechSynthesisUtterance(cleanText);
                 utterance.lang = 'zh-CN';
-                utterance.rate = 1.0;
+                utterance.rate = 1.1;  // 稍微加快语速
                 utterance.pitch = 1.0;
                 utterance.volume = 1.0;
 
                 utterance.onstart = () => {
                     isSpeaking = true;
-                    voiceStatus.textContent = 'AI 正在说话...';
+                    voiceStatus.textContent = '🔊 AI 正在说话...';
                 };
 
                 utterance.onend = () => {
                     isSpeaking = false;
-                    voiceStatus.textContent = '准备就绪';
+                    voiceStatus.textContent = '✅ 准备就绪';
                 };
 
                 utterance.onerror = (error) => {
                     console.error('语音合成错误:', error);
                     isSpeaking = false;
-                    voiceStatus.textContent = '准备就绪';
+                    voiceStatus.textContent = '✅ 准备就绪';
                 };
 
                 window.speechSynthesis.speak(utterance);

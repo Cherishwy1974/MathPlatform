@@ -9,10 +9,10 @@ const VOLCENGINE_CONFIG = {
     baseUrl: 'https://sd413i7v6n5j6uua1gn70.apigateway-cn-beijing.volceapi.com',
     apiKey: '348522f9-6a1b-4d0b-ad6b-8faab8ea09c0',
 
-    // 文本生成模型配置（使用正确的接入点 ID）
+    // 文本生成模型配置（使用快速模型）
     textModel: {
-        endpointId: 'ep-20251030004119-7c4wk',  // Doubao-1.5-thinking-pro
-        modelName: 'Doubao-1.5-thinking-pro'
+        endpointId: 'ep-20251030011739-pxv56',  // Doubao-lite-32k（快速模型）
+        modelName: 'Doubao-lite-32k'
     },
 
     // 图像生成模型配置（使用正确的接入点 ID）
