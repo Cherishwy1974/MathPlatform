@@ -1777,6 +1777,60 @@ function runPythonCode(codeId, outputId) {
         </div>
     </div>
 
+    <!-- 文生图模态框 -->
+    <div class="voice-assistant-modal" id="text-to-image-modal">
+        <div class="message-board-header">
+            <h3 class="text-xl font-bold flex items-center gap-2">
+                🎨 文生图
+            </h3>
+            <button id="close-text-to-image" class="text-gray-500 hover:text-gray-700 transition">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+
+        <div class="voice-chat-history" id="image-result-area" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+            <p style="color: #666; text-align: center;">请在下方输入图像描述</p>
+        </div>
+
+        <div style="padding: 20px; background: white; border-top: 1px solid #e5e7eb;">
+            <textarea id="image-prompt-input" placeholder="例如：一只可爱的小猫在草地上玩耍"
+                style="width: 100%; min-height: 80px; padding: 12px; border: 2px solid #e5e7eb; border-radius: 12px; font-size: 14px; resize: vertical;"></textarea>
+            <button id="generate-image-btn"
+                style="width: 100%; margin-top: 12px; padding: 12px; background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); color: white; border: none; border-radius: 12px; font-weight: 600; cursor: pointer; font-size: 16px;">
+                🎨 生成图像
+            </button>
+        </div>
+    </div>
+
+    <!-- 文生视频模态框 -->
+    <div class="voice-assistant-modal" id="text-to-video-modal">
+        <div class="message-board-header">
+            <h3 class="text-xl font-bold flex items-center gap-2">
+                🎬 文生视频
+            </h3>
+            <button id="close-text-to-video" class="text-gray-500 hover:text-gray-700 transition">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+
+        <div class="voice-chat-history" id="video-result-area" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+            <p style="color: #666; text-align: center;">请在下方输入视频描述</p>
+        </div>
+
+        <div style="padding: 20px; background: white; border-top: 1px solid #e5e7eb;">
+            <textarea id="video-prompt-input" placeholder="例如：小猫在草地上追逐蝴蝶"
+                style="width: 100%; min-height: 80px; padding: 12px; border: 2px solid #e5e7eb; border-radius: 12px; font-size: 14px; resize: vertical;"></textarea>
+            <button id="generate-video-btn"
+                style="width: 100%; margin-top: 12px; padding: 12px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; border: none; border-radius: 12px; font-weight: 600; cursor: pointer; font-size: 16px;">
+                🎬 生成视频
+            </button>
+        </div>
+    </div>
+
     <!-- 留言板模态框 -->
     <div class="message-board-modal" id="message-board-modal">
         <div class="message-board-header">
@@ -3500,11 +3554,15 @@ ${issueBody}
                 };
 
                 recognition.onresult = (event) => {
+                    console.log('收到识别结果:', event);
+
                     let interimTranscript = '';
                     let finalTranscript = '';
 
                     for (let i = event.resultIndex; i < event.results.length; i++) {
                         const transcript = event.results[i][0].transcript;
+                        console.log(`结果 ${i}:`, transcript, 'isFinal:', event.results[i].isFinal);
+
                         if (event.results[i].isFinal) {
                             finalTranscript += transcript;
                         } else {
@@ -3512,17 +3570,17 @@ ${issueBody}
                         }
                     }
 
+                    // 显示中间结果
                     if (interimTranscript) {
+                        console.log('中间结果:', interimTranscript);
                         voiceStatus.textContent = `🎤 识别中: ${interimTranscript}`;
                     }
 
+                    // 处理最终结果
                     if (finalTranscript) {
-                        console.log('识别完成:', finalTranscript);
+                        console.log('最终结果:', finalTranscript);
                         voiceStatus.textContent = `✅ 识别完成: ${finalTranscript}`;
                         addMessage('user', finalTranscript);
-
-                        // 自动停止录音
-                        stopRecording();
 
                         // 发送请求
                         sendChatRequest(finalTranscript);
@@ -3545,10 +3603,20 @@ ${issueBody}
                 };
 
                 recognition.onend = () => {
-                    console.log('语音识别已结束');
-                    // 识别结束后自动停止录音状态
+                    console.log('语音识别已结束，isRecording:', isRecording);
+
+                    // 如果还在录音状态，自动重启识别（持续监听）
                     if (isRecording) {
-                        stopRecording();
+                        console.log('重启语音识别...');
+                        setTimeout(() => {
+                            if (isRecording) {
+                                try {
+                                    recognition.start();
+                                } catch (error) {
+                                    console.error('重启识别失败:', error);
+                                }
+                            }
+                        }, 100);
                     }
                 };
 
@@ -3566,24 +3634,155 @@ ${issueBody}
                 }
             });
 
-            // 文生图按钮
+            // 文生图功能
             const textToImageBtn = document.getElementById('text-to-image-btn');
+            const textToImageModal = document.getElementById('text-to-image-modal');
+            const closeTextToImage = document.getElementById('close-text-to-image');
+            const imagePromptInput = document.getElementById('image-prompt-input');
+            const generateImageBtn = document.getElementById('generate-image-btn');
+            const imageResultArea = document.getElementById('image-result-area');
+
             if (textToImageBtn) {
-                textToImageBtn.addEventListener('click', async () => {
-                    const prompt = window.prompt('🎨 请输入图像描述：\n\n例如：一只可爱的小猫在草地上玩耍');
-                    if (prompt && prompt.trim()) {
-                        await generateImage(prompt.trim());
+                textToImageBtn.addEventListener('click', () => {
+                    textToImageModal.classList.add('active');
+                    modalOverlay.classList.add('active');
+                    imagePromptInput.focus();
+                });
+            }
+
+            if (closeTextToImage) {
+                closeTextToImage.addEventListener('click', () => {
+                    textToImageModal.classList.remove('active');
+                    modalOverlay.classList.remove('active');
+                });
+            }
+
+            if (generateImageBtn) {
+                generateImageBtn.addEventListener('click', async () => {
+                    const prompt = imagePromptInput.value.trim();
+                    if (!prompt) {
+                        alert('请输入图像描述');
+                        return;
+                    }
+
+                    generateImageBtn.disabled = true;
+                    generateImageBtn.textContent = '🎨 生成中...';
+                    imageResultArea.innerHTML = '<p style="color: #666;">🎨 正在生成图像，请稍候...</p>';
+
+                    try {
+                        const response = await fetch(`${VOLCENGINE_BASE_URL}/images/generations`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                model: IMAGE_MODEL,
+                                prompt: prompt,
+                                size: '1024x1024',
+                                n: 1
+                            })
+                        });
+
+                        if (!response.ok) {
+                            throw new Error(`生成失败: ${response.status}`);
+                        }
+
+                        const data = await response.json();
+                        if (data.data && data.data[0] && data.data[0].url) {
+                            const imageUrl = data.data[0].url;
+                            imageResultArea.innerHTML = `
+                                <img src="${imageUrl}" style="max-width: 100%; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" alt="生成的图像">
+                                <p style="margin-top: 12px; color: #10b981; font-weight: 600;">✅ 图像生成完成</p>
+                                <a href="${imageUrl}" target="_blank" style="display: inline-block; margin-top: 8px; padding: 8px 16px; background: #10b981; color: white; text-decoration: none; border-radius: 8px;">下载图像</a>
+                            `;
+                        } else {
+                            throw new Error('未返回图像URL');
+                        }
+                    } catch (error) {
+                        console.error('图像生成失败:', error);
+                        imageResultArea.innerHTML = `<p style="color: #ef4444;">❌ 生成失败：${error.message}</p>`;
+                    } finally {
+                        generateImageBtn.disabled = false;
+                        generateImageBtn.textContent = '🎨 生成图像';
                     }
                 });
             }
 
-            // 文生视频按钮
+            // 文生视频功能
             const textToVideoBtn = document.getElementById('text-to-video-btn');
+            const textToVideoModal = document.getElementById('text-to-video-modal');
+            const closeTextToVideo = document.getElementById('close-text-to-video');
+            const videoPromptInput = document.getElementById('video-prompt-input');
+            const generateVideoBtn = document.getElementById('generate-video-btn');
+            const videoResultArea = document.getElementById('video-result-area');
+
             if (textToVideoBtn) {
-                textToVideoBtn.addEventListener('click', async () => {
-                    const prompt = window.prompt('🎬 请输入视频描述：\n\n例如：小猫在草地上追逐蝴蝶');
-                    if (prompt && prompt.trim()) {
-                        await generateVideo(prompt.trim());
+                textToVideoBtn.addEventListener('click', () => {
+                    textToVideoModal.classList.add('active');
+                    modalOverlay.classList.add('active');
+                    videoPromptInput.focus();
+                });
+            }
+
+            if (closeTextToVideo) {
+                closeTextToVideo.addEventListener('click', () => {
+                    textToVideoModal.classList.remove('active');
+                    modalOverlay.classList.remove('active');
+                });
+            }
+
+            if (generateVideoBtn) {
+                generateVideoBtn.addEventListener('click', async () => {
+                    const prompt = videoPromptInput.value.trim();
+                    if (!prompt) {
+                        alert('请输入视频描述');
+                        return;
+                    }
+
+                    generateVideoBtn.disabled = true;
+                    generateVideoBtn.textContent = '🎬 生成中...';
+                    videoResultArea.innerHTML = '<p style="color: #666;">🎬 正在生成视频，这可能需要几分钟，请稍候...</p>';
+
+                    try {
+                        const response = await fetch(`${VOLCENGINE_BASE_URL}/videos/generations`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                model: VIDEO_MODEL,
+                                prompt: prompt,
+                                duration: 5
+                            })
+                        });
+
+                        if (!response.ok) {
+                            throw new Error(`生成失败: ${response.status}`);
+                        }
+
+                        const data = await response.json();
+                        if (data.task_id) {
+                            videoResultArea.innerHTML = `
+                                <div style="padding: 20px; background: #f0f9ff; border-radius: 12px; border-left: 4px solid #3b82f6;">
+                                    <p style="margin: 0; color: #1e40af; font-weight: 600;">📋 视频生成任务已提交</p>
+                                    <p style="margin: 8px 0 0 0; font-size: 14px; color: #64748b;">任务ID: ${data.task_id}</p>
+                                    <p style="margin: 4px 0 0 0; font-size: 12px; color: #64748b;">请稍后在火山引擎控制台查看结果</p>
+                                </div>
+                            `;
+                        } else if (data.data && data.data[0] && data.data[0].url) {
+                            const videoUrl = data.data[0].url;
+                            videoResultArea.innerHTML = `
+                                <video controls style="max-width: 100%; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                                    <source src="${videoUrl}" type="video/mp4">
+                                </video>
+                                <p style="margin-top: 12px; color: #10b981; font-weight: 600;">✅ 视频生成完成</p>
+                                <a href="${videoUrl}" target="_blank" style="display: inline-block; margin-top: 8px; padding: 8px 16px; background: #10b981; color: white; text-decoration: none; border-radius: 8px;">下载视频</a>
+                            `;
+                        } else {
+                            throw new Error('未返回视频URL或任务ID');
+                        }
+                    } catch (error) {
+                        console.error('视频生成失败:', error);
+                        videoResultArea.innerHTML = `<p style="color: #ef4444;">❌ 生成失败：${error.message}</p>`;
+                    } finally {
+                        generateVideoBtn.disabled = false;
+                        generateVideoBtn.textContent = '🎬 生成视频';
                     }
                 });
             }
