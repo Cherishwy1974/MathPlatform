@@ -62,12 +62,12 @@ exports.handler = async (event, context) => {
         if (requestBody.prompt && requestBody.size) {
             apiPath = '/images/generations';
         }
-        
-        console.log('转发请求到:', `${VOLCENGINE_BASE_URL}${path}`);
+
+        console.log('转发请求到:', `${VOLCENGINE_BASE_URL}${apiPath}`);
         console.log('请求体:', JSON.stringify(requestBody));
-        
+
         // 转发请求到火山引擎 API
-        const response = await fetch(`${VOLCENGINE_BASE_URL}${path}`, {
+        const response = await fetch(`${VOLCENGINE_BASE_URL}${apiPath}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
