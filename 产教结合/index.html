@@ -3496,6 +3496,8 @@ ${issueBody}
             const VOLCENGINE_API_KEY = window.volcengineConfig?.apiKey || '348522f9-6a1b-4d0b-ad6b-8faab8ea09c0';
             const VOLCENGINE_BASE_URL = 'https://sd413i7v6n5j6uua1gn70.apigateway-cn-beijing.volceapi.com';
             const LLM_MODEL = 'ep-20251030004119-7c4wk';  // Doubao-1.5-thinking-pro
+            const IMAGE_MODEL = 'ep-20251030004015-v4jzb';  // Doubao-Seedream-4.0
+            const VIDEO_MODEL = 'ep-20251030004255-jhlf6';  // Doubao-Seedance-1.0-lite-i2v（图生视频 - 便宜）
 
             let isRecording = false;
             let recognition = null;
@@ -3637,6 +3639,15 @@ ${issueBody}
                 chatMessages.push({ role: 'user', content: text });
 
                 try {
+                    // 检查是否是视频生成请求
+                    const videoKeywords = ['生成视频', '做个视频', '制作视频', '视频', '动画', '动起来'];
+                    const isVideoRequest = videoKeywords.some(keyword => text.includes(keyword));
+
+                    if (isVideoRequest) {
+                        await generateVideo(text);
+                        return;
+                    }
+
                     // 检查是否是图像生成请求
                     const imageKeywords = ['画', '生成图片', '生成图像', '画一个', '画一张', '帮我画', '图片', '图像'];
                     const isImageRequest = imageKeywords.some(keyword => text.includes(keyword));
@@ -3708,7 +3719,7 @@ ${issueBody}
                             'Content-Type': 'application/json'
                         },
                         body: JSON.stringify({
-                            model: 'ep-20251030004015-v4jzb',  // Doubao-Seedream-4.0
+                            model: IMAGE_MODEL,
                             prompt: prompt,
                             size: '1024x1024',
                             n: 1
@@ -3735,6 +3746,54 @@ ${issueBody}
                     console.error('图像生成失败:', error);
                     voiceStatus.textContent = '准备就绪';
                     addMessage('assistant', `图像生成失败：${error.message}`);
+                }
+            }
+
+            // 生成视频
+            async function generateVideo(prompt) {
+                voiceStatus.textContent = '正在生成视频...';
+                addMessage('assistant', '正在为您生成视频，这可能需要几分钟时间，请稍候...');
+
+                try {
+                    const response = await fetch(`${VOLCENGINE_BASE_URL}/videos/generations`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            model: VIDEO_MODEL,
+                            prompt: prompt,
+                            duration: 5
+                        })
+                    });
+
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        console.error('视频生成错误:', errorText);
+                        throw new Error(`视频生成失败: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    console.log('视频生成返回:', data);
+
+                    if (data.task_id) {
+                        addMessage('assistant', `视频生成任务已提交，任务ID: ${data.task_id}。请稍后在火山引擎控制台查看结果。`);
+                        voiceStatus.textContent = '视频生成任务已提交';
+                        speakText('视频生成任务已提交，请稍后查看结果');
+                    } else if (data.data && data.data[0] && data.data[0].url) {
+                        const videoUrl = data.data[0].url;
+                        const videoHtml = `<video controls style="max-width: 100%; border-radius: 8px; margin-top: 8px;"><source src="${videoUrl}" type="video/mp4">您的浏览器不支持视频播放</video>`;
+                        addMessage('assistant', `视频已生成：${videoHtml}`, true);
+                        voiceStatus.textContent = '准备就绪';
+                        speakText('视频已生成完成');
+                    } else {
+                        throw new Error('未返回视频URL或任务ID');
+                    }
+
+                } catch (error) {
+                    console.error('视频生成失败:', error);
+                    voiceStatus.textContent = '准备就绪';
+                    addMessage('assistant', `视频生成失败：${error.message}`);
                 }
             }
 

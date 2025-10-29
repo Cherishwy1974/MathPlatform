@@ -37,7 +37,7 @@ const VOLCENGINE_CONFIG = {
 async function generateText(prompt, options = {}) {
     const {
         temperature = 0.7,
-        maxTokens = 2000,
+        maxTokens = 1000,  // 减少 token 数量，加快响应
         stream = false
     } = options;
 
@@ -53,7 +53,7 @@ async function generateText(prompt, options = {}) {
                 messages: [
                     {
                         role: 'system',
-                        content: '你是一个专业的教育助手，擅长分析产教融合案例和思政教育内容。'
+                        content: '你是教育助手，请简洁回答。'  // 简化系统提示，加快响应
                     },
                     {
                         role: 'user',
@@ -62,7 +62,8 @@ async function generateText(prompt, options = {}) {
                 ],
                 temperature: temperature,
                 max_tokens: maxTokens,
-                stream: stream
+                stream: stream,
+                top_p: 0.9  // 添加 top_p 参数优化生成速度
             })
         });
 
