@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab 7.5 微分方程的物理应用实验室</title>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            startup: {
+                pageReady: () => {
+                    return MathJax.startup.defaultPageReady().then(() => {
+                        if (typeof window.scheduleMathRender === 'function') {
+                            window.scheduleMathRender();
+                        }
+                        console.log('MathJax加载完成');
+                    });
+                }
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+            }
+        };
+    </script>
+    <script defer src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js"></script>
+    <script defer src="../common-assets/js/lab-math-enhancer.js"></script>
+    <style>
+        :root {
+            --h1-size: 22px;
+            --h2-size: 20px;
+            --h3-size: 18px;
+            --btn-size: 16px;
+            --formula-size: 20px;
+            --text-size: 16px;
+            --primary: #4f46e5;
+            --primary-light: #6366f1;
+            --primary-dark: #3730a3;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --light: #ffffff;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-600: #4b5563;
+            --gray-800: #1f2937;
+            --border: #e5e7eb;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        *::-webkit-scrollbar {
+            width: 0;
+            background: transparent;
+        }
+
+        * {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
+            font-size: var(--text-size);
+            line-height: 1.5;
+            background: var(--gray-50);
+            color: var(--gray-800);
+        }
+
+        .return-home-panel {
+            position: fixed;
+            top: 12px;
+            right: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+            z-index: 40;
+        }
+
+        .return-toggle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.95), rgba(99, 102, 241, 0.9));
+            color: #ffffff;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 10px 18px rgba(79, 70, 229, 0.28);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .return-toggle:focus-visible {
+            outline: 2px solid rgba(129, 140, 248, 0.6);
+            outline-offset: 3px;
+        }
+
+        .return-toggle:hover {
+            transform: translateY(-1px) scale(1.03);
+            box-shadow: 0 14px 26px rgba(79, 70, 229, 0.35);
+        }
+
+        .return-links {
+            display: none;
+            flex-direction: column;
+            gap: 6px;
+            padding: 10px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(79, 70, 229, 0.15);
+            box-shadow: 0 16px 30px rgba(15, 23, 42, 0.18);
+            backdrop-filter: blur(6px);
+        }
+
+        .return-home-panel.open .return-links {
+            display: flex;
+        }
+
+        .return-link {
+            padding: 6px 12px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 14px;
+            color: var(--primary);
+            background: rgba(79, 70, 229, 0.12);
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+
+        .return-link.return-main {
+            color: var(--success);
+            background: rgba(16, 185, 129, 0.12);
+        }
+
+        .return-link:hover {
+            background: rgba(79, 70, 229, 0.2);
+            color: var(--primary-dark);
+        }
+
+        .return-link.return-main:hover {
+            background: rgba(16, 185, 129, 0.22);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            height: 100vh;
+            max-height: 700px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            background: var(--light);
+            border-radius: 12px;
+            box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(90deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: var(--light);
+            padding: 10px 24px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: var(--h1-size);
+            font-weight: 600;
+        }
+
+        .main {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 120px;
+            background: var(--gray-50);
+            border-right: 1px solid var(--border);
+            padding: 12px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .nav-btn {
+            width: 100%;
+            padding: 8px;
+            border: none;
+            border-radius: 6px;
+            background: transparent;
+            color: var(--gray-600);
+            text-align: left;
+            font-size: var(--text-size);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .nav-btn:hover {
+            background: var(--gray-100);
+        }
+
+        .nav-btn.active {
+            background: var(--primary);
+            color: var(--light);
+        }
+
+        .content {
+            flex: 1;
+            display: none;
+            padding: 18px;
+            overflow-y: auto;
+        }
+
+        .content.active {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 20px;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow-y: auto;
+        }
+
+        .card {
+            background: var(--light);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+        }
+
+        .card h3 {
+            font-size: var(--h3-size);
+            color: var(--primary);
+            margin-bottom: 12px;
+        }
+
+        .card p {
+            color: var(--gray-600);
+            margin-bottom: 8px;
+        }
+
+        .input-group {
+            margin-bottom: 12px;
+        }
+
+        .input-group label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: var(--gray-600);
+        }
+
+        .input-group input[type="range"] {
+            width: 100%;
+        }
+
+        .info-box {
+            background: var(--gray-50);
+            border-left: 3px solid var(--primary);
+            padding: 12px;
+            border-radius: 6px;
+            font-size: var(--text-size);
+            line-height: 1.6;
+        }
+
+        .hint-box {
+            background: #ecfdf5;
+            border-left: 3px solid var(--success);
+            padding: 12px;
+            border-radius: 6px;
+            color: var(--gray-700);
+        }
+
+        .formula-box {
+            background: #eef2ff;
+            border-radius: 8px;
+            padding: 12px;
+            border: 1px solid rgba(79, 70, 229, 0.2);
+            min-height: 90px;
+        }
+
+        .metrics {
+            display: grid;
+            gap: 10px;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        }
+
+        .metric {
+            background: var(--gray-50);
+            border-radius: 8px;
+            padding: 10px;
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .metric h4 {
+            color: var(--gray-600);
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .metric span {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        canvas {
+            width: 100%;
+            height: 260px;
+            background: var(--light);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+        }
+
+        @media (max-width: 1024px) {
+            .content.active {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                height: auto;
+                max-height: none;
+            }
+
+            canvas {
+                height: 220px;
+            }
+        }
+    
+        /* 内联公式排版 */
+        .formula-box {
+            display: inline-flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+            gap: 8px;
+            margin: 4px 12px 4px 0;
+            width: auto;
+            max-width: 100%;
+            text-align: left;
+        }
+
+        .formula-box::before {
+            content: attr(data-prefix);
+            font-weight: 600;
+            color: var(--primary, #4f46e5);
+            margin-right: 6px;
+        }
+
+        .formula-box[data-prefix=""]::before,
+        .formula-box:not([data-prefix])::before {
+            content: none;
+        }
+
+        .formula-box mjx-container {
+            margin: 0;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="return-home-panel">
+        <button class="return-toggle" type="button" aria-label="打开返回导航" onclick="toggleReturnPanel(event)"><i class="fa-solid fa-house"></i></button>
+        <div class="return-links">
+            <a class="return-link return-sub" href="index.html"><i class="fa-solid fa-arrow-left"></i> 返回目录</a>
+            <a class="return-link return-main" href="../index.html"><i class="fa-solid fa-house"></i> 返回主站</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <header class="header">
+            <h1>Lab 7.5 微分方程的物理应用</h1>
+        </header>
+
+        <div class="main">
+            <nav class="sidebar">
+                <button class="nav-btn active"  data-panel="module1"onclick="switchPanel('module1', this)">冷却过程</button>
+                <button class="nav-btn"  data-panel="module2"onclick="switchPanel('module2', this)">混合槽模型</button>
+                <button class="nav-btn"  data-panel="module3"onclick="switchPanel('module3', this)">阻尼振动</button>
+            </nav>
+
+            <div class="content active" id="module1">
+                <div class="column">
+                    <div class="card">
+                        <h3>牛顿冷却定律参数</h3>
+                        <p>温度随时间的变化满足 $\dfrac{dT}{dt}=-k(T-T_\text{env})$。</p>
+                        <div class="input-group">
+                            <label>环境温度 $T_\text{env}$ <span id="envValue">20℃</span></label>
+                            <input id="envSlider" type="range" min="0" max="40" value="20">
+                        </div>
+                        <div class="input-group">
+                            <label>初始温度 $T(0)$ <span id="startValue">90℃</span></label>
+                            <input id="startSlider" type="range" min="30" max="120" value="90">
+                        </div>
+                        <div class="input-group">
+                            <label>冷却系数 $k$ <span id="kValue">0.25</span></label>
+                            <input id="kSlider" type="range" min="0.05" max="0.5" step="0.01" value="0.25">
+                        </div>
+                        <div class="info-box" id="coolEquation">
+                            模型方程：$\dfrac{dT}{dt}=-0.25\big(T-20\big)$
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3>解析解与定量指标</h3>
+                        <p class="formula-box" id="coolSolution" data-prefix="公式：">$T(t)=20+(90-20)e^{-0.25t}$</p>
+                        <div class="metrics" id="coolMetrics"></div>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="card">
+                        <h3>温度曲线</h3>
+                        <canvas id="coolCanvas"></canvas>
+                        <div class="hint-box" style="margin-top:12px;">观察咖啡温度如何指数衰减并趋向环境温度。</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content" id="module2">
+                <div class="column">
+                    <div class="card">
+                        <h3>混合槽浓度模型</h3>
+                        <p>溶液浓度满足 $\dfrac{dC}{dt}=\dfrac{q}{V}\big(C_\text{in}-C\big)$。</p>
+                        <div class="input-group">
+                            <label>进液浓度 $C_\text{in}$ (g/L) <span id="cinValue">8</span></label>
+                            <input id="cinSlider" type="range" min="0" max="12" step="0.5" value="8">
+                        </div>
+                        <div class="input-group">
+                            <label>初始浓度 $C(0)$ (g/L) <span id="c0Value">2</span></label>
+                            <input id="c0Slider" type="range" min="0" max="12" step="0.5" value="2">
+                        </div>
+                        <div class="input-group">
+                            <label>流量 $q$ (L/min) <span id="flowValue">3</span></label>
+                            <input id="flowSlider" type="range" min="1" max="6" step="0.5" value="3">
+                        </div>
+                        <div class="input-group">
+                            <label>容积 $V$ (L) <span id="volumeValue">120</span></label>
+                            <input id="volumeSlider" type="range" min="80" max="200" step="10" value="120">
+                        </div>
+                        <div class="info-box" id="mixEquation">
+                            模型方程：$\dfrac{dC}{dt}=\dfrac{3}{120}\big(8-C\big)$
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3>解析解与定量指标</h3>
+                        <p class="formula-box" id="mixSolution" data-prefix="公式：">$C(t)=8+(2-8)e^{-0.025t}$</p>
+                        <div class="metrics" id="mixMetrics"></div>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="card">
+                        <h3>浓度变化曲线</h3>
+                        <canvas id="mixCanvas"></canvas>
+                        <div class="hint-box" style="margin-top:12px;">浓度以指数方式逼近来液浓度，时间常数取决于 $q/V$。</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content" id="module3">
+                <div class="column">
+                    <div class="card">
+                        <h3>阻尼振动参数</h3>
+                        <p>无外力阻尼振动满足 $y''+2\zeta\omega_n y'+\omega_n^2 y=0$。</p>
+                        <div class="input-group">
+                            <label>阻尼比 $\zeta$ <span id="zetaValue">0.30</span></label>
+                            <input id="zetaSlider" type="range" min="0.05" max="0.9" step="0.05" value="0.3">
+                        </div>
+                        <div class="input-group">
+                            <label>固有角频率 $\omega_n$ <span id="omegaValue">3.0</span></label>
+                            <input id="omegaSlider" type="range" min="1" max="6" step="0.5" value="3">
+                        </div>
+                        <div class="input-group">
+                            <label>初始位移 $y(0)$ <span id="ampValue">1.0</span></label>
+                            <input id="ampSlider" type="range" min="0.5" max="2.5" step="0.1" value="1">
+                        </div>
+                        <div class="info-box" id="oscEquation">
+                            模型方程：$y''+1.8y'+9y=0$
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3>解析解与特征量</h3>
+                        <p class="formula-box" id="oscSolution" data-prefix="公式：">$y(t)=e^{-0.90t}\big(1.00\cos(2.81t)+0.32\sin(2.81t)\big)$</p>
+                        <div class="metrics" id="oscMetrics"></div>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="card">
+                        <h3>阻尼振动曲线</h3>
+                        <canvas id="oscCanvas"></canvas>
+                        <div class="hint-box" style="margin-top:12px;">阻尼比越大，振幅衰减越快；当 $\zeta \to 0$ 时近似无阻尼振动。</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let mathObserver = null;
+        let mathRenderQueued = false;
+
+        function startMathObserver() {
+            if (typeof MutationObserver === 'undefined' || !document.body) {
+                return;
+            }
+            if (mathObserver) {
+                mathObserver.disconnect();
+            }
+            mathObserver = new MutationObserver(mutations => {
+                for (const mutation of mutations) {
+                    if (mutation.type === 'childList' || mutation.type === 'characterData') {
+                        scheduleMathRender();
+                        break;
+                    }
+                }
+            });
+            mathObserver.observe(document.body, { childList: true, subtree: true, characterData: true });
+        }
+
+        function scheduleMathRender() {
+            if (mathRenderQueued) {
+                return;
+            }
+            mathRenderQueued = true;
+            requestAnimationFrame(() => {
+                mathRenderQueued = false;
+                if (window.MathJax && MathJax.typesetPromise) {
+                    if (mathObserver) {
+                        mathObserver.disconnect();
+                    }
+                    MathJax.typesetPromise()
+                        .catch(err => console.log('渲染错误:', err))
+                        .finally(() => {
+                            startMathObserver();
+                        });
+                } else {
+                    setTimeout(scheduleMathRender, 160);
+                }
+            });
+        }
+
+        window.scheduleMathRender = scheduleMathRender;
+
+        function renderMath() {
+            scheduleMathRender();
+        }
+
+        function ensureMathReady() {
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', () => {
+                    startMathObserver();
+                    scheduleMathRender();
+                });
+            } else {
+                startMathObserver();
+                scheduleMathRender();
+            }
+        }
+
+        ensureMathReady();
+
+        function toggleReturnPanel(event) {
+            event.stopPropagation();
+            const panel = document.querySelector('.return-home-panel');
+            if (panel) {
+                panel.classList.toggle('open');
+            }
+        }
+
+        document.addEventListener('click', event => {
+            const panel = document.querySelector('.return-home-panel');
+            if (!panel) {
+                return;
+            }
+            if (panel.classList.contains('open') && !panel.contains(event.target)) {
+                panel.classList.remove('open');
+            }
+        });
+
+        window.addEventListener('pageshow', () => {
+            scheduleMathRender();
+        });
+
+        function switchPanel(id, btn) {
+            document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderMath();
+            setTimeout(() => {
+                resizeCanvas(coolCanvas);
+                resizeCanvas(mixCanvas);
+                resizeCanvas(oscCanvas);
+                drawCooling();
+                drawMixing();
+                drawOscillation();
+            }, 120);
+        }
+
+        function resizeCanvas(canvas) {
+            if (!canvas) return;
+            const container = canvas.parentElement;
+            const width = container.clientWidth - 20;
+            const height = 240;
+            canvas.style.width = width + 'px';
+            canvas.style.height = height + 'px';
+            const ratio = window.devicePixelRatio || 1;
+            canvas.width = width * ratio;
+            canvas.height = height * ratio;
+            const ctx = canvas.getContext('2d');
+            ctx.scale(ratio, ratio);
+        }
+
+        function drawAxis(ctx, width, height, xLabel = 't', yLabel = 'y') {
+            ctx.clearRect(0, 0, width, height);
+            ctx.save();
+            ctx.strokeStyle = '#374151';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(50, height - 30);
+            ctx.lineTo(width - 20, height - 30);
+            ctx.moveTo(50, 20);
+            ctx.lineTo(50, height - 30);
+            ctx.stroke();
+
+            ctx.fillStyle = '#374151';
+            ctx.font = '12px sans-serif';
+            ctx.fillText(xLabel, width - 30, height - 36);
+            ctx.fillText(yLabel, 34, 26);
+
+            for (let i = 0; i <= 5; i++) {
+                const x = 50 + (width - 80) * (i / 5);
+                ctx.beginPath();
+                ctx.moveTo(x, height - 34);
+                ctx.lineTo(x, height - 26);
+                ctx.stroke();
+                ctx.fillText((2 * i).toString(), x - 6, height - 10);
+            }
+            ctx.restore();
+        }
+
+        function mapCoolingY(temp, minTemp, maxTemp, height) {
+            const plotHeight = height - 60;
+            return height - 30 - (temp - minTemp) / (maxTemp - minTemp) * plotHeight;
+        }
+
+        const coolCanvas = document.getElementById('coolCanvas');
+        const coolCtx = coolCanvas.getContext('2d');
+        const mixCanvas = document.getElementById('mixCanvas');
+        const mixCtx = mixCanvas.getContext('2d');
+        const oscCanvas = document.getElementById('oscCanvas');
+        const oscCtx = oscCanvas.getContext('2d');
+
+        function drawCooling() {
+            resizeCanvas(coolCanvas);
+            const width = coolCanvas.clientWidth;
+            const height = coolCanvas.clientHeight;
+            drawAxis(coolCtx, width, height, 't (min)', 'T');
+            const env = parseFloat(document.getElementById('envSlider').value);
+            const start = parseFloat(document.getElementById('startSlider').value);
+            const k = parseFloat(document.getElementById('kSlider').value);
+            const minTemp = Math.min(env, start) - 5;
+            const maxTemp = Math.max(env, start) + 5;
+            coolCtx.beginPath();
+            coolCtx.strokeStyle = '#4f46e5';
+            coolCtx.lineWidth = 2.2;
+            for (let i = 0; i <= 200; i++) {
+                const t = 0 + 10 * (i / 200);
+                const temp = env + (start - env) * Math.exp(-k * t);
+                const x = 50 + (width - 80) * (t / 10);
+                const y = mapCoolingY(temp, minTemp, maxTemp, height);
+                if (i === 0) coolCtx.moveTo(x, y);
+                else coolCtx.lineTo(x, y);
+            }
+            coolCtx.stroke();
+
+            coolCtx.setLineDash([6, 6]);
+            coolCtx.strokeStyle = '#10b981';
+            coolCtx.beginPath();
+            const envY = mapCoolingY(env, minTemp, maxTemp, height);
+            coolCtx.moveTo(50, envY);
+            coolCtx.lineTo(width - 20, envY);
+            coolCtx.stroke();
+            coolCtx.setLineDash([]);
+        }
+
+        function updateCoolingText() {
+            const env = parseFloat(document.getElementById('envSlider').value);
+            const start = parseFloat(document.getElementById('startSlider').value);
+            const k = parseFloat(document.getElementById('kSlider').value);
+            document.getElementById('envValue').textContent = `${env}℃`;
+            document.getElementById('startValue').textContent = `${start}℃`;
+            document.getElementById('kValue').textContent = k.toFixed(2);
+            document.getElementById('coolEquation').innerHTML = `模型方程：$\\dfrac{dT}{dt}=-${k.toFixed(2)}\\big(T-${env}\\big)$`;
+            document.getElementById('coolSolution').innerHTML = `$T(t)=${env}+(${start}-${env})e^{-${k.toFixed(2)}t}$`;
+            const metrics = document.getElementById('coolMetrics');
+            let timeLabel = '目标不可达';
+            if (Math.abs(30 - env) < 1e-6) {
+                timeLabel = '环境即为 30℃';
+            } else if ((start - env) * (30 - env) <= 0) {
+                timeLabel = '初始温度已越过 30℃';
+            } else {
+                const timeTo30 = Math.log((start - env) / (30 - env)) / k;
+                timeLabel = timeTo30 > 0 ? timeTo30.toFixed(1) + ' min' : '初始温度已低于 30℃';
+            }
+            metrics.innerHTML = `
+                <div class="metric"><h4>10 分钟温度</h4><span>${(env + (start - env) * Math.exp(-k * 10)).toFixed(1)}℃</span></div>
+                <div class="metric"><h4>下降到 30℃ 所需时间</h4><span>${timeLabel}</span></div>
+                <div class="metric"><h4>温度差衰减常数</h4><span>${(1 / k).toFixed(1)} min</span></div>`;
+            renderMath();
+            drawCooling();
+        }
+
+        function drawMixing() {
+            resizeCanvas(mixCanvas);
+            const width = mixCanvas.clientWidth;
+            const height = mixCanvas.clientHeight;
+            drawAxis(mixCtx, width, height, 't (min)', 'C');
+            const cin = parseFloat(document.getElementById('cinSlider').value);
+            const c0 = parseFloat(document.getElementById('c0Slider').value);
+            const q = parseFloat(document.getElementById('flowSlider').value);
+            const V = parseFloat(document.getElementById('volumeSlider').value);
+            const lambda = q / V;
+            const minC = Math.min(cin, c0) - 1;
+            const maxC = Math.max(cin, c0) + 1;
+            mixCtx.beginPath();
+            mixCtx.strokeStyle = '#10b981';
+            mixCtx.lineWidth = 2.2;
+            for (let i = 0; i <= 200; i++) {
+                const t = 0 + 20 * (i / 200);
+                const conc = cin + (c0 - cin) * Math.exp(-lambda * t);
+                const x = 50 + (width - 80) * (t / 20);
+                const y = mapCoolingY(conc, minC, maxC, height);
+                if (i === 0) mixCtx.moveTo(x, y);
+                else mixCtx.lineTo(x, y);
+            }
+            mixCtx.stroke();
+
+            mixCtx.setLineDash([6, 6]);
+            mixCtx.strokeStyle = '#f59e0b';
+            mixCtx.beginPath();
+            const cinY = mapCoolingY(cin, minC, maxC, height);
+            mixCtx.moveTo(50, cinY);
+            mixCtx.lineTo(width - 20, cinY);
+            mixCtx.stroke();
+            mixCtx.setLineDash([]);
+        }
+
+        function updateMixingText() {
+            const cin = parseFloat(document.getElementById('cinSlider').value);
+            const c0 = parseFloat(document.getElementById('c0Slider').value);
+            const q = parseFloat(document.getElementById('flowSlider').value);
+            const V = parseFloat(document.getElementById('volumeSlider').value);
+            const lambda = q / V;
+            document.getElementById('cinValue').textContent = cin;
+            document.getElementById('c0Value').textContent = c0;
+            document.getElementById('flowValue').textContent = q;
+            document.getElementById('volumeValue').textContent = V;
+            document.getElementById('mixEquation').innerHTML = `模型方程：$\\dfrac{dC}{dt}=\\dfrac{${q}}{${V}}\\big(${cin}-C\\big)$`;
+            document.getElementById('mixSolution').innerHTML = `$C(t)=${cin}+(${c0}-${cin})e^{-(${lambda.toFixed(3)})t}$`;
+            const metrics = document.getElementById('mixMetrics');
+            metrics.innerHTML = `
+                <div class="metric"><h4>时间常数</h4><span>${(1 / lambda).toFixed(1)} min</span></div>
+                <div class="metric"><h4>10 min 浓度</h4><span>${(cin + (c0 - cin) * Math.exp(-lambda * 10)).toFixed(2)} g/L</span></div>
+                <div class="metric"><h4>最终浓度</h4><span>${cin} g/L</span></div>`;
+            renderMath();
+            drawMixing();
+        }
+
+        function drawOscillation() {
+            resizeCanvas(oscCanvas);
+            const width = oscCanvas.clientWidth;
+            const height = oscCanvas.clientHeight;
+            drawAxis(oscCtx, width, height, 't (s)', 'y');
+            const zeta = parseFloat(document.getElementById('zetaSlider').value);
+            const omega = parseFloat(document.getElementById('omegaSlider').value);
+            const amp = parseFloat(document.getElementById('ampSlider').value);
+            const omegaD = omega * Math.sqrt(Math.max(1 - zeta * zeta, 0));
+            const c1 = amp;
+            const c2 = omegaD > 0 ? (zeta * omega * amp) / omegaD : 0;
+            oscCtx.beginPath();
+            oscCtx.strokeStyle = '#4f46e5';
+            oscCtx.lineWidth = 2.2;
+            for (let i = 0; i <= 240; i++) {
+                const t = 0 + 12 * (i / 240);
+                const y = Math.exp(-zeta * omega * t) * (c1 * Math.cos(omegaD * t) + c2 * Math.sin(omegaD * t));
+                const x = 50 + (width - 80) * (t / 12);
+                const yCanvas = mapCoolingY(y, -amp, amp, height);
+                if (i === 0) oscCtx.moveTo(x, yCanvas);
+                else oscCtx.lineTo(x, yCanvas);
+            }
+            oscCtx.stroke();
+        }
+
+        function updateOscillationText() {
+            const zeta = parseFloat(document.getElementById('zetaSlider').value);
+            const omega = parseFloat(document.getElementById('omegaSlider').value);
+            const amp = parseFloat(document.getElementById('ampSlider').value);
+            const omegaD = omega * Math.sqrt(Math.max(1 - zeta * zeta, 0));
+            const c2 = omegaD > 0 ? (zeta * omega * amp) / omegaD : 0;
+            document.getElementById('zetaValue').textContent = zeta.toFixed(2);
+            document.getElementById('omegaValue').textContent = omega.toFixed(1);
+            document.getElementById('ampValue').textContent = amp.toFixed(1);
+            document.getElementById('oscEquation').innerHTML = `模型方程：$y''+${(2 * zeta * omega).toFixed(2)}y'+${(omega * omega).toFixed(2)}y=0$`;
+            document.getElementById('oscSolution').innerHTML = `$y(t)=e^{-${(zeta * omega).toFixed(2)}t}\\Big(${c1Fixed(amp)}\\cos(${omegaD.toFixed(2)}t)+${c2.toFixed(2)}\\sin(${omegaD.toFixed(2)}t)\\Big)$`;
+            const metrics = document.getElementById('oscMetrics');
+            metrics.innerHTML = `
+                <div class="metric"><h4>阻尼自然频率</h4><span>${omegaD.toFixed(2)} rad/s</span></div>
+                <div class="metric"><h4>周期</h4><span>${omegaD > 0 ? (2 * Math.PI / omegaD).toFixed(2) + ' s' : '临界/过阻尼'}</span></div>
+                <div class="metric"><h4>能量衰减常数</h4><span>${(1 / (zeta * omega)).toFixed(2)} s</span></div>`;
+            renderMath();
+            drawOscillation();
+        }
+
+        function c1Fixed(value) {
+            return value.toFixed(2);
+        }
+
+        document.getElementById('envSlider').addEventListener('input', updateCoolingText);
+        document.getElementById('startSlider').addEventListener('input', updateCoolingText);
+        document.getElementById('kSlider').addEventListener('input', updateCoolingText);
+        document.getElementById('cinSlider').addEventListener('input', updateMixingText);
+        document.getElementById('c0Slider').addEventListener('input', updateMixingText);
+        document.getElementById('flowSlider').addEventListener('input', updateMixingText);
+        document.getElementById('volumeSlider').addEventListener('input', updateMixingText);
+        document.getElementById('zetaSlider').addEventListener('input', updateOscillationText);
+        document.getElementById('omegaSlider').addEventListener('input', updateOscillationText);
+        document.getElementById('ampSlider').addEventListener('input', updateOscillationText);
+
+        window.addEventListener('resize', () => {
+            resizeCanvas(coolCanvas);
+            resizeCanvas(mixCanvas);
+            resizeCanvas(oscCanvas);
+            drawCooling();
+            drawMixing();
+            drawOscillation();
+        });
+
+        updateCoolingText();
+        updateMixingText();
+        updateOscillationText();
+        renderMath();
+    </script>
+</body>
+</html>

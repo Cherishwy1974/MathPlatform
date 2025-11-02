@@ -1,0 +1,1036 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>侯爵的交易</title>
+    <script src="../../common-assets/js/tailwind.min.js"></script>    <style>
+        @font-face {
+            font-family: 'Iansui-Regular';
+            src: url('../../common-assets/fonts/Iansui-Regular.ttf') format('truetype');
+            font-weight: 400;
+            font-style: normal;
+        }
+        
+        /* 美化滚动条 - 竖向 */
+        *::-webkit-scrollbar {
+            width: 12px;
+        }
+        *::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+        }
+        *::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #d4af37, #b8860b);
+            border-radius: 6px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+        *::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #ffd700, #d4af37);
+        }
+        *::-webkit-scrollbar-thumb:active {
+            background: linear-gradient(180deg, #b8860b, #8b7355);
+        }
+        
+        /* 隐藏横向滚动条 */
+        *::-webkit-scrollbar:horizontal {
+            display: none;
+        }
+        
+        :root {
+            /* 金色贵族主题 */
+            --bg-start: #1a1207;
+            --bg-scene1: linear-gradient(135deg, #2c1810, #4a2c1a, #6b3e1f);
+            --bg-scene2: linear-gradient(180deg, #3d2817, #5c3d20, #7a4e28);
+            --bg-scene3: linear-gradient(45deg, #2e1f13, #4a3220, #66462d);
+            --bg-scene4: radial-gradient(circle, #4a3220, #2c1810, #1a0f07);
+            --bg-scene5: linear-gradient(315deg, #5c3d20, #8b5a2b);
+            --bg-scene6: linear-gradient(135deg, #3d2817, #5c3d20, #7a4e28);
+            --bg-scene7: linear-gradient(180deg, #2c1810, #4a2c1a);
+            --bg-scene8: linear-gradient(45deg, #1a1207, #2e1f13, #42311e);
+            --bg-scene9: linear-gradient(135deg, #4a3220, #6b3e1f, #8b5a2b);
+            --bg-scene10: linear-gradient(180deg, #2c1810, #1a0f07);
+            --bg-scene11: linear-gradient(315deg, #3d2817, #5c3d20);
+            --bg-scene12: linear-gradient(135deg, #4a2c1a, #6b3e1f);
+            --bg-scene13: radial-gradient(circle, #8b5a2b, #5c3d20, #2c1810);
+        }
+
+        body {
+            font-family: 'Iansui-Regular', serif;
+            color: #f4e4c1;
+            overflow-x: hidden;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            background-color: var(--bg-start);
+            transition: background-color 1.5s ease-in-out;
+        }
+
+        #scroll-container {
+            height: 1600vh;
+            position: relative;
+        }
+
+        .sticky-element {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* 金币和羽毛笔动画背景 */
+        #goldCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        /* 几何过渡效果 */
+        .geometric-transition {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 0;
+            height: 0;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .gold-wipe {
+            width: 100vmax;
+            height: 100vmax;
+            border-radius: 50%;
+            background: radial-gradient(circle, transparent 0%, var(--transition-color, #8b5a2b) 100%);
+            transform: translate(-50%, -50%) scale(0);
+            transition: transform 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .gold-wipe.active {
+            transform: translate(-50%, -50%) scale(2);
+        }
+
+        /* 契约纸张过渡 */
+        .paper-transition {
+            width: 100vw;
+            height: 100vh;
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            opacity: 0;
+            transition: opacity 0.8s ease;
+        }
+
+        .paper-strip {
+            flex: 1;
+            background: linear-gradient(90deg, transparent, #d4af37, transparent);
+            transform: scaleX(0);
+            transition: transform 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .paper-transition.active {
+            opacity: 1;
+        }
+
+        .paper-transition.active .paper-strip {
+            transform: scaleX(1);
+        }
+
+        /* 羽毛笔书写效果 */
+        .quill-writing {
+            position: absolute;
+            font-family: 'Iansui-Regular', serif;
+            font-size: 36px;
+            color: rgba(212, 175, 55, 0.3);
+            font-style: italic;
+            animation: write-fade 4s ease-in-out infinite;
+        }
+
+        @keyframes write-fade {
+            0%, 100% { opacity: 0; transform: translateX(-20px); }
+            50% { opacity: 0.4; transform: translateX(0); }
+        }
+
+        /* 金币漂浮效果 */
+        .floating-coin {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: radial-gradient(circle, #ffd700, #b8860b);
+            border-radius: 50%;
+            animation: float-coin 10s infinite linear;
+            pointer-events: none;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+
+        @keyframes float-coin {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.8;
+            }
+            90% {
+                opacity: 0.8;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* 场景样式 */
+        .scene {
+            opacity: 0;
+            transition: opacity 0.8s ease-in-out;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .scene-background {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            transition: opacity 1.5s ease-in-out;
+            z-index: -2;
+        }
+
+        /* 场景背景 */
+        .bg-scene1 { background: var(--bg-scene1); }
+        .bg-scene2 { background: var(--bg-scene2); }
+        .bg-scene3 { background: var(--bg-scene3); }
+        .bg-scene4 { background: var(--bg-scene4); }
+        .bg-scene5 { background: var(--bg-scene5); }
+        .bg-scene6 { background: var(--bg-scene6); }
+        .bg-scene7 { background: var(--bg-scene7); }
+        .bg-scene8 { background: var(--bg-scene8); }
+        .bg-scene9 { background: var(--bg-scene9); }
+        .bg-scene10 { background: var(--bg-scene10); }
+        .bg-scene11 { background: var(--bg-scene11); }
+        .bg-scene12 { background: var(--bg-scene12); }
+        .bg-scene13 { background: var(--bg-scene13); }
+
+        /* 图片样式 */
+        .illustration-wrapper {
+            position: absolute;
+            z-index: 5;
+            transition: all 1.5s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .illustration {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: all 1.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            opacity: 0;
+            transform: scale(0.85) translateY(30px);
+            filter: brightness(0.95) contrast(1.1) saturate(1.1);
+        }
+
+        .frame-elegant {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            border-radius: 20px;
+            box-shadow: 
+                0 15px 35px rgba(0, 0, 0, 0.4),
+                0 5px 15px rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(212, 175, 55, 0.3);
+        }
+
+        .frame-elegant::before {
+            content: '';
+            position: absolute;
+            inset: -1px;
+            background: linear-gradient(135deg, 
+                rgba(212, 175, 55, 0.2) 0%, 
+                rgba(212, 175, 55, 0) 50%,
+                rgba(212, 175, 55, 0.1) 100%
+            );
+            border-radius: inherit;
+            opacity: 0.6;
+            z-index: -1;
+        }
+
+        .illustration-appear {
+            opacity: 0.95;
+            transform: scale(1) translateY(0);
+        }
+
+        .illustration-left {
+            left: 10vw;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 35vw;
+            height: 55vh;
+        }
+
+        .illustration-right {
+            right: 10vw;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 35vw;
+            height: 55vh;
+        }
+
+        /* 文字样式 */
+        .story-text {
+            position: absolute;
+            font-size: 1.5rem;
+            text-shadow: 3px 3px 10px rgba(0,0,0,0.8);
+            transition: all 1s cubic-bezier(0.23, 1, 0.32, 1);
+            text-align: left;
+            padding: 2rem;
+            max-width: 280px;
+            line-height: 2.2;
+            font-weight: 500;
+            z-index: 8;
+            writing-mode: vertical-rl;
+            text-orientation: upright;
+            letter-spacing: 0.12em;
+            opacity: 0;
+            transform: translateY(20px);
+            color: #f4e4c1;
+        }
+
+        .story-text-appear {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .text-left {
+            left: 30vw;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .text-right {
+            right: 30vw;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        /* 逐字浮现动画 */
+        .char-float {
+            display: inline-block;
+            opacity: 0;
+            transform: translateY(15px);
+            animation: float-up 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+        }
+
+        @keyframes float-up {
+            0% {
+                opacity: 0;
+                transform: translateY(15px) scale(0.9);
+            }
+            50% {
+                opacity: 0.5;
+                transform: translateY(5px) scale(0.95);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* 特殊场景：交易契约 */
+        #scene6 {
+            position: relative;
+        }
+
+        #contract-animation {
+            position: absolute;
+            width: 400px;
+            height: 500px;
+            opacity: 0;
+            transition: opacity 1.5s cubic-bezier(0.23, 1, 0.32, 1);
+            z-index: 20;
+        }
+
+        .contract-text {
+            position: absolute;
+            font-family: 'Iansui-Regular', serif;
+            font-size: 24px;
+            color: rgba(212, 175, 55, 0.5);
+            font-style: italic;
+            animation: contract-write 3s ease-in-out infinite;
+        }
+
+        @keyframes contract-write {
+            0%, 100% { 
+                opacity: 0.2;
+                transform: translateX(-10px);
+            }
+            50% { 
+                opacity: 0.6;
+                transform: translateX(0);
+            }
+        }
+
+        /* 封面和封底样式 */
+        #scene-cover, #scene-end {
+            z-index: 10;
+        }
+
+        #scene-cover h1, #scene-cover p, #scene-end p {
+            position: relative;
+            z-index: 11;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.5);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1366px) {
+            .story-text {
+                font-size: 1.3rem;
+                max-width: 260px;
+            }
+            .illustration-left,
+            .illustration-right {
+                width: 33vw;
+                height: 50vh;
+            }
+            .text-left {
+               left: 30vw;            }
+            .text-right {
+                right: 30vw;            }
+        }
+        
+        @media (max-width: 768px) {
+            .scene { 
+                flex-direction: column; 
+                justify-content: center; 
+                align-items: center;
+                padding: 3vh 3vw;
+                gap: 1.5rem;
+            }
+            .illustration-wrapper { 
+                position: relative !important; 
+                left: auto !important;
+                right: auto !important;
+                width: 80vw !important;
+                height: 40vh !important;
+                margin: 0 auto;
+            }
+            .story-text { 
+                position: relative !important; 
+                left: auto !important;
+                right: auto !important;
+                max-width: 85vw; 
+                font-size: 1.1rem;
+                writing-mode: horizontal-tb;
+                text-orientation: initial;
+                letter-spacing: normal;
+                margin: 0 auto;
+                text-align: center;
+                padding: 1rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .story-text {
+                font-size: 1rem;
+                max-width: 90vw;
+                padding: 0.8rem;
+            }
+            .illustration-wrapper {
+                width: 90vw !important;
+                height: 35vh !important;
+            }
+        }
+    </style>
+
+    <style>
+        .return-home-panel {
+            position: fixed;
+            top: 12px;
+            left: 12px;
+            display: flex;
+            gap: 6px;
+            z-index: 9999;
+            flex-wrap: wrap;
+        }
+        .return-home-panel .return-link {
+            padding: 6px 10px;
+            border-radius: 10px;
+            background: rgba(15, 23, 42, 0.35);
+            color: #f8fafc;
+            font-size: 13px;
+            text-decoration: none;
+            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.18);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            border: 1px solid rgba(248, 250, 252, 0.12);
+            transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .return-home-panel .return-link:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.25);
+            background: rgba(15, 23, 42, 0.42);
+        }
+        .return-home-panel .return-link.return-main {
+            background: rgba(79, 70, 229, 0.18);
+            border-color: rgba(79, 70, 229, 0.25);
+        }
+        @media (max-width: 640px) {
+            .return-home-panel {
+                top: 12px;
+                left: 12px;
+                right: 12px;
+                justify-content: center;
+            }
+            .return-home-panel .return-link {
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="return-home-panel">
+         <a class="return-link return-sub" href="../index.html"><i class="fa-solid fa-arrow-left"></i> 返回目录</a>
+        <a class="return-link return-main" href="../../index.html"><i class="fa-solid fa-house"></i> 返回主站</a>
+    </div>
+    <!-- 几何过渡效果层 -->
+    <div class="geometric-transition">
+        <div id="gold-wipe" class="gold-wipe"></div>
+    </div>
+
+    <div class="geometric-transition">
+        <div id="paper-transition" class="paper-transition">
+            <div class="paper-strip" style="transition-delay: 0s"></div>
+            <div class="paper-strip" style="transition-delay: 0.1s"></div>
+            <div class="paper-strip" style="transition-delay: 0.2s"></div>
+            <div class="paper-strip" style="transition-delay: 0.3s"></div>
+            <div class="paper-strip" style="transition-delay: 0.4s"></div>
+        </div>
+    </div>
+
+    <!-- 金币和羽毛笔动画背景 -->
+    <canvas id="goldCanvas"></canvas>
+
+    <div id="scroll-container">
+        <div id="scene-container" class="sticky-element">
+
+            <!-- 场景背景 -->
+            <div id="bg-scene1" class="scene-background bg-scene1"></div>
+            <div id="bg-scene2" class="scene-background bg-scene2"></div>
+            <div id="bg-scene3" class="scene-background bg-scene3"></div>
+            <div id="bg-scene4" class="scene-background bg-scene4"></div>
+            <div id="bg-scene5" class="scene-background bg-scene5"></div>
+            <div id="bg-scene6" class="scene-background bg-scene6"></div>
+            <div id="bg-scene7" class="scene-background bg-scene7"></div>
+            <div id="bg-scene8" class="scene-background bg-scene8"></div>
+            <div id="bg-scene9" class="scene-background bg-scene9"></div>
+            <div id="bg-scene10" class="scene-background bg-scene10"></div>
+            <div id="bg-scene11" class="scene-background bg-scene11"></div>
+            <div id="bg-scene12" class="scene-background bg-scene12"></div>
+            <div id="bg-scene13" class="scene-background bg-scene13"></div>
+
+            <!-- 场景0: 封面 -->
+            <div id="scene-cover" class="scene flex-col">
+                <h1 class="text-5xl md:text-6xl font-bold text-center" style="color: #d4af37;">侯爵的交易</h1>
+                <p class="text-xl md:text-2xl mt-4 text-center" style="color: #f4e4c1;">洛必达法则的真相</p>
+                <p class="absolute bottom-20 opacity-80 text-lg">向下滚动，开启故事</p>
+            </div>
+
+            <!-- 场景1: 17世纪的巴黎 -->
+            <div id="scene1" class="scene">
+                <div class="illustration-wrapper illustration-left depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="4- (1).png" alt="17世纪的巴黎" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-right depth-layer-3">17世纪末的巴黎，是欧洲的文化与思想中心。在贵族们的沙龙里，一种来自德国和英格兰的"新魔法"——微积分，成为了最时髦的话题。</p>
+            </div>
+
+            <!-- 场景2: 洛必达侯爵 -->
+            <div id="scene2" class="scene">
+                <div class="illustration-wrapper illustration-right depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="4- (2).png" alt="洛必达侯爵" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-left depth-layer-3">在这些热情的追随者中，有一位名叫纪尧姆·德·洛必达的法国侯爵。他是一位真心热爱且极具天赋的数学家，渴望能洞悉这门新学问的全部奥秘。</p>
+            </div>
+
+            <!-- 场景3: 伯努利的到来 -->
+            <div id="scene3" class="scene">
+                <div class="illustration-wrapper illustration-left depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="4- (3).png" alt="伯努利" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-right depth-layer-3">他必须找到最好的老师。而放眼全欧洲，这个头衔的有力竞争者，无疑是才华横溢但常常为生计发愁的约翰·伯努利。</p>
+            </div>
+
+            <!-- 场景4: 私人教师 -->
+            <div id="scene4" class="scene">
+                <div class="illustration-wrapper illustration-right depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="4- (4).png" alt="教学时光" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-left depth-layer-3">1691年，伯努利旅居巴黎，洛必达聘请他作为私人教师。伯努利在洛必达的庄园里度过了一段愉快的教学时光。</p>
+            </div>
+
+            <!-- 场景5: 惊人的提议 -->
+            <div id="scene5" class="scene">
+                <div class="illustration-wrapper illustration-left depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="4- (5).png" alt="商业合作" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-right depth-layer-3">当伯努利准备离开巴黎时，洛必达提出了一个更加惊人的"商业合作"。</p>
+            </div>
+
+            <!-- 场景6: 契约签订 -->
+            <div id="scene6" class="scene flex-col">
+                <!-- 契约动画 -->
+                <div id="contract-animation">
+                    <div class="contract-text" style="top: 30%; left: 20%;">300法郎/年</div>
+                    <div class="contract-text" style="top: 50%; right: 30%; animation-delay: 0.5s;">独家权利</div>
+                    <div class="contract-text" style="bottom: 30%; left: 40%; animation-delay: 1s;">知识交易</div>
+                </div>
+                
+                <!-- 背景图片 -->
+                <div class="illustration-wrapper" style="position: absolute; opacity: 0.15; width: 100%; height: 100%;">
+                    <img src="4- (6).png" alt="契约" style="object-fit: cover; width: 100%; height: 100%; filter: blur(2px);">
+                </div>
+                
+                <!-- 文字 -->
+                <div class="story-text" style="position: absolute; bottom: 10vh; text-align: center; max-width: 600px; writing-mode: horizontal-tb;">
+                    <p>洛必达每年支付300法郎，伯努利需将所有数学发现毫无保留地寄送给他，并承诺不再透露给任何人。</p>
+                </div>
+            </div>
+
+            <!-- 场景7: 魔鬼交易 -->
+            <div id="scene7" class="scene">
+                <div class="illustration-wrapper illustration-right depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="4- (7).png" alt="魔鬼交易" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-left depth-layer-3">对于伯努利而言，这是一个诱人又带有魔鬼色彩的交易。他有冠绝欧洲的头脑，但缺乏稳定的收入。于是，他同意了。</p>
+            </div>
+
+            <!-- 场景8: 知识流动 -->
+            <div id="scene8" class="scene">
+                <div class="illustration-wrapper illustration-left depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="4- (8).png" alt="信件往来" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-right depth-layer-3">从此，装满顶尖数学思想的信件，源源不断地从瑞士寄往巴黎。其中包括解决"0/0"未定式问题的绝妙方法。</p>
+            </div>
+
+            <!-- 场景9: 教科书出版 -->
+            <div id="scene9" class="scene">
+                <div class="illustration-wrapper illustration-right depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="4- (9).png" alt="教科书" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-left depth-layer-3">1696年，洛必达出版了《阐明曲线的无穷小分析》，这是历史上第一本系统性的微积分教科书。</p>
+            </div>
+
+            <!-- 场景10: 洛必达法则 -->
+            <div id="scene10" class="scene">
+                <div class="illustration-wrapper illustration-left depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="4- (10).png" alt="洛必达法则" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-right depth-layer-3">书中第九章介绍的解决"0/0"未定式的方法，顺理成章地被冠以"洛必达法则"之名，传遍了全世界。</p>
+            </div>
+
+            <!-- 场景11: 伯努利的痛苦 -->
+            <div id="scene11" class="scene">
+                <div class="illustration-wrapper illustration-right depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="4- (11).png" alt="伯努利的痛苦" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-left depth-layer-3">只要洛必达还活着并支付年金，伯努利就必须保持沉默。他眼睁睁看着自己的成果，为他人带来了巨大的声誉。</p>
+            </div>
+
+            <!-- 场景12: 真相大白 -->
+            <div id="scene12" class="scene">
+                <div class="illustration-wrapper illustration-left depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="4- (10).png" alt="真相大白" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-right depth-layer-3">1704年洛必达去世后，伯努利开始宣告真相。但直到1922年，历史学家发现了伯努利的手稿，真相才终于大白于天下。</p>
+            </div>
+
+            <!-- 场景13: 历史的评判 -->
+            <div id="scene13" class="scene">
+                <div class="illustration-wrapper illustration-right depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="4- (13).png" alt="历史评判" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-left depth-layer-3">洛必达并非剽窃者，他是一个"知识的投资人"。这个名字，是那场著名交易留给后世最永恒的纪念品。</p>
+            </div>
+
+            <!-- 结局 -->
+            <div id="scene-end" class="scene flex-col">
+                <p class="text-5xl md:text-6xl font-bold" style="color: #d4af37;">完</p>
+                <p class="text-xl mt-4" style="color: #f4e4c1;">一个关于天才、财富与契约的故事</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const scenes = Array.from(document.querySelectorAll('.scene'));
+        const sceneBackgrounds = Array.from(document.querySelectorAll('.scene-background'));
+        const sceneCount = scenes.length;
+        const scrollContainer = document.getElementById('scroll-container');
+        const goldWipe = document.getElementById('gold-wipe');
+        const paperTransition = document.getElementById('paper-transition');
+        const contractAnimation = document.getElementById('contract-animation');
+        
+        let lastSceneIndex = -1;
+        let isTransitioning = false;
+        let animatedTexts = new Set();
+        let contractAnimationStarted = false;
+
+        // ========= 金币和羽毛笔动画 =========
+        const goldCanvas = document.getElementById('goldCanvas');
+        const ctx = goldCanvas.getContext('2d');
+        let canvasWidth = goldCanvas.width = window.innerWidth;
+        let canvasHeight = goldCanvas.height = window.innerHeight;
+
+        window.addEventListener('resize', () => {
+            canvasWidth = goldCanvas.width = window.innerWidth;
+            canvasHeight = goldCanvas.height = window.innerHeight;
+        });
+
+        // 金币类
+        class GoldCoin {
+            constructor() {
+                this.reset();
+            }
+
+            reset() {
+                this.x = Math.random() * canvasWidth;
+                this.y = canvasHeight + 50;
+                this.vx = (Math.random() - 0.5) * 0.5;
+                this.vy = -Math.random() * 0.8 - 0.5;
+                this.size = Math.random() * 15 + 10;
+                this.rotation = 0;
+                this.rotationSpeed = (Math.random() - 0.5) * 0.1;
+                this.life = 1;
+                this.decay = Math.random() * 0.002 + 0.001;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.rotation += this.rotationSpeed;
+                this.life -= this.decay;
+                
+                if (this.life <= 0 || this.y < -50) {
+                    this.reset();
+                }
+            }
+
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.life * 0.6;
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.rotation);
+                
+                // 绘制金币
+                const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, this.size);
+                gradient.addColorStop(0, '#ffd700');
+                gradient.addColorStop(0.5, '#ffed4e');
+                gradient.addColorStop(1, '#b8860b');
+                
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.arc(0, 0, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // 金币上的符号
+                ctx.fillStyle = '#8b6914';
+                ctx.font = `${this.size * 0.8}px serif`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('₣', 0, 0);
+                
+                ctx.restore();
+            }
+        }
+
+        // 羽毛笔类
+        class Quill {
+            constructor() {
+                this.reset();
+            }
+
+            reset() {
+                this.x = Math.random() * canvasWidth;
+                this.y = canvasHeight + 100;
+                this.vx = (Math.random() - 0.5) * 0.3;
+                this.vy = -Math.random() * 0.6 - 0.4;
+                this.angle = Math.random() * Math.PI / 4 - Math.PI / 8;
+                this.size = Math.random() * 20 + 20;
+                this.life = 1;
+                this.decay = Math.random() * 0.002 + 0.001;
+                this.writing = false;
+                this.inkTrail = [];
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.life -= this.decay;
+                
+                // 偶尔留下墨迹
+                if (Math.random() < 0.02 && this.inkTrail.length < 10) {
+                    this.inkTrail.push({ x: this.x, y: this.y, life: 1 });
+                }
+                
+                // 更新墨迹
+                this.inkTrail = this.inkTrail.filter(ink => {
+                    ink.life -= 0.02;
+                    return ink.life > 0;
+                });
+                
+                if (this.life <= 0 || this.y < -100) {
+                    this.reset();
+                }
+            }
+
+            draw() {
+                // 绘制墨迹
+                this.inkTrail.forEach(ink => {
+                    ctx.save();
+                    ctx.globalAlpha = ink.life * 0.2;
+                    ctx.fillStyle = '#2c1810';
+                    ctx.beginPath();
+                    ctx.arc(ink.x, ink.y, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                });
+                
+                // 绘制羽毛笔
+                ctx.save();
+                ctx.globalAlpha = this.life * 0.5;
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.angle);
+                
+                // 笔杆
+                ctx.strokeStyle = '#8b6914';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.lineTo(0, -this.size);
+                ctx.stroke();
+                
+                // 羽毛
+                ctx.fillStyle = '#f4e4c1';
+                ctx.beginPath();
+                ctx.ellipse(0, -this.size, this.size * 0.3, this.size * 0.7, 0, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.restore();
+            }
+        }
+
+        const goldCoins = [];
+        const quills = [];
+
+        // 创建初始对象
+        for (let i = 0; i < 8; i++) {
+            goldCoins.push(new GoldCoin());
+        }
+        for (let i = 0; i < 3; i++) {
+            quills.push(new Quill());
+        }
+
+        function animateBackground() {
+            ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+            
+            // 更新和绘制金币
+            goldCoins.forEach(coin => {
+                coin.update();
+                coin.draw();
+            });
+            
+            // 更新和绘制羽毛笔
+            quills.forEach(quill => {
+                quill.update();
+                quill.draw();
+            });
+            
+            requestAnimationFrame(animateBackground);
+        }
+        animateBackground();
+
+        // 创建漂浮的金币元素
+        function createFloatingCoins() {
+            for (let i = 0; i < 5; i++) {
+                const coin = document.createElement('div');
+                coin.className = 'floating-coin';
+                coin.style.left = `${Math.random() * 100}%`;
+                coin.style.animationDelay = `${Math.random() * 10}s`;
+                coin.style.animationDuration = `${10 + Math.random() * 5}s`;
+                document.body.appendChild(coin);
+            }
+        }
+        createFloatingCoins();
+
+        // 几何过渡效果
+        function triggerGeometricTransition(type, fromScene, toScene) {
+            if (isTransitioning) return;
+            isTransitioning = true;
+            
+            if (Math.abs(toScene - fromScene) > 2) {
+                // 大跨度使用纸张效果
+                paperTransition.classList.add('active');
+                
+                setTimeout(() => {
+                    paperTransition.classList.remove('active');
+                    isTransitioning = false;
+                }, 800);
+            } else {
+                // 小跨度使用金色圆形效果
+                goldWipe.style.setProperty('--transition-color', '#8b5a2b');
+                goldWipe.classList.add('active');
+                
+                setTimeout(() => {
+                    goldWipe.classList.remove('active');
+                    isTransitioning = false;
+                }, 1500);
+            }
+        }
+
+        // 文字浮现动画
+        function animateTextFloat(element) {
+            if (animatedTexts.has(element)) return;
+            animatedTexts.add(element);
+            
+            const text = element.textContent;
+            element.textContent = '';
+            
+            [...text].forEach((char, index) => {
+                const span = document.createElement('span');
+                span.textContent = char;
+                span.className = 'char-float';
+                span.style.animationDelay = `${index * 0.02}s`;
+                element.appendChild(span);
+            });
+        }
+
+        // 主滚动处理
+        window.addEventListener('scroll', () => {
+            const scrollHeight = scrollContainer.scrollHeight - window.innerHeight;
+            const scrollTop = window.scrollY;
+            const scrollPercent = Math.min(scrollTop / scrollHeight, 1);
+            
+            updateScenes(scrollPercent);
+        });
+
+        function updateScenes(percent) {
+            const currentSceneIndex = Math.floor(percent * (sceneCount - 0.001));
+            const sceneProgress = getSceneProgress(percent, currentSceneIndex);
+            
+            // 触发场景转换效果
+            if (currentSceneIndex !== lastSceneIndex && lastSceneIndex !== -1) {
+                triggerGeometricTransition('gold', lastSceneIndex, currentSceneIndex);
+            }
+            lastSceneIndex = currentSceneIndex;
+            
+            // 更新场景显示
+            scenes.forEach((scene, index) => {
+                const isActive = index === currentSceneIndex;
+                scene.style.opacity = isActive ? 1 : 0;
+                
+                if (isActive) {
+                    // 图片动画
+                    const img = scene.querySelector('.illustration');
+                    if (img && sceneProgress > 0.1) {
+                        setTimeout(() => {
+                            img.classList.add('illustration-appear');
+                        }, 100);
+                    }
+                    
+                    // 文字动画
+                    const text = scene.querySelector('.story-text');
+                    if (text && sceneProgress > 0.3) {
+                        text.classList.add('story-text-appear');
+                        if (!animatedTexts.has(text)) {
+                            animateTextFloat(text);
+                        }
+                    }
+                } else {
+                    // 重置非活动场景
+                    const img = scene.querySelector('.illustration');
+                    if (img) {
+                        img.classList.remove('illustration-appear');
+                    }
+                    const text = scene.querySelector('.story-text');
+                    if (text) {
+                        text.classList.remove('story-text-appear');
+                    }
+                }
+            });
+            
+            // 更新场景背景
+            sceneBackgrounds.forEach((bg, index) => {
+                const sceneNumber = index + 1;
+                const progress = getSceneProgress(percent, sceneNumber);
+                bg.style.opacity = progress > 0 ? Math.min(progress * 1.5, 1) : 0;
+            });
+            
+            // 场景6的契约动画
+            const p6 = getSceneProgress(percent, 6);
+            if (p6 > 0.2 && !contractAnimationStarted) {
+                contractAnimationStarted = true;
+                contractAnimation.style.opacity = 1;
+                // 生成额外的金币
+                for(let i = 0; i < 3; i++) {
+                    setTimeout(() => {
+                        goldCoins.push(new GoldCoin());
+                    }, i * 200);
+                }
+            } else if (p6 === 0) {
+                contractAnimation.style.opacity = 0;
+                contractAnimationStarted = false;
+            }
+        }
+
+        function getSceneProgress(percent, sceneIndex) {
+            const sceneStart = sceneIndex / sceneCount;
+            const sceneEnd = (sceneIndex + 1) / sceneCount;
+            if (percent < sceneStart || percent > sceneEnd) return 0;
+            return (percent - sceneStart) / (sceneEnd - sceneStart);
+        }
+
+        // 初始化
+        window.scrollTo(0, 0);
+        updateScenes(0);
+    </script>
+</body>
+</html>

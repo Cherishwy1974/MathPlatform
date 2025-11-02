@@ -1,0 +1,1294 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>区间分类实验室</title>
+    
+    <!-- ========================================
+         修复1：使用本地MathJax，优化配置减少卡顿
+         修复2：延迟加载，避免阻塞页面
+         ======================================== -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            startup: {
+                pageReady: () => {
+                    return MathJax.startup.defaultPageReady().then(() => {
+                        console.log('MathJax加载完成');
+                    });
+                }
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+            }
+        };
+    </script>
+    <!-- 使用defer异步加载，避免阻塞 -->
+    <script defer src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js"></script>    
+    <style>
+        /* ========================================
+           用户要求1：字号统一
+           ======================================== */
+        :root {
+            --h1-size: 22px;      
+            --h2-size: 20px;      
+            --h3-size: 18px;      
+            --btn-size: 16px;     
+            --formula-size: 20px; 
+            --text-size: 16px;
+            
+            --primary: #4f46e5;
+            --primary-light: #6366f1;
+            --primary-dark: #3730a3;
+            --light: #ffffff;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-600: #4b5563;
+            --gray-800: #1f2937;
+            --border: #e5e7eb;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* ========================================
+           用户要求：滚动条生效但不显示
+           ======================================== */
+        *::-webkit-scrollbar {
+            width: 0;
+            background: transparent;
+        }
+        
+        * {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
+            font-size: var(--text-size);
+            line-height: 1.5;
+            background: var(--gray-50);
+            color: var(--gray-800);
+        }
+
+        /* ========================================
+           用户要求：横向布局（宽是高的2倍），压缩高度
+           ======================================== */
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            height: 100vh;
+            max-height: 700px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            background: var(--light);
+        }
+
+        .header {
+            background: var(--primary);
+            color: var(--light);
+            padding: 8px 20px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: var(--h2-size);
+            margin: 0;
+        }
+
+        .main {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* ========================================
+           用户要求：侧边栏不动
+           ======================================== */
+        .sidebar {
+            width: 120px;
+            background: var(--gray-50);
+            border-right: 1px solid var(--border);
+            padding: 10px 8px;
+        }
+
+        .nav-btn {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 4px;
+            background: transparent;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: var(--text-size);
+            color: var(--gray-600);
+            text-align: left;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover {
+            background: var(--gray-100);
+        }
+
+        .nav-btn.active {
+            background: var(--primary);
+            color: var(--light);
+        }
+
+        /* ========================================
+           用户要求：最多左右两栏，必须有可视化
+           ======================================== */
+        .content {
+            flex: 1;
+            display: none;
+            padding: 16px;
+            overflow-y: auto;
+        }
+
+        .content.active {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow-y: auto;
+        }
+
+        .card {
+            background: var(--light);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .card h3 {
+            font-size: var(--h3-size);
+            color: var(--primary);
+            margin-bottom: 12px;
+        }
+
+        .input-group {
+            margin-bottom: 12px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 4px;
+            font-size: var(--text-size);
+            font-weight: 500;
+        }
+
+        .input-group input,
+        .input-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: var(--text-size);
+            background: var(--gray-50);
+        }
+
+        .input-group input:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: var(--light);
+        }
+
+        .btn {
+            padding: 8px 16px;
+            background: var(--primary);
+            color: var(--light);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: var(--btn-size);
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .result {
+            background: var(--gray-50);
+            padding: 12px;
+            border-radius: 4px;
+            border: 1px solid var(--primary);
+            text-align: center;
+            font-size: var(--text-size);
+            margin: 12px 0;
+            min-height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .formula-box {
+            background: #f0f7ff;
+            padding: 12px;
+            border-radius: 4px;
+            border-left: 3px solid var(--primary);
+            margin: 12px 0;
+            text-align: center;
+            font-size: var(--formula-size);
+        }
+
+        .info-box {
+            background: var(--gray-50);
+            padding: 10px;
+            border-radius: 4px;
+            margin: 8px 0;
+            font-size: var(--text-size);
+            text-align: center;
+        }
+
+        .steps {
+            background: #fff9e6;
+            padding: 12px;
+            border-radius: 4px;
+            border-left: 3px solid #f59e0b;
+            line-height: 1.8;
+            font-size: var(--text-size);
+        }
+
+        .canvas-container {
+            border: 1px solid var(--gray-200);
+            border-radius: 4px;
+            background: #fafafa;
+            padding: 10px;
+            min-height: 200px;
+            max-height: 500px;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .canvas-container canvas {
+            max-width: 100%;
+            max-height: 100%;
+            display: block;
+            margin: 0 auto;
+        }
+
+        /* ========================================
+           区间可视化专用样式
+           ======================================== */
+        .queue-container {
+            background: var(--gray-50);
+            border-radius: 8px;
+            padding: 20px;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .queue-line {
+            display: flex;
+            align-items: center;
+            margin: 20px 0;
+            position: relative;
+        }
+
+        .person {
+            width: 40px;
+            height: 60px;
+            margin: 0 5px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: bold;
+            position: relative;
+            transition: all 0.3s;
+        }
+
+        .person.included {
+            background: var(--primary);
+            color: var(--light);
+            border: 2px solid var(--primary-dark);
+        }
+
+        .person.excluded {
+            background: var(--gray-200);
+            color: var(--gray-600);
+            border: 2px dashed var(--gray-400);
+            opacity: 0.5;
+        }
+
+        .person.boundary-included {
+            background: var(--success);
+            color: var(--light);
+            border: 2px solid #059669;
+        }
+
+        .person.boundary-excluded {
+            background: var(--danger);
+            color: var(--light);
+            border: 2px dashed #dc2626;
+            opacity: 0.7;
+        }
+
+        .person-icon {
+            font-size: 24px;
+        }
+
+        .person-label {
+            font-size: 10px;
+            margin-top: 2px;
+        }
+
+        .interval-notation {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary);
+            margin: 10px 0;
+            text-align: center;
+        }
+
+        .interval-line {
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(to right, 
+                transparent 0%, 
+                var(--primary) 20%, 
+                var(--primary) 80%, 
+                transparent 100%);
+            position: relative;
+            margin: 20px 0;
+        }
+
+        .interval-point {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .interval-point.closed {
+            background: var(--primary);
+            border: 2px solid var(--primary-dark);
+        }
+
+        .interval-point.open {
+            background: var(--light);
+            border: 3px solid var(--primary);
+        }
+
+        .interval-types {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .interval-type {
+            padding: 12px;
+            background: var(--light);
+            border: 2px solid var(--gray-200);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .interval-type:hover {
+            border-color: var(--primary);
+            background: var(--gray-50);
+        }
+
+        .interval-type.active {
+            border-color: var(--primary);
+            background: #f0f7ff;
+        }
+
+        .interval-type-notation {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 4px;
+        }
+
+        .interval-type-desc {
+            font-size: 12px;
+            color: var(--gray-600);
+        }
+
+        .slider-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: var(--gray-50);
+            border-radius: 4px;
+            margin-top: 12px;
+        }
+
+        .slider-group label {
+            min-width: 60px;
+            font-size: var(--text-size);
+        }
+
+        .slider {
+            flex: 1;
+            height: 4px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: var(--gray-200);
+            outline: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+        }
+
+        .slider-value {
+            min-width: 40px;
+            text-align: center;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        /* ========================================
+           响应式设计：小尺寸下导航按钮移到上方
+           ======================================== */
+        @media (max-width: 768px) {
+            .main {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+                padding: 8px 16px;
+                display: flex;
+                flex-direction: row;
+                gap: 8px;
+                overflow-x: auto;
+                flex-shrink: 0;
+                /* ========================================
+                   修复：小屏幕下按钮居中改为起始对齐，确保全部可见
+                   ======================================== */
+                justify-content: flex-start;
+                flex-wrap: nowrap;
+            }
+
+            .nav-btn {
+                /* ========================================
+                   修复：调整最小宽度，确保三个按钮能在小屏幕下全部显示
+                   ======================================== */
+                min-width: 90px;
+                text-align: center;
+                margin-bottom: 0;
+                white-space: nowrap;
+                flex-shrink: 0;
+                padding: 8px 12px;
+                font-size: 14px;
+            }
+
+            .content.active {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .container {
+                max-height: none;
+                height: 100vh;
+            }
+
+            .interval-types {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header {
+                padding: 4px 12px;
+                height: 32px;
+            }
+
+            .header h1 {
+                font-size: 16px;
+            }
+
+            .sidebar {
+                padding: 6px 8px;
+                gap: 6px;
+                /* ========================================
+                   修复：480px下确保按钮不被均分而导致文字被截断
+                   ======================================== */
+                justify-content: flex-start;
+            }
+
+            .nav-btn {
+                /* ========================================
+                   修复：移除flex避免按钮被强制拉伸
+                   ======================================== */
+                min-width: 75px;
+                padding: 6px 8px;
+                font-size: 13px;
+            }
+
+            .person {
+                width: 35px;
+                height: 50px;
+                margin: 0 3px;
+            }
+
+            .person-icon {
+                font-size: 20px;
+            }
+        }
+
+        /* 极小屏幕优化 */
+        @media (max-width: 360px) {
+            .sidebar {
+                padding: 4px 6px;
+                gap: 4px;
+                /* ========================================
+                   修复：极小屏幕确保按钮可以横向滚动查看
+                   ======================================== */
+                overflow-x: auto;
+                justify-content: flex-start;
+            }
+
+            .nav-btn {
+                /* ========================================
+                   修复：保持最小宽度，确保文字不被截断
+                   ======================================== */
+                min-width: 65px;
+                padding: 5px 6px;
+                font-size: 12px;
+                flex-shrink: 0;
+            }
+
+            .header h1 {
+                font-size: 14px;
+            }
+        }
+
+        /* 统一悬浮返回按钮样式 */
+        .return-home-panel {
+            position: fixed;
+            bottom: 12px;
+            right: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+            z-index: 40;
+        }
+        .return-toggle { width: 40px; height: 40px; border-radius: 50%; border: none; background: linear-gradient(135deg, rgba(79,70,229,0.96), rgba(99,102,241,0.9)); color: #ffffff; font-size: 20px; cursor: pointer; box-shadow: 0 10px 18px rgba(79,70,229,0.28); transition: transform 0.2s ease, box-shadow 0.2s ease; }
+        .return-toggle:hover { transform: translateY(-1px) scale(1.03); box-shadow: 0 14px 26px rgba(79,70,229,0.35); }
+        .return-toggle:focus-visible { outline: 2px solid rgba(129,140,248,0.65); outline-offset: 3px; }
+        .return-links { display: none; flex-direction: column; gap: 6px; padding: 10px; border-radius: 10px; background: rgba(255,255,255,0.96); border: 1px solid rgba(79,70,229,0.18); box-shadow: 0 10px 30px rgba(15,23,42,0.14); opacity: 0; transition: opacity 0.16s ease; }
+        .return-link { text-decoration: none; font-size: 15px; color: var(--primary-dark); padding: 6px 12px; border-radius: 8px; background: rgba(99,102,241,0.12); transition: background 0.2s ease, color 0.2s ease; }
+        .return-link:hover { background: rgba(79,70,229,0.18); color: var(--primary); }
+    </style>
+
+</head>
+<body>
+    <div class="return-home-panel">
+        <button class="return-toggle" onclick="toggleReturnLinks()"><i class="fa-solid fa-house"></i></button>
+        <div class="return-links">
+            <a class="return-link" href="index.html"><i class="fa-solid fa-arrow-left"></i> 返回目录</a>
+            <a class="return-link" href="../index.html"><i class="fa-solid fa-house"></i> 返回主站</a>
+        </div>
+    </div>
+    <div class="container">
+        <header class="header">
+            <h1>区间分类实验室</h1>
+        </header>
+
+        <div class="main">
+            <!-- 侧边栏 -->
+            <nav class="sidebar">
+                <button class="nav-btn active" onclick="switchPanel('basic')">基础概念</button>
+                <button class="nav-btn" onclick="switchPanel('queue')">排队游戏</button>
+                <button class="nav-btn" onclick="switchPanel('types')">区间分类</button>
+            </nav>
+
+            <!-- 基础概念页面 -->
+            <div class="content active" id="basic">
+                <div class="column">
+                    <div class="card">
+                        <h3>区间计算器</h3>
+                        <div class="input-group">
+                            <label>左端点 a</label>
+                            <input type="number" id="leftPoint" value="3" step="0.5">
+                        </div>
+                        <div class="input-group">
+                            <label>右端点 b</label>
+                            <input type="number" id="rightPoint" value="7" step="0.5">
+                        </div>
+                        <div class="input-group">
+                            <label>区间类型</label>
+                            <select id="intervalType" onchange="updateInterval()">
+                                <option value="closed">[a, b] 闭区间</option>
+                                <option value="open">(a, b) 开区间</option>
+                                <option value="left-open">(a, b] 左开右闭</option>
+                                <option value="right-open">[a, b) 左闭右开</option>
+                            </select>
+                        </div>
+                        <div class="result" id="intervalResult">
+                            $[3, 7]$ 包含3和7
+                        </div>
+                        <button class="btn" onclick="checkNumber()" style="width: 100%; margin-top: 12px;">
+                            检查一个数是否在区间内
+                        </button>
+                    </div>
+
+                    <div class="card">
+                        <h3>核心理解</h3>
+                        <div class="formula-box" style="font-size: 18px;">
+                            只看"第一个人"和"最后一个人"算不算在队伍里
+                        </div>
+                        <div class="info-box">
+                            <strong>[ ]</strong> = 算你一个（包含）
+                        </div>
+                        <div class="info-box">
+                            <strong>( )</strong> = 不算你（不包含）
+                        </div>
+                    </div>
+                </div>
+
+                <div class="column">
+                    <div class="card">
+                        <h3>数轴可视化</h3>
+                        <div class="canvas-container">
+                            <canvas id="numberLine" width="600" height="200"></canvas>
+                        </div>
+                        <div class="slider-group">
+                            <label>测试点</label>
+                            <input type="range" class="slider" id="testPoint" 
+                                   min="0" max="10" step="0.1" value="5">
+                            <span class="slider-value" id="testValue">5.0</span>
+                        </div>
+                        <div class="info-box" id="testResult">
+                            5.0 在区间 [3, 7] 内 ✓
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>四种基本区间</h3>
+                        <div class="interval-types">
+                            <div class="interval-type" onclick="selectIntervalType('closed')">
+                                <div class="interval-type-notation">[a, b]</div>
+                                <div class="interval-type-desc">两端都算</div>
+                            </div>
+                            <div class="interval-type" onclick="selectIntervalType('open')">
+                                <div class="interval-type-notation">(a, b)</div>
+                                <div class="interval-type-desc">两端都不算</div>
+                            </div>
+                            <div class="interval-type" onclick="selectIntervalType('left-open')">
+                                <div class="interval-type-notation">(a, b]</div>
+                                <div class="interval-type-desc">左不算右算</div>
+                            </div>
+                            <div class="interval-type" onclick="selectIntervalType('right-open')">
+                                <div class="interval-type-notation">[a, b)</div>
+                                <div class="interval-type-desc">左算右不算</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 排队游戏页面 -->
+            <div class="content" id="queue">
+                <div class="column">
+                    <div class="card">
+                        <h3>🚶 排队场景模拟</h3>
+                        <div class="input-group">
+                            <label>选择场景</label>
+                            <select id="queueScenario" onchange="updateQueueScene()">
+                                <option value="closed">从张三到李四都出列 [张三, 李四]</option>
+                                <option value="open">张三和李四之间的人出列 (张三, 李四)</option>
+                                <option value="left-open">张三后面到李四出列 (张三, 李四]</option>
+                                <option value="right-open">从张三到李四前面出列 [张三, 李四)</option>
+                            </select>
+                        </div>
+                        <div class="queue-container">
+                            <div class="queue-line" id="queueDisplay"></div>
+                        </div>
+                        <div class="steps" id="queueExplanation">
+                            老师说："从张三到李四，你们都出列！"<br>
+                            张三要出来 ✓，李四要出来 ✓<br>
+                            他们之间的人也都要出来 ✓
+                        </div>
+                    </div>
+                </div>
+
+                <div class="column">
+                    <div class="card">
+                        <h3><i class="fa-solid fa-drafting-compass"></i> 理解规则</h3>
+                        <div class="formula-box">
+                            排队 = 区间<br>
+                            队伍边界 = 端点
+                        </div>
+                        <div class="steps">
+                            <strong>闭区间 [a,b]：</strong><br>
+                            "从张三到李四都出列"<br>
+                            → 张三算、李四也算<br><br>
+                            
+                            <strong>开区间 (a,b)：</strong><br>
+                            "张三和李四之间的人出列"<br>
+                            → 张三不算、李四也不算<br><br>
+                            
+                            <strong>半开半闭：</strong><br>
+                            看括号类型决定算不算
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3><i class="fa-solid fa-bullseye"></i> 直观记忆</h3>
+                        <div class="info-box" style="background: #dcfce7;">
+                            <strong>方括号 [ ]</strong><br>
+                            像围墙，把人围进来<br>
+                            "算你一个！"
+                        </div>
+                        <div class="info-box" style="background: #fee2e2;">
+                            <strong>圆括号 ( )</strong><br>
+                            像气泡，人在外面<br>
+                            "不算你！"
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 区间分类页面 -->
+            <div class="content" id="types">
+                <div class="column">
+                    <div class="card">
+                        <h3>有界区间</h3>
+                        <div class="formula-box">
+                            队伍有明确的开头和结尾
+                        </div>
+                        <div class="interval-types">
+                            <div class="interval-type" onclick="showIntervalExample('[3,7]')">
+                                <div class="interval-type-notation">[3, 7]</div>
+                                <div class="interval-type-desc">3, 4, 5, 6, 7</div>
+                            </div>
+                            <div class="interval-type" onclick="showIntervalExample('(3,7)')">
+                                <div class="interval-type-notation">(3, 7)</div>
+                                <div class="interval-type-desc">3.1, 4, 5, 6, 6.9</div>
+                            </div>
+                            <div class="interval-type" onclick="showIntervalExample('(3,7]')">
+                                <div class="interval-type-notation">(3, 7]</div>
+                                <div class="interval-type-desc">3.1, 4, 5, 6, 7</div>
+                            </div>
+                            <div class="interval-type" onclick="showIntervalExample('[3,7)')">
+                                <div class="interval-type-notation">[3, 7)</div>
+                                <div class="interval-type-desc">3, 4, 5, 6, 6.9</div>
+                            </div>
+                        </div>
+                        <div class="result" id="boundedExample" style="margin-top: 12px;">
+                            选择一个区间查看例子
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>特殊区间</h3>
+                        <div class="info-box">
+                            <strong>单点集：</strong> $[a, a] = \{a\}$<br>
+                            只有一个人的队伍
+                        </div>
+                        <div class="info-box">
+                            <strong>空集：</strong> $(a, a) = \emptyset$<br>
+                            没有人的队伍（不可能）
+                        </div>
+                        <div class="info-box">
+                            <strong>全体实数：</strong> $(-\infty, +\infty)$<br>
+                            所有人都在队伍里
+                        </div>
+                    </div>
+                </div>
+
+                <div class="column">
+                    <div class="card">
+                        <h3>无界区间</h3>
+                        <div class="formula-box">
+                            队伍一头没有尽头
+                        </div>
+                        <div class="interval-types">
+                            <div class="interval-type" onclick="showIntervalExample('[3,+∞)')">
+                                <div class="interval-type-notation">[3, +∞)</div>
+                                <div class="interval-type-desc">从3开始往后所有</div>
+                            </div>
+                            <div class="interval-type" onclick="showIntervalExample('(3,+∞)')">
+                                <div class="interval-type-notation">(3, +∞)</div>
+                                <div class="interval-type-desc">比3大的所有</div>
+                            </div>
+                            <div class="interval-type" onclick="showIntervalExample('(-∞,7]')">
+                                <div class="interval-type-notation">(-∞, 7]</div>
+                                <div class="interval-type-desc">7及以下所有</div>
+                            </div>
+                            <div class="interval-type" onclick="showIntervalExample('(-∞,7)')">
+                                <div class="interval-type-notation">(-∞, 7)</div>
+                                <div class="interval-type-desc">比7小的所有</div>
+                            </div>
+                        </div>
+                        <div class="steps" style="margin-top: 12px;">
+                            <strong>生活例子：</strong><br>
+                            "[1.2, +∞)" = 身高1米2及以上才能玩<br>
+                            "(18, +∞)" = 必须年满18岁<br>
+                            "(-∞, 100]" = 100分及以下都算合格
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>区间运算</h3>
+                        <div class="info-box">
+                            <strong>交集 ∩：</strong> 两个队伍都包含的人
+                        </div>
+                        <div class="info-box">
+                            <strong>并集 ∪：</strong> 至少在一个队伍里的人
+                        </div>
+                        <div class="info-box">
+                            <strong>补集：</strong> 不在队伍里的人
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ========================================
+        // 修复3：简化渲染逻辑，减少重复调用
+        // ========================================
+        function renderMath() {
+            if (window.MathJax && MathJax.typesetPromise) {
+                MathJax.typesetPromise().catch(err => console.log('渲染错误:', err));
+            }
+        }
+
+        // 页面切换
+        function switchPanel(panel) {
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(panel).classList.add('active');
+            
+            // 延迟渲染，避免卡顿
+            setTimeout(() => {
+                renderMath();
+                if (panel === 'basic') {
+                    updateInterval();
+                    drawNumberLine();
+                }
+                if (panel === 'queue') updateQueueScene();
+                if (panel === 'types') initTypes();
+            }, 50);
+        }
+
+        // 更新区间显示
+        function updateInterval() {
+            const left = parseFloat(document.getElementById('leftPoint').value);
+            const right = parseFloat(document.getElementById('rightPoint').value);
+            const type = document.getElementById('intervalType').value;
+            
+            let notation = '';
+            let description = '';
+            
+            switch(type) {
+                case 'closed':
+                    notation = `[${left}, ${right}]`;
+                    description = `包含${left}和${right}`;
+                    break;
+                case 'open':
+                    notation = `(${left}, ${right})`;
+                    description = `不包含${left}和${right}`;
+                    break;
+                case 'left-open':
+                    notation = `(${left}, ${right}]`;
+                    description = `不包含${left}，包含${right}`;
+                    break;
+                case 'right-open':
+                    notation = `[${left}, ${right})`;
+                    description = `包含${left}，不包含${right}`;
+                    break;
+            }
+            
+            document.getElementById('intervalResult').innerHTML = 
+                `$${notation}$ ${description}`;
+            
+            drawNumberLine();
+            renderMath();
+        }
+
+        // 绘制数轴
+        function drawNumberLine() {
+            const canvas = document.getElementById('numberLine');
+            if (!canvas) return;
+            
+            const container = canvas.parentElement;
+            const containerWidth = Math.max(200, container.clientWidth - 20);
+            const containerHeight = 200;
+            
+            canvas.style.width = containerWidth + 'px';
+            canvas.style.height = containerHeight + 'px';
+            
+            const devicePixelRatio = window.devicePixelRatio || 1;
+            canvas.width = containerWidth * devicePixelRatio;
+            canvas.height = containerHeight * devicePixelRatio;
+            
+            const ctx = canvas.getContext('2d');
+            ctx.scale(devicePixelRatio, devicePixelRatio);
+            
+            const width = containerWidth;
+            const height = containerHeight;
+            const centerY = height / 2;
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            const left = parseFloat(document.getElementById('leftPoint').value);
+            const right = parseFloat(document.getElementById('rightPoint').value);
+            const type = document.getElementById('intervalType').value;
+            const testPt = parseFloat(document.getElementById('testPoint').value);
+            
+            // 计算缩放
+            const padding = 50;
+            const scale = (width - 2 * padding) / 10;
+            
+            // 绘制数轴
+            ctx.strokeStyle = '#374151';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(padding, centerY);
+            ctx.lineTo(width - padding, centerY);
+            ctx.stroke();
+            
+            // 绘制刻度
+            ctx.fillStyle = '#374151';
+            ctx.font = '12px sans-serif';
+            ctx.textAlign = 'center';
+            for (let i = 0; i <= 10; i++) {
+                const x = padding + i * scale;
+                ctx.beginPath();
+                ctx.moveTo(x, centerY - 5);
+                ctx.lineTo(x, centerY + 5);
+                ctx.stroke();
+                ctx.fillText(i.toString(), x, centerY + 20);
+            }
+            
+            // 绘制区间
+            const leftX = padding + left * scale;
+            const rightX = padding + right * scale;
+            
+            // 区间线段
+            ctx.strokeStyle = '#4f46e5';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(leftX, centerY);
+            ctx.lineTo(rightX, centerY);
+            ctx.stroke();
+            
+            // 端点
+            ctx.fillStyle = '#4f46e5';
+            ctx.strokeStyle = '#4f46e5';
+            ctx.lineWidth = 2;
+            
+            // 左端点
+            ctx.beginPath();
+            ctx.arc(leftX, centerY, 6, 0, 2 * Math.PI);
+            if (type === 'closed' || type === 'right-open') {
+                ctx.fill();
+            } else {
+                ctx.stroke();
+            }
+            
+            // 右端点
+            ctx.beginPath();
+            ctx.arc(rightX, centerY, 6, 0, 2 * Math.PI);
+            if (type === 'closed' || type === 'left-open') {
+                ctx.fill();
+            } else {
+                ctx.stroke();
+            }
+            
+            // 测试点
+            const testX = padding + testPt * scale;
+            ctx.fillStyle = '#ef4444';
+            ctx.beginPath();
+            ctx.arc(testX, centerY - 30, 5, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // 测试点标签
+            ctx.fillStyle = '#ef4444';
+            ctx.font = 'bold 14px sans-serif';
+            ctx.fillText(testPt.toFixed(1), testX, centerY - 45);
+            
+            // 更新测试结果
+            let inInterval = false;
+            switch(type) {
+                case 'closed':
+                    inInterval = testPt >= left && testPt <= right;
+                    break;
+                case 'open':
+                    inInterval = testPt > left && testPt < right;
+                    break;
+                case 'left-open':
+                    inInterval = testPt > left && testPt <= right;
+                    break;
+                case 'right-open':
+                    inInterval = testPt >= left && testPt < right;
+                    break;
+            }
+            
+            const typeText = {
+                'closed': `[${left}, ${right}]`,
+                'open': `(${left}, ${right})`,
+                'left-open': `(${left}, ${right}]`,
+                'right-open': `[${left}, ${right})`
+            };
+            
+            document.getElementById('testResult').innerHTML = 
+                `${testPt.toFixed(1)} ${inInterval ? '在' : '不在'}区间 ${typeText[type]} 内 ${inInterval ? '✓' : '✗'}`;
+        }
+
+        // 滑块事件
+        document.getElementById('testPoint')?.addEventListener('input', function() {
+            const value = parseFloat(this.value);
+            document.getElementById('testValue').textContent = value.toFixed(1);
+            drawNumberLine();
+        });
+
+        // 更新排队场景
+        function updateQueueScene() {
+            const scenario = document.getElementById('queueScenario').value;
+            const display = document.getElementById('queueDisplay');
+            
+            // 创建5个人的队列
+            const people = ['小王', '张三', '小明', '李四', '小刘'];
+            display.innerHTML = '';
+            
+            people.forEach((name, index) => {
+                const person = document.createElement('div');
+                person.className = 'person';
+                
+                // 根据场景设置样式
+                if (scenario === 'closed') {
+                    if (index >= 1 && index <= 3) {
+                        person.classList.add(index === 1 || index === 3 ? 'boundary-included' : 'included');
+                    } else {
+                        person.classList.add('excluded');
+                    }
+                } else if (scenario === 'open') {
+                    if (index === 2) {
+                        person.classList.add('included');
+                    } else if (index === 1 || index === 3) {
+                        person.classList.add('boundary-excluded');
+                    } else {
+                        person.classList.add('excluded');
+                    }
+                } else if (scenario === 'left-open') {
+                    if (index === 2 || index === 3) {
+                        person.classList.add(index === 3 ? 'boundary-included' : 'included');
+                    } else if (index === 1) {
+                        person.classList.add('boundary-excluded');
+                    } else {
+                        person.classList.add('excluded');
+                    }
+                } else if (scenario === 'right-open') {
+                    if (index === 1 || index === 2) {
+                        person.classList.add(index === 1 ? 'boundary-included' : 'included');
+                    } else if (index === 3) {
+                        person.classList.add('boundary-excluded');
+                    } else {
+                        person.classList.add('excluded');
+                    }
+                }
+                
+                person.innerHTML = `
+                    <div class="person-icon">👤</div>
+                    <div class="person-label">${name}</div>
+                `;
+                
+                display.appendChild(person);
+            });
+            
+            // 更新说明
+            const explanations = {
+                'closed': '老师说："从张三到李四，你们都出列！"<br>张三要出来 ✓，李四要出来 ✓<br>他们之间的人也都要出来 ✓',
+                'open': '老师说："张三和李四之间的人出列！"<br>张三不动 ✗，李四不动 ✗<br>只有中间的小明要出来 ✓',
+                'left-open': '老师说："张三后面到李四的人出列！"<br>张三不动 ✗，李四要出来 ✓<br>小明也要出来 ✓',
+                'right-open': '老师说："从张三到李四前面的人出列！"<br>张三要出来 ✓，李四不动 ✗<br>小明也要出来 ✓'
+            };
+            
+            document.getElementById('queueExplanation').innerHTML = explanations[scenario];
+        }
+
+        // 选择区间类型
+        function selectIntervalType(type) {
+            const types = {
+                'closed': 0,
+                'open': 1,
+                'left-open': 2,
+                'right-open': 3
+            };
+            
+            document.getElementById('intervalType').selectedIndex = types[type];
+            updateInterval();
+            
+            // 高亮选中的类型
+            document.querySelectorAll('.interval-type').forEach(el => {
+                el.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+        }
+
+        // 显示区间例子
+        function showIntervalExample(interval) {
+            const examples = {
+                '[3,7]': '包含：3, 3.5, 4, 5, 6, 6.5, 7<br>这是最"实在"的区间，两端都算',
+                '(3,7)': '包含：3.001, 3.5, 4, 5, 6, 6.999<br>不包含3和7，只要中间的',
+                '(3,7]': '包含：3.001, 3.5, 4, 5, 6, 6.5, 7<br>不包含3，但包含7',
+                '[3,7)': '包含：3, 3.5, 4, 5, 6, 6.999<br>包含3，但不包含7',
+                '[3,+∞)': '包含：3, 4, 5, ... 无限大<br>从3开始，往后所有数都算',
+                '(3,+∞)': '包含：3.001, 4, 5, ... 无限大<br>比3大的所有数都算',
+                '(-∞,7]': '包含：... -100, 0, 3, 5, 7<br>7及以下的所有数都算',
+                '(-∞,7)': '包含：... -100, 0, 3, 5, 6.999<br>比7小的所有数都算'
+            };
+            
+            document.getElementById('boundedExample').innerHTML = 
+                `<strong>${interval}:</strong><br>${examples[interval] || ''}`;
+            
+            // 高亮选中的区间
+            document.querySelectorAll('.interval-type').forEach(el => {
+                el.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+        }
+
+        // 检查数字是否在区间内
+        function checkNumber() {
+            const num = prompt('请输入要检查的数字：');
+            if (num === null) return;
+            
+            const value = parseFloat(num);
+            if (isNaN(value)) {
+                alert('请输入有效的数字！');
+                return;
+            }
+            
+            const left = parseFloat(document.getElementById('leftPoint').value);
+            const right = parseFloat(document.getElementById('rightPoint').value);
+            const type = document.getElementById('intervalType').value;
+            
+            let inInterval = false;
+            switch(type) {
+                case 'closed':
+                    inInterval = value >= left && value <= right;
+                    break;
+                case 'open':
+                    inInterval = value > left && value < right;
+                    break;
+                case 'left-open':
+                    inInterval = value > left && value <= right;
+                    break;
+                case 'right-open':
+                    inInterval = value >= left && value < right;
+                    break;
+            }
+            
+            const typeText = {
+                'closed': `[${left}, ${right}]`,
+                'open': `(${left}, ${right})`,
+                'left-open': `(${left}, ${right}]`,
+                'right-open': `[${left}, ${right})`
+            };
+            
+            alert(`${value} ${inInterval ? '在' : '不在'} 区间 ${typeText[type]} 内！`);
+        }
+
+        // 初始化类型页面
+        function initTypes() {
+            // 默认显示第一个区间的例子
+            showIntervalExample('[3,7]');
+        }
+
+        // 防抖优化：窗口大小变化时只重绘当前活跃面板
+        let resizeTimeout;
+        window.addEventListener('resize', function() {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                const activePanel = document.querySelector('.content.active');
+                if (activePanel) {
+                    const panelId = activePanel.id;
+                    if (panelId === 'basic') {
+                        drawNumberLine();
+                    }
+                }
+            }, 150);
+        });
+
+        // 初始化
+        window.addEventListener('DOMContentLoaded', function() {
+            // 延迟初始化，避免阻塞
+            setTimeout(() => {
+                updateInterval();
+                drawNumberLine();
+                updateQueueScene();
+                initTypes();
+                renderMath();
+            }, 100);
+        });
+
+        // 统一悬浮返回按钮控制函数
+        function toggleReturnLinks() {
+            const panel = document.querySelector('.return-links');
+            if (!panel) return;
+            if (panel.style.display === 'flex') {
+                panel.style.opacity = '0';
+                setTimeout(() => panel.style.display = 'none', 160);
+            } else {
+                panel.style.display = 'flex';
+                requestAnimationFrame(() => panel.style.opacity = '1');
+            }
+        }
+    </script>
+</body>
+</html>

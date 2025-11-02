@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab 6.4 微元法与面积建模实验室</title>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            startup: {
+                pageReady: () => {
+                    return MathJax.startup.defaultPageReady().then(() => {
+                        if (typeof window.scheduleMathRender === 'function') {
+                            window.scheduleMathRender();
+                        }
+                        console.log('MathJax加载完成');
+                    });
+                }
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+            }
+        };
+    </script>
+    <script defer src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js"></script>
+    <script defer src="../common-assets/js/lab-math-enhancer.js"></script>
+    <style>
+        :root {
+            --h1-size: 22px;
+            --h2-size: 20px;
+            --h3-size: 18px;
+            --btn-size: 16px;
+            --formula-size: 20px;
+            --text-size: 16px;
+            --primary: #4f46e5;
+            --primary-dark: #3730a3;
+            --primary-light: #6366f1;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-500: #6b7280;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --border: #e5e7eb;
+            --card-radius: 14px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        *::-webkit-scrollbar { width: 0; background: transparent; }
+        * { scrollbar-width: none; -ms-overflow-style: none; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
+            background: var(--gray-50);
+            color: var(--gray-800);
+            font-size: var(--text-size);
+            line-height: 1.5;
+        }
+
+        .return-home-panel { position: fixed; bottom: 12px; right: 12px; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; z-index: 40; }
+        .return-toggle { width: 40px; height: 40px; border-radius: 50%; border: none; background: linear-gradient(135deg, rgba(79,70,229,0.96), rgba(99,102,241,0.9)); color: #fff; font-size: 20px; cursor: pointer; box-shadow: 0 10px 18px rgba(79,70,229,0.28); transition: transform 0.2s, box-shadow 0.2s; }
+        .return-toggle:hover { transform: translateY(-1px) scale(1.03); box-shadow: 0 14px 26px rgba(79,70,229,0.35); }
+        .return-links { display: none; flex-direction: column; gap: 6px; padding: 10px; border-radius: 10px; background: rgba(255,255,255,0.96); border: 1px solid rgba(79,70,229,0.18); box-shadow: 0 10px 30px rgba(15,23,42,0.14); opacity: 0; transition: opacity 0.16s; }
+        .return-link { text-decoration: none; font-size: 15px; color: var(--primary-dark); padding: 6px 12px; border-radius: 8px; background: rgba(99,102,241,0.12); transition: background 0.2s; }
+        .return-link:hover { background: rgba(79,70,229,0.18); }
+
+                .container {
+
+                    max-width: 1400px;
+
+                    margin: 0 auto;
+
+                    padding: 24px 24px 32px;
+
+                }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+        .header h1 { font-size: var(--h2-size); color: var(--primary-dark); }
+        .main { display: flex; gap: 18px; min-height: 620px; }
+        .sidebar { width: 120px; display: flex; flex-direction: column; gap: 12px; }
+        .nav-btn { padding: 12px 10px; border-radius: 4px; margin-bottom: 4px; border: 1px solid var(--border); background: #ffffff; color: var(--gray-700); font-size: var(--btn-size); font-weight: 600; cursor: pointer; transition: all 0.2s ease; }
+        .nav-btn:hover, .nav-btn.active { background: linear-gradient(135deg, rgba(79,70,229,0.95), rgba(99,102,241,0.88)); color: #ffffff; border-color: transparent; box-shadow: 0 12px 20px rgba(79,70,229,0.2); }
+
+        .content { flex: 1; display: none; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+        .content.active { display: grid; }
+        .column { display: flex; flex-direction: column; gap: 16px; max-height: 640px; overflow-y: auto; padding-right: 4px; }
+        .card { background: #ffffff; border-radius: var(--card-radius); border: 1px solid var(--gray-200); padding: 16px; box-shadow: 0 10px 20px rgba(15,23,42,0.08); }
+        .card h3 { font-size: var(--h3-size); color: var(--primary-dark); margin-bottom: 10px; }
+        .info-box { background: rgba(79,70,229,0.08); border: 1px solid rgba(79,70,229,0.18); border-radius: 12px; padding: 12px; color: var(--primary-dark); }
+
+        .input-row { display: flex; align-items: center; gap: 12px; }
+        .input-row label { min-width: 110px; font-weight: 600; color: var(--gray-700); }
+        .input-row input { flex: 1; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--gray-300); font-size: 15px; }
+
+        .pill-group { display: flex; gap: 8px; flex-wrap: wrap; }
+        .pill { border-radius: 999px; border: 1px solid var(--gray-300); padding: 6px 14px; background: var(--gray-100); color: var(--gray-700); cursor: pointer; transition: all 0.2s ease; }
+        .pill.active { background: rgba(79,70,229,0.12); border-color: rgba(79,70,229,0.4); color: var(--primary-dark); font-weight: 600; }
+
+        .action-btn { padding: 10px 16px; border: none; border-radius: 12px; font-size: var(--btn-size); font-weight: 600; background: linear-gradient(135deg, rgba(79,70,229,0.95), rgba(129,140,248,0.9)); color: #ffffff; cursor: pointer; transition: transform 0.2s ease, box-shadow 0.2s ease; }
+        .action-btn:hover { transform: translateY(-1px); box-shadow: 0 14px 30px rgba(79,70,229,0.28); }
+
+        .status-tag { display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; padding: 6px 12px; font-size: 14px; font-weight: 600; }
+        .status-tag.success { background: rgba(16,185,129,0.18); color: var(--success); }
+        .status-tag.warning { background: rgba(245,158,11,0.18); color: var(--warning); }
+        .status-tag.danger { background: rgba(239,68,68,0.18); color: var(--danger); }
+
+        .canvas-wrapper { position: relative; background: linear-gradient(180deg, rgba(129,140,248,0.12), rgba(129,140,248,0)); border-radius: var(--card-radius); border: 1px solid var(--gray-200); padding: 12px; }
+        canvas { width: 100%; height: 360px; border-radius: 10px; background: #ffffff; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 8px 10px; border-bottom: 1px solid var(--gray-200); text-align: left; }
+        th { color: var(--gray-600); font-weight: 600; }
+
+        @media (max-width: 1024px) {
+            .main { flex-direction: column; }
+            .sidebar { flex-direction: row; width: 100%; overflow-x: auto; }
+            .content { grid-template-columns: 1fr; }
+            canvas { height: 300px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>Lab 6.4 微元法与面积建模实验室</h1>
+        </header>
+
+        <div class="main">
+            <nav class="sidebar">
+                <button class="nav-btn active"  data-panel="cartesian"onclick="switchPanel('cartesian')">直角坐标面积</button>
+                <button class="nav-btn"  data-panel="polar"onclick="switchPanel('polar')">极坐标面积</button>
+                <button class="nav-btn"  data-panel="parametric"onclick="switchPanel('parametric')">参数方程面积</button>
+            </nav>
+
+            <div class="content active" id="cartesian">
+                <div class="column">
+                    <div class="card">
+                        <h3>案例：上界 $y=2-(x-1)^2$，下界 $y=\tfrac{x}{2}$</h3>
+                        <div class="info-box">积分区间位于 $x=0$ 到 $x=2$。微元法通过细条 $dA=[f(x)-g(x)]dx$ 扫描整个区域。</div>
+                    </div>
+                    <div class="card">
+                        <h3>扫描微元</h3>
+                        <div class="input-row">
+                            <label for="stripSlider">位置 x</label>
+                            <input id="stripSlider" type="range" min="0" max="2" step="0.02" value="0.6" oninput="updateStrip(this.value)">
+                        </div>
+                        <div class="info-box" id="stripInfo">当前 $x=0.60$，矩形高度 $1.70$。</div>
+                    </div>
+                    <div class="card">
+                        <h3>填写三要素</h3>
+                        <div class="pill-group" role="radiogroup" aria-label="积分变量">
+                            <button class="pill active" data-var="x" onclick="selectVariable(event, 'x')">变量 $x$</button>
+                            <button class="pill" data-var="y" onclick="selectVariable(event, 'y')">变量 $y$</button>
+                        </div>
+                        <div class="input-row" style="margin-top:12px">
+                            <label for="cartesianIntegrand">被积函数</label>
+                            <input id="cartesianIntegrand" type="text" placeholder="例如 2-(x-1)^2 - x/2">
+                        </div>
+                        <div class="input-row">
+                            <label for="cartesianInterval">积分区间</label>
+                            <input id="cartesianInterval" type="text" placeholder="如 [0,2]">
+                        </div>
+                        <button class="action-btn" onclick="checkCartesian()">检查表达式</button>
+                        <div id="cartesianFeedback" style="margin-top:12px"></div>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="card canvas-wrapper">
+                        <canvas id="cartesianCanvas" width="640" height="360" aria-label="直角坐标面积可视化"></canvas>
+                    </div>
+                    <div class="card">
+                        <h3>数值结果</h3>
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <td>标准积分</td>
+                                    <td>$\int_0^2 [2-(x-1)^2 - \tfrac{x}{2}]\,dx$</td>
+                                </tr>
+                                <tr>
+                                    <td>面积数值</td>
+                                    <td id="cartesianArea">3.333</td>
+                                </tr>
+                                <tr>
+                                    <td>状态</td>
+                                    <td id="cartesianStatus">待核对</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content" id="polar">
+                <div class="column">
+                    <div class="card">
+                        <h3>案例：极坐标曲线 $r=2\sin\theta$</h3>
+                        <div class="info-box">考虑 $\theta$ 从 $0$ 到 $\pi$，曲线生成一个心形的上半叶，面积公式 $A=\tfrac12\int r^2 d\theta$。</div>
+                    </div>
+                    <div class="card">
+                        <h3>角度扫描</h3>
+                        <div class="input-row">
+                            <label for="thetaSlider">角度 $\theta$</label>
+                            <input id="thetaSlider" type="range" min="0" max="3.1416" step="0.01" value="1.2" oninput="updateTheta(this.value)">
+                        </div>
+                        <div class="info-box" id="thetaInfo">当前 $\theta=1.20$ rad，半径 $r=1.86$。</div>
+                    </div>
+                    <div class="card">
+                        <h3>公式选择</h3>
+                        <div class="pill-group">
+                            <button class="pill" data-polar="wrong1" onclick="selectPolar(event, 'wrong1')">$A=\int r\,d\theta$</button>
+                            <button class="pill active" data-polar="correct" onclick="selectPolar(event, 'correct')">$A=\tfrac12\int r^2 d\theta$</button>
+                            <button class="pill" data-polar="wrong2" onclick="selectPolar(event, 'wrong2')">$A=\int r^2 dr$</button>
+                        </div>
+                        <div class="input-row" style="margin-top:12px">
+                            <label for="thetaInterval">积分区间</label>
+                            <input id="thetaInterval" type="text" value="[0,\pi]">
+                        </div>
+                        <div class="input-row">
+                            <label for="polarResult">面积结果</label>
+                            <input id="polarResult" type="text" placeholder="填写 π">
+                        </div>
+                        <button class="action-btn" onclick="checkPolar()">检查极坐标表达</button>
+                        <div id="polarFeedback" style="margin-top:12px"></div>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="card canvas-wrapper">
+                        <canvas id="polarCanvas" width="640" height="360" aria-label="极坐标面积可视化"></canvas>
+                    </div>
+                    <div class="card">
+                        <h3>面积提示</h3>
+                        <div class="info-box" id="polarNote">阴影扇形面积约等于 $\pi$，角度滑块越大，扇形填充越完整。</div>
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <td>半径函数</td>
+                                    <td>$r(\theta)=2\sin\theta$</td>
+                                </tr>
+                                <tr>
+                                    <td>标准结果</td>
+                                    <td>$\pi$</td>
+                                </tr>
+                                <tr>
+                                    <td>状态</td>
+                                    <td id="polarStatus">待核对</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content" id="parametric">
+                <div class="column">
+                    <div class="card">
+                        <h3>案例：$x=\cos t,\ y=\sin t$，$t\in[0,\tfrac{\pi}{2}]$</h3>
+                        <div class="info-box">这是单位圆第一象限的弧段。利用公式 $A=\int_{t_0}^{t_1} x(t)\,y'(t)\,dt$ 计算面积。</div>
+                    </div>
+                    <div class="card">
+                        <h3>参数推进</h3>
+                        <div class="input-row">
+                            <label for="paramSlider">参数 t</label>
+                            <input id="paramSlider" type="range" min="0" max="1.5708" step="0.01" value="0.8" oninput="updateParam(this.value)">
+                        </div>
+                        <div class="info-box" id="paramInfo">当前 $t=0.80$，点坐标 $(x,y)=(0.70,0.72)$。</div>
+                    </div>
+                    <div class="card">
+                        <h3>填写积分</h3>
+                        <div class="input-row">
+                            <label for="paramIntegrand">被积函数</label>
+                            <input id="paramIntegrand" type="text" placeholder="例如 cos t · cos t">
+                        </div>
+                        <div class="input-row">
+                            <label for="paramResult">面积结果</label>
+                            <input id="paramResult" type="text" placeholder="填写 π/4">
+                        </div>
+                        <button class="action-btn" onclick="checkParametric()">检查参数方程</button>
+                        <div id="paramFeedback" style="margin-top:12px"></div>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="card canvas-wrapper">
+                        <canvas id="paramCanvas" width="640" height="360" aria-label="参数方程面积可视化"></canvas>
+                    </div>
+                    <div class="card">
+                        <h3>面积结论</h3>
+                        <div class="info-box" id="paramNote">四分之一圆面积等于 $\tfrac{\pi}{4}$。图像上阴影区域对应积分结果。</div>
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <td>积分公式</td>
+                                    <td>$A=\int_0^{\pi/2} \cos t \cdot \cos t\,dt$</td>
+                                </tr>
+                                <tr>
+                                    <td>标准结果</td>
+                                    <td>$\tfrac{\pi}{4}$</td>
+                                </tr>
+                                <tr>
+                                    <td>状态</td>
+                                    <td id="paramStatus">待核对</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvases = {};
+        const cartesianConfig = {
+            upper: x => 2 - (x - 1) * (x - 1),
+            lower: x => x / 2,
+            a: 0,
+            b: 2
+        };
+
+        let variableChoice = 'x';
+        let polarChoice = 'correct';
+
+        function switchPanel(id, trigger) {
+            const activeButton = trigger instanceof HTMLElement ? trigger :
+
+                (typeof event !== 'undefined' && event?.currentTarget instanceof HTMLElement ? event.currentTarget :
+
+                    document.querySelector(`.nav-btn[data-panel="${id}"]`) ||
+
+                    document.querySelector(`.nav-btn[data-target="${id}"]`) ||
+
+                    null);
+
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.content').forEach(panel => panel.classList.remove('active'));
+            const btn = document.querySelector(`.nav-btn[onclick="switchPanel('${id}')"]`);
+            const panel = document.getElementById(id);
+            if (btn && panel) {
+                btn.classList.add('active');
+                panel.classList.add('active');
+                scheduleMathRender();
+            }
+            resizeAllCanvases();
+        }
+
+        function resizeCanvas(canvas) {
+            const wrapper = canvas.parentElement;
+            const width = wrapper.clientWidth - 24;
+            const height = 340;
+            canvas.style.width = width + 'px';
+            canvas.style.height = height + 'px';
+            const ratio = window.devicePixelRatio || 1;
+            canvas.width = width * ratio;
+            canvas.height = height * ratio;
+            const ctx = canvas.getContext('2d');
+            ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+            return ctx;
+        }
+
+        function resizeAllCanvases() {
+            Object.keys(canvases).forEach(key => {
+                canvases[key].ctx = resizeCanvas(canvases[key].canvas);
+                canvases[key].draw();
+            });
+        }
+
+        function drawAxes(ctx, width, height, options = {}) {
+            ctx.clearRect(0, 0, width, height);
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, width, height);
+            ctx.strokeStyle = '#d1d5db';
+            ctx.lineWidth = 1;
+            const padL = 60;
+            const padB = 40;
+            ctx.beginPath();
+            ctx.moveTo(padL, 20);
+            ctx.lineTo(padL, height - padB);
+            ctx.lineTo(width - 20, height - padB);
+            ctx.stroke();
+            ctx.fillStyle = '#6b7280';
+            ctx.font = '14px "Microsoft YaHei"';
+            ctx.fillText(options.xLabel || 'x', width - 28, height - padB - 6);
+            ctx.fillText(options.yLabel || 'y', padL - 18, 30);
+            return { padL, padB };
+        }
+
+        function mapCartesian(x, y, width, height, axis) {
+            const sampleY = [];
+            for (let t = cartesianConfig.a; t <= cartesianConfig.b; t += 0.02) {
+                sampleY.push(cartesianConfig.upper(t));
+                sampleY.push(cartesianConfig.lower(t));
+            }
+            const maxY = Math.max(...sampleY) + 0.5;
+            const minY = Math.min(...sampleY, 0) - 0.2;
+            const w = width - axis.padL - 40;
+            const h = height - axis.padB - 20;
+            const px = axis.padL + ((x - cartesianConfig.a) / (cartesianConfig.b - cartesianConfig.a)) * w;
+            const py = height - axis.padB - ((y - minY) / (maxY - minY)) * h;
+            return [px, py];
+        }
+
+        function drawCartesian() {
+            const canvas = canvases.cartesian.canvas;
+            const ctx = canvases.cartesian.ctx;
+            const width = canvas.clientWidth;
+            const height = canvas.clientHeight;
+            const axis = drawAxes(ctx, width, height);
+            const { a, b, upper, lower } = cartesianConfig;
+
+            ctx.fillStyle = 'rgba(129,140,248,0.22)';
+            ctx.beginPath();
+            const [startX, baseY] = mapCartesian(a, lower(a), width, height, axis);
+            ctx.moveTo(startX, baseY);
+            for (let x = a; x <= b + 0.001; x += 0.01) {
+                const [px, py] = mapCartesian(x, upper(x), width, height, axis);
+                ctx.lineTo(px, py);
+            }
+            const [endX] = mapCartesian(b, lower(b), width, height, axis);
+            ctx.lineTo(endX, mapCartesian(b, lower(b), width, height, axis)[1]);
+            for (let x = b; x >= a - 0.001; x -= 0.01) {
+                const [px, py] = mapCartesian(x, lower(x), width, height, axis);
+                ctx.lineTo(px, py);
+            }
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.strokeStyle = '#4f46e5';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            for (let x = a; x <= b + 0.001; x += 0.01) {
+                const [px, py] = mapCartesian(x, upper(x), width, height, axis);
+                if (x === a) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+            }
+            ctx.stroke();
+            ctx.strokeStyle = '#10b981';
+            ctx.beginPath();
+            for (let x = a; x <= b + 0.001; x += 0.01) {
+                const [px, py] = mapCartesian(x, lower(x), width, height, axis);
+                if (x === a) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+            }
+            ctx.stroke();
+
+            const currentX = parseFloat(document.getElementById('stripSlider').value);
+            drawStrip(currentX);
+        }
+
+        function drawStrip(x) {
+            const canvas = canvases.cartesian.canvas;
+            const ctx = canvases.cartesian.ctx;
+            const width = canvas.clientWidth;
+            const height = canvas.clientHeight;
+            const axis = { padL: 60, padB: 40 };
+            const upperY = cartesianConfig.upper(x);
+            const lowerY = cartesianConfig.lower(x);
+            const [px, pyTop] = mapCartesian(x, upperY, width, height, axis);
+            const [, pyBottom] = mapCartesian(x, lowerY, width, height, axis);
+            ctx.save();
+            ctx.strokeStyle = 'rgba(239, 68, 68, 0.8)';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([6, 6]);
+            ctx.beginPath();
+            ctx.moveTo(px, pyTop);
+            ctx.lineTo(px, pyBottom);
+            ctx.stroke();
+            ctx.restore();
+
+            const heightVal = upperY - lowerY;
+            document.getElementById('stripInfo').textContent = `当前 x=${Number(x).toFixed(2)}，矩形高度 ${heightVal.toFixed(2)}。`;
+        }
+
+        function updateStrip(val) {
+            resizeAllCanvases();
+        }
+
+        function selectVariable(event, variable) {
+            event.preventDefault();
+            variableChoice = variable;
+            document.querySelectorAll('.pill[data-var]').forEach(btn => btn.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+        }
+
+        function sanitize(str) {
+            return str.replace(/\s+/g, '').toLowerCase();
+        }
+
+        function checkCartesian() {
+            const integrand = sanitize(document.getElementById('cartesianIntegrand').value || '');
+            const interval = sanitize(document.getElementById('cartesianInterval').value || '');
+            const feedback = [];
+            let correct = true;
+
+            if (variableChoice === 'x') {
+                feedback.push('<span class="status-tag success">变量正确</span> 面积条沿 x 方向滑动。');
+            } else {
+                feedback.push('<span class="status-tag warning">变量选择</span> 本例应以 $x$ 为积分变量。');
+                correct = false;
+            }
+
+            const target = sanitize('2-(x-1)^2 - x/2');
+            if (integrand === target || integrand === '2-(x-1)^2-x/2') {
+                feedback.push('<span class="status-tag success">被积函数正确</span> 上曲线减下曲线。');
+            } else if (integrand === '') {
+                feedback.push('<span class="status-tag warning">请填写被积函数</span> 记得是上减下。');
+                correct = false;
+            } else {
+                feedback.push('<span class="status-tag warning">被积函数待修正</span> 建议写成 2-(x-1)^2 - x/2。');
+                correct = false;
+            }
+
+            if (interval === '[0,2]' || interval === '0,2' || interval === '0to2') {
+                feedback.push('<span class="status-tag success">区间正确</span> 交点位于 $x=0$ 与 $x=2$。');
+            } else {
+                feedback.push('<span class="status-tag warning">区间填写</span> 正确区间是 [0,2]。');
+                correct = false;
+            }
+
+            document.getElementById('cartesianFeedback').innerHTML = feedback.join('<br>');
+            document.getElementById('cartesianStatus').innerHTML = correct ? '<span class="status-tag success">表达式成立</span>' : '<span class="status-tag warning">请修正</span>';
+        }
+
+        function drawPolar() {
+            const canvas = canvases.polar.canvas;
+            const ctx = canvases.polar.ctx;
+            const width = canvas.clientWidth;
+            const height = canvas.clientHeight;
+            const axis = drawAxes(ctx, width, height, { xLabel: 'x', yLabel: 'y' });
+
+            ctx.save();
+            ctx.translate(axis.padL, height - axis.padB);
+            ctx.scale(1, -1);
+            ctx.strokeStyle = '#d1d5db';
+            ctx.lineWidth = 1;
+            for (let r = 0.5; r <= 2; r += 0.5) {
+                ctx.beginPath();
+                ctx.arc(0, 0, r * 80, 0, Math.PI, false);
+                ctx.stroke();
+            }
+            ctx.restore();
+
+            ctx.save();
+            ctx.translate(axis.padL, height - axis.padB);
+            ctx.scale(80, -80);
+            ctx.beginPath();
+            for (let theta = 0; theta <= Math.PI + 0.001; theta += 0.01) {
+                const r = 2 * Math.sin(theta);
+                const x = r * Math.cos(theta);
+                const y = r * Math.sin(theta);
+                if (theta === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+            }
+            ctx.closePath();
+            ctx.fillStyle = 'rgba(129,140,248,0.25)';
+            ctx.fill();
+            ctx.strokeStyle = '#4f46e5';
+            ctx.lineWidth = 0.02;
+            ctx.stroke();
+
+            const theta = parseFloat(document.getElementById('thetaSlider').value);
+            const r = 2 * Math.sin(theta);
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(r * Math.cos(theta), r * Math.sin(theta));
+            ctx.strokeStyle = 'rgba(239,68,68,0.8)';
+            ctx.lineWidth = 0.025;
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        function updateTheta(val) {
+            const r = 2 * Math.sin(parseFloat(val));
+            document.getElementById('thetaInfo').textContent = `当前 θ=${parseFloat(val).toFixed(2)} rad，半径 r=${r.toFixed(2)}。`;
+            resizeAllCanvases();
+        }
+
+        function selectPolar(event, key) {
+            event.preventDefault();
+            polarChoice = key;
+            document.querySelectorAll('.pill[data-polar]').forEach(btn => btn.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+        }
+
+        function checkPolar() {
+            const feedback = [];
+            let correct = true;
+            if (polarChoice === 'correct') {
+                feedback.push('<span class="status-tag success">公式正确</span> 极坐标面积需乘 $\tfrac{1}{2}$。');
+            } else {
+                feedback.push('<span class="status-tag warning">公式需调整</span> 请使用 $\tfrac12\int r^2 d\theta$。');
+                correct = false;
+            }
+
+            const interval = sanitize(document.getElementById('thetaInterval').value || '');
+            if (interval === '[0,π]' || interval === '[0,pi]' || interval === '0,π') {
+                feedback.push('<span class="status-tag success">区间正确</span> 一整半叶需 $0$ 到 $\pi$。');
+            } else {
+                feedback.push('<span class="status-tag warning">区间不完整</span> 应写 [0,π]。');
+                correct = false;
+            }
+
+            const result = sanitize(document.getElementById('polarResult').value || '');
+            if (result === 'π' || result === 'pi' || result === '3.1416' || result === '3.14') {
+                feedback.push('<span class="status-tag success">面积正确</span> 计算结果为 $\pi$。');
+            } else if (result === '') {
+                feedback.push('<span class="status-tag warning">请填写面积</span> 可写成 π。');
+                correct = false;
+            } else {
+                feedback.push('<span class="status-tag warning">面积待核实</span> 建议写成 π。');
+                correct = false;
+            }
+
+            document.getElementById('polarFeedback').innerHTML = feedback.join('<br>');
+            document.getElementById('polarStatus').innerHTML = correct ? '<span class="status-tag success">表达式正确</span>' : '<span class="status-tag warning">需要调整</span>';
+        }
+
+        function drawParametric() {
+            const canvas = canvases.param.canvas;
+            const ctx = canvases.param.ctx;
+            const width = canvas.clientWidth;
+            const height = canvas.clientHeight;
+            const axis = drawAxes(ctx, width, height, { xLabel: 'x', yLabel: 'y' });
+
+            ctx.save();
+            ctx.translate(axis.padL, height - axis.padB);
+            ctx.scale(120, -120);
+            ctx.beginPath();
+            for (let t = 0; t <= Math.PI / 2 + 0.001; t += 0.01) {
+                const x = Math.cos(t);
+                const y = Math.sin(t);
+                if (t === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+            }
+            ctx.lineTo(0, 0);
+            ctx.closePath();
+            ctx.fillStyle = 'rgba(129,140,248,0.25)';
+            ctx.fill();
+            ctx.strokeStyle = '#4f46e5';
+            ctx.lineWidth = 0.015;
+            ctx.stroke();
+
+            const t = parseFloat(document.getElementById('paramSlider').value);
+            const x = Math.cos(t);
+            const y = Math.sin(t);
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(x, y);
+            ctx.strokeStyle = 'rgba(239,68,68,0.85)';
+            ctx.lineWidth = 0.02;
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        function updateParam(val) {
+            const t = parseFloat(val);
+            const x = Math.cos(t);
+            const y = Math.sin(t);
+            document.getElementById('paramInfo').textContent = `当前 t=${t.toFixed(2)}，点坐标 (x,y)=(${x.toFixed(2)}, ${y.toFixed(2)})。`;
+            resizeAllCanvases();
+        }
+
+        function checkParametric() {
+            const integrand = sanitize(document.getElementById('paramIntegrand').value || '');
+            const result = sanitize(document.getElementById('paramResult').value || '');
+            const feedback = [];
+            let correct = true;
+
+            if (integrand === 'cost\cdotcost' || integrand === '(cost)^2' || integrand === 'cos^2t') {
+                feedback.push("<span class=\"status-tag success\">被积函数正确</span> 使用 $x(t)=\\cos t$ 与 $y'(t)=\\cos t$。");
+            } else if (integrand === '') {
+                feedback.push('<span class="status-tag warning">请填写被积函数</span> 建议写 cos t · cos t。');
+                correct = false;
+            } else {
+                feedback.push('<span class="status-tag warning">表达式待修正</span> 注意是 x·y′ 而非 y·x′。');
+                correct = false;
+            }
+
+            if (result === 'π/4' || result === 'pi/4' || result === '0.785' || result === '0.7854') {
+                feedback.push('<span class="status-tag success">面积正确</span> 四分之一圆面积为 $\pi/4$。');
+            } else {
+                feedback.push('<span class="status-tag warning">面积待核对</span> 建议填写 π/4。');
+                correct = false;
+            }
+
+            document.getElementById('paramFeedback').innerHTML = feedback.join('<br>');
+            document.getElementById('paramStatus').innerHTML = correct ? '<span class="status-tag success">表达式正确</span>' : '<span class="status-tag warning">请修正</span>';
+        }
+
+        function scheduleMathRender() {
+            if (window.MathJax && MathJax.typesetPromise) {
+                MathJax.typesetPromise().catch(err => console.warn('MathJax 渲染异常', err));
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            canvases.cartesian = { canvas: document.getElementById('cartesianCanvas'), draw: drawCartesian };
+            canvases.polar = { canvas: document.getElementById('polarCanvas'), draw: drawPolar };
+            canvases.param = { canvas: document.getElementById('paramCanvas'), draw: drawParametric };
+            resizeAllCanvases();
+            const areaPrimitive = x => x - (x ** 3) / 3 + 0.75 * x * x;
+            document.getElementById('cartesianArea').textContent = (areaPrimitive(cartesianConfig.b) - areaPrimitive(cartesianConfig.a)).toFixed(3);
+            scheduleMathRender();
+        });
+
+        window.addEventListener('resize', resizeAllCanvases);
+
+        function toggleReturnLinks() { const p = document.querySelector('.return-links'); if (!p) return; if (p.style.display === 'flex') { p.style.opacity = '0'; setTimeout(() => p.style.display = 'none', 160); } else { p.style.display = 'flex'; requestAnimationFrame(() => p.style.opacity = '1'); } }
+    </script>
+
+    <div class="return-home-panel"><button class="return-toggle" onclick="toggleReturnLinks()"><i class="fa-solid fa-house"></i></button><div class="return-links"><a class="return-link" href="index.html"><i class="fa-solid fa-arrow-left"></i> 返回目录</a><a class="return-link" href="../index.html"><i class="fa-solid fa-house"></i> 返回主站</a></div></div>
+</body>
+</html>

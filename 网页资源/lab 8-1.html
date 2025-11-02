@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab 8.1 二元函数定义域实验室</title>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            startup: {
+                pageReady: () => {
+                    return MathJax.startup.defaultPageReady().then(() => {
+                        console.log('MathJax加载完成');
+                    });
+                }
+            }
+        };
+    </script>
+    <script defer src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js"></script>
+    <style>
+        :root {
+            --primary: #4f46e5; --primary-dark: #3730a3;
+            --success: #10b981; --danger: #ef4444;
+            --gray-50: #f9fafb; --gray-100: #f3f4f6; --gray-200: #e5e7eb; --gray-600: #4b5563; --gray-700: #1f2937; --white: #ffffff;
+            --border: #e5e7eb; --h1-size: 22px; --h3-size: 18px; --text-size: 16px; --formula-size: 20px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        *::-webkit-scrollbar { width: 0; background: transparent; }
+        * { scrollbar-width: none; -ms-overflow-style: none; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", Arial, sans-serif; font-size: var(--text-size); line-height: 1.5; background: var(--gray-50); color: var(--gray-700); }
+        .container { width: 100%; max-width: 1400px; height: min(100vh, 700px); margin: 0 auto; display: flex; flex-direction: column; background: var(--white); border-radius: 12px; box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08); overflow: hidden; }
+        .header { height: 40px; background: var(--primary); color: var(--white); display: flex; align-items: center; padding: 0 20px; }
+        .header h1 { font-size: var(--h1-size); font-weight: 600; }
+        .main { flex: 1; display: flex; overflow: hidden; }
+        .sidebar { width: 120px; background: var(--gray-50); border-right: 1px solid var(--border); padding: 12px 10px; display: flex; flex-direction: column; gap: 8px; }
+        .nav-btn { width: 100%; padding: 8px; background: transparent; border: none; border-radius: 8px; cursor: pointer; font-size: var(--text-size); color: var(--gray-600); text-align: left; transition: background 0.2s ease; }
+        .nav-btn:hover { background: var(--gray-100); }
+        .nav-btn.active { background: var(--primary); color: var(--white); }
+        .content { flex: 1; display: none; padding: 16px; overflow-y: auto; }
+        .content.active { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+        .column { display: flex; flex-direction: column; gap: 14px; overflow-y: auto; }
+        .card { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 16px; box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04); }
+        .card h3 { font-size: var(--h3-size); color: var(--primary); margin-bottom: 10px; }
+        .formula-box { background: #f0f7ff; border-left: 3px solid var(--primary); border-radius: 8px; padding: 12px; text-align: center; font-size: var(--formula-size); }
+        .input-group { margin: 10px 0; }
+        .input-group label { display: block; margin-bottom: 6px; font-weight: 600; color: var(--gray-600); }
+        .input-group select, .input-group input { width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; font-size: var(--text-size); background: var(--gray-50); }
+        .btn { padding: 10px; background: var(--primary); color: var(--white); border: none; border-radius: 8px; cursor: pointer; font-size: var(--text-size); width: 100%; transition: background 0.2s ease; }
+        .btn:hover { background: var(--primary-dark); }
+        .canvas-container { border: 1px solid var(--gray-200); border-radius: 12px; background: #fafafa; padding: 16px; min-height: 400px; display: flex; align-items: center; justify-content: center; }
+        .return-panel { position: fixed; top: 16px; left: 16px; display: flex; gap: 10px; z-index: 9999; }
+        .return-link { padding: 8px 14px; border-radius: 999px; background: rgba(15, 23, 42, 0.8); color: #f8fafc; font-size: 14px; text-decoration: none; transition: transform 0.2s ease; }
+        .return-link:hover { transform: translateY(-2px); }
+        .return-link.return-main { background: rgba(79, 70, 229, 0.85); }
+    </style>
+</head>
+<body>
+    <div class="return-panel">
+        <a class="return-link" href="index.html"><i class="fa-solid fa-arrow-left"></i> 返回目录</a>
+        <a class="return-link return-main" href="../index.html"><i class="fa-solid fa-house"></i> 返回主站</a>
+    </div>
+    <div class="container">
+        <header class="header"><h1>Lab 8.1｜二元函数定义域实验室</h1></header>
+        <div class="main">
+            <nav class="sidebar">
+                <button class="nav-btn active" onclick="switchPanel('domain')">定义域分析</button>
+                <button class="nav-btn" onclick="switchPanel('graph')">函数图像</button>
+                <button class="nav-btn" onclick="switchPanel('test')">点测试</button>
+            </nav>
+
+            <!-- 面板1: 定义域分析 -->
+            <div class="content active" id="domain">
+                <div class="column">
+                    <div class="card">
+                        <h3>选择函数</h3>
+                        <div class="input-group">
+                            <select id="funcSelect" onchange="updateDomain()">
+                                <option value="sqrt">函数1: 半球面</option>
+                                <option value="ln">函数2: 对数函数</option>
+                                <option value="frac">函数3: 分式函数</option>
+                                <option value="comp">函数4: 复合函数</option>
+                            </select>
+                        </div>
+                        <div class="formula-box" id="funcFormula"></div>
+                    </div>
+                    <div class="card">
+                        <h3>定义域条件</h3>
+                        <p id="condition"></p>
+                    </div>
+                    <div class="card">
+                        <h3>不等式分析</h3>
+                        <div class="formula-box" id="inequality"></div>
+                    </div>
+                    <div class="card">
+                        <h3>几何描述</h3>
+                        <p id="geometry"></p>
+                    </div>
+                    <div class="card">
+                        <h3>边界类型</h3>
+                        <p id="boundary"></p>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="card" style="flex: 1;">
+                        <h3>定义域区域</h3>
+                        <div class="canvas-container">
+                            <canvas id="domainCanvas"></canvas>
+                        </div>
+                        <p style="margin-top: 10px; font-size: 14px;">
+                            <span style="color: #10b981;">■</span> 定义域内部
+                            <span style="color: #ef4444;">■</span> 定义域外部
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 面板2: 函数图像 -->
+            <div class="content" id="graph">
+                <div class="column">
+                    <div class="card">
+                        <h3>视角控制</h3>
+                        <div class="input-group">
+                            <label>旋转角度: <span id="angleVal">30</span>°</label>
+                            <input type="range" id="angleSlider" min="0" max="90" value="30" oninput="updateAngle(this.value)">
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3>切片位置</h3>
+                        <div class="input-group">
+                            <label>x = <span id="sliceXVal">0</span></label>
+                            <input type="range" id="sliceX" min="-1" max="1" step="0.1" value="0" oninput="updateSlice()">
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3>函数性质</h3>
+                        <p id="properties"></p>
+                    </div>
+                    <div class="card">
+                        <h3>值域范围</h3>
+                        <p id="range"></p>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="card" style="flex: 1;">
+                        <h3>三维曲面</h3>
+                        <div class="canvas-container">
+                            <canvas id="graphCanvas"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 面板3: 点测试 -->
+            <div class="content" id="test">
+                <div class="column">
+                    <div class="card">
+                        <h3>输入坐标</h3>
+                        <div class="input-group">
+                            <label>x坐标</label>
+                            <input type="number" id="testX" step="0.1" value="0">
+                        </div>
+                        <div class="input-group">
+                            <label>y坐标</label>
+                            <input type="number" id="testY" step="0.1" value="0">
+                        </div>
+                    </div>
+                    <div class="card">
+                        <button class="btn" onclick="testPoint()">✓ 检查点</button>
+                    </div>
+                    <div class="card">
+                        <h3>判定结果</h3>
+                        <div id="testResult"></div>
+                    </div>
+                    <div class="card">
+                        <h3>函数值</h3>
+                        <div id="funcValue"></div>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="card" style="flex: 1;">
+                        <h3>点位置图示</h3>
+                        <div class="canvas-container">
+                            <canvas id="testCanvas"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function resizeCanvas(canvas) {
+            const container = canvas.parentElement;
+            canvas.width = container.clientWidth - 32;
+            canvas.height = container.clientHeight - 32;
+            return canvas.getContext('2d');
+        }
+
+        function drawAxes(ctx, w, h) {
+            ctx.strokeStyle = '#374151'; ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(40, h - 40); ctx.lineTo(w - 20, h - 40);
+            ctx.moveTo(40, h - 40); ctx.lineTo(40, 20);
+            ctx.stroke();
+            ctx.fillStyle = '#374151'; ctx.font = '14px sans-serif';
+            ctx.fillText('x', w - 30, h - 25); ctx.fillText('y', 50, 15);
+        }
+
+        const functions = {
+            sqrt: {
+                formula: '$z = \\sqrt{1-x^2-y^2}$',
+                condition: '平方根要求: $1-x^2-y^2 \\geq 0$',
+                inequality: '$$ x^2 + y^2 \\leq 1 $$',
+                geometry: '单位圆盘(含边界)',
+                boundary: '圆 $x^2+y^2=1$, 边界包含在定义域内',
+                test: (x, y) => 1 - x*x - y*y >= 0,
+                value: (x, y) => Math.sqrt(1 - x*x - y*y),
+                properties: '连续函数,最大值1(在原点),边界上值为0',
+                range: '[0, 1]'
+            },
+            ln: {
+                formula: '$z = \\ln(x+y)$',
+                condition: '对数要求: $x+y > 0$',
+                inequality: '$$ x + y > 0 $$',
+                geometry: '直线$x+y=0$上方的半平面',
+                boundary: '直线 $x+y=0$, 边界不包含',
+                test: (x, y) => x + y > 0,
+                value: (x, y) => Math.log(x + y),
+                properties: '在定义域内连续,沿$x+y=c$的直线函数值相等',
+                range: '$(-\\infty, +\\infty)$'
+            },
+            frac: {
+                formula: '$z = \\dfrac{1}{x^2+y^2-4}$',
+                condition: '分母不为零: $x^2+y^2-4 \\neq 0$',
+                inequality: '$$ x^2 + y^2 \\neq 4 $$',
+                geometry: '平面去掉半径为2的圆周',
+                boundary: '圆周 $x^2+y^2=4$, 边界不包含',
+                test: (x, y) => Math.abs(x*x + y*y - 4) > 0.01,
+                value: (x, y) => 1 / (x*x + y*y - 4),
+                properties: '在圆周附近函数值趋于无穷',
+                range: '$(-\\infty, -\\frac{1}{4}] \\cup [\\frac{1}{4}, +\\infty)$'
+            },
+            comp: {
+                formula: '$z = \\sqrt{x} + \\ln(1-y)$',
+                condition: '同时满足: $x \\geq 0$ 且 $1-y > 0$',
+                inequality: '$$ x \\geq 0, \\quad y < 1 $$',
+                geometry: '第一、四象限中$y<1$的部分',
+                boundary: 'y轴正半轴和直线$y=1$(在$x\\geq 0$部分)',
+                test: (x, y) => x >= 0 && y < 1,
+                value: (x, y) => Math.sqrt(x) + Math.log(1 - y),
+                properties: '复合函数,两部分独立',
+                range: '$(-\\infty, +\\infty)$'
+            }
+        };
+
+        let currentFunc = 'sqrt';
+
+        function updateDomain() {
+            currentFunc = document.getElementById('funcSelect').value;
+            const f = functions[currentFunc];
+            document.getElementById('funcFormula').innerHTML = f.formula;
+            document.getElementById('condition').innerHTML = f.condition;
+            document.getElementById('inequality').innerHTML = f.inequality;
+            document.getElementById('geometry').textContent = f.geometry;
+            document.getElementById('boundary').textContent = f.boundary;
+            drawDomain();
+            if (typeof MathJax !== 'undefined') MathJax.typesetPromise();
+        }
+
+        function drawDomain() {
+            const canvas = document.getElementById('domainCanvas');
+            if (!canvas) return;
+            const ctx = resizeCanvas(canvas);
+            const w = canvas.width, h = canvas.height;
+
+            drawAxes(ctx, w, h);
+
+            const f = functions[currentFunc];
+            const step = 8;
+            for (let px = 0; px < w; px += step) {
+                for (let py = 0; py < h; py += step) {
+                    const x = (px - w/2) / (w/4);
+                    const y = (h/2 - py) / (h/4);
+                    const inDomain = f.test(x, y);
+                    ctx.fillStyle = inDomain ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.1)';
+                    ctx.fillRect(px, py, step, step);
+                }
+            }
+        }
+
+        function updateAngle(val) {
+            document.getElementById('angleVal').textContent = val;
+            drawGraph();
+        }
+
+        function updateSlice() {
+            const val = document.getElementById('sliceX').value;
+            document.getElementById('sliceXVal').textContent = val;
+            drawGraph();
+        }
+
+        function drawGraph() {
+            const canvas = document.getElementById('graphCanvas');
+            if (!canvas) return;
+            const ctx = resizeCanvas(canvas);
+            const w = canvas.width, h = canvas.height;
+
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, w, h);
+
+            const f = functions[currentFunc];
+            const angle = parseFloat(document.getElementById('angleSlider')?.value || 30) * Math.PI / 180;
+
+            ctx.fillStyle = '#4f46e5';
+            ctx.font = '14px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('三维曲面投影', w/2, 30);
+            ctx.fillText('(旋转角度: ' + Math.round(angle * 180 / Math.PI) + '°)', w/2, 50);
+
+            // 简化的3D投影
+            for (let x = -1; x <= 1; x += 0.2) {
+                for (let y = -1; y <= 1; y += 0.2) {
+                    if (!f.test(x, y)) continue;
+                    const z = f.value(x, y);
+                    if (!isFinite(z) || Math.abs(z) > 3) continue;
+
+                    const px = w/2 + x * 100 + z * 20 * Math.cos(angle);
+                    const py = h/2 - y * 100 - z * 30;
+
+                    ctx.fillStyle = `rgba(79, 70, 229, ${0.3 + Math.min(0.5, Math.abs(z)/3)})`;
+                    ctx.beginPath();
+                    ctx.arc(px, py, 4, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+        }
+
+        function testPoint() {
+            const x = parseFloat(document.getElementById('testX').value);
+            const y = parseFloat(document.getElementById('testY').value);
+            const f = functions[currentFunc];
+
+            const inDomain = f.test(x, y);
+            const resultDiv = document.getElementById('testResult');
+            const valueDiv = document.getElementById('funcValue');
+
+            if (inDomain) {
+                resultDiv.innerHTML = '<div style="color: var(--success); font-weight: 600;">✓ 点在定义域内</div>';
+                const val = f.value(x, y);
+                valueDiv.innerHTML = `<div class="formula-box">$z = ${val.toFixed(4)}$</div>`;
+                if (typeof MathJax !== 'undefined') {
+                    MathJax.typesetPromise([valueDiv]).catch(err => console.log(err));
+                }
+            } else {
+                resultDiv.innerHTML = '<div style="color: var(--danger); font-weight: 600;">✗ 点不在定义域内</div>';
+                valueDiv.innerHTML = '<div style="color: var(--gray-600);">函数无定义</div>';
+            }
+
+            drawTestCanvas(x, y, inDomain);
+            if (typeof MathJax !== 'undefined') MathJax.typesetPromise();
+        }
+
+        function drawTestCanvas(testX, testY, inDomain) {
+            const canvas = document.getElementById('testCanvas');
+            if (!canvas) return;
+            const ctx = resizeCanvas(canvas);
+            const w = canvas.width, h = canvas.height;
+
+            drawDomain();
+
+            // 绘制测试点
+            const px = w/2 + testX * (w/4);
+            const py = h/2 - testY * (h/4);
+
+            ctx.fillStyle = inDomain ? '#10b981' : '#ef4444';
+            ctx.beginPath();
+            ctx.arc(px, py, 8, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.strokeStyle = inDomain ? '#10b981' : '#ef4444';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(px, py, 12, 0, Math.PI * 2);
+            ctx.stroke();
+        }
+
+        function switchPanel(id) {
+            document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            event.target.classList.add('active');
+
+            setTimeout(() => {
+                if (id === 'domain') {
+                    updateDomain();
+                } else if (id === 'graph') {
+                    const f = functions[currentFunc];
+                    document.getElementById('properties').textContent = f.properties;
+                    document.getElementById('range').innerHTML = '值域: ' + f.range;
+                    drawGraph();
+                } else if (id === 'test') {
+                    drawTestCanvas(0, 0, functions[currentFunc].test(0, 0));
+                }
+                if (typeof MathJax !== 'undefined') MathJax.typesetPromise();
+            }, 100);
+        }
+
+        window.addEventListener('load', () => {
+            updateDomain();
+            if (typeof MathJax !== 'undefined') MathJax.typesetPromise();
+        });
+
+        window.addEventListener('resize', () => {
+            drawDomain();
+            drawGraph();
+        });
+    </script>
+</body>
+</html>

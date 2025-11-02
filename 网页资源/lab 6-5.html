@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab 6.5 定积分物理应用实验室</title>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            startup: {
+                pageReady: () => {
+                    return MathJax.startup.defaultPageReady().then(() => {
+                        console.log('MathJax加载完成');
+                    });
+                }
+            }
+        };
+    </script>
+    <script defer src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js"></script>
+    <script defer src="../common-assets/js/lab-math-enhancer.js"></script>
+    <style>
+        :root {
+            --primary: #4f46e5; --primary-dark: #3730a3;
+            --success: #10b981; --danger: #ef4444;
+            --gray-50: #f9fafb; --gray-100: #f3f4f6; --gray-200: #e5e7eb; --gray-600: #4b5563; --gray-700: #1f2937; --white: #ffffff;
+            --border: #e5e7eb; --h1-size: 22px; --h3-size: 18px; --text-size: 16px; --formula-size: 20px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        *::-webkit-scrollbar { width: 0; background: transparent; }
+        * { scrollbar-width: none; -ms-overflow-style: none; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", Arial, sans-serif; font-size: var(--text-size); line-height: 1.5; background: var(--gray-50); color: var(--gray-700); }
+        .container { width: 100%; max-width: 1400px; height: min(100vh, 700px); margin: 0 auto; display: flex; flex-direction: column; background: var(--white); border-radius: 12px; box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08); overflow: hidden; }
+        .header { height: 40px; background: var(--primary); color: var(--white); display: flex; align-items: center; padding: 0 20px; }
+        .header h1 { font-size: var(--h1-size); font-weight: 600; }
+        .main { flex: 1; display: flex; overflow: hidden; }
+        .sidebar { width: 120px; background: var(--gray-50); border-right: 1px solid var(--border); padding: 12px 10px; display: flex; flex-direction: column; gap: 8px; }
+        .nav-btn { width: 100%; padding: 8px; background: transparent; border: none; border-radius: 8px; cursor: pointer; font-size: var(--text-size); color: var(--gray-600); text-align: left; transition: background 0.2s ease; }
+        .nav-btn:hover { background: var(--gray-100); }
+        .nav-btn.active { background: var(--primary); color: var(--white); }
+        .content { flex: 1; display: none; padding: 16px; overflow-y: auto; }
+        .content.active { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+        .column { display: flex; flex-direction: column; gap: 14px; overflow-y: auto; }
+        .card { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 16px; box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04); }
+        .card h3 { font-size: var(--h3-size); color: var(--primary); margin-bottom: 10px; }
+        .formula-box { background: #f0f7ff; border-left: 3px solid var(--primary); border-radius: 8px; padding: 12px; text-align: center; font-size: var(--formula-size); }
+        .input-group { margin: 10px 0; }
+        .input-group label { display: block; margin-bottom: 6px; font-weight: 600; color: var(--gray-600); }
+        .input-group input, .input-group select { width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; font-size: var(--text-size); background: var(--gray-50); }
+        .btn { padding: 10px; background: var(--primary); color: var(--white); border: none; border-radius: 8px; cursor: pointer; font-size: var(--text-size); width: 100%; transition: background 0.2s ease; }
+        .btn:hover { background: var(--primary-dark); }
+        .canvas-container { border: 1px solid var(--gray-200); border-radius: 12px; background: #fafafa; padding: 16px; min-height: 400px; display: flex; align-items: center; justify-content: center; }
+        .return-home-panel { position: fixed; bottom: 12px; right: 12px; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; z-index: 40; }
+        .return-toggle { width: 40px; height: 40px; border-radius: 50%; border: none; background: linear-gradient(135deg, rgba(79,70,229,0.96), rgba(99,102,241,0.9)); color: #fff; font-size: 20px; cursor: pointer; box-shadow: 0 10px 18px rgba(79,70,229,0.28); transition: transform 0.2s, box-shadow 0.2s; }
+        .return-toggle:hover { transform: translateY(-1px) scale(1.03); box-shadow: 0 14px 26px rgba(79,70,229,0.35); }
+        .return-links { display: none; flex-direction: column; gap: 6px; padding: 10px; border-radius: 10px; background: rgba(255,255,255,0.96); border: 1px solid rgba(79,70,229,0.18); box-shadow: 0 10px 30px rgba(15,23,42,0.14); opacity: 0; transition: opacity 0.16s; }
+        .return-link { text-decoration: none; font-size: 15px; color: var(--primary-dark); padding: 6px 12px; border-radius: 8px; background: rgba(99,102,241,0.12); transition: background 0.2s; }
+        .return-link:hover { background: rgba(79,70,229,0.18); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header"><h1>Lab 6.5｜定积分的物理应用实验室</h1></header>
+        <div class="main">
+            <nav class="sidebar">
+                <button class="nav-btn active" onclick="switchPanel('volume')">旋转体体积</button>
+                <button class="nav-btn" onclick="switchPanel('work')">变力做功</button>
+                <button class="nav-btn" onclick="switchPanel('pressure')">液体压力</button>
+            </nav>
+
+            <!-- 面板1: 旋转体体积 -->
+            <div class="content active" id="volume">
+                <div class="column">
+                    <div class="card">
+                        <h3>切片法公式</h3>
+                        <div class="formula-box">$$ V = \pi \int_a^b [f(x)]^2 dx $$</div>
+                    </div>
+                    <div class="card">
+                        <h3>选择曲线</h3>
+                        <div class="input-group">
+                            <select id="curveSelect" onchange="updateCurve()">
+                                <option value="sqrt">$y = \sqrt{x}$, [0,4]</option>
+                                <option value="cone">$y = 1-x/2$, [0,2]</option>
+                                <option value="sine">$y = \sin(\pi x/4)$, [0,4]</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3>切片位置</h3>
+                        <div class="input-group">
+                            <label>$x = $ <span id="sliceVal">2.0</span></label>
+                            <input type="range" id="slicePos" min="0" max="4" step="0.1" value="2" oninput="updateSlice(this.value)">
+                        </div>
+                    </div>
+                    <div class="card">
+                        <button class="btn" onclick="toggleRotation()">▶ 旋转动画</button>
+                    </div>
+                    <div class="card">
+                        <h3>体积计算</h3>
+                        <p id="volumeResult"></p>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="card" style="flex: 1;">
+                        <h3>旋转体生成</h3>
+                        <div class="canvas-container">
+                            <canvas id="volumeCanvas" aria-label="旋转体体积可视化"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 面板2: 变力做功 -->
+            <div class="content" id="work">
+                <div class="column">
+                    <div class="card">
+                        <h3>做功公式</h3>
+                        <div class="formula-box">$$ W = \int_{x_0}^{x_1} F(x) dx $$</div>
+                    </div>
+                    <div class="card">
+                        <h3>力函数场景</h3>
+                        <div class="input-group">
+                            <select id="forceSelect" onchange="updateForce()">
+                                <option value="spring">弹簧: $F=kx$</option>
+                                <option value="rope">滑轮: $F=k(1+0.2x)$</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="card" id="springCard">
+                        <h3>弹簧系数</h3>
+                        <div class="input-group">
+                            <label>$k = $ <span id="kVal">4.0</span> N/m</label>
+                            <input type="range" id="kSlider" min="1" max="10" step="0.5" value="4" oninput="updateK(this.value)">
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3>位移范围</h3>
+                        <div class="input-group">
+                            <label>$x_1 = $ <span id="x1Val">3.0</span> m</label>
+                            <input type="range" id="x1Slider" min="0.5" max="5" step="0.1" value="3" oninput="updateX1(this.value)">
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3>做功结果</h3>
+                        <p id="workResult"></p>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="card" style="flex: 1;">
+                        <h3>力与位移曲线</h3>
+                        <div class="canvas-container">
+                            <canvas id="workCanvas" aria-label="变力做功可视化"></canvas>
+                        </div>
+                        <p style="margin-top: 10px; font-size: 14px;">
+                            <span style="color: #4f46e5;">■</span> 力函数 $F(x)$
+                            <span style="color: #10b981;">■</span> 做功面积
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 面板3: 液体压力 -->
+            <div class="content" id="pressure">
+                <div class="column">
+                    <div class="card">
+                        <h3>压力公式</h3>
+                        <div class="formula-box">$$ F = \int_a^b \rho g h(y) w(y) dy $$</div>
+                    </div>
+                    <div class="card">
+                        <h3>容器形状</h3>
+                        <div class="input-group">
+                            <select id="shapeSelect" onchange="updateShape()">
+                                <option value="rect">矩形水槽</option>
+                                <option value="tri">三角形水渠</option>
+                                <option value="circ">圆形水塔</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3>液面深度</h3>
+                        <div class="input-group">
+                            <label>$h = $ <span id="depthVal">2.0</span> m</label>
+                            <input type="range" id="depthSlider" min="0.5" max="4" step="0.1" value="2" oninput="updateDepth(this.value)">
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3>液体密度</h3>
+                        <div class="input-group">
+                            <label>$\rho = $ <span id="rhoVal">1000</span> kg/m³</label>
+                            <input type="range" id="rhoSlider" min="500" max="1200" step="10" value="1000" oninput="updateRho(this.value)">
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3>总压力</h3>
+                        <p id="pressureResult"></p>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="card" style="flex: 1;">
+                        <h3>容器截面与压力</h3>
+                        <div class="canvas-container">
+                            <canvas id="pressureCanvas" aria-label="液体压力可视化"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function resizeCanvas(canvas) {
+            const container = canvas.parentElement;
+            const width = container.clientWidth - 32;
+            const height = container.clientHeight - 32;
+            canvas.style.width = width + 'px';
+            canvas.style.height = height + 'px';
+            const ratio = window.devicePixelRatio || 1;
+            canvas.width = Math.max(1, Math.floor(width * ratio));
+            canvas.height = Math.max(1, Math.floor(height * ratio));
+            const ctx = canvas.getContext('2d');
+            ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+            return ctx;
+        }
+
+        function drawAxes(ctx, w, h) {
+            ctx.strokeStyle = '#374151'; ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(40, h - 40); ctx.lineTo(w - 20, h - 40);
+            ctx.moveTo(40, h - 40); ctx.lineTo(40, 20);
+            ctx.stroke();
+            ctx.fillStyle = '#374151'; ctx.font = '14px sans-serif';
+            ctx.fillText('x', w - 30, h - 25); ctx.fillText('y', 50, 15);
+        }
+
+        // 旋转体体积
+        let volumeState = { curve: 'sqrt', slice: 2, rotating: false, angle: 0 };
+        const curves = {
+            sqrt: { f: x => Math.sqrt(x), domain: [0, 4] },
+            cone: { f: x => Math.max(0, 1 - x/2), domain: [0, 2] },
+            sine: { f: x => Math.max(0, Math.sin(Math.PI * x / 4)), domain: [0, 4] }
+        };
+
+        function updateCurve() {
+            volumeState.curve = document.getElementById('curveSelect').value;
+            const domain = curves[volumeState.curve].domain;
+            document.getElementById('slicePos').max = domain[1];
+            drawVolume();
+            calcVolume();
+        }
+
+        function updateSlice(val) {
+            volumeState.slice = parseFloat(val);
+            document.getElementById('sliceVal').textContent = val;
+            drawVolume();
+        }
+
+        function toggleRotation() {
+            volumeState.rotating = !volumeState.rotating;
+            if (volumeState.rotating) animateRotation();
+        }
+
+        function animateRotation() {
+            if (!volumeState.rotating) return;
+            volumeState.angle = (volumeState.angle + 0.05) % (2 * Math.PI);
+            drawVolume();
+            requestAnimationFrame(animateRotation);
+        }
+
+        function drawVolume() {
+            const canvas = document.getElementById('volumeCanvas');
+            if (!canvas) return;
+            const ctx = resizeCanvas(canvas);
+            const w = canvas.width, h = canvas.height;
+
+            ctx.clearRect(0, 0, w, h);
+            drawAxes(ctx, w, h);
+
+            const { f, domain } = curves[volumeState.curve];
+            const [a, b] = domain;
+
+            // 绘制曲线
+            ctx.strokeStyle = '#4f46e5'; ctx.lineWidth = 2;
+            ctx.beginPath();
+            for (let x = a; x <= b; x += 0.05) {
+                const px = 40 + (x / 5) * (w - 60);
+                const py = h - 40 - (f(x) / 2.5) * (h - 60);
+                if (x === a) ctx.moveTo(px, py);
+                else ctx.lineTo(px, py);
+            }
+            ctx.stroke();
+
+            // 绘制旋转体轮廓
+            ctx.fillStyle = 'rgba(16, 185, 129, 0.2)';
+            for (let x = a; x <= b; x += 0.2) {
+                const r = f(x);
+                const px = 40 + (x / 5) * (w - 60);
+                const py = h - 40;
+                const radius = (r / 2.5) * (h - 60);
+                ctx.beginPath();
+                ctx.ellipse(px, py, radius * Math.abs(Math.sin(volumeState.angle)), 4, 0, 0, 2 * Math.PI);
+                ctx.fill();
+            }
+
+            // 绘制切片
+            const sx = Math.min(Math.max(volumeState.slice, a), b);
+            const sr = f(sx);
+            const spx = 40 + (sx / 5) * (w - 60);
+            const spy = h - 40;
+            const sradius = (sr / 2.5) * (h - 60);
+            ctx.fillStyle = 'rgba(239, 68, 68, 0.4)';
+            ctx.strokeStyle = '#ef4444'; ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(spx, spy, sradius, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.stroke();
+        }
+
+        function calcVolume() {
+            const { f, domain } = curves[volumeState.curve];
+            const [a, b] = domain;
+            let sum = 0;
+            const n = 200;
+            for (let i = 0; i <= n; i++) {
+                const x = a + (b - a) * i / n;
+                sum += Math.pow(f(x), 2) * (b - a) / n;
+            }
+            const V = Math.PI * sum;
+            document.getElementById('volumeResult').innerHTML = `$V \\approx ${V.toFixed(3)}$ 立方单位`;
+            if (typeof MathJax !== 'undefined') MathJax.typesetPromise();
+        }
+
+        // 变力做功
+        let workState = { type: 'spring', k: 4, x1: 3 };
+
+        function updateForce() {
+            workState.type = document.getElementById('forceSelect').value;
+            drawWork();
+            calcWork();
+        }
+
+        function updateK(val) {
+            workState.k = parseFloat(val);
+            document.getElementById('kVal').textContent = val;
+            drawWork();
+            calcWork();
+        }
+
+        function updateX1(val) {
+            workState.x1 = parseFloat(val);
+            document.getElementById('x1Val').textContent = val;
+            drawWork();
+            calcWork();
+        }
+
+        function getF(x) {
+            if (workState.type === 'spring') return workState.k * x;
+            return workState.k * (1 + 0.2 * x);
+        }
+
+        function drawWork() {
+            const canvas = document.getElementById('workCanvas');
+            if (!canvas) return;
+            const ctx = resizeCanvas(canvas);
+            const w = canvas.width, h = canvas.height;
+
+            ctx.clearRect(0, 0, w, h);
+            drawAxes(ctx, w, h);
+
+            const x1 = workState.x1;
+            let maxF = 0;
+            for (let x = 0; x <= x1; x += 0.1) maxF = Math.max(maxF, getF(x));
+            const yMax = Math.max(5, maxF * 1.2);
+
+            // 填充做功面积
+            ctx.fillStyle = 'rgba(16, 185, 129, 0.3)';
+            ctx.beginPath();
+            ctx.moveTo(40, h - 40);
+            for (let x = 0; x <= x1; x += 0.05) {
+                const px = 40 + (x / 5) * (w - 60);
+                const py = h - 40 - (getF(x) / yMax) * (h - 60);
+                ctx.lineTo(px, py);
+            }
+            ctx.lineTo(40 + (x1 / 5) * (w - 60), h - 40);
+            ctx.closePath();
+            ctx.fill();
+
+            // 绘制力函数曲线
+            ctx.strokeStyle = '#4f46e5'; ctx.lineWidth = 3;
+            ctx.beginPath();
+            for (let x = 0; x <= 5; x += 0.05) {
+                const px = 40 + (x / 5) * (w - 60);
+                const py = h - 40 - (getF(x) / yMax) * (h - 60);
+                if (x === 0) ctx.moveTo(px, py);
+                else ctx.lineTo(px, py);
+            }
+            ctx.stroke();
+        }
+
+        function calcWork() {
+            const x1 = workState.x1;
+            let sum = 0;
+            const n = 200;
+            for (let i = 0; i <= n; i++) {
+                const x = x1 * i / n;
+                sum += getF(x) * x1 / n;
+            }
+            document.getElementById('workResult').innerHTML = `$W \\approx ${sum.toFixed(2)}$ J`;
+            if (typeof MathJax !== 'undefined') MathJax.typesetPromise();
+        }
+
+        // 液体压力
+        let pressureState = { shape: 'rect', depth: 2, rho: 1000, width: 3 };
+
+        function updateShape() {
+            pressureState.shape = document.getElementById('shapeSelect').value;
+            drawPressure();
+            calcPressure();
+        }
+
+        function updateDepth(val) {
+            pressureState.depth = parseFloat(val);
+            document.getElementById('depthVal').textContent = val;
+            drawPressure();
+            calcPressure();
+        }
+
+        function updateRho(val) {
+            pressureState.rho = parseFloat(val);
+            document.getElementById('rhoVal').textContent = val;
+            calcPressure();
+        }
+
+        function getWidth(y) {
+            if (pressureState.shape === 'rect') return pressureState.width;
+            if (pressureState.shape === 'tri') return (y / pressureState.depth) * pressureState.width;
+            const r = pressureState.width / 2;
+            return 2 * Math.sqrt(Math.max(0, r*r - Math.pow(y - pressureState.depth/2, 2)));
+        }
+
+        function drawPressure() {
+            const canvas = document.getElementById('pressureCanvas');
+            if (!canvas) return;
+            const ctx = resizeCanvas(canvas);
+            const w = canvas.width, h = canvas.height;
+
+            ctx.clearRect(0, 0, w, h);
+
+            const d = pressureState.depth;
+            const cx = w / 2;
+            const scale = (h - 80) / d;
+
+            // 绘制容器轮廓
+            ctx.strokeStyle = '#4f46e5'; ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(cx, 40);
+            for (let y = 0; y <= d; y += 0.05) {
+                const width = getWidth(y);
+                const py = 40 + y * scale;
+                const px = cx + width * 20;
+                ctx.lineTo(px, py);
+            }
+            for (let y = d; y >= 0; y -= 0.05) {
+                const width = getWidth(y);
+                const py = 40 + y * scale;
+                const px = cx - width * 20;
+                ctx.lineTo(px, py);
+            }
+            ctx.closePath();
+            ctx.stroke();
+
+            // 填充液体区域
+            ctx.fillStyle = 'rgba(16, 185, 129, 0.3)';
+            ctx.fill();
+
+            // 绘制压力微元
+            const sampleY = d * 0.6;
+            const py = 40 + sampleY * scale;
+            const width = getWidth(sampleY);
+            ctx.fillStyle = 'rgba(239, 68, 68, 0.4)';
+            ctx.fillRect(cx - width * 20, py - 5, width * 40, 10);
+        }
+
+        function calcPressure() {
+            const d = pressureState.depth;
+            const rho = pressureState.rho;
+            const g = 9.8;
+            let sum = 0;
+            const n = 200;
+            for (let i = 0; i <= n; i++) {
+                const y = d * i / n;
+                const pressure = rho * g * (d - y);
+                sum += pressure * getWidth(y) * d / n;
+            }
+            document.getElementById('pressureResult').innerHTML = `$F \\approx ${sum.toFixed(0)}$ N`;
+            if (typeof MathJax !== 'undefined') MathJax.typesetPromise();
+        }
+
+        function switchPanel(id, trigger) {
+            const activeButton = trigger instanceof HTMLElement ? trigger :
+                (typeof event !== 'undefined' && event?.currentTarget instanceof HTMLElement ? event.currentTarget :
+                    document.querySelector(`.nav-btn[onclick="switchPanel('${id}')"]`) || null);
+            document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            const panel = document.getElementById(id);
+            if (panel) panel.classList.add('active');
+            if (activeButton) activeButton.classList.add('active');
+            if (id === 'volume') { drawVolume(); calcVolume(); }
+            else if (id === 'work') { drawWork(); calcWork(); }
+            else if (id === 'pressure') { drawPressure(); calcPressure(); }
+            if (typeof scheduleMathRender === 'function') scheduleMathRender();
+        }
+
+        function scheduleMathRender() {
+            if (window.MathJax && MathJax.typesetPromise) {
+                MathJax.typesetPromise().catch(err => console.warn('MathJax 渲染异常', err));
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            drawVolume(); calcVolume();
+            drawWork(); calcWork();
+            drawPressure(); calcPressure();
+            scheduleMathRender();
+        });
+
+        window.addEventListener('resize', () => {
+            drawVolume(); drawWork(); drawPressure();
+        });
+
+        function toggleReturnLinks() { const p = document.querySelector('.return-links'); if (!p) return; if (p.style.display === 'flex') { p.style.opacity = '0'; setTimeout(() => p.style.display = 'none', 160); } else { p.style.display = 'flex'; requestAnimationFrame(() => p.style.opacity = '1'); } }
+    </script>
+
+    <div class="return-home-panel"><button class="return-toggle" onclick="toggleReturnLinks()"><i class="fa-solid fa-house"></i></button><div class="return-links"><a class="return-link" href="index.html"><i class="fa-solid fa-arrow-left"></i> 返回目录</a><a class="return-link" href="../index.html"><i class="fa-solid fa-house"></i> 返回主站</a></div></div>
+</body>
+</html>

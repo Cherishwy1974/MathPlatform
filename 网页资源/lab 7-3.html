@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab 7.3 二阶常系数齐次线性方程通解构建实验室</title>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            startup: {
+                pageReady: () => {
+                    return MathJax.startup.defaultPageReady().then(() => {
+                        if (typeof window.scheduleMathRender === 'function') {
+                            window.scheduleMathRender();
+                        }
+                        console.log('MathJax加载完成');
+                    });
+                }
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+            }
+        };
+    </script>
+    <script defer src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js"></script>
+    <script defer src="../common-assets/js/lab-math-enhancer.js"></script>
+    <style>
+        :root {
+            --h1-size: 22px;
+            --h2-size: 20px;
+            --h3-size: 18px;
+            --btn-size: 16px;
+            --formula-size: 20px;
+            --text-size: 16px;
+            --primary: #4f46e5;
+            --primary-light: #6366f1;
+            --primary-dark: #3730a3;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --light: #ffffff;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-600: #4b5563;
+            --gray-800: #1f2937;
+            --border: #e5e7eb;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        *::-webkit-scrollbar {
+            width: 0;
+            background: transparent;
+        }
+
+        * {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
+            font-size: var(--text-size);
+            line-height: 1.5;
+            background: var(--gray-50);
+            color: var(--gray-800);
+        }
+
+        .return-home-panel {
+            position: fixed;
+            top: 12px;
+            right: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+            z-index: 40;
+        }
+
+        .return-toggle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.95), rgba(99, 102, 241, 0.9));
+            color: #ffffff;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 10px 18px rgba(79, 70, 229, 0.28);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .return-toggle:focus-visible {
+            outline: 2px solid rgba(129, 140, 248, 0.6);
+            outline-offset: 3px;
+        }
+
+        .return-toggle:hover {
+            transform: translateY(-1px) scale(1.03);
+            box-shadow: 0 14px 26px rgba(79, 70, 229, 0.35);
+        }
+
+        .return-links {
+            display: none;
+            flex-direction: column;
+            gap: 6px;
+            padding: 10px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(79, 70, 229, 0.15);
+            box-shadow: 0 16px 30px rgba(15, 23, 42, 0.18);
+            backdrop-filter: blur(6px);
+        }
+
+        .return-home-panel.open .return-links {
+            display: flex;
+        }
+
+        .return-link {
+            padding: 6px 12px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 14px;
+            color: var(--primary);
+            background: rgba(79, 70, 229, 0.12);
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+
+        .return-link.return-main {
+            color: var(--success);
+            background: rgba(16, 185, 129, 0.12);
+        }
+
+        .return-link:hover {
+            background: rgba(79, 70, 229, 0.2);
+            color: var(--primary-dark);
+        }
+
+        .return-link.return-main:hover {
+            background: rgba(16, 185, 129, 0.22);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            height: 100vh;
+            max-height: 700px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            background: var(--light);
+            border-radius: 12px;
+            box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(90deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: var(--light);
+            padding: 10px 24px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: var(--h1-size);
+            font-weight: 600;
+        }
+
+        .main {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 120px;
+            background: var(--gray-50);
+            border-right: 1px solid var(--border);
+            padding: 12px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .nav-btn {
+            width: 100%;
+            padding: 8px;
+            border: none;
+            border-radius: 6px;
+            background: transparent;
+            color: var(--gray-600);
+            text-align: left;
+            font-size: var(--text-size);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .nav-btn:hover {
+            background: var(--gray-100);
+        }
+
+        .nav-btn.active {
+            background: var(--primary);
+            color: var(--light);
+        }
+
+        .content {
+            flex: 1;
+            display: none;
+            padding: 18px;
+            overflow-y: auto;
+        }
+
+        .content.active {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 20px;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow-y: auto;
+        }
+
+        .card {
+            background: var(--light);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+        }
+
+        .card h3 {
+            font-size: var(--h3-size);
+            color: var(--primary);
+            margin-bottom: 12px;
+        }
+
+        .card p {
+            color: var(--gray-600);
+            margin-bottom: 8px;
+        }
+
+        .slider-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 600;
+            color: var(--gray-600);
+        }
+
+        .slider-group input[type="range"] {
+            width: 100%;
+        }
+
+        .info-box {
+            background: var(--gray-50);
+            border-left: 3px solid var(--primary);
+            padding: 12px;
+            border-radius: 6px;
+            font-size: var(--text-size);
+            line-height: 1.6;
+        }
+
+        .warning-box {
+            background: #fef3c7;
+            border-left: 3px solid var(--warning);
+            padding: 12px;
+            border-radius: 6px;
+            color: var(--gray-800);
+        }
+
+        .success-box {
+            background: #ecfdf5;
+            border-left: 3px solid var(--success);
+            padding: 12px;
+            border-radius: 6px;
+            color: var(--gray-700);
+        }
+
+        .formula-box {
+            background: #eef2ff;
+            border-radius: 8px;
+            padding: 12px;
+            border: 1px solid rgba(79, 70, 229, 0.2);
+            min-height: 80px;
+        }
+
+        canvas {
+            width: 100%;
+            height: 260px;
+            background: var(--light);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+        }
+
+        .curve-legend {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+            font-size: 14px;
+            color: var(--gray-600);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .legend-color {
+            width: 14px;
+            height: 14px;
+            border-radius: 4px;
+        }
+
+        @media (max-width: 1024px) {
+            .content.active {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                height: auto;
+                max-height: none;
+            }
+
+            canvas {
+                height: 220px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="return-home-panel">
+        <button class="return-toggle" type="button" aria-label="打开返回导航" onclick="toggleReturnPanel(event)"><i class="fa-solid fa-house"></i></button>
+        <div class="return-links">
+            <a class="return-link return-sub" href="index.html"><i class="fa-solid fa-arrow-left"></i> 返回目录</a>
+            <a class="return-link return-main" href="../index.html"><i class="fa-solid fa-house"></i> 返回主站</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <header class="header">
+            <h1>Lab 7.3 二阶常系数齐次线性方程的通解构建</h1>
+        </header>
+
+        <div class="main">
+            <nav class="sidebar">
+                <button class="nav-btn active"  data-panel="module1"onclick="switchPanel('module1', this)">两不等实根</button>
+                <button class="nav-btn"  data-panel="module2"onclick="switchPanel('module2', this)">两相等实根</button>
+                <button class="nav-btn"  data-panel="module3"onclick="switchPanel('module3', this)">一对共轭复根</button>
+            </nav>
+
+            <div class="content active" id="module1">
+                <div class="column">
+                    <div class="card">
+                        <h3>参数调节：保持 $\Delta>0$</h3>
+                        <p>通过滑块调整 $p, q$，观察判别式 $\Delta=p^2-4q$ 的变化。</p>
+                        <div class="slider-group">
+                            <label class="slider-label">$p$
+                                <span id="pValue1">-1.0</span>
+                            </label>
+                            <input id="pSlider1" type="range" min="-3" max="3" step="0.5" value="-1">
+                            <label class="slider-label">$q$
+                                <span id="qValue1">-6.0</span>
+                            </label>
+                            <input id="qSlider1" type="range" min="-4" max="4" step="0.5" value="-6">
+                        </div>
+                        <div id="infoReal" class="info-box" style="margin-top:12px;">
+                            当前判别式 $\Delta=25.0$，属于两不等实根情形。
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3>通解结构</h3>
+                        <div id="formulaReal" class="formula-box">$y(x)=C_1e^{3x}+C_2e^{-2x}$</div>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="card">
+                        <h3>指数型解曲线</h3>
+                        <canvas id="canvasReal"></canvas>
+                        <div class="curve-legend">
+                            <div class="legend-item"><span class="legend-color" style="background:#4f46e5"></span> $C_1=1,C_2=-0.5$</div>
+                            <div class="legend-item"><span class="legend-color" style="background:#f59e0b"></span> $C_1=-1,C_2=1$</div>
+                            <div class="legend-item"><span class="legend-color" style="background:#10b981"></span> $C_1=0.5,C_2=0.5$</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content" id="module2">
+                <div class="column">
+                    <div class="card">
+                        <h3>参数调节：寻找 $\Delta=0$</h3>
+                        <p>调节 $p, q$，让判别式 $\Delta=p^2-4q$ 恰好为 0。</p>
+                        <div class="slider-group">
+                            <label class="slider-label">$p$
+                                <span id="pValue2">4.0</span>
+                            </label>
+                            <input id="pSlider2" type="range" min="-4" max="4" step="0.5" value="4">
+                            <label class="slider-label">$q$
+                                <span id="qValue2">4.0</span>
+                            </label>
+                            <input id="qSlider2" type="range" min="-1" max="6" step="0.5" value="4">
+                        </div>
+                        <div id="infoRepeated" class="info-box" style="margin-top:12px;">
+                            当前 $\Delta=0.0$，为相等实根，特征根 $r=-2.0$。
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3>通解结构</h3>
+                        <div id="formulaRepeated" class="formula-box">$y(x)=(C_1+C_2x)e^{-2x}$</div>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="card">
+                        <h3>相等实根解曲线</h3>
+                        <canvas id="canvasRepeated"></canvas>
+                        <div class="curve-legend">
+                            <div class="legend-item"><span class="legend-color" style="background:#4f46e5"></span> $C_1=1,C_2=1$</div>
+                            <div class="legend-item"><span class="legend-color" style="background:#f59e0b"></span> $C_1=-1,C_2=0.5$</div>
+                            <div class="legend-item"><span class="legend-color" style="background:#10b981"></span> $C_1=0.5,C_2=-1$</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content" id="module3">
+                <div class="column">
+                    <div class="card">
+                        <h3>参数调节：保持 $\Delta<0$</h3>
+                        <p>调节 $p, q$，当 $\Delta=p^2-4q<0$ 时，特征根为共轭复数。</p>
+                        <div class="slider-group">
+                            <label class="slider-label">$p$
+                                <span id="pValue3">0.0</span>
+                            </label>
+                            <input id="pSlider3" type="range" min="-4" max="4" step="0.5" value="0">
+                            <label class="slider-label">$q$
+                                <span id="qValue3">4.0</span>
+                            </label>
+                            <input id="qSlider3" type="range" min="0" max="6" step="0.5" value="4">
+                        </div>
+                        <div id="infoComplex" class="info-box" style="margin-top:12px;">
+                            当前 $\Delta=-16.0$，对应复根 $r_{1,2} = \pm 2.0i$。
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3>通解结构</h3>
+                        <div id="formulaComplex" class="formula-box">$y(x)=e^{0x}\big(C_1\cos(2x)+C_2\sin(2x)\big)$</div>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="card">
+                        <h3>振荡型解曲线</h3>
+                        <canvas id="canvasComplex"></canvas>
+                        <div class="curve-legend">
+                            <div class="legend-item"><span class="legend-color" style="background:#4f46e5"></span> $C_1=1,C_2=0$</div>
+                            <div class="legend-item"><span class="legend-color" style="background:#f59e0b"></span> $C_1=0,C_2=1$</div>
+                            <div class="legend-item"><span class="legend-color" style="background:#10b981"></span> $C_1=1,C_2=1$</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let mathObserver = null;
+        let mathRenderQueued = false;
+
+        function startMathObserver() {
+            if (typeof MutationObserver === 'undefined' || !document.body) {
+                return;
+            }
+            if (mathObserver) {
+                mathObserver.disconnect();
+            }
+            mathObserver = new MutationObserver(mutations => {
+                for (const mutation of mutations) {
+                    if (mutation.type === 'childList' || mutation.type === 'characterData') {
+                        scheduleMathRender();
+                        break;
+                    }
+                }
+            });
+            mathObserver.observe(document.body, { childList: true, subtree: true, characterData: true });
+        }
+
+        function scheduleMathRender() {
+            if (mathRenderQueued) {
+                return;
+            }
+            mathRenderQueued = true;
+            requestAnimationFrame(() => {
+                mathRenderQueued = false;
+                if (window.MathJax && MathJax.typesetPromise) {
+                    if (mathObserver) {
+                        mathObserver.disconnect();
+                    }
+                    MathJax.typesetPromise()
+                        .catch(err => console.log('渲染错误:', err))
+                        .finally(() => {
+                            startMathObserver();
+                        });
+                } else {
+                    setTimeout(scheduleMathRender, 160);
+                }
+            });
+        }
+
+        window.scheduleMathRender = scheduleMathRender;
+
+        function renderMath() {
+            scheduleMathRender();
+        }
+
+        function ensureMathReady() {
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', () => {
+                    startMathObserver();
+                    scheduleMathRender();
+                });
+            } else {
+                startMathObserver();
+                scheduleMathRender();
+            }
+        }
+
+        ensureMathReady();
+
+        function toggleReturnPanel(event) {
+            event.stopPropagation();
+            const panel = document.querySelector('.return-home-panel');
+            if (panel) {
+                panel.classList.toggle('open');
+            }
+        }
+
+        document.addEventListener('click', event => {
+            const panel = document.querySelector('.return-home-panel');
+            if (!panel) {
+                return;
+            }
+            if (panel.classList.contains('open') && !panel.contains(event.target)) {
+                panel.classList.remove('open');
+            }
+        });
+
+        window.addEventListener('pageshow', () => {
+            scheduleMathRender();
+        });
+
+        function switchPanel(id, btn) {
+            document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderMath();
+            setTimeout(() => {
+                resizeCanvas(document.getElementById('canvasReal'));
+                resizeCanvas(document.getElementById('canvasRepeated'));
+                resizeCanvas(document.getElementById('canvasComplex'));
+                updateRealRoots();
+                updateRepeatedRoots();
+                updateComplexRoots();
+            }, 100);
+        }
+
+        function resizeCanvas(canvas) {
+            if (!canvas) return;
+            const container = canvas.parentElement;
+            const width = container.clientWidth - 20;
+            const height = 240;
+            canvas.style.width = width + 'px';
+            canvas.style.height = height + 'px';
+            const ratio = window.devicePixelRatio || 1;
+            canvas.width = width * ratio;
+            canvas.height = height * ratio;
+            const ctx = canvas.getContext('2d');
+            ctx.scale(ratio, ratio);
+        }
+
+        function drawAxis(ctx, width, height) {
+            ctx.clearRect(0, 0, width, height);
+            ctx.save();
+            ctx.strokeStyle = '#374151';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(40, height / 2);
+            ctx.lineTo(width - 20, height / 2);
+            ctx.moveTo(40, 20);
+            ctx.lineTo(40, height - 20);
+            ctx.stroke();
+
+            ctx.fillStyle = '#374151';
+            ctx.font = '12px sans-serif';
+            ctx.fillText('x', width - 30, height / 2 - 6);
+            ctx.fillText('y', 28, 26);
+
+            for (let i = -3; i <= 3; i++) {
+                const x = 40 + (width - 80) * (i + 3) / 6;
+                ctx.beginPath();
+                ctx.moveTo(x, height / 2 - 4);
+                ctx.lineTo(x, height / 2 + 4);
+                ctx.stroke();
+                if (i !== 0) ctx.fillText(i.toString(), x - 4, height / 2 + 16);
+            }
+
+            for (let j = -3; j <= 3; j++) {
+                const y = height / 2 - (height - 60) * j / 6;
+                ctx.beginPath();
+                ctx.moveTo(36, y);
+                ctx.lineTo(44, y);
+                ctx.stroke();
+                if (j !== 0) ctx.fillText(j.toString(), 16, y + 4);
+            }
+            ctx.restore();
+        }
+
+        function clampY(y) {
+            if (y > 4) return 4;
+            if (y < -4) return -4;
+            return y;
+        }
+
+        function toCanvasY(y, height) {
+            const scale = (height - 60) / 8;
+            return height / 2 - clampY(y) * scale;
+        }
+
+        function updateRealRoots() {
+            const p = parseFloat(document.getElementById('pSlider1').value);
+            const q = parseFloat(document.getElementById('qSlider1').value);
+            document.getElementById('pValue1').textContent = p.toFixed(1);
+            document.getElementById('qValue1').textContent = q.toFixed(1);
+            const delta = p * p - 4 * q;
+            const info = document.getElementById('infoReal');
+            const formula = document.getElementById('formulaReal');
+            const canvas = document.getElementById('canvasReal');
+            const ctx = canvas.getContext('2d');
+            drawAxis(ctx, canvas.clientWidth, canvas.clientHeight);
+            if (delta <= 0) {
+                info.className = 'warning-box';
+                info.innerHTML = `当前 \\(\\Delta=${delta.toFixed(2)}\\)，已不再属于两不等实根，请调整。`;
+                formula.innerHTML = '—';
+                renderMath();
+                return;
+            }
+            const sqrtDelta = Math.sqrt(delta);
+            const r1 = (-p + sqrtDelta) / 2;
+            const r2 = (-p - sqrtDelta) / 2;
+            info.className = 'info-box';
+            info.innerHTML = `判别式 \\(\\Delta=${delta.toFixed(2)}\\)，特征根 $r_1=${r1.toFixed(2)}$，$r_2=${r2.toFixed(2)}$。`;
+            formula.innerHTML = `$y(x)=C_1e^{${r1.toFixed(2)}x}+C_2e^{${r2.toFixed(2)}x}$`;
+            renderMath();
+
+            const constants = [
+                { c1: 1, c2: -0.5, color: '#4f46e5' },
+                { c1: -1, c2: 1, color: '#f59e0b' },
+                { c1: 0.5, c2: 0.5, color: '#10b981' }
+            ];
+            constants.forEach(set => {
+                ctx.beginPath();
+                ctx.strokeStyle = set.color;
+                ctx.lineWidth = 2;
+                const step = (canvas.clientWidth - 80) / 120;
+                for (let i = 0; i <= 120; i++) {
+                    const canvasX = 40 + i * step;
+                    const x = -2 + 4 * (i / 120);
+                    const y = set.c1 * Math.exp(r1 * x) + set.c2 * Math.exp(r2 * x);
+                    const canvasY = toCanvasY(y, canvas.clientHeight);
+                    if (i === 0) ctx.moveTo(canvasX, canvasY);
+                    else ctx.lineTo(canvasX, canvasY);
+                }
+                ctx.stroke();
+            });
+        }
+
+        function updateRepeatedRoots() {
+            const p = parseFloat(document.getElementById('pSlider2').value);
+            const q = parseFloat(document.getElementById('qSlider2').value);
+            document.getElementById('pValue2').textContent = p.toFixed(1);
+            document.getElementById('qValue2').textContent = q.toFixed(1);
+            const delta = p * p - 4 * q;
+            const info = document.getElementById('infoRepeated');
+            const formula = document.getElementById('formulaRepeated');
+            const canvas = document.getElementById('canvasRepeated');
+            const ctx = canvas.getContext('2d');
+            drawAxis(ctx, canvas.clientWidth, canvas.clientHeight);
+            if (Math.abs(delta) > 1e-6) {
+                info.className = 'warning-box';
+                info.innerHTML = `当前 \\(\\Delta=${delta.toFixed(2)}\\)，尚未达到相等实根，尝试调整使其为 0。`;
+                formula.innerHTML = '—';
+                renderMath();
+                return;
+            }
+            const r = -p / 2;
+            info.className = 'success-box';
+            info.innerHTML = `成功！$\\Delta=0$，特征根 $r=${r.toFixed(2)}$，通解含 $x$ 的线性因子。`;
+            formula.innerHTML = `$y(x)=(C_1+C_2x)e^{${r.toFixed(2)}x}$`;
+            renderMath();
+
+            const constants = [
+                { c1: 1, c2: 1, color: '#4f46e5' },
+                { c1: -1, c2: 0.5, color: '#f59e0b' },
+                { c1: 0.5, c2: -1, color: '#10b981' }
+            ];
+            constants.forEach(set => {
+                ctx.beginPath();
+                ctx.strokeStyle = set.color;
+                ctx.lineWidth = 2;
+                const step = (canvas.clientWidth - 80) / 120;
+                for (let i = 0; i <= 120; i++) {
+                    const canvasX = 40 + i * step;
+                    const x = -2 + 4 * (i / 120);
+                    const y = (set.c1 + set.c2 * x) * Math.exp(r * x);
+                    const canvasY = toCanvasY(y, canvas.clientHeight);
+                    if (i === 0) ctx.moveTo(canvasX, canvasY);
+                    else ctx.lineTo(canvasX, canvasY);
+                }
+                ctx.stroke();
+            });
+        }
+
+        function updateComplexRoots() {
+            const p = parseFloat(document.getElementById('pSlider3').value);
+            const q = parseFloat(document.getElementById('qSlider3').value);
+            document.getElementById('pValue3').textContent = p.toFixed(1);
+            document.getElementById('qValue3').textContent = q.toFixed(1);
+            const delta = p * p - 4 * q;
+            const info = document.getElementById('infoComplex');
+            const formula = document.getElementById('formulaComplex');
+            const canvas = document.getElementById('canvasComplex');
+            const ctx = canvas.getContext('2d');
+            drawAxis(ctx, canvas.clientWidth, canvas.clientHeight);
+            if (delta >= 0) {
+                info.className = 'warning-box';
+                info.innerHTML = `当前 \\(\\Delta=${delta.toFixed(2)}\\)，需要 \\(\\Delta<0\\) 才能得到复根，请降低 $q$ 或调整 $p$。`;
+                formula.innerHTML = '—';
+                renderMath();
+                return;
+            }
+            const alpha = -p / 2;
+            const beta = Math.sqrt(-delta) / 2;
+            info.className = 'info-box';
+            info.innerHTML = `判别式 \\(\\Delta=${delta.toFixed(2)}\\)，复根 $r_{1,2}=${alpha.toFixed(2)}\\pm ${beta.toFixed(2)}i$。`;
+            formula.innerHTML = `$y(x)=e^{${alpha.toFixed(2)}x}\\big(C_1\\cos(${beta.toFixed(2)}x)+C_2\\sin(${beta.toFixed(2)}x)\\big)$`;
+            renderMath();
+
+            const constants = [
+                { c1: 1, c2: 0, color: '#4f46e5' },
+                { c1: 0, c2: 1, color: '#f59e0b' },
+                { c1: 1, c2: 1, color: '#10b981' }
+            ];
+            constants.forEach(set => {
+                ctx.beginPath();
+                ctx.strokeStyle = set.color;
+                ctx.lineWidth = 2;
+                const step = (canvas.clientWidth - 80) / 120;
+                for (let i = 0; i <= 120; i++) {
+                    const canvasX = 40 + i * step;
+                    const x = -2 + 4 * (i / 120);
+                    const y = Math.exp(alpha * x) * (set.c1 * Math.cos(beta * x) + set.c2 * Math.sin(beta * x));
+                    const canvasY = toCanvasY(y, canvas.clientHeight);
+                    if (i === 0) ctx.moveTo(canvasX, canvasY);
+                    else ctx.lineTo(canvasX, canvasY);
+                }
+                ctx.stroke();
+            });
+        }
+
+        document.getElementById('pSlider1').addEventListener('input', updateRealRoots);
+        document.getElementById('qSlider1').addEventListener('input', updateRealRoots);
+        document.getElementById('pSlider2').addEventListener('input', updateRepeatedRoots);
+        document.getElementById('qSlider2').addEventListener('input', updateRepeatedRoots);
+        document.getElementById('pSlider3').addEventListener('input', updateComplexRoots);
+        document.getElementById('qSlider3').addEventListener('input', updateComplexRoots);
+
+        window.addEventListener('resize', () => {
+            resizeCanvas(document.getElementById('canvasReal'));
+            resizeCanvas(document.getElementById('canvasRepeated'));
+            resizeCanvas(document.getElementById('canvasComplex'));
+            updateRealRoots();
+            updateRepeatedRoots();
+            updateComplexRoots();
+        });
+
+        resizeCanvas(document.getElementById('canvasReal'));
+        resizeCanvas(document.getElementById('canvasRepeated'));
+        resizeCanvas(document.getElementById('canvasComplex'));
+        updateRealRoots();
+        updateRepeatedRoots();
+        updateComplexRoots();
+        renderMath();
+    </script>
+</body>
+</html>

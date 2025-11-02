@@ -1,0 +1,3467 @@
+﻿<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+    <link rel="stylesheet" href="../common-assets/css/fontawesome.min.css">
+    <link rel="stylesheet" href="../common-assets/css/solid.min.css">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>第十三章：概率与统计 (交互式课件)</title>
+<script src="../common-assets/js/d3-7.8.5.min.js"></script>
+<!-- 使用统一的MathJax配置文件 -->
+<script src="../common-assets/js/mathjax-config.js"></script>
+<script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true,
+                processEnvironments: true
+            },
+            svg: {
+                fontCache: 'global'
+            },
+            startup: {
+                pageReady: () => {
+                    return window.MathJax.startup.defaultPageReady().then(() => {
+                        console.log('MathJax is ready!');
+                    });
+                }
+            }
+        };
+    </script>
+<script async="" id="MathJax-script" src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js" type="text/javascript">
+</script>
+<style>
+        /* === RESET AND BASE STYLES === */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: 16px;
+            height: 100%;
+        }
+
+        body {
+            font-family: 'Inter', 'Source Han Sans SC', 'Noto Sans SC', 'Microsoft YaHei', system-ui, -apple-system, sans-serif;
+            background: #FAFAFA;
+            overflow: hidden;
+            color: #1a1a1a;
+            height: 100%;
+            line-height: 1.6;
+            font-weight: 400;
+        }
+
+        /* === SLIDE LAYOUT === */
+        .slide-container {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            position: relative;
+            gap: 0;
+            padding: 0;
+        }
+
+        /* Left Content Area - Academic Journal Style */
+        .left-content {
+            width: 50%;
+            height: 100vh;
+            padding: 60px 80px 60px 60px;
+            background: #FBFBFB;
+            overflow-y: auto;
+            font-size: 16px;
+            line-height: 1.6;
+            border: none;
+            box-shadow: none;
+            border-radius: 0;
+        }
+
+        .slide-container.single-column .left-content {
+            width: 100%;
+            max-width: 960px;
+            border-right: none;
+        }
+
+        /* Right Visualization Area - Subtle Contrast */
+        .right-visual {
+            width: 50%;
+            height: 100vh;
+            background: #F8F9FA;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            border: none;
+            box-shadow: none;
+            border-radius: 0;
+        }
+
+        .slide-container.single-column .right-visual {
+            display: none;
+        }
+
+        .right-visual > div {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            border-radius: 0;
+            box-shadow: none;
+            padding: 24px;
+        }
+
+        .right-visual > div > * {
+            width: 100%;
+            height: 100%;
+        }
+
+        .right-visual canvas,
+        .right-visual svg {
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        /* === SLIDE TRANSITIONS === */
+        .slide {
+            display: none;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .slide.active {
+            display: flex;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* === 统一的字体系统 === */
+        h1 {
+            color: #003366;
+            font-size: 28px;
+            line-height: 1.3;
+            font-weight: 700;
+            margin: 0 0 24px 0;
+            padding: 0;
+            letter-spacing: -0.02em;
+        }
+
+        h2 {
+            color: #008080;
+            font-size: 22px;
+            line-height: 1.4;
+            font-weight: 600;
+            margin: 32px 0 16px 0;
+            position: relative;
+            padding-left: 0;
+        }
+
+        h2::before {
+            content: '';
+            position: absolute;
+            left: -20px;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: #008080;
+            border-radius: 2px;
+        }
+
+        h3 {
+            color: #1a1a1a;
+            font-size: 20px;
+            line-height: 1.4;
+            font-weight: 600;
+            margin: 24px 0 12px 0;
+        }
+
+        h4 {
+            color: #333333;
+            font-size: 18px;
+            line-height: 1.4;
+            font-weight: 500;
+            margin: 20px 0 8px 0;
+        }
+
+        h5 {
+            color: #555555;
+            font-size: 16px;
+            line-height: 1.4;
+            font-weight: 500;
+            margin: 16px 0 8px 0;
+        }
+
+        p {
+            margin-bottom: 16px;
+            color: #2d2d2d;
+            font-weight: 400;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        ul, ol {
+            margin: 0 0 16px 0;
+            line-height: 1.6;
+            padding-left: 24px;
+            font-size: 16px;
+        }
+
+        li {
+            margin-bottom: 8px;
+            color: #2d2d2d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        /* === CONTENT MODULES - 去框化设计 === */
+        .definition, .theorem, .example, .note {
+            background: transparent;
+            border: none;
+            border-left: 4px solid;
+            padding: 16px 0 16px 20px;
+            margin: 20px 0;
+        }
+
+        .definition {
+            border-left-color: #1e40af;
+        }
+
+        .theorem {
+            border-left-color: #059669;
+        }
+
+        .example {
+            border-left-color: #dc2626;
+        }
+
+        .note {
+            border-left-color: #6b7280;
+            font-style: italic;
+            color: #4b5563;
+        }
+
+        .math-formula {
+            background: transparent;
+            border: none;
+            border-left: 4px solid #008080;
+            padding: 16px 0 16px 20px;
+            margin: 20px 0;
+            border-radius: 0;
+            font-size: 16px;
+        }
+
+        .highlight {
+            color: #008080;
+            font-weight: 600;
+        }
+
+        .formula-highlight {
+            background: transparent;
+            padding: 24px 0;
+            margin: 24px 0;
+            text-align: center;
+            font-size: 18px;
+            border: none;
+            box-shadow: none;
+        }
+
+        /* === MATHJAX FORMULA STYLING === */
+        .MathJax {
+            outline: none;
+            display: inline-block;
+        }
+
+        .MathJax_Display {
+            text-align: center !important;
+            margin: 20px 0 !important;
+        }
+
+        /* SVG Container Styling */
+        mjx-container[jax="SVG"] {
+            display: inline-block !important;
+            line-height: 1;
+            vertical-align: baseline;
+        }
+
+        mjx-container[jax="SVG"][display="true"] {
+            display: block !important;
+            text-align: center !important;
+            margin: 20px 0 !important;
+        }
+
+        mjx-container[jax="SVG"] svg {
+            display: inline-block !important;
+            vertical-align: baseline;
+            max-width: 100%;
+            height: auto;
+        }
+
+        mjx-container[jax="SVG"][display="true"] svg {
+            display: block !important;
+            margin: 0 auto !important;
+        }
+
+        /* Enhanced SVG Rendering */
+        mjx-container svg {
+            shape-rendering: geometricPrecision;
+            text-rendering: geometricPrecision;
+            font-family: 'MJXZERO', 'MJXTEX';
+        }
+
+        /* Force Visibility and Proper Display */
+        mjx-container[jax="SVG"] {
+            visibility: visible !important;
+            opacity: 1 !important;
+            overflow: visible !important;
+        }
+
+        mjx-container[jax="SVG"] svg {
+            visibility: visible !important;
+            opacity: 1 !important;
+            width: auto !important;
+            height: auto !important;
+        }
+
+        /* Content Area Formula Display */
+        .left-content mjx-container {
+            display: inline-block !important;
+            margin: 0 3px;
+        }
+
+        .left-content mjx-container[display="true"] {
+            display: block !important;
+            text-align: center !important;
+            margin: 20px 0 !important;
+        }
+
+        /* === SIMPLIFIED INTERACTIVE ELEMENTS === */
+        .step-stack {
+            margin: 32px 0;
+        }
+
+        .step-item {
+            border: none;
+            border-left: 3px solid #008080;
+            border-radius: 0;
+            padding: 0 0 0 20px;
+            background: transparent;
+            display: none;
+            margin: 24px 0;
+        }
+
+        .step-item.active {
+            display: block;
+            background: transparent;
+            border-left-color: #003366;
+        }
+
+        .step-btn {
+            margin-top: 16px;
+            padding: 8px 16px;
+            border-radius: 0;
+            border: 1px solid #E5E7EB;
+            background: transparent;
+            cursor: pointer;
+            font-size: 14px;
+            color: #003366;
+            transition: all 0.2s ease;
+        }
+
+        .step-btn:hover {
+            background: #003366;
+            color: white;
+            border-color: #003366;
+        }
+
+        .prompt-card {
+            background: transparent;
+            border: none;
+            border-left: 3px solid #008080;
+            border-radius: 0;
+            padding: 0 0 0 20px;
+            margin: 32px 0;
+        }
+
+        .teacher-note {
+            background: transparent;
+            border: none;
+            border-left: 3px solid #CC5500;
+            border-radius: 0;
+            padding: 0 0 0 20px;
+            margin: 32px 0;
+            font-style: normal;
+        }
+
+        /* === CANVAS STYLING === */
+        canvas {
+            max-width: 95%;
+            max-height: 95%;
+            border-radius: 0;
+            box-shadow: none;
+        }
+
+        /* === 导航控制 - 第二章极简设计 === */
+        .nav-controls {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .nav-btn {
+            background: rgba(0, 0, 0, 0.15);
+            color: transparent;
+            border: none;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 0;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .nav-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 8px;
+            height: 8px;
+            border-top: 2px solid rgba(0, 0, 0, 0.5);
+            border-right: 2px solid rgba(0, 0, 0, 0.5);
+        }
+
+        .nav-btn:first-child::before {
+            transform: translate(-40%, -50%) rotate(-135deg);
+        }
+
+        .nav-btn:last-child::before {
+            transform: translate(-60%, -50%) rotate(45deg);
+        }
+
+        .nav-btn:hover {
+            background: rgba(0, 0, 0, 0.25);
+        }
+
+        .nav-btn:hover::before {
+            border-color: rgba(0, 0, 0, 0.7);
+        }
+
+        .nav-btn:disabled {
+            background: rgba(0, 0, 0, 0.05);
+            cursor: not-allowed;
+        }
+
+        .nav-btn:disabled::before {
+            border-color: rgba(0, 0, 0, 0.2);
+        }
+
+        .slide-number {
+            font-size: 11px;
+            color: #9ca3af;
+            font-weight: 400;
+            display: flex;
+            align-items: center;
+            gap: 0;
+            opacity: 0.6;
+        }
+
+        .slide-number input {
+            width: 50px;
+            text-align: right;
+            border: none;
+            background: transparent;
+            font-size: 11px;
+            padding: 0 2px;
+            margin: 0;
+            color: #000000;
+            font-weight: 700;
+        }
+
+        .slide-number input::-webkit-outer-spin-button,
+        .slide-number input::-webkit-inner-spin-button {
+            display: none;
+        }
+
+        .slide-number input[type=number] {
+            -moz-appearance: textfield;
+            appearance: textfield;
+        }
+
+        .slide-number input:focus {
+            outline: none;
+            color: #000000;
+        }
+
+        #slideNumberTotal {
+            color: #9ca3af;
+            font-size: 14px;
+            font-weight: 400;
+            padding: 0 12px;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+        }
+
+        .directory-toggle {
+            border: none;
+            background: transparent;
+            color: #003366;
+            padding: 8px 12px;
+            border-radius: 0;
+            cursor: pointer;
+            border: 1px solid #E5E7EB;
+            transition: all 0.2s ease;
+        }
+
+        .directory-toggle:hover {
+            background: #003366;
+            color: white;
+            border-color: #003366;
+        }
+
+        .directory-menu {
+            position: fixed;
+            bottom: 90px;
+            right: 24px;
+            width: 320px;
+            max-height: 60vh;
+            overflow-y: auto;
+            background: rgba(251, 251, 251, 0.95);
+            border: 1px solid #E5E7EB;
+            border-radius: 0;
+            padding: 20px;
+            box-shadow: none;
+            display: none;
+            z-index: 1200;
+            backdrop-filter: blur(10px);
+        }
+
+        .directory-menu.active {
+            display: block;
+        }
+
+        .directory-menu h3 {
+            margin-bottom: 16px;
+            font-size: 16px;
+            color: #003366;
+        }
+
+        .directory-item {
+            margin-bottom: 12px;
+            color: #2d2d2d;
+            text-decoration: none;
+            display: block;
+            padding: 10px 12px;
+            border-radius: 0;
+            transition: background 0.2s ease;
+            border: 1px solid transparent;
+        }
+
+        .directory-item:hover {
+            background: #003366;
+            color: white;
+            border-color: #003366;
+        }
+
+        .slide-note {
+            font-size: 14px;
+            color: #666666;
+            margin-top: 12px;
+            font-style: italic;
+        }
+
+        /* === UTILITY CLASSES === */
+        .loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 16px;
+            color: #003366;
+            z-index: 9999;
+            font-weight: 500;
+        }
+
+        /* === VISUAL HINTS AND UTILITY === */
+        .visual-hint {
+            font-style: italic;
+            color: #666666;
+            font-size: 15px;
+            margin: 24px 0;
+            padding-left: 20px;
+            border-left: 2px solid #E5E7EB;
+        }
+
+        /* === CLEAN SCROLLBAR === */
+        .left-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .left-content::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .left-content::-webkit-scrollbar-thumb {
+            background: #E5E7EB;
+            border-radius: 3px;
+        }
+
+        .left-content::-webkit-scrollbar-thumb:hover {
+            background: #D1D5DB;
+        }
+
+        .error-message {
+            color: #ef4444;
+            text-align: center;
+            padding: 20px;
+            font-size: 16px;
+            background: #fef2f2;
+        }
+
+        @media print {
+            body {
+                overflow: visible;
+            }
+            .slide {
+                display: block !important;
+                page-break-after: always;
+            }
+            .nav-container,
+            .directory-menu,
+            .directory-toggle {
+                display: none !important;
+            }
+        }
+    </style>
+    <style>
+        /* 统一封面样式（与第1–12章一致） */
+        .slide-container.cover { align-items: stretch; }
+        .cover-left { padding: 60px; display: flex; flex-direction: column; justify-content: center; }
+        .cover-badge { display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(90deg, #4a90e2, #9b59b6); color: #fff; padding: 6px 12px; border-radius: 999px; font-size: 14px; width: fit-content; box-shadow: 0 6px 16px rgba(74,144,226,0.35); }
+        .cover-title { font-size: 4rem; line-height: 1.1; margin: 18px 0 8px 0; color: #1a1a2e; background: linear-gradient(90deg, #1a1a2e 0%, #4a90e2 60%, #9b59b6 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+        .cover-subtitle { font-size: 1.6rem; color: #4f5b6a; margin: 10px 0 18px 0; }
+        .cover-meta { display: flex; gap: 14px; flex-wrap: wrap; color: #6b7b8c; font-size: 0.95rem; }
+        .cover-meta span { display: inline-flex; align-items: center; gap: 6px; }
+        .cover-actions { display: flex; gap: 14px; margin-top: 26px; flex-wrap: wrap; }
+        .cover-right { position: relative; overflow: hidden; }
+        .cover-visual { position: relative; width: 100%; height: 100%; background:
+                radial-gradient(1200px 800px at 80% 20%, rgba(155, 89, 182, 0.18), transparent 60%),
+                radial-gradient(900px 700px at 20% 80%, rgba(74, 144, 226, 0.18), transparent 60%),
+                linear-gradient(135deg, #ffffff 0%, #f7faff 50%, #f9f6ff 100%);
+        }
+        .cover-visual::after { content: ""; position: absolute; inset: 0; background: radial-gradient(600px 300px at 50% -10%, rgba(255,255,255,0.7), transparent 70%); pointer-events: none; }
+        .math-badge { position: absolute; padding: 0; background: transparent; border: none; border-radius: 0; box-shadow: none; color: #334155; font-weight: 700; animation: floatY 6s ease-in-out infinite; backdrop-filter: none; pointer-events: none; }
+        .math-badge.b1 { left: 12%; top: 22%; animation-delay: 0s; }
+        .math-badge.b2 { right: 14%; top: 30%; animation-delay: 0.8s; }
+        .math-badge.b3 { left: 20%; bottom: 18%; animation-delay: 1.5s; }
+        .math-badge.b4 { right: 18%; bottom: 22%; animation-delay: 2.2s; }
+        @keyframes floatY { 0% { transform: translateY(0px); } 50% { transform: translateY(-12px); } 100% { transform: translateY(0px); } }
+        .orbit { position: absolute; left: 50%; top: 50%; width: 320px; height: 320px; margin-left: -160px; margin-top: -160px; border-radius: 50%; border: 1px dashed rgba(52, 152, 219, 0.35); animation: spin 18s linear infinite; }
+        .orbit .dot { position: absolute; top: -6px; left: 50%; width: 12px; height: 12px; margin-left: -6px; background: #4a90e2; border-radius: 50%; box-shadow: 0 0 0 6px rgba(74,144,226,0.15); }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+<style>
+        .return-home-panel {
+            position: fixed;
+            top: 16px;
+            left: 16px;
+            display: flex;
+            gap: 10px;
+            z-index: 9999;
+            flex-wrap: wrap;
+        }
+        .return-home-panel .return-link {
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: rgba(15, 23, 42, 0.8);
+            color: #f8fafc;
+            font-size: 14px;
+            text-decoration: none;
+            box-shadow: 0 6px 20px rgba(15, 23, 42, 0.25);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .return-home-panel .return-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(15, 23, 42, 0.35);
+        }
+        .return-home-panel .return-link.return-main {
+            background: rgba(79, 70, 229, 0.85);
+        }
+        @media (max-width: 640px) {
+            .return-home-panel {
+                top: 12px;
+                left: 12px;
+                right: 12px;
+                justify-content: center;
+            }
+            .return-home-panel .return-link {
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
+    <style>
+        /* 返回按钮样式（统一为第1/2章风格） */
+        .return-home-panel {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            z-index: 9999;
+            display: flex;
+            gap: 10px;
+            opacity: 0.3;
+            transition: opacity 0.3s ease;
+        }
+        .return-home-panel:hover { opacity: 1; }
+        .return-home-panel .return-link {
+            padding: 6px 12px;
+            background: rgba(15, 23, 42, 0.7);
+            color: #f8fafc;
+            text-decoration: none;
+            border-radius: 999px;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+        .return-home-panel .return-link:hover {
+            background: rgba(15, 23, 42, 0.9);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(15, 23, 42, 0.3);
+        }
+        .return-home-panel .return-link.return-main {
+            background: rgba(79, 70, 229, 0.7);
+        }
+        .return-home-panel .return-link.return-main:hover {
+            background: rgba(79, 70, 229, 0.9);
+            box-shadow: 0 8px 16px rgba(79, 70, 229, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="return-home-panel">
+        <a class="return-link" href="../index.html"><i class="fa-solid fa-house"></i> 返回主站</a>
+        <a class="return-link return-main" href="javascript:void(0)" onclick="event.stopPropagation(); toggleCourseSubmenu()"><i class="fa-solid fa-arrow-left"></i> 返回目录</a>
+    </div>
+<div id="slidesContainer">
+<!-- 第1页：标题页 -->
+<div class="slide active"><div class="slide-container cover"><div class="left-content tex2jax_process cover-left">
+<div class="cover-badge"><i class="fa-solid fa-seedling"></i><span> 第十三章</span></div>
+<h1 class="cover-title">概率与统计</h1>
+<p class="cover-subtitle">不确定性中的确定性</p>
+<div class="cover-meta">
+<span><i class="fa-solid fa-book-open"></i> 基础篇</span>
+<span><i class="fa-solid fa-bolt"></i> 关键概念速览</span>
+</div>
+<div class="cover-actions">
+<a class="home-link-btn" href="../index.html"><span>主页</span></a>
+<a class="home-link-btn" href="../故事书/第13章/幽灵地图与死亡水泵.html"><span>故事书</span></a>
+<a class="home-link-btn" href="../习题/index.html"><span>习题</span></a>
+<a class="home-link-btn" href="../产教结合/index.html"><span>产教融合</span></a>
+</div>
+</div><div class="right-visual cover-right"><div class="cover-visual">
+<div class="math-badge b1">μ, σ</div>
+<div class="math-badge b2">P(A)</div>
+<div class="math-badge b3">𝒩(μ,σ²)</div>
+<div class="math-badge b4">p-value</div>
+<div class="orbit"><span class="dot"></span></div>
+<div id="vis-title"></div>
+</div></div></div></div>
+<!-- 第2页：生活中的随机现象 -->
+<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
+<h2>生活中的随机现象</h2>
+<h3>什么是随机现象？</h3>
+<p>在相同条件下，可能出现不同结果的现象。</p>
+<ul>
+<li>抛硬币：正面或反面</li>
+<li>掷骰子：1到6的点数</li>
+<li>抽奖：中奖或不中奖</li>
+<li>天气：晴天或雨天</li>
+</ul>
+<div class="math-formula">
+                虽然结果不确定，但有规律可循！
+            </div>
+</div><div class="right-visual"><div id="vis-random"></div></div></div></div>
+<!-- 第3页：随机试验 -->
+<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
+<h2>随机试验</h2>
+<h3>三个特点</h3>
+<ol>
+<li><span class="highlight">可重复性</span>：试验可以重复进行</li>
+<li><span class="highlight">明确性</span>：所有可能结果已知</li>
+<li><span class="highlight">随机性</span>：每次结果不能预知</li>
+</ol>
+<h3>例子：掷骰子</h3>
+<ul>
+<li>可以反复投掷（可重复）</li>
+<li>结果是1,2,3,4,5,6之一（明确）</li>
+<li>投掷前不知道结果（随机）</li>
+</ul>
+</div><div class="right-visual"><div id="vis-experiment"></div></div></div></div>
+<!-- 第4页：样本空间与随机事件 -->
+<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
+<h2>样本空间与事件</h2>
+<h3>样本空间 Ω</h3>
+<p>试验所有可能结果的集合</p>
+<p>掷骰子：Ω = {1, 2, 3, 4, 5, 6}</p>
+<h3>随机事件 A</h3>
+<p>样本空间的子集</p>
+<ul>
+<li>事件A：掷出偶数 = {2, 4, 6}</li>
+<li>事件B：掷出大于4 = {5, 6}</li>
+</ul>
+<h3>特殊事件</h3>
+<ul>
+<li><span class="highlight">必然事件</span>：Ω（一定发生）</li>
+<li><span class="highlight">不可能事件</span>：∅（不会发生）</li>
+</ul>
+</div><div class="right-visual"><div id="vis-sample-space"></div></div></div></div>
+<!-- 第5页：事件的关系 -->
+<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
+<h2>事件的关系</h2>
+<h3>并事件 A∪B</h3>
+<p>"A或B发生"（至少一个发生）</p>
+<h3>交事件 A∩B</h3>
+<p>"A和B同时发生"</p>
+<h3>互斥事件</h3>
+<p>A∩B = ∅（不能同时发生）</p>
+<h3>对立事件</h3>
+<p>A∪B = Ω 且 A∩B = ∅</p>
+<p>例：掷骰子"奇数"与"偶数"</p>
+</div><div class="right-visual"><div id="vis-event-relations"></div></div></div></div>
+<!-- 第6页：古典概率 -->
+<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
+<h2>古典概率</h2>
+<h3>两个条件</h3>
+<ol>
+<li>试验结果<span class="highlight">有限个</span></li>
+<li>每个结果<span class="highlight">等可能</span></li>
+</ol>
+<h3>计算公式</h3>
+<div class="math-formula">
+                $P(A) = \frac{\text{事件A包含的基本事件数}}{\text{样本空间的基本事件总数}}$
+            </div>
+<h3>例子</h3>
+<p>掷骰子出现偶数的概率：</p>
+<div class="math-formula">
+                $P(\text{偶数}) = \frac{3}{6} = \frac{1}{2}$
+            </div>
+</div><div class="right-visual"><div id="vis-classical-prob"></div></div></div></div>
+<!-- 第7页：频率与概率 -->
+<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
+<h2>频率与概率</h2>
+<h3>频率</h3>
+<p>事件A在n次试验中发生m次：</p>
+<div class="math-formula">
+                $\text{频率} = \frac{m}{n}$
+            </div>
+<h3>大数定律</h3>
+<p>当试验次数n很大时：</p>
+<div class="math-formula">
+                频率 → 概率
+            </div>
+<h3>例子</h3>
+<p>抛硬币1000次，正面约500次</p>
+<p>频率 ≈ 0.5 = 概率</p>
+</div><div class="right-visual"><div id="vis-frequency"></div></div></div></div>
+<!-- 第8页：概率的性质 -->
+<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
+<h2>概率的基本性质</h2>
+<h3>三个公理</h3>
+<ol>
+<li><span class="highlight">非负性</span>：$0 \leq P(A) \leq 1$</li>
+<li><span class="highlight">规范性</span>：$P(\Omega) = 1$</li>
+<li><span class="highlight">可加性</span>：互斥事件<br/>
+                    $P(A∪B) = P(A) + P(B)$</li>
+</ol>
+<h3>重要公式</h3>
+<ul>
+<li>对立事件：$P(\bar{A}) = 1 - P(A)$</li>
+<li>一般加法：$P(A∪B) = P(A) + P(B) - P(A∩B)$</li>
+</ul>
+</div><div class="right-visual"><div id="vis-prob-properties"></div></div></div></div>
+<!-- 第9页：条件概率 -->
+<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
+<h2>条件概率</h2>
+<h3>定义</h3>
+<p>在事件B发生的条件下，事件A发生的概率：</p>
+<div class="math-formula">
+                $P(A|B) = \frac{P(AB)}{P(B)}$
+            </div>
+<h3>理解</h3>
+<p>"已知B发生，A发生的概率"</p>
+<h3>例子</h3>
+<p>已知掷出的是偶数，它是6的概率：</p>
+<ul>
+<li>偶数：{2, 4, 6}</li>
+<li>在偶数中，6占1/3</li>
+<li>$P(6|\text{偶数}) = \frac{1}{3}$</li>
+</ul>
+</div><div class="right-visual"><div id="vis-conditional"></div></div></div></div>
+<!-- 第10页：独立事件 -->
+<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
+<h2>独立事件</h2>
+<h3>定义</h3>
+<p>事件A的发生不影响事件B的概率</p>
+<div class="math-formula">
+                $P(B|A) = P(B)$
+            </div>
+<h3>独立事件的乘法</h3>
+<div class="math-formula">
+                $P(AB) = P(A) \cdot P(B)$
+            </div>
+<h3>例子</h3>
+<ul>
+<li>两次抛硬币（独立）</li>
+<li>有放回抽样（独立）</li>
+<li>无放回抽样（不独立）</li>
+</ul>
+</div><div class="right-visual"><div id="vis-independence"></div></div></div></div>
+<!-- 第11页：随机变量 -->
+<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
+<h2>随机变量</h2>
+<h3>什么是随机变量？</h3>
+<p>将随机试验的结果用<span class="highlight">数字</span>表示</p>
+<h3>例子</h3>
+<ul>
+<li>掷骰子的点数：X = {1,2,3,4,5,6}</li>
+<li>抛硬币（正=1，反=0）：X = {0,1}</li>
+<li>考试成绩：X = [0,100]</li>
+</ul>
+<h3>两种类型</h3>
+<ul>
+<li><span class="highlight">离散型</span>：可数的值（骰子点数）</li>
+<li><span class="highlight">连续型</span>：连续区间（身高、体重）</li>
+</ul>
+</div><div class="right-visual"><div id="vis-random-var"></div></div></div></div>
+<!-- 第12页：二项分布 -->
+<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
+<h2>二项分布</h2>
+<h3>背景</h3>
+<p>n次独立重复试验，每次成功概率p</p>
+<h3>记号</h3>
+<div class="math-formula">
+                $X \sim B(n, p)$
+            </div>
+<h3>概率公式</h3>
+<div class="math-formula">
+                $P(X=k) = C_n^k p^k (1-p)^{n-k}$
+            </div>
+<h3>例子</h3>
+<p>投10次硬币，恰好5次正面：</p>
+<p>$n=10, p=0.5, k=5$</p>
+</div><div class="right-visual"><div id="vis-binomial"></div></div></div></div>
+<!-- 第13页：正态分布 -->
+<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
+<h2>正态分布</h2>
+<h3>最重要的分布</h3>
+<p>自然界中大量现象服从正态分布</p>
+<h3>记号</h3>
+<div class="math-formula">
+                $X \sim N(\mu, \sigma^2)$
+            </div>
+<ul>
+<li>μ：均值（中心位置）</li>
+<li>σ：标准差（离散程度）</li>
+</ul>
+<h3>特点</h3>
+<ul>
+<li>钟形曲线</li>
+<li>关于μ对称</li>
+<li>68-95-99.7规则</li>
+</ul>
+</div><div class="right-visual"><div id="vis-normal"></div></div></div></div>
+<!-- 第14页：数学期望 -->
+<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
+<h2>数学期望（均值）</h2>
+<h3>含义</h3>
+<p>随机变量的<span class="highlight">平均值</span></p>
+<h3>离散型</h3>
+<div class="math-formula">
+                $E(X) = \sum x_i p_i$
+            </div>
+<h3>例子</h3>
+<p>掷骰子的期望：</p>
+<div class="formula-rule">
+                $E = 1×\frac{1}{6} + 2×\frac{1}{6} + ... + 6×\frac{1}{6} = 3.5$
+            </div>
+</div><div class="right-visual"><div id="vis-expectation"></div></div></div></div>
+<!-- 第15页：例题 · 条件概率（树形图） -->
+<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
+<h2>例题 · 条件概率（树形图）</h2>
+<p>某厂 A 线生产 60% 产品，不良率 2%；B 线生产 40% 产品，不良率 5%。随机抽到一件不良品，求来自 A 线的概率。</p>
+<h3>要点</h3>
+<ul>
+<li>全概率：$P(\text{次品})=0.6\times0.02+0.4\times0.05$</li>
+<li>贝叶斯：$P(A|\text{次品})=\dfrac{0.6\times0.02}{P(\text{次品})}$</li>
+<ul>
+</div><div class="right-visual"><div id="vis-example-conditional"></div></div></div></div>
+
+<!-- 第16页：例题 · 二项分布计算 -->
+<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
+<h2>例题 · 二项分布计算</h2>
+<p>掷一枚不均匀硬币 5 次，正面概率 $p=0.3$。求 $X\sim B(5,0.3)$ 中 $P(X=2)$。</p>
+<h3>要点</h3>
+<ul>
+<li>$P(X=k)=\dbinom{n}{k}p^k(1-p)^{n-k}$</li>
+<li>$P(X=2)=\dbinom{5}{2}(0.3)^2(0.7)^3$</li>
+</ul>
+</div><div class="right-visual"><div id="vis-example-binomial"></div></div></div></div>
+
+<!-- 第17页：例题 · 正态分布与标准化 -->
+<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
+<h2>例题 · 正态分布与标准化</h2>
+<p>$X\sim N(\mu=100,\,\sigma=15)$，求 $P(X\le 115)$。</p>
+<h3>要点</h3>
+<ul>
+<li>标准化：$Z=\dfrac{X-\mu}{\sigma}$</li>
+<li>$P(X\le115)=P\!\left(Z\le \dfrac{115-100}{15}\right)=P(Z\le1)$</li>
+<li>查表或计算器：$\Phi(1)\approx0.8413$</li>
+</ul>
+</div><div class="right-visual"><div id="vis-example-normal"></div></div></div></div>
+
+<!-- 第18页：抽样与抽样分布 -->
+<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
+<h2>抽样与抽样分布</h2>
+<h3>总体与样本</h3>
+<ul>
+<li>总体：研究对象的全集；样本：从总体中抽取的若干个体</li>
+<li>样本均值：$\bar X=\dfrac{1}{n}\sum_{i=1}^n X_i$；样本比例：$\hat p=\dfrac{X}{n}$</li>
+<li>有放回/无放回抽样；简单随机样本（独立同分布）</li>
+<li>目的：用样本推断总体（点估计、区间估计、检验）</li>
+<li>职业情境：质检车间从日产5万件中抽查 n 件估计合格率</li>
+</ul>
+<h3>抽样分布</h3>
+<ul>
+<li>$\bar X$ 的抽样分布：$E(\bar X)=\mu,\ \operatorname{Var}(\bar X)=\sigma^2\/n$</li>
+<li>中心极限定理：当 n 较大时，$\bar X\ \approx\ N\!\left(\mu,\ \dfrac{\sigma^2}{n}\right)$</li>
+<li>样本比例：$\hat p\ \approx\ N\!\left(p,\ \dfrac{p(1-p)}{n}\right)$（当 $np,\ n(1-p)\ge5$）</li>
+</ul>
+</div><div class="right-visual"><div id="vis-sampling"></div></div></div></div>
+
+<!-- 第19页：参数估计（点估计与区间估计） -->
+<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
+<h2>参数估计</h2>
+<h3>点估计</h3>
+<ul>
+<li>总体均值的点估计：$\hat \mu=\bar X$；总体比例的点估计：$\hat p$</li>
+<li>良好估计的特性：无偏性、一致性、有效性（了解）</li>
+</ul>
+<h3>区间估计（单总体）</h3>
+<ul>
+<li>$\sigma$ 已知时：$\bar X \pm z_{\alpha\/2}\dfrac{\sigma}{\sqrt{n}}$</li>
+<li>$\sigma$ 未知且样本量不大：$\bar X \pm t_{\alpha\/2,\,n-1}\dfrac{s}{\sqrt{n}}$</li>
+<li>总体比例：$\hat p \pm z_{\alpha\/2}\sqrt{\dfrac{\hat p(1-\hat p)}{n}}$</li>
+</ul>
+</div><div class="right-visual"><div id="vis-estimation"></div></div></div></div>
+
+<!-- 第20页：假设检验（思路与流程） -->
+<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
+<h2>假设检验</h2>
+<h3>基本步骤</h3>
+<ol>
+<li>提出原假设/备择假设：$H_0$ 与 $H_1$（双侧或单侧）</li>
+<li>选定显著性水平：$\alpha$（如 0.05）</li>
+<li>选取检验统计量（Z、t 或比例Z），计算观测值</li>
+<li>基于临界值或 P 值做出是否拒绝 $H_0$ 的决策</li>
+<li>结合业务场景给出解释性结论</li>
+</ol>
+<h3>常用单样本检验</h3>
+<ul>
+<li>均值检验：$Z=\dfrac{\bar X-\mu_0}{\sigma\/\sqrt{n}}$（$\sigma$ 已知）；$t=\dfrac{\bar X-\mu_0}{s\/\sqrt{n}}$（$\sigma$ 未知）</li>
+<li>比例检验：$Z=\dfrac{\hat p-p_0}{\sqrt{p_0(1-p_0)\/n}}$</li>
+</ul>
+</div><div class="right-visual"><div id="vis-hypothesis"></div></div></div></div>
+
+<!-- 第21页：相关与一元线性回归（应用导向） -->
+<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
+<h2>相关与一元线性回归</h2>
+<h3>相关</h3>
+<ul>
+<li>皮尔逊相关系数：$r\in[-1,1]$；方向与强度的度量</li>
+<li>结合散点图判断线性关系与离群点</li>
+</ul>
+<h3>一元线性回归</h3>
+<ul>
+<li>模型：$y=a+bx+\varepsilon$；最小二乘法估计 $a,b$</li>
+<li>斜率 b 的含义：自变量变化 1 单位，因变量的平均变化</li>
+<li>用于预测与解释；注意外推风险与因果误解</li>
+</ul>
+</div><div class="right-visual"><div id="vis-regression"></div></div></div></div>
+
+<!-- 第22页：例题 · 区间估计与检验 -->
+<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
+<h2>例题 · 区间估计与检验</h2>
+<h3>例1（区间估计）</h3>
+<p>某加工件关键尺寸总体标准差近似已知 $\sigma=0.8$ mm，抽样 n=64，样本均值 $\bar X=50.2$ mm。构造 95% 置信区间。</p>
+<p>解：$50.2\pm 1.96\times \dfrac{0.8}{\sqrt{64}}=[50.004,\ 50.396]$（mm）</p>
+<h3>例2（比例检验）</h3>
+<p>历史合格率 $p_0=0.98$，本周抽检 n=400，合格 388 件，$\hat p=0.97$。检验质量是否下降（$\alpha=0.05$，左侧）。</p>
+<p>$Z=\dfrac{0.97-0.98}{\sqrt{0.98\times0.02\/400}}\approx-1.43$，未到临界 $-1.645$，<span class="highlight">不拒绝</span> $H_0$。</p>
+</div><div class="right-visual"><div id="vis-ci-test"></div></div></div></div>
+
+<!-- 第23页：职业情境 · 质量与可靠性 -->
+<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
+<h2>职业情境 · 质量与可靠性</h2>
+<ul>
+<li><span class="highlight">过程监控</span>：用 $\hat p$ 的区间与检验监控生产合格率波动</li>
+<li><span class="highlight">抽样检验</span>：按成本与风险选择 n，平衡检出率与效率</li>
+<li><span class="highlight">设备维护</span>：故障率近似二项/泊松，估计均值与预测停机</li>
+<li>与第12章可视化结合：正态近似二项（$np,\ n(1-p)\ge5$）支持快速计算</li>
+</ul>
+</div><div class="right-visual"><div id="vis-context-quality"></div></div></div></div>
+
+<!-- 第24页：总结 -->
+<div class="slide"><div class="slide-container single-column"><div class="left-content tex2jax_process">
+<h2 style="font-size: 3rem">课程总结</h2>
+<div style="text-align: left; max-width: 600px; margin: 0 auto">
+<h3>概率论</h3>
+<ul>
+<li>随机事件与概率</li>
+<li>条件概率与独立性</li>
+<li>随机变量与分布</li>
+</ul>
+<h3>统计基础</h3>
+<ul>
+<li>数据的收集与整理；数字特征：期望、方差</li>
+<li>常见分布：二项分布、正态分布；抽样分布与中心极限定理</li>
+<li>参数估计（点估计、区间估计）与假设检验（均值、比例）</li>
+<li>相关与一元线性回归的应用与解读</li>
+</ul>
+</div>
+<p style="font-size: 1.5rem; margin-top: 50px">
+                掌握随机规律，做出科学决策！
+            </p>
+</div></div></div>
+<!-- 翻页按钮 -->
+</div>
+
+<div class="nav-controls" role="navigation" aria-label="幻灯片导航">
+    <button class="nav-btn" id="prev-btn" onclick="previousSlide()" aria-label="上一页" title="上一页 (<i class="fa-solid fa-arrow-left"></i>)">上一页</button>
+    <div class="slide-number" role="status" aria-live="polite">
+        <input type="number" id="slideNumberInput" min="1" max="18" value="1"
+               onchange="jumpToSlide(this.value)"
+               aria-label="当前页码" />/<span id="slideNumberTotal">18</span>
+    </div>
+    <button class="nav-btn" id="next-btn" onclick="nextSlide()" aria-label="下一页" title="下一页 (→)">下一页</button>
+</div>
+
+<script>
+    // 主题颜色定义
+    const themeColors = {
+        text: '#ffffff',
+        muted: '#95a5a6',
+        background: '#2c3e50',
+        cardBg: '#f8f9fa'
+    };
+
+    // 全局变量
+    let slides, totalSlides, currentSlide = 0;
+
+    // 初始化
+    document.addEventListener('DOMContentLoaded', function() {
+        slides = document.querySelectorAll('.slide');
+        totalSlides = slides.length;
+        
+        showSlide(0);
+        
+        // 键盘导航
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ' ||
+                e.key === 'PageDown' || e.key === 'Enter') {
+                e.preventDefault();
+                nextSlide();
+            } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp' ||
+                       e.key === 'PageUp' || e.key === 'Backspace') {
+                e.preventDefault();
+                previousSlide();
+            }
+        });
+
+        // 鼠标滚轮导航
+        document.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            if (e.deltaY > 0) {
+                nextSlide();
+            } else {
+                previousSlide();
+            }
+        }, { passive: false });
+    });
+
+    // 显示指定幻灯片
+    function showSlide(index) {
+        if (index < 0 || index >= totalSlides) return;
+        
+        slides.forEach(slide => slide.classList.remove('active'));
+        currentSlide = index;
+        slides[currentSlide].classList.add('active');
+        
+        // 更新页码输入框
+        const slideInput = document.getElementById('slideNumberInput');
+        const slideTotal = document.getElementById('slideNumberTotal');
+        if (slideInput) {
+            slideInput.value = currentSlide + 1;
+            slideInput.max = totalSlides;
+        }
+        if (slideTotal) {
+            slideTotal.textContent = totalSlides;
+        }
+        
+        updateNavButtons();
+        
+        // 运行对应的可视化
+        runVisualization(currentSlide);
+        
+        // 渲染数学公式
+        if (window.MathJax) {
+            MathJax.typesetPromise([slides[currentSlide]]).catch(error => {
+                console.warn('MathJax rendering failed:', error);
+            });
+        }
+    }
+
+    // 更新导航按钮状态
+    function updateNavButtons() {
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        
+        if (prevBtn && nextBtn) {
+            prevBtn.disabled = (currentSlide === 0);
+            nextBtn.disabled = (currentSlide === totalSlides - 1);
+        }
+    }
+
+    // 下一页
+    function nextSlide() {
+        if (currentSlide < totalSlides - 1) {
+            showSlide(currentSlide + 1);
+        }
+    }
+
+    // 上一页
+    function previousSlide() {
+        if (currentSlide > 0) {
+            showSlide(currentSlide - 1);
+        }
+    }
+
+    // 跳转到指定页
+    function jumpToSlide(value) {
+        const slideNumber = parseInt(value);
+        if (slideNumber >= 1 && slideNumber <= totalSlides) {
+            currentSlide = slideNumber - 1;
+            showSlide(currentSlide);
+        }
+    }
+
+    // 运行可视化
+    function runVisualization(slideIndex) {
+        // 清理之前的动画
+        cleanupAnimations();
+        
+        switch(slideIndex) {
+            case 0: visualizeTitleProb('vis-title'); break;
+            case 1: visualizeRandomPhenomena('vis-random'); break;
+            case 2: visualizeExperiment('vis-experiment'); break;
+            case 3: visualizeSampleSpace('vis-sample-space'); break;
+            case 4: visualizeEventRelations('vis-event-relations'); break;
+            case 5: visualizeClassicalProbability('vis-classical-prob'); break;
+            case 6: visualizeFrequency('vis-frequency'); break;
+            case 7: visualizeProbProperties('vis-prob-properties'); break;
+            case 8: visualizeConditional('vis-conditional'); break;
+            case 9: visualizeIndependence('vis-independence'); break;
+            case 10: visualizeRandomVariable('vis-random-var'); break;
+            case 11: visualizeBinomial('vis-binomial'); break;
+            case 12: visualizeNormal('vis-normal'); break;
+            case 13: visualizeExpectation('vis-expectation'); break;
+            case 14: visualizeExampleConditional('vis-example-conditional'); break;
+            case 15: visualizeExampleBinomial('vis-example-binomial'); break;
+            case 16: visualizeExampleNormal('vis-example-normal'); break;
+        }
+    }
+
+    // 标题页可视化
+    function visualizeTitleProb(containerId) {
+        const container = d3.select(`#${containerId}`);
+        if (container.empty()) return;
+        container.selectAll('*').remove();
+        
+        const bounds = container.node().getBoundingClientRect();
+        const width = bounds.width;
+        const height = bounds.height;
+        
+        const svg = container.append('svg')
+            .attr('width', width)
+            .attr('height', height);
+        
+        const g = svg.append('g')
+            .attr('transform', `translate(${width/2}, ${height/2})`);
+        
+        // P(A)符号
+        g.append('text')
+            .attr('text-anchor', 'middle')
+            .attr('font-size', '100px')
+            .attr('fill', '#e74c3c')
+            .attr('font-weight', 'bold')
+            .text('P(A)')
+            .style('opacity', 0)
+            .transition()
+            .duration(1000)
+            .style('opacity', 1);
+        
+        // 概率范围
+        g.append('text')
+            .attr('text-anchor', 'middle')
+            .attr('y', 80)
+            .attr('font-size', '40px')
+            .attr('fill', '#3498db')
+            .text('∈ [0, 1]')
+            .style('opacity', 0)
+            .transition()
+            .delay(800)
+            .duration(1000)
+            .style('opacity', 1);
+        
+        // 骰子装饰
+        const diceSize = 50;
+        const diceX = -180;
+        const diceY = -80;
+        
+        const dice = g.append('g')
+            .attr('transform', `translate(${diceX}, ${diceY})`);
+        
+        dice.append('rect')
+            .attr('x', -diceSize/2)
+            .attr('y', -diceSize/2)
+            .attr('width', diceSize)
+            .attr('height', diceSize)
+            .attr('rx', 8)
+            .attr('fill', '#fff')
+            .attr('stroke', '#2ecc71')
+            .attr('stroke-width', 3)
+            .style('opacity', 0)
+            .transition()
+            .delay(1200)
+            .duration(800)
+            .style('opacity', 1);
+        
+        // 骰子点数
+        const dotPositions = [
+            {x: 0, y: 0}
+        ];
+        
+        dotPositions.forEach((pos, i) => {
+            dice.append('circle')
+                .attr('cx', pos.x)
+                .attr('cy', pos.y)
+                .attr('r', 5)
+                .attr('fill', '#2ecc71')
+                .style('opacity', 0)
+                .transition()
+                .delay(1400 + i * 100)
+                .duration(400)
+                .style('opacity', 1);
+        });
+        
+        // 装饰圆环
+        g.append('circle')
+            .attr('r', 0)
+            .attr('fill', 'none')
+            .attr('stroke', '#9b59b6')
+            .attr('stroke-width', 2)
+            .attr('stroke-dasharray', '10,5')
+            .transition()
+            .delay(1800)
+            .duration(1500)
+            .attr('r', 180);
+    }
+
+    // 清理动画
+    function cleanupAnimations() {
+        // 清理所有定时器和动画
+        const highestId = setTimeout(() => {}, 0);
+        for (let i = 0; i < highestId; i++) {
+            clearTimeout(i);
+            clearInterval(i);
+        }
+    }
+
+    // --- 可视化函数 ---
+
+    // 例题步骤渲染（简化）
+    function renderSteps13(containerId, steps) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        container.innerHTML = '';
+        const wrap = document.createElement('div');
+        wrap.style.cssText = 'width:100%;height:100%;padding:24px;overflow:auto;';
+        steps.forEach((s,i)=>{
+            const d=document.createElement('div');
+            d.className='tex2jax_process';
+            d.style.cssText='margin:8px 0;line-height:1.9;font-size:16px;opacity:0;transition:opacity .3s';
+            d.innerHTML = s;
+            wrap.appendChild(d);
+            setTimeout(()=>{ d.style.opacity='1'; }, 80*i);
+        });
+        container.appendChild(wrap);
+        if (window.MathJax && window.MathJax.typesetPromise) {
+            setTimeout(()=> window.MathJax.typesetPromise([wrap]).catch(()=>{}), 120);
+        }
+    }
+
+    function visualizeExampleConditional(containerId) {
+        renderSteps13(containerId, [
+            '全概率：$P(次品)=0.6\\times0.02+0.4\\times0.05=0.012+0.02=0.032$',
+            '贝叶斯：$P(A|次品)=\\dfrac{0.6\\times0.02}{0.032}=0.375$',
+            '解释：尽管A产量更高，但B的不良率更高，结果介于二者之间'
+        ]);
+    }
+
+    function visualizeExampleBinomial(containerId) {
+        renderSteps13(containerId, [
+            '二项：$X\\sim B(5,0.3)$，$P(X=2)=\\binom{5}{2}(0.3)^2(0.7)^3$',
+            '$\\binom{5}{2}=10$，故 $P=10\\times0.09\\times0.343=0.3087$',
+            '含义：5次中恰有2次正面的概率约为 30.87%'
+        ]);
+    }
+
+    function visualizeExampleNormal(containerId) {
+        renderSteps13(containerId, [
+            '标准化：$Z=\\dfrac{X-100}{15}$，$P(X\\le115)=P(Z\\le1)$',
+            '查表：$\\Phi(1)\\approx0.8413$',
+            '解：$P(X\\le115)\\approx0.8413$'
+        ]);
+    }
+
+    // 第2页：随机现象
+    function visualizeRandomPhenomena(containerId) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        container.innerHTML = '';
+        
+        const examples = [
+            { icon: '🪙', name: '抛硬币', outcomes: ['正面', '反面'], color: '#ffd700' },
+            { icon: '🎲', name: '掷骰子', outcomes: ['1', '2', '3', '4', '5', '6'], color: '#e74c3c' },
+            { icon: '🎰', name: '抽奖', outcomes: ['中奖', '未中奖'], color: '#2ecc71' },
+            { icon: '☁️', name: '天气', outcomes: ['晴', '阴', '雨'], color: '#3498db' }
+        ];
+        
+        const wrapper = document.createElement('div');
+        wrapper.style.cssText = 'display: flex; flex-wrap: wrap; gap: 30px; justify-content: center; align-items: center;';
+        
+        examples.forEach((example, index) => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.style.cssText = `width: 200px; text-align: center; animation: fadeIn 0.5s ease-in-out ${index * 0.1}s both;`;
+            
+            const icon = document.createElement('div');
+            icon.style.cssText = 'font-size: 80px; margin-bottom: 15px;';
+            icon.textContent = example.icon;
+            
+            const name = document.createElement('h3');
+            name.style.cssText = `margin: 10px 0; color: #2c3e50; font-size: 20px;`;
+            name.textContent = example.name;
+            
+            const outcomes = document.createElement('div');
+            outcomes.style.cssText = 'display: flex; gap: 10px; justify-content: center; margin-top: 20px; flex-wrap: wrap;';
+            
+            let currentIndex = 0;
+            
+            example.outcomes.forEach(outcome => {
+                const chip = document.createElement('span');
+                chip.style.cssText = `background: ${example.color}; color: ${themeColors.text}; padding: 8px 15px; border-radius: 20px; font-size: 14px; transition: all 0.3s ease;`;
+                chip.textContent = outcome;
+                outcomes.appendChild(chip);
+            });
+            
+            // 添加循环高亮动画
+            setInterval(() => {
+                const chips = outcomes.children;
+                for (let i = 0; i < chips.length; i++) {
+                    chips[i].style.transform = i === currentIndex ? 'scale(1.2)' : 'scale(1)';
+                    chips[i].style.opacity = i === currentIndex ? '1' : '0.6';
+                }
+                currentIndex = (currentIndex + 1) % chips.length;
+            }, 1500);
+            
+            card.appendChild(icon);
+            card.appendChild(name);
+            card.appendChild(outcomes);
+            wrapper.appendChild(card);
+        });
+        
+        container.appendChild(wrapper);
+        
+        // 添加淡入动画
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(20px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    // 第3页：随机试验 - 掷骰子动画
+    function visualizeExperiment(containerId) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        container.innerHTML = '';
+        
+        const wrapper = document.createElement('div');
+        wrapper.className = 'dice-container';
+        
+        // 骰子
+        const dice = document.createElement('div');
+        dice.className = 'dice';
+        dice.textContent = '🎲';
+        
+        // 结果显示
+        const result = document.createElement('div');
+        result.style.cssText = 'font-size: 28px; color: #2c3e50; font-weight: bold;';
+        result.textContent = '点击骰子投掷';
+        
+        // 历史记录
+        const historyTitle = document.createElement('div');
+        historyTitle.style.cssText = 'font-size: 18px; color: #7f8c8d; margin-top: 30px;';
+        historyTitle.textContent = '投掷历史';
+        
+        const history = document.createElement('div');
+        history.style.cssText = 'display: flex; gap: 15px; flex-wrap: wrap; max-width: 500px; justify-content: center; margin-top: 15px;';
+        
+        // 统计显示
+        const stats = document.createElement('div');
+        stats.style.cssText = 'display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-top: 20px;';
+        
+        const counts = [0, 0, 0, 0, 0, 0];
+        
+        for (let i = 1; i <= 6; i++) {
+            const statCard = document.createElement('div');
+            statCard.style.cssText = 'background: #f8f9fa; padding: 10px; border-radius: 10px; text-align: center; box-shadow: 0 2px 10px rgba(15, 23, 42, 0.12);';
+            statCard.innerHTML = `
+                <div style="font-size: 24px; margin-bottom: 5px;">
+                    ${['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'][i - 1]}
+                </div>
+                <div id="count-${i}" style="font-size: 18px; font-weight: bold; color: #3498db;">0</div>
+            `;
+            stats.appendChild(statCard);
+        }
+        
+        dice.addEventListener('click', () => {
+            dice.classList.add('rolling');
+            
+            setTimeout(() => {
+                const value = Math.floor(Math.random() * 6) + 1;
+                dice.textContent = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'][value - 1];
+                result.textContent = `投出了 ${value} 点！`;
+                
+                // 更新统计
+                counts[value - 1]++;
+                document.getElementById(`count-${value}`).textContent = counts[value - 1];
+                
+                // 添加到历史
+                const record = document.createElement('span');
+                record.style.cssText = `
+                    background: linear-gradient(135deg, #667eea, #764ba2);
+                    color: ${themeColors.text};
+                    padding: 8px 12px;
+                    border-radius: 50%;
+                    width: 40px;
+                    height: 40px;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 20px;
+                    animation: bounceIn 0.5s ease;
+                `;
+                record.textContent = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'][value - 1];
+                history.appendChild(record);
+                
+                if (history.children.length > 10) {
+                    history.removeChild(history.firstChild);
+                }
+                
+                dice.classList.remove('rolling');
+            }, 600);
+        });
+        
+        wrapper.appendChild(dice);
+        wrapper.appendChild(result);
+        wrapper.appendChild(stats);
+        wrapper.appendChild(historyTitle);
+        wrapper.appendChild(history);
+        container.appendChild(wrapper);
+        
+        // 添加弹入动画
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes bounceIn {
+                0% { transform: scale(0); opacity: 0; }
+                60% { transform: scale(1.2); }
+                100% { transform: scale(1); opacity: 1; }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    // 第4页：样本空间
+    function visualizeSampleSpace(containerId) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        container.innerHTML = '';
+        
+        const svg = d3.select(container)
+            .append('svg')
+            .attr('width', '100%')
+            .attr('height', '100%')
+            .attr('viewBox', '0 0 600 400');
+        
+        // 添加渐变定义
+        const defs = svg.append('defs');
+        const gradient = defs.append('linearGradient')
+            .attr('id', 'space-gradient')
+            .attr('x1', '0%')
+            .attr('y1', '0%')
+            .attr('x2', '100%')
+            .attr('y2', '100%');
+        
+        gradient.append('stop')
+            .attr('offset', '0%')
+            .style('stop-color', themeColors.text)
+            .style('stop-opacity', 1);
+        
+        gradient.append('stop')
+            .attr('offset', '100%')
+            .style('stop-color', '#bdc3c7')
+            .style('stop-opacity', 1);
+        
+        // 样本空间（大圆）
+        svg.append('circle')
+            .attr('cx', 300)
+            .attr('cy', 200)
+            .attr('r', 150)
+            .attr('fill', 'url(#space-gradient)')
+            .attr('stroke', '#2c3e50')
+            .attr('stroke-width', 3)
+            .style('filter', 'drop-shadow(0 5px 15px rgba(15, 23, 42, 0.18))');
+        
+        svg.append('text')
+            .attr('x', 300)
+            .attr('y', 70)
+            .attr('text-anchor', 'middle')
+            .attr('font-size', 22)
+            .attr('font-weight', 'bold')
+            .text('Ω = {1, 2, 3, 4, 5, 6}');
+        
+        // 事件A（偶数）
+        const eventA = svg.append('g')
+            .attr('opacity', 0);
+        
+        eventA.append('ellipse')
+            .attr('cx', 250)
+            .attr('cy', 200)
+            .attr('rx', 80)
+            .attr('ry', 100)
+            .attr('fill', '#3498db')
+            .attr('fill-opacity', 0.5)
+            .attr('stroke', '#2980b9')
+            .attr('stroke-width', 2);
+        
+        eventA.append('text')
+            .attr('x', 250)
+            .attr('y', 150)
+            .attr('text-anchor', 'middle')
+            .attr('font-size', 18)
+            .attr('font-weight', 'bold')
+            .attr('fill', themeColors.text)
+            .text('A = {2, 4, 6}');
+        
+        eventA.transition()
+            .duration(1000)
+            .delay(500)
+            .attr('opacity', 1);
+        
+        // 事件B（大于4）
+        const eventB = svg.append('g')
+            .attr('opacity', 0);
+        
+        eventB.append('ellipse')
+            .attr('cx', 350)
+            .attr('cy', 200)
+            .attr('rx', 80)
+            .attr('ry', 100)
+            .attr('fill', '#e74c3c')
+            .attr('fill-opacity', 0.5)
+            .attr('stroke', '#c0392b')
+            .attr('stroke-width', 2);
+        
+        eventB.append('text')
+            .attr('x', 350)
+            .attr('y', 150)
+            .attr('text-anchor', 'middle')
+            .attr('font-size', 18)
+            .attr('font-weight', 'bold')
+            .attr('fill', themeColors.text)
+            .text('B = {5, 6}');
+        
+        eventB.transition()
+            .duration(1000)
+            .delay(1000)
+            .attr('opacity', 1);
+        
+        // 样本点动画
+        const points = [
+            {x: 200, y: 200, value: 2, delay: 1500},
+            {x: 250, y: 180, value: 4, delay: 1600},
+            {x: 300, y: 200, value: 6, delay: 1700},
+            {x: 350, y: 200, value: 5, delay: 1800},
+            {x: 180, y: 250, value: 1, delay: 1900},
+            {x: 380, y: 250, value: 3, delay: 2000}
+        ];
+        
+        points.forEach(point => {
+            const g = svg.append('g')
+                .attr('opacity', 0);
+            
+            g.append('circle')
+                .attr('cx', point.x)
+                .attr('cy', point.y)
+                .attr('r', 25)
+                .attr('fill', themeColors.text)
+                .attr('stroke', '#2c3e50')
+                .attr('stroke-width', 2)
+                .style('filter', 'drop-shadow(0 2px 5px rgba(15, 23, 42, 0.18))');
+            
+            g.append('text')
+                .attr('x', point.x)
+                .attr('y', point.y + 5)
+                .attr('text-anchor', 'middle')
+                .attr('font-size', 20)
+                .attr('font-weight', 'bold')
+                .text(point.value);
+            
+            g.transition()
+                .duration(500)
+                .delay(point.delay)
+                .attr('opacity', 1)
+                .attr('transform', 'scale(1.2)')
+                .transition()
+                .duration(300)
+                .attr('transform', 'scale(1)');
+        });
+    }
+
+    // 第5页：事件关系（文氏图）
+    function visualizeEventRelations(containerId) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        container.innerHTML = '';
+        
+        const wrapper = document.createElement('div');
+        wrapper.style.cssText = 'display: grid; grid-template-columns: 1fr 1fr; gap: 30px; padding: 30px;';
+        
+        const relations = [
+            { 
+                name: '并事件 A∪B',
+                colorA: '#3498db',
+                colorB: '#e74c3c',
+                type: 'union',
+                description: 'A或B至少一个发生'
+            },
+            { 
+                name: '交事件 A∩B',
+                colorA: '#3498db',
+                colorB: '#e74c3c',
+                type: 'intersection',
+                description: 'A和B同时发生'
+            },
+            { 
+                name: '互斥事件',
+                colorA: '#3498db',
+                colorB: '#e74c3c',
+                type: 'disjoint',
+                description: '不能同时发生'
+            },
+            { 
+                name: '对立事件',
+                colorA: '#3498db',
+                colorB: themeColors.muted,
+                type: 'complement',
+                description: '必有一个发生'
+            }
+        ];
+        
+        relations.forEach((rel, index) => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.style.cssText = 'padding: 20px; text-align: center;';
+            
+            const title = document.createElement('h3');
+            title.style.cssText = 'margin: 0 0 10px 0; color: #2c3e50;';
+            title.textContent = rel.name;
+            
+            const desc = document.createElement('p');
+            desc.style.cssText = 'color: #7f8c8d; font-size: 14px; margin: 0 0 15px 0;';
+            desc.textContent = rel.description;
+            
+            const svg = d3.select(card)
+                .append('svg')
+                .attr('width', 200)
+                .attr('height', 150);
+            
+            // 绘制不同类型的关系
+            if (rel.type === 'union' || rel.type === 'intersection') {
+                // 有重叠的事件
+                svg.append('circle')
+                    .attr('cx', 80)
+                    .attr('cy', 75)
+                    .attr('r', 45)
+                    .attr('fill', rel.colorA)
+                    .attr('fill-opacity', rel.type === 'union' ? 0.5 : 0.2);
+                
+                svg.append('circle')
+                    .attr('cx', 120)
+                    .attr('cy', 75)
+                    .attr('r', 45)
+                    .attr('fill', rel.colorB)
+                    .attr('fill-opacity', rel.type === 'union' ? 0.5 : 0.2);
+                
+                if (rel.type === 'intersection') {
+                    // 高亮交集
+                    const intersection = svg.append('path')
+                        .attr('d', 'M 100 40 A 45 45 0 0 1 100 110 A 45 45 0 0 1 100 40')
+                        .attr('fill', '#9b59b6')
+                        .attr('fill-opacity', 0)
+                        .transition()
+                        .duration(1000)
+                        .delay(index * 200)
+                        .attr('fill-opacity', 0.7);
+                }
+            } else if (rel.type === 'disjoint') {
+                // 互斥事件
+                svg.append('circle')
+                    .attr('cx', 60)
+                    .attr('cy', 75)
+                    .attr('r', 40)
+                    .attr('fill', rel.colorA)
+                    .attr('fill-opacity', 0.5);
+                
+                svg.append('circle')
+                    .attr('cx', 140)
+                    .attr('cy', 75)
+                    .attr('r', 40)
+                    .attr('fill', rel.colorB)
+                    .attr('fill-opacity', 0.5);
+            } else if (rel.type === 'complement') {
+                // 对立事件
+                svg.append('rect')
+                    .attr('x', 20)
+                    .attr('y', 30)
+                    .attr('width', 80)
+                    .attr('height', 90)
+                    .attr('fill', rel.colorA)
+                    .attr('fill-opacity', 0.5)
+                    .attr('rx', 5);
+                
+                svg.append('rect')
+                    .attr('x', 100)
+                    .attr('y', 30)
+                    .attr('width', 80)
+                    .attr('height', 90)
+                    .attr('fill', rel.colorB)
+                    .attr('fill-opacity', 0.5)
+                    .attr('rx', 5);
+                
+                svg.append('text')
+                    .attr('x', 60)
+                    .attr('y', 80)
+                    .attr('text-anchor', 'middle')
+                    .attr('fill', themeColors.text)
+                    .attr('font-weight', 'bold')
+                    .text('A');
+                
+                svg.append('text')
+                    .attr('x', 140)
+                    .attr('y', 80)
+                    .attr('text-anchor', 'middle')
+                    .attr('fill', themeColors.text)
+                    .attr('font-weight', 'bold')
+                    .text('Ā');
+            }
+            
+            card.appendChild(title);
+            card.appendChild(desc);
+            wrapper.appendChild(card);
+        });
+        
+        container.appendChild(wrapper);
+    }
+
+    // 第6页：古典概率
+    function visualizeClassicalProbability(containerId) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        container.innerHTML = '';
+        
+        const wrapper = document.createElement('div');
+        wrapper.style.cssText = 'display: flex; flex-direction: column; align-items: center; gap: 30px;';
+        
+        // 骰子面板
+        const dicePanel = document.createElement('div');
+        dicePanel.style.cssText = 'display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;';
+        
+        const faces = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
+        const selected = new Set();
+        
+        faces.forEach((face, i) => {
+            const die = document.createElement('div');
+            die.style.cssText = `
+                width: 100px;
+                height: 100px;
+                background: #f8f9fa;
+                border: 3px solid #2c3e50;
+                border-radius: 15px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 50px;
+                cursor: pointer;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                box-shadow: 0 5px 15px rgba(15, 23, 42, 0.12);
+            `;
+            die.textContent = face;
+            die.dataset.value = i + 1;
+            
+            die.addEventListener('click', () => {
+                if (selected.has(i + 1)) {
+                    selected.delete(i + 1);
+                    die.style.background = themeColors.cardBg;
+                    die.style.color = '#000000';
+                    die.style.transform = 'scale(1)';
+                } else {
+                    selected.add(i + 1);
+                    die.style.background = 'linear-gradient(135deg, #667eea, #764ba2)';
+                    die.style.color = themeColors.text;
+                    die.style.transform = 'scale(1.1)';
+                }
+                updateProbability();
+            });
+            
+            dicePanel.appendChild(die);
+        });
+        
+        // 概率显示
+        const probDisplay = document.createElement('div');
+        probDisplay.style.cssText = 'font-size: 24px; color: #2c3e50; text-align: center; font-weight: bold;';
+        
+        const formula = document.createElement('div');
+        formula.style.cssText = `
+            margin-top: 20px;
+            padding: 25px;
+            background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(15, 23, 42, 0.12);
+        `;
+        formula.innerHTML = `
+            <div style="font-size: 20px; margin-bottom: 10px;">概率计算</div>
+            <div style="display: flex; align-items: center; justify-content: center; gap: 20px; font-size: 24px;">
+                <span>P(A) = </span>
+                <div style="display: flex; flex-direction: column; align-items: center;">
+                    <span id="favorable" style="border-bottom: 2px solid #2c3e50; padding: 0 10px;">0</span>
+                    <span id="total" style="padding: 0 10px;">6</span>
+                </div>
+                <span> = </span>
+                <span id="prob" style="color: #3498db; font-weight: bold;">0</span>
+            </div>
+        `;
+        
+        // 概率条
+        const probBar = document.createElement('div');
+        probBar.className = 'probability-bar';
+        probBar.style.width = '300px';
+        
+        const probFill = document.createElement('div');
+        probFill.className = 'probability-fill';
+        probFill.style.width = '0%';
+        probFill.id = 'prob-fill';
+        
+        probBar.appendChild(probFill);
+        
+        function updateProbability() {
+            const favorable = selected.size;
+            const total = 6;
+            const prob = favorable / total;
+            
+            document.getElementById('favorable').textContent = favorable;
+            document.getElementById('prob').textContent = prob.toFixed(3);
+            
+            const fillEl = document.getElementById('prob-fill');
+            fillEl.style.width = `${prob * 100}%`;
+            fillEl.textContent = selected.size > 0 ? `${(prob * 100).toFixed(1)}%` : '';
+            
+            probDisplay.textContent = selected.size > 0 
+                ? `选中事件: {${Array.from(selected).sort().join(', ')}}`
+                : '点击选择事件中的基本事件';
+        }
+        
+        wrapper.appendChild(dicePanel);
+        wrapper.appendChild(probDisplay);
+        wrapper.appendChild(formula);
+        wrapper.appendChild(probBar);
+        container.appendChild(wrapper);
+        
+        updateProbability();
+    }
+
+    // 第7页：频率与概率
+    function visualizeFrequency(containerId) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        container.innerHTML = '';
+        
+        const wrapper = document.createElement('div');
+        wrapper.style.cssText = 'display: flex; flex-direction: column; align-items: center; gap: 20px; padding: 20px;';
+        
+        // 控制按钮
+        const controls = document.createElement('div');
+        controls.style.cssText = 'display: flex; gap: 20px;';
+        
+        const flipBtn = document.createElement('button');
+        flipBtn.textContent = '抛100次硬币';
+        flipBtn.className = 'control-btn';
+        flipBtn.style.cssText = 'width: auto; padding: 10px 20px; font-size: 16px;';
+        
+        const autoBtn = document.createElement('button');
+        autoBtn.textContent = '自动模拟';
+        autoBtn.className = 'control-btn';
+        autoBtn.style.cssText = 'width: auto; padding: 10px 20px; font-size: 16px; background: #2ecc71;';
+        
+        const resetBtn = document.createElement('button');
+        resetBtn.textContent = '重置';
+        resetBtn.className = 'control-btn';
+        resetBtn.style.cssText = 'width: auto; padding: 10px 20px; font-size: 16px; background: #e74c3c;';
+        
+        controls.appendChild(flipBtn);
+        controls.appendChild(autoBtn);
+        controls.appendChild(resetBtn);
+        
+        // 统计显示
+        const stats = document.createElement('div');
+        stats.style.cssText = 'display: flex; gap: 50px; font-size: 20px;';
+        
+        const totalDisplay = document.createElement('div');
+        const headsDisplay = document.createElement('div');
+        const freqDisplay = document.createElement('div');
+        
+        // 图表容器
+        const chartContainer = document.createElement('div');
+        chartContainer.style.cssText = 'width: 600px; height: 350px;';
+        
+        let total = 0;
+        let heads = 0;
+        const history = [];
+        let autoInterval;
+        
+        function updateDisplay() {
+            totalDisplay.innerHTML = `总次数: <strong style="color: #3498db;">${total}</strong>`;
+            headsDisplay.innerHTML = `正面: <strong style="color: #2ecc71;">${heads}</strong>`;
+            const freq = total > 0 ? (heads / total).toFixed(4) : '0.0000';
+            freqDisplay.innerHTML = `频率: <strong style="color: #e74c3c;">${freq}</strong>`;
+            
+            if (history.length > 0) {
+                drawFrequencyChart();
+            }
+        }
+        
+        function drawFrequencyChart() {
+            chartContainer.innerHTML = '';
+            
+            const svg = d3.select(chartContainer)
+                .append('svg')
+                .attr('width', 600)
+                .attr('height', 350);
+            
+            const margin = {top: 20, right: 30, bottom: 40, left: 50};
+            const width = 600 - margin.left - margin.right;
+            const height = 350 - margin.top - margin.bottom;
+            
+            const g = svg.append('g')
+                .attr('transform', `translate(${margin.left},${margin.top})`);
+            
+            const x = d3.scaleLinear()
+                .domain([0, Math.max(history.length, 10)])
+                .range([0, width]);
+            
+            const y = d3.scaleLinear()
+                .domain([0, 1])
+                .range([height, 0]);
+            
+            // 添加网格线
+            g.append('g')
+                .attr('class', 'grid')
+                .attr('transform', `translate(0,${height})`)
+                .call(d3.axisBottom(x).ticks(10).tickSize(-height).tickFormat(''))
+                .style('stroke-dasharray', '2,2')
+                .style('opacity', 0.3);
+            
+            g.append('g')
+                .attr('class', 'grid')
+                .call(d3.axisLeft(y).ticks(10).tickSize(-width).tickFormat(''))
+                .style('stroke-dasharray', '2,2')
+                .style('opacity', 0.3);
+            
+            const line = d3.line()
+                .x((d, i) => x(i + 1))
+                .y(d => y(d))
+                .curve(d3.curveMonotoneX);
+            
+            // 添加0.5参考线
+            g.append('line')
+                .attr('x1', 0)
+                .attr('x2', width)
+                .attr('y1', y(0.5))
+                .attr('y2', y(0.5))
+                .attr('stroke', '#e74c3c')
+                .attr('stroke-width', 2)
+                .attr('stroke-dasharray', '10,5');
+            
+            // 添加标签
+            g.append('text')
+                .attr('x', width - 50)
+                .attr('y', y(0.5) - 5)
+                .text('理论概率 0.5')
+                .attr('fill', '#e74c3c')
+                .attr('font-size', 12);
+            
+            // 绘制频率线
+            g.append('path')
+                .datum(history)
+                .attr('fill', 'none')
+                .attr('stroke', '#3498db')
+                .attr('stroke-width', 3)
+                .attr('d', line);
+            
+            // 绘制数据点
+            g.selectAll('.dot')
+                .data(history.slice(-1))
+                .enter().append('circle')
+                .attr('class', 'dot')
+                .attr('cx', (d, i) => x(history.length))
+                .attr('cy', d => y(d))
+                .attr('r', 5)
+                .attr('fill', '#3498db')
+                .style('filter', 'drop-shadow(0 0 5px rgba(52, 152, 219, 0.5))');
+            
+            // 添加坐标轴
+            g.append('g')
+                .attr('transform', `translate(0,${height})`)
+                .call(d3.axisBottom(x).ticks(10));
+            
+            g.append('g')
+                .call(d3.axisLeft(y).ticks(10));
+            
+            // 添加轴标签
+            svg.append('text')
+                .attr('transform', 'rotate(-90)')
+                .attr('y', margin.left - 35)
+                .attr('x', 0 - (height / 2) - margin.top)
+                .attr('text-anchor', 'middle')
+                .text('频率');
+            
+            svg.append('text')
+                .attr('x', width / 2 + margin.left)
+                .attr('y', height + margin.top + 35)
+                .attr('text-anchor', 'middle')
+                .text('试验次数');
+        }
+        
+        function flip(n = 100) {
+            for (let i = 0; i < n; i++) {
+                total++;
+                if (Math.random() < 0.5) heads++;
+                history.push(heads / total);
+                
+                // 限制历史记录长度
+                if (history.length > 1000) {
+                    history.shift();
+                }
+            }
+            updateDisplay();
+        }
+        
+        flipBtn.addEventListener('click', () => flip(100));
+        
+        autoBtn.addEventListener('click', () => {
+            if (autoInterval) {
+                clearInterval(autoInterval);
+                autoInterval = null;
+                autoBtn.textContent = '自动模拟';
+                autoBtn.style.background = '#2ecc71';
+            } else {
+                autoInterval = setInterval(() => flip(10), 100);
+                autoBtn.textContent = '停止';
+                autoBtn.style.background = '#f39c12';
+            }
+        });
+        
+        resetBtn.addEventListener('click', () => {
+            if (autoInterval) {
+                clearInterval(autoInterval);
+                autoInterval = null;
+                autoBtn.textContent = '自动模拟';
+                autoBtn.style.background = '#2ecc71';
+            }
+            total = 0;
+            heads = 0;
+            history.length = 0;
+            chartContainer.innerHTML = '';
+            updateDisplay();
+        });
+        
+        stats.appendChild(totalDisplay);
+        stats.appendChild(headsDisplay);
+        stats.appendChild(freqDisplay);
+        
+        wrapper.appendChild(controls);
+        wrapper.appendChild(stats);
+        wrapper.appendChild(chartContainer);
+        container.appendChild(wrapper);
+        
+        updateDisplay();
+    }
+
+    // 第8页：概率性质演示
+    function visualizeProbProperties(containerId) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        container.innerHTML = '';
+        
+        const wrapper = document.createElement('div');
+        wrapper.style.cssText = 'display: flex; flex-direction: column; align-items: center; gap: 20px; padding: 20px; max-width: 100%; overflow: hidden;';
+        
+        // 创建文氏图容器
+        const vennContainer = document.createElement('div');
+        vennContainer.style.cssText = 'position: relative; width: 100%; max-width: 450px; height: 300px;';
+        
+        // 创建SVG
+        const svg = d3.select(vennContainer)
+            .append('svg')
+            .attr('width', '100%')
+            .attr('height', 300)
+            .attr('viewBox', '0 0 450 300');
+        
+        // 定义渐变
+        const defs = svg.append('defs');
+        
+        const gradientA = defs.append('linearGradient')
+            .attr('id', 'gradient-a')
+            .attr('x1', '0%').attr('y1', '0%')
+            .attr('x2', '100%').attr('y2', '100%');
+        gradientA.append('stop').attr('offset', '0%').style('stop-color', '#3498db').style('stop-opacity', 0.6);
+        gradientA.append('stop').attr('offset', '100%').style('stop-color', '#2980b9').style('stop-opacity', 0.6);
+        
+        const gradientB = defs.append('linearGradient')
+            .attr('id', 'gradient-b')
+            .attr('x1', '0%').attr('y1', '0%')
+            .attr('x2', '100%').attr('y2', '100%');
+        gradientB.append('stop').attr('offset', '0%').style('stop-color', '#e74c3c').style('stop-opacity', 0.6);
+        gradientB.append('stop').attr('offset', '100%').style('stop-color', '#c0392b').style('stop-opacity', 0.6);
+        
+        // 样本空间
+        const g = svg.append('g');
+        
+        // 绘制样本空间矩形
+        g.append('rect')
+            .attr('x', 30)
+            .attr('y', 30)
+            .attr('width', 440)
+            .attr('height', 290)
+            .attr('fill', '#ecf0f1')
+            .attr('stroke', '#2c3e50')
+            .attr('stroke-width', 3)
+            .attr('rx', 10);
+        
+        g.append('text')
+            .attr('x', 50)
+            .attr('y', 55)
+            .attr('font-size', 20)
+            .attr('font-weight', 'bold')
+            .attr('fill', '#2c3e50')
+            .text('Ω (样本空间)');
+        
+        // 事件A (圆形)
+        const circleA = g.append('circle')
+            .attr('cx', 180)
+            .attr('cy', 180)
+            .attr('r', 80)
+            .attr('fill', 'url(#gradient-a)')
+            .attr('stroke', '#2980b9')
+            .attr('stroke-width', 3)
+            .style('cursor', 'pointer')
+            .style('opacity', 0);
+        
+        g.append('text')
+            .attr('x', 120)
+            .attr('y', 140)
+            .attr('font-size', 18)
+            .attr('font-weight', 'bold')
+            .attr('fill', '#2c3e50')
+            .text('A')
+            .style('opacity', 0)
+            .attr('class', 'label-a');
+        
+        // 事件B (圆形)
+        const circleB = g.append('circle')
+            .attr('cx', 320)
+            .attr('cy', 180)
+            .attr('r', 80)
+            .attr('fill', 'url(#gradient-b)')
+            .attr('stroke', '#c0392b')
+            .attr('stroke-width', 3)
+            .style('cursor', 'pointer')
+            .style('opacity', 0);
+        
+        g.append('text')
+            .attr('x', 360)
+            .attr('y', 140)
+            .attr('font-size', 18)
+            .attr('font-weight', 'bold')
+            .attr('fill', '#2c3e50')
+            .text('B')
+            .style('opacity', 0)
+            .attr('class', 'label-b');
+        
+        // 概率显示面板（简化版）
+        const infoPanel = document.createElement('div');
+        infoPanel.style.cssText = `
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 450px;
+        `;
+        
+        const probDisplay = document.createElement('div');
+        probDisplay.style.cssText = 'font-size: 16px; color: #2c3e50;';
+        probDisplay.innerHTML = `
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                <div style="text-align: center; padding: 10px; background: #e8f4f8; border-radius: 6px;">
+                    <div style="font-size: 12px; color: #7f8c8d;">P(A)</div>
+                    <div style="font-size: 20px; font-weight: bold; color: #3498db;">0.40</div>
+                </div>
+                <div style="text-align: center; padding: 10px; background: #fde8e8; border-radius: 6px;">
+                    <div style="font-size: 12px; color: #7f8c8d;">P(B)</div>
+                    <div style="font-size: 20px; font-weight: bold; color: #e74c3c;">0.40</div>
+                </div>
+            </div>
+            <div style="text-align: center; padding: 15px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border-radius: 8px;">
+                <div style="font-size: 14px; margin-bottom: 5px;">P(A∪B) = P(A) + P(B) - P(A∩B)</div>
+                <div style="font-size: 24px; font-weight: bold;">0.60</div>
+            </div>
+        `;
+        
+        infoPanel.appendChild(probDisplay);
+        
+        // 控制按钮
+        const controls = document.createElement('div');
+        controls.style.cssText = 'display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; max-width: 450px;';
+        
+        const showUnionBtn = document.createElement('button');
+        showUnionBtn.textContent = '并集';
+        showUnionBtn.style.cssText = 'padding: 8px 16px; background: #9b59b6; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: all 0.3s;';
+        
+        const showIntersectBtn = document.createElement('button');
+        showIntersectBtn.textContent = '交集';
+        showIntersectBtn.style.cssText = 'padding: 8px 16px; background: #2ecc71; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: all 0.3s;';
+        
+        const resetBtn = document.createElement('button');
+        resetBtn.textContent = '重置';
+        resetBtn.style.cssText = 'padding: 8px 16px; background: #95a5a6; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: all 0.3s;';
+        
+        // 动画演示
+        let step = 0;
+        
+        function animateIntro() {
+            circleA.transition().duration(800).style('opacity', 1);
+            svg.selectAll('.label-a').transition().duration(800).style('opacity', 1);
+            
+            setTimeout(() => {
+                circleB.transition().duration(800).style('opacity', 1);
+                svg.selectAll('.label-b').transition().duration(800).style('opacity', 1);
+            }, 400);
+        }
+        
+        animateIntro();
+        
+        showUnionBtn.addEventListener('click', () => {
+            // 高亮并集区域
+            circleA.transition().duration(500)
+                .attr('fill', 'url(#gradient-a)')
+                .style('opacity', 0.8);
+            circleB.transition().duration(500)
+                .attr('fill', 'url(#gradient-b)')
+                .style('opacity', 0.8);
+        });
+        
+        showIntersectBtn.addEventListener('click', () => {
+            // 先降低不透明度
+            circleA.transition().duration(500).style('opacity', 0.3);
+            circleB.transition().duration(500).style('opacity', 0.3);
+            
+            // 绘制交集高亮
+            const existingIntersection = svg.select('.intersection-highlight');
+            if (!existingIntersection.empty()) {
+                existingIntersection.remove();
+            }
+            
+            g.append('ellipse')
+                .attr('class', 'intersection-highlight')
+                .attr('cx', 250)
+                .attr('cy', 180)
+                .attr('rx', 40)
+                .attr('ry', 70)
+                .attr('fill', '#9b59b6')
+                .attr('opacity', 0)
+                .transition()
+                .duration(800)
+                .attr('opacity', 0.8);
+        });
+        
+        resetBtn.addEventListener('click', () => {
+            circleA.transition().duration(500).style('opacity', 1)
+                .attr('fill', 'url(#gradient-a)');
+            circleB.transition().duration(500).style('opacity', 1)
+                .attr('fill', 'url(#gradient-b)');
+            svg.selectAll('.intersection-highlight').transition().duration(500)
+                .attr('opacity', 0).remove();
+        });
+        
+        controls.appendChild(showUnionBtn);
+        controls.appendChild(showIntersectBtn);
+        controls.appendChild(resetBtn);
+        
+        wrapper.appendChild(vennContainer);
+        wrapper.appendChild(infoPanel);
+        wrapper.appendChild(controls);
+        container.appendChild(wrapper);
+    }
+
+    // 第9页：条件概率
+    function visualizeConditional(containerId) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        container.innerHTML = '';
+        
+        const wrapper = document.createElement('div');
+        wrapper.style.cssText = 'display: flex; flex-direction: column; align-items: center; gap: 20px; padding: 20px; max-width: 100%; overflow: hidden;';
+        
+        // 简化的卡片演示
+        const cardsContainer = document.createElement('div');
+        cardsContainer.style.cssText = 'display: flex; gap: 30px; align-items: center;';
+        
+        const suitBox1 = document.createElement('div');
+        suitBox1.style.cssText = 'text-align: center;';
+        suitBox1.innerHTML = `
+            <div style="font-size: 60px; color: #e74c3c;">♥</div>
+            <div style="font-size: 14px; font-weight: bold; margin-top: 5px;">红心 (13张)</div>
+        `;
+        
+        const arrow = document.createElement('div');
+        arrow.style.cssText = 'font-size: 36px; color: #95a5a6;';
+        arrow.textContent = '→';
+        
+        const suitBox2 = document.createElement('div');
+        suitBox2.style.cssText = 'text-align: center;';
+        suitBox2.innerHTML = `
+            <div style="font-size: 60px; color: #e74c3c;">A♥</div>
+            <div style="font-size: 14px; font-weight: bold; margin-top: 5px;">红心A (1张)</div>
+        `;
+        
+        cardsContainer.appendChild(suitBox1);
+        cardsContainer.appendChild(arrow);
+        cardsContainer.appendChild(suitBox2);
+        
+        // 简化的计算面板
+        const calcPanel = document.createElement('div');
+        calcPanel.style.cssText = `
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        `;
+        
+        calcPanel.innerHTML = `
+            <div style="text-align: center; margin-bottom: 15px;">
+                <div style="font-size: 16px; margin-bottom: 8px;">条件概率公式</div>
+                <div style="font-size: 20px; font-weight: bold;">
+                    P(A|B) = P(A∩B) / P(B)
+                </div>
+            </div>
+            
+            <div style="background: rgba(255, 255, 255, 0.15); padding: 15px; border-radius: 8px; margin-bottom: 12px; font-size: 13px; line-height: 1.8;">
+                <div>已知：抽到红心♥</div>
+                <div>求：抽到A的概率</div>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; text-align: center;">
+                <div style="background: rgba(255, 255, 255, 0.2); padding: 10px; border-radius: 6px;">
+                    <div style="font-size: 11px; opacity: 0.9;">P(A∩B)</div>
+                    <div style="font-size: 18px; font-weight: bold;">1/26</div>
+                </div>
+                <div style="background: rgba(255, 255, 255, 0.2); padding: 10px; border-radius: 6px;">
+                    <div style="font-size: 11px; opacity: 0.9;">P(B)</div>
+                    <div style="font-size: 18px; font-weight: bold;">13/26</div>
+                </div>
+                <div style="background: rgba(255, 255, 255, 0.3); padding: 10px; border-radius: 6px; border: 2px solid rgba(255, 255, 255, 0.5);">
+                    <div style="font-size: 11px; opacity: 0.9;">结果</div>
+                    <div style="font-size: 18px; font-weight: bold;">1/13</div>
+                </div>
+            </div>
+        `;
+        
+        wrapper.appendChild(cardsContainer);
+        wrapper.appendChild(calcPanel);
+        container.appendChild(wrapper);
+    }
+
+    // 第10页：独立事件
+    function visualizeIndependence(containerId) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        container.innerHTML = '';
+        
+        const wrapper = document.createElement('div');
+        wrapper.style.cssText = 'display: flex; flex-direction: column; align-items: center; gap: 20px; padding: 20px; max-width: 100%; overflow: hidden;';
+        
+        // 创建两次抛硬币的演示
+        const coinContainer = document.createElement('div');
+        coinContainer.style.cssText = 'display: flex; gap: 30px; align-items: center;';
+        
+        // 第一枚硬币
+        const coin1Container = document.createElement('div');
+        coin1Container.style.cssText = 'text-align: center;';
+        
+        const coin1 = document.createElement('div');
+        coin1.id = 'coin1';
+        coin1.style.cssText = `
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s;
+        `;
+        coin1.textContent = '🪙';
+        
+        coin1.addEventListener('mouseenter', () => {
+            coin1.style.transform = 'scale(1.1)';
+        });
+        coin1.addEventListener('mouseleave', () => {
+            coin1.style.transform = 'scale(1)';
+        });
+        
+        const coin1Label = document.createElement('div');
+        coin1Label.style.cssText = 'margin-top: 10px; font-size: 14px; font-weight: bold;';
+        coin1Label.textContent = '硬币1';
+        
+        const coin1Result = document.createElement('div');
+        coin1Result.id = 'coin1-result';
+        coin1Result.style.cssText = 'margin-top: 5px; font-size: 18px; color: #3498db; font-weight: bold; min-height: 25px;';
+        
+        coin1Container.appendChild(coin1);
+        coin1Container.appendChild(coin1Label);
+        coin1Container.appendChild(coin1Result);
+        
+        // 箭头符号
+        const arrow = document.createElement('div');
+        arrow.style.cssText = 'font-size: 36px; color: #95a5a6;';
+        arrow.textContent = '→';
+        
+        // 第二枚硬币
+        const coin2Container = document.createElement('div');
+        coin2Container.style.cssText = 'text-align: center;';
+        
+        const coin2 = document.createElement('div');
+        coin2.id = 'coin2';
+        coin2.style.cssText = `
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s;
+        `;
+        coin2.textContent = '🪙';
+        
+        coin2.addEventListener('mouseenter', () => {
+            coin2.style.transform = 'scale(1.1)';
+        });
+        coin2.addEventListener('mouseleave', () => {
+            coin2.style.transform = 'scale(1)';
+        });
+        
+        const coin2Label = document.createElement('div');
+        coin2Label.style.cssText = 'margin-top: 10px; font-size: 14px; font-weight: bold;';
+        coin2Label.textContent = '硬币2';
+        
+        const coin2Result = document.createElement('div');
+        coin2Result.id = 'coin2-result';
+        coin2Result.style.cssText = 'margin-top: 5px; font-size: 18px; color: #e74c3c; font-weight: bold; min-height: 25px;';
+        
+        coin2Container.appendChild(coin2);
+        coin2Container.appendChild(coin2Label);
+        coin2Container.appendChild(coin2Result);
+        
+        coinContainer.appendChild(coin1Container);
+        coinContainer.appendChild(arrow);
+        coinContainer.appendChild(coin2Container);
+        
+        // 简化的说明面板
+        const explanationPanel = document.createElement('div');
+        explanationPanel.style.cssText = `
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        `;
+        
+        explanationPanel.innerHTML = `
+            <div style="text-align: center; margin-bottom: 15px;">
+                <div style="font-size: 16px; margin-bottom: 8px;">独立事件乘法公式</div>
+                <div style="font-size: 20px; font-weight: bold;">
+                    P(AB) = P(A) × P(B)
+                </div>
+            </div>
+            
+            <div style="background: rgba(255, 255, 255, 0.15); padding: 12px; border-radius: 8px; margin-bottom: 12px; font-size: 13px; line-height: 1.8;">
+                <div>✓ 两次抛掷互不影响</div>
+                <div>✓ 每次独立进行</div>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; text-align: center;">
+                <div style="background: rgba(255, 255, 255, 0.2); padding: 10px; border-radius: 6px;">
+                    <div style="font-size: 11px; opacity: 0.9;">P(正)</div>
+                    <div style="font-size: 18px; font-weight: bold;">1/2</div>
+                </div>
+                <div style="background: rgba(255, 255, 255, 0.2); padding: 10px; border-radius: 6px;">
+                    <div style="font-size: 11px; opacity: 0.9;">P(正)</div>
+                    <div style="font-size: 18px; font-weight: bold;">1/2</div>
+                </div>
+                <div style="background: rgba(255, 255, 255, 0.3); padding: 10px; border-radius: 6px; border: 2px solid rgba(255, 255, 255, 0.5);">
+                    <div style="font-size: 11px; opacity: 0.9;">结果</div>
+                    <div style="font-size: 18px; font-weight: bold;">1/4</div>
+                </div>
+            </div>
+        `;
+        
+        // 简化的按钮
+        const flipButton = document.createElement('button');
+        flipButton.textContent = '抛掷硬币';
+        flipButton.style.cssText = `
+            padding: 10px 30px;
+            background: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(46, 204, 113, 0.4);
+            transition: all 0.3s;
+        `;
+        
+        flipButton.addEventListener('mouseenter', () => {
+            flipButton.style.transform = 'translateY(-2px)';
+            flipButton.style.boxShadow = '0 6px 20px rgba(46, 204, 113, 0.6)';
+        });
+        
+        flipButton.addEventListener('mouseleave', () => {
+            flipButton.style.transform = 'translateY(0)';
+            flipButton.style.boxShadow = '0 4px 15px rgba(46, 204, 113, 0.4)';
+        });
+        
+        flipButton.addEventListener('click', () => {
+            // 动画效果
+            coin1.style.animation = 'spin 0.6s ease-in-out';
+            coin2.style.animation = 'spin 0.6s ease-in-out';
+            
+            setTimeout(() => {
+                const result1 = Math.random() < 0.5 ? '正面' : '反面';
+                const result2 = Math.random() < 0.5 ? '正面' : '反面';
+                
+                document.getElementById('coin1-result').textContent = result1;
+                document.getElementById('coin2-result').textContent = result2;
+                
+                coin1.style.animation = '';
+                coin2.style.animation = '';
+            }, 600);
+        });
+        
+        // 添加旋转动画
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes spin {
+                0% { transform: rotateY(0deg); }
+                100% { transform: rotateY(720deg); }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        wrapper.appendChild(coinContainer);
+        wrapper.appendChild(explanationPanel);
+        wrapper.appendChild(flipButton);
+        container.appendChild(wrapper);
+    }
+
+    // 第11页：随机变量
+    function visualizeRandomVariable(containerId) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        container.innerHTML = '';
+        
+        const wrapper = document.createElement('div');
+        wrapper.style.cssText = 'display: flex; flex-direction: column; align-items: center; gap: 20px; padding: 20px; max-width: 100%; overflow: hidden;';
+        
+        // 简化的映射演示
+        const mappingContainer = document.createElement('div');
+        mappingContainer.style.cssText = 'display: flex; gap: 20px; align-items: center; flex-wrap: wrap; justify-content: center;';
+        
+        // 左侧：随机试验结果
+        const trialBox = document.createElement('div');
+        trialBox.style.cssText = `
+            background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+            padding: 15px;
+            border-radius: 10px;
+            width: 140px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        `;
+        
+        trialBox.innerHTML = `
+            <h4 style="margin: 0 0 10px 0; text-align: center; color: #2e7d32; font-size: 14px;">随机试验</h4>
+            <div style="font-size: 14px; color: #333; line-height: 1.6;">
+                <div style="padding: 5px; margin: 3px 0; background: white; border-radius: 4px;">🪙 正面</div>
+                <div style="padding: 5px; margin: 3px 0; background: white; border-radius: 4px;">🪙 反面</div>
+                <div style="padding: 5px; margin: 3px 0; background: white; border-radius: 4px;">🎲 1点</div>
+                <div style="text-align: center; margin-top: 8px; color: #7f8c8d;">...</div>
+                </div>
+        `;
+        
+        // 中间：映射箭头
+        const mappingArrow = document.createElement('div');
+        mappingArrow.style.cssText = 'text-align: center;';
+        mappingArrow.innerHTML = `
+            <div style="font-size: 36px; color: #9b59b6;">→</div>
+            <div style="font-size: 14px; font-weight: bold; color: #9b59b6; background: #f3e8ff; padding: 5px 10px; border-radius: 8px;">X</div>
+        `;
+        
+        // 右侧：数值
+        const valueBox = document.createElement('div');
+        valueBox.style.cssText = `
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            padding: 15px;
+            border-radius: 10px;
+            width: 140px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        `;
+        
+        valueBox.innerHTML = `
+            <h4 style="margin: 0 0 10px 0; text-align: center; color: #1565c0; font-size: 14px;">变量 X</h4>
+            <div style="font-size: 18px; color: #333; line-height: 1.6; text-align: center;">
+                <div style="padding: 5px; margin: 3px 0; background: white; border-radius: 4px; font-weight: bold; color: #3498db;">1</div>
+                <div style="padding: 5px; margin: 3px 0; background: white; border-radius: 4px; font-weight: bold; color: #3498db;">0</div>
+                <div style="padding: 5px; margin: 3px 0; background: white; border-radius: 4px; font-weight: bold; color: #e74c3c;">1</div>
+                <div style="text-align: center; margin-top: 8px; color: #7f8c8d;">...</div>
+        </div>
+        `;
+        
+        mappingContainer.appendChild(trialBox);
+        mappingContainer.appendChild(mappingArrow);
+        mappingContainer.appendChild(valueBox);
+        
+        // 简化的说明面板
+        const explanationPanel = document.createElement('div');
+        explanationPanel.style.cssText = `
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        `;
+        
+        explanationPanel.innerHTML = `
+            <div style="text-align: center; margin-bottom: 15px;">
+                <div style="font-size: 16px; margin-bottom: 8px;">随机变量的定义</div>
+                <div style="font-size: 14px; line-height: 1.8;">
+                    将随机试验结果映射为<strong>数值</strong>
+                </div>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
+                <div style="background: rgba(255, 255, 255, 0.2); padding: 12px; border-radius: 8px;">
+                    <div style="font-size: 14px; font-weight: bold; margin-bottom: 8px; text-align: center;">离散型</div>
+                    <div style="font-size: 12px; line-height: 1.6; opacity: 0.95;">
+                        <div>可数值</div>
+                        <div>如：骰子点数</div>
+                    </div>
+                </div>
+                <div style="background: rgba(255, 255, 255, 0.2); padding: 12px; border-radius: 8px;">
+                    <div style="font-size: 14px; font-weight: bold; margin-bottom: 8px; text-align: center;">连续型</div>
+                    <div style="font-size: 12px; line-height: 1.6; opacity: 0.95;">
+                        <div>连续值</div>
+                        <div>如：身高、体重</div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // 简化的示例
+        const exampleSection = document.createElement('div');
+        exampleSection.style.cssText = `
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        `;
+        
+        exampleSection.innerHTML = `
+            <div style="text-align: center; margin-bottom: 12px; font-size: 14px; color: #2c3e50; font-weight: bold;">
+                例：抛2枚硬币，X = 正面数
+            </div>
+            <div style="display: flex; justify-content: space-around; padding: 12px; background: #f8f9fa; border-radius: 8px;">
+                <div style="text-align: center;">
+                    <div style="font-size: 16px; color: #3498db; font-weight: bold;">X=0</div>
+                    <div style="font-size: 11px; color: #7f8c8d;">P=1/4</div>
+                </div>
+                <div style="text-align: center;">
+                    <div style="font-size: 16px; color: #2ecc71; font-weight: bold;">X=1</div>
+                    <div style="font-size: 11px; color: #7f8c8d;">P=1/2</div>
+                </div>
+                <div style="text-align: center;">
+                    <div style="font-size: 16px; color: #e74c3c; font-weight: bold;">X=2</div>
+                    <div style="font-size: 11px; color: #7f8c8d;">P=1/4</div>
+                </div>
+            </div>
+        `;
+        
+        wrapper.appendChild(mappingContainer);
+        wrapper.appendChild(explanationPanel);
+        wrapper.appendChild(exampleSection);
+        container.appendChild(wrapper);
+    }
+
+    // 第12页：二项分布
+    function visualizeBinomial(containerId) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        container.innerHTML = '';
+        
+        const svg = d3.select(container)
+            .append('svg')
+            .attr('width', '100%')
+            .attr('height', '100%')
+            .attr('viewBox', '0 0 700 450');
+        
+        const n = 10;
+        const p = 0.5;
+        const data = [];
+        
+        // 计算二项分布概率
+        for (let k = 0; k <= n; k++) {
+            const prob = combination(n, k) * Math.pow(p, k) * Math.pow(1-p, n-k);
+            data.push({k: k, prob: prob});
+        }
+        
+        const margin = {top: 40, right: 40, bottom: 60, left: 60};
+        const width = 700 - margin.left - margin.right;
+        const height = 450 - margin.top - margin.bottom;
+        
+        const g = svg.append('g')
+            .attr('transform', `translate(${margin.left},${margin.top})`);
+        
+        const x = d3.scaleBand()
+            .domain(data.map(d => d.k))
+            .range([0, width])
+            .padding(0.1);
+        
+        const y = d3.scaleLinear()
+            .domain([0, d3.max(data, d => d.prob) * 1.1])
+            .range([height, 0]);
+        
+        // 添加渐变
+        const gradient = svg.append('defs')
+            .append('linearGradient')
+            .attr('id', 'bar-gradient')
+            .attr('x1', '0%')
+            .attr('y1', '0%')
+            .attr('x2', '0%')
+            .attr('y2', '100%');
+        
+        gradient.append('stop')
+            .attr('offset', '0%')
+            .style('stop-color', '#3498db')
+            .style('stop-opacity', 1);
+        
+        gradient.append('stop')
+            .attr('offset', '100%')
+            .style('stop-color', '#2980b9')
+            .style('stop-opacity', 1);
+        
+        // 绘制柱状图
+        g.selectAll('.bar')
+            .data(data)
+            .enter().append('rect')
+            .attr('class', 'bar')
+            .attr('x', d => x(d.k))
+            .attr('y', height)
+            .attr('width', x.bandwidth())
+            .attr('height', 0)
+            .attr('fill', 'url(#bar-gradient)')
+            .style('filter', 'drop-shadow(0 2px 5px rgba(15, 23, 42, 0.18))')
+            .transition()
+            .duration(1000)
+            .delay((d, i) => i * 100)
+            .attr('y', d => y(d.prob))
+            .attr('height', d => height - y(d.prob));
+        
+        // 添加数值标签
+        g.selectAll('.label')
+            .data(data)
+            .enter().append('text')
+            .attr('class', 'label')
+            .attr('x', d => x(d.k) + x.bandwidth() / 2)
+            .attr('y', d => y(d.prob) - 5)
+            .attr('text-anchor', 'middle')
+            .attr('font-size', 12)
+            .attr('fill', '#2c3e50')
+            .text(d => d.prob.toFixed(3))
+            .style('opacity', 0)
+            .transition()
+            .duration(500)
+            .delay((d, i) => i * 100 + 1000)
+            .style('opacity', 1);
+        
+        // 添加坐标轴
+        g.append('g')
+            .attr('transform', `translate(0,${height})`)
+            .call(d3.axisBottom(x))
+            .append('text')
+            .attr('x', width / 2)
+            .attr('y', 45)
+            .attr('fill', '#000')
+            .style('text-anchor', 'middle')
+            .style('font-size', 14)
+            .text('成功次数 k');
+        
+        g.append('g')
+            .call(d3.axisLeft(y).ticks(10))
+            .append('text')
+            .attr('transform', 'rotate(-90)')
+            .attr('y', -45)
+            .attr('x', -height / 2)
+            .attr('fill', '#000')
+            .style('text-anchor', 'middle')
+            .style('font-size', 14)
+            .text('概率 P(X=k)');
+        
+        // 标题
+        svg.append('text')
+            .attr('x', 350)
+            .attr('y', 25)
+            .attr('text-anchor', 'middle')
+            .attr('font-size', 20)
+            .attr('font-weight', 'bold')
+            .text(`二项分布 B(${n}, ${p})`);
+    }
+
+    // 组合数计算
+    function combination(n, k) {
+        if (k > n) return 0;
+        if (k === 0 || k === n) return 1;
+        let result = 1;
+        for (let i = 0; i < k; i++) {
+            result = result * (n - i) / (i + 1);
+        }
+        return result;
+    }
+
+    // 第13页：正态分布
+    function visualizeNormal(containerId) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        container.innerHTML = '';
+        
+        const svg = d3.select(container)
+            .append('svg')
+            .attr('width', '100%')
+            .attr('height', '100%')
+            .attr('viewBox', '0 0 700 450');
+        
+        const margin = {top: 40, right: 40, bottom: 60, left: 60};
+        const width = 700 - margin.left - margin.right;
+        const height = 450 - margin.top - margin.bottom;
+        
+        const g = svg.append('g')
+            .attr('transform', `translate(${margin.left},${margin.top})`);
+        
+        // 正态分布参数
+        const mu = 0;
+        const sigma = 1;
+        
+        // 生成正态分布数据
+        const xValues = d3.range(-4, 4.1, 0.1);
+        const data = xValues.map(x => ({
+            x: x,
+            y: (1 / (sigma * Math.sqrt(2 * Math.PI))) * 
+               Math.exp(-0.5 * Math.pow((x - mu) / sigma, 2))
+        }));
+        
+        const x = d3.scaleLinear()
+            .domain([-4, 4])
+            .range([0, width]);
+        
+        const y = d3.scaleLinear()
+            .domain([0, 0.45])
+            .range([height, 0]);
+        
+        // 绘制坐标轴
+        g.append('g')
+            .attr('transform', `translate(0,${height})`)
+            .call(d3.axisBottom(x).ticks(8));
+        
+        g.append('g')
+            .call(d3.axisLeft(y).ticks(8));
+        
+        // 绘制正态曲线
+        const line = d3.line()
+            .x(d => x(d.x))
+            .y(d => y(d.y))
+            .curve(d3.curveNatural);
+        
+        const path = g.append('path')
+            .datum(data)
+            .attr('class', 'normal-curve')
+            .attr('d', line)
+            .attr('fill', 'none')
+            .attr('stroke', '#3498db')
+            .attr('stroke-width', 3);
+        
+        // 动画绘制曲线
+        const totalLength = path.node().getTotalLength();
+        path
+            .attr('stroke-dasharray', totalLength + ' ' + totalLength)
+            .attr('stroke-dashoffset', totalLength)
+            .transition()
+            .duration(2000)
+            .attr('stroke-dashoffset', 0);
+        
+        // 添加1σ、2σ、3σ区域
+        const sigmaRanges = [
+            {range: 1, color: '#3498db', opacity: 0.3, percent: '68.3%'},
+            {range: 2, color: '#2ecc71', opacity: 0.2, percent: '95.4%'},
+            {range: 3, color: '#e74c3c', opacity: 0.1, percent: '99.7%'}
+        ];
+        
+        sigmaRanges.forEach((s, i) => {
+            const areaData = data.filter(d => d.x >= -s.range && d.x <= s.range);
+            
+            const area = d3.area()
+                .x(d => x(d.x))
+                .y0(height)
+                .y1(d => y(d.y))
+                .curve(d3.curveNatural);
+            
+            g.append('path')
+                .datum(areaData)
+                .attr('class', 'area-under-curve')
+                .attr('fill', s.color)
+                .attr('opacity', 0)
+                .attr('d', area)
+                .transition()
+                .delay(2000 + i * 500)
+                .duration(500)
+                .attr('opacity', s.opacity);
+            
+            // 添加标签
+            g.append('text')
+                .attr('x', x(0))
+                .attr('y', height - 20 - i * 25)
+                .attr('text-anchor', 'middle')
+                .text(`±${s.range}σ: ${s.percent}`)
+                .attr('font-size', 14)
+                .attr('fill', s.color)
+                .style('font-weight', 'bold')
+                .style('opacity', 0)
+                .transition()
+                .delay(2000 + i * 500)
+                .duration(500)
+                .style('opacity', 1);
+        });
+        
+        // 添加标签
+        g.append('text')
+            .attr('x', x(1))
+            .attr('y', height + 35)
+            .attr('text-anchor', 'middle')
+            .text('μ+σ')
+            .attr('font-size', 12);
+        
+        g.append('text')
+            .attr('x', x(-1))
+            .attr('y', height + 35)
+            .attr('text-anchor', 'middle')
+            .text('μ-σ')
+            .attr('font-size', 12);
+        
+        g.append('text')
+            .attr('x', x(0))
+            .attr('y', height + 35)
+            .attr('text-anchor', 'middle')
+            .text('μ')
+            .attr('font-size', 12)
+            .style('font-weight', 'bold');
+        
+        // 标题
+        svg.append('text')
+            .attr('x', 350)
+            .attr('y', 25)
+            .attr('text-anchor', 'middle')
+            .attr('font-size', 20)
+            .attr('font-weight', 'bold')
+            .text('标准正态分布 N(0, 1)');
+    }
+
+    // 第14页：数学期望
+    function visualizeExpectation(containerId) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        container.innerHTML = '';
+        
+        const wrapper = document.createElement('div');
+        wrapper.style.cssText = 'display: flex; flex-direction: column; align-items: center; gap: 30px; padding: 20px;';
+        
+        // 骰子期望演示
+        const diceSection = document.createElement('div');
+        diceSection.className = 'card';
+        diceSection.style.cssText = 'padding: 30px; width: 600px;';
+        
+        const title = document.createElement('h3');
+        title.style.cssText = 'text-align: center; color: #2c3e50; margin-bottom: 20px;';
+        title.textContent = '掷骰子的数学期望';
+        
+        // 创建表格
+        const table = document.createElement('table');
+        table.style.cssText = `
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            box-shadow: 0 2px 10px rgba(15, 23, 42, 0.12);
+        `;
+        
+        const header = table.insertRow();
+        ['点数 X', '概率 P', 'X × P'].forEach(text => {
+            const th = document.createElement('th');
+            th.style.cssText = `background: #3498db; color: ${themeColors.text}; padding: 15px; text-align: center;`;
+            th.textContent = text;
+            header.appendChild(th);
+        });
+        
+        const faces = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
+        let sum = 0;
+        
+        faces.forEach((face, i) => {
+            const row = table.insertRow();
+            row.style.cssText = 'background: #f8f9fa; transition: all 0.3s;';
+            
+            const cellFace = row.insertCell();
+            cellFace.style.cssText = 'padding: 10px; text-align: center; font-size: 30px;';
+            cellFace.innerHTML = `${face} (${i + 1})`;
+            
+            const cellProb = row.insertCell();
+            cellProb.style.cssText = 'padding: 10px; text-align: center;';
+            cellProb.textContent = '1/6';
+            
+            const cellProduct = row.insertCell();
+            cellProduct.style.cssText = 'padding: 10px; text-align: center;';
+            const product = (i + 1) / 6;
+            cellProduct.textContent = product.toFixed(3);
+            
+            sum += product;
+            
+            row.addEventListener('mouseenter', () => {
+                row.style.background = '#e8f4f8';
+                row.style.transform = 'scale(1.02)';
+            });
+            
+            row.addEventListener('mouseleave', () => {
+                row.style.background = themeColors.cardBg;
+                row.style.transform = 'scale(1)';
+            });
+        });
+        
+        // 添加合计行
+        const sumRow = table.insertRow();
+        sumRow.style.cssText = 'background: #f8f9fa; font-weight: bold;';
+        
+        const sumLabel = sumRow.insertCell();
+        sumLabel.style.cssText = 'padding: 15px; text-align: center;';
+        sumLabel.colSpan = 2;
+        sumLabel.textContent = '期望值 E(X) =';
+        
+        const sumValue = sumRow.insertCell();
+        sumValue.style.cssText = 'padding: 15px; text-align: center; color: #e74c3c; font-size: 20px;';
+        sumValue.textContent = sum.toFixed(1);
+        
+        diceSection.appendChild(title);
+        diceSection.appendChild(table);
+        
+        // 图形化展示
+        const visual = document.createElement('div');
+        visual.style.cssText = 'margin-top: 30px; text-align: center;';
+        
+        const balanceBar = document.createElement('div');
+        balanceBar.style.cssText = `
+            width: 500px;
+            height: 20px;
+            background: linear-gradient(90deg, #3498db 0%, #2ecc71 50%, #e74c3c 100%);
+            border-radius: 10px;
+            margin: 20px auto;
+            position: relative;
+            box-shadow: 0 2px 10px rgba(15, 23, 42, 0.18);
+        `;
+        
+        const marker = document.createElement('div');
+        marker.style.cssText = `
+            position: absolute;
+            top: -10px;
+            left: ${(sum / 6) * 100}%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 15px solid #e74c3c;
+            filter: drop-shadow(0 2px 5px rgba(15, 23, 42, 0.2));
+        `;
+        
+        balanceBar.appendChild(marker);
+        
+        const scale = document.createElement('div');
+        scale.style.cssText = 'display: flex; justify-content: space-between; margin-top: 5px;';
+        
+        for (let i = 1; i <= 6; i++) {
+            const tick = document.createElement('div');
+            tick.style.cssText = 'font-size: 12px; color: #7f8c8d;';
+            tick.textContent = i;
+            scale.appendChild(tick);
+        }
+        
+        visual.appendChild(balanceBar);
+        visual.appendChild(scale);
+        
+        diceSection.appendChild(visual);
+        wrapper.appendChild(diceSection);
+        container.appendChild(wrapper);
+    }
+</script>
+
+<style>
+/* 悬浮控制与面板（统一样式） */
+.floating-control-btn { position: fixed; bottom: 20px; left: 20px; width: 56px; height: 56px; border: none; border-radius: 16px; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 1100; background: rgba(15,23,42,0.7); color: #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.25); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); transition: transform .2s ease, box-shadow .2s ease; }
+.floating-control-btn:hover { transform: translateY(-2px); box-shadow: 0 16px 36px rgba(0,0,0,0.32); }
+.floating-control-btn .btn-icon { font-size: 22px; font-weight: 700; }
+.floating-menu-items { position: fixed; bottom: 20px; left: 86px; display: none; gap: 10px; z-index: 1100; }
+.floating-menu-items.active { display: flex; }
+.floating-menu-item { display: inline-flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 14px; cursor: pointer; background: rgba(255,255,255,0.9); color: #0f172a; box-shadow: 0 10px 30px rgba(0,0,0,0.18); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); transition: transform .18s ease, box-shadow .18s ease; }
+.floating-menu-item:hover { transform: translateY(-1px); box-shadow: 0 14px 36px rgba(0,0,0,0.24); }
+.floating-menu-item .item-icon { font-size: 16px; width: 18px; text-align: center; }
+.lab-submenu, .chapter-submenu { position: fixed; left: 20px; bottom: 86px; display: none; z-index: 1100; }
+.course-submenu { position: fixed; right: 20px; top: 70px; display: none; z-index: 1100; }
+.submenu-content { position: relative; width: min(920px, calc(100vw - 40px)); max-height: min(70vh, 620px); overflow-y: auto; background: rgba(255,255,255,0.88); border: 1px solid rgba(0,0,0,0.06); border-radius: 16px; padding: 16px; box-shadow: 0 20px 50px rgba(0,0,0,0.25); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+.submenu-title { font-weight: 700; color: #0f172a; margin-bottom: 10px; }
+.submenu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; }
+.submenu-item { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 12px; cursor: pointer; background: rgba(255,255,255,0.95); border: 1px solid rgba(0,0,0,0.05); transition: background .15s ease, transform .15s ease; }
+.submenu-item:hover { background: rgba(241,245,249,0.95); transform: translateY(-1px); }
+.submenu-icon { width: 18px; text-align: center; color: #64748b; }
+.submenu-text { color: #111827; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.submenu-close { position: absolute; right: 10px; top: 6px; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; background: rgba(0,0,0,0.55); color: #fff; font-weight: 700; }
+.submenu-close:hover { background: rgba(0,0,0,0.72); }
+</style>
+
+<!-- 悬浮主按钮与二级菜单 -->
+<button id="floating-control-btn" class="floating-control-btn" title="工具菜单" aria-label="工具菜单"><span class="btn-icon">≡</span></button>
+<div class="floating-menu-items" id="floating-menu-items">
+    <div class="floating-menu-item" onclick="event.stopPropagation(); toggleLabSubmenu()">
+        <span class="item-icon"><i class="fa-solid fa-flask"></i></span>
+        <span class="item-text">实验室</span>
+    </div>
+    <div class="floating-menu-item" onclick="event.stopPropagation(); toggleChapterSubmenu()">
+        <span class="item-icon"><i class="fa-solid fa-clipboard-list"></i></span>
+        <span class="item-text">本章目录</span>
+    </div>
+</div>
+
+<!-- 子面板：实验室 -->
+<div class="lab-submenu" id="lab-submenu">
+    <div class="submenu-content">
+        <div class="submenu-close" onclick="closeAllSubmenus()">×</div>
+        <div class="submenu-title">第十三章 · 实验室与资源</div>
+        <div class="submenu-grid">
+            <a class="submenu-item" href="../网页资源/index.html" target="_blank">
+                <span class="submenu-icon"><i class="fa-solid fa-layer-group"></i></span>
+                <span class="submenu-text">资源总览</span>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- 子面板：本章目录（动态） -->
+<div class="chapter-submenu" id="chapter-submenu">
+    <div class="submenu-content">
+        <div class="submenu-close" onclick="closeAllSubmenus()">×</div>
+        <div class="submenu-title">本章目录</div>
+        <div class="submenu-grid" id="ch13-menu-grid"></div>
+    </div>
+</div>
+
+<!-- 子面板：课程目录 -->
+<div class="course-submenu" id="course-submenu">
+    <div class="submenu-content">
+        <div class="submenu-close" onclick="closeAllSubmenus()">×</div>
+        <div class="submenu-title">全部课程目录</div>
+        <div class="submenu-grid">
+            <a class="submenu-item" href="第1章代数.html"><span class="submenu-text">第1章 代数</span></a>
+            <a class="submenu-item" href="第2章极限与连续.html"><span class="submenu-text">第2章 极限与连续</span></a>
+            <a class="submenu-item" href="第3章导数与微分.html"><span class="submenu-text">第3章 导数与微分</span></a>
+            <a class="submenu-item" href="第4章导数应用.html"><span class="submenu-text">第4章 导数应用</span></a>
+            <a class="submenu-item" href="第5章不定积分.html"><span class="submenu-text">第5章 不定积分</span></a>
+            <a class="submenu-item" href="第6章定积分.html"><span class="submenu-text">第6章 定积分</span></a>
+            <a class="submenu-item" href="第7章常微分方程.html"><span class="submenu-text">第7章 常微分方程</span></a>
+            <a class="submenu-item" href="第8章多元函数微分学.html"><span class="submenu-text">第8章 多元函数微分学</span></a>
+            <a class="submenu-item" href="第9章多元函数积分学初步.html"><span class="submenu-text">第9章 多元函数积分学初步</span></a>
+            <a class="submenu-item" href="第10章线性代数.html"><span class="submenu-text">第10章 线性代数</span></a>
+            <a class="submenu-item" href="第11章无穷级数.html"><span class="submenu-text">第11章 无穷级数</span></a>
+            <a class="submenu-item" href="第12章向量代数与空间解析几何.html"><span class="submenu-text">第12章 向量代数与空间解析几何</span></a>
+            <a class="submenu-item" href="第13章概率与统计.html"><span class="submenu-text">第13章 概率与统计</span></a>
+        </div>
+    </div>
+</div>
+
+<script>
+function closeAllSubmenus(){
+    document.getElementById('floating-menu-items')?.classList.remove('active');
+    document.getElementById('lab-submenu')?.style && (document.getElementById('lab-submenu').style.display = 'none');
+    document.getElementById('chapter-submenu')?.style && (document.getElementById('chapter-submenu').style.display = 'none');
+    document.getElementById('course-submenu')?.style && (document.getElementById('course-submenu').style.display = 'none');
+}
+function toggleLabSubmenu(){
+    const el = document.getElementById('lab-submenu');
+    if(!el) return;
+    document.getElementById('chapter-submenu')?.style && (document.getElementById('chapter-submenu').style.display = 'none');
+    document.getElementById('course-submenu')?.style && (document.getElementById('course-submenu').style.display = 'none');
+    el.style.display = (el.style.display === 'block') ? 'none' : 'block';
+}
+function toggleChapterSubmenu(){
+    const el = document.getElementById('chapter-submenu');
+    if(!el) return;
+    document.getElementById('lab-submenu')?.style && (document.getElementById('lab-submenu').style.display = 'none');
+    document.getElementById('course-submenu')?.style && (document.getElementById('course-submenu').style.display = 'none');
+    el.style.display = (el.style.display === 'block') ? 'none' : 'block';
+}
+function toggleCourseSubmenu(){
+    const el = document.getElementById('course-submenu');
+    if(!el) return;
+    document.getElementById('lab-submenu')?.style && (document.getElementById('lab-submenu').style.display = 'none');
+    document.getElementById('chapter-submenu')?.style && (document.getElementById('chapter-submenu').style.display = 'none');
+    el.style.display = (el.style.display === 'block') ? 'none' : 'block';
+}
+
+function buildChapterMenuCh13(){
+    const grid = document.getElementById('ch13-menu-grid');
+    if(!grid) return;
+    grid.innerHTML = '';
+    const slides = Array.from(document.querySelectorAll('#slidesContainer > .slide'));
+    slides.forEach((slide, idx) => {
+        const t1 = slide.querySelector('.left-content h1');
+        const t2 = slide.querySelector('.left-content h2');
+        const t3 = slide.querySelector('.left-content h3');
+        const title = ((t1 && t1.textContent) || (t2 && t2.textContent) || (t3 && t3.textContent) || '').trim();
+        if(!title) return;
+        const item = document.createElement('div');
+        item.className = 'submenu-item';
+        item.innerHTML = '<span class="submenu-icon"><i class="fa-solid fa-file"></i></span><span class="submenu-text"></span>';
+        item.querySelector('.submenu-text').textContent = title;
+        item.addEventListener('click', () => { if (typeof window.goToSlide === 'function') { window.goToSlide(idx); } closeAllSubmenus(); });
+        grid.appendChild(item);
+    });
+}
+
+function initFloatingControl(){
+    const btn = document.getElementById('floating-control-btn');
+    const menu = document.getElementById('floating-menu-items');
+    if(btn && menu){ btn.addEventListener('click', (e)=>{ e.stopPropagation(); menu.classList.toggle('active'); }); }
+    document.addEventListener('click', ()=> closeAllSubmenus());
+    document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') closeAllSubmenus(); });
+    ;['lab-submenu','chapter-submenu','course-submenu'].forEach(id=>{ const el = document.getElementById(id); if(el) el.addEventListener('click', (e)=> e.stopPropagation()); });
+    buildChapterMenuCh13();
+}
+
+window.addEventListener('DOMContentLoaded', initFloatingControl);
+
+window.goToSlide = window.goToSlide || function(index){
+    try{
+        if (typeof window.showSlide === 'function') window.showSlide(index);
+        else if (typeof window.jumpToSlide === 'function') window.jumpToSlide(index + 1);
+    }catch(e){}
+};
+</script>
+
+</body>
+</html>
+

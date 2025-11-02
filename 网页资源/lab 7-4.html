@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab 7.4 二阶常系数非齐次线性方程特解求解实验室</title>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            startup: {
+                pageReady: () => {
+                    return MathJax.startup.defaultPageReady().then(() => {
+                        if (typeof window.scheduleMathRender === 'function') {
+                            window.scheduleMathRender();
+                        }
+                        console.log('MathJax加载完成');
+                    });
+                }
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+            }
+        };
+    </script>
+    <script defer src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js"></script>
+    <script defer src="../common-assets/js/lab-math-enhancer.js"></script>
+    <style>
+        :root {
+            --h1-size: 22px;
+            --h2-size: 20px;
+            --h3-size: 18px;
+            --btn-size: 16px;
+            --formula-size: 20px;
+            --text-size: 16px;
+            --primary: #4f46e5;
+            --primary-light: #6366f1;
+            --primary-dark: #3730a3;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --light: #ffffff;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-600: #4b5563;
+            --gray-800: #1f2937;
+            --border: #e5e7eb;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        *::-webkit-scrollbar {
+            width: 0;
+            background: transparent;
+        }
+
+        * {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
+            font-size: var(--text-size);
+            line-height: 1.5;
+            background: var(--gray-50);
+            color: var(--gray-800);
+        }
+
+        .return-home-panel {
+            position: fixed;
+            top: 12px;
+            right: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+            z-index: 40;
+        }
+
+        .return-toggle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.95), rgba(99, 102, 241, 0.9));
+            color: #ffffff;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 10px 18px rgba(79, 70, 229, 0.28);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .return-toggle:focus-visible {
+            outline: 2px solid rgba(129, 140, 248, 0.6);
+            outline-offset: 3px;
+        }
+
+        .return-toggle:hover {
+            transform: translateY(-1px) scale(1.03);
+            box-shadow: 0 14px 26px rgba(79, 70, 229, 0.35);
+        }
+
+        .return-links {
+            display: none;
+            flex-direction: column;
+            gap: 6px;
+            padding: 10px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(79, 70, 229, 0.15);
+            box-shadow: 0 16px 30px rgba(15, 23, 42, 0.18);
+            backdrop-filter: blur(6px);
+        }
+
+        .return-home-panel.open .return-links {
+            display: flex;
+        }
+
+        .return-link {
+            padding: 6px 12px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 14px;
+            color: var(--primary);
+            background: rgba(79, 70, 229, 0.12);
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+
+        .return-link.return-main {
+            color: var(--success);
+            background: rgba(16, 185, 129, 0.12);
+        }
+
+        .return-link:hover {
+            background: rgba(79, 70, 229, 0.2);
+            color: var(--primary-dark);
+        }
+
+        .return-link.return-main:hover {
+            background: rgba(16, 185, 129, 0.22);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            height: 100vh;
+            max-height: 700px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            background: var(--light);
+            border-radius: 12px;
+            box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(90deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: var(--light);
+            padding: 10px 24px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: var(--h1-size);
+            font-weight: 600;
+        }
+
+        .main {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 120px;
+            background: var(--gray-50);
+            border-right: 1px solid var(--border);
+            padding: 12px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .nav-btn {
+            width: 100%;
+            padding: 8px;
+            border: none;
+            border-radius: 6px;
+            background: transparent;
+            color: var(--gray-600);
+            text-align: left;
+            font-size: var(--text-size);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .nav-btn:hover {
+            background: var(--gray-100);
+        }
+
+        .nav-btn.active {
+            background: var(--primary);
+            color: var(--light);
+        }
+
+        .content {
+            flex: 1;
+            display: none;
+            padding: 18px;
+            overflow-y: auto;
+        }
+
+        .content.active {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 20px;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow-y: auto;
+        }
+
+        .card {
+            background: var(--light);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+        }
+
+        .card h3 {
+            font-size: var(--h3-size);
+            color: var(--primary);
+            margin-bottom: 12px;
+        }
+
+        .card p {
+            color: var(--gray-600);
+            margin-bottom: 8px;
+        }
+
+        .input-group {
+            margin-bottom: 12px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: var(--gray-600);
+        }
+
+        .input-group select,
+        .input-group input {
+            width: 100%;
+            padding: 8px 10px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            font-size: var(--text-size);
+            background: var(--gray-50);
+        }
+
+        .input-group input:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: var(--light);
+        }
+
+        .coefficients {
+            display: grid;
+            gap: 10px;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 16px;
+            font-size: var(--btn-size);
+            border: none;
+            border-radius: 6px;
+            background: var(--primary);
+            color: var(--light);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .info-box {
+            background: var(--gray-50);
+            border-left: 3px solid var(--primary);
+            padding: 12px;
+            border-radius: 6px;
+            font-size: var(--text-size);
+            line-height: 1.6;
+        }
+
+        .hint-box {
+            background: #ecfdf5;
+            border-left: 3px solid var(--success);
+            padding: 12px;
+            border-radius: 6px;
+            color: var(--gray-700);
+        }
+
+        .warning-box {
+            background: #fef3c7;
+            border-left: 3px solid var(--warning);
+            padding: 12px;
+            border-radius: 6px;
+            color: var(--gray-800);
+        }
+
+        .structure-container {
+            display: grid;
+            gap: 12px;
+        }
+
+        .structure-layer {
+            border-radius: 10px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            position: relative;
+        }
+
+        .layer-title {
+            font-weight: 600;
+            color: var(--gray-600);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .layer-title span {
+            display: inline-flex;
+            width: 18px;
+            height: 18px;
+            border-radius: 4px;
+        }
+
+        .structure-layer.yc {
+            background: rgba(79, 70, 229, 0.08);
+            border: 1px solid rgba(79, 70, 229, 0.2);
+        }
+
+        .structure-layer.yp {
+            background: rgba(16, 185, 129, 0.08);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .structure-layer.total {
+            background: rgba(245, 158, 11, 0.08);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+
+        canvas {
+            width: 100%;
+            height: 260px;
+            background: var(--light);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+        }
+
+        .curve-legend {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+            font-size: 14px;
+            color: var(--gray-600);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .legend-color {
+            width: 14px;
+            height: 14px;
+            border-radius: 4px;
+        }
+
+        @media (max-width: 1024px) {
+            .content.active {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                height: auto;
+                max-height: none;
+            }
+
+            canvas {
+                height: 220px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="return-home-panel">
+        <button class="return-toggle" type="button" aria-label="打开返回导航" onclick="toggleReturnPanel(event)"><i class="fa-solid fa-house"></i></button>
+        <div class="return-links">
+            <a class="return-link return-sub" href="index.html"><i class="fa-solid fa-arrow-left"></i> 返回目录</a>
+            <a class="return-link return-main" href="../index.html"><i class="fa-solid fa-house"></i> 返回主站</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <header class="header">
+            <h1>Lab 7.4 二阶常系数非齐次线性方程的特解求解</h1>
+        </header>
+
+        <div class="main">
+            <nav class="sidebar">
+                <button class="nav-btn active"  data-panel="module1"onclick="switchPanel('module1', this)">多项式型</button>
+                <button class="nav-btn"  data-panel="module2"onclick="switchPanel('module2', this)">指数函数型</button>
+                <button class="nav-btn"  data-panel="module3"onclick="switchPanel('module3', this)">三角函数型</button>
+            </nav>
+
+            <div class="content active" id="module1">
+                <div class="column">
+                    <div class="card">
+                        <h3>选择 $f(x)$ 并设定特解形式</h3>
+                        <p>多项式型右端函数通常猜想 $y^*=A_nx^n+\cdots+A_0$。</p>
+                        <div class="input-group">
+                            <label for="polySelect">右端函数 $f(x)$</label>
+                            <select id="polySelect">
+                                <option value="poly1">$y''-y'-2y = 3x$</option>
+                                <option value="poly2">$y''+y = x^2$</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>推荐特解假设</label>
+                            <div id="polyGuess" class="info-box">$y^*=Ax+B$</div>
+                        </div>
+                        <div class="input-group">
+                            <label>填写待定系数</label>
+                            <div id="polyCoefficients" class="coefficients"></div>
+                        </div>
+                        <button class="btn" onclick="checkParticular('polynomial')">检验特解</button>
+                        <div id="polyFeedback" class="hint-box" style="margin-top:12px;">填写完系数后点击按钮，系统将对比左右两侧的系数。</div>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="card">
+                        <h3>通解结构 $Y=y_c+y^*$</h3>
+                        <div id="polyStructure" class="structure-container"></div>
+                    </div>
+                    <div class="card">
+                        <h3>曲线叠加演示</h3>
+                        <canvas id="canvasPoly"></canvas>
+                        <div class="curve-legend">
+                            <div class="legend-item"><span class="legend-color" style="background:#4f46e5"></span> $y_c$（齐次解）</div>
+                            <div class="legend-item"><span class="legend-color" style="background:#10b981"></span> $y^*$（特解）</div>
+                            <div class="legend-item"><span class="legend-color" style="background:#f59e0b"></span> $Y$（通解）</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content" id="module2">
+                <div class="column">
+                    <div class="card">
+                        <h3>选择 $f(x)=Ke^{ax}$ 型</h3>
+                        <p>指数函数型若 $a$ 与特征根重合，需乘以 $x$ 提升阶次。</p>
+                        <div class="input-group">
+                            <label for="expSelect">右端函数 $f(x)$</label>
+                            <select id="expSelect">
+                                <option value="exp1">$y''-3y'+2y=e^{x}$</option>
+                                <option value="exp2">$y''-y=e^{2x}$</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>推荐特解假设</label>
+                            <div id="expGuess" class="info-box">$y^*=Axe^{x}$</div>
+                        </div>
+                        <div class="input-group">
+                            <label>填写待定系数</label>
+                            <div id="expCoefficients" class="coefficients"></div>
+                        </div>
+                        <button class="btn" onclick="checkParticular('exponential')">检验特解</button>
+                        <div id="expFeedback" class="hint-box" style="margin-top:12px;">观察齐次根是否与 $e^{ax}$ 相撞，若相撞请记得乘以 $x$。</div>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="card">
+                        <h3>通解结构 $Y=y_c+y^*$</h3>
+                        <div id="expStructure" class="structure-container"></div>
+                    </div>
+                    <div class="card">
+                        <h3>曲线叠加演示</h3>
+                        <canvas id="canvasExp"></canvas>
+                        <div class="curve-legend">
+                            <div class="legend-item"><span class="legend-color" style="background:#4f46e5"></span> $y_c$</div>
+                            <div class="legend-item"><span class="legend-color" style="background:#10b981"></span> $y^*$</div>
+                            <div class="legend-item"><span class="legend-color" style="background:#f59e0b"></span> $Y$</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content" id="module3">
+                <div class="column">
+                    <div class="card">
+                        <h3>选择三角函数型 $f(x)$</h3>
+                        <p>当频率与齐次解重复时，需乘以 $x$ 调整特解形式。</p>
+                        <div class="input-group">
+                            <label for="trigSelect">右端函数 $f(x)$</label>
+                            <select id="trigSelect">
+                                <option value="trig1">$y''+y=\sin x$</option>
+                                <option value="trig2">$y''+4y=3\sin x$</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>推荐特解假设</label>
+                            <div id="trigGuess" class="info-box">$y^*=x(A\cos x + B\sin x)$</div>
+                        </div>
+                        <div class="input-group">
+                            <label>填写待定系数</label>
+                            <div id="trigCoefficients" class="coefficients"></div>
+                        </div>
+                        <button class="btn" onclick="checkParticular('trigonometric')">检验特解</button>
+                        <div id="trigFeedback" class="hint-box" style="margin-top:12px;">利用 $\sin$ 与 $\cos$ 的求导关系填写系数。</div>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="card">
+                        <h3>通解结构 $Y=y_c+y^*$</h3>
+                        <div id="trigStructure" class="structure-container"></div>
+                    </div>
+                    <div class="card">
+                        <h3>曲线叠加演示</h3>
+                        <canvas id="canvasTrig"></canvas>
+                        <div class="curve-legend">
+                            <div class="legend-item"><span class="legend-color" style="background:#4f46e5"></span> $y_c$</div>
+                            <div class="legend-item"><span class="legend-color" style="background:#10b981"></span> $y^*$</div>
+                            <div class="legend-item"><span class="legend-color" style="background:#f59e0b"></span> $Y$</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const scenarios = {
+            polynomial: {
+                select: document.getElementById('polySelect'),
+                guessBox: document.getElementById('polyGuess'),
+                coeffContainer: document.getElementById('polyCoefficients'),
+                feedback: document.getElementById('polyFeedback'),
+                structureBox: document.getElementById('polyStructure'),
+                canvas: document.getElementById('canvasPoly'),
+                ctx: document.getElementById('canvasPoly').getContext('2d'),
+                options: {
+                    poly1: {
+                        equation: `y''-y'-2y = 3x`,
+                        guess: '$y^*=Ax+B$',
+                        coefficients: { A: -1.5, B: 0.75 },
+                        yc: '$y_c=C_1e^{2x}+C_2e^{-x}$',
+                        yp: '$y^*=-1.5x+0.75$',
+                        solution: '$Y=C_1e^{2x}+C_2e^{-x}-1.5x+0.75$',
+                        ycFunc: x => 0.6 * Math.exp(2 * x) - 0.4 * Math.exp(-x),
+                        ypFunc: x => -1.5 * x + 0.75
+                    },
+                    poly2: {
+                        equation: `y''+y = x^2`,
+                        guess: '$y^*=Ax^2+Bx+C$',
+                        coefficients: { A: 1, B: 0, C: -2 },
+                        yc: '$y_c=C_1\\cos x+C_2\\sin x$',
+                        yp: '$y^*=x^2-2$',
+                        solution: '$Y=C_1\\cos x+C_2\\sin x+x^2-2$',
+                        ycFunc: x => Math.cos(x) + 0.4 * Math.sin(x),
+                        ypFunc: x => x * x - 2
+                    }
+                }
+            },
+            exponential: {
+                select: document.getElementById('expSelect'),
+                guessBox: document.getElementById('expGuess'),
+                coeffContainer: document.getElementById('expCoefficients'),
+                feedback: document.getElementById('expFeedback'),
+                structureBox: document.getElementById('expStructure'),
+                canvas: document.getElementById('canvasExp'),
+                ctx: document.getElementById('canvasExp').getContext('2d'),
+                options: {
+                    exp1: {
+                        equation: `y''-3y'+2y=e^{x}`,
+                        guess: '$y^*=Axe^{x}$',
+                        coefficients: { A: -1 },
+                        yc: '$y_c=C_1e^{x}+C_2e^{2x}$',
+                        yp: '$y^*=-xe^{x}$',
+                        solution: '$Y=C_1e^{x}+C_2e^{2x}-xe^{x}$',
+                        ycFunc: x => 0.6 * Math.exp(x) - 0.4 * Math.exp(2 * x),
+                        ypFunc: x => -x * Math.exp(x)
+                    },
+                    exp2: {
+                        equation: `y''-y=e^{2x}`,
+                        guess: '$y^*=Ae^{2x}$',
+                        coefficients: { A: 1 / 3 },
+                        yc: '$y_c=C_1e^{x}+C_2e^{-x}$',
+                        yp: '$y^*=\\frac{1}{3}e^{2x}$',
+                        solution: '$Y=C_1e^{x}+C_2e^{-x}+\\frac{1}{3}e^{2x}$',
+                        ycFunc: x => 0.7 * Math.exp(x) + 0.3 * Math.exp(-x),
+                        ypFunc: x => (1 / 3) * Math.exp(2 * x)
+                    }
+                }
+            },
+            trigonometric: {
+                select: document.getElementById('trigSelect'),
+                guessBox: document.getElementById('trigGuess'),
+                coeffContainer: document.getElementById('trigCoefficients'),
+                feedback: document.getElementById('trigFeedback'),
+                structureBox: document.getElementById('trigStructure'),
+                canvas: document.getElementById('canvasTrig'),
+                ctx: document.getElementById('canvasTrig').getContext('2d'),
+                options: {
+                    trig1: {
+                        equation: `y''+y=\\sin x`,
+                        guess: '$y^*=x(A\\cos x+B\\sin x)$',
+                        coefficients: { A: -0.5, B: 0 },
+                        yc: '$y_c=C_1\\cos x+C_2\\sin x$',
+                        yp: '$y^*=-0.5x\\cos x$',
+                        solution: '$Y=C_1\\cos x+C_2\\sin x-0.5x\\cos x$',
+                        ycFunc: x => Math.cos(x) - 0.4 * Math.sin(x),
+                        ypFunc: x => -0.5 * x * Math.cos(x)
+                    },
+                    trig2: {
+                        equation: `y''+4y=3\\sin x`,
+                        guess: '$y^*=A\\sin x+B\\cos x$',
+                        coefficients: { A: 1, B: 0 },
+                        yc: '$y_c=C_1\\cos(2x)+C_2\\sin(2x)$',
+                        yp: '$y^*=\\sin x$',
+                        solution: '$Y=C_1\\cos(2x)+C_2\\sin(2x)+\\sin x$',
+                        ycFunc: x => Math.cos(2 * x) * 0.8 + 0.3 * Math.sin(2 * x),
+                        ypFunc: x => Math.sin(x)
+                    }
+                }
+            }
+        };
+
+        let mathObserver = null;
+        let mathRenderQueued = false;
+
+        function startMathObserver() {
+            if (typeof MutationObserver === 'undefined' || !document.body) {
+                return;
+            }
+            if (mathObserver) {
+                mathObserver.disconnect();
+            }
+            mathObserver = new MutationObserver(mutations => {
+                for (const mutation of mutations) {
+                    if (mutation.type === 'childList' || mutation.type === 'characterData') {
+                        scheduleMathRender();
+                        break;
+                    }
+                }
+            });
+            mathObserver.observe(document.body, { childList: true, subtree: true, characterData: true });
+        }
+
+        function scheduleMathRender() {
+            if (mathRenderQueued) {
+                return;
+            }
+            mathRenderQueued = true;
+            requestAnimationFrame(() => {
+                mathRenderQueued = false;
+                if (window.MathJax && MathJax.typesetPromise) {
+                    if (mathObserver) {
+                        mathObserver.disconnect();
+                    }
+                    MathJax.typesetPromise()
+                        .catch(err => console.log('渲染错误:', err))
+                        .finally(() => {
+                            startMathObserver();
+                        });
+                } else {
+                    setTimeout(scheduleMathRender, 160);
+                }
+            });
+        }
+
+        window.scheduleMathRender = scheduleMathRender;
+
+        function renderMath() {
+            scheduleMathRender();
+        }
+
+        function ensureMathReady() {
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', () => {
+                    startMathObserver();
+                    scheduleMathRender();
+                });
+            } else {
+                startMathObserver();
+                scheduleMathRender();
+            }
+        }
+
+        ensureMathReady();
+
+        function toggleReturnPanel(event) {
+            event.stopPropagation();
+            const panel = document.querySelector('.return-home-panel');
+            if (panel) {
+                panel.classList.toggle('open');
+            }
+        }
+
+        document.addEventListener('click', event => {
+            const panel = document.querySelector('.return-home-panel');
+            if (!panel) {
+                return;
+            }
+            if (panel.classList.contains('open') && !panel.contains(event.target)) {
+                panel.classList.remove('open');
+            }
+        });
+
+        window.addEventListener('pageshow', () => {
+            scheduleMathRender();
+        });
+
+        function switchPanel(id, btn) {
+            document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderMath();
+            setTimeout(() => {
+                resizeCanvas(scenarios.polynomial.canvas);
+                resizeCanvas(scenarios.exponential.canvas);
+                resizeCanvas(scenarios.trigonometric.canvas);
+                drawScenario('polynomial');
+                drawScenario('exponential');
+                drawScenario('trigonometric');
+            }, 120);
+        }
+
+        function resizeCanvas(canvas) {
+            if (!canvas) return;
+            const container = canvas.parentElement;
+            const width = container.clientWidth - 20;
+            const height = 240;
+            canvas.style.width = width + 'px';
+            canvas.style.height = height + 'px';
+            const ratio = window.devicePixelRatio || 1;
+            canvas.width = width * ratio;
+            canvas.height = height * ratio;
+            const ctx = canvas.getContext('2d');
+            ctx.scale(ratio, ratio);
+        }
+
+        function drawAxis(ctx, width, height) {
+            ctx.clearRect(0, 0, width, height);
+            ctx.save();
+            ctx.strokeStyle = '#374151';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(40, height / 2);
+            ctx.lineTo(width - 20, height / 2);
+            ctx.moveTo(40, 20);
+            ctx.lineTo(40, height - 20);
+            ctx.stroke();
+
+            ctx.fillStyle = '#374151';
+            ctx.font = '12px sans-serif';
+            ctx.fillText('x', width - 30, height / 2 - 6);
+            ctx.fillText('y', 26, 24);
+
+            for (let i = -3; i <= 3; i++) {
+                const x = 40 + (width - 80) * (i + 3) / 6;
+                ctx.beginPath();
+                ctx.moveTo(x, height / 2 - 4);
+                ctx.lineTo(x, height / 2 + 4);
+                ctx.stroke();
+                if (i !== 0) ctx.fillText(i.toString(), x - 4, height / 2 + 16);
+            }
+
+            for (let j = -3; j <= 3; j++) {
+                const y = height / 2 - (height - 60) * j / 6;
+                ctx.beginPath();
+                ctx.moveTo(36, y);
+                ctx.lineTo(44, y);
+                ctx.stroke();
+                if (j !== 0) ctx.fillText(j.toString(), 16, y + 4);
+            }
+            ctx.restore();
+        }
+
+        function clampY(y) {
+            if (y > 4) return 4;
+            if (y < -4) return -4;
+            return y;
+        }
+
+        function toCanvasY(y, height) {
+            const scale = (height - 60) / 8;
+            return height / 2 - clampY(y) * scale;
+        }
+
+        function buildCoefficientInputs(type) {
+            const scenario = scenarios[type];
+            const option = scenario.options[scenario.select.value];
+            const container = scenario.coeffContainer;
+            container.innerHTML = '';
+            Object.keys(option.coefficients).forEach(key => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'input-group';
+                wrapper.innerHTML = `<label>${key}</label><input type="number" step="0.1" data-coeff="${key}" placeholder="请输入 ${key}">`;
+                container.appendChild(wrapper);
+            });
+        }
+
+        function updateStructure(type) {
+            const scenario = scenarios[type];
+            const option = scenario.options[scenario.select.value];
+            const structure = scenario.structureBox;
+            structure.innerHTML = `
+                <div class="structure-layer yc">
+                    <div class="layer-title"><span style="background:#4f46e5"></span>齐次解 $y_c$</div>
+                    <div>${option.yc}</div>
+                </div>
+                <div class="structure-layer yp">
+                    <div class="layer-title"><span style="background:#10b981"></span>特解 $y^*$</div>
+                    <div>${option.yp}</div>
+                </div>
+                <div class="structure-layer total">
+                    <div class="layer-title"><span style="background:#f59e0b"></span>通解 $Y=y_c+y^*$</div>
+                    <div>${option.solution}</div>
+                </div>`;
+            scenario.guessBox.innerHTML = option.guess;
+            scenario.feedback.className = 'hint-box';
+            scenario.feedback.innerHTML = '根据推荐形式填写系数，然后点击“检验特解”。';
+            renderMath();
+        }
+
+        function drawScenario(type) {
+            const scenario = scenarios[type];
+            const option = scenario.options[scenario.select.value];
+            const canvas = scenario.canvas;
+            const ctx = scenario.ctx;
+            drawAxis(ctx, canvas.clientWidth, canvas.clientHeight);
+
+            const step = (canvas.clientWidth - 80) / 120;
+            const xValues = [];
+            for (let i = 0; i <= 120; i++) {
+                const x = -2 + 4 * (i / 120);
+                xValues.push({ canvasX: 40 + i * step, x });
+            }
+
+            ctx.beginPath();
+            ctx.strokeStyle = '#4f46e5';
+            ctx.lineWidth = 2;
+            xValues.forEach((pt, idx) => {
+                const y = option.ycFunc(pt.x);
+                const yCanvas = toCanvasY(y, canvas.clientHeight);
+                if (idx === 0) ctx.moveTo(pt.canvasX, yCanvas);
+                else ctx.lineTo(pt.canvasX, yCanvas);
+            });
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.strokeStyle = '#10b981';
+            ctx.lineWidth = 2;
+            xValues.forEach((pt, idx) => {
+                const y = option.ypFunc(pt.x);
+                const yCanvas = toCanvasY(y, canvas.clientHeight);
+                if (idx === 0) ctx.moveTo(pt.canvasX, yCanvas);
+                else ctx.lineTo(pt.canvasX, yCanvas);
+            });
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.strokeStyle = '#f59e0b';
+            ctx.lineWidth = 2.2;
+            xValues.forEach((pt, idx) => {
+                const y = option.ycFunc(pt.x) + option.ypFunc(pt.x);
+                const yCanvas = toCanvasY(y, canvas.clientHeight);
+                if (idx === 0) ctx.moveTo(pt.canvasX, yCanvas);
+                else ctx.lineTo(pt.canvasX, yCanvas);
+            });
+            ctx.stroke();
+        }
+
+        function checkParticular(type) {
+            const scenario = scenarios[type];
+            const option = scenario.options[scenario.select.value];
+            const inputs = scenario.coeffContainer.querySelectorAll('input[data-coeff]');
+            let correct = true;
+            let message = '';
+            inputs.forEach(input => {
+                const key = input.dataset.coeff;
+                const value = parseFloat(input.value);
+                if (isNaN(value)) {
+                    correct = false;
+                    message = '请先完整填写全部系数。';
+                } else if (Math.abs(value - option.coefficients[key]) > 0.05) {
+                    correct = false;
+                }
+            });
+
+            if (!inputs.length) {
+                buildCoefficientInputs(type);
+                scenario.feedback.className = 'warning-box';
+                scenario.feedback.innerHTML = '请按照推荐形式输入待定系数再点击检验。';
+                return;
+            }
+
+            if (correct) {
+                scenario.feedback.className = 'hint-box';
+                scenario.feedback.innerHTML = '恭喜！系数填写正确，带入原方程即可得到右端函数。';
+            } else {
+                scenario.feedback.className = 'warning-box';
+                scenario.feedback.innerHTML = message || '系数暂未匹配成功，请重新推导并调整。';
+            }
+        }
+
+        Object.keys(scenarios).forEach(type => {
+            const scenario = scenarios[type];
+            scenario.select.addEventListener('change', () => {
+                buildCoefficientInputs(type);
+                updateStructure(type);
+                drawScenario(type);
+            });
+        });
+
+        window.addEventListener('resize', () => {
+            resizeCanvas(scenarios.polynomial.canvas);
+            resizeCanvas(scenarios.exponential.canvas);
+            resizeCanvas(scenarios.trigonometric.canvas);
+            drawScenario('polynomial');
+            drawScenario('exponential');
+            drawScenario('trigonometric');
+        });
+
+        buildCoefficientInputs('polynomial');
+        buildCoefficientInputs('exponential');
+        buildCoefficientInputs('trigonometric');
+        updateStructure('polynomial');
+        updateStructure('exponential');
+        updateStructure('trigonometric');
+        resizeCanvas(scenarios.polynomial.canvas);
+        resizeCanvas(scenarios.exponential.canvas);
+        resizeCanvas(scenarios.trigonometric.canvas);
+        drawScenario('polynomial');
+        drawScenario('exponential');
+        drawScenario('trigonometric');
+        renderMath();
+    </script>
+</body>
+</html>

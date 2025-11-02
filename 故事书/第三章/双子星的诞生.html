@@ -1,0 +1,796 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>双子星的诞生</title>
+    <script src="../../common-assets/js/tailwind.min.js"></script>    <style>
+        @font-face {
+            font-family: 'Iansui-Regular';
+            src: url('../../common-assets/fonts/Iansui-Regular.ttf') format('truetype');
+            font-weight: 400;
+            font-style: normal;
+        }
+        
+        /* 美化滚动条 - 竖向 */
+        *::-webkit-scrollbar {
+            width: 12px;
+        }
+        *::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+        }
+        *::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #8a2be2, #6a0dad);
+            border-radius: 6px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+        *::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #9370db, #8a2be2);
+        }
+        *::-webkit-scrollbar-thumb:active {
+            background: linear-gradient(180deg, #6a0dad, #4b0082);
+        }
+        
+        /* 隐藏横向滚动条 */
+        *::-webkit-scrollbar:horizontal {
+            display: none;
+        }
+        
+        :root {
+            /* 双子星主题 - 对称的蓝紫渐变 */
+            --bg-start: #0a0416;
+            --bg-scene1: linear-gradient(135deg, #1a1651, #2a2475, #3a3299);
+            --bg-scene2: linear-gradient(180deg, #241c5f, #342c7f, #443c9f);
+            --bg-scene3: linear-gradient(45deg, #1e1855, #2e2875, #3e3895);
+            --bg-scene4: radial-gradient(circle, #2a2475, #1a1651, #0a0416);
+            --bg-scene5: linear-gradient(315deg, #3a3299, #4a42b9);
+            --bg-scene6: linear-gradient(135deg, #241c5f, #342c7f, #443c9f);
+            --bg-scene7: linear-gradient(180deg, #1a1651, #2a2475);
+            --bg-scene8: linear-gradient(45deg, #0a0416, #1a1651, #2a2475);
+            --bg-scene9: linear-gradient(135deg, #3a3299, #4a42b9, #5a52d9);
+        }
+
+        body {
+            font-family: 'Iansui-Regular', serif;
+            color: #e0e7ff;
+            overflow-x: hidden;
+            background-color: var(--bg-start);
+            transition: background-color 1.5s ease-in-out;
+        }
+
+        #scroll-container {
+            height: 1300vh;
+            position: relative;
+        }
+
+        .sticky-element {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* 双星轨道动画背景 */
+        #twinStarsCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        /* 几何过渡效果 */
+        .geometric-transition {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 0;
+            height: 0;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .star-burst {
+            width: 100vmax;
+            height: 100vmax;
+            background: radial-gradient(circle, transparent 0%, var(--transition-color, #4a42b9) 100%);
+            transform: translate(-50%, -50%) scale(0);
+            transition: transform 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .star-burst.active {
+            transform: translate(-50%, -50%) scale(2);
+        }
+
+        /* 双星符号动画 */
+        .twin-symbol {
+            position: absolute;
+            font-size: 30px;
+            color: rgba(224, 231, 255, 0.3);
+            animation: orbit 15s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes orbit {
+            0% {
+                transform: rotate(0deg) translateX(150px) rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg) translateX(150px) rotate(-360deg);
+            }
+        }
+
+        /* dy/dx 和流数符号漂浮 */
+        .calculus-symbol {
+            position: absolute;
+            font-family: 'Iansui-Regular', serif;
+            color: rgba(224, 231, 255, 0.3);
+            animation: float-symbol 10s infinite linear;
+            pointer-events: none;
+        }
+
+        @keyframes float-symbol {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.3;
+            }
+            90% {
+                opacity: 0.3;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* 场景样式 */
+        .scene {
+            opacity: 0;
+            transition: opacity 0.8s ease-in-out;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .scene-background {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            transition: opacity 1.5s ease-in-out;
+            z-index: -2;
+        }
+
+        /* 场景背景 */
+        .bg-scene1 { background: var(--bg-scene1); }
+        .bg-scene2 { background: var(--bg-scene2); }
+        .bg-scene3 { background: var(--bg-scene3); }
+        .bg-scene4 { background: var(--bg-scene4); }
+        .bg-scene5 { background: var(--bg-scene5); }
+        .bg-scene6 { background: var(--bg-scene6); }
+        .bg-scene7 { background: var(--bg-scene7); }
+        .bg-scene8 { background: var(--bg-scene8); }
+        .bg-scene9 { background: var(--bg-scene9); }
+
+        /* 图片样式 */
+        .illustration-wrapper {
+            position: absolute;
+            z-index: 5;
+            transition: all 1.5s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .illustration {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: all 1.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            opacity: 0;
+            transform: scale(0.85) translateY(30px);
+            filter: brightness(0.9) contrast(1.05);
+        }
+
+        .frame-elegant {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            border-radius: 20px;
+            box-shadow: 
+                0 15px 35px rgba(0, 0, 0, 0.4),
+                0 5px 15px rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(147, 147, 255, 0.3);
+        }
+
+        .illustration-appear {
+            opacity: 0.95;
+            transform: scale(1) translateY(0);
+        }
+
+        .illustration-left {
+            left: 10vw;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 35vw;
+            height: 55vh;
+        }
+
+        .illustration-right {
+            right: 10vw;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 35vw;
+            height: 55vh;
+        }
+
+        /* 文字样式 */
+        .story-text {
+            position: absolute;
+            font-size: 1.5rem;
+            text-shadow: 3px 3px 10px rgba(0,0,0,0.8);
+            transition: all 1s cubic-bezier(0.23, 1, 0.32, 1);
+            text-align: left;
+            padding: 2rem;
+            max-width: 280px;
+            line-height: 2.2;
+            font-weight: 500;
+            z-index: 8;
+            writing-mode: vertical-rl;
+            text-orientation: upright;
+            letter-spacing: 0.12em;
+            opacity: 0;
+            transform: translateY(20px);
+            color: #e0e7ff;
+        }
+
+        .story-text-appear {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .text-left {
+            left: 30vw;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .text-right {
+            right: 30vw;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        /* 逐字浮现动画 */
+        .char-float {
+            display: inline-block;
+            opacity: 0;
+            transform: translateY(15px);
+            animation: float-up 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+        }
+
+        @keyframes float-up {
+            0% {
+                opacity: 0;
+                transform: translateY(15px) scale(0.9);
+            }
+            50% {
+                opacity: 0.5;
+                transform: translateY(5px) scale(0.95);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* 特殊场景：公式对比 */
+        #scene6 {
+            position: relative;
+        }
+
+        #formula-comparison {
+            position: absolute;
+            width: 600px;
+            height: 400px;
+            opacity: 0;
+            transition: opacity 1.5s cubic-bezier(0.23, 1, 0.32, 1);
+            z-index: 20;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        .formula-side {
+            font-family: 'Iansui-Regular', serif;
+            font-size: 36px;
+            color: rgba(224, 231, 255, 0.8);
+            text-align: center;
+            animation: pulse-formula 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse-formula {
+            0%, 100% { 
+                opacity: 0.6;
+                transform: scale(0.95);
+            }
+            50% { 
+                opacity: 1;
+                transform: scale(1.05);
+            }
+        }
+
+        /* 封面和封底样式 */
+        #scene-cover, #scene-end {
+            z-index: 10;
+        }
+
+        #scene-cover h1, #scene-cover p, #scene-end p {
+            position: relative;
+            z-index: 11;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.5);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .scene { 
+                flex-direction: column; 
+                justify-content: center; 
+                align-items: center;
+                padding: 3vh 3vw;
+                gap: 1.5rem;
+            }
+            .illustration-wrapper { 
+                position: relative !important; 
+                left: auto !important;
+                right: auto !important;
+                width: 80vw !important;
+                height: 40vh !important;
+                margin: 0 auto;
+            }
+            .story-text { 
+                position: relative !important; 
+                left: auto !important;
+                right: auto !important;
+                max-width: 85vw; 
+                font-size: 1.1rem;
+                writing-mode: horizontal-tb;
+                text-orientation: initial;
+                letter-spacing: normal;
+                margin: 0 auto;
+                text-align: center;
+                padding: 1rem;
+            }
+        }
+    </style>
+
+    <style>
+        .return-home-panel {
+            position: fixed;
+            top: 12px;
+            left: 12px;
+            display: flex;
+            gap: 6px;
+            z-index: 9999;
+            flex-wrap: wrap;
+        }
+        .return-home-panel .return-link {
+            padding: 6px 10px;
+            border-radius: 10px;
+            background: rgba(15, 23, 42, 0.35);
+            color: #f8fafc;
+            font-size: 13px;
+            text-decoration: none;
+            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.18);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            border: 1px solid rgba(248, 250, 252, 0.12);
+            transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .return-home-panel .return-link:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.25);
+            background: rgba(15, 23, 42, 0.42);
+        }
+        .return-home-panel .return-link.return-main {
+            background: rgba(79, 70, 229, 0.18);
+            border-color: rgba(79, 70, 229, 0.25);
+        }
+        @media (max-width: 640px) {
+            .return-home-panel {
+                top: 12px;
+                left: 12px;
+                right: 12px;
+                justify-content: center;
+            }
+            .return-home-panel .return-link {
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="return-home-panel">
+         <a class="return-link return-sub" href="../index.html"><i class="fa-solid fa-arrow-left"></i> 返回目录</a>
+        <a class="return-link return-main" href="../../index.html"><i class="fa-solid fa-house"></i> 返回主站</a>
+    </div>
+    <!-- 几何过渡效果层 -->
+    <div class="geometric-transition">
+        <div id="star-burst" class="star-burst"></div>
+    </div>
+
+    <!-- 双星轨道动画背景 -->
+    <canvas id="twinStarsCanvas"></canvas>
+
+    <div id="scroll-container">
+        <div id="scene-container" class="sticky-element">
+
+            <!-- 场景背景 -->
+            <div id="bg-scene1" class="scene-background bg-scene1"></div>
+            <div id="bg-scene2" class="scene-background bg-scene2"></div>
+            <div id="bg-scene3" class="scene-background bg-scene3"></div>
+            <div id="bg-scene4" class="scene-background bg-scene4"></div>
+            <div id="bg-scene5" class="scene-background bg-scene5"></div>
+            <div id="bg-scene6" class="scene-background bg-scene6"></div>
+            <div id="bg-scene7" class="scene-background bg-scene7"></div>
+            <div id="bg-scene8" class="scene-background bg-scene8"></div>
+            <div id="bg-scene9" class="scene-background bg-scene9"></div>
+
+            <!-- 场景0: 封面 -->
+            <div id="scene-cover" class="scene flex-col">
+                <h1 class="text-5xl md:text-6xl font-bold text-center" style="color: #9393ff;">双子星的诞生</h1>
+                <p class="text-xl md:text-2xl mt-4 text-center" style="color: #e0e7ff;">牛顿与莱布尼茨的微积分之争</p>
+                <p class="absolute bottom-20 opacity-80 text-lg">向下滚动，开启故事</p>
+            </div>
+
+            <!-- 场景1 -->
+            <div id="scene1" class="scene">
+                <div class="illustration-wrapper illustration-left depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="3- (1).png" alt="17世纪欧洲" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-right depth-layer-3">17世纪末，欧洲的智慧之火正以前所未有的强度燃烧着。最顶尖的头脑，在挑战一个终极问题：如何精确地描述一个变化的世界？</p>
+            </div>
+
+            <!-- 场景2 -->
+            <div id="scene2" class="scene">
+                <div class="illustration-wrapper illustration-right depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="3- (2).png" alt="牛顿" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-left depth-layer-3">在英格兰剑桥，艾萨克·牛顿早已秘密地铸造出了他的利剑。他将变化的量称为"流数"，将变化率称为"流数率"。</p>
+            </div>
+
+            <!-- 场景3 -->
+            <div id="scene3" class="scene">
+                <div class="illustration-wrapper illustration-left depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="3- (3).png" alt="莱布尼茨" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-right depth-layer-3">而在德意志，戈特弗里德·威廉·莱布尼茨正从另一个山峰攀登。他毕生追求一种"普适的语言"。</p>
+            </div>
+
+            <!-- 场景4 -->
+            <div id="scene4" class="scene">
+                <div class="illustration-wrapper illustration-right depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="3- (4).png" alt="流数法" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-left depth-layer-3">牛顿的方法植根于物理学的直觉，试图通过计算"流数率"，来捕捉运动在每一瞬间的脉搏。</p>
+            </div>
+
+            <!-- 场景5 -->
+            <div id="scene5" class="scene">
+                <div class="illustration-wrapper illustration-left depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="3- (5).png" alt="微商" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-right depth-layer-3">莱布尼茨则从几何视角出发，创造了dx和dy的符号，切线的斜率就是dy/dx。</p>
+            </div>
+
+            <!-- 场景6: 公式对比 -->
+            <div id="scene6" class="scene flex-col">
+                <div id="formula-comparison">
+                    <div class="formula-side">
+                        <p>牛顿</p>
+                        <p style="font-size: 48px; margin: 20px 0;">ẋ</p>
+                        <p style="font-size: 18px;">流数率</p>
+                    </div>
+                    <div class="formula-side">
+                        <p>莱布尼茨</p>
+                        <p style="font-size: 48px; margin: 20px 0;">dy/dx</p>
+                        <p style="font-size: 18px;">微商</p>
+                    </div>
+                </div>
+                
+                <div class="illustration-wrapper" style="position: absolute; opacity: 0.1; width: 100%; height: 100%;">
+                    <img src="3- (6).png" alt="符号对比" style="object-fit: cover; width: 100%; height: 100%; filter: blur(2px);">
+                </div>
+                
+                <div class="story-text" style="position: absolute; bottom: 10vh; text-align: center; max-width: 600px; writing-mode: horizontal-tb;">
+                    <p>这套符号简洁、优美，充满了逻辑的力量。1684年，莱布尼茨公开发表了他的研究成果。</p>
+                </div>
+            </div>
+
+            <!-- 场景7 -->
+            <div id="scene7" class="scene">
+                <div class="illustration-wrapper illustration-right depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="3- (7).png" alt="争论" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-left depth-layer-3">风暴由此而起。一场科学史上最激烈、最苦涩的优先权之争爆发了。</p>
+            </div>
+
+            <!-- 场景8 -->
+            <div id="scene8" class="scene">
+                <div class="illustration-wrapper illustration-left depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="3- (8).png" alt="历史评判" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-right depth-layer-3">这场争论演变成了国家荣誉之战。英国固守牛顿的符号，欧洲大陆则在莱布尼茨的体系下高歌猛进。</p>
+            </div>
+
+            <!-- 场景9 -->
+            <div id="scene9" class="scene">
+                <div class="illustration-wrapper illustration-right depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="3- (9).png" alt="双子星" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-left depth-layer-3">今天，我们用牛顿的例子理解导数的概念，却用莱布尼茨的符号进行计算。两颗双子星，从不同路径到达了同一真理的山巅。</p>
+            </div>
+
+            <!-- 结局 -->
+            <div id="scene-end" class="scene flex-col">
+                <p class="text-5xl md:text-6xl font-bold" style="color: #9393ff;">完</p>
+                <p class="text-xl mt-4" style="color: #e0e7ff;">导数的双重诞生</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const scenes = Array.from(document.querySelectorAll('.scene'));
+        const sceneBackgrounds = Array.from(document.querySelectorAll('.scene-background'));
+        const sceneCount = scenes.length;
+        const scrollContainer = document.getElementById('scroll-container');
+        const starBurst = document.getElementById('star-burst');
+        const formulaComparison = document.getElementById('formula-comparison');
+        
+        let lastSceneIndex = -1;
+        let isTransitioning = false;
+        let animatedTexts = new Set();
+        let formulaAnimationStarted = false;
+
+        // ========= 双星轨道动画 =========
+        const canvas = document.getElementById('twinStarsCanvas');
+        const ctx = canvas.getContext('2d');
+        let canvasWidth = canvas.width = window.innerWidth;
+        let canvasHeight = canvas.height = window.innerHeight;
+
+        window.addEventListener('resize', () => {
+            canvasWidth = canvas.width = window.innerWidth;
+            canvasHeight = canvas.height = window.innerHeight;
+        });
+
+        // 双星类
+        class TwinStar {
+            constructor(isFirst) {
+                this.isFirst = isFirst;
+                this.angle = isFirst ? 0 : Math.PI;
+                this.radius = 150;
+                this.centerX = canvasWidth / 2;
+                this.centerY = canvasHeight / 2;
+                this.size = 3;
+                this.trail = [];
+                this.maxTrailLength = 50;
+            }
+
+            update() {
+                this.angle += 0.02;
+                const x = this.centerX + Math.cos(this.angle) * this.radius;
+                const y = this.centerY + Math.sin(this.angle) * this.radius;
+                
+                this.trail.push({ x, y });
+                if (this.trail.length > this.maxTrailLength) {
+                    this.trail.shift();
+                }
+            }
+
+            draw() {
+                // 绘制轨迹
+                ctx.strokeStyle = this.isFirst ? 'rgba(147, 147, 255, 0.3)' : 'rgba(255, 147, 147, 0.3)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                this.trail.forEach((point, i) => {
+                    if (i === 0) {
+                        ctx.moveTo(point.x, point.y);
+                    } else {
+                        ctx.lineTo(point.x, point.y);
+                    }
+                });
+                ctx.stroke();
+                
+                // 绘制星星
+                const currentPos = this.trail[this.trail.length - 1];
+                if (currentPos) {
+                    ctx.fillStyle = this.isFirst ? '#9393ff' : '#ff9393';
+                    ctx.beginPath();
+                    ctx.arc(currentPos.x, currentPos.y, this.size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+        }
+
+        const star1 = new TwinStar(true);
+        const star2 = new TwinStar(false);
+
+        function animateTwinStars() {
+            ctx.fillStyle = 'rgba(10, 4, 22, 0.05)';
+            ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+            
+            star1.update();
+            star2.update();
+            star1.draw();
+            star2.draw();
+            
+            requestAnimationFrame(animateTwinStars);
+        }
+        animateTwinStars();
+
+        // 创建漂浮的数学符号
+        function createFloatingSymbols() {
+            const symbols = ['dx', 'dy', 'ẋ', 'ẏ', '∫', '∂'];
+            for (let i = 0; i < 8; i++) {
+                const symbol = document.createElement('div');
+                symbol.className = 'calculus-symbol';
+                symbol.textContent = symbols[i % symbols.length];
+                symbol.style.fontSize = `${20 + Math.random() * 15}px`;
+                symbol.style.left = `${Math.random() * 100}%`;
+                symbol.style.animationDelay = `${Math.random() * 10}s`;
+                symbol.style.animationDuration = `${10 + Math.random() * 5}s`;
+                document.body.appendChild(symbol);
+            }
+        }
+        createFloatingSymbols();
+
+        // 几何过渡效果
+        function triggerGeometricTransition(fromScene, toScene) {
+            if (isTransitioning) return;
+            isTransitioning = true;
+            
+            starBurst.style.setProperty('--transition-color', '#4a42b9');
+            starBurst.classList.add('active');
+            
+            setTimeout(() => {
+                starBurst.classList.remove('active');
+                isTransitioning = false;
+            }, 1500);
+        }
+
+        // 文字浮现动画
+        function animateTextFloat(element) {
+            if (animatedTexts.has(element)) return;
+            animatedTexts.add(element);
+            
+            const text = element.textContent;
+            element.textContent = '';
+            
+            [...text].forEach((char, index) => {
+                const span = document.createElement('span');
+                span.textContent = char;
+                span.className = 'char-float';
+                span.style.animationDelay = `${index * 0.02}s`;
+                element.appendChild(span);
+            });
+        }
+
+        // 主滚动处理
+        window.addEventListener('scroll', () => {
+            const scrollHeight = scrollContainer.scrollHeight - window.innerHeight;
+            const scrollTop = window.scrollY;
+            const scrollPercent = Math.min(scrollTop / scrollHeight, 1);
+            
+            updateScenes(scrollPercent);
+        });
+
+        function updateScenes(percent) {
+            const currentSceneIndex = Math.floor(percent * (sceneCount - 0.001));
+            const sceneProgress = getSceneProgress(percent, currentSceneIndex);
+            
+            // 触发场景转换效果
+            if (currentSceneIndex !== lastSceneIndex && lastSceneIndex !== -1) {
+                triggerGeometricTransition(lastSceneIndex, currentSceneIndex);
+            }
+            lastSceneIndex = currentSceneIndex;
+            
+            // 更新场景显示
+            scenes.forEach((scene, index) => {
+                const isActive = index === currentSceneIndex;
+                scene.style.opacity = isActive ? 1 : 0;
+                
+                if (isActive) {
+                    // 图片动画
+                    const img = scene.querySelector('.illustration');
+                    if (img && sceneProgress > 0.1) {
+                        setTimeout(() => {
+                            img.classList.add('illustration-appear');
+                        }, 100);
+                    }
+                    
+                    // 文字动画
+                    const text = scene.querySelector('.story-text');
+                    if (text && sceneProgress > 0.3) {
+                        text.classList.add('story-text-appear');
+                        if (!animatedTexts.has(text)) {
+                            animateTextFloat(text);
+                        }
+                    }
+                } else {
+                    // 重置非活动场景
+                    const img = scene.querySelector('.illustration');
+                    if (img) {
+                        img.classList.remove('illustration-appear');
+                    }
+                    const text = scene.querySelector('.story-text');
+                    if (text) {
+                        text.classList.remove('story-text-appear');
+                    }
+                }
+            });
+            
+            // 更新场景背景
+            sceneBackgrounds.forEach((bg, index) => {
+                const sceneNumber = index + 1;
+                const progress = getSceneProgress(percent, sceneNumber);
+                bg.style.opacity = progress > 0 ? Math.min(progress * 1.5, 1) : 0;
+            });
+            
+            // 场景6的公式对比动画
+            const p6 = getSceneProgress(percent, 6);
+            if (p6 > 0.2 && !formulaAnimationStarted) {
+                formulaAnimationStarted = true;
+                formulaComparison.style.opacity = 1;
+            } else if (p6 === 0) {
+                formulaComparison.style.opacity = 0;
+                formulaAnimationStarted = false;
+            }
+        }
+
+        function getSceneProgress(percent, sceneIndex) {
+            const sceneStart = sceneIndex / sceneCount;
+            const sceneEnd = (sceneIndex + 1) / sceneCount;
+            if (percent < sceneStart || percent > sceneEnd) return 0;
+            return (percent - sceneStart) / (sceneEnd - sceneStart);
+        }
+
+        // 初始化
+        window.scrollTo(0, 0);
+        updateScenes(0);
+    </script>
+</body>
+</html>

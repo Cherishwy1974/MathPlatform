@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab 12.1 三维向量构建与代数运算实验室</title>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\(', '\)']],
+                displayMath: [['$$', '$$'], ['\[', '\]']],
+                processEscapes: true
+            },
+            startup: {
+                pageReady: () => {
+                    return MathJax.startup.defaultPageReady().then(() => {
+                        if (typeof window.scheduleMathRender === 'function') {
+                            window.scheduleMathRender();
+                        }
+                        console.log('MathJax加载完成');
+                    });
+                }
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+            }
+        };
+    </script>
+    <script defer src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js"></script>
+    <script defer src="../common-assets/js/lab-math-enhancer.js"></script>
+    <style>
+
+        :root {
+            --h1-size: 22px;
+            --h2-size: 20px;
+            --h3-size: 18px;
+            --btn-size: 16px;
+            --formula-size: 20px;
+            --text-size: 16px;
+            --primary: #4f46e5;
+            --primary-light: #6366f1;
+            --primary-dark: #3730a3;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --light: #ffffff;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-400: #9ca3af;
+            --gray-600: #4b5563;
+            --gray-800: #1f2937;
+            --border: #e5e7eb;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        *::-webkit-scrollbar {
+            width: 0;
+            background: transparent;
+        }
+
+        * {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
+            font-size: var(--text-size);
+            line-height: 1.5;
+            background: var(--gray-50);
+            color: var(--gray-800);
+        }
+
+        .return-home-panel {
+            position: fixed;
+            top: 12px;
+            right: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+            z-index: 40;
+        }
+
+        .return-toggle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.95), rgba(99, 102, 241, 0.9));
+            color: #ffffff;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 10px 18px rgba(79, 70, 229, 0.28);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .return-toggle:focus-visible {
+            outline: 2px solid rgba(129, 140, 248, 0.6);
+            outline-offset: 3px;
+        }
+
+        .return-toggle:hover {
+            transform: translateY(-1px) scale(1.03);
+            box-shadow: 0 14px 26px rgba(79, 70, 229, 0.35);
+        }
+
+        .return-links {
+            display: none;
+            flex-direction: column;
+            gap: 6px;
+            padding: 10px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(79, 70, 229, 0.15);
+            box-shadow: 0 16px 30px rgba(15, 23, 42, 0.18);
+            backdrop-filter: blur(6px);
+        }
+
+        .return-home-panel.open .return-links {
+            display: flex;
+        }
+
+        .return-link {
+            padding: 6px 12px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 14px;
+            color: var(--primary);
+            background: rgba(79, 70, 229, 0.12);
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+
+        .return-link.return-main {
+            color: var(--success);
+            background: rgba(16, 185, 129, 0.12);
+        }
+
+        .return-link:hover {
+            background: rgba(79, 70, 229, 0.2);
+            color: var(--primary-dark);
+        }
+
+        .return-link.return-main:hover {
+            background: rgba(16, 185, 129, 0.22);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            height: 100vh;
+            max-height: 700px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            background: var(--light);
+            border-radius: 12px;
+            box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(90deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: var(--light);
+            padding: 10px 24px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: var(--h1-size);
+            font-weight: 600;
+        }
+
+        .main {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 120px;
+            background: var(--gray-50);
+            border-right: 1px solid var(--border);
+            padding: 12px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .nav-btn {
+            width: 100%;
+            padding: 8px;
+            border: none;
+            border-radius: 6px;
+            background: transparent;
+            color: var(--gray-600);
+            text-align: left;
+            font-size: var(--text-size);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .nav-btn:hover {
+            background: var(--gray-100);
+        }
+
+        .nav-btn.active {
+            background: var(--primary);
+            color: var(--light);
+        }
+
+        .content {
+            flex: 1;
+            display: none;
+            padding: 18px;
+            overflow-y: auto;
+        }
+
+        .content.active {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow-y: auto;
+        }
+
+        .card {
+            background: var(--light);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+        }
+
+        .card h3 {
+            font-size: var(--h3-size);
+            color: var(--primary);
+            margin-bottom: 12px;
+        }
+
+        .input-group {
+            margin-bottom: 12px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: var(--gray-600);
+        }
+
+        .input-group select,
+        .input-group input,
+        .input-group range,
+        .input-group textarea {
+            width: 100%;
+            padding: 8px 10px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            font-size: var(--text-size);
+            background: var(--gray-50);
+        }
+
+        .input-group input[type="range"] {
+            padding: 0;
+        }
+
+        .input-group input:focus,
+        .input-group select:focus,
+        .input-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: var(--light);
+        }
+
+        .btn,
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 16px;
+            font-size: var(--btn-size);
+            border: none;
+            border-radius: 6px;
+            background: var(--primary);
+            color: var(--light);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            gap: 6px;
+        }
+
+        .btn.secondary {
+            background: var(--gray-200);
+            color: var(--gray-600);
+        }
+
+        .btn:hover,
+        .action-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn.secondary:hover {
+            background: var(--gray-400);
+            color: var(--light);
+        }
+
+        .info-box {
+            background: var(--gray-50);
+            border-left: 3px solid var(--primary);
+            padding: 12px;
+            border-radius: 6px;
+            font-size: var(--text-size);
+            line-height: 1.6;
+        }
+
+        canvas {
+            width: 100%;
+            height: 260px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: #ffffff;
+        }
+
+        .tag-list {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: rgba(79, 70, 229, 0.12);
+            color: var(--primary);
+            font-size: 14px;
+        }
+
+        table.matrix-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: center;
+        }
+
+        table.matrix-table td {
+            border: 1px solid var(--gray-200);
+            padding: 6px;
+            font-size: var(--text-size);
+        }
+    
+        .value-pill {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 12px;
+            background: rgba(79, 70, 229, 0.1);
+            border-radius: 999px;
+            color: var(--primary);
+            font-weight: 600;
+            margin-right: 8px;
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 10px;
+        }
+
+        .stat-card {
+            background: var(--gray-50);
+            border-radius: 8px;
+            padding: 10px;
+            border: 1px dashed var(--border);
+        }
+
+        .stat-card h4 {
+            font-size: 15px;
+            color: var(--gray-600);
+            margin-bottom: 4px;
+        }
+
+        .stat-card p {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .vector-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .vector-list li {
+            list-style: none;
+            background: var(--gray-50);
+            padding: 6px 10px;
+            border-radius: 6px;
+        }
+
+        .highlight {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .formula-box {
+            background: rgba(79, 70, 229, 0.08);
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 10px;
+        }
+
+    
+        /* 内联公式排版 */
+        .formula-box {
+            display: inline-flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+            gap: 8px;
+            margin: 4px 12px 4px 0;
+            width: auto;
+            max-width: 100%;
+            text-align: left;
+        }
+
+        .formula-box::before {
+            content: attr(data-prefix);
+            font-weight: 600;
+            color: var(--primary, #4f46e5);
+            margin-right: 6px;
+        }
+
+        .formula-box[data-prefix=""]::before,
+        .formula-box:not([data-prefix])::before {
+            content: none;
+        }
+
+        .formula-box mjx-container {
+            margin: 0;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="return-home-panel">
+        <button class="return-toggle" type="button" aria-label="打开返回导航" onclick="toggleReturnPanel(event)"><i class="fa-solid fa-house"></i></button>
+        <div class="return-links">
+            <a class="return-link return-sub" href="index.html"><i class="fa-solid fa-arrow-left"></i> 返回目录</a>
+            <a class="return-link return-main" href="../index.html"><i class="fa-solid fa-house"></i> 返回主站</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <header class="header">
+            <h1>Lab 12.1 三维向量的构建与代数运算可视化</h1>
+        </header>
+
+        <div class="main">
+            <nav class="sidebar">
+                <button class="nav-btn active"  data-panel="module1"onclick="switchPanel('module1')">向量构建</button>
+                <button class="nav-btn"  data-panel="module2"onclick="switchPanel('module2')">运算演示</button>
+            </nav>
+
+            <div class="content active" id="module1">
+                <div class="column">
+                    <div class="card">
+                        <h3>自定义向量 A 与 B</h3>
+                        <div class="input-group">
+                            <label>向量 $\\vec{A}=(a_x,a_y,a_z)$</label>
+                            <div class="input-group">
+                                <span>$a_x =$ <span id="axValue" class="highlight">2</span></span>
+                                <input type="range" id="axRange" min="-5" max="5" value="2" step="1">
+                            </div>
+                            <div class="input-group">
+                                <span>$a_y =$ <span id="ayValue" class="highlight">1</span></span>
+                                <input type="range" id="ayRange" min="-5" max="5" value="1" step="1">
+                            </div>
+                            <div class="input-group">
+                                <span>$a_z =$ <span id="azValue" class="highlight">3</span></span>
+                                <input type="range" id="azRange" min="-5" max="5" value="3" step="1">
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>向量 $\\vec{B}=(b_x,b_y,b_z)$</label>
+                            <div class="input-group">
+                                <span>$b_x =$ <span id="bxValue" class="highlight">-1</span></span>
+                                <input type="range" id="bxRange" min="-5" max="5" value="-1" step="1">
+                            </div>
+                            <div class="input-group">
+                                <span>$b_y =$ <span id="byValue" class="highlight">2</span></span>
+                                <input type="range" id="byRange" min="-5" max="5" value="2" step="1">
+                            </div>
+                            <div class="input-group">
+                                <span>$b_z =$ <span id="bzValue" class="highlight">1</span></span>
+                                <input type="range" id="bzRange" min="-5" max="5" value="1" step="1">
+                            </div>
+                        </div>
+                        <div class="stat-grid">
+                            <div class="stat-card">
+                                <h4>$|\vec{A}|$</h4>
+                                <p id="magA">3.74</p>
+                            </div>
+                            <div class="stat-card">
+                                <h4>$|\vec{B}|$</h4>
+                                <p id="magB">2.45</p>
+                            </div>
+                            <div class="stat-card">
+                                <h4>方向余弦</h4>
+                                <p id="directionCos">(0.45,0.22,0.67)</p>
+                            </div>
+                        </div>
+                        <p class="formula-box">
+                            <p>模长公式：$|\\vec{v}|=\\sqrt{v_x^2+v_y^2+v_z^2}$</p>
+                            <p>方向余弦：$\\cos\\alpha=\\frac{v_x}{|\\vec{v}|}$ 等。</p></p>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="card">
+                        <h3>空间向量投影示意</h3>
+                        <canvas id="vectorCanvas" width="520" height="320"></canvas>
+                        <div class="info-box">
+                            <p>采用斜二测投影展示 $\vec{A}$ 与 $\vec{B}$，同时保留 $xy$ 平面网格帮助理解三维方向。</p>
+                            <p>可视化比例随向量长度动态调整。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content" id="module2">
+                <div class="column">
+                    <div class="card">
+                        <h3>向量线性运算探索</h3>
+                        <div class="input-group">
+                            <label>标量 $k$</label>
+                            <input type="range" id="scalarRange" min="-3" max="3" step="0.5" value="1">
+                            <div>当前 $k =$ <span id="scalarValue" class="highlight">1.0</span></div>
+                        </div>
+                        <div class="stat-grid">
+                            <div class="stat-card">
+                                <h4>$\vec{A}+\vec{B}$</h4>
+                                <p id="addResult">(1,3,4)</p>
+                            </div>
+                            <div class="stat-card">
+                                <h4>$k\vec{A}$</h4>
+                                <p id="scalarResult">(2.0,1.0,3.0)</p>
+                            </div>
+                            <div class="stat-card">
+                                <h4>$\vec{A}\cdot\vec{B}$</h4>
+                                <p id="dotResult">3</p>
+                            </div>
+                        </div>
+                        <ul class="vector-list">
+                            <li>通过拖动 $k$，观察伸缩与反向的几何效果。</li>
+                            <li>向量加法采用平行四边形法则进行图形呈现。</li>
+                            <li>点积正负反映夹角的锐钝关系。</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="card">
+                        <h3>运算结果图形叠加</h3>
+                        <canvas id="operationCanvas" width="520" height="320"></canvas>
+                        <div class="info-box">
+                            <p>蓝色箭头：$\vec{A}$，紫色箭头：$\vec{B}$，绿色箭头：$\vec{A}+\vec{B}$。</p>
+                            <p>橙色箭头表示标量乘积 $k\vec{A}$，帮助理解伸缩与反向。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const panels = document.querySelectorAll('.content');
+        const buttons = document.querySelectorAll('.nav-btn');
+
+        function switchPanel(id, trigger) {
+            const activeButton = trigger instanceof HTMLElement ? trigger :
+
+                (typeof event !== 'undefined' && event?.currentTarget instanceof HTMLElement ? event.currentTarget :
+
+                    document.querySelector(`.nav-btn[data-panel="${id}"]`) ||
+
+                    document.querySelector(`.nav-btn[data-target="${id}"]`) ||
+
+                    null);
+
+            panels.forEach(panel => panel.classList.remove('active'));
+            buttons.forEach(btn => btn.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            const activeBtn = Array.from(buttons).find(btn => btn.getAttribute('onclick').includes(id));
+            if (activeBtn) {
+                activeBtn.classList.add('active');
+            }
+        }
+
+        let mathObserver = null;
+        let mathRenderQueued = false;
+
+        function startMathObserver() {
+            if (typeof MutationObserver === 'undefined' || !document.body) {
+                return;
+            }
+            if (mathObserver) {
+                mathObserver.disconnect();
+            }
+            mathObserver = new MutationObserver(mutations => {
+                for (const mutation of mutations) {
+                    if (mutation.type === 'childList' || mutation.type === 'characterData') {
+                        scheduleMathRender();
+                        break;
+                    }
+                }
+            });
+            mathObserver.observe(document.body, { childList: true, subtree: true, characterData: true });
+        }
+
+        function scheduleMathRender() {
+            if (mathRenderQueued) {
+                return;
+            }
+            mathRenderQueued = true;
+            requestAnimationFrame(() => {
+                mathRenderQueued = false;
+                if (window.MathJax && MathJax.typesetPromise) {
+                    if (mathObserver) {
+                        mathObserver.disconnect();
+                    }
+                    MathJax.typesetPromise()
+                        .catch(err => console.log('渲染错误:', err))
+                        .finally(() => {
+                            startMathObserver();
+                        });
+                } else {
+                    setTimeout(scheduleMathRender, 160);
+                }
+            });
+        }
+
+        window.scheduleMathRender = scheduleMathRender;
+
+        function renderMath() {
+            scheduleMathRender();
+        }
+
+        function ensureMathReady() {
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', () => {
+                    startMathObserver();
+                    scheduleMathRender();
+                });
+            } else {
+                startMathObserver();
+                scheduleMathRender();
+            }
+        }
+
+        ensureMathReady();
+
+        function toggleReturnPanel(event) {
+            event.stopPropagation();
+            const panel = document.querySelector('.return-home-panel');
+            if (panel) {
+                panel.classList.toggle('open');
+            }
+        }
+
+        document.addEventListener('click', event => {
+            const panel = document.querySelector('.return-home-panel');
+            if (!panel) {
+                return;
+            }
+            if (panel.classList.contains('open') && !panel.contains(event.target)) {
+                panel.classList.remove('open');
+            }
+        });
+
+        window.addEventListener('pageshow', () => {
+            scheduleMathRender();
+        });
+
+        function resizeCanvas(canvas) {
+            const container = canvas.parentElement;
+            const width = container.clientWidth - 20;
+            const height = 300;
+            canvas.style.width = width + 'px';
+            canvas.style.height = height + 'px';
+            const ratio = window.devicePixelRatio || 1;
+            canvas.width = width * ratio;
+            canvas.height = height * ratio;
+            const ctx = canvas.getContext('2d');
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.scale(ratio, ratio);
+            return ctx;
+        }
+
+        function drawAxis(ctx, width, height) {
+            ctx.clearRect(0, 0, width, height);
+            ctx.save();
+            ctx.lineWidth = 1.2;
+            ctx.strokeStyle = '#374151';
+            ctx.beginPath();
+            // x轴
+            ctx.moveTo(50, height - 40);
+            ctx.lineTo(width - 30, height - 40);
+            // y轴
+            ctx.moveTo(50, height - 40);
+            ctx.lineTo(50, 30);
+            // z轴（向左上延伸，表示深度）
+            ctx.moveTo(50, height - 40);
+            ctx.lineTo(50 - 80, height - 40 - 60);
+            ctx.stroke();
+            ctx.fillStyle = '#111827';
+            ctx.font = '12px sans-serif';
+            ctx.fillText('x', width - 40, height - 45);
+            ctx.fillText('y', 45, 40);
+            ctx.fillText('z', 50 - 85, height - 40 - 65);
+            ctx.fillText('O', 40, height - 30);
+            ctx.restore();
+        }
+
+        function project3D(x, y, z) {
+            const scale = 30;
+            const px = 50 + x * scale + z * 12;
+            const py = 260 - (y * scale + z * 8);
+            return { x: px, y: py };
+        }
+
+        function drawVector(ctx, from, vec, color) {
+            ctx.save();
+            ctx.strokeStyle = color;
+            ctx.fillStyle = color;
+            ctx.lineWidth = 2.2;
+            ctx.beginPath();
+            ctx.moveTo(from.x, from.y);
+            ctx.lineTo(vec.x, vec.y);
+            ctx.stroke();
+            const angle = Math.atan2(vec.y - from.y, vec.x - from.x);
+            const arrowSize = 8;
+            ctx.beginPath();
+            ctx.moveTo(vec.x, vec.y);
+            ctx.lineTo(vec.x - arrowSize * Math.cos(angle - Math.PI / 6), vec.y - arrowSize * Math.sin(angle - Math.PI / 6));
+            ctx.lineTo(vec.x - arrowSize * Math.cos(angle + Math.PI / 6), vec.y - arrowSize * Math.sin(angle + Math.PI / 6));
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
+        }
+
+        function updateVectorInfo() {
+            const ax = Number(document.getElementById('axRange').value);
+            const ay = Number(document.getElementById('ayRange').value);
+            const az = Number(document.getElementById('azRange').value);
+            const bx = Number(document.getElementById('bxRange').value);
+            const by = Number(document.getElementById('byRange').value);
+            const bz = Number(document.getElementById('bzRange').value);
+
+            document.getElementById('axValue').textContent = ax;
+            document.getElementById('ayValue').textContent = ay;
+            document.getElementById('azValue').textContent = az;
+            document.getElementById('bxValue').textContent = bx;
+            document.getElementById('byValue').textContent = by;
+            document.getElementById('bzValue').textContent = bz;
+
+            const magA = Math.sqrt(ax * ax + ay * ay + az * az);
+            const magB = Math.sqrt(bx * bx + by * by + bz * bz);
+            document.getElementById('magA').textContent = magA.toFixed(2);
+            document.getElementById('magB').textContent = magB.toFixed(2);
+            const cosAlpha = magA ? (ax / magA).toFixed(2) : '0.00';
+            const cosBeta = magA ? (ay / magA).toFixed(2) : '0.00';
+            const cosGamma = magA ? (az / magA).toFixed(2) : '0.00';
+            document.getElementById('directionCos').textContent = `(${cosAlpha}, ${cosBeta}, ${cosGamma})`;
+
+            const ctx = vectorCtx;
+            const width = ctx.canvas.clientWidth;
+            const height = ctx.canvas.clientHeight;
+            drawAxis(ctx, width, height);
+            ctx.save();
+            ctx.strokeStyle = '#cbd5f5';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < 6; i++) {
+                ctx.beginPath();
+                ctx.moveTo(50 + i * 40, height - 40);
+                ctx.lineTo(50 + i * 40 - 20, height - 40 - 20);
+                ctx.stroke();
+            }
+            ctx.restore();
+            const origin = project3D(0, 0, 0);
+            drawVector(ctx, origin, project3D(ax, ay, az), '#2563eb');
+            drawVector(ctx, origin, project3D(bx, by, bz), '#a855f7');
+            renderMath();
+        }
+
+        function updateOperations() {
+            const ax = Number(document.getElementById('axRange').value);
+            const ay = Number(document.getElementById('ayRange').value);
+            const az = Number(document.getElementById('azRange').value);
+            const bx = Number(document.getElementById('bxRange').value);
+            const by = Number(document.getElementById('byRange').value);
+            const bz = Number(document.getElementById('bzRange').value);
+            const k = Number(document.getElementById('scalarRange').value);
+
+            document.getElementById('scalarValue').textContent = k.toFixed(1);
+            const add = [ax + bx, ay + by, az + bz];
+            const scalar = [k * ax, k * ay, k * az];
+            const dot = ax * bx + ay * by + az * bz;
+            document.getElementById('addResult').textContent = `(${add.map(v => v.toFixed(1)).join(',')})`;
+            document.getElementById('scalarResult').textContent = `(${scalar.map(v => v.toFixed(1)).join(',')})`;
+            document.getElementById('dotResult').textContent = dot.toFixed(2);
+
+            const ctx = operationCtx;
+            const width = ctx.canvas.clientWidth;
+            const height = ctx.canvas.clientHeight;
+            drawAxis(ctx, width, height);
+            const origin = project3D(0, 0, 0);
+            drawVector(ctx, origin, project3D(ax, ay, az), '#2563eb');
+            drawVector(ctx, origin, project3D(bx, by, bz), '#7c3aed');
+            drawVector(ctx, origin, project3D(add[0], add[1], add[2]), '#16a34a');
+            drawVector(ctx, origin, project3D(scalar[0], scalar[1], scalar[2]), '#f97316');
+        }
+
+        const vectorCanvas = document.getElementById('vectorCanvas');
+        const operationCanvas = document.getElementById('operationCanvas');
+        const vectorCtx = resizeCanvas(vectorCanvas);
+        const operationCtx = resizeCanvas(operationCanvas);
+
+        document.querySelectorAll('input[type="range"]').forEach(input => {
+            input.addEventListener('input', () => {
+                updateVectorInfo();
+                updateOperations();
+            });
+        });
+
+        window.addEventListener('resize', () => {
+            resizeCanvas(vectorCanvas);
+            resizeCanvas(operationCanvas);
+            updateVectorInfo();
+            updateOperations();
+        });
+
+        updateVectorInfo();
+        updateOperations();
+        renderMath();
+    </script>
+</body>
+</html>

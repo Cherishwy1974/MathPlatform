@@ -1,0 +1,1471 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>函数性质实验室</title>
+    
+    <!-- ========================================
+         修复经验总结：
+         
+         1. MathJax渲染问题分析：
+            - 问题现象：输出框和下拉框中的公式没有正确渲染
+            - 原因分析：DOM更新后没有触发MathJax重新渲染，或渲染时机不对
+            - 关键点：MathJax需要在DOM更新完成后才能正确渲染公式
+         
+         2. 解决方案：
+            - 使用本地MathJax资源，避免网络延迟和依赖问题
+            - 优化MathJax配置，添加错误处理和重试机制
+            - 在DOM更新后添加延迟渲染调用，确保公式能被正确渲染
+            - 实现多重渲染策略，确保页面加载和交互过程中公式都能正确显示
+         
+         3. 关键技术点：
+            - setTimeout延迟渲染：确保DOM更新完成后再渲染公式
+            - 错误处理和重试：捕获渲染错误并自动重试
+            - 多重初始化策略：确保在不同页面加载阶段都能正确渲染公式
+            - 资源本地化：所有资源使用本地文件，避免外部依赖
+         ======================================== -->
+    <!-- 使用本地MathJax，确保公式正确渲染 -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true,
+                processEnvironments: true
+            },
+            chtml: {
+                fontCache: 'global',
+                scale: 1.2,
+                minScale: 0.5,
+                displayAlign: 'center',
+                displayIndent: '0'
+            },
+            options: {
+                ignoreHtmlClass: 'tex2jax_ignore',
+                processHtmlClass: 'tex2jax_process'
+            },
+            startup: {
+                typeset: false,
+                ready: () => {
+                    console.log('MathJax 正在初始化...');
+                    MathJax.startup.defaultReady();
+                    console.log('MathJax 初始化完成');
+                },
+                pageReady: () => {
+                    console.log('MathJax 页面准备中...');
+                    return MathJax.startup.defaultPageReady().then(() => {
+                        console.log('MathJax 页面准备完成');
+                        // 强制重新渲染所有公式
+                        setTimeout(() => {
+                            if (window.MathJax && MathJax.typesetPromise) {
+                                MathJax.typesetPromise().then(() => {
+                                    console.log('MathJax 公式渲染完成');
+                                }).catch((error) => {
+                                    console.error('MathJax 渲染错误:', error);
+                                });
+                            }
+                        }, 500);
+                    }).catch((error) => {
+                        console.error('MathJax 页面准备错误:', error);
+                    });
+                }
+            },
+            loader: {
+                load: ['[tex]/ams', '[tex]/autoload', '[tex]/require']
+            }
+        };
+    </script>
+    <!-- 使用defer异步加载，避免阻塞 -->
+    <script defer src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js"></script>    
+    <style>
+        /* ========================================
+           用户要求1：字号统一
+           ======================================== */
+        :root {
+            --h1-size: 22px;      
+            --h2-size: 20px;      
+            --h3-size: 18px;      
+            --btn-size: 16px;     
+            --formula-size: 20px; 
+            --text-size: 16px;
+            
+            --primary: #4f46e5;
+            --primary-light: #6366f1;
+            --primary-dark: #3730a3;
+            --light: #ffffff;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-600: #4b5563;
+            --gray-800: #1f2937;
+            --border: #e5e7eb;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* ========================================
+           用户要求：滚动条生效但不显示
+           ======================================== */
+        *::-webkit-scrollbar {
+            width: 0;
+            background: transparent;
+        }
+        
+        * {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
+            font-size: var(--text-size);
+            line-height: 1.5;
+            background: var(--gray-50);
+            color: var(--gray-800);
+        }
+
+        /* ========================================
+           用户要求：横向布局（宽是高的2倍），压缩高度
+           ======================================== */
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            height: 100vh;
+            max-height: 700px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            background: var(--light);
+        }
+
+        .header {
+            background: var(--primary);
+            color: var(--light);
+            padding: 8px 20px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: var(--h2-size);
+            margin: 0;
+        }
+
+        .main {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* ========================================
+           用户要求：侧边栏不动
+           ======================================== */
+        .sidebar {
+            width: 120px;
+            background: var(--gray-50);
+            border-right: 1px solid var(--border);
+            padding: 10px 8px;
+        }
+
+        .nav-btn {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 4px;
+            background: transparent;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: var(--text-size);
+            color: var(--gray-600);
+            text-align: left;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover {
+            background: var(--gray-100);
+        }
+
+        .nav-btn.active {
+            background: var(--primary);
+            color: var(--light);
+        }
+
+        /* ========================================
+           用户要求：最多左右两栏，必须有可视化
+           ======================================== */
+        .content {
+            flex: 1;
+            display: none;
+            padding: 16px;
+            overflow-y: auto;
+        }
+
+        .content.active {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow-y: auto;
+        }
+
+        .card {
+            background: var(--light);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .card h3 {
+            font-size: var(--h3-size);
+            color: var(--primary);
+            margin-bottom: 12px;
+        }
+
+        .input-group {
+            margin-bottom: 12px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 4px;
+            font-size: var(--text-size);
+            font-weight: 500;
+        }
+
+        .input-group input,
+        .input-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: var(--text-size);
+            background: var(--gray-50);
+        }
+
+        .input-group input:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: var(--light);
+        }
+
+        .btn {
+            padding: 8px 16px;
+            background: var(--primary);
+            color: var(--light);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: var(--btn-size);
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .result {
+            background: var(--gray-50);
+            padding: 12px;
+            border-radius: 4px;
+            border: 1px solid var(--primary);
+            text-align: center;
+            font-size: var(--text-size); /* 已经是正文字号，保持不变 */
+            margin: 12px 0;
+            min-height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .formula-box {
+            background: #f0f7ff;
+            padding: 12px;
+            border-radius: 4px;
+            border-left: 3px solid var(--primary);
+            margin: 12px 0;
+            text-align: center;
+            font-size: var(--text-size); /* 修复：使用正文字号，原来是var(--formula-size) 20px */
+        }
+
+        .info-box {
+            background: var(--gray-50);
+            padding: 10px;
+            border-radius: 4px;
+            margin: 8px 0;
+            font-size: var(--text-size);
+            text-align: center;
+        }
+
+        .steps {
+            background: #fff9e6;
+            padding: 12px;
+            border-radius: 4px;
+            border-left: 3px solid #f59e0b;
+            line-height: 1.6; /* 修复：减少行高，原来是1.8 */
+            font-size: var(--text-size);
+        }
+
+        .canvas-container {
+            border: 1px solid var(--gray-200);
+            border-radius: 4px;
+            background: #fafafa;
+            padding: 10px;
+            min-height: 200px;
+            max-height: 500px;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .canvas-container canvas {
+            max-width: 100%;
+            max-height: 100%;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .tower-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: var(--gray-50);
+            border-radius: 4px;
+            min-height: 250px;
+            max-height: 400px;
+        }
+
+        .tower-display {
+            display: flex;
+            align-items: flex-end;
+            gap: 10px;
+        }
+
+        .tower {
+            display: flex;
+            flex-direction: column-reverse;
+            align-items: center;
+        }
+
+        .block {
+            width: 40px;
+            height: 25px;
+            background: var(--primary);
+            border: 1px solid var(--primary-dark);
+            margin: 1px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--light);
+            font-size: 12px; /* 保持小字号，用于数字块显示 */
+            font-weight: bold;
+            border-radius: 2px;
+            transition: all 0.3s;
+        }
+
+        .block.removing {
+            opacity: 0.3;
+            transform: translateX(50px);
+        }
+
+        .slider-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: var(--gray-50);
+            border-radius: 4px;
+            margin-top: 12px;
+        }
+
+        .slider-group label {
+            min-width: 60px;
+            font-size: var(--text-size);
+        }
+
+        .slider {
+            flex: 1;
+            height: 4px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: var(--gray-200);
+            outline: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+        }
+
+        .slider-value {
+            min-width: 40px;
+            text-align: center;
+            font-weight: 600;
+            color: var(--primary);
+            font-size: var(--text-size); /* 修复：确保滑块值使用正文字号 */
+        }
+
+        .rule-visual {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 20px;
+            background: var(--gray-50);
+            border-radius: 4px;
+            min-height: 150px;
+        }
+
+        .rule-tower {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .rule-height {
+            width: 30px;
+            background: var(--primary);
+            border-radius: 2px;
+            margin-bottom: 5px;
+        }
+
+        .rule-label {
+            font-size: 12px; /* 保持小字号，用于图表标签 */
+            color: var(--gray-600);
+            text-align: center;
+        }
+
+        .operator {
+            font-size: var(--h3-size); /* 修复：使用统一字号变量，原来是24px */
+            font-weight: bold;
+            color: var(--primary);
+            padding: 0 10px;
+        }
+
+        /* ========================================
+           响应式设计：小尺寸下导航按钮移到上方
+           ======================================== */
+        @media (max-width: 768px) {
+            .main {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+                padding: 8px 16px;
+                display: flex;
+                flex-direction: row;
+                gap: 8px;
+                overflow-x: auto;
+                flex-shrink: 0;
+                justify-content: center;
+                flex-wrap: nowrap;
+            }
+
+            .nav-btn {
+                min-width: 90px;
+                text-align: center;
+                margin-bottom: 0;
+                white-space: nowrap;
+                flex-shrink: 0;
+                padding: 8px 12px;
+                font-size: var(--text-size); /* 修复：使用统一字号变量，原来是14px */
+            }
+
+            .content.active {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .container {
+                max-height: none;
+                height: 100vh;
+            }
+
+            .header {
+                padding: 6px 16px;
+                height: 36px;
+            }
+
+            .header h1 {
+                font-size: var(--h2-size); /* 修复：使用统一字号变量，原来是18px */
+            }
+
+            .card {
+                padding: 12px;
+            }
+
+            .canvas-container {
+                min-height: 200px;
+                max-height: 300px;
+                padding: 8px;
+            }
+
+            .canvas-container canvas {
+                width: 100%;
+                max-width: 100%;
+                height: auto;
+            }
+
+            .tower-container {
+                min-height: 200px;
+                max-height: 300px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header {
+                padding: 4px 12px;
+                height: 32px;
+            }
+
+            .header h1 {
+                font-size: var(--h3-size); /* 修复：使用统一字号变量，原来是16px */
+            }
+
+            .sidebar {
+                padding: 6px 8px;
+                gap: 6px;
+                justify-content: space-between;
+            }
+
+            .nav-btn {
+                min-width: 75px;
+                padding: 6px 8px;
+                font-size: var(--text-size); /* 修复：使用统一字号变量，原来是13px */
+                flex: 1;
+                max-width: 100px;
+            }
+
+            .content {
+                padding: 12px;
+            }
+
+            .card {
+                padding: 10px;
+            }
+
+            .canvas-container {
+                min-height: 180px;
+                max-height: 250px;
+                padding: 6px;
+            }
+
+            .canvas-container canvas {
+                width: 100%;
+                max-width: 100%;
+                height: auto;
+            }
+
+            .tower-container {
+                min-height: 180px;
+                max-height: 250px;
+            }
+        }
+
+        /* 极小屏幕优化 */
+        @media (max-width: 360px) {
+            .sidebar {
+                padding: 4px 6px;
+                gap: 4px;
+                /* ========================================
+                   修复：极小屏幕确保按钮可以横向滚动查看
+                   不强制挤压，保持按钮最小可读宽度
+                   ======================================== */
+                overflow-x: auto;
+                justify-content: flex-start;
+            }
+
+            .nav-btn {
+                /* ========================================
+                   修复：保持最小宽度，确保文字不被截断
+                   用户可通过横向滚动查看所有按钮
+                   ======================================== */
+                min-width: 65px;
+                padding: 5px 6px;
+                font-size: var(--text-size); /* 修复：使用统一字号变量，原来是12px */
+                flex-shrink: 0;
+            }
+
+            .header h1 {
+                font-size: var(--h3-size); /* 修复：使用统一字号变量，原来是14px */
+            }
+        }
+    /* 统一悬浮返回按钮样式 */
+        .return-home-panel { position: fixed; bottom: 12px; right: 12px; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; z-index: 40; }
+        .return-toggle { width: 40px; height: 40px; border-radius: 50%; border: none; background: linear-gradient(135deg, rgba(79,70,229,0.96), rgba(99,102,241,0.9)); color: #ffffff; font-size: 20px; cursor: pointer; box-shadow: 0 10px 18px rgba(79,70,229,0.28); transition: transform 0.2s ease, box-shadow 0.2s ease; }
+        .return-toggle:hover { transform: translateY(-1px) scale(1.03); box-shadow: 0 14px 26px rgba(79,70,229,0.35); }
+        .return-toggle:focus-visible { outline: 2px solid rgba(129,140,248,0.65); outline-offset: 3px; }
+        .return-links { display: none; flex-direction: column; gap: 6px; padding: 10px; border-radius: 10px; background: rgba(255,255,255,0.96); border: 1px solid rgba(79,70,229,0.18); box-shadow: 0 10px 30px rgba(15,23,42,0.14); opacity: 0; transition: opacity 0.16s ease; }
+        .return-link { text-decoration: none; font-size: 15px; color: var(--primary-dark); padding: 6px 12px; border-radius: 8px; background: rgba(99,102,241,0.12); transition: background 0.2s ease, color 0.2s ease; }
+        .return-link:hover { background: rgba(79,70,229,0.18); color: var(--primary); }
+    </style>
+
+</head>
+<body>
+    <div class="return-home-panel">
+        <button class="return-toggle" onclick="toggleReturnLinks()"><i class="fa-solid fa-house"></i></button>
+        <div class="return-links">
+            <a class="return-link" href="index.html"><i class="fa-solid fa-arrow-left"></i> 返回目录</a>
+            <a class="return-link" href="../index.html"><i class="fa-solid fa-house"></i> 返回主站</a>
+        </div>
+    </div>
+    <div class="container">
+        <header class="header">
+            <h1>函数性质实验室</h1>
+        </header>
+
+        <div class="main">
+            <!-- 侧边栏 -->
+            <nav class="sidebar">
+                <button class="nav-btn active" onclick="switchPanel('basic')">单调奇偶</button>
+                <button class="nav-btn" onclick="switchPanel('tower')">动手实验</button>
+                <button class="nav-btn" onclick="switchPanel('rules')">有界周期</button>
+            </nav>
+
+            <!-- 单调性与奇偶性页面 -->
+            <div class="content active" id="basic">
+                <div class="column">
+                    <div class="card">
+                        <h3>单调性测试器</h3>
+                        <div class="input-group">
+                            <label>选择函数</label>
+                            <select id="base" onchange="calculate()">
+                                <option value="2x" selected>f(x) = 2x</option>
+                                <option value="-2x">f(x) = -2x</option>
+                                <option value="x²">f(x) = x²</option>
+                                <option value="x³">f(x) = x³</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>输入第一个x值</label>
+                            <input type="number" id="value1" value="1" step="1">
+                        </div>
+                        <div class="input-group">
+                            <label>输入第二个x值（更大）</label>
+                            <input type="number" id="value2" value="3" step="1">
+                        </div>
+                        <div class="result" id="result">
+                            x从1变到3，f(x)从2变到6
+                        </div>
+                        <div class="btn-row">
+                            <button class="btn" onclick="calculate()">计算</button>
+                            <button class="btn" onclick="randomCalc()">随机测试</button>
+                        </div>
+                        <div class="formula-box" id="steps">
+                            <strong>单调递增</strong>：$x$变大，$f(x)$也变大
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>奇偶性测试器</h3>
+                        <div class="input-group">
+                            <label>输入一个正数</label>
+                            <input type="number" id="oddEvenInput" value="3" step="1">
+                        </div>
+                        <button class="btn" onclick="testOddEven()" style="width: 100%;">测试奇偶性</button>
+                        <div class="info-box" id="oddEvenResult1">$f(3) = ?$</div>
+                        <div class="info-box" id="oddEvenResult2">$f(-3) = ?$</div>
+                        <div class="info-box" id="oddEvenConclusion">等待测试...</div>
+                    </div>
+                </div>
+
+                <div class="column">
+                    <div class="card">
+                        <h3>函数图像</h3>
+                        <div class="canvas-container">
+                            <canvas id="graph" width="600" height="300"></canvas>
+                        </div>
+                        <div class="slider-group">
+                            <label>x值</label>
+                            <input type="range" class="slider" id="baseSlider" 
+                                   min="-5" max="5" step="0.5" value="0">
+                            <span class="slider-value" id="sliderValue">0</span>
+                        </div>
+                        <div class="info-box" id="funcDesc">
+                            当前函数：$f(x) = 2x$
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 动手实验页面 -->
+            <div class="content" id="tower">
+                <div class="column">
+                    <div class="card">
+                        <h3>数字实验 - 看数字怎么变</h3>
+                        <div class="info-box">
+                            输入几个数，看看结果的规律
+                        </div>
+                        <div class="input-group">
+                            <label>选择要研究的函数</label>
+                            <select id="towerSize" onchange="updateTower()">
+                                <option value="2x" selected>f(x) = 2x（线性）</option>
+                                <option value="x²">f(x) = x²（平方）</option>
+                                <option value="x³">f(x) = x³（立方）</option>
+                                <option value="sin">f(x) = sin(x)（正弦）</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>选择测试范围</label>
+                            <select id="towerBase" onchange="updateTower()">
+                                <option value="-2到2" selected>从-2到2</option>
+                                <option value="-5到5">从-5到5</option>
+                                <option value="0到10">从0到10</option>
+                            </select>
+                        </div>
+                        <button class="btn" onclick="animateDismantling()" style="width: 100%; margin-top: 12px;">
+                            逐个计算动画
+                        </button>
+                        <div class="steps" id="towerSteps">
+                            准备计算$f(x) = 2x$<br>
+                            范围：从-2到2
+                        </div>
+                    </div>
+                </div>
+
+                <div class="column">
+                    <div class="card">
+                        <h3>计算结果表</h3>
+                        <div class="tower-container">
+                            <div class="tower-display" id="towerVisual"></div>
+                        </div>
+                        <div class="result" id="towerResult">
+                            等待计算...
+                        </div>
+                        <div class="formula-box">
+                            观察规律<br>
+                            数字变大了还是变小了？<br>
+                            正负号改变了吗？
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 有界性与周期性页面 -->
+            <div class="content" id="rules">
+                <div class="column">
+                    <div class="card">
+                        <h3>有界性：有没有上限或下限？</h3>
+                        <div class="formula-box">看结果能到多大或多小</div>
+                        <div class="rule-visual" id="multiplyViz"></div>
+                        <div class="steps">
+                            以$f(x) = x^2$为例<br>
+                            试试这些数：<br>
+                            $f(0) = 0$ <i class="fa-solid fa-arrow-left"></i> 最小值！<br>
+                            $f(1) = 1$<br>
+                            $f(2) = 4$<br>
+                            $f(10) = 100$<br>
+                            $f(100) = 10000$ <i class="fa-solid fa-arrow-left"></i> 可以无限大<br>
+                            <strong>结论：有下界（0），无上界</strong>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>下有界的例子</h3>
+                        <div class="formula-box">$f(x) = x^2 + 3$</div>
+                        <div class="steps">
+                            因为$x^2 \geq 0$<br>
+                            所以$x^2 + 3 \geq 3$<br>
+                            最小值是3，不可能更小<br>
+                            $f(0) = 0^2 + 3 = 3$<br>
+                            $f(1) = 1^2 + 3 = 4$<br>
+                            $f(-1) = 1 + 3 = 4$
+                        </div>
+                    </div>
+                </div>
+
+                <div class="column">
+                    <div class="card">
+                        <h3>周期性：结果在循环吗？</h3>
+                        <div class="formula-box">看结果是否重复出现</div>
+                        <div class="rule-visual" id="divideViz"></div>
+                        <div class="steps">
+                            星期几的例子：<br>
+                            今天(0) = 周四<br>
+                            明天(1) = 周五<br>
+                            后天(2) = 周六<br>
+                            ...<br>
+                            第7天 = 周四 <i class="fa-solid fa-arrow-left"></i> 又回来了！<br>
+                            第8天 = 周五 <i class="fa-solid fa-arrow-left"></i> 又重复了！<br>
+                            <strong>周期 = 7天</strong>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>上有界的例子</h3>
+                        <div class="formula-box">$f(x) = -x^2 + 5$</div>
+                        <div class="steps">
+                            因为$-x^2 \leq 0$<br>
+                            所以$-x^2 + 5 \leq 5$<br>
+                            最大值是5，不可能更大<br>
+                            $f(0) = 0 + 5 = 5$ <i class="fa-solid fa-arrow-left"></i> 最大！<br>
+                            $f(1) = -1 + 5 = 4$<br>
+                            $f(2) = -4 + 5 = 1$<br>
+                            $f(10) = -100 + 5 = -95$
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * 改进的MathJax渲染函数
+         * 
+         * 修复经验：
+         * 1. 问题根源：MathJax渲染需要在DOM更新后进行，且需要处理加载和渲染错误
+         * 2. 解决方案：
+         *    - 添加详细日志，便于调试
+         *    - 实现错误处理和自动重试机制
+         *    - 支持MathJax v2和v3两种API
+         *    - 当MathJax未加载完成时，使用延迟重试
+         * 3. 最佳实践：
+         *    - 在DOM更新后使用setTimeout延迟调用此函数
+         *    - 建议延迟50-100ms，确保DOM已完全更新
+         *    - 在关键节点（页面加载、内容更新、用户交互后）调用此函数
+         */
+        function renderMath() {
+            console.log('尝试渲染MathJax公式...');
+            if (window.MathJax && MathJax.typesetPromise) {
+                // 使用Promise API (MathJax v3)
+                MathJax.typesetPromise()
+                    .then(() => {
+                        console.log('MathJax 公式渲染完成');
+                    })
+                    .catch(err => {
+                        console.error('MathJax 渲染错误:', err);
+                        // 错误后重试一次
+                        setTimeout(() => {
+                            console.log('MathJax 渲染重试中...');
+                            MathJax.typesetPromise().catch(e => console.error('重试失败:', e));
+                        }, 200);
+                    });
+            } else if (window.MathJax && MathJax.typeset) {
+                // 使用直接API (MathJax v2)
+                try {
+                    MathJax.typeset();
+                    console.log('MathJax 渲染完成');
+                } catch (err) {
+                    console.error('MathJax 渲染错误:', err);
+                    // 错误后重试一次
+                    setTimeout(() => {
+                        console.log('MathJax 渲染重试中...');
+                        try { MathJax.typeset(); } catch(e) { console.error('重试失败:', e); }
+                    }, 200);
+                }
+            } else {
+                // MathJax还没有加载完成，延迟重试
+                console.log('MathJax未就绪，100ms后重试');
+                setTimeout(renderMath, 100);
+            }
+        }
+
+        /**
+         * 页面切换函数
+         * 
+         * 修复经验：
+         * 1. 问题：切换页面后公式不渲染
+         * 2. 解决方案：
+         *    - 在页面切换后添加延迟渲染
+         *    - 根据不同面板类型执行相应的初始化函数
+         * 3. 关键点：
+         *    - 使用setTimeout确保DOM更新后再渲染
+         *    - 针对不同面板执行特定的初始化和渲染
+         */
+        function switchPanel(panel) {
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(panel).classList.add('active');
+            
+            // 延迟渲染公式，避免卡顿
+            setTimeout(() => {
+                renderMath();
+                if (panel === 'basic') drawGraph();
+                if (panel === 'tower') updateTower();
+                if (panel === 'rules') drawRuleVisuals();
+            }, 50);
+        }
+
+        // 计算单调性
+        function calculate() {
+            const func = document.getElementById('base').value;
+            const x1 = parseFloat(document.getElementById('value1').value);
+            const x2 = parseFloat(document.getElementById('value2').value);
+            
+            if (isNaN(x1) || isNaN(x2)) {
+                document.getElementById('result').innerHTML = '请输入有效数字';
+                return;
+            }
+            
+            let y1, y2;
+            switch(func) {
+                case '2x':
+                    y1 = 2 * x1;
+                    y2 = 2 * x2;
+                    break;
+                case '-2x':
+                    y1 = -2 * x1;
+                    y2 = -2 * x2;
+                    break;
+                case 'x²':
+                    y1 = x1 * x1;
+                    y2 = x2 * x2;
+                    break;
+                case 'x³':
+                    y1 = x1 * x1 * x1;
+                    y2 = x2 * x2 * x2;
+                    break;
+            }
+            
+            const result = document.getElementById('result');
+            result.innerHTML = `$x$从${x1}变到${x2}，$f(x)$从${y1.toFixed(2)}变到${y2.toFixed(2)}`;
+            
+            // 判断单调性
+            let monotone = '';
+            if (x2 > x1) {
+                if (y2 > y1) {
+                    monotone = '<strong>单调递增</strong>：$x$变大，$f(x)$也变大';
+                } else if (y2 < y1) {
+                    monotone = '<strong>单调递减</strong>：$x$变大，$f(x)$反而变小';
+                } else {
+                    monotone = '结果相同';
+                }
+            }
+            
+            document.getElementById('steps').innerHTML = monotone;
+            
+            drawGraph();
+            renderMath();
+        }
+
+        /**
+         * 测试奇偶性函数
+         * 
+         * 修复经验：
+         * 1. 问题：奇偶性测试结果中的公式不渲染
+         * 2. 解决方案：
+         *    - 在更新DOM内容后添加延迟渲染调用
+         *    - 使用setTimeout确保DOM更新完成后再渲染
+         * 3. 关键点：
+         *    - 延迟50ms，确保DOM已完全更新
+         *    - 在函数末尾调用，确保所有内容更新后再渲染
+         */
+        function testOddEven() {
+            const func = document.getElementById('base').value;
+            const x = Math.abs(parseFloat(document.getElementById('oddEvenInput').value));
+            
+            if (isNaN(x)) return;
+            
+            let yPos, yNeg;
+            switch(func) {
+                case '2x':
+                    yPos = 2 * x;
+                    yNeg = 2 * (-x);
+                    break;
+                case '-2x':
+                    yPos = -2 * x;
+                    yNeg = -2 * (-x);
+                    break;
+                case 'x²':
+                    yPos = x * x;
+                    yNeg = (-x) * (-x);
+                    break;
+                case 'x³':
+                    yPos = x * x * x;
+                    yNeg = (-x) * (-x) * (-x);
+                    break;
+            }
+            
+            document.getElementById('oddEvenResult1').innerHTML = `$f(${x}) = ${yPos}$`;
+            document.getElementById('oddEvenResult2').innerHTML = `$f(-${x}) = ${yNeg}$`;
+            
+            let conclusion = '';
+            if (Math.abs(yPos - yNeg) < 0.001) {
+                conclusion = '<strong>偶函数</strong>：$f(x) = f(-x)$';
+            } else if (Math.abs(yPos + yNeg) < 0.001) {
+                conclusion = '<strong>奇函数</strong>：$f(-x) = -f(x)$';
+            } else {
+                conclusion = '非奇非偶函数';
+            }
+            
+            document.getElementById('oddEvenConclusion').innerHTML = conclusion;
+            
+            // 确保在DOM更新后渲染公式
+            setTimeout(() => {
+                renderMath();
+            }, 50);
+        }
+
+        // 随机测试
+        function randomCalc() {
+            const x1 = Math.floor(Math.random() * 10 - 5);
+            const x2 = x1 + Math.floor(Math.random() * 5 + 1);
+            
+            document.getElementById('value1').value = x1;
+            document.getElementById('value2').value = x2;
+            calculate();
+        }
+
+        /**
+         * 绘制函数图像
+         * 
+         * 修复经验：
+         * 1. 问题：函数图像描述中的公式不渲染
+         * 2. 解决方案：
+         *    - 在更新描述后添加延迟渲染调用
+         *    - 使用setTimeout确保DOM更新完成后再渲染
+         * 3. 关键点：
+         *    - Canvas绘制和DOM更新分离处理
+         *    - 在更新funcDesc元素后专门调用渲染函数
+         */
+        function drawGraph() {
+            const canvas = document.getElementById('graph');
+            if (!canvas) return;
+            
+            const container = canvas.parentElement;
+            const containerWidth = Math.max(200, container.clientWidth - 20);
+            const containerHeight = Math.max(150, Math.min(400, container.clientHeight - 20));
+            
+            canvas.style.width = containerWidth + 'px';
+            canvas.style.height = containerHeight + 'px';
+            
+            const devicePixelRatio = window.devicePixelRatio || 1;
+            canvas.width = containerWidth * devicePixelRatio;
+            canvas.height = containerHeight * devicePixelRatio;
+            
+            const ctx = canvas.getContext('2d');
+            ctx.scale(devicePixelRatio, devicePixelRatio);
+            
+            const width = containerWidth;
+            const height = containerHeight;
+            const centerX = width / 2;
+            const centerY = height / 2;
+            const scale = width / 12;
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            // 绘制坐标轴
+            ctx.strokeStyle = '#374151';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(0, centerY);
+            ctx.lineTo(width, centerY);
+            ctx.moveTo(centerX, 0);
+            ctx.lineTo(centerX, height);
+            ctx.stroke();
+            
+            // 绘制函数
+            const func = document.getElementById('base').value;
+            ctx.strokeStyle = '#4f46e5';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            
+            for (let px = 0; px <= width; px++) {
+                const x = (px - centerX) / scale;
+                let y;
+                
+                switch(func) {
+                    case '2x':
+                        y = 2 * x;
+                        break;
+                    case '-2x':
+                        y = -2 * x;
+                        break;
+                    case 'x²':
+                        y = x * x;
+                        break;
+                    case 'x³':
+                        y = x * x * x;
+                        break;
+                }
+                
+                const py = centerY - y * scale;
+                
+                if (px === 0) {
+                    ctx.moveTo(px, py);
+                } else {
+                    ctx.lineTo(px, py);
+                }
+            }
+            ctx.stroke();
+            
+            // 标记当前点
+            const xVal = parseFloat(document.getElementById('baseSlider').value);
+            let yVal;
+            switch(func) {
+                case '2x':
+                    yVal = 2 * xVal;
+                    break;
+                case '-2x':
+                    yVal = -2 * xVal;
+                    break;
+                case 'x²':
+                    yVal = xVal * xVal;
+                    break;
+                case 'x³':
+                    yVal = xVal * xVal * xVal;
+                    break;
+            }
+            
+            ctx.fillStyle = '#ef4444';
+            ctx.beginPath();
+            ctx.arc(centerX + xVal * scale, centerY - yVal * scale, 5, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // 更新描述
+            document.getElementById('funcDesc').innerHTML = `当前函数：$f(${xVal}) = ${yVal.toFixed(2)}$`;
+            
+            // 确保在更新描述后渲染公式
+            setTimeout(() => {
+                renderMath();
+            }, 50);
+        }
+
+        /**
+         * 更新数字实验
+         * 
+         * 修复经验：
+         * 1. 问题：数字实验结果中的公式不渲染
+         * 2. 解决方案：
+         *    - 在更新DOM内容后添加延迟渲染调用
+         *    - 移除重复的渲染调用，避免冲突
+         * 3. 关键点：
+         *    - 使用表格展示数据，确保格式一致
+         *    - 在DOM更新后使用setTimeout延迟渲染
+         */
+        function updateTower() {
+            const func = document.getElementById('towerSize').value;
+            const range = document.getElementById('towerBase').value;
+            
+            const visual = document.getElementById('towerVisual');
+            visual.innerHTML = '';
+            
+            // 根据范围生成测试点
+            let testPoints = [];
+            switch(range) {
+                case '-2到2':
+                    testPoints = [-2, -1, 0, 1, 2];
+                    break;
+                case '-5到5':
+                    testPoints = [-5, -3, 0, 3, 5];
+                    break;
+                case '0到10':
+                    testPoints = [0, 2, 5, 8, 10];
+                    break;
+            }
+            
+            // 创建结果显示
+            let tableHTML = '<table style="width:100%; text-align:center;">';
+            tableHTML += '<tr><th>x</th><th>f(x)</th></tr>';
+            
+            testPoints.forEach(x => {
+                let y;
+                switch(func) {
+                    case '2x':
+                        y = 2 * x;
+                        break;
+                    case 'x²':
+                        y = x * x;
+                        break;
+                    case 'x³':
+                        y = x * x * x;
+                        break;
+                    case 'sin':
+                        y = Math.sin(x);
+                        break;
+                }
+                tableHTML += `<tr><td>${x}</td><td>${y.toFixed(2)}</td></tr>`;
+            });
+            
+            tableHTML += '</table>';
+            visual.innerHTML = tableHTML;
+            
+            document.getElementById('towerResult').innerHTML = `函数：$f(x) = ${func}$`;
+            document.getElementById('towerSteps').innerHTML = 
+                `准备计算$f(x) = ${func}$<br>范围：${range}`;
+            
+            // 延迟渲染，确保DOM更新后再渲染公式
+            setTimeout(() => {
+                renderMath();
+            }, 50);
+            
+            renderMath();
+        }
+
+        // 动画演示
+        function animateDismantling() {
+            const func = document.getElementById('towerSize').value;
+            const range = document.getElementById('towerBase').value;
+            
+            let testPoints = [];
+            switch(range) {
+                case '-2到2':
+                    testPoints = [-2, -1, 0, 1, 2];
+                    break;
+                case '-5到5':
+                    testPoints = [-5, -3, 0, 3, 5];
+                    break;
+                case '0到10':
+                    testPoints = [0, 2, 5, 8, 10];
+                    break;
+            }
+            
+            let index = 0;
+            let results = '';
+            
+            const animate = () => {
+                if (index >= testPoints.length) {
+                    document.getElementById('towerSteps').innerHTML = 
+                        results + '<br><strong>计算完成！</strong>';
+                    return;
+                }
+                
+                const x = testPoints[index];
+                let y;
+                switch(func) {
+                    case '2x':
+                        y = 2 * x;
+                        break;
+                    case 'x²':
+                        y = x * x;
+                        break;
+                    case 'x³':
+                        y = x * x * x;
+                        break;
+                    case 'sin':
+                        y = Math.sin(x);
+                        break;
+                }
+                
+                results += `$f(${x}) = ${y.toFixed(2)}$<br>`;
+                document.getElementById('towerSteps').innerHTML = results;
+                
+                // 延迟渲染，确保DOM更新后再渲染公式
+                setTimeout(() => {
+                    renderMath();
+                }, 50);
+                
+                index++;
+                setTimeout(animate, 500);
+            };
+            
+            updateTower();
+            setTimeout(animate, 500);
+        }
+
+        // 绘制有界性和周期性可视化
+        function drawRuleVisuals() {
+            // 有界性可视化
+            const multiplyViz = document.getElementById('multiplyViz');
+            multiplyViz.innerHTML = `
+                <div class="rule-tower">
+                    <div class="rule-height" style="height: 0px; border-top: 2px solid red;"></div>
+                    <div class="rule-label">下界<br>f(x) ≥ 0</div>
+                </div>
+                <div class="rule-tower">
+                    <div class="rule-height" style="height: 20px;"></div>
+                    <div class="rule-label">f(1) = 1</div>
+                </div>
+                <div class="rule-tower">
+                    <div class="rule-height" style="height: 40px;"></div>
+                    <div class="rule-label">f(2) = 4</div>
+                </div>
+                <div class="rule-tower">
+                    <div class="rule-height" style="height: 90px;"></div>
+                    <div class="rule-label">f(3) = 9</div>
+                </div>
+                <div class="rule-tower">
+                    <div class="rule-height" style="height: 120px; background: #10b981;"></div>
+                    <div class="rule-label">→∞<br>无上界</div>
+                </div>
+            `;
+            
+            // 周期性可视化
+            const divideViz = document.getElementById('divideViz');
+            divideViz.innerHTML = `
+                <div class="rule-tower">
+                    <div class="rule-height" style="height: 40px; background: #fbbf24;"></div>
+                    <div class="rule-label">周四</div>
+                </div>
+                <div class="rule-tower">
+                    <div class="rule-height" style="height: 40px; background: #6366f1;"></div>
+                    <div class="rule-label">周五</div>
+                </div>
+                <div class="rule-tower">
+                    <div class="rule-height" style="height: 40px; background: #10b981;"></div>
+                    <div class="rule-label">周六</div>
+                </div>
+                <div class="operator">···</div>
+                <div class="rule-tower">
+                    <div class="rule-height" style="height: 40px; background: #fbbf24;"></div>
+                    <div class="rule-label">周四<br>(重复)</div>
+                </div>
+            `;
+        }
+
+        // 滑块事件
+        document.getElementById('baseSlider')?.addEventListener('input', function() {
+            const value = parseFloat(this.value);
+            document.getElementById('sliderValue').textContent = value;
+            drawGraph();
+        });
+
+        // 防抖优化：窗口大小变化时只重绘当前活跃面板
+        let resizeTimeout;
+        window.addEventListener('resize', function() {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                const activePanel = document.querySelector('.content.active');
+                if (activePanel) {
+                    const panelId = activePanel.id;
+                    if (panelId === 'basic') {
+                        drawGraph();
+                    } else if (panelId === 'tower') {
+                        updateTower();
+                    } else if (panelId === 'rules') {
+                        drawRuleVisuals();
+                    }
+                }
+            }, 150);
+        });
+
+        // 强制初始化函数
+        function forceInitialize() {
+            console.log('强制初始化开始');
+
+            // 强制执行计算
+            try {
+                calculate();
+                console.log('calculate() 执行完成');
+            } catch (e) {
+                console.error('calculate() 执行失败:', e);
+            }
+
+            // 强制绘制图形
+            try {
+                drawGraph();
+                console.log('drawGraph() 执行完成');
+            } catch (e) {
+                console.error('drawGraph() 执行失败:', e);
+            }
+
+            // 强制更新塔
+            try {
+                updateTower();
+                console.log('updateTower() 执行完成');
+            } catch (e) {
+                console.error('updateTower() 执行失败:', e);
+            }
+
+            // 强制绘制规则可视化
+            try {
+                drawRuleVisuals();
+                console.log('drawRuleVisuals() 执行完成');
+            } catch (e) {
+                console.error('drawRuleVisuals() 执行失败:', e);
+            }
+
+            // 强制渲染数学公式
+            setTimeout(() => {
+                try {
+                    renderMath();
+                    console.log('renderMath() 执行完成');
+                } catch (e) {
+                    console.error('renderMath() 执行失败:', e);
+                }
+            }, 500);
+
+            console.log('强制初始化完成');
+        }
+
+        /**
+         * 多重初始化策略
+         * 
+         * 修复经验：
+         * 1. 问题：页面加载时公式可能不渲染
+         * 2. 解决方案：
+         *    - 实现多重初始化策略，确保在不同页面加载阶段都能正确渲染
+         *    - 添加多次渲染尝试，增加成功率
+         * 3. 关键点：
+         *    - DOMContentLoaded：DOM结构加载完成时触发
+         *    - window.onload：所有资源加载完成时触发
+         *    - 立即执行：针对DOM已就绪的情况
+         *    - 延迟执行：作为最后的后备方案
+         *    - 每个策略都添加额外的渲染尝试，确保公式能被正确渲染
+         */
+        // 策略1: DOMContentLoaded
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOMContentLoaded 触发');
+            setTimeout(forceInitialize, 100);
+        });
+
+        // 策略2: window.onload
+        window.addEventListener('load', function() {
+            console.log('window.load 触发');
+            setTimeout(forceInitialize, 200);
+            
+            // 额外的MathJax渲染尝试
+            setTimeout(() => {
+                console.log('额外的MathJax渲染尝试');
+                renderMath();
+            }, 500);
+            
+            // 再次尝试渲染所有公式
+            setTimeout(() => {
+                console.log('再次尝试渲染所有公式');
+                renderMath();
+            }, 1000);
+        });
+
+        // 策略3: 立即执行（如果DOM已经准备好）
+        if (document.readyState !== 'loading') {
+            console.log('DOM已准备好，立即执行');
+            setTimeout(forceInitialize, 100);
+        }
+
+        // 策略4: 延迟执行作为后备
+        setTimeout(function() {
+            console.log('延迟后备执行');
+            forceInitialize();
+            
+            // 最后的渲染尝试
+            setTimeout(() => {
+                console.log('最后的MathJax渲染尝试');
+                renderMath();
+            }, 500);
+        }, 1000);
+        function toggleReturnLinks() { const p = document.querySelector('.return-links'); if (!p) return; if (p.style.display === 'flex') { p.style.opacity = '0'; setTimeout(() => p.style.display = 'none', 160); } else { p.style.display = 'flex'; requestAnimationFrame(() => p.style.opacity = '1'); } }
+    </script>
+</body>
+</html>

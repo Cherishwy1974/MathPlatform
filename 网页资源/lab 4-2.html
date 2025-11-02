@@ -1,0 +1,1349 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>洛必达法则实验室</title>
+
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            startup: {
+                pageReady: () => {
+                    return MathJax.startup.defaultPageReady().then(() => {
+                        console.log('MathJax加载完成');
+                    });
+                }
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+            }
+        };
+    </script>
+    <script defer src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js"></script>
+
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-dark: #3730a3;
+            --primary-light: #6366f1;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #1f2937;
+            --white: #ffffff;
+            --border: #e5e7eb;
+            --h1-size: 22px;
+            --h3-size: 18px;
+            --text-size: 16px;
+            --formula-size: 20px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        *::-webkit-scrollbar {
+            width: 0;
+            background: transparent;
+        }
+
+        * {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+            font-size: var(--text-size);
+            line-height: 1.5;
+            background: var(--gray-50);
+            color: var(--gray-700);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            height: min(100vh, 700px);
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            background: var(--white);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+            overflow: hidden;
+        }
+
+        .header {
+            height: 40px;
+            background: var(--primary);
+            color: var(--white);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+        }
+
+        .header h1 { font-size: var(--h1-size); font-weight: 600; margin: 0; }
+
+        .main { flex: 1; display: flex; overflow: hidden; }
+
+        .sidebar {
+            width: 120px;
+            background: var(--gray-50);
+            border-right: 1px solid var(--border);
+            padding: 12px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .nav-btn {
+            width: 100%;
+            padding: 8px;
+            background: transparent;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: var(--text-size);
+            color: var(--gray-600);
+            text-align: left;
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+
+        .nav-btn:hover {
+            background: var(--gray-100);
+        }
+
+        .nav-btn.active {
+            background: var(--primary);
+            color: var(--white);
+        }
+
+        .content {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            padding: 0;
+        }
+
+        .content section {
+            display: none;
+            height: 100%;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .content section.active {
+            display: block;
+        }
+
+        .two-column {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 20px;
+            height: 100%;
+        }
+
+        .column { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 16px; 
+            overflow-y: auto; 
+            padding-right: 4px; 
+        }
+
+        .card { 
+            background: var(--white); 
+            border: 1px solid var(--border); 
+            border-radius: 12px; 
+            padding: 16px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 12px; 
+        }
+
+        .card h3 { 
+            font-size: var(--h3-size); 
+            color: var(--primary-dark);
+            border-bottom: 2px solid var(--gray-100);
+            padding-bottom: 8px;
+        }
+        
+        .card p { line-height: 1.6; }
+        
+        .formula-display {
+            background: var(--gray-50);
+            padding: 16px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: var(--formula-size);
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .controls { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 12px; 
+            background: var(--gray-50); 
+            border: 1px solid var(--gray-200); 
+            border-radius: 10px; 
+            padding: 12px; 
+        }
+        
+        .control-row { 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+        }
+        
+        .control-row label { 
+            font-weight: 600;
+            min-width: 100px;
+        }
+        
+        .control-row span { 
+            color: var(--primary-dark); 
+            font-weight: 600;
+            min-width: 40px;
+            text-align: right;
+        }
+        
+        select { 
+            flex: 1; 
+            padding: 8px; 
+            border-radius: 8px; 
+            border: 1px solid var(--gray-300); 
+            font-size: 15px; 
+        }
+        
+        input[type="range"] { 
+            flex: 1; 
+        }
+
+        .btn-group { 
+            display: flex; 
+            gap: 10px; 
+            margin-top: 10px;
+        }
+        
+        button.action {
+            flex: 1;
+            background: var(--primary);
+            color: var(--white);
+            border: none;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: var(--text-size);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 600;
+        }
+
+        button.action:hover { 
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+        }
+
+        button.action.secondary {
+            background: var(--white);
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+
+        button.action.danger { 
+            background: var(--danger); 
+        }
+
+        .flow-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .flow-step {
+            position: relative;
+            border: 2px solid var(--gray-200);
+            border-radius: 10px;
+            padding: 12px;
+            background: var(--gray-50);
+            transition: all 0.3s ease;
+        }
+
+        .flow-step.active {
+            border-color: var(--primary);
+            background: #eef2ff;
+            transform: translateX(5px);
+            box-shadow: 0 2px 8px rgba(79, 70, 229, 0.2);
+        }
+
+        .flow-step.success { 
+            border-color: var(--success);
+            background: #d1fae5;
+        }
+
+        .flow-step h4 { 
+            font-size: 15px; 
+            margin-bottom: 6px; 
+            color: var(--primary-dark); 
+        }
+        
+        .flow-step p { 
+            font-size: 14px; 
+            color: var(--gray-600); 
+        }
+
+        .canvas-wrapper {
+            border: 1px solid var(--gray-200);
+            border-radius: 12px;
+            background: var(--white);
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .canvas-wrapper canvas {
+            width: 100%;
+            height: 300px;
+            border-radius: 8px;
+            background: var(--white);
+        }
+
+        .legend { 
+            display: flex; 
+            gap: 16px; 
+            flex-wrap: wrap; 
+            font-size: 14px; 
+            color: var(--gray-600); 
+            padding: 8px;
+            background: var(--gray-50);
+            border-radius: 8px;
+        }
+        
+        .legend span { 
+            display: flex; 
+            align-items: center; 
+            gap: 6px; 
+        }
+        
+        .legend i { 
+            width: 16px; 
+            height: 3px; 
+            display: inline-block; 
+        }
+
+        .examples-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 12px;
+        }
+
+        .example-card {
+            padding: 12px;
+            border: 1px solid var(--gray-200);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .example-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .example-card.selected {
+            background: #eef2ff;
+            border-color: var(--primary);
+        }
+
+        .status-box {
+            border-radius: 10px;
+            padding: 12px;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .status-box.calculating {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-box.complete {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-box.error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .calculating {
+            animation: pulse 1.5s infinite;
+        }
+
+        /* 返回主页按钮样式 */
+        .floatingHomeBtn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 9999;
+            border: none;
+            color: white;
+            font-size: 24px;
+        }
+        .floatingHomeBtn:hover {
+            transform: translateY(-4px) scale(1.05);
+            box-shadow: 0 12px 32px rgba(102, 126, 234, 0.5);
+        }
+        .floatingHomeBtn:active {
+            transform: translateY(-2px) scale(1.02);
+        }
+        .backOptions {
+            position: fixed;
+            bottom: 100px;
+            right: 30px;
+            background: white;
+            border-radius: 16px;
+            padding: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(10px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 9998;
+            min-width: 160px;
+        }
+        .backOptions.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        .backOptions a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            color: #1f2937;
+            text-decoration: none;
+            border-radius: 10px;
+            transition: all 0.2s ease;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .backOptions a:hover {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transform: translateX(-3px);
+        }
+        .backOptions a + a {
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h1>洛必达法则实验室</h1>
+        </div>
+        
+        <div class="main">
+            <div class="sidebar">
+                <button class="nav-btn active" data-page="intro">理论介绍</button>
+                <button class="nav-btn" data-page="calculator">计算器</button>
+                <button class="nav-btn" data-page="visualize">可视化</button>
+                <button class="nav-btn" data-page="examples">经典例题</button>
+                <button class="nav-btn" data-page="practice">练习模式</button>
+            </div>
+            
+            <div class="content">
+                <!-- 理论介绍页 -->
+                <section class="active" id="intro">
+                    <div class="two-column">
+                        <div class="column">
+                            <div class="card">
+                                <h3>📚 什么是洛必达法则？</h3>
+                                <p>洛必达法则（L'Hôpital's Rule）是微积分中用于求解未定式极限的重要方法。当直接代入极限值得到 0/0 或 ∞/∞ 型未定式时，可以通过对分子分母分别求导来计算极限。</p>
+                                <div class="formula-display">
+                                    $$\lim\limits_{x \to a} \frac{f(x)}{g(x)} = \lim\limits_{x \to a} \frac{f'(x)}{g'(x)}$$
+                                </div>
+                            </div>
+                            
+                            <div class="card">
+                                <h3><i class="fa-solid fa-bullseye"></i> 适用条件</h3>
+                                <ol style="padding-left: 20px; line-height: 1.8;">
+                                    <li>$f(x)$ 和 $g(x)$ 在点 $a$ 的某去心邻域内可导</li>
+                                    <li>$g'(x) \neq 0$ 在该邻域内</li>
+                                    <li>$\lim\limits_{x \to a} f(x) = \lim\limits_{x \to a} g(x) = 0$ 或 $\pm\infty$</li>
+                                    <li>$\lim\limits_{x \to a} \frac{f'(x)}{g'(x)}$ 存在（有限或无穷）</li>
+                                </ol>
+                            </div>
+                        </div>
+                        
+                        <div class="column">
+                            <div class="card">
+                                <h3>🔍 未定式类型</h3>
+                                <div class="examples-grid">
+                                    <div class="example-card">
+                                        <strong>0/0 型</strong>
+                                        <div style="margin-top: 8px;">$\lim\limits_{x \to 0} \frac{\sin x}{x}$</div>
+                                    </div>
+                                    <div class="example-card">
+                                        <strong>∞/∞ 型</strong>
+                                        <div style="margin-top: 8px;">$\lim\limits_{x \to \infty} \frac{e^x}{x^2}$</div>
+                                    </div>
+                                    <div class="example-card">
+                                        <strong>0·∞ 型</strong>
+                                        <div style="margin-top: 8px;">转化为 0/0 或 ∞/∞</div>
+                                    </div>
+                                    <div class="example-card">
+                                        <strong>∞-∞ 型</strong>
+                                        <div style="margin-top: 8px;">通分后使用</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="card">
+                                <h3>⚡ 使用步骤</h3>
+                                <div class="flow-container">
+                                    <div class="flow-step">
+                                        <h4>步骤 1：验证未定式</h4>
+                                        <p>确认极限是 0/0 或 ∞/∞ 型</p>
+                                    </div>
+                                    <div class="flow-step">
+                                        <h4>步骤 2：求导</h4>
+                                        <p>分别对分子、分母求导</p>
+                                    </div>
+                                    <div class="flow-step">
+                                        <h4>步骤 3：计算新极限</h4>
+                                        <p>求导后的极限值</p>
+                                    </div>
+                                    <div class="flow-step">
+                                        <h4>步骤 4：重复或结束</h4>
+                                        <p>若仍为未定式，可重复使用</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 计算器页 -->
+                <section id="calculator">
+                    <div class="two-column">
+                        <div class="column">
+                            <div class="card">
+                                <h3>🧮 极限计算器</h3>
+                                <div class="controls">
+                                    <div class="control-row">
+                                        <label>选择函数：</label>
+                                        <select id="funcSelect">
+                                            <option value="sinx/x">sin(x) / x</option>
+                                            <option value="(e^x-1)/x">(e^x - 1) / x</option>
+                                            <option value="ln(1+x)/x">ln(1+x) / x</option>
+                                            <option value="(1-cosx)/x^2">(1 - cos(x)) / x²</option>
+                                            <option value="custom">自定义...</option>
+                                        </select>
+                                    </div>
+                                    <div class="control-row">
+                                        <label>极限点 a：</label>
+                                        <input type="range" id="limitPoint" min="-5" max="5" step="0.1" value="0">
+                                        <span id="limitValue">0</span>
+                                    </div>
+                                </div>
+                                <div class="btn-group">
+                                    <button class="action" onclick="calculate()">开始计算</button>
+                                    <button class="action secondary" onclick="reset()">重置</button>
+                                </div>
+                            </div>
+                            
+                            <div class="card">
+                                <h3><i class="fa-solid fa-chart-bar"></i> 图形展示</h3>
+                                <div class="canvas-wrapper">
+                                    <canvas id="graph"></canvas>
+                                    <div class="legend">
+                                        <span><i style="background: #3b82f6;"></i>原函数 f(x)/g(x)</span>
+                                        <span><i style="background: #ef4444;"></i>导数 f'(x)/g'(x)</span>
+                                        <span><i style="background: #10b981;"></i>极限点</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="column">
+                            <div class="card">
+                                <h3><i class="fa-solid fa-file-pen"></i> 计算步骤</h3>
+                                <div class="flow-container" id="calcSteps">
+                                    <div class="flow-step">
+                                        <h4>等待输入...</h4>
+                                        <p>请选择函数并点击"开始计算"</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="card">
+                                <h3>✅ 计算结果</h3>
+                                <div id="result" class="status-box" style="background: var(--gray-50);">
+                                    <p>等待计算...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 可视化页 -->
+                <section id="visualize">
+                    <div class="two-column">
+                        <div class="column">
+                            <div class="card">
+                                <h3><i class="fa-solid fa-palette"></i> 动态可视化</h3>
+                                <div class="controls">
+                                    <div class="control-row">
+                                        <label>选择函数：</label>
+                                        <select id="vizFunc">
+                                            <option value="sinx/x">sin(x) / x</option>
+                                            <option value="(e^x-1)/x">(e^x - 1) / x</option>
+                                            <option value="ln(1+x)/x">ln(1+x) / x</option>
+                                            <option value="(1-cosx)/x^2">(1 - cos(x)) / x²</option>
+                                        </select>
+                                    </div>
+                                    <div class="control-row">
+                                        <label>动画速度：</label>
+                                        <input type="range" id="animSpeed" min="1" max="10" value="5">
+                                        <span id="speedValue">5</span>
+                                    </div>
+                                    <div class="control-row">
+                                        <label>缩放级别：</label>
+                                        <input type="range" id="zoomLevel" min="20" max="100" value="50" step="10">
+                                        <span id="zoomValue">50</span>
+                                    </div>
+                                </div>
+                                <div class="btn-group">
+                                    <button class="action" onclick="startAnimation()">▶ 播放动画</button>
+                                    <button class="action secondary" onclick="pauseAnimation()">⏸ 暂停</button>
+                                    <button class="action danger" onclick="resetAnimation()">⏹ 重置</button>
+                                </div>
+                            </div>
+                            
+                            <div class="card">
+                                <h3><i class="fa-solid fa-chart-bar"></i> 函数图像</h3>
+                                <div class="canvas-wrapper">
+                                    <canvas id="animCanvas"></canvas>
+                                    <div class="legend">
+                                        <span><i style="background: #3b82f6;"></i>原函数</span>
+                                        <span><i style="background: #ef4444;"></i>切线</span>
+                                        <span><i style="background: #10b981;"></i>逼近点</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="column">
+                            <div class="card">
+                                <h3><i class="fa-solid fa-chart-line"></i> 实时数值</h3>
+                                <div class="info-grid" style="display: grid; grid-template-columns: 1fr; gap: 10px;">
+                                    <div class="info-item" style="background: var(--gray-50); padding: 10px; border-radius: 8px;">
+                                        <strong>当前 x 值：</strong>
+                                        <span id="currentX" style="font-size: 20px;">0.00</span>
+                                    </div>
+                                    <div class="info-item" style="background: var(--gray-50); padding: 10px; border-radius: 8px;">
+                                        <strong>函数值 f(x)/g(x)：</strong>
+                                        <span id="currentY" style="font-size: 20px;">--</span>
+                                    </div>
+                                    <div class="info-item" style="background: var(--gray-50); padding: 10px; border-radius: 8px;">
+                                        <strong>导数值 f'(x)/g'(x)：</strong>
+                                        <span id="currentDeriv" style="font-size: 20px;">--</span>
+                                    </div>
+                                    <div class="info-item" style="background: #eef2ff; padding: 10px; border-radius: 8px;">
+                                        <strong>极限值：</strong>
+                                        <span id="limitResult" style="font-size: 20px; color: var(--primary);">1.00</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="card">
+                                <h3>🔍 洛必达法则过程</h3>
+                                <div class="flow-container">
+                                    <div class="flow-step" id="viz-step1">
+                                        <h4>原始函数</h4>
+                                        <p id="viz-func-display">$\frac{\sin x}{x}$</p>
+                                    </div>
+                                    <div class="flow-step" id="viz-step2">
+                                        <h4>求导后</h4>
+                                        <p id="viz-deriv-display">$\frac{\cos x}{1}$</p>
+                                    </div>
+                                    <div class="flow-step" id="viz-step3">
+                                        <h4>x → 0 时的极限</h4>
+                                        <p id="viz-limit-display">$\lim\limits_{x \to 0} \cos x = 1$</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="card">
+                                <h3><i class="fa-solid fa-lightbulb"></i> 观察要点</h3>
+                                <ul style="padding-left: 20px; line-height: 1.8;">
+                                    <li>注意函数在 x=0 附近的行为</li>
+                                    <li>观察函数值如何逼近极限值</li>
+                                    <li>比较原函数与导数的图像</li>
+                                    <li>理解为什么需要洛必达法则</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 经典例题页 -->
+                <section id="examples">
+                    <div class="card">
+                        <h3><i class="fa-solid fa-book"></i> 经典例题库</h3>
+                        <div class="examples-grid">
+                            <div class="example-card">
+                                <h4>例题 1：基础 0/0 型</h4>
+                                <div class="formula-display">$$\lim\limits_{x \to 0} \frac{\sin x}{x} = 1$$</div>
+                                <p style="margin-top: 10px;">这是洛必达法则最经典的例子</p>
+                            </div>
+                            <div class="example-card">
+                                <h4>例题 2：指数函数</h4>
+                                <div class="formula-display">$$\lim\limits_{x \to 0} \frac{e^x - 1}{x} = 1$$</div>
+                                <p style="margin-top: 10px;">涉及指数函数的未定式</p>
+                            </div>
+                            <div class="example-card">
+                                <h4>例题 3：对数函数</h4>
+                                <div class="formula-display">$$\lim\limits_{x \to 1} \frac{\ln x}{x - 1} = 1$$</div>
+                                <p style="margin-top: 10px;">对数函数的应用</p>
+                            </div>
+                            <div class="example-card">
+                                <h4>例题 4：多次使用</h4>
+                                <div class="formula-display">$$\lim\limits_{x \to 0} \frac{x - \sin x}{x^3} = \frac{1}{6}$$</div>
+                                <p style="margin-top: 10px;">需要多次应用洛必达法则</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 练习模式页 -->
+                <section id="practice">
+                    <div class="two-column">
+                        <div class="column">
+                            <div class="card">
+                                <h3>✏️ 练习题目</h3>
+                                <div id="practiceQuestion" class="formula-display" style="min-height: 80px;">
+                                    点击"生成题目"开始练习
+                                </div>
+                                <div class="btn-group">
+                                    <button class="action" onclick="generateProblem()">生成题目</button>
+                                    <button class="action secondary" onclick="showHint()">提示</button>
+                                    <button class="action danger" onclick="showAnswer()">查看答案</button>
+                                </div>
+                            </div>
+                            
+                            <div class="card">
+                                <h3><i class="fa-solid fa-lightbulb"></i> 提示区域</h3>
+                                <div id="hintArea" style="min-height: 100px; padding: 10px; background: var(--gray-50); border-radius: 8px;">
+                                    提示将在这里显示...
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="column">
+                            <div class="card">
+                                <h3><i class="fa-solid fa-chart-line"></i> 练习统计</h3>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                                    <div style="padding: 10px; background: var(--gray-50); border-radius: 8px; text-align: center;">
+                                        <div style="font-size: 24px; font-weight: bold; color: var(--primary);">0</div>
+                                        <div style="font-size: 14px; color: var(--gray-600);">已完成</div>
+                                    </div>
+                                    <div style="padding: 10px; background: var(--gray-50); border-radius: 8px; text-align: center;">
+                                        <div style="font-size: 24px; font-weight: bold; color: var(--success);">0%</div>
+                                        <div style="font-size: 14px; color: var(--gray-600);">正确率</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="card">
+                                <h3><i class="fa-solid fa-bullseye"></i> 答案区域</h3>
+                                <div id="answerArea" class="formula-display" style="min-height: 80px;">
+                                    答案将在这里显示...
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 页面切换逻辑
+        const navBtns = document.querySelectorAll('.nav-btn');
+        const pages = document.querySelectorAll('.content section');
+        
+        navBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const targetPage = btn.dataset.page;
+                
+                // 更新按钮状态
+                navBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                // 更新页面显示
+                pages.forEach(page => page.classList.remove('active'));
+                document.getElementById(targetPage).classList.add('active');
+                
+                // 触发MathJax重新渲染
+                if (window.MathJax) {
+                    MathJax.typeset();
+                }
+                
+                // 如果切换到可视化页面，初始化图形
+                if (targetPage === 'visualize') {
+                    setTimeout(() => {
+                        drawAnimation();
+                        updateVisualizationFormulas();
+                    }, 100);
+                }
+            });
+        });
+        
+        // 滑块值更新
+        const limitPoint = document.getElementById('limitPoint');
+        const limitValue = document.getElementById('limitValue');
+        if (limitPoint) {
+            limitPoint.addEventListener('input', () => {
+                limitValue.textContent = limitPoint.value;
+            });
+        }
+        
+        // 可视化页面的滑块更新
+        const animSpeed = document.getElementById('animSpeed');
+        const speedValue = document.getElementById('speedValue');
+        if (animSpeed) {
+            animSpeed.addEventListener('input', () => {
+                speedValue.textContent = animSpeed.value;
+            });
+        }
+        
+        const zoomLevel = document.getElementById('zoomLevel');
+        const zoomValue = document.getElementById('zoomValue');
+        if (zoomLevel) {
+            zoomLevel.addEventListener('input', () => {
+                zoomValue.textContent = zoomLevel.value;
+                if (animationId) {
+                    drawAnimation();
+                }
+            });
+        }
+        
+        // 可视化动画变量
+        let animationId = null;
+        let animX = -3;
+        let animationPaused = false;
+        
+        // 函数定义
+        const functions = {
+            'sinx/x': {
+                f: (x) => Math.abs(x) < 0.001 ? 1 : Math.sin(x) / x,
+                df: (x) => Math.abs(x) < 0.001 ? 0 : (Math.cos(x) * x - Math.sin(x)) / (x * x),
+                fName: '\sin x',
+                gName: 'x',
+                dfName: '\cos x',
+                dgName: '1',
+                limit: 1
+            },
+            '(e^x-1)/x': {
+                f: (x) => Math.abs(x) < 0.001 ? 1 : (Math.exp(x) - 1) / x,
+                df: (x) => Math.abs(x) < 0.001 ? 1 : (Math.exp(x) * x - (Math.exp(x) - 1)) / (x * x),
+                fName: 'e^x - 1',
+                gName: 'x',
+                dfName: 'e^x',
+                dgName: '1',
+                limit: 1
+            },
+            'ln(1+x)/x': {
+                f: (x) => Math.abs(x) < 0.001 ? 1 : Math.log(1 + x) / x,
+                df: (x) => Math.abs(x) < 0.001 ? 0 : (1/(1+x) * x - Math.log(1+x)) / (x * x),
+                fName: '\ln(1+x)',
+                gName: 'x',
+                dfName: '\frac{1}{1+x}',
+                dgName: '1',
+                limit: 1
+            },
+            '(1-cosx)/x^2': {
+                f: (x) => Math.abs(x) < 0.001 ? 0.5 : (1 - Math.cos(x)) / (x * x),
+                df: (x) => Math.abs(x) < 0.001 ? 0 : Math.sin(x) / (2 * x),
+                fName: '1 - \cos x',
+                gName: 'x^2',
+                dfName: '\sin x',
+                dgName: '2x',
+                limit: 0.5
+            }
+        };
+        
+        // 绘制可视化动画
+        function drawAnimation() {
+            const canvas = document.getElementById('animCanvas');
+            if (!canvas) return;
+            
+            const ctx = canvas.getContext('2d');
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+            
+            const width = canvas.width;
+            const height = canvas.height;
+            const centerX = width / 2;
+            const centerY = height / 2;
+            const scale = parseInt(zoomLevel?.value || 50);
+            
+            // 清空画布
+            ctx.clearRect(0, 0, width, height);
+            
+            // 绘制网格
+            ctx.strokeStyle = '#f0f0f0';
+            ctx.lineWidth = 0.5;
+            for (let i = 0; i <= width; i += scale) {
+                ctx.beginPath();
+                ctx.moveTo(i, 0);
+                ctx.lineTo(i, height);
+                ctx.stroke();
+            }
+            for (let i = 0; i <= height; i += scale) {
+                ctx.beginPath();
+                ctx.moveTo(0, i);
+                ctx.lineTo(width, i);
+                ctx.stroke();
+            }
+            
+            // 绘制坐标轴
+            ctx.strokeStyle = '#9ca3af';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(0, centerY);
+            ctx.lineTo(width, centerY);
+            ctx.moveTo(centerX, 0);
+            ctx.lineTo(centerX, height);
+            ctx.stroke();
+            
+            // 绘制刻度和标签
+            ctx.fillStyle = '#6b7280';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'top';
+            
+            for (let x = -5; x <= 5; x++) {
+                if (x !== 0) {
+                    const px = centerX + x * scale;
+                    ctx.fillText(x.toString(), px, centerY + 5);
+                    ctx.beginPath();
+                    ctx.moveTo(px, centerY - 3);
+                    ctx.lineTo(px, centerY + 3);
+                    ctx.stroke();
+                }
+            }
+            
+            // 获取当前函数
+            const funcKey = document.getElementById('vizFunc')?.value || 'sinx/x';
+            const func = functions[funcKey];
+            
+            // 绘制函数曲线
+            ctx.strokeStyle = '#3b82f6';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            
+            let firstPoint = true;
+            for (let px = 0; px < width; px++) {
+                const x = (px - centerX) / scale;
+                if (Math.abs(x) > 5) continue;
+                
+                const y = func.f(x);
+                if (!isFinite(y) || Math.abs(y) > 10) continue;
+                
+                const py = centerY - y * scale;
+                
+                if (firstPoint) {
+                    ctx.moveTo(px, py);
+                    firstPoint = false;
+                } else {
+                    ctx.lineTo(px, py);
+                }
+            }
+            ctx.stroke();
+            
+            // 绘制动画点
+            if (Math.abs(animX) <= 5) {
+                const y = func.f(animX);
+                if (isFinite(y)) {
+                    const px = centerX + animX * scale;
+                    const py = centerY - y * scale;
+                    
+                    // 绘制点
+                    ctx.fillStyle = '#10b981';
+                    ctx.beginPath();
+                    ctx.arc(px, py, 6, 0, 2 * Math.PI);
+                    ctx.fill();
+                    
+                    // 绘制垂直线
+                    ctx.strokeStyle = 'rgba(16, 185, 129, 0.3)';
+                    ctx.lineWidth = 1;
+                    ctx.setLineDash([5, 5]);
+                    ctx.beginPath();
+                    ctx.moveTo(px, py);
+                    ctx.lineTo(px, centerY);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                    
+                    // 更新数值显示
+                    document.getElementById('currentX').textContent = animX.toFixed(3);
+                    document.getElementById('currentY').textContent = y.toFixed(4);
+                    
+                    const deriv = func.df(animX);
+                    document.getElementById('currentDeriv').textContent = isFinite(deriv) ? deriv.toFixed(4) : '--';
+                    
+                    // 高亮步骤
+                    if (Math.abs(animX) < 0.5) {
+                        document.getElementById('viz-step3').classList.add('active');
+                        document.getElementById('viz-step2').classList.add('success');
+                    } else if (Math.abs(animX) < 1.5) {
+                        document.getElementById('viz-step2').classList.add('active');
+                        document.getElementById('viz-step1').classList.add('success');
+                        document.getElementById('viz-step3').classList.remove('active');
+                    } else {
+                        document.getElementById('viz-step1').classList.add('active');
+                        document.getElementById('viz-step2').classList.remove('active', 'success');
+                        document.getElementById('viz-step3').classList.remove('active');
+                    }
+                }
+            }
+            
+            // 绘制极限点
+            ctx.fillStyle = '#ef4444';
+            ctx.beginPath();
+            ctx.arc(centerX, centerY - func.limit * scale, 5, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // 添加极限值标签
+            ctx.fillStyle = '#ef4444';
+            ctx.font = '14px Arial';
+            ctx.fillText(`极限值: ${func.limit}`, centerX + 30, centerY - func.limit * scale);
+        }
+        
+        // 开始动画
+        function startAnimation() {
+            if (animationId) return;
+            
+            animationPaused = false;
+            const speed = parseInt(animSpeed?.value || 5);
+            
+            function animate() {
+                if (animationPaused) {
+                    animationId = null;
+                    return;
+                }
+                
+                drawAnimation();
+                
+                animX += 0.01 * speed;
+                if (animX > 3) {
+                    animX = -3;
+                }
+                
+                animationId = requestAnimationFrame(animate);
+            }
+            
+            animate();
+            updateVisualizationFormulas();
+        }
+        
+        // 暂停动画
+        function pauseAnimation() {
+            animationPaused = true;
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+                animationId = null;
+            }
+        }
+        
+        // 重置动画
+        function resetAnimation() {
+            pauseAnimation();
+            animX = -3;
+            drawAnimation();
+            
+            // 重置步骤高亮
+            document.getElementById('viz-step1')?.classList.remove('active', 'success');
+            document.getElementById('viz-step2')?.classList.remove('active', 'success');
+            document.getElementById('viz-step3')?.classList.remove('active', 'success');
+            
+            // 重置数值显示
+            document.getElementById('currentX').textContent = '0.00';
+            document.getElementById('currentY').textContent = '--';
+            document.getElementById('currentDeriv').textContent = '--';
+        }
+        
+        // 更新可视化页面的公式显示
+        function updateVisualizationFormulas() {
+            const funcKey = document.getElementById('vizFunc')?.value || 'sinx/x';
+            const func = functions[funcKey];
+            
+            document.getElementById('viz-func-display').innerHTML = `$\frac{${func.fName}}{${func.gName}}$`;
+            document.getElementById('viz-deriv-display').innerHTML = `$\frac{${func.dfName}}{${func.dgName}}$`;
+            document.getElementById('viz-limit-display').innerHTML = `$\lim\limits_{x \to 0} \frac{${func.dfName}}{${func.dgName}} = ${func.limit}$`;
+            document.getElementById('limitResult').textContent = func.limit.toString();
+            
+            if (window.MathJax) {
+                MathJax.typeset();
+            }
+        }
+        
+        // 函数选择改变时更新
+        document.getElementById('vizFunc')?.addEventListener('change', () => {
+            updateVisualizationFormulas();
+            if (animationId) {
+                drawAnimation();
+            }
+        });
+        
+        // 计算器功能
+        function calculate() {
+            const stepsContainer = document.getElementById('calcSteps');
+            const resultContainer = document.getElementById('result');
+            const funcSelect = document.getElementById('funcSelect');
+            
+            // 清空之前的步骤
+            stepsContainer.innerHTML = '';
+            
+            // 模拟计算步骤
+            const steps = [
+                { title: '步骤 1：识别未定式类型', content: '代入 x = 0，得到 0/0 型未定式', status: 'active' },
+                { title: '步骤 2：应用洛必达法则', content: '对分子分母分别求导', status: '' },
+                { title: '步骤 3：求导计算', content: '分子导数：cos(x)，分母导数：1', status: '' },
+                { title: '步骤 4：计算极限', content: '$\lim\limits_{x \to 0} \cos(x) = 1$', status: '' }
+            ];
+            
+            // 逐步显示计算过程
+            steps.forEach((step, index) => {
+                setTimeout(() => {
+                    const stepDiv = document.createElement('div');
+                    stepDiv.className = 'flow-step ' + (index === 0 ? 'active' : '');
+                    stepDiv.innerHTML = `
+                        <h4>${step.title}</h4>
+                        <p>${step.content}</p>
+                    `;
+                    stepsContainer.appendChild(stepDiv);
+                    
+                    // 更新前一个步骤的状态
+                    if (index > 0) {
+                        stepsContainer.children[index - 1].classList.remove('active');
+                        stepsContainer.children[index - 1].classList.add('success');
+                        stepDiv.classList.add('active');
+                    }
+                    
+                    // 最后一步时显示结果
+                    if (index === steps.length - 1) {
+                        setTimeout(() => {
+                            stepDiv.classList.remove('active');
+                            stepDiv.classList.add('success');
+                            resultContainer.className = 'status-box complete';
+                            resultContainer.innerHTML = '<h4>极限值 = 1</h4><p>计算完成！</p>';
+                            MathJax.typeset();
+                        }, 1000);
+                    }
+                    
+                    MathJax.typeset();
+                }, index * 1500);
+            });
+            
+            // 绘制图形
+            drawGraph();
+        }
+        
+        function reset() {
+            document.getElementById('calcSteps').innerHTML = `
+                <div class="flow-step">
+                    <h4>等待输入...</h4>
+                    <p>请选择函数并点击"开始计算"</p>
+                </div>
+            `;
+            document.getElementById('result').className = 'status-box';
+            document.getElementById('result').innerHTML = '<p>等待计算...</p>';
+            
+            const canvas = document.getElementById('graph');
+            if (canvas) {
+                const ctx = canvas.getContext('2d');
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+        }
+        
+        function drawGraph() {
+            const canvas = document.getElementById('graph');
+            if (!canvas) return;
+            
+            const ctx = canvas.getContext('2d');
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+            
+            const width = canvas.width;
+            const height = canvas.height;
+            const centerX = width / 2;
+            const centerY = height / 2;
+            
+            // 清空画布
+            ctx.clearRect(0, 0, width, height);
+            
+            // 绘制坐标轴
+            ctx.strokeStyle = '#d1d5db';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(0, centerY);
+            ctx.lineTo(width, centerY);
+            ctx.moveTo(centerX, 0);
+            ctx.lineTo(centerX, height);
+            ctx.stroke();
+            
+            // 绘制函数曲线 sin(x)/x
+            ctx.strokeStyle = '#3b82f6';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            
+            for (let px = 0; px < width; px++) {
+                const x = (px - centerX) / 50;
+                let y;
+                if (Math.abs(x) < 0.001) {
+                    y = 1; // 极限值
+                } else {
+                    y = Math.sin(x) / x;
+                }
+                const py = centerY - y * 50;
+                
+                if (px === 0) {
+                    ctx.moveTo(px, py);
+                } else {
+                    ctx.lineTo(px, py);
+                }
+            }
+            ctx.stroke();
+            
+            // 绘制极限点
+            ctx.fillStyle = '#10b981';
+            ctx.beginPath();
+            ctx.arc(centerX, centerY - 50, 5, 0, 2 * Math.PI);
+            ctx.fill();
+        }
+        
+        // 练习模式功能
+        const problems = [
+            { question: '\\lim\\limits_{x \\to 0} \\frac{\\sin x}{x}', answer: '1', hint: '这是最基础的0/0型，直接应用洛必达法则' },
+            { question: '\\lim\\limits_{x \\to 0} \\frac{e^x - 1}{x}', answer: '1', hint: '指数函数的导数是它本身' },
+            { question: '\\lim\\limits_{x \\to 0} \\frac{\\ln(1+x)}{x}', answer: '1', hint: 'ln(1+x)的导数是1/(1+x)' },
+            { question: '\\lim\\limits_{x \\to 0} \\frac{1 - \\cos x}{x^2}', answer: '\\frac{1}{2}', hint: '可能需要应用两次洛必达法则' }
+        ];
+        
+        let currentProblem = null;
+        
+        function generateProblem() {
+            currentProblem = problems[Math.floor(Math.random() * problems.length)];
+            const questionDiv = document.getElementById('practiceQuestion');
+            questionDiv.innerHTML = `$$${currentProblem.question} = ?$$`;
+            document.getElementById('hintArea').innerHTML = '提示将在这里显示...';
+            document.getElementById('answerArea').innerHTML = '答案将在这里显示...';
+            
+            // 确保MathJax重新渲染
+            if (window.MathJax && window.MathJax.typeset) {
+                setTimeout(() => {
+                    window.MathJax.typeset([questionDiv]);
+                }, 100);
+            }
+        }
+        
+        function showHint() {
+            if (currentProblem) {
+                document.getElementById('hintArea').innerHTML = `<strong>提示：</strong>${currentProblem.hint}`;
+            }
+        }
+        
+        function showAnswer() {
+            if (currentProblem) {
+                const answerDiv = document.getElementById('answerArea');
+                answerDiv.innerHTML = `$$${currentProblem.question} = ${currentProblem.answer}$$`;
+                
+                // 确保MathJax重新渲染
+                if (window.MathJax && window.MathJax.typeset) {
+                    setTimeout(() => {
+                        window.MathJax.typeset([answerDiv]);
+                    }, 100);
+                }
+            }
+        }
+        
+        // 页面加载完成后初始化
+        window.addEventListener('load', () => {
+            // 触发MathJax渲染
+            if (window.MathJax) {
+                MathJax.typeset();
+            }
+            
+            // 为练习页面生成一个默认题目
+            setTimeout(() => {
+                if (document.getElementById('practiceQuestion')) {
+                    generateProblem();
+                }
+            }, 1500);
+        });
+
+        // 返回按钮交互
+        function toggleBackOptions() {
+            const options = document.getElementById('backOptions');
+            options.classList.toggle('show');
+        }
+
+        // 点击页面其他地方关闭菜单
+        document.addEventListener('click', function(event) {
+            const btn = document.getElementById('floatingHomeBtn');
+            const options = document.getElementById('backOptions');
+            if (btn && options && !btn.contains(event.target) && !options.contains(event.target)) {
+                options.classList.remove('show');
+            }
+        });
+    </script>
+
+    <!-- 返回主页按钮 -->
+    <button id="floatingHomeBtn" class="floatingHomeBtn" onclick="toggleBackOptions()" title="返回选项">
+        <i class="fa-solid fa-house"></i>
+    </button>
+    <div id="backOptions" class="backOptions">
+        <a href="index.html"><i class="fa-solid fa-arrow-left"></i> 返回目录</a>
+        <a href="../index.html"><i class="fa-solid fa-house"></i> 返回主站</a>
+    </div>
+</body>
+</html>

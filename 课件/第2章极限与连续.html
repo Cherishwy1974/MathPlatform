@@ -119,6 +119,8 @@
             width: 100%;
             height: 100%;
             padding: 20px 30px;
+            /* 预留底部空间，避免被底部导航遮挡 */
+            padding-bottom: calc(84px + env(safe-area-inset-bottom));
             background: #ffffff;
             position: absolute;
             top: 0;
@@ -206,21 +208,19 @@
         .right-visual {
             grid-column: 2;
             min-width: 0;
-            display: grid;
-            place-items: center;
-            padding: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
             position: relative;
             min-height: 0;
-            background: #f9fafb;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
         }
 
         .right-visual canvas {
-            max-width: 80%;
-            max-height: 80%;
-            width: auto !important;
-            height: auto !important;
+            width: 100% !important;
+            height: 100% !important;
+            max-width: none;
+            max-height: none;
             object-fit: contain;
         }
 
@@ -297,6 +297,7 @@
         @media (max-width: 768px) {
             .slide {
                 padding: 15px 20px;
+                padding-bottom: calc(90px + env(safe-area-inset-bottom));
             }
 
             .slide-container {
@@ -370,6 +371,7 @@
         @media (max-width: 480px) {
             .slide {
                 padding: 10px 15px;
+                padding-bottom: calc(100px + env(safe-area-inset-bottom));
             }
 
             .slide-container {
@@ -856,10 +858,9 @@
             color: #9ca3af;
         }
         
-        /* Canvas 样式 */
+        /* Canvas 样式（去除可视化外框效果） */
         canvas {
             display: block;
-            border-radius: 8px;
             background: white;
         }
         
@@ -1057,13 +1058,285 @@
                 box-shadow: 0 2px 0 rgba(229, 231, 235, 0.6);
             }
         }
+        
+        /* 统一封面样式（与第1章一致） */
+        .slide-container.cover {
+            align-items: stretch;
+        }
+        .cover-left {
+            padding: 60px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .cover-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(90deg, #4a90e2, #9b59b6);
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 14px;
+            width: fit-content;
+            box-shadow: 0 6px 16px rgba(74,144,226,0.35);
+        }
+        .cover-title {
+            font-size: 4rem;
+            line-height: 1.1;
+            margin: 18px 0 8px 0;
+            color: #1a1a2e;
+            background: linear-gradient(90deg, #1a1a2e 0%, #4a90e2 60%, #9b59b6 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .cover-subtitle {
+            font-size: 1.6rem;
+            color: #4f5b6a;
+            margin: 10px 0 18px 0;
+        }
+        .cover-meta {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+            color: #6b7b8c;
+            font-size: 0.95rem;
+        }
+        .cover-meta span { display: inline-flex; align-items: center; gap: 6px; }
+        .cover-actions {
+            display: flex;
+            gap: 14px;
+            margin-top: 26px;
+            flex-wrap: wrap;
+        }
+        .cover-right {
+            position: relative;
+            overflow: hidden;
+        }
+        .cover-visual {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(1200px 800px at 80% 20%, rgba(155, 89, 182, 0.18), transparent 60%),
+                radial-gradient(900px 700px at 20% 80%, rgba(74, 144, 226, 0.18), transparent 60%),
+                linear-gradient(135deg, #ffffff 0%, #f7faff 50%, #f9f6ff 100%);
+        }
+        .cover-visual::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(600px 300px at 50% -10%, rgba(255,255,255,0.7), transparent 70%);
+            pointer-events: none;
+        }
+        .math-badge {
+            position: absolute;
+            padding: 8px 12px;
+            background: rgba(255,255,255,0.85);
+            border: 1px solid rgba(0,0,0,0.06);
+            border-radius: 10px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+            color: #34495e;
+            font-weight: 600;
+            animation: floatY 6s ease-in-out infinite;
+            backdrop-filter: blur(4px);
+        }
+        .math-badge.b1 { left: 12%; top: 22%; animation-delay: 0s; }
+        .math-badge.b2 { right: 14%; top: 30%; animation-delay: 0.8s; }
+        .math-badge.b3 { left: 20%; bottom: 18%; animation-delay: 1.5s; }
+        .math-badge.b4 { right: 18%; bottom: 22%; animation-delay: 2.2s; }
+        @keyframes floatY {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-12px); }
+            100% { transform: translateY(0px); }
+        }
+        .orbit {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 320px;
+            height: 320px;
+            margin-left: -160px;
+            margin-top: -160px;
+            border-radius: 50%;
+            border: 1px dashed rgba(52, 152, 219, 0.35);
+            animation: spin 18s linear infinite;
+        }
+        .orbit .dot {
+            position: absolute;
+            top: -6px;
+            left: 50%;
+            width: 12px;
+            height: 12px;
+            margin-left: -6px;
+            background: #4a90e2;
+            border-radius: 50%;
+            box-shadow: 0 0 0 6px rgba(74,144,226,0.15);
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* 悬浮主按钮（左下角） */
+        .floating-control-btn {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            width: 56px;
+            height: 56px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            border-radius: 50%;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+            cursor: pointer;
+            z-index: 1100;
+            transition: all 0.25s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+        }
+        .floating-control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
+            background: #111827;
+        }
+        .floating-control-btn .btn-icon {
+            color: #111827;
+            font-size: 20px;
+            transition: transform 0.3s ease, color 0.3s ease;
+        }
+        .floating-control-btn:hover .btn-icon { color: #ffffff; }
+        .floating-control-btn.active .btn-icon { transform: rotate(45deg); }
+
+        /* 悬浮二级按钮容器与项（横向一排） */
+        .floating-menu-items {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 1099;
+            pointer-events: none;
+            opacity: 0;
+            transition: all 0.25s ease;
+        }
+        .floating-menu-items.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .floating-menu-item {
+            position: absolute;
+            width: 48px;
+            height: 48px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+            transform: scale(0);
+            backdrop-filter: blur(8px);
+            color: #111827;
+        }
+        .floating-menu-items.active .floating-menu-item { transform: scale(1); }
+        .floating-menu-item:hover { background: #111827; color: #ffffff; transform: scale(1.06); }
+        .floating-menu-item .item-icon { font-size: 16px; }
+        .floating-menu-item .item-text {
+            position: absolute;
+            top: -32px;
+            left: 0;
+            transform: translateX(-10%);
+            background: rgba(0, 0, 0, 0.85);
+            color: #fff;
+            padding: 6px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+        .floating-menu-item:hover .item-text { opacity: 1; }
+        /* 横向布局 */
+        .floating-menu-item:nth-child(1) { bottom: 28px; left: 88px; transition-delay: 0.08s; }
+        .floating-menu-item:nth-child(2) { bottom: 28px; left: 148px; transition-delay: 0.12s; }
+
+        /* 统一型弹层（实验室/本章目录/返回目录） */
+        .lab-submenu {
+            position: fixed;
+            top: 12%;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1200;
+            width: 96%;
+            max-width: 1000px;
+            max-height: 78vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .submenu-content { padding: 24px; position: relative; }
+        .submenu-title {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+        .submenu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 16px;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+        .submenu-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            background: #f8f9fa;
+            border: 2px solid transparent;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            font-size: 14px;
+            color: #2c3e50;
+        }
+        .submenu-item:hover { background: #667eea; color: white; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3); }
+        .submenu-icon { margin-right: 10px; font-size: 16px; }
+        .submenu-close {
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            width: 28px;
+            height: 28px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.25s ease;
+        }
+        .submenu-close:hover { background: #c0392b; transform: scale(1.08); }
     </style>
 </head>
 <body>
     <!-- 返回按钮 -->
     <div class="return-home-panel">
         <a class="return-link" href="../index.html"><i class="fa-solid fa-house"></i> 返回主站</a>
-        <a class="return-link return-main" href="index.html"><i class="fa-solid fa-arrow-left"></i> 返回课件目录</a>
+        <a class="return-link return-main" href="javascript:void(0)" onclick="event.stopPropagation(); toggleCourseSubmenu()"><i class="fa-solid fa-arrow-left"></i> 返回目录</a>
     </div>
 
     <!-- 加载指示器 -->
@@ -1087,6 +1360,79 @@
         </div>
         <button class="nav-btn" onclick="nextSlide()" aria-label="下一页" title="下一页 (→)">下一页 →</button>
     </div>
+
+    <!-- 悬浮控制按钮与二级菜单 -->
+    <button class="floating-control-btn" id="floating-control-btn"><span class="btn-icon">+</span></button>
+    <div class="floating-menu-items" id="floating-menu-items">
+        <div class="floating-menu-item" onclick="event.stopPropagation(); toggleLabSubmenu()">
+            <span class="item-icon"><i class="fa-solid fa-flask"></i></span>
+            <span class="item-text">实验室</span>
+        </div>
+        <div class="floating-menu-item" onclick="event.stopPropagation(); toggleChapterSubmenu()">
+            <span class="item-icon"><i class="fa-solid fa-clipboard-list"></i></span>
+            <span class="item-text">本章目录</span>
+        </div>
+    </div>
+
+    <!-- 实验室弹层（第二章） -->
+    <div class="lab-submenu" id="lab-submenu" style="display: none;">
+        <div class="submenu-content">
+            <div class="submenu-title">第二章实验室</div>
+            <div class="submenu-grid">
+                <div class="submenu-item" onclick="window.open('../网页资源/index.html', '_blank')"><span class="submenu-icon"><i class="fa-solid fa-list"></i></span><span class="submenu-text">资源总览</span></div>
+                <div class="submenu-item" onclick="window.open('../网页资源/lab 2-1.html', '_blank')"><span class="submenu-icon"><i class="fa-solid fa-vial"></i></span><span class="submenu-text">图像压缩与数列极限实验室</span></div>
+                <div class="submenu-item" onclick="window.open('../网页资源/lab 2-2.html', '_blank')"><span class="submenu-icon"><i class="fa-solid fa-vial"></i></span><span class="submenu-text">数列极限案例探索实验室</span></div>
+                <div class="submenu-item" onclick="window.open('../网页资源/lab 2-3.html', '_blank')"><span class="submenu-icon"><i class="fa-solid fa-vial"></i></span><span class="submenu-text">函数极限与自变量变化实验室</span></div>
+                <div class="submenu-item" onclick="window.open('../网页资源/lab 2-4.html', '_blank')"><span class="submenu-icon"><i class="fa-solid fa-vial"></i></span><span class="submenu-text">左右极限与存在性判定实验室</span></div>
+                <div class="submenu-item" onclick="window.open('../网页资源/lab 2-5.html', '_blank')"><span class="submenu-icon"><i class="fa-solid fa-vial"></i></span><span class="submenu-text">无穷大与无穷小倒数关系实验室</span></div>
+                <div class="submenu-item" onclick="window.open('../网页资源/lab 2-6.html', '_blank')"><span class="submenu-icon"><i class="fa-solid fa-vial"></i></span><span class="submenu-text">重要极限实验室</span></div>
+                <div class="submenu-item" onclick="window.open('../网页资源/lab 2-7.html', '_blank')"><span class="submenu-icon"><i class="fa-solid fa-vial"></i></span><span class="submenu-text">无穷小比较实验室</span></div>
+                <div class="submenu-item" onclick="window.open('../网页资源/lab 2-8.html', '_blank')"><span class="submenu-icon"><i class="fa-solid fa-vial"></i></span><span class="submenu-text">函数增量实验室</span></div>
+                <div class="submenu-item" onclick="window.open('../网页资源/lab 2-9.html', '_blank')"><span class="submenu-icon"><i class="fa-solid fa-vial"></i></span><span class="submenu-text">等价无穷小倒水游戏</span></div>
+                <div class="submenu-item" onclick="window.open('../网页资源/lab 2-10.html', '_blank')"><span class="submenu-icon"><i class="fa-solid fa-vial"></i></span><span class="submenu-text">连续与间断游戏</span></div>
+                <div class="submenu-item" onclick="window.open('../网页资源/lab 2-11.html', '_blank')"><span class="submenu-icon"><i class="fa-solid fa-vial"></i></span><span class="submenu-text">函数连续性实验室</span></div>
+                <div class="submenu-item" onclick="window.open('../网页资源/lab 2-12.html', '_blank')"><span class="submenu-icon"><i class="fa-solid fa-vial"></i></span><span class="submenu-text">函数间断点实验室</span></div>
+                <div class="submenu-item" onclick="window.open('../网页资源/lab 2-13.html', '_blank')"><span class="submenu-icon"><i class="fa-solid fa-vial"></i></span><span class="submenu-text">极限与连续游戏</span></div>
+                <div class="submenu-item" onclick="window.open('../网页资源/lab 2-14.html', '_blank')"><span class="submenu-icon"><i class="fa-solid fa-vial"></i></span><span class="submenu-text">直接代入法求极限游戏</span></div>
+                <div class="submenu-item" onclick="window.open('../网页资源/lab 2-15.html', '_blank')"><span class="submenu-icon"><i class="fa-solid fa-vial"></i></span><span class="submenu-text">极限求解方法知识图谱</span></div>
+            </div>
+            <div class="submenu-close" onclick="toggleLabSubmenu()">×</div>
+        </div>
+    </div>
+
+    <!-- 本章目录弹层（结构化） -->
+    <div class="lab-submenu" id="chapter-submenu" style="display: none;">
+        <div class="submenu-content">
+            <div class="submenu-title">第二章课件目录</div>
+            <div class="submenu-grid" id="chapter-submenu-grid">
+                <!-- 由脚本基于 slidesData 自动生成：封面 + 各节标题 -->
+            </div>
+            <div class="submenu-close" onclick="toggleChapterSubmenu()">×</div>
+        </div>
+    </div>
+
+    <!-- 全部课件目录弹层 -->
+    <div class="lab-submenu" id="course-submenu" style="display: none;">
+        <div class="submenu-content">
+            <div class="submenu-title">全部课件目录</div>
+            <div class="submenu-grid">
+                <div class="submenu-item" onclick="window.location.href='第1章代数.html';"><span class="submenu-icon"><i class="fa-solid fa-1"></i></span><span class="submenu-text">第1章 代数</span></div>
+                <div class="submenu-item" onclick="window.location.href='第2章极限与连续.html';"><span class="submenu-icon"><i class="fa-solid fa-2"></i></span><span class="submenu-text">第2章 极限与连续</span></div>
+                <div class="submenu-item" onclick="window.location.href='第3章导数与微分.html';"><span class="submenu-icon"><i class="fa-solid fa-3"></i></span><span class="submenu-text">第3章 导数与微分</span></div>
+                <div class="submenu-item" onclick="window.location.href='第4章导数应用.html';"><span class="submenu-icon"><i class="fa-solid fa-4"></i></span><span class="submenu-text">第4章 导数应用</span></div>
+                <div class="submenu-item" onclick="window.location.href='第5章不定积分.html';"><span class="submenu-icon"><i class="fa-solid fa-5"></i></span><span class="submenu-text">第5章 不定积分</span></div>
+                <div class="submenu-item" onclick="window.location.href='第6章定积分.html';"><span class="submenu-icon"><i class="fa-solid fa-6"></i></span><span class="submenu-text">第6章 定积分</span></div>
+                <div class="submenu-item" onclick="window.location.href='第7章常微分方程.html';"><span class="submenu-icon"><i class="fa-solid fa-7"></i></span><span class="submenu-text">第7章 常微分方程</span></div>
+                <div class="submenu-item" onclick="window.location.href='第8章多元函数微分学.html';"><span class="submenu-icon"><i class="fa-solid fa-8"></i></span><span class="submenu-text">第8章 多元函数微分学</span></div>
+                <div class="submenu-item" onclick="window.location.href='第9章多元函数积分学初步.html';"><span class="submenu-icon"><i class="fa-solid fa-9"></i></span><span class="submenu-text">第9章 多元函数积分学初步</span></div>
+                <div class="submenu-item" onclick="window.location.href='第10章线性代数.html';"><span class="submenu-icon"><i class="fa-solid fa-x"></i></span><span class="submenu-text">第10章 线性代数</span></div>
+                <div class="submenu-item" onclick="window.location.href='第11章无穷级数.html';"><span class="submenu-icon"><i class="fa-solid fa-x"></i></span><span class="submenu-text">第11章 无穷级数</span></div>
+                <div class="submenu-item" onclick="window.location.href='第12章向量代数与空间解析几何.html';"><span class="submenu-icon"><i class="fa-solid fa-x"></i></span><span class="submenu-text">第12章 向量代数与空间解析几何</span></div>
+                <div class="submenu-item" onclick="window.location.href='第13章概率与统计.html';"><span class="submenu-icon"><i class="fa-solid fa-x"></i></span><span class="submenu-text">第13章 概率与统计</span></div>
+            </div>
+            <div class="submenu-close" onclick="toggleCourseSubmenu()">×</div>
+        </div>
+    </div>
     
     <script>
         // ========================================
@@ -1095,6 +1441,144 @@
         let currentSlide = 1;
         let totalSlides = 0;
         let activeAnimation = null; // 当前活动的动画对象
+        
+        // 基于 slidesData 自动生成本章目录
+        function buildChapterMenu() {
+            const grid = document.getElementById('chapter-submenu-grid');
+            if (!grid) return;
+            grid.innerHTML = '';
+
+            // 工具：中文数字转阿拉伯（1-10即可）
+            const zhNumMap = { '一':1,'二':2,'三':3,'四':4,'五':5,'六':6,'七':7,'八':8,'九':9,'十':10 };
+            function chineseToArabic(zh) {
+                if (zh in zhNumMap) return zhNumMap[zh];
+                // 兼容“十一”“十二”这类
+                if (zh.length === 2 && zh[0] === '十') return 10 + (zhNumMap[zh[1]] || 0);
+                if (zh.length === 2 && zh[1] === '十') return (zhNumMap[zh[0]] || 0) * 10;
+                return null;
+            }
+
+            // 收集：封面 + 各节 + 小节
+            const sections = [];
+            let currentSection = null;
+
+            // 封面
+            sections.push({
+                title: '封面',
+                index: 1,
+                isSection: true,
+                arabic: 0,
+                subs: []
+            });
+
+            const sectionRe = /第([一二三四五六七八九十]+)节\s*(.*)?/;
+            const subRe = /^(\d+)\.(\d+)\s*[\-：:]?\s*(.*)$/;
+
+            for (let i = 0; i < slidesData.length; i++) {
+                const s = slidesData[i];
+                const raw = (s && s.title) ? String(s.title).trim() : '';
+                if (!raw) continue;
+
+                const mSection = raw.match(sectionRe);
+                if (mSection) {
+                    const zh = mSection[1];
+                    const rest = (mSection[2] || '').trim();
+                    const arabic = chineseToArabic(zh) || sections.length; // 回退
+                    currentSection = {
+                        title: `第${zh}节 ${rest || ''}`.trim(),
+                        index: i + 1,
+                        isSection: true,
+                        arabic,
+                        subs: []
+                    };
+                    sections.push(currentSection);
+                    continue;
+                }
+
+                const mSub = raw.match(subRe);
+                if (mSub) {
+                    const major = parseInt(mSub[1], 10);
+                    const label = (mSub[3] || raw).trim() || raw;
+                    const subItem = {
+                        title: raw, // 保留原始标题（含 5.1 等编号）
+                        label,
+                        index: i + 1
+                    };
+
+                    // 放到最近的对应节（数字与节号一致）
+                    let target = currentSection;
+                    if (!target || (target && typeof target.arabic === 'number' && target.arabic !== major)) {
+                        target = sections.find(sec => sec.isSection && sec.arabic === major) || currentSection;
+                    }
+                    if (target && target.isSection) {
+                        target.subs.push(subItem);
+                    }
+                }
+            }
+
+            // 渲染：每个大节作为一个可点击项，下面跟随小节
+            sections.forEach(sec => {
+                const secEl = document.createElement('div');
+                secEl.className = 'submenu-item';
+                secEl.innerHTML = '<span class="submenu-icon"><i class="fa-solid ' + (sec.arabic ? 'fa-clipboard-list' : 'fa-house') + '"></i></span><span class="submenu-text">' + sec.title + '</span>';
+                secEl.onclick = function() { jumpToSlide(sec.index); toggleChapterSubmenu(); };
+                grid.appendChild(secEl);
+
+                if (sec.subs && sec.subs.length) {
+                    sec.subs.forEach(sub => {
+                        const subEl = document.createElement('div');
+                        subEl.className = 'submenu-item';
+                        subEl.style.marginLeft = '12px';
+                        subEl.style.fontSize = '13px';
+                        subEl.innerHTML = '<span class="submenu-icon"><i class="fa-regular fa-circle-dot"></i></span><span class="submenu-text">' + sub.title + '</span>';
+                        subEl.onclick = function() { jumpToSlide(sub.index); toggleChapterSubmenu(); };
+                        grid.appendChild(subEl);
+                    });
+                }
+            });
+        }
+
+        // ================= 悬浮菜单与弹层：函数与互斥控制 =================
+        function closeAllSubmenus(exceptId) {
+            const ids = ['lab-submenu', 'chapter-submenu', 'course-submenu'];
+            ids.forEach(id => {
+                if (id !== exceptId) {
+                    const el = document.getElementById(id);
+                    if (el) el.style.display = 'none';
+                }
+            });
+        }
+        function toggleLabSubmenu() {
+            const el = document.getElementById('lab-submenu');
+            if (!el) return;
+            const willOpen = el.style.display !== 'block';
+            closeAllSubmenus('lab-submenu');
+            el.style.display = willOpen ? 'block' : 'none';
+        }
+        function toggleChapterSubmenu() {
+            const el = document.getElementById('chapter-submenu');
+            if (!el) return;
+            const willOpen = el.style.display !== 'block';
+            closeAllSubmenus('chapter-submenu');
+            el.style.display = willOpen ? 'block' : 'none';
+        }
+        function toggleCourseSubmenu() {
+            const el = document.getElementById('course-submenu');
+            if (!el) return;
+            const willOpen = el.style.display !== 'block';
+            closeAllSubmenus('course-submenu');
+            el.style.display = willOpen ? 'block' : 'none';
+        }
+        function initFloatingControl() {
+            const floatingBtn = document.getElementById('floating-control-btn');
+            const floatingMenu = document.getElementById('floating-menu-items');
+            if (!floatingBtn || !floatingMenu) return;
+            floatingBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                floatingBtn.classList.toggle('active');
+                floatingMenu.classList.toggle('active');
+            });
+        }
         
         // ========================================
         // 幻灯片数据
@@ -1106,17 +1590,30 @@
             {
                 title: "第2章 极限与连续",
                 content: `
-                    <div class="slide-container">
-                        <div class="cover-page">
-                            <h1 class="cover-title">第2章 极限与连续</h1>
-                            <h2 class="cover-subtitle">本章内容</h2>
-                            <ul class="cover-list">
-                                <li><strong>第一节</strong> 极限的概念</li>
-                                <li><strong>第二节</strong> 极限的性质和运算法则</li>
-                                <li><strong>第三节</strong> 极限的求法</li>
-                                <li><strong>第四节</strong> 两个重要极限及无穷小的比较</li>
-                                <li><strong>第五节</strong> 函数的连续性</li>
-                            </ul>
+                    <div class="slide-container cover">
+                        <div class="left-content tex2jax_process cover-left">
+                            <div class="cover-badge"><i class="fa-solid fa-seedling"></i><span> 第二章</span></div>
+                            <h1 class="cover-title">极限与连续</h1>
+                            <p class="cover-subtitle">微积分的基础与核心</p>
+                            <div class="cover-meta">
+                                <span><i class="fa-solid fa-book-open"></i> 基础篇</span>
+                                <span><i class="fa-solid fa-bolt"></i> 关键概念速览</span>
+                            </div>
+                            <div class="cover-actions">
+                                <a class="home-link-btn" href="../index.html"><span>主页</span></a>
+                                <a class="home-link-btn" href="../故事书/第二章/与幽灵共舞.html"><span>故事书</span></a>
+                                <a class="home-link-btn" href="../习题/assets/limit.html"><span>习题</span></a>
+                                <a class="home-link-btn" href="../产教结合/index.html"><span>资源</span></a>
+                            </div>
+                        </div>
+                        <div class="right-visual cover-right">
+                            <div class="cover-visual">
+                                <div class="math-badge b1">lim</div>
+                                <div class="math-badge b2">ε-δ</div>
+                                <div class="math-badge b3">∞</div>
+                                <div class="math-badge b4">→</div>
+                                <div class="orbit"><span class="dot"></span></div>
+                            </div>
                         </div>
                     </div>
                 `,
@@ -2741,9 +3238,9 @@
                 // 获取设备像素比以支持高DPI屏幕
                 const dpr = window.devicePixelRatio || 1;
 
-                // 设置显示尺寸
-                const displayWidth = Math.min(rect.width - 40, 700);
-                const displayHeight = Math.min(rect.height - 40, 500);
+                // 使用容器的全部尺寸，确保大小一致且完整呈现
+                const displayWidth = Math.max(0, Math.floor(rect.width));
+                const displayHeight = Math.max(0, Math.floor(rect.height));
 
                 // 设置实际尺寸（考虑设备像素比）
                 this.canvas.width = displayWidth * dpr;
@@ -2755,6 +3252,7 @@
 
                 // 缩放上下文以匹配设备像素比
                 if (this.ctx) {
+                    this.ctx.setTransform(1, 0, 0, 1, 0, 0);
                     this.ctx.scale(dpr, dpr);
                 }
 
@@ -2767,8 +3265,12 @@
             // 清除画布
             clear() {
                 if (!this.ctx) return;
-                this.ctx.clearRect(0, 0, this.width, this.height);
+                // 先用单位矩阵清除设备像素大小的画布，再恢复DPR缩放
                 this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                // 恢复到与CSS像素一致的缩放
+                const scale = this.dpr || (window.devicePixelRatio || 1);
+                this.ctx.setTransform(scale, 0, 0, scale, 0, 0);
                 this.ctx.globalAlpha = 1.0;
                 this.ctx.shadowBlur = 0;
             }
@@ -2851,69 +3353,75 @@
 
         // 绘制坐标系
         function drawCoordinateSystem(ctx, canvas, options = {}) {
+            const w = (canvas.clientWidth || parseInt(canvas.style.width) || canvas.width);
+            const h = (canvas.clientHeight || parseInt(canvas.style.height) || canvas.height);
             const {
-                originX = canvas.width / 2,
-                originY = canvas.height / 2,
+                originX = w / 2,
+                originY = h / 2,
                 axisColor = '#374151',
                 lineWidth = 2,
-                showLabels = true
+                showLabels = true,
+                xLabel = 'x',
+                yLabel = 'y'
             } = options;
-            
+
             ctx.save();
             ctx.strokeStyle = axisColor;
             ctx.lineWidth = lineWidth;
-            
+
             // X轴
             ctx.beginPath();
             ctx.moveTo(0, originY);
-            ctx.lineTo(canvas.width, originY);
+            ctx.lineTo(w, originY);
             ctx.stroke();
-            
+
             // Y轴
             ctx.beginPath();
             ctx.moveTo(originX, 0);
-            ctx.lineTo(originX, canvas.height);
+            ctx.lineTo(originX, h);
             ctx.stroke();
-            
+
             // 箭头
             const arrowSize = 10;
             ctx.fillStyle = axisColor;
             // X轴箭头
             ctx.beginPath();
-            ctx.moveTo(canvas.width - arrowSize, originY - arrowSize/2);
-            ctx.lineTo(canvas.width, originY);
-            ctx.lineTo(canvas.width - arrowSize, originY + arrowSize/2);
+            ctx.moveTo(w - arrowSize, originY - arrowSize / 2);
+            ctx.lineTo(w, originY);
+            ctx.lineTo(w - arrowSize, originY + arrowSize / 2);
             ctx.fill();
-            
+
             // Y轴箭头
             ctx.beginPath();
-            ctx.moveTo(originX - arrowSize/2, arrowSize);
+            ctx.moveTo(originX - arrowSize / 2, arrowSize);
             ctx.lineTo(originX, 0);
-            ctx.lineTo(originX + arrowSize/2, arrowSize);
+            ctx.lineTo(originX + arrowSize / 2, arrowSize);
             ctx.fill();
-            
+
             if (showLabels) {
                 ctx.fillStyle = axisColor;
                 ctx.font = 'bold 18px Arial';
-                ctx.fillText('x', canvas.width - 25, originY + 25);
-                ctx.fillText('y', originX + 15, 20);
+                ctx.fillText(xLabel, w - 25, originY + 25);
+                ctx.fillText(yLabel, originX + 15, 20);
                 ctx.font = '14px Arial';
                 ctx.fillText('O', originX - 20, originY + 20);
             }
-            
+
             ctx.restore();
         }
         
         // 坐标转换函数生成器
         function createCoordinateTransform(canvas, xMin, xMax, yMin, yMax, padding = 50) {
-            const width = canvas.width - 2 * padding;
-            const height = canvas.height - 2 * padding;
-            
+            const w = (canvas.clientWidth || parseInt(canvas.style.width) || canvas.width);
+            const h = (canvas.clientHeight || parseInt(canvas.style.height) || canvas.height);
+            const width = w - 2 * padding;
+            const height = h - 2 * padding;
+
             return {
                 toCanvasX: (x) => ((x - xMin) / (xMax - xMin)) * width + padding,
-                toCanvasY: (y) => canvas.height - padding - ((y - yMin) / (yMax - yMin)) * height,
+                toCanvasY: (y) => h - padding - ((y - yMin) / (yMax - yMin)) * height,
                 originX: ((0 - xMin) / (xMax - xMin)) * width + padding,
-                originY: canvas.height - padding - ((0 - yMin) / (yMax - yMin)) * height
+                originY: h - padding - ((0 - yMin) / (yMax - yMin)) * height
             };
         }
         
@@ -3063,8 +3571,8 @@
                 if (!this.ctx) return;
 
                 const padding = 50;
-                const width = this.canvas.width;
-                const height = this.canvas.height;
+                const width = this.width;
+                const height = this.height;
 
                 // 绘制坐标系
                 drawCoordinateSystem(this.ctx, this.canvas, {
@@ -3145,9 +3653,8 @@
 
             draw() {
                 if (!this.ctx) return;
-
-                const width = this.canvas.width;
-                const height = this.canvas.height;
+                const width = this.width;
+                const height = this.height;
                 const centerY = height * 0.5;
                 const titleY = height * 0.15;
                 const dotRadius = Math.min(width, height) * 0.04;
@@ -3273,8 +3780,8 @@
             draw() {
                 if (!this.ctx) return;
                 const ctx = this.ctx;
-                const width = this.canvas.width;
-                const height = this.canvas.height;
+                const width = this.width;
+                const height = this.height;
                 ctx.clearRect(0, 0, width, height);
 
                 const paddingX = width * 0.12;
@@ -3375,8 +3882,8 @@
                 if (!this.ctx) return;
 
                 const padding = 60;
-                const width = this.canvas.width;
-                const height = this.canvas.height;
+                const width = this.width;
+                const height = this.height;
 
                 // 计算下一个斐波那契数
                 if (this.n < 20) {
@@ -3456,8 +3963,8 @@
                 if (!this.ctx) return;
 
                 const padding = 60;
-                const width = this.canvas.width;
-                const height = this.canvas.height;
+                const width = this.width;
+                const height = this.height;
 
                 // 计算当前价值
                 const value = this.V0 * Math.pow(0.9, this.year);
@@ -3522,8 +4029,8 @@
                 if (!this.ctx) return;
 
                 const padding = 60;
-                const width = this.canvas.width;
-                const height = this.canvas.height;
+                const width = this.width;
+                const height = this.height;
 
                 drawCoordinateSystem(this.ctx, this.canvas, {
                     originX: padding,
@@ -3578,9 +4085,8 @@
 
             draw() {
                 if (!this.ctx) return;
-
-                const width = this.canvas.width;
-                const height = this.canvas.height;
+                const width = this.width;
+                const height = this.height;
                 const sectionWidth = width / 3;
 
                 // 收敛
@@ -3643,11 +4149,11 @@
                 this.ctx.fillStyle = '#3b82f6';
                 this.ctx.font = '24px Arial';
                 this.ctx.textAlign = 'center';
-                this.ctx.fillText('数列极限的几何意义', this.canvas.width / 2, this.canvas.height / 2 - 50);
+                this.ctx.fillText('数列极限的几何意义', this.width / 2, this.height / 2 - 50);
                 this.ctx.font = '18px Arial';
                 this.ctx.fillStyle = '#6b7280';
-                this.ctx.fillText('数列的项无限接近某个常数A', this.canvas.width / 2, this.canvas.height / 2);
-                this.ctx.fillText('但可能永远不会等于A', this.canvas.width / 2, this.canvas.height / 2 + 30);
+                this.ctx.fillText('数列的项无限接近某个常数A', this.width / 2, this.height / 2);
+                this.ctx.fillText('但可能永远不会等于A', this.width / 2, this.height / 2 + 30);
             }
         }
 
@@ -5413,9 +5919,8 @@
 
             draw() {
                 if (!this.ctx) return;
-
-                const width = this.canvas.width;
-                const height = this.canvas.height;
+                const width = this.width;
+                const height = this.height;
                 const canvasWidth = width - 2 * this.padding;
                 const canvasHeight = height - 2 * this.padding;
 
@@ -5573,8 +6078,8 @@
             draw() {
                 if (!this.ctx) return;
                 const padding = 50;
-                const width = this.canvas.width;
-                const height = this.canvas.height;
+                const width = this.width;
+                const height = this.height;
 
                 // 标题
                 this.ctx.fillStyle = '#1f2937';
@@ -5643,8 +6148,8 @@
             draw() {
                 if (!this.ctx) return;
                 const padding = 60;
-                const width = this.canvas.width;
-                const height = this.canvas.height;
+                const width = this.width;
+                const height = this.height;
 
                 // 绘制坐标系
                 const originX = padding;
@@ -5740,8 +6245,8 @@
             draw() {
                 if (!this.ctx) return;
                 const padding = 60;
-                const width = this.canvas.width;
-                const height = this.canvas.height;
+                const width = this.width;
+                const height = this.height;
 
                 // 绘制坐标系
                 const originX = padding;
@@ -5828,8 +6333,8 @@
             draw() {
                 if (!this.ctx) return;
                 const padding = 60;
-                const width = this.canvas.width;
-                const height = this.canvas.height;
+                const width = this.width;
+                const height = this.height;
 
                 // 绘制坐标系
                 const originX = width / 2;
@@ -5912,8 +6417,8 @@
             draw() {
                 if (!this.ctx) return;
                 const padding = 60;
-                const width = this.canvas.width;
-                const height = this.canvas.height;
+                const width = this.width;
+                const height = this.height;
 
                 // 绘制坐标系
                 const originX = padding;
@@ -6011,8 +6516,8 @@
             draw() {
                 if (!this.ctx) return;
                 const padding = 50;
-                const width = this.canvas.width;
-                const height = this.canvas.height;
+                const width = this.width;
+                const height = this.height;
                 const leftWidth = width / 2;
 
                 // 中间分隔线
@@ -6191,8 +6696,8 @@
             draw() {
                 if (!this.ctx) return;
                 const padding = 50;
-                const width = this.canvas.width;
-                const height = this.canvas.height;
+                const width = this.width;
+                const height = this.height;
 
                 // 标题
                 this.ctx.fillStyle = '#1f2937';
@@ -6312,8 +6817,8 @@
             draw() {
                 if (!this.ctx) return;
                 const padding = 60;
-                const width = this.canvas.width;
-                const height = this.canvas.height;
+                const width = this.width;
+                const height = this.height;
 
                 // 标题
                 this.ctx.fillStyle = '#1f2937';
@@ -6431,8 +6936,8 @@
             draw() {
                 if (!this.ctx) return;
                 const padding = 60;
-                const width = this.canvas.width;
-                const height = this.canvas.height;
+                const width = this.width;
+                const height = this.height;
 
                 // 标题
                 this.ctx.fillStyle = '#1f2937';
@@ -6550,8 +7055,8 @@
             draw() {
                 if (!this.ctx) return;
                 const padding = 60;
-                const width = this.canvas.width;
-                const height = this.canvas.height;
+                const width = this.width;
+                const height = this.height;
 
                 // 标题
                 this.ctx.fillStyle = '#1f2937';
@@ -6669,8 +7174,8 @@
             draw() {
                 if (!this.ctx) return;
                 const padding = 60;
-                const width = this.canvas.width;
-                const height = this.canvas.height;
+                const width = this.width;
+                const height = this.height;
 
                 // 标题
                 this.ctx.fillStyle = '#1f2937';
@@ -6790,8 +7295,8 @@
             draw() {
                 if (!this.ctx) return;
                 const padding = 50;
-                const width = this.canvas.width;
-                const height = this.canvas.height;
+                const width = this.width;
+                const height = this.height;
 
                 // 标题
                 this.ctx.fillStyle = '#1f2937';
@@ -6858,8 +7363,8 @@
             draw() {
                 if (!this.ctx) return;
                 const padding = 60;
-                const width = this.canvas.width;
-                const height = this.canvas.height;
+                const width = this.width;
+                const height = this.height;
 
                 // 标题
                 this.ctx.fillStyle = '#1f2937';
@@ -6951,8 +7456,8 @@
             draw() {
                 if (!this.ctx) return;
                 const padding = 60;
-                const width = this.canvas.width;
-                const height = this.canvas.height;
+                const width = this.width;
+                const height = this.height;
 
                 // 标题
                 this.ctx.fillStyle = '#1f2937';
@@ -7016,8 +7521,8 @@
             draw() {
                 if (!this.ctx) return;
                 const padding = 60;
-                const width = this.canvas.width;
-                const height = this.canvas.height;
+                const width = this.width;
+                const height = this.height;
 
                 // 标题
                 this.ctx.fillStyle = '#1f2937';
@@ -7080,8 +7585,8 @@
             draw() {
                 if (!this.ctx) return;
                 const padding = 60;
-                const width = this.canvas.width;
-                const height = this.canvas.height;
+                const width = this.width;
+                const height = this.height;
 
                 // 标题
                 this.ctx.fillStyle = '#1f2937';
@@ -7170,8 +7675,8 @@
             draw() {
                 if (!this.ctx) return;
                 const padding = 60;
-                const width = this.canvas.width;
-                const height = this.canvas.height;
+                const width = this.width;
+                const height = this.height;
 
                 // 标题
                 this.ctx.fillStyle = '#1f2937';
@@ -7257,8 +7762,8 @@
             draw() {
                 if (!this.ctx) return;
                 const padding = 60;
-                const width = this.canvas.width;
-                const height = this.canvas.height;
+                const width = this.width;
+                const height = this.height;
 
                 // 标题
                 this.ctx.fillStyle = '#1f2937';
@@ -7341,8 +7846,8 @@
             draw() {
                 if (!this.ctx) return;
                 const padding = 60;
-                const width = this.canvas.width;
-                const height = this.canvas.height;
+                const width = this.width;
+                const height = this.height;
 
                 // 标题
                 this.ctx.fillStyle = '#1f2937';
@@ -7413,8 +7918,8 @@
             draw() {
                 if (!this.ctx) return;
                 const padding = 60;
-                const width = this.canvas.width;
-                const height = this.canvas.height;
+                const width = this.width;
+                const height = this.height;
 
                 // 标题
                 this.ctx.fillStyle = '#1f2937';
@@ -7677,6 +8182,37 @@
             totalSlides = slidesData.length;
             document.getElementById('slideNumberTotal').textContent = totalSlides;
             document.getElementById('slideNumberInput').max = totalSlides;
+
+            // 初始化悬浮菜单及关闭逻辑
+            initFloatingControl();
+            // 构建目录
+            try { buildChapterMenu(); } catch (e) { console.warn('构建目录失败', e); }
+            ['lab-submenu','chapter-submenu','course-submenu'].forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                const content = el.querySelector('.submenu-content');
+                if (content) content.addEventListener('click', ev => ev.stopPropagation());
+            });
+            document.addEventListener('click', () => {
+                closeAllSubmenus();
+                const floatingBtn = document.getElementById('floating-control-btn');
+                const floatingMenu = document.getElementById('floating-menu-items');
+                if (floatingBtn && floatingMenu) {
+                    floatingBtn.classList.remove('active');
+                    floatingMenu.classList.remove('active');
+                }
+            });
+            document.addEventListener('keydown', (ev) => {
+                if (ev.key === 'Escape') {
+                    closeAllSubmenus();
+                    const floatingBtn = document.getElementById('floating-control-btn');
+                    const floatingMenu = document.getElementById('floating-menu-items');
+                    if (floatingBtn && floatingMenu) {
+                        floatingBtn.classList.remove('active');
+                        floatingMenu.classList.remove('active');
+                    }
+                }
+            });
 
             // 等待MathJax加载完成后显示第一页
             if (window.MathJax) {

@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab 13.2 概率的加法与乘法公式验证实验室</title>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\(', '\)']],
+                displayMath: [['$$', '$$'], ['\[', '\]']],
+                processEscapes: true
+            },
+            startup: {
+                pageReady: () => {
+                    return MathJax.startup.defaultPageReady().then(() => {
+                        if (typeof window.scheduleMathRender === 'function') {
+                            window.scheduleMathRender();
+                        }
+                        console.log('MathJax加载完成');
+                    });
+                }
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+            }
+        };
+    </script>
+    <script defer src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js"></script>
+    <script defer src="../common-assets/js/lab-math-enhancer.js"></script>
+    <style>
+
+        :root {
+            --h1-size: 22px;
+            --h2-size: 20px;
+            --h3-size: 18px;
+            --btn-size: 16px;
+            --formula-size: 20px;
+            --text-size: 16px;
+            --primary: #4f46e5;
+            --primary-light: #6366f1;
+            --primary-dark: #3730a3;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --light: #ffffff;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-400: #9ca3af;
+            --gray-600: #4b5563;
+            --gray-800: #1f2937;
+            --border: #e5e7eb;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        *::-webkit-scrollbar {
+            width: 0;
+            background: transparent;
+        }
+
+        * {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
+            font-size: var(--text-size);
+            line-height: 1.5;
+            background: var(--gray-50);
+            color: var(--gray-800);
+        }
+
+        .return-home-panel {
+            position: fixed;
+            top: 12px;
+            right: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+            z-index: 40;
+        }
+
+        .return-toggle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.95), rgba(99, 102, 241, 0.9));
+            color: #ffffff;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 10px 18px rgba(79, 70, 229, 0.28);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .return-toggle:focus-visible {
+            outline: 2px solid rgba(129, 140, 248, 0.6);
+            outline-offset: 3px;
+        }
+
+        .return-toggle:hover {
+            transform: translateY(-1px) scale(1.03);
+            box-shadow: 0 14px 26px rgba(79, 70, 229, 0.35);
+        }
+
+        .return-links {
+            display: none;
+            flex-direction: column;
+            gap: 6px;
+            padding: 10px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(79, 70, 229, 0.15);
+            box-shadow: 0 16px 30px rgba(15, 23, 42, 0.18);
+            backdrop-filter: blur(6px);
+        }
+
+        .return-home-panel.open .return-links {
+            display: flex;
+        }
+
+        .return-link {
+            padding: 6px 12px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 14px;
+            color: var(--primary);
+            background: rgba(79, 70, 229, 0.12);
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+
+        .return-link.return-main {
+            color: var(--success);
+            background: rgba(16, 185, 129, 0.12);
+        }
+
+        .return-link:hover {
+            background: rgba(79, 70, 229, 0.2);
+            color: var(--primary-dark);
+        }
+
+        .return-link.return-main:hover {
+            background: rgba(16, 185, 129, 0.22);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            height: 100vh;
+            max-height: 700px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            background: var(--light);
+            border-radius: 12px;
+            box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(90deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: var(--light);
+            padding: 10px 24px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: var(--h1-size);
+            font-weight: 600;
+        }
+
+        .main {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 120px;
+            background: var(--gray-50);
+            border-right: 1px solid var(--border);
+            padding: 12px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .nav-btn {
+            width: 100%;
+            padding: 8px;
+            border: none;
+            border-radius: 6px;
+            background: transparent;
+            color: var(--gray-600);
+            text-align: left;
+            font-size: var(--text-size);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .nav-btn:hover {
+            background: var(--gray-100);
+        }
+
+        .nav-btn.active {
+            background: var(--primary);
+            color: var(--light);
+        }
+
+        .content {
+            flex: 1;
+            display: none;
+            padding: 18px;
+            overflow-y: auto;
+        }
+
+        .content.active {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow-y: auto;
+        }
+
+        .card {
+            background: var(--light);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+        }
+
+        .card h3 {
+            font-size: var(--h3-size);
+            color: var(--primary);
+            margin-bottom: 12px;
+        }
+
+        .input-group {
+            margin-bottom: 12px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: var(--gray-600);
+        }
+
+        .input-group select,
+        .input-group input,
+        .input-group range,
+        .input-group textarea {
+            width: 100%;
+            padding: 8px 10px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            font-size: var(--text-size);
+            background: var(--gray-50);
+        }
+
+        .input-group input[type="range"] {
+            padding: 0;
+        }
+
+        .input-group input:focus,
+        .input-group select:focus,
+        .input-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: var(--light);
+        }
+
+        .btn,
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 16px;
+            font-size: var(--btn-size);
+            border: none;
+            border-radius: 6px;
+            background: var(--primary);
+            color: var(--light);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            gap: 6px;
+        }
+
+        .btn.secondary {
+            background: var(--gray-200);
+            color: var(--gray-600);
+        }
+
+        .btn:hover,
+        .action-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn.secondary:hover {
+            background: var(--gray-400);
+            color: var(--light);
+        }
+
+        .info-box {
+            background: var(--gray-50);
+            border-left: 3px solid var(--primary);
+            padding: 12px;
+            border-radius: 6px;
+            font-size: var(--text-size);
+            line-height: 1.6;
+        }
+
+        canvas {
+            width: 100%;
+            height: 260px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: #ffffff;
+        }
+
+        .tag-list {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: rgba(79, 70, 229, 0.12);
+            color: var(--primary);
+            font-size: 14px;
+        }
+
+        table.matrix-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: center;
+        }
+
+        table.matrix-table td {
+            border: 1px solid var(--gray-200);
+            padding: 6px;
+            font-size: var(--text-size);
+        }
+    
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 12px;
+        }
+
+        .stat-card {
+            background: var(--gray-50);
+            border-radius: 10px;
+            padding: 12px;
+            border: 1px dashed var(--border);
+        }
+
+        .stat-card h4 {
+            font-size: 15px;
+            color: var(--gray-600);
+            margin-bottom: 6px;
+        }
+
+        .stat-card p {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .equation-box {
+            background: rgba(79, 70, 229, 0.08);
+            border-radius: 8px;
+            padding: 12px;
+            font-weight: 600;
+            color: var(--primary);
+            margin-top: 10px;
+        }
+
+        .info-list {
+            padding-left: 18px;
+        }
+
+        .info-list li {
+            list-style: disc;
+            color: var(--gray-600);
+            margin-bottom: 4px;
+        }
+
+        .highlight {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="return-home-panel">
+        <button class="return-toggle" type="button" aria-label="打开返回导航" onclick="toggleReturnPanel(event)"><i class="fa-solid fa-house"></i></button>
+        <div class="return-links">
+            <a class="return-link return-sub" href="index.html"><i class="fa-solid fa-arrow-left"></i> 返回目录</a>
+            <a class="return-link return-main" href="../index.html"><i class="fa-solid fa-house"></i> 返回主站</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <header class="header">
+            <h1>Lab 13.2 概率加法与乘法公式的直观验证</h1>
+        </header>
+
+        <div class="main">
+            <nav class="sidebar">
+                <button class="nav-btn active"  data-panel="module1"onclick="switchPanel('module1')">加法公式</button>
+                <button class="nav-btn"  data-panel="module2"onclick="switchPanel('module2')">乘法公式</button>
+            </nav>
+
+            <div class="content active" id="module1">
+                <div class="column">
+                    <div class="card">
+                        <h3>设置事件概率</h3>
+                        <div class="input-group">
+                            <label>$P(A)$</label>
+                            <input type="range" id="paRange" min="0" max="1" step="0.05" value="0.4">
+                            <div>$P(A)=$<span id="paVal" class="highlight">0.40</span></div>
+                        </div>
+                        <div class="input-group">
+                            <label>$P(B)$</label>
+                            <input type="range" id="pbRange" min="0" max="1" step="0.05" value="0.5">
+                            <div>$P(B)=$<span id="pbVal" class="highlight">0.50</span></div>
+                        </div>
+                        <div class="input-group">
+                            <label>$P(A\cap B)$</label>
+                            <input type="range" id="pabRange" min="0" max="1" step="0.05" value="0.2">
+                            <div>$P(A\cap B)=$<span id="pabVal" class="highlight">0.20</span></div>
+                        </div>
+                        <div class="stat-grid">
+                            <div class="stat-card">
+                                <h4>理论 $P(A\cup B)$</h4>
+                                <p id="unionTheory">0.70</p>
+                            </div>
+                            <div class="stat-card">
+                                <h4>模拟 $P(A\cup B)$</h4>
+                                <p id="unionSim">0.00</p>
+                            </div>
+                        </div>
+                        <button class="btn" id="simulateUnion">运行 200 次试验</button>
+                        <div class="equation-box">$P(A\cup B)=P(A)+P(B)-P(A\cap B)$</div>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="card">
+                        <h3>维恩图示意</h3>
+                        <canvas id="vennCanvas" width="520" height="320"></canvas>
+                        <ul class="info-list">
+                            <li>圆面积按概率比例显示。</li>
+                            <li>重叠区域代表 $A\cap B$。</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content" id="module2">
+                <div class="column">
+                    <div class="card">
+                        <h3>乘法法则模拟</h3>
+                        <div class="input-group">
+                            <label>事件 A 成功率</label>
+                            <input type="range" id="pa2Range" min="0" max="1" step="0.05" value="0.6">
+                            <div>$P(A)=$<span id="pa2Val" class="highlight">0.60</span></div>
+                        </div>
+                        <div class="input-group">
+                            <label>条件概率 $P(B|A)$</label>
+                            <input type="range" id="pbaRange" min="0" max="1" step="0.05" value="0.5">
+                            <div>$P(B|A)=$<span id="pbaVal" class="highlight">0.50</span></div>
+                        </div>
+                        <div class="input-group">
+                            <label>条件概率 $P(B|\overline{A})$</label>
+                            <input type="range" id="pbnaRange" min="0" max="1" step="0.05" value="0.3">
+                            <div>$P(B|\overline{A})=$<span id="pbnaVal" class="highlight">0.30</span></div>
+                        </div>
+                        <div class="stat-grid">
+                            <div class="stat-card">
+                                <h4>理论 $P(A\cap B)$</h4>
+                                <p id="jointTheory">0.30</p>
+                            </div>
+                            <div class="stat-card">
+                                <h4>模拟结果</h4>
+                                <p id="jointSim">0.00</p>
+                            </div>
+                        </div>
+                        <button class="btn" id="simulateJoint">运行 300 次试验</button>
+                        <div class="equation-box">$P(A\cap B)=P(A)P(B|A)$</div>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="card">
+                        <h3>概率硬币翻转图</h3>
+                        <canvas id="treeCanvas" width="520" height="320"></canvas>
+                        <ul class="info-list">
+                            <li>硬币以3D翻转动画展示不同事件及其概率。</li>
+                            <li>上排显示事件A和Ā,下排显示四个联合事件结果。</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const panels = document.querySelectorAll('.content');
+        const buttons = document.querySelectorAll('.nav-btn');
+
+        function switchPanel(id, trigger) {
+            const activeButton = trigger instanceof HTMLElement ? trigger :
+
+                (typeof event !== 'undefined' && event?.currentTarget instanceof HTMLElement ? event.currentTarget :
+
+                    document.querySelector(`.nav-btn[data-panel="${id}"]`) ||
+
+                    document.querySelector(`.nav-btn[data-target="${id}"]`) ||
+
+                    null);
+
+            panels.forEach(panel => panel.classList.remove('active'));
+            buttons.forEach(btn => btn.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            const activeBtn = Array.from(buttons).find(btn => btn.getAttribute('onclick').includes(id));
+            if (activeBtn) activeBtn.classList.add('active');
+        }
+
+        let mathObserver = null;
+        let mathRenderQueued = false;
+
+        function startMathObserver() {
+            if (typeof MutationObserver === 'undefined' || !document.body) {
+                return;
+            }
+            if (mathObserver) {
+                mathObserver.disconnect();
+            }
+            mathObserver = new MutationObserver(mutations => {
+                for (const mutation of mutations) {
+                    if (mutation.type === 'childList' || mutation.type === 'characterData') {
+                        scheduleMathRender();
+                        break;
+                    }
+                }
+            });
+            mathObserver.observe(document.body, { childList: true, subtree: true, characterData: true });
+        }
+
+        function scheduleMathRender() {
+            if (mathRenderQueued) {
+                return;
+            }
+            mathRenderQueued = true;
+            requestAnimationFrame(() => {
+                mathRenderQueued = false;
+                if (window.MathJax && MathJax.typesetPromise) {
+                    if (mathObserver) {
+                        mathObserver.disconnect();
+                    }
+                    MathJax.typesetPromise()
+                        .catch(err => console.log('渲染错误:', err))
+                        .finally(() => {
+                            startMathObserver();
+                        });
+                } else {
+                    setTimeout(scheduleMathRender, 160);
+                }
+            });
+        }
+
+        window.scheduleMathRender = scheduleMathRender;
+
+        function renderMath() {
+            scheduleMathRender();
+        }
+
+        function ensureMathReady() {
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', () => {
+                    startMathObserver();
+                    scheduleMathRender();
+                });
+            } else {
+                startMathObserver();
+                scheduleMathRender();
+            }
+        }
+
+        ensureMathReady();
+
+        function toggleReturnPanel(event) {
+            event.stopPropagation();
+            const panel = document.querySelector('.return-home-panel');
+            if (panel) {
+                panel.classList.toggle('open');
+            }
+        }
+
+        document.addEventListener('click', event => {
+            const panel = document.querySelector('.return-home-panel');
+            if (!panel) {
+                return;
+            }
+            if (panel.classList.contains('open') && !panel.contains(event.target)) {
+                panel.classList.remove('open');
+            }
+        });
+
+        window.addEventListener('pageshow', () => {
+            scheduleMathRender();
+        });
+
+        function resizeCanvas(canvas) {
+            const container = canvas.parentElement;
+            const width = container.clientWidth - 20;
+            const height = 300;
+            canvas.style.width = width + 'px';
+            canvas.style.height = height + 'px';
+            const ratio = window.devicePixelRatio || 1;
+            canvas.width = width * ratio;
+            canvas.height = height * ratio;
+            const ctx = canvas.getContext('2d');
+            ctx.setTransform(1,0,0,1,0,0);
+            ctx.scale(ratio, ratio);
+            return ctx;
+        }
+
+        const vennCtx = resizeCanvas(document.getElementById('vennCanvas'));
+        const treeCtx = resizeCanvas(document.getElementById('treeCanvas'));
+
+        // 维恩图动画变量
+        let vennAnimationFrame = null;
+        let vennAnimProgress = { a: 0, b: 0 };
+        let vennTargetRadii = { a: 100, b: 100 };
+        let vennTime = 0;
+
+        // 树形图动画变量
+        let treeAnimationFrame = null;
+        let treeTime = 0;
+
+        function clampIntersection(pa, pb, pab) {
+            const maxAllowed = Math.min(pa, pb);
+            return Math.min(Math.max(pab, 0), maxAllowed);
+        }
+
+        function updateUnionTheory() {
+            let pa = Number(document.getElementById('paRange').value);
+            let pb = Number(document.getElementById('pbRange').value);
+            let pab = Number(document.getElementById('pabRange').value);
+            pab = clampIntersection(pa, pb, pab);
+            document.getElementById('pabRange').value = pab.toFixed(2);
+            document.getElementById('paVal').textContent = pa.toFixed(2);
+            document.getElementById('pbVal').textContent = pb.toFixed(2);
+            document.getElementById('pabVal').textContent = pab.toFixed(2);
+            const union = pa + pb - pab;
+            document.getElementById('unionTheory').textContent = union.toFixed(2);
+            drawVenn(pa, pb, pab);
+        }
+
+        function drawVenn(pa, pb, pab) {
+            // 计算目标半径(基于概率大小)
+            const minRadius = 50;
+            const maxRadius = 95;
+            vennTargetRadii.a = minRadius + (maxRadius - minRadius) * Math.sqrt(pa);
+            vennTargetRadii.b = minRadius + (maxRadius - minRadius) * Math.sqrt(pb);
+
+            // 取消之前的动画
+            if (vennAnimationFrame) {
+                cancelAnimationFrame(vennAnimationFrame);
+            }
+
+            // 启动新动画
+            animateVenn(pa, pb, pab);
+        }
+
+        function animateVenn(pa, pb, pab) {
+            const ctx = vennCtx;
+            const container = ctx.canvas.parentElement;
+            const width = container.clientWidth - 20;
+            const height = 300;
+
+            // 平滑插值动画
+            const speed = 0.15;
+            vennAnimProgress.a += (vennTargetRadii.a - vennAnimProgress.a) * speed;
+            vennAnimProgress.b += (vennTargetRadii.b - vennAnimProgress.b) * speed;
+
+            // 初始化半径
+            if (vennAnimProgress.a === 0 && vennAnimProgress.b === 0) {
+                vennAnimProgress.a = vennTargetRadii.a;
+                vennAnimProgress.b = vennTargetRadii.b;
+            }
+
+            vennTime += 0.04;
+
+            ctx.clearRect(0, 0, width, height);
+            ctx.save();
+
+            // 计算圆心位置(居中,动态间距)
+            const centerY = height / 2;
+            const overlap = Math.min(vennAnimProgress.a, vennAnimProgress.b) * (pab > 0.01 ? 0.6 : 0.3);
+            const centerAX = width / 2 - overlap;
+            const centerBX = width / 2 + overlap;
+
+            // 绘制圆A的渐变
+            const gradientA = ctx.createRadialGradient(centerAX, centerY, 0, centerAX, centerY, vennAnimProgress.a);
+            gradientA.addColorStop(0, 'rgba(59, 130, 246, 0.65)');
+            gradientA.addColorStop(0.5, 'rgba(59, 130, 246, 0.45)');
+            gradientA.addColorStop(1, 'rgba(59, 130, 246, 0.15)');
+
+            ctx.fillStyle = gradientA;
+            ctx.beginPath();
+            ctx.arc(centerAX, centerY, vennAnimProgress.a, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 圆A流动边框
+            ctx.strokeStyle = 'rgba(37, 99, 235, 0.9)';
+            ctx.lineWidth = 2.5;
+            ctx.setLineDash([8, 6]);
+            ctx.lineDashOffset = -vennTime * 30;
+            ctx.beginPath();
+            ctx.arc(centerAX, centerY, vennAnimProgress.a, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // 绘制圆B的渐变
+            const gradientB = ctx.createRadialGradient(centerBX, centerY, 0, centerBX, centerY, vennAnimProgress.b);
+            gradientB.addColorStop(0, 'rgba(168, 85, 247, 0.65)');
+            gradientB.addColorStop(0.5, 'rgba(168, 85, 247, 0.45)');
+            gradientB.addColorStop(1, 'rgba(168, 85, 247, 0.15)');
+
+            ctx.fillStyle = gradientB;
+            ctx.beginPath();
+            ctx.arc(centerBX, centerY, vennAnimProgress.b, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 圆B流动边框
+            ctx.strokeStyle = 'rgba(147, 51, 234, 0.9)';
+            ctx.lineWidth = 2.5;
+            ctx.setLineDash([8, 6]);
+            ctx.lineDashOffset = -vennTime * 30;
+            ctx.beginPath();
+            ctx.arc(centerBX, centerY, vennAnimProgress.b, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // 交集高亮(呼吸效果)
+            if (pab > 0.01) {
+                ctx.save();
+                ctx.globalCompositeOperation = 'source-over';
+                const pulseIntensity = 0.55 + 0.18 * Math.sin(vennTime * 2);
+                ctx.fillStyle = `rgba(236, 72, 153, ${pulseIntensity})`;
+
+                ctx.beginPath();
+                ctx.arc(centerAX, centerY, vennAnimProgress.a, 0, Math.PI * 2);
+                ctx.clip();
+                ctx.beginPath();
+                ctx.arc(centerBX, centerY, vennAnimProgress.b, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+
+            ctx.save();
+
+            // 绘制标签
+            ctx.fillStyle = '#1e40af';
+            ctx.font = 'bold 16px sans-serif';
+            ctx.textAlign = 'center';
+            const labelOffsetA = vennAnimProgress.a + 18;
+            const labelOffsetB = vennAnimProgress.b + 18;
+
+            ctx.fillText('事件 A', centerAX, centerY - labelOffsetA);
+            ctx.font = '14px sans-serif';
+            ctx.fillText(`P(A)=${pa.toFixed(2)}`, centerAX, centerY - labelOffsetA + 18);
+
+            ctx.fillStyle = '#7c3aed';
+            ctx.font = 'bold 16px sans-serif';
+            ctx.fillText('事件 B', centerBX, centerY - labelOffsetB);
+            ctx.font = '14px sans-serif';
+            ctx.fillText(`P(B)=${pb.toFixed(2)}`, centerBX, centerY - labelOffsetB + 18);
+
+            // 交集标签
+            if (pab > 0.01) {
+                ctx.fillStyle = '#be185d';
+                ctx.font = 'bold 15px sans-serif';
+                ctx.fillText('A∩B', width / 2, centerY - 6);
+                ctx.font = '13px sans-serif';
+                ctx.fillText(`${pab.toFixed(2)}`, width / 2, centerY + 11);
+            }
+
+            // 各区域概率值
+            ctx.font = 'bold 13px sans-serif';
+            const aOnlyProb = pa - pab;
+            if (aOnlyProb > 0.01) {
+                ctx.fillStyle = '#1e40af';
+                ctx.fillText(`${aOnlyProb.toFixed(2)}`, centerAX - vennAnimProgress.a * 0.45, centerY + 5);
+            }
+
+            const bOnlyProb = pb - pab;
+            if (bOnlyProb > 0.01) {
+                ctx.fillStyle = '#7c3aed';
+                ctx.fillText(`${bOnlyProb.toFixed(2)}`, centerBX + vennAnimProgress.b * 0.45, centerY + 5);
+            }
+
+            ctx.restore();
+
+            // 继续动画
+            vennAnimationFrame = requestAnimationFrame(() => animateVenn(pa, pb, pab));
+        }
+
+        function simulateUnionTrials() {
+            const trials = 200;
+            const pa = Number(document.getElementById('paRange').value);
+            const pb = Number(document.getElementById('pbRange').value);
+            const pab = Number(document.getElementById('pabRange').value);
+            let count = 0;
+            for (let i = 0; i < trials; i++) {
+                const rand = Math.random();
+                let outcome;
+                if (rand < pab) outcome = 'both';
+                else if (rand < pab + (pa - pab)) outcome = 'A';
+                else if (rand < pab + (pa - pab) + (pb - pab)) outcome = 'B';
+                else outcome = 'none';
+                if (outcome !== 'none') count++;
+            }
+            document.getElementById('unionSim').textContent = (count / trials).toFixed(2);
+        }
+
+        function updateTreeDiagram(pa, pba, pbna) {
+            // 取消之前的动画
+            if (treeAnimationFrame) {
+                cancelAnimationFrame(treeAnimationFrame);
+            }
+
+            // 启动新动画
+            animateTree(pa, pba, pbna);
+        }
+
+        function animateTree(pa, pba, pbna) {
+            const ctx = treeCtx;
+            const container = ctx.canvas.parentElement;
+            const width = container.clientWidth - 20;
+            const height = 300;
+
+            treeTime += 0.05;
+
+            ctx.clearRect(0, 0, width, height);
+            ctx.save();
+
+            // 硬币翻转设计
+            const coinRadius = 35;
+            const coinSpacing = 120;
+            const startX = 80;
+            const row1Y = 80;
+            const row2Y = 220;
+
+            // 翻转动画效果
+            const flip1 = Math.abs(Math.sin(treeTime * 1.2));
+            const flip2 = Math.abs(Math.sin(treeTime * 1.5 + 1));
+            const flip3 = Math.abs(Math.sin(treeTime * 1.3 + 2));
+            const flip4 = Math.abs(Math.sin(treeTime * 1.8 + 3));
+
+            // 绘制硬币函数
+            function drawCoin(x, y, label, prob, color, flipAmount) {
+                ctx.save();
+
+                // 3D翻转效果 - 缩放X轴
+                const scaleX = 0.3 + flipAmount * 0.7;
+                ctx.translate(x, y);
+                ctx.scale(scaleX, 1);
+
+                // 硬币圆形
+                const gradient = ctx.createRadialGradient(0, -10, 5, 0, 0, coinRadius);
+                gradient.addColorStop(0, color);
+                gradient.addColorStop(0.7, color);
+                gradient.addColorStop(1, '#cbd5e1');
+
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.arc(0, 0, coinRadius, 0, Math.PI * 2);
+                ctx.fill();
+
+                // 硬币边缘高光
+                ctx.strokeStyle = '#f8fafc';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // 内圈装饰
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.arc(0, 0, coinRadius - 5, 0, Math.PI * 2);
+                ctx.stroke();
+
+                ctx.restore();
+
+                // 文字标签(不翻转)
+                ctx.fillStyle = '#fff';
+                ctx.font = 'bold 16px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(label, x, y - 3);
+
+                ctx.font = '11px sans-serif';
+                ctx.fillText(prob, x, y + 12);
+            }
+
+            // 绘制连接线
+            ctx.strokeStyle = '#cbd5e1';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 3]);
+
+            // 从第一行到第二行的连线
+            ctx.beginPath();
+            ctx.moveTo(startX, row1Y + coinRadius);
+            ctx.lineTo(startX, row2Y - coinRadius);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(startX + coinSpacing, row1Y + coinRadius);
+            ctx.lineTo(startX + coinSpacing, row2Y - coinRadius);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(startX + coinSpacing * 2, row1Y + coinRadius);
+            ctx.lineTo(startX + coinSpacing * 2, row2Y - coinRadius);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(startX + coinSpacing * 3, row1Y + coinRadius);
+            ctx.lineTo(startX + coinSpacing * 3, row2Y - coinRadius);
+            ctx.stroke();
+
+            ctx.setLineDash([]);
+
+            // 第一行硬币 - 事件A和事件Ā
+            drawCoin(startX, row1Y, 'A', pa.toFixed(2), '#3b82f6', flip1);
+            drawCoin(startX + coinSpacing, row1Y, 'Ā', (1-pa).toFixed(2), '#64748b', flip2);
+
+            // 第二行硬币 - 四个结果
+            const pAB = pa * pba;
+            const pANotB = pa * (1 - pba);
+            const pNotAB = (1 - pa) * pbna;
+            const pNotANotB = (1 - pa) * (1 - pbna);
+
+            drawCoin(startX, row2Y, 'A∩B', pAB.toFixed(3), '#10b981', flip1);
+            drawCoin(startX + coinSpacing, row2Y, 'A∩B̄', pANotB.toFixed(3), '#f59e0b', flip2);
+            drawCoin(startX + coinSpacing * 2, row2Y, 'Ā∩B', pNotAB.toFixed(3), '#8b5cf6', flip3);
+            drawCoin(startX + coinSpacing * 3, row2Y, 'Ā∩B̄', pNotANotB.toFixed(3), '#ef4444', flip4);
+
+            // 标注条件概率
+            ctx.fillStyle = '#475569';
+            ctx.font = '10px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            ctx.fillText(`P(B|A)=${pba.toFixed(2)}`, startX, (row1Y + row2Y) / 2);
+            ctx.fillText(`P(B̄|A)=${(1-pba).toFixed(2)}`, startX + coinSpacing, (row1Y + row2Y) / 2);
+            ctx.fillText(`P(B|Ā)=${pbna.toFixed(2)}`, startX + coinSpacing * 2, (row1Y + row2Y) / 2);
+            ctx.fillText(`P(B̄|Ā)=${(1-pbna).toFixed(2)}`, startX + coinSpacing * 3, (row1Y + row2Y) / 2);
+
+            ctx.restore();
+
+            treeAnimationFrame = requestAnimationFrame(() => animateTree(pa, pba, pbna));
+        }
+
+        function simulateJointTrials() {
+            const trials = 300;
+            const pa = Number(document.getElementById('pa2Range').value);
+            const pba = Number(document.getElementById('pbaRange').value);
+            const pbna = Number(document.getElementById('pbnaRange').value);
+            let count = 0;
+            for (let i = 0; i < trials; i++) {
+                const aOccurs = Math.random() < pa;
+                let bOccurs;
+                if (aOccurs) {
+                    bOccurs = Math.random() < pba;
+                } else {
+                    bOccurs = Math.random() < pbna;
+                }
+                if (aOccurs && bOccurs) count++;
+            }
+            const theory = pa * pba;
+            document.getElementById('jointTheory').textContent = theory.toFixed(2);
+            document.getElementById('jointSim').textContent = (count / trials).toFixed(2);
+        }
+
+        document.querySelectorAll('#paRange, #pbRange, #pabRange').forEach(input => {
+            input.addEventListener('input', updateUnionTheory);
+        });
+
+        document.getElementById('simulateUnion').addEventListener('click', () => {
+            simulateUnionTrials();
+        });
+
+        document.querySelectorAll('#pa2Range, #pbaRange, #pbnaRange').forEach(input => {
+            input.addEventListener('input', () => {
+                document.getElementById('pa2Val').textContent = Number(document.getElementById('pa2Range').value).toFixed(2);
+                document.getElementById('pbaVal').textContent = Number(document.getElementById('pbaRange').value).toFixed(2);
+                document.getElementById('pbnaVal').textContent = Number(document.getElementById('pbnaRange').value).toFixed(2);
+                updateTreeDiagram(Number(document.getElementById('pa2Range').value), Number(document.getElementById('pbaRange').value), Number(document.getElementById('pbnaRange').value));
+            });
+        });
+
+        document.getElementById('simulateJoint').addEventListener('click', () => {
+            simulateJointTrials();
+        });
+
+        window.addEventListener('resize', () => {
+            resizeCanvas(vennCtx.canvas);
+            resizeCanvas(treeCtx.canvas);
+            updateUnionTheory();
+            updateTreeDiagram(Number(document.getElementById('pa2Range').value), Number(document.getElementById('pbaRange').value), Number(document.getElementById('pbnaRange').value));
+        });
+
+        updateUnionTheory();
+        updateTreeDiagram(Number(document.getElementById('pa2Range').value), Number(document.getElementById('pbaRange').value), Number(document.getElementById('pbnaRange').value));
+        renderMath();
+    </script>
+</body>
+</html>

@@ -1,0 +1,1779 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>基本初等函数实验室</title>
+    
+    <!-- MathJax 配置 -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true,
+                processEnvironments: true
+            },
+            svg: {
+                fontCache: 'global',
+                scale: 0.9
+            },
+            startup: {
+                ready: () => {
+                    MathJax.startup.defaultReady();
+                    console.log('MathJax v3 loaded successfully');
+                    // 延迟扫描以确保所有公式元素都已渲染
+                    setTimeout(() => {
+                        MathJax.typesetPromise();
+                    }, 200);
+                }
+            }
+        };
+    </script>
+    <script src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js" id="MathJax-script"></script>
+    
+    <style>
+        :root {
+            --h1-size: 22px;      
+            --h2-size: 20px;      
+            --h3-size: 18px;      
+            --btn-size: 16px;     
+            --formula-size: 18px;
+            --text-size: 16px;
+            
+            --primary: #4f46e5;
+            --primary-light: #6366f1;
+            --primary-dark: #3730a3;
+            --light: #ffffff;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-600: #4b5563;
+            --gray-800: #1f2937;
+            --border: #e5e7eb;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        *::-webkit-scrollbar {
+            width: 0;
+            background: transparent;
+        }
+        
+        * {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
+            font-size: var(--text-size);
+            line-height: 1.5;
+            background: var(--gray-50);
+            color: var(--gray-800);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            height: 100vh;
+            max-height: 700px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            background: var(--light);
+        }
+
+        .header {
+            background: var(--primary);
+            color: var(--light);
+            padding: 8px 20px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: var(--h2-size);
+            margin: 0;
+        }
+
+        .main {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 120px;
+            background: var(--gray-50);
+            border-right: 1px solid var(--border);
+            padding: 10px 8px;
+        }
+
+        .nav-btn {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 4px;
+            background: transparent;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: var(--text-size);
+            color: var(--gray-600);
+            text-align: left;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover {
+            background: var(--gray-100);
+        }
+
+        .nav-btn.active {
+            background: var(--primary);
+            color: var(--light);
+        }
+
+        .content {
+            flex: 1;
+            display: none;
+            padding: 16px;
+            overflow-y: auto;
+        }
+
+        .content.active {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow-y: auto;
+        }
+
+        .card {
+            background: var(--light);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .card h3 {
+            font-size: var(--h3-size);
+            color: var(--primary);
+            margin-bottom: 12px;
+        }
+
+        .input-group {
+            margin-bottom: 12px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 4px;
+            font-size: var(--text-size);
+            font-weight: 500;
+        }
+
+        .input-group input,
+        .input-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: var(--text-size);
+            background: var(--gray-50);
+        }
+
+        .input-group input:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: var(--light);
+        }
+
+        .btn {
+            padding: 8px 16px;
+            background: var(--primary);
+            color: var(--light);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: var(--btn-size);
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .result {
+            background: var(--gray-50);
+            padding: 12px;
+            border-radius: 4px;
+            border: 1px solid var(--primary);
+            text-align: center;
+            font-size: var(--text-size);
+            margin: 12px 0;
+            min-height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .formula-box {
+            background: #f0f7ff;
+            padding: 12px;
+            border-radius: 4px;
+            border-left: 3px solid var(--primary);
+            margin: 12px 0;
+            text-align: center;
+            font-size: var(--formula-size);
+        }
+
+        /* MathJax 字体大小控制 */
+        .MathJax {
+            font-size: 0.9em !important;
+        }
+        
+        mjx-container {
+            font-size: 100% !important;
+        }
+        
+        .formula-box mjx-container {
+            font-size: 90% !important;
+        }
+        
+        .info-box mjx-container {
+            font-size: 90% !important;
+        }
+        
+        .result mjx-container {
+            font-size: 90% !important;
+        }
+
+        .info-box {
+            background: var(--gray-50);
+            padding: 10px;
+            border-radius: 4px;
+            margin: 8px 0;
+            font-size: var(--text-size);
+            text-align: center;
+        }
+
+        .steps {
+            background: #fff9e6;
+            padding: 12px;
+            border-radius: 4px;
+            border-left: 3px solid #f59e0b;
+            line-height: 1.8;
+            font-size: var(--text-size);
+        }
+
+        .canvas-container {
+            border: 1px solid var(--gray-200);
+            border-radius: 4px;
+            background: #fafafa;
+            padding: 10px;
+            min-height: 200px;
+            max-height: 500px;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .canvas-container canvas {
+            max-width: 100%;
+            max-height: 100%;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .tower-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: var(--gray-50);
+            border-radius: 4px;
+            min-height: 250px;
+            max-height: 400px;
+        }
+
+        .tower-display {
+            display: flex;
+            align-items: flex-end;
+            gap: 10px;
+        }
+
+        .tower {
+            display: flex;
+            flex-direction: column-reverse;
+            align-items: center;
+        }
+
+        .block {
+            width: 40px;
+            height: 25px;
+            background: var(--primary);
+            border: 1px solid var(--primary-dark);
+            margin: 1px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--light);
+            font-size: 12px;
+            font-weight: bold;
+            border-radius: 2px;
+            transition: all 0.3s;
+        }
+
+        .block.removing {
+            opacity: 0.3;
+            transform: translateX(50px);
+        }
+
+        .slider-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: var(--gray-50);
+            border-radius: 4px;
+            margin-top: 12px;
+        }
+
+        .slider-group label {
+            min-width: 60px;
+            font-size: var(--text-size);
+        }
+
+        .slider {
+            flex: 1;
+            height: 4px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: var(--gray-200);
+            outline: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+        }
+
+        .slider-value {
+            min-width: 40px;
+            text-align: center;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .rule-visual {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 20px;
+            background: var(--gray-50);
+            border-radius: 4px;
+            min-height: 150px;
+        }
+
+        .rule-tower {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .rule-height {
+            width: 30px;
+            background: var(--primary);
+            border-radius: 2px;
+            margin-bottom: 5px;
+        }
+
+        .rule-label {
+            font-size: 12px;
+            color: var(--gray-600);
+            text-align: center;
+        }
+
+        .operator {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary);
+            padding: 0 10px;
+        }
+
+        /* 图例层样式 */
+        .legend-overlay {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 8px;
+            max-width: 180px;
+            font-size: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            pointer-events: none; /* 允许点击穿透到底层Canvas */
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 4px;
+            gap: 6px;
+        }
+
+        .color-box {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+
+        .math-formula1,
+        .math-formula2,
+        .math-formula3 {
+            font-family: 'Times New Roman', serif;
+            font-style: italic;
+        }
+
+        #anchorFormulaText {
+            font-weight: 600;
+            color: #ff6b6b;
+        }
+
+        .explanation-text {
+            font-size: 11px;
+            color: #666;
+            margin: 6px 0;
+            line-height: 1.4;
+        }
+
+        .hint-text {
+            font-size: 10px;
+            color: #999;
+            margin-top: 4px;
+            text-align: center;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .main {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+                padding: 8px 16px;
+                display: flex;
+                flex-direction: row;
+                gap: 8px;
+                overflow-x: auto;
+                flex-shrink: 0;
+                justify-content: center;
+                flex-wrap: nowrap;
+            }
+
+            .nav-btn {
+                min-width: 90px;
+                text-align: center;
+                margin-bottom: 0;
+                white-space: nowrap;
+                flex-shrink: 0;
+                padding: 8px 12px;
+                font-size: 14px;
+            }
+
+            .content.active {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .container {
+                max-height: none;
+                height: 100vh;
+            }
+
+            .header {
+                padding: 6px 16px;
+                height: 36px;
+            }
+
+            .header h1 {
+                font-size: 18px;
+            }
+
+            .card {
+                padding: 12px;
+            }
+
+            .canvas-container {
+                min-height: 200px;
+                max-height: 300px;
+                padding: 8px;
+            }
+
+            .tower-container {
+                min-height: 200px;
+                max-height: 300px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header {
+                padding: 4px 12px;
+                height: 32px;
+            }
+
+            .header h1 {
+                font-size: 16px;
+            }
+
+            .sidebar {
+                padding: 6px 8px;
+                gap: 6px;
+                justify-content: space-between;
+            }
+
+            .nav-btn {
+                min-width: 75px;
+                padding: 6px 8px;
+                font-size: 13px;
+                flex: 1;
+                max-width: 100px;
+            }
+
+            .content {
+                padding: 12px;
+            }
+
+            .card {
+                padding: 10px;
+            }
+
+            .canvas-container {
+                min-height: 180px;
+                max-height: 250px;
+                padding: 6px;
+            }
+
+            .tower-container {
+                min-height: 180px;
+                max-height: 250px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .sidebar {
+                padding: 4px 6px;
+                gap: 4px;
+                overflow-x: auto;
+                justify-content: flex-start;
+            }
+
+            .nav-btn {
+                min-width: 65px;
+                padding: 5px 6px;
+                font-size: 12px;
+                flex-shrink: 0;
+            }
+
+            .header h1 {
+                font-size: 14px;
+            }
+        }
+    .return-home-panel { position: fixed; bottom: 12px; right: 12px; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; z-index: 40; }
+        .return-toggle { width: 40px; height: 40px; border-radius: 50%; border: none; background: linear-gradient(135deg, rgba(79,70,229,0.96), rgba(99,102,241,0.9)); color: #fff; font-size: 20px; cursor: pointer; box-shadow: 0 10px 18px rgba(79,70,229,0.28); transition: transform 0.2s, box-shadow 0.2s; }
+        .return-toggle:hover { transform: translateY(-1px) scale(1.03); box-shadow: 0 14px 26px rgba(79,70,229,0.35); }
+        .return-links { display: none; flex-direction: column; gap: 6px; padding: 10px; border-radius: 10px; background: rgba(255,255,255,0.96); border: 1px solid rgba(79,70,229,0.18); box-shadow: 0 10px 30px rgba(15,23,42,0.14); opacity: 0; transition: opacity 0.16s; }
+        .return-link { text-decoration: none; font-size: 15px; color: var(--primary-dark); padding: 6px 12px; border-radius: 8px; background: rgba(99,102,241,0.12); transition: background 0.2s; }
+        .return-link:hover { background: rgba(79,70,229,0.18); }
+    </style>
+
+</head>
+<body>
+    <div class="return-home-panel">
+        <button class="return-toggle" onclick="toggleReturnLinks()"><i class="fa-solid fa-house"></i></button>
+        <div class="return-links"><a class="return-link" href="index.html"><i class="fa-solid fa-arrow-left"></i> 返回目录</a><a class="return-link" href="../index.html"><i class="fa-solid fa-house"></i> 返回主站</a></div>
+    </div>
+    <div class="container">
+        <header class="header">
+            <h1>基本初等函数实验室</h1>
+        </header>
+
+        <div class="main">
+            <!-- 侧边栏 -->
+            <nav class="sidebar">
+                <button class="nav-btn active" onclick="switchPanel('basic')">反函数对</button>
+                <button class="nav-btn" onclick="switchPanel('tower')">锚点实验</button>
+                <button class="nav-btn" onclick="switchPanel('rules')">内部规律</button>
+            </nav>
+
+            <!-- 反函数对页面 -->
+            <div class="content active" id="basic">
+                <div class="column">
+                    <div class="card">
+                        <h3>指数 vs 对数：完美镜像</h3>
+                        <div class="input-group">
+                            <label>选择底数 a</label>
+                            <select id="base" onchange="calculate()">
+                                <option value="2" selected>a = 2</option>
+                                <option value="e">a = e</option>
+                                <option value="10">a = 10</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>输入 x 值</label>
+                            <input type="number" id="value1" value="3" step="0.5" onchange="calculate()">
+                        </div>
+                        <div class="result" id="result">
+                            2³ = 8，log₂(8) = 3
+                        </div>
+                        <div class="btn-row">
+                            <button class="btn" onclick="calculate()">计算镜像</button>
+                            <button class="btn" onclick="randomCalc()">随机测试</button>
+                        </div>
+                        <div class="formula-box" id="steps">
+                            <strong>定义域值域互换</strong><br>
+                            指数：(-∞,+∞) → (0,+∞)<br>
+                            对数：(0,+∞) → (-∞,+∞)
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>三角 vs 反三角：受限镜像</h3>
+                        <div class="input-group">
+                            <label>输入角度（弧度）</label>
+                            <input type="number" id="oddEvenInput" value="0.5" step="0.1" onchange="testOddEven()">
+                        </div>
+                        <button class="btn" onclick="testOddEven()" style="width: 100%;">计算反函数</button>
+                        <div class="info-box" id="oddEvenResult1">$\sin(0.5) = ?$</div>
+                        <div class="info-box" id="oddEvenResult2">$\arcsin(?) = ?$</div>
+                        <div class="info-box" id="oddEvenConclusion">为保证唯一性，$\arcsin$值域限制在$[-\pi/2, \pi/2]$</div>
+                    </div>
+                </div>
+
+                <div class="column">
+                    <div class="card">
+                        <h3>反函数图像：y=x对称</h3>
+                        <div class="canvas-container">
+                            <canvas id="graph" width="600" height="300"></canvas>
+                        </div>
+                        <div class="slider-group">
+                            <label>x值</label>
+                            <input type="range" class="slider" id="baseSlider" 
+                                   min="-3" max="3" step="0.1" value="1" oninput="updateSlider()">
+                            <span class="slider-value" id="sliderValue">1</span>
+                        </div>
+                        <div class="info-box" id="funcDesc">
+                            指数和对数关于y=x对称
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 锚点实验页面 -->
+            <div class="content" id="tower">
+                <div class="column">
+                    <div class="card">
+                        <h3>三大锚点 - 函数的定位点</h3>
+                        <div class="info-box">
+                            每个函数族都有"锚点"（关键必过点），就像建筑物的固定桩
+                        </div>
+                        <div class="input-group">
+                            <label>选择函数族</label>
+                            <select id="towerSize" onchange="updateTower()">
+                                <option value="power" selected>幂函数 y=xᵃ</option>
+                                <option value="exp">指数函数 y=aˣ</option>
+                                <option value="log">对数函数 y=logₐx</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>选择参数</label>
+                            <select id="towerBase" onchange="updateTower()">
+                                <option value="2" selected>a = 2</option>
+                                <option value="3">a = 3</option>
+                                <option value="0.5">a = 0.5</option>
+                            </select>
+                        </div>
+                        <button class="btn" onclick="animateDismantling()" style="width: 100%; margin-top: 12px;">
+                            开始锚点验证动画
+                        </button>
+                        <div class="steps" id="towerSteps">
+                            点击上方按钮开始验证，动画将演示函数锚点的验证过程<br>
+                            <strong>锚点定义：</strong>函数无论参数如何变化都必须经过的固定点
+                        </div>
+                    </div>
+                </div>
+
+                <div class="column">
+                    <div class="card">
+                        <h3>锚点可视化图像</h3>
+                        <div class="canvas-container" style="position: relative;">
+                            <canvas id="anchorGraph" width="400" height="250"></canvas>
+                            <!-- MathJax公式图例区域 -->
+                            <div id="legendOverlay" class="legend-overlay" style="display: none;">
+                                <div class="legend-item">
+                                    <span class="color-box" style="background-color: #4f46e5;"></span>
+                                    <span class="math-formula1"></span>
+                                </div>
+                                <div class="legend-item">
+                                    <span class="color-box" style="background-color: #e54f46;"></span>
+                                    <span class="math-formula2"></span>
+                                </div>
+                                <div class="legend-item">
+                                    <span class="color-box" style="background-color: #46e546;"></span>
+                                    <span class="math-formula3"></span>
+                                </div>
+                                <div class="legend-item">
+                                    <span class="color-box" style="background-color: #ff6b6b;"></span>
+                                    <span id="anchorFormulaText">锚点公式</span>
+                                </div>
+                                <div class="explanation-text" id="legendExplanation">公式说明</div>
+                                <div class="hint-text">🧭 看到红色圆点吗？就是函数族的锚点！</div>
+                            </div>
+                        </div>
+                        <div class="result" id="towerResult">
+                            等待验证...
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>锚点验证演示</h3>
+                        <div class="tower-container">
+                            <div class="tower-display" id="towerVisual">
+                                <div class="block">锚</div>
+                            </div>
+                        </div>
+                        <div class="formula-box">
+                            📍 幂函数：必过(1,1)<br>
+                            📍 指数函数：必过(0,1)<br>
+                            📍 对数函数：必过(1,0)
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 内部规律页面 -->
+            <div class="content" id="rules">
+                <div class="column">
+                    <div class="card">
+                        <h3>对称性：奇偶函数家族</h3>
+                        <div class="formula-box">三角函数的对称美</div>
+                        <div class="rule-visual" id="multiplyViz">
+                            <div class="rule-tower">
+                                <div class="rule-height" style="height: 40px;"></div>
+                                <div class="rule-label">奇函数</div>
+                            </div>
+                            <div class="operator">vs</div>
+                            <div class="rule-tower">
+                                <div class="rule-height" style="height: 60px;"></div>
+                                <div class="rule-label">偶函数</div>
+                            </div>
+                        </div>
+                        <div class="steps">
+                            <strong>偶函数（Y轴对称）：</strong><br>
+                            $\cos(-x) = \cos(x)$ ✓<br>
+                            $\sec(-x) = \sec(x)$ ✓<br>
+                            <br>
+                            <strong>奇函数（原点对称）：</strong><br>
+                            $\sin(-x) = -\sin(x)$ ✓<br>
+                            $\tan(-x) = -\tan(x)$ ✓<br>
+                            $\csc(-x) = -\csc(x)$ ✓
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>倒数关系：分母的秘密</h3>
+                        <div class="formula-box">$$\sec(x) = \frac{1}{\cos(x)}$$</div>
+                        <div class="steps">
+                            当$\cos(x) = 0.5$时：$\sec(x) = \frac{1}{0.5} = 2$<br>
+                            <br>
+                            当$\cos(x) = 0$时：$\sec(x) = \frac{1}{0} = $未定义！<br>
+                            <br>
+                            这解释了为什么$\sec$的定义域要排除$\cos=0$的点
+                        </div>
+                    </div>
+                </div>
+
+                <div class="column">
+                    <div class="card">
+                        <h3>值域限制：倒数的影响</h3>
+                        <div class="formula-box">从$[-1,1]$到$(-\infty,-1] \cup [1,+\infty)$</div>
+                        <div class="rule-visual" id="divideViz">
+                            <div class="rule-tower">
+                                <div class="rule-height" style="height: 30px;"></div>
+                                <div class="rule-label">cos范围</div>
+                            </div>
+                            <div class="operator">→</div>
+                            <div class="rule-tower">
+                                <div class="rule-height" style="height: 80px;"></div>
+                                <div class="rule-label">sec范围</div>
+                            </div>
+                        </div>
+                        <div class="steps">
+                            <strong>$\cos(x)$的值域：$[-1,1]$</strong><br>
+                            当$|\cos(x)| = 1$时：$|\sec(x)| = 1$<br>
+                            当$|\cos(x)| = 0.5$时：$|\sec(x)| = 2$<br>
+                            当$|\cos(x)| = 0.1$时：$|\sec(x)| = 10$<br>
+                            当$|\cos(x)| \to 0$时：$|\sec(x)| \to \infty$<br>
+                            <br>
+                            所以$\sec(x)$永远$\geq 1$或$\leq -1$
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>主值区间：反三角的妥协</h3>
+                        <div class="formula-box">为了唯一性的牺牲</div>
+                        <div class="steps">
+                            $\sin(\pi/6) = 0.5$<br>
+                            $\sin(5\pi/6) = 0.5$<br>
+                            $\sin(13\pi/6) = 0.5$<br>
+                            ...<br>
+                            <strong>无数个角度都得到0.5！</strong><br>
+                            <br>
+                            所以$\arcsin(0.5)$只能选一个：<br>
+                            $\arcsin(0.5) = \pi/6$<br>
+                            （限制在$[-\pi/2, \pi/2]$内）
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 全局变量
+        let mathJaxReady = false;
+
+        // MathJax渲染函数
+        function renderMath() {
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                MathJax.typesetPromise().then(() => {
+                    console.log('MathJax 渲染成功');
+                }).catch(err => {
+                    console.error('MathJax 渲染错误:', err);
+                });
+            } else {
+                console.log('MathJax 未就绪，等待...');
+                setTimeout(renderMath, 300);
+            }
+        }
+
+        // 页面切换
+        function switchPanel(panel) {
+            // 移除所有活动状态
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+            
+            // 设置新的活动状态
+            event.target.classList.add('active');
+            document.getElementById(panel).classList.add('active');
+            
+            // 重新渲染 MathJax
+            setTimeout(renderMath, 100);
+        }
+
+        // 计算指数和对数的镜像关系
+        function calculate() {
+            const baseSelect = document.getElementById('base');
+            const valueInput = document.getElementById('value1');
+            const resultDiv = document.getElementById('result');
+            const stepsDiv = document.getElementById('steps');
+            
+            if (!baseSelect || !valueInput || !resultDiv || !stepsDiv) return;
+            
+            const base = baseSelect.value;
+            const x = parseFloat(valueInput.value) || 0;
+            
+            let a, expResult, logResult, domainRange;
+            
+            if (base === '2') {
+                a = 2;
+                expResult = Math.pow(2, x);
+                logResult = Math.log(expResult) / Math.log(2);
+                domainRange = '指数：(-∞,+∞) → (0,+∞)<br>对数：(0,+∞) → (-∞,+∞)';
+            } else if (base === 'e') {
+                a = Math.E;
+                expResult = Math.exp(x);
+                logResult = Math.log(expResult);
+                domainRange = '指数：(-∞,+∞) → (0,+∞)<br>对数：(0,+∞) → (-∞,+∞)';
+            } else if (base === '10') {
+                a = 10;
+                expResult = Math.pow(10, x);
+                logResult = Math.log10(expResult);
+                domainRange = '指数：(-∞,+∞) → (0,+∞)<br>对数：(0,+∞) → (-∞,+∞)';
+            }
+            
+            // 格式化结果
+            const expFormatted = Math.abs(expResult - Math.round(expResult)) < 0.0001 ? 
+                Math.round(expResult) : expResult.toFixed(4);
+            const logFormatted = Math.abs(logResult - Math.round(logResult)) < 0.0001 ? 
+                Math.round(logResult) : logResult.toFixed(4);
+            const xFormatted = Math.abs(x - Math.round(x)) < 0.0001 ? 
+                Math.round(x) : x.toFixed(2);
+            
+            // 构建结果字符串
+            let resultText;
+            if (base === 'e') {
+                resultText = `e<sup>${xFormatted}</sup> = ${expFormatted}，ln(${expFormatted}) = ${logFormatted}`;
+            } else {
+                resultText = `${a}<sup>${xFormatted}</sup> = ${expFormatted}，log<sub>${a}</sub>(${expFormatted}) = ${logFormatted}`;
+            }
+            
+            resultDiv.innerHTML = resultText;
+            stepsDiv.innerHTML = `<strong>定义域值域互换</strong><br>${domainRange}`;
+            
+            // 更新图像
+            drawGraph();
+            
+            // 重新渲染MathJax
+            setTimeout(renderMath, 100);
+        }
+        
+        // 随机测试
+        function randomCalc() {
+            const baseSelect = document.getElementById('base');
+            const valueInput = document.getElementById('value1');
+            
+            if (!baseSelect || !valueInput) return;
+            
+            const bases = ['2', 'e', '10'];
+            const randomBase = bases[Math.floor(Math.random() * bases.length)];
+            baseSelect.value = randomBase;
+            
+            const randomX = (Math.random() * 6 - 3).toFixed(1);
+            valueInput.value = randomX;
+            
+            calculate();
+        }
+        
+        // 计算三角函数和反三角函数
+        function testOddEven() {
+            const input = document.getElementById('oddEvenInput');
+            if (!input) return;
+            
+            const x = parseFloat(input.value) || 0;
+            
+            const sinResult = Math.sin(x);
+            const arcsinResult = Math.asin(sinResult);
+            
+            const sinResultElement = document.getElementById('oddEvenResult1');
+            const arcsinResultElement = document.getElementById('oddEvenResult2');
+            const conclusionElement = document.getElementById('oddEvenConclusion');
+            
+            if (sinResultElement) {
+                sinResultElement.innerHTML = `$\\sin(${x.toFixed(3)}) = ${sinResult.toFixed(4)}$`;
+            }
+            if (arcsinResultElement) {
+                arcsinResultElement.innerHTML = `$\\arcsin(${sinResult.toFixed(4)}) = ${arcsinResult.toFixed(4)}$`;
+            }
+            if (conclusionElement) {
+                conclusionElement.innerHTML = `为保证唯一性，$\\arcsin$值域限制在$[-\\pi/2, \\pi/2]$`;
+            }
+            
+            setTimeout(renderMath, 100);
+        }
+        
+        // 更新滑块
+        function updateSlider() {
+            const slider = document.getElementById('baseSlider');
+            const valueDisplay = document.getElementById('sliderValue');
+            const funcDesc = document.getElementById('funcDesc');
+            
+            if (!slider || !valueDisplay) return;
+            
+            const x = parseFloat(slider.value);
+            valueDisplay.textContent = x.toFixed(1);
+            
+            if (funcDesc) {
+                funcDesc.innerHTML = `x = ${x.toFixed(1)} 时的函数值关系`;
+            }
+            
+            // 更新图像中的点标记
+            drawGraph();
+        }
+        
+        // 更新锚点实验
+        function updateTower() {
+            const towerSizeSelect = document.getElementById('towerSize');
+            const towerBaseSelect = document.getElementById('towerBase');
+            const towerVisual = document.getElementById('towerVisual');
+            const towerSteps = document.getElementById('towerSteps');
+            const towerResult = document.getElementById('towerResult');
+
+            if (!towerSizeSelect || !towerBaseSelect) return;
+
+            const towerSize = towerSizeSelect.value;
+            const towerBase = parseFloat(towerBaseSelect.value);
+
+            let anchorPoint, stepsText, resultText;
+
+            if (towerSize === 'power') {
+                anchorPoint = '(1,1)';
+                stepsText = `准备验证幂函数的锚点(1,1)...<br>无论a取何值，都必过此点`;
+                resultText = `验证成功！无论参数a为何值，幂函数y=x<sup>${towerBase}</sup>必过点${anchorPoint}`;
+            } else if (towerSize === 'exp') {
+                anchorPoint = '(0,1)';
+                stepsText = `准备验证指数函数的锚点(0,1)...<br>无论a取何值，都必过此点`;
+                resultText = `验证成功！无论参数a为何值，指数函数y=${towerBase}<sup>x</sup>必过点${anchorPoint}`;
+            } else if (towerSize === 'log') {
+                anchorPoint = '(1,0)';
+                stepsText = `准备验证对数函数的锚点(1,0)...<br>无论a取何值，都必过此点`;
+                resultText = `验证成功！无论参数a为何值，对数函数y=log<sub>${towerBase}</sub>(x)必过点${anchorPoint}`;
+            }
+
+            if (towerVisual) {
+                towerVisual.innerHTML = '<div class="block">锚</div>';
+            }
+            if (towerSteps) {
+                towerSteps.innerHTML = stepsText;
+            }
+            if (towerResult) {
+                towerResult.innerHTML = resultText;
+            }
+
+            // 初始化绘制锚点图像和公式图例
+            drawAnchorGraph(towerSize, towerBase, false); // 静态绘制Canvas
+            finishLegend(towerSize, towerBase); // 绘制MathJax图例
+
+            setTimeout(renderMath, 100);
+        }
+
+        // 绘制锚点可视化图像
+        function drawAnchorGraph(towerSize, towerBase) {
+            const canvas = document.getElementById('anchorGraph');
+            if (!canvas) return;
+
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+
+            // 清空画布
+            ctx.clearRect(0, 0, width, height);
+
+            // 设置坐标系（适当的范围）
+            let xMin, xMax, yMin, yMax;
+            if (towerSize === 'power') {
+                xMin = -2, xMax = 3;
+                yMin = -1, yMax = 3;
+            } else if (towerSize === 'exp') {
+                xMin = -2, xMax = 2;
+                yMin = 0, yMax = 4;
+            } else if (towerSize === 'log') {
+                xMin = 0, xMax = 4;
+                yMin = -2, yMax = 3;
+            }
+
+            const xScale = width / (xMax - xMin);
+            const yScale = height / (yMax - yMin);
+
+            // 坐标转换函数
+            function toCanvas(x, y) {
+                return [
+                    (x - xMin) * xScale,
+                    height - (y - yMin) * yScale
+                ];
+            }
+
+            // 绘制网格
+            ctx.strokeStyle = '#f0f0f0';
+            ctx.lineWidth = 1;
+            for (let i = Math.round(xMin); i <= Math.round(xMax); i++) {
+                const [x] = toCanvas(i, 0);
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, height);
+                ctx.stroke();
+            }
+            for (let i = Math.round(yMin); i <= Math.round(yMax); i++) {
+                const [, y] = toCanvas(0, i);
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(width, y);
+                ctx.stroke();
+            }
+
+            // 绘制坐标轴
+            ctx.strokeStyle = '#ccc';
+            ctx.lineWidth = 2;
+
+            // x轴
+            const [, xAxisY] = toCanvas(0, 0);
+            ctx.beginPath();
+            ctx.moveTo(0, xAxisY);
+            ctx.lineTo(width, xAxisY);
+            ctx.stroke();
+
+            // y轴
+            const [yAxisX] = toCanvas(0, 0);
+            ctx.beginPath();
+            ctx.moveTo(yAxisX, 0);
+            ctx.lineTo(yAxisX, height);
+            ctx.stroke();
+
+            // 绘制多个参数的函数图像，展示锚点不变性
+            const bases = [towerBase, towerBase * 0.5, towerBase * 2];
+            const colors = ['#4f46e5', '#e54f46', '#46e546'];
+
+            bases.forEach((base, index) => {
+                ctx.strokeStyle = colors[index];
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+
+                let firstPoint = true;
+                let step = 0.01;
+
+                for (let x = xMin; x <= xMax; x += step) {
+                    let y;
+                    if (towerSize === 'power') {
+                        y = Math.pow(x, base);
+                        if (x <= 0 && base <= 0) continue; // 避免负数次幂
+                        if (y < yMin || y > yMax) continue;
+                    } else if (towerSize === 'exp') {
+                        y = Math.pow(base, x);
+                        if (y < yMin || y > yMax) continue;
+                    } else if (towerSize === 'log') {
+                        if (x <= 0 || base <= 0) continue;
+                        y = Math.log(x) / Math.log(base);
+                        if (y < yMin || y > yMax) continue;
+                    }
+
+                    const [canvasX, canvasY] = toCanvas(x, y);
+
+                    if (firstPoint) {
+                        ctx.moveTo(canvasX, canvasY);
+                        firstPoint = false;
+                    } else {
+                        ctx.lineTo(canvasX, canvasY);
+                    }
+                }
+                ctx.stroke();
+            });
+
+            // 绘制锚点位置
+            let anchorX, anchorY;
+            if (towerSize === 'power') {
+                anchorX = 1; anchorY = 1;
+            } else if (towerSize === 'exp') {
+                anchorX = 0; anchorY = 1;
+            } else if (towerSize === 'log') {
+                anchorX = 1; anchorY = 0;
+            }
+
+            const [anchorCanvasX, anchorCanvasY] = toCanvas(anchorX, anchorY);
+
+            // 大圆圈标记锚点
+            ctx.strokeStyle = '#ff6b6b';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(anchorCanvasX, anchorCanvasY, 8, 0, 2 * Math.PI);
+            ctx.stroke();
+
+            // 填充点
+            ctx.fillStyle = '#ff6b6b';
+            ctx.beginPath();
+            ctx.arc(anchorCanvasX, anchorCanvasY, 3, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // Canvas中暂时不绘制标签，统一由MathJax图例处理
+            // 这避免了Canvas文本与MathJax公式的冲突问题
+        }
+        
+        // 绘制锚点动画过程（逐渐绘制函数曲线）
+        function animateAnchorGraph(towerSize, towerBase, onComplete) {
+            const canvas = document.getElementById('anchorGraph');
+            if (!canvas) {
+                if (onComplete) onComplete();
+                return;
+            }
+
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+
+            // 清空画布
+            ctx.clearRect(0, 0, width, height);
+
+            // 设置坐标系（适当的范围）
+            let xMin, xMax, yMin, yMax;
+            if (towerSize === 'power') {
+                xMin = -2, xMax = 3;
+                yMin = -1, yMax = 3;
+            } else if (towerSize === 'exp') {
+                xMin = -2, xMax = 2;
+                yMin = 0, yMax = 4;
+            } else if (towerSize === 'log') {
+                xMin = 0, xMax = 4;
+                yMin = -2, yMax = 3;
+            }
+
+            const xScale = width / (xMax - xMin);
+            const yScale = height / (yMax - yMin);
+
+            // 坐标转换函数
+            function toCanvas(x, y) {
+                return [
+                    (x - xMin) * xScale,
+                    height - (y - yMin) * yScale
+                ];
+            }
+
+            // 绘制网格
+            ctx.strokeStyle = '#f0f0f0';
+            ctx.lineWidth = 1;
+            for (let i = Math.round(xMin); i <= Math.round(xMax); i++) {
+                const [x] = toCanvas(i, 0);
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, height);
+                ctx.stroke();
+            }
+            for (let i = Math.round(yMin); i <= Math.round(yMax); i++) {
+                const [, y] = toCanvas(0, i);
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(width, y);
+                ctx.stroke();
+            }
+
+            // 绘制坐标轴
+            ctx.strokeStyle = '#ccc';
+            ctx.lineWidth = 2;
+            const [, xAxisY] = toCanvas(0, 0);
+            const [yAxisX] = toCanvas(0, 0);
+            ctx.beginPath();
+            ctx.moveTo(0, xAxisY);
+            ctx.lineTo(width, xAxisY);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(yAxisX, 0);
+            ctx.lineTo(yAxisX, height);
+            ctx.stroke();
+
+            // 动画：逐步绘制函数曲线
+            let animationProgress = 0;
+            let animationFrames = 60; // 动画总帧数
+            let currentFrame = 0;
+
+            const bases = [towerBase, towerBase * 0.5, towerBase * 2];
+            const colors = ['#4f46e5', '#e54f46', '#46e546'];
+
+            function animateFrame() {
+                currentFrame++;
+                const progress = currentFrame / animationFrames;
+
+                // 为每个函数绘制部分曲线
+                bases.forEach((base, index) => {
+                    ctx.strokeStyle = colors[index];
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+
+                    let firstPoint = true;
+                    let step = 0.05;
+                    let maxX = xMin + (xMax - xMin) * progress;
+
+                    for (let x = xMin; x <= maxX; x += step) {
+                        let y;
+                        if (towerSize === 'power') {
+                            y = Math.pow(x, base);
+                            if (x <= 0 && base <= 0) continue;
+                            if (y < yMin || y > yMax) continue;
+                        } else if (towerSize === 'exp') {
+                            y = Math.pow(base, x);
+                            if (y < yMin || y > yMax) continue;
+                        } else if (towerSize === 'log') {
+                            if (x <= 0 || base <= 0) continue;
+                            y = Math.log(x) / Math.log(base);
+                            if (y < yMin || y > yMax) continue;
+                        }
+
+                        const [canvasX, canvasY] = toCanvas(x, y);
+
+                        if (firstPoint) {
+                            ctx.moveTo(canvasX, canvasY);
+                            firstPoint = false;
+                        } else {
+                            ctx.lineTo(canvasX, canvasY);
+                        }
+                    }
+                    ctx.stroke();
+                });
+
+                // 如果动画还没完成，继续下一帧
+                if (currentFrame < animationFrames) {
+                    requestAnimationFrame(animateFrame);
+
+                    // 更新进度文字
+                    const progressPercent = Math.round(progress * 100);
+                    const towerSteps = document.getElementById('towerSteps');
+                    if (towerSteps) {
+                        towerSteps.innerHTML = `正在绘制函数曲线...<br>进度: ${progressPercent}%`;
+                    }
+                } else {
+                    // 动画完成，绘制锚点和最终效果
+                    finishAnchorDrawing(towerSize, towerBase, onComplete);
+                }
+            }
+
+            // 开始动画
+            animateFrame();
+        }
+
+        // 完成锚点绘制（添加锚点标记和图例）
+        function finishAnchorDrawing(towerSize, towerBase, onComplete) {
+            const canvas = document.getElementById('anchorGraph');
+            if (!canvas) {
+                if (onComplete) onComplete();
+                return;
+            }
+
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+
+            // 网格和坐标轴已经在动画中绘制，现在只添加锚点标记
+
+            let xMin, xMax, yMin, yMax;
+            if (towerSize === 'power') {
+                xMin = -2, xMax = 3;
+                yMin = -1, yMax = 3;
+            } else if (towerSize === 'exp') {
+                xMin = -2, xMax = 2;
+                yMin = 0, yMax = 4;
+            } else if (towerSize === 'log') {
+                xMin = 0, xMax = 4;
+                yMin = -2, yMax = 3;
+            }
+
+            const xScale = width / (xMax - xMin);
+            const yScale = height / (yMax - yMin);
+
+            // 坐标转换函数
+            function toCanvas(x, y) {
+                return [
+                    (x - xMin) * xScale,
+                    height - (y - yMin) * yScale
+                ];
+            }
+
+            // 绘制所有函数曲线（完整版本）
+            const bases = [towerBase, towerBase * 0.5, towerBase * 2];
+            const colors = ['#4f46e5', '#e54f46', '#46e546'];
+
+            bases.forEach((base, index) => {
+                ctx.strokeStyle = colors[index];
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+
+                let firstPoint = true;
+                let step = 0.01;
+
+                for (let x = xMin; x <= xMax; x += step) {
+                    let y;
+                    if (towerSize === 'power') {
+                        y = Math.pow(x, base);
+                        if (x <= 0 && base <= 0) continue;
+                        if (y < yMin || y > yMax) continue;
+                    } else if (towerSize === 'exp') {
+                        y = Math.pow(base, x);
+                        if (y < yMin || y > yMax) continue;
+                    } else if (towerSize === 'log') {
+                        if (x <= 0 || base <= 0) continue;
+                        y = Math.log(x) / Math.log(base);
+                        if (y < yMin || y > yMax) continue;
+                    }
+
+                    const [canvasX, canvasY] = toCanvas(x, y);
+
+                    if (firstPoint) {
+                        ctx.moveTo(canvasX, canvasY);
+                        firstPoint = false;
+                    } else {
+                        ctx.lineTo(canvasX, canvasY);
+                    }
+                }
+                ctx.stroke();
+            });
+
+            // 绘制锚点位置
+            let anchorX, anchorY;
+            if (towerSize === 'power') {
+                anchorX = 1; anchorY = 1;
+            } else if (towerSize === 'exp') {
+                anchorX = 0; anchorY = 1;
+            } else if (towerSize === 'log') {
+                anchorX = 1; anchorY = 0;
+            }
+
+            const [anchorCanvasX, anchorCanvasY] = toCanvas(anchorX, anchorY);
+
+            // 大圆圈标记锚点（添加动画效果）
+            let animationDuration = 30;
+            let currentFrame = 0;
+
+            function animateAnchor() {
+                currentFrame++;
+                const progress = currentFrame / animationDuration;
+
+                ctx.strokeStyle = '#ff6b6b';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.arc(anchorCanvasX, anchorCanvasY, 8 * (progress > 1 ? 1 : progress), 0, 2 * Math.PI);
+                ctx.stroke();
+
+                if (progress < 1) {
+                    requestAnimationFrame(animateAnchor);
+                } else {
+                    // 填充点
+                    ctx.fillStyle = '#ff6b6b';
+                    ctx.beginPath();
+                    ctx.arc(anchorCanvasX, anchorCanvasY, 3, 0, 2 * Math.PI);
+                    ctx.fill();
+
+                    // 添加图例
+                    finishLegend(towerSize, towerBase);
+
+                    // 调用完成回调
+                    if (onComplete) onComplete();
+                }
+            }
+
+            animateAnchor();
+        }
+
+        // 添加图例和说明文字
+        function finishLegend(towerSize, towerBase) {
+            const canvas = document.getElementById('anchorGraph');
+            if (!canvas) return;
+
+            const overlay = document.getElementById('legendOverlay');
+            if (!overlay) return;
+
+            const bases = [towerBase, towerBase * 0.5, towerBase * 2];
+            const formulaElements = document.querySelectorAll('.math-formula1, .math-formula2, .math-formula3');
+
+            // 填充公式内容
+            formulaElements.forEach((elem, index) => {
+                const base = bases[index];
+                let formula;
+                if (towerSize === 'power') {
+                    formula = `$y=x^{${base.toFixed(1)}}$`;
+                } else if (towerSize === 'exp') {
+                    formula = `$y=${base.toFixed(1)}^x$`;
+                } else if (towerSize === 'log') {
+                    formula = `$y=\\log_{${base.toFixed(1)}}(x)$`;
+                }
+                elem.innerHTML = formula;
+            });
+
+            // 设置锚点公式
+            const anchorElement = document.getElementById('anchorFormulaText');
+            if (anchorElement) {
+                let anchorFormula;
+                if (towerSize === 'power') {
+                    anchorFormula = '$\\text{锚点}(1,1)$';
+                } else if (towerSize === 'exp') {
+                    anchorFormula = '$\\text{锚点}(0,1)$';
+                } else if (towerSize === 'log') {
+                    anchorFormula = '$\\text{锚点}(1,0)$';
+                }
+                anchorElement.innerHTML = anchorFormula;
+            }
+
+            // 设置解释文字
+            const explanationElement = document.getElementById('legendExplanation');
+            if (explanationElement) {
+                let explanation;
+                if (towerSize === 'power') {
+                    explanation = '$\\text{无论a取正数，}y=x^a\\text{都经过}(1,1)$';
+                } else if (towerSize === 'exp') {
+                    explanation = '$\\text{无论底数a取值，}y=a^x\\text{都经过}(0,1)$';
+                } else if (towerSize === 'log') {
+                    explanation = '$\\text{无论底数a取正数，}y=\\log_a(x)\\text{都经过}(1,0)$';
+                }
+                explanationElement.innerHTML = explanation;
+            }
+
+            // 显示图例
+            overlay.style.display = 'block';
+
+            // 触发MathJax渲染
+            setTimeout(renderMath, 100);
+        }
+
+        // 验证锚点动画
+        /* 修复经验详述：
+        原问题：用户不明白"锚点动画"是什么意思，界面缺乏详细解释。
+        修复方案：
+        1. 在HTML中扩展了info-box，明确定义锚点的概念："函数无论参数如何变化都必须经过的固定点"
+        2. 列出了三大函数族的锚点示例
+        3. 更改按钮文本为更明确的"开始锚点验证动画"
+        4. 在步骤框中添加引导文字和定义解释
+        5. 动画过程中添加更清晰的中文提示
+        动画机制：
+        - 我是故意设置只有一个block ('div class="block"') 代表锚点
+        - 通过CSS转场(.removing类：opacity: 0.3, transform: translateX(50px))模拟验证过程
+        - 每个block延迟500ms依次移除，最后显示验证成功
+        这修复了用户对锚点概念的理解障碍，动画现在清楚地展示函数锚点的验证过程。 */
+        function animateDismantling() {
+            const towerVisual = document.getElementById('towerVisual');
+            const towerSteps = document.getElementById('towerSteps');
+            const towerResult = document.getElementById('towerResult');
+
+            if (!towerVisual) return;
+
+            const blocks = towerVisual.querySelectorAll('.block');
+
+            if (towerSteps) {
+                towerSteps.innerHTML = '开始验证锚点...<br>即将开始函数图像动画演示';
+            }
+
+            // 先开始图像动画
+            const currentTowerSize = document.getElementById('towerSize')?.value || 'power';
+            const currentTowerBase = parseFloat(document.getElementById('towerBase')?.value || 2);
+
+            animateAnchorGraph(currentTowerSize, currentTowerBase, () => {
+                // 图像动画完成后，开始验证演示
+                if (towerSteps) {
+                    towerSteps.innerHTML = '图像绘制完成！<br>开始验证锚点概念';
+                }
+
+                blocks.forEach((block, index) => {
+                    setTimeout(() => {
+                        block.classList.add('removing');
+
+                        if (index === blocks.length - 1) {
+                            setTimeout(() => {
+                                // 用户关注：验证成功文本现在更清楚说明锚点的含义
+                                if (towerSteps) {
+                                    towerSteps.innerHTML = '<i class="fa-solid fa-bullseye"></i> 锚点验证完成！<br><strong>锚点定义：</strong>某族函数通用的必过点，随参数变化保持不变';
+                                }
+                                if (towerResult) {
+                                    towerResult.innerHTML = '✅ 验证成功！三大函数族的锚点均得到验证：幂函数(1,1)、指数函数(0,1)、对数函数(1,0)';
+                                }
+
+                                setTimeout(() => {
+                                    block.classList.remove('removing');
+                                }, 1000);
+                            }, 500);
+                        }
+                    }, index * 500);
+                });
+            });
+        }
+        
+        // 绘制图像
+        function drawGraph() {
+            const canvas = document.getElementById('graph');
+            if (!canvas) return;
+            
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+            
+            // 清空画布
+            ctx.clearRect(0, 0, width, height);
+            
+            // 设置坐标系
+            const xMin = -3, xMax = 3;
+            const yMin = -3, yMax = 3;
+            const xScale = width / (xMax - xMin);
+            const yScale = height / (yMax - yMin);
+            
+            // 坐标转换函数
+            function toCanvas(x, y) {
+                return [
+                    (x - xMin) * xScale,
+                    height - (y - yMin) * yScale
+                ];
+            }
+            
+            // 绘制网格
+            ctx.strokeStyle = '#f0f0f0';
+            ctx.lineWidth = 1;
+            for (let i = xMin; i <= xMax; i++) {
+                if (i !== 0) {
+                    const [x] = toCanvas(i, 0);
+                    ctx.beginPath();
+                    ctx.moveTo(x, 0);
+                    ctx.lineTo(x, height);
+                    ctx.stroke();
+                }
+            }
+            for (let i = yMin; i <= yMax; i++) {
+                if (i !== 0) {
+                    const [, y] = toCanvas(0, i);
+                    ctx.beginPath();
+                    ctx.moveTo(0, y);
+                    ctx.lineTo(width, y);
+                    ctx.stroke();
+                }
+            }
+            
+            // 绘制坐标轴
+            ctx.strokeStyle = '#ccc';
+            ctx.lineWidth = 2;
+            
+            // x轴
+            const [, xAxisY] = toCanvas(0, 0);
+            ctx.beginPath();
+            ctx.moveTo(0, xAxisY);
+            ctx.lineTo(width, xAxisY);
+            ctx.stroke();
+            
+            // y轴
+            const [yAxisX] = toCanvas(0, 0);
+            ctx.beginPath();
+            ctx.moveTo(yAxisX, 0);
+            ctx.lineTo(yAxisX, height);
+            ctx.stroke();
+            
+            // 绘制y=x直线
+            ctx.strokeStyle = '#666';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            const [x1, y1] = toCanvas(xMin, xMin);
+            const [x2, y2] = toCanvas(xMax, xMax);
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            // 获取当前底数
+            const baseSelect = document.getElementById('base');
+            const base = baseSelect ? baseSelect.value : '2';
+            let a;
+            if (base === '2') a = 2;
+            else if (base === 'e') a = Math.E;
+            else if (base === '10') a = 10;
+            else a = 2;
+            
+            // 绘制指数函数 y=a^x
+            ctx.strokeStyle = '#4f46e5';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            
+            let firstPoint = true;
+            for (let x = xMin; x <= xMax; x += 0.01) {
+                const y = Math.pow(a, x);
+                if (y >= yMin && y <= yMax && y > 0) {
+                    const [canvasX, canvasY] = toCanvas(x, y);
+                    
+                    if (firstPoint) {
+                        ctx.moveTo(canvasX, canvasY);
+                        firstPoint = false;
+                    } else {
+                        ctx.lineTo(canvasX, canvasY);
+                    }
+                }
+            }
+            ctx.stroke();
+            
+            // 绘制对数函数 y=log_a(x)
+            ctx.strokeStyle = '#e54f46';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            
+            firstPoint = true;
+            for (let x = 0.01; x <= xMax; x += 0.01) {
+                const y = Math.log(x) / Math.log(a);
+                if (y >= yMin && y <= yMax && x > 0) {
+                    const [canvasX, canvasY] = toCanvas(x, y);
+                    
+                    if (firstPoint) {
+                        ctx.moveTo(canvasX, canvasY);
+                        firstPoint = false;
+                    } else {
+                        ctx.lineTo(canvasX, canvasY);
+                    }
+                }
+            }
+            ctx.stroke();
+            
+            // 绘制滑块对应的点
+            const slider = document.getElementById('baseSlider');
+            if (slider) {
+                const x = parseFloat(slider.value);
+                const expY = Math.pow(a, x);
+                const logY = Math.log(Math.abs(x)) / Math.log(a);
+
+                // 指数函数上的点
+                if (expY >= yMin && expY <= yMax) {
+                    const [pointX, pointY] = toCanvas(x, expY);
+                    ctx.fillStyle = '#4f46e5';
+                    ctx.beginPath();
+                    ctx.arc(pointX, pointY, 4, 0, 2 * Math.PI);
+                    ctx.fill();
+                }
+
+                // 对数函数上的点
+                if (x > 0 && logY >= yMin && logY <= yMax) {
+                    const [pointX, pointY] = toCanvas(x, logY);
+                    ctx.fillStyle = '#e54f46';
+                    ctx.beginPath();
+                    ctx.arc(pointX, pointY, 4, 0, 2 * Math.PI);
+                    ctx.fill();
+                }
+            }
+
+            // Canvas中移除文本图例，统一改用MathJax公式图例
+            // 这样避免了Canvas文本无法正确渲染数学公式的冲突问题
+        }
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('页面加载完成，开始初始化...');
+            
+            // 延迟初始化，等待MathJax加载
+            setTimeout(() => {
+                try {
+                    calculate();
+                    updateTower();
+                    testOddEven();
+                    drawGraph();
+                    renderMath();
+                    console.log('初始化完成');
+                } catch (error) {
+                    console.error('初始化错误:', error);
+                }
+            }, 500);
+        });
+        
+        // 当MathJax准备就绪时
+        window.addEventListener('load', function() {
+            mathJaxReady = true;
+            renderMath();
+        });
+        function toggleReturnLinks() { const p = document.querySelector('.return-links'); if (!p) return; if (p.style.display === 'flex') { p.style.opacity = '0'; setTimeout(() => p.style.display = 'none', 160); } else { p.style.display = 'flex'; requestAnimationFrame(() => p.style.opacity = '1'); } }
+    </script>
+</body>
+</html>

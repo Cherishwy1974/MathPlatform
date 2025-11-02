@@ -1,0 +1,964 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>通往产量山巅的路径</title>
+    <script src="../../common-assets/js/tailwind.min.js"></script>    <style>
+        @font-face {
+            font-family: 'Iansui-Regular';
+            src: url('../../common-assets/fonts/Iansui-Regular.ttf') format('truetype');
+            font-weight: 400;
+            font-style: normal;
+        }
+        
+        /* 美化滚动条 - 竖向 */
+        *::-webkit-scrollbar {
+            width: 12px;
+        }
+        *::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+        }
+        *::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #a0a4f7, #7c7ce8);
+            border-radius: 6px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+        *::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #b8b8ff, #a0a4f7);
+        }
+        *::-webkit-scrollbar-thumb:active {
+            background: linear-gradient(180deg, #7c7ce8, #5c5cd6);
+        }
+        
+        /* 隐藏横向滚动条 */
+        *::-webkit-scrollbar:horizontal {
+            display: none;
+        }
+        
+        :root {
+            --bg-start: #1a1a2e;
+            --bg-scene1: linear-gradient(135deg, #16213e, #0f3460, #533483);
+            --bg-scene2: linear-gradient(180deg, #0f3460, #16213e, #533483);
+            --bg-scene3: linear-gradient(45deg, #533483, #16213e, #0f3460);
+            --bg-scene4: radial-gradient(circle, #16213e, #533483, #0f3460);
+            --bg-scene5: linear-gradient(315deg, #0f3460, #16213e);
+            --bg-scene6: linear-gradient(135deg, #533483, #0f3460, #16213e);
+            --bg-scene7: linear-gradient(180deg, #16213e, #533483);
+            --bg-scene8: linear-gradient(45deg, #0f3460, #16213e, #533483);
+            --bg-scene9: linear-gradient(135deg, #533483, #16213e, #0f3460);
+            --bg-scene10: radial-gradient(circle, #0f3460, #16213e);
+            --bg-scene11: linear-gradient(315deg, #16213e, #533483);
+        }
+
+        body {
+            font-family: 'Iansui-Regular', serif;
+            color: #eee2dc;
+            overflow-x: hidden;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            background-color: var(--bg-start);
+            transition: background-color 1.5s ease-in-out;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* 数学图表背景 */
+        #chartCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.3;
+            pointer-events: none;
+        }
+
+        /* 滚动进度指示器 */
+        .scroll-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 6px;
+            background: linear-gradient(90deg, #533483, #16213e, #0f3460);
+            z-index: 1000;
+            transition: width 0.3s ease;
+            box-shadow: 0 2px 10px rgba(83, 52, 131, 0.5);
+        }
+
+        /* 循环提示 */
+        .loop-indicator {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: rgba(83, 52, 131, 0.9);
+            color: #eee2dc;
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-size: 14px;
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 0.5s ease;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(238, 226, 220, 0.2);
+        }
+
+        .loop-indicator.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        #scroll-container {
+            height: 1300vh;
+            position: relative;
+        }
+
+        .sticky-element {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* 几何过渡效果 */
+        .geometric-transition {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 0;
+            height: 0;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .econ-wipe {
+            width: 100vmax;
+            height: 100vmax;
+            background: conic-gradient(from 0deg, transparent 0%, rgba(83, 52, 131, 0.8) 50%, transparent 100%);
+            transform: translate(-50%, -50%) scale(0) rotate(0deg);
+            transition: all 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .econ-wipe.active {
+            transform: translate(-50%, -50%) scale(2) rotate(360deg);
+        }
+
+        /* 场景样式 */
+        .scene {
+            opacity: 0;
+            transition: opacity 0.8s ease-in-out;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .scene-background {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            transition: opacity 1.5s ease-in-out;
+            z-index: -2;
+        }
+
+        /* 场景背景 */
+        .bg-scene1 { background: var(--bg-scene1); }
+        .bg-scene2 { background: var(--bg-scene2); }
+        .bg-scene3 { background: var(--bg-scene3); }
+        .bg-scene4 { background: var(--bg-scene4); }
+        .bg-scene5 { background: var(--bg-scene5); }
+        .bg-scene6 { background: var(--bg-scene6); }
+        .bg-scene7 { background: var(--bg-scene7); }
+        .bg-scene8 { background: var(--bg-scene8); }
+        .bg-scene9 { background: var(--bg-scene9); }
+        .bg-scene10 { background: var(--bg-scene10); }
+        .bg-scene11 { background: var(--bg-scene11); }
+
+        /* 图片样式 */
+        .illustration-wrapper {
+            position: absolute;
+            z-index: 5;
+            transition: all 1.5s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .illustration {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: all 1.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            opacity: 0;
+            transform: scale(0.85) translateY(30px);
+            filter: brightness(0.9) contrast(1.2) saturate(0.9) hue-rotate(15deg);
+        }
+
+        .frame-elegant {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            border-radius: 20px;
+            box-shadow: 
+                0 15px 35px rgba(83, 52, 131, 0.3),
+                0 5px 15px rgba(83, 52, 131, 0.2);
+            border: 1px solid rgba(83, 52, 131, 0.3);
+        }
+
+        .frame-elegant::before {
+            content: '';
+            position: absolute;
+            inset: -1px;
+            background: linear-gradient(135deg, 
+                rgba(238, 226, 220, 0.2) 0%, 
+                rgba(238, 226, 220, 0) 50%,
+                rgba(83, 52, 131, 0.1) 100%
+            );
+            border-radius: inherit;
+            opacity: 0.6;
+            z-index: -1;
+        }
+
+        .illustration-appear {
+            opacity: 0.95;
+            transform: scale(1) translateY(0);
+        }
+
+        .illustration-left {
+            left: 10vw;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 35vw;
+            height: 55vh;
+        }
+
+        .illustration-right {
+            right: 10vw;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 35vw;
+            height: 55vh;
+        }
+
+        /* 文字样式 */
+        .story-text {
+            position: absolute;
+            font-size: 1.5rem;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
+            transition: all 1s cubic-bezier(0.23, 1, 0.32, 1);
+            text-align: left;
+            padding: 2rem;
+            max-width: 280px;
+            line-height: 2.2;
+            font-weight: 500;
+            z-index: 8;
+            writing-mode: vertical-rl;
+            text-orientation: upright;
+            letter-spacing: 0.12em;
+            opacity: 0;
+            transform: translateY(20px);
+            color: #eee2dc;
+        }
+
+        .story-text-appear {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .text-left {
+            left: 30vw;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .text-right {
+            right: 10vw;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        /* 逐字浮现动画 */
+        .char-float {
+            display: inline-block;
+            opacity: 0;
+            transform: translateY(15px);
+            animation: econ-float 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+        }
+
+        @keyframes econ-float {
+            0% {
+                opacity: 0;
+                transform: translateY(15px) scale(0.9) rotateX(90deg);
+            }
+            50% {
+                opacity: 0.5;
+                transform: translateY(5px) scale(0.95) rotateX(45deg);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1) rotateX(0deg);
+            }
+        }
+
+        /* 封面和封底样式 */
+        #scene-cover, #scene-end {
+            z-index: 10;
+        }
+
+        #scene-cover h1, #scene-cover p, #scene-end p {
+            position: relative;
+            z-index: 11;
+            text-shadow: 0 0 20px rgba(83, 52, 131, 0.8);
+        }
+
+        /* 数学公式样式 */
+        .math-formula {
+            position: absolute;
+            bottom: 20vh;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'Iansui-Regular', serif;
+            font-size: 2rem;
+            color: #a0a4f7;
+            text-shadow: 0 0 15px rgba(160, 164, 247, 0.8);
+            opacity: 0;
+            transition: opacity 1s ease;
+            writing-mode: horizontal-tb;
+            text-orientation: initial;
+            background: rgba(22, 33, 62, 0.7);
+            padding: 20px 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(5px);
+            border: 2px solid rgba(83, 52, 131, 0.4);
+        }
+
+        .math-formula.show {
+            opacity: 1;
+        }
+
+        /* 特殊场景：拉格朗日展示 */
+        #scene-lagrange {
+            position: relative;
+        }
+
+        #lagrange-display {
+            position: absolute;
+            width: 700px;
+            height: 400px;
+            opacity: 0;
+            transition: opacity 1.5s cubic-bezier(0.23, 1, 0.32, 1);
+            z-index: 20;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .lagrange-equation {
+            font-family: 'Iansui-Regular', serif;
+            font-size: 2.2rem;
+            color: #a0a4f7;
+            text-shadow: 0 0 20px rgba(160, 164, 247, 0.8);
+            margin: 15px 0;
+            background: rgba(22, 33, 62, 0.8);
+            padding: 20px 35px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(83, 52, 131, 0.4);
+        }
+
+        .lagrange-title {
+            color: #eee2dc;
+            font-size: 1.3rem;
+            margin-top: 20px;
+            background: rgba(83, 52, 131, 0.6);
+            padding: 10px 20px;
+            border-radius: 10px;
+        }
+
+        /* 3D 图形效果 */
+        .surface-3d {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            opacity: 0;
+            transition: opacity 1.5s ease;
+            z-index: 15;
+            transform-style: preserve-3d;
+            animation: rotate-3d 20s linear infinite;
+        }
+
+        @keyframes rotate-3d {
+            0% { transform: rotateY(0deg) rotateX(15deg); }
+            100% { transform: rotateY(360deg) rotateX(15deg); }
+        }
+
+        .surface-grid {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, 
+                transparent 48%, 
+                rgba(160, 164, 247, 0.3) 50%, 
+                transparent 52%),
+                linear-gradient(-45deg, 
+                transparent 48%, 
+                rgba(160, 164, 247, 0.3) 50%, 
+                transparent 52%);
+            background-size: 20px 20px;
+            border-radius: 50%;
+            box-shadow: inset 0 0 50px rgba(83, 52, 131, 0.5);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .scene { 
+                flex-direction: column; 
+                justify-content: center; 
+                align-items: center;
+                padding: 3vh 3vw;
+                gap: 1.5rem;
+            }
+            .illustration-wrapper { 
+                position: relative !important; 
+                left: auto !important;
+                right: auto !important;
+                width: 80vw !important;
+                height: 40vh !important;
+                margin: 0 auto;
+            }
+            .story-text { 
+                position: relative !important; 
+                left: auto !important;
+                right: auto !important;
+                max-width: 85vw; 
+                font-size: 1.1rem;
+                writing-mode: horizontal-tb;
+                text-orientation: initial;
+                letter-spacing: normal;
+                margin: 0 auto;
+                text-align: center;
+                padding: 1rem;
+            }
+            .loop-indicator {
+                bottom: 20px;
+                right: 20px;
+                padding: 10px 16px;
+                font-size: 12px;
+            }
+            #lagrange-display {
+                width: 90vw;
+                height: auto;
+            }
+            .lagrange-equation {
+                font-size: 1.4rem;
+                padding: 15px 25px;
+                margin: 10px 0;
+            }
+            .lagrange-title {
+                font-size: 1.1rem;
+                margin-top: 15px;
+            }
+            .surface-3d {
+                width: 200px;
+                height: 200px;
+            }
+        }
+    </style>
+
+    <style>
+        .return-home-panel {
+            position: fixed;
+            top: 12px;
+            left: 12px;
+            display: flex;
+            gap: 6px;
+            z-index: 9999;
+            flex-wrap: wrap;
+        }
+        .return-home-panel .return-link {
+            padding: 6px 10px;
+            border-radius: 10px;
+            background: rgba(15, 23, 42, 0.35);
+            color: #f8fafc;
+            font-size: 13px;
+            text-decoration: none;
+            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.18);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            border: 1px solid rgba(248, 250, 252, 0.12);
+            transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .return-home-panel .return-link:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.25);
+            background: rgba(15, 23, 42, 0.42);
+        }
+        .return-home-panel .return-link.return-main {
+            background: rgba(79, 70, 229, 0.18);
+            border-color: rgba(79, 70, 229, 0.25);
+        }
+        @media (max-width: 640px) {
+            .return-home-panel {
+                top: 12px;
+                left: 12px;
+                right: 12px;
+                justify-content: center;
+            }
+            .return-home-panel .return-link {
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="return-home-panel">
+         <a class="return-link return-sub" href="../index.html"><i class="fa-solid fa-arrow-left"></i> 返回目录</a>
+        <a class="return-link return-main" href="../../index.html"><i class="fa-solid fa-house"></i> 返回主站</a>
+    </div>
+    <!-- 滚动进度指示器 -->
+    <div class="scroll-progress" id="scrollProgress"></div>
+
+    <!-- 循环提示 -->
+    <div class="loop-indicator" id="loopIndicator">
+        <span>🔄 滚动到底部可循环到开头</span>
+    </div>
+
+    <!-- 几何过渡效果层 -->
+    <div class="geometric-transition">
+        <div id="econ-wipe" class="econ-wipe"></div>
+    </div>
+
+    <!-- 数学图表背景 -->
+    <canvas id="chartCanvas"></canvas>
+
+    <div id="scroll-container">
+        <div id="scene-container" class="sticky-element">
+
+            <!-- 场景背景 -->
+            <div id="bg-scene1" class="scene-background bg-scene1"></div>
+            <div id="bg-scene2" class="scene-background bg-scene2"></div>
+            <div id="bg-scene3" class="scene-background bg-scene3"></div>
+            <div id="bg-scene4" class="scene-background bg-scene4"></div>
+            <div id="bg-scene5" class="scene-background bg-scene5"></div>
+            <div id="bg-scene6" class="scene-background bg-scene6"></div>
+            <div id="bg-scene7" class="scene-background bg-scene7"></div>
+            <div id="bg-scene8" class="scene-background bg-scene8"></div>
+            <div id="bg-scene9" class="scene-background bg-scene9"></div>
+            <div id="bg-scene10" class="scene-background bg-scene10"></div>
+            <div id="bg-scene11" class="scene-background bg-scene11"></div>
+
+            <!-- 场景0: 封面 -->
+            <div id="scene-cover" class="scene flex-col">
+                <h1 class="text-5xl md:text-6xl font-bold text-center">通往产量<br>山巅的路径</h1>
+                <p class="text-xl md:text-2xl mt-4 text-center">拉格朗日乘数法的魔法</p>
+                <p class="absolute bottom-20 opacity-80 text-lg">向下滚动，开启故事</p>
+            </div>
+
+            <!-- 场景1: 咆哮年代 -->
+            <div id="scene1" class="scene">
+                <div class="illustration-wrapper illustration-left depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="8- (1).png" alt="咆哮年代" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-right depth-layer-3">20世纪20年代的美国，一个工业化飞速发展的"咆哮年代"。工厂的烟囱林立，机器的轰鸣声谱写着时代的乐章。</p>
+            </div>
+
+            <!-- 场景2: 核心问题 -->
+            <div id="scene2" class="scene">
+                <div class="illustration-wrapper illustration-right depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="8- (2).png" alt="核心问题" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-left depth-layer-3">所有人都想知道一个核心问题的答案：财富是如何被创造出来的？一个工厂的产量，到底和它的两大投入——资本和劳动力——之间，存在着怎样的精确关系？</p>
+            </div>
+
+            <!-- 场景3: 道格拉斯的苦恼 -->
+            <div id="scene3" class="scene">
+                <div class="illustration-wrapper illustration-left depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="8- (3).png" alt="道格拉斯" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-right depth-layer-3">当时，经济学家保罗·道格拉斯正为此苦恼。他手里有美国制造业从1899年到1922年的大量真实数据，但他需要一个数学模型来描述这座由资本和劳动力共同构成的"产量之山"。</p>
+            </div>
+
+            <!-- 场景4: 寻找数学家 -->
+            <div id="scene4" class="scene">
+                <div class="illustration-wrapper illustration-right depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="8- (4).png" alt="数学家柯布" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-left depth-layer-3">他找到了数学家查尔斯·柯布求助。两人一起，将这个问题变成了一个经典的多元函数问题。现在，问题来了。对于任何一个工厂主来说，他的资源都不是无限的。</p>
+            </div>
+
+            <!-- 场景5: 约束条件 -->
+            <div id="scene5" class="scene">
+                <div class="illustration-wrapper illustration-left depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="8- (5).png" alt="约束条件" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-right depth-layer-3">他只有一个固定的预算。假设工人的工资是固定的，购买或租赁机器的成本也是固定的。那么，工厂主的所有花费，都必须等于他的总预算。</p>
+                <div class="math-formula show">wL + rK = B</div>
+            </div>
+
+            <!-- 场景6: 登山者的挑战 -->
+            <div id="scene6" class="scene">
+                <div class="illustration-wrapper illustration-right depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="8- (6).png" alt="登山挑战" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-left depth-layer-3">在"产量之山"的地图上，这就成了一条"预算线"。工厂主只能沿着这条线行走，不能逾越雷池一步。那么，核心问题就变成了：一个登山者，如何在他被限制的路径上，找到海拔高度最高的点？</p>
+            </div>
+
+            <!-- 场景7: 拉格朗日乘数法 -->
+            <div id="scene-lagrange" class="scene flex-col">
+                <!-- 拉格朗日公式展示 -->
+                <div id="lagrange-display">
+                    <div class="lagrange-equation">∇f = λ∇g</div>
+                    <div class="lagrange-title">拉格朗日乘数法</div>
+                    <p style="color: #eee2dc; font-size: 1rem; margin-top: 15px; max-width: 500px;">
+                        当目标函数的梯度与约束条件的梯度平行时，就找到了最优解
+                    </p>
+                </div>
+                
+                <!-- 3D 表面 -->
+                <div class="surface-3d" style="top: 30%; left: 70%;">
+                    <div class="surface-grid"></div>
+                </div>
+                
+                <!-- 背景图片 -->
+                <div class="illustration-wrapper" style="position: absolute; opacity: 0.15; width: 100%; height: 100%;">
+                    <img src="8- (7).png" alt="拉格朗日" style="object-fit: cover; width: 100%; height: 100%; filter: blur(2px);">
+                </div>
+            </div>
+
+            <!-- 场景8: λ的真实身份 -->
+            <div id="scene8" class="scene">
+                <div class="illustration-wrapper illustration-left depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="8- (8).png" alt="边际效益" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-right depth-layer-3">当柯布和道格拉斯应用了这个方法后，他们发现了一个惊人的秘密：那个在计算中凭空出现的拉格朗日乘子λ，竟然有着极其重要的经济学意义！</p>
+            </div>
+
+            <!-- 场景9: 边际效益的含义 -->
+            <div id="scene9" class="scene">
+                <div class="illustration-wrapper illustration-right depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="8- (9).png" alt="含义" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-left depth-layer-3">λ的值，代表着"边际效益"——也就是说，如果你的总预算增加一块钱，你的总产量将会增加λ个单位。这太强大了！</p>
+            </div>
+
+            <!-- 场景10: 柯布-道格拉斯函数 -->
+            <div id="scene10" class="scene">
+                <div class="illustration-wrapper illustration-left depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="8- (10).png" alt="生产函数" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-right depth-layer-3">这个数学工具，不仅告诉了你如何达到顶峰，还告诉了你"多一块钱的预算"究竟有多大的价值。最终，通过对真实数据的拟合，他们提出了那个名垂青史的"柯布-道格拉斯生产函数"。</p>
+                <div class="math-formula show">P(L,K) = bL^α K^(1-α)</div>
+            </div>
+
+            <!-- 场景11: 伟大的遗产 -->
+            <div id="scene11" class="scene">
+                <div class="illustration-wrapper illustration-right depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="8- (11).png" alt="遗产" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-left depth-layer-3">这个简洁而优美的公式，成为了整个20世纪微观经济学的基石之一。它被无数次地应用、修正和扩展，用来分析各行各业的生产效率。</p>
+            </div>
+
+            <!-- 结局 -->
+            <div id="scene-end" class="scene flex-col">
+                <p class="text-5xl md:text-6xl font-bold">完</p>
+                <p class="text-xl mt-4">数学指引通往效率的路径</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const scenes = Array.from(document.querySelectorAll('.scene'));
+        const sceneBackgrounds = Array.from(document.querySelectorAll('.scene-background'));
+        const sceneCount = scenes.length;
+        const scrollContainer = document.getElementById('scroll-container');
+        const econWipe = document.getElementById('econ-wipe');
+        const scrollProgress = document.getElementById('scrollProgress');
+        const loopIndicator = document.getElementById('loopIndicator');
+        const lagrangeDisplay = document.getElementById('lagrange-display');
+        const surface3d = document.querySelector('.surface-3d');
+        
+        let lastSceneIndex = -1;
+        let isTransitioning = false;
+        let animatedTexts = new Set();
+        let hasLooped = false;
+        let lagrangeAnimationStarted = false;
+
+        // ========= 数学图表动画 =========
+        const chartCanvas = document.getElementById('chartCanvas');
+        const cCtx = chartCanvas.getContext('2d');
+        let chartWidth = chartCanvas.width = window.innerWidth;
+        let chartHeight = chartCanvas.height = window.innerHeight;
+
+        class DataPoint {
+            constructor() {
+                this.reset();
+            }
+
+            reset() {
+                this.x = Math.random() * chartWidth;
+                this.y = Math.random() * chartHeight;
+                this.vx = (Math.random() - 0.5) * 1;
+                this.vy = (Math.random() - 0.5) * 1;
+                this.size = Math.random() * 4 + 2;
+                this.opacity = Math.random() * 0.4 + 0.2;
+                this.connections = [];
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+
+                // 边界反弹
+                if (this.x <= 0 || this.x >= chartWidth) this.vx *= -1;
+                if (this.y <= 0 || this.y >= chartHeight) this.vy *= -1;
+
+                this.x = Math.max(0, Math.min(chartWidth, this.x));
+                this.y = Math.max(0, Math.min(chartHeight, this.y));
+            }
+
+            draw() {
+                cCtx.globalAlpha = this.opacity;
+                cCtx.fillStyle = '#533483';
+                cCtx.beginPath();
+                cCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                cCtx.fill();
+                cCtx.globalAlpha = 1;
+            }
+        }
+
+        const dataPoints = [];
+        for (let i = 0; i < 30; i++) {
+            dataPoints.push(new DataPoint());
+        }
+
+        function drawConnections() {
+            cCtx.strokeStyle = 'rgba(83, 52, 131, 0.1)';
+            cCtx.lineWidth = 1;
+
+            for (let i = 0; i < dataPoints.length; i++) {
+                for (let j = i + 1; j < dataPoints.length; j++) {
+                    const dx = dataPoints[i].x - dataPoints[j].x;
+                    const dy = dataPoints[i].y - dataPoints[j].y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance < 150) {
+                        cCtx.globalAlpha = (150 - distance) / 150 * 0.1;
+                        cCtx.beginPath();
+                        cCtx.moveTo(dataPoints[i].x, dataPoints[i].y);
+                        cCtx.lineTo(dataPoints[j].x, dataPoints[j].y);
+                        cCtx.stroke();
+                    }
+                }
+            }
+            cCtx.globalAlpha = 1;
+        }
+
+        function animateChart() {
+            cCtx.clearRect(0, 0, chartWidth, chartHeight);
+            
+            drawConnections();
+            
+            dataPoints.forEach(point => {
+                point.update();
+                point.draw();
+            });
+
+            requestAnimationFrame(animateChart);
+        }
+        animateChart();
+
+        window.addEventListener('resize', () => {
+            chartWidth = chartCanvas.width = window.innerWidth;
+            chartHeight = chartCanvas.height = window.innerHeight;
+        });
+
+        // 滚动进度更新
+        function updateScrollProgress() {
+            const scrollHeight = scrollContainer.scrollHeight - window.innerHeight;
+            const scrollTop = window.scrollY;
+            const progress = Math.min(scrollTop / scrollHeight, 1) * 100;
+            scrollProgress.style.width = progress + '%';
+            
+            // 显示循环提示
+            if (progress > 90 && !hasLooped) {
+                loopIndicator.classList.add('show');
+            } else {
+                loopIndicator.classList.remove('show');
+            }
+        }
+
+        // 循环滚动功能
+        function handleLoopScroll() {
+            const scrollHeight = scrollContainer.scrollHeight - window.innerHeight;
+            const scrollTop = window.scrollY;
+            
+            if (scrollTop >= scrollHeight && !hasLooped) {
+                hasLooped = true;
+                setTimeout(() => {
+                    window.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    });
+                    setTimeout(() => {
+                        hasLooped = false;
+                    }, 1000);
+                }, 500);
+            }
+        }
+
+        // 几何过渡效果
+        function triggerGeometricTransition() {
+            if (isTransitioning) return;
+            isTransitioning = true;
+            
+            econWipe.classList.add('active');
+            
+            setTimeout(() => {
+                econWipe.classList.remove('active');
+                isTransitioning = false;
+            }, 1500);
+        }
+
+        // 文字浮现动画
+        function animateTextFloat(element) {
+            if (animatedTexts.has(element)) return;
+            animatedTexts.add(element);
+            
+            const text = element.textContent;
+            element.textContent = '';
+            
+            [...text].forEach((char, index) => {
+                const span = document.createElement('span');
+                span.textContent = char;
+                span.className = 'char-float';
+                span.style.animationDelay = `${index * 0.02}s`;
+                element.appendChild(span);
+            });
+        }
+
+        // 主滚动处理
+        window.addEventListener('scroll', () => {
+            const scrollHeight = scrollContainer.scrollHeight - window.innerHeight;
+            const scrollTop = window.scrollY;
+            const scrollPercent = Math.min(scrollTop / scrollHeight, 1);
+            
+            updateScrollProgress();
+            handleLoopScroll();
+            updateScenes(scrollPercent);
+        });
+
+        function updateScenes(percent) {
+            const currentSceneIndex = Math.floor(percent * (sceneCount - 0.001));
+            const sceneProgress = getSceneProgress(percent, currentSceneIndex);
+            
+            // 触发场景转换效果
+            if (currentSceneIndex !== lastSceneIndex && lastSceneIndex !== -1 && Math.abs(currentSceneIndex - lastSceneIndex) > 1) {
+                triggerGeometricTransition();
+            }
+            lastSceneIndex = currentSceneIndex;
+            
+            // 更新场景显示
+            scenes.forEach((scene, index) => {
+                const isActive = index === currentSceneIndex;
+                scene.style.opacity = isActive ? 1 : 0;
+                
+                if (isActive) {
+                    // 图片动画
+                    const img = scene.querySelector('.illustration');
+                    if (img && sceneProgress > 0.1) {
+                        setTimeout(() => {
+                            img.classList.add('illustration-appear');
+                        }, 100);
+                    }
+                    
+                    // 文字动画
+                    const text = scene.querySelector('.story-text');
+                    if (text && sceneProgress > 0.3) {
+                        text.classList.add('story-text-appear');
+                        if (!animatedTexts.has(text)) {
+                            animateTextFloat(text);
+                        }
+                    }
+                } else {
+                    // 重置非活动场景
+                    const img = scene.querySelector('.illustration');
+                    if (img) {
+                        img.classList.remove('illustration-appear');
+                    }
+                    const text = scene.querySelector('.story-text');
+                    if (text) {
+                        text.classList.remove('story-text-appear');
+                    }
+                }
+            });
+            
+            // 更新场景背景
+            sceneBackgrounds.forEach((bg, index) => {
+                const sceneNumber = index + 1;
+                const progress = getSceneProgress(percent, sceneNumber);
+                bg.style.opacity = progress > 0 ? Math.min(progress * 1.5, 1) : 0;
+            });
+
+            // 场景7的拉格朗日展示动画
+            const p7 = getSceneProgress(percent, 7);
+            if (p7 > 0.2 && !lagrangeAnimationStarted) {
+                lagrangeAnimationStarted = true;
+                lagrangeDisplay.style.opacity = 1;
+                surface3d.style.opacity = 0.8;
+            } else if (p7 === 0) {
+                lagrangeDisplay.style.opacity = 0;
+                surface3d.style.opacity = 0;
+                lagrangeAnimationStarted = false;
+            }
+        }
+
+        function getSceneProgress(percent, sceneIndex) {
+            const sceneStart = sceneIndex / sceneCount;
+            const sceneEnd = (sceneIndex + 1) / sceneCount;
+            if (percent < sceneStart || percent > sceneEnd) return 0;
+            return (percent - sceneStart) / (sceneEnd - sceneStart);
+        }
+
+        // 初始化
+        window.scrollTo(0, 0);
+        updateScenes(0);
+        updateScrollProgress();
+    </script>
+</body>
+</html>

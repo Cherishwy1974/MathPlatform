@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab 8.6 二元函数无条件极值点实验室</title>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            startup: {
+                pageReady: () => {
+                    return MathJax.startup.defaultPageReady().then(() => {
+                        if (typeof window.scheduleMathRender === 'function') {
+                            window.scheduleMathRender();
+                        }
+                        console.log('MathJax加载完成');
+                    });
+                }
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+            }
+        };
+    </script>
+    <script defer src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js"></script>
+    <script defer src="../common-assets/js/lab-math-enhancer.js"></script>
+    <style>
+        :root {
+            --h1-size: 22px;
+            --h2-size: 20px;
+            --h3-size: 18px;
+            --btn-size: 16px;
+            --formula-size: 20px;
+            --text-size: 16px;
+            --primary: #4f46e5;
+            --primary-dark: #3730a3;
+            --primary-light: #6366f1;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --light: #ffffff;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-600: #4b5563;
+            --gray-800: #1f2937;
+            --border: #e5e7eb;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        *::-webkit-scrollbar { width: 0; background: transparent; }
+        * { scrollbar-width: none; -ms-overflow-style: none; }
+
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif; font-size: var(--text-size); line-height: 1.5; background: var(--gray-50); color: var(--gray-800); }
+        .return-home-panel {
+            position: fixed;
+            top: 12px;
+            right: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+            z-index: 40;
+        }
+
+        .return-toggle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.95), rgba(99, 102, 241, 0.9));
+            color: #ffffff;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 10px 18px rgba(79, 70, 229, 0.28);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .return-toggle:focus-visible {
+            outline: 2px solid rgba(129, 140, 248, 0.6);
+            outline-offset: 3px;
+        }
+
+        .return-toggle:hover {
+            transform: translateY(-1px) scale(1.03);
+            box-shadow: 0 14px 26px rgba(79, 70, 229, 0.35);
+        }
+
+        .return-links {
+            display: none;
+            flex-direction: column;
+            gap: 6px;
+            padding: 10px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(79, 70, 229, 0.15);
+            box-shadow: 0 16px 30px rgba(15, 23, 42, 0.18);
+            backdrop-filter: blur(6px);
+        }
+
+        .return-home-panel.open .return-links {
+            display: flex;
+        }
+
+        .return-link {
+            padding: 6px 12px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 14px;
+            color: var(--primary);
+            background: rgba(79, 70, 229, 0.12);
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+
+        .return-link.return-main {
+            color: var(--success);
+            background: rgba(16, 185, 129, 0.12);
+        }
+
+        .return-link:hover {
+            background: rgba(79, 70, 229, 0.2);
+            color: var(--primary-dark);
+        }
+
+        .return-link.return-main:hover {
+            background: rgba(16, 185, 129, 0.22);
+        }
+
+        .container { width: 100%; max-width: 1400px; height: 100vh; max-height: 700px; margin: 0 auto; display: flex; flex-direction: column; background: var(--light); border-radius: 12px; box-shadow: 0 12px 24px rgba(15,23,42,0.08); overflow: hidden; }
+        .header { background: linear-gradient(90deg, var(--primary), var(--primary-dark)); color: var(--light); padding: 10px 24px; height: 48px; display: flex; align-items: center; }
+        .header h1 { font-size: var(--h1-size); font-weight: 600; }
+        .main { flex: 1; display: flex; overflow: hidden; }
+        .sidebar { width: 120px; background: var(--gray-50); border-right: 1px solid var(--border); padding: 12px 10px; display: flex; flex-direction: column; gap: 8px; }
+        .nav-btn { width: 100%; padding: 8px; border: none; border-radius: 6px; background: transparent; color: var(--gray-600); text-align: left; font-size: var(--text-size); cursor: pointer; transition: all 0.2s ease; }
+        .nav-btn:hover { background: var(--gray-100); color: var(--primary); }
+        .nav-btn.active { background: rgba(79,70,229,0.12); color: var(--primary); font-weight: 600; }
+
+        .content { flex: 1; display: none; padding: 16px; overflow-y: auto; }
+        .content.active { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .column { display: flex; flex-direction: column; gap: 16px; overflow-y: auto; }
+        
+        .card { background: var(--light); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+        .card h3 { font-size: var(--h3-size); color: var(--primary); margin-bottom: 12px; }
+        
+        .control-group { display: flex; flex-direction: column; gap: 8px; background: var(--light); padding: 12px; border-radius: 8px; border: 1px solid var(--gray-200); }
+        label { font-weight: 500; color: var(--gray-600); }
+        select, input[type="range"] { padding: 8px 10px; border-radius: 6px; border: 1px solid var(--gray-300); font-size: var(--text-size); outline: none; transition: border 0.2s ease; }
+        select:focus, input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79,70,229,0.2); }
+        .info-card { background: var(--gray-50); border-radius: 4px; padding: 10px; margin: 8px 0; font-size: var(--text-size); }
+        .status-tag { display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 999px; background: rgba(79,70,229,0.12); color: var(--primary); font-size: 14px; }
+        .status-tag.success { background: rgba(16,185,129,0.16); color: var(--success); }
+        .status-tag.danger { background: rgba(239,68,68,0.16); color: var(--danger); }
+        .status-tag.warning { background: rgba(245,158,11,0.18); color: var(--warning); }
+        
+        .canvas-container { border: 1px solid var(--gray-200); border-radius: 4px; background: #fafafa; padding: 10px; }
+        .canvas-container canvas { width: 100%; height: 300px; display: block; }
+        table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+        th, td { border: 1px solid var(--gray-200); padding: 8px; text-align: center; font-size: 15px; }
+        th { background: var(--gray-100); color: var(--gray-600); }
+        @media (max-width: 1100px) { .content.active { grid-template-columns: 1fr; } }
+        
+        /* 自定义下拉框支持LaTeX渲染 */
+        .custom-select-container { position: relative; width: 100%; }
+        .custom-select-trigger { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border: 1px solid #e5e7eb; border-radius: 6px; background: #f9fafb; cursor: pointer; transition: all 0.2s; min-height: 40px; }
+        .custom-select-trigger:hover { border-color: #4f46e5; background: #ffffff; }
+        .custom-select-container.open .custom-select-trigger { border-color: #4f46e5; background: #ffffff; }
+        .selected-formula { flex: 1; }
+        .arrow { font-size: 12px; transition: transform 0.2s; margin-left: 8px; color: #6b7280; }
+        .custom-select-container.open .arrow { transform: rotate(180deg); }
+        .custom-select-options { position: absolute; top: 100%; left: 0; right: 0; margin-top: 4px; background: #ffffff; border: 1px solid #e5e7eb; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); max-height: 200px; overflow-y: auto; display: none; z-index: 1000; }
+        .custom-select-container.open .custom-select-options { display: block; }
+        .custom-option { padding: 10px 12px; cursor: pointer; transition: background 0.2s; border-bottom: 1px solid #f3f4f6; background: #ffffff; }
+        .custom-option:last-child { border-bottom: none; }
+        .custom-option:hover { background: #f3f4f6; }
+        .custom-option.selected { background: #eef2ff; color: #4f46e5; font-weight: 500; }
+    </style>
+</head>
+<body>
+    <div class="return-home-panel">
+        <button class="return-toggle" type="button" aria-label="打开返回导航" onclick="toggleReturnPanel(event)"><i class="fa-solid fa-house"></i></button>
+        <div class="return-links">
+            <a class="return-link return-sub" href="index.html"><i class="fa-solid fa-arrow-left"></i> 返回目录</a>
+            <a class="return-link return-main" href="../index.html"><i class="fa-solid fa-house"></i> 返回主站</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <header class="header">
+            <h1>Lab 8.6｜无条件极值点的搜索与判定</h1>
+        </header>
+
+        <div class="main">
+            <nav class="sidebar">
+                <button class="nav-btn active"  data-panel="module1"onclick="switchPanel('module1', this)">临界点定位</button>
+                <button class="nav-btn"  data-panel="module2"onclick="switchPanel('module2', this)">Hessian 判定</button>
+            </nav>
+
+            <div class="content active" id="module1">
+                <div class="column">
+                    <div class="card">
+                        <h3>函数与初始猜测</h3>
+                        <div class="control-group">
+                            <label for="functionSelect">选择函数：</label>
+                            <div class="custom-select-container">
+                                <div class="custom-select-trigger" onclick="toggleCustomSelect(this)">
+                                    <span class="selected-formula">$f(x,y)=x^2+y^2-4x-2y$</span>
+                                    <span class="arrow">▼</span>
+                                </div>
+                                <div class="custom-select-options">
+                                    <div class="custom-option selected" data-value="f1" onclick="selectCustomOption(this, 'functionSelect')">
+                                        $f(x,y)=x^2+y^2-4x-2y$
+                                    </div>
+                                    <div class="custom-option" data-value="f2" onclick="selectCustomOption(this, 'functionSelect')">
+                                        $f(x,y)=x^3-3xy^2$
+                                    </div>
+                                    <div class="custom-option" data-value="f3" onclick="selectCustomOption(this, 'functionSelect')">
+                                        $f(x,y)=e^{-(x^2+y^2)}(x^2- y^2)$
+                                    </div>
+                                </div>
+                                <input type="hidden" id="functionSelect" value="f1">
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label for="guessSlider">沿引导路径扫描：</label>
+                            <input type="range" id="guessSlider" min="-2" max="2" step="0.1" value="0" oninput="scanPath()" />
+                            <div class="info-card" id="scanInfo">拖动滑块观察梯度方向如何指向临界点。</div>
+                        </div>
+                        <div class="info-card" id="criticalInfo">临界点表将在下方列出。</div>
+                        <table>
+                            <thead>
+                                <tr><th>编号</th><th>坐标 $(x_0,y_0)$</th><th>函数值</th></tr>
+                            </thead>
+                            <tbody id="criticalTable"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="card">
+                        <h3>等高线与梯度流</h3>
+                        <div class="canvas-container">
+                            <canvas id="contourCanvas"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content" id="module2">
+                <div class="column">
+                    <div class="card">
+                        <h3>Hessian 矩阵及判定</h3>
+                        <div class="info-card" id="hessianInfo">选择函数后，系统自动计算 Hessian 矩阵。</div>
+                        <div class="info-card" id="classificationInfo">依据 $D=f_{xx}f_{yy}-f_{xy}^2$ 判定极值类型。</div>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="card">
+                        <h3>判定图示</h3>
+                        <div class="canvas-container">
+                            <canvas id="hessianCanvas"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const contourCanvas = document.getElementById('contourCanvas');
+        const hessianCanvas = document.getElementById('hessianCanvas');
+
+        const functions = {
+            f1: {
+                value: (x, y) => x * x + y * y - 4 * x - 2 * y,
+                grad: (x, y) => ({ gx: 2 * x - 4, gy: 2 * y - 2 }),
+                hessian: () => ({ a: 2, b: 0, c: 2 }),
+                critical: [{ x: 2, y: 1 }]
+            },
+            f2: {
+                value: (x, y) => x * x * x - 3 * x * y * y,
+                grad: (x, y) => ({ gx: 3 * x * x - 3 * y * y, gy: -6 * x * y }),
+                hessian: (x, y) => ({ a: 6 * x, b: -6 * y, c: -6 * x }),
+                critical: [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: -1, y: 0 }]
+            },
+            f3: {
+                value: (x, y) => Math.exp(-(x * x + y * y)) * (x * x - y * y),
+                grad: (x, y) => {
+                    const e = Math.exp(-(x * x + y * y));
+                    return {
+                        gx: e * (2 * x - 2 * x * (x * x - y * y) - 2 * x * (x * x - y * y)),
+                        gy: e * (-2 * y - 2 * y * (x * x - y * y) + 2 * y * (x * x - y * y))
+                    };
+                },
+                hessian: (x, y) => ({ a: -2 + 4 * x * x - 2 * (x * x - y * y), b: 4 * x * y, c: -2 - 4 * y * y + 2 * (x * x - y * y) }),
+                critical: [{ x: 0, y: 0 }, { x: 1 / Math.sqrt(2), y: 0 }, { x: -1 / Math.sqrt(2), y: 0 }, { x: 0, y: 1 / Math.sqrt(2) }, { x: 0, y: -1 / Math.sqrt(2) }]
+            }
+        };
+
+        function resizeCanvas(canvas) {
+            const container = canvas.parentElement;
+            const width = container.clientWidth - 20;
+            const height = container.clientHeight - 20;
+            canvas.style.width = width + 'px';
+            canvas.style.height = height + 'px';
+            const ratio = window.devicePixelRatio || 1;
+            canvas.width = width * ratio;
+            canvas.height = height * ratio;
+            const ctx = canvas.getContext('2d');
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.scale(ratio, ratio);
+            return ctx;
+        }
+
+        function drawAxis(ctx, width, height) {
+            ctx.clearRect(0, 0, width, height);
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, width, height);
+            ctx.strokeStyle = '#374151';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(50, height - 40);
+            ctx.lineTo(width - 30, height - 40);
+            ctx.moveTo(50, height - 40);
+            ctx.lineTo(50, 30);
+            ctx.stroke();
+            ctx.fillStyle = '#4b5563';
+            ctx.font = '14px sans-serif';
+            ctx.fillText('x', width - 40, height - 48);
+            ctx.fillText('y', 60, 36);
+        }
+
+        let mathObserver = null;
+        let mathRenderQueued = false;
+
+        function startMathObserver() {
+            if (typeof MutationObserver === 'undefined' || !document.body) {
+                return;
+            }
+            if (mathObserver) {
+                mathObserver.disconnect();
+            }
+            mathObserver = new MutationObserver(mutations => {
+                for (const mutation of mutations) {
+                    if (mutation.type === 'childList' || mutation.type === 'characterData') {
+                        scheduleMathRender();
+                        break;
+                    }
+                }
+            });
+            mathObserver.observe(document.body, { childList: true, subtree: true, characterData: true });
+        }
+
+        function scheduleMathRender() {
+            if (mathRenderQueued) {
+                return;
+            }
+            mathRenderQueued = true;
+            requestAnimationFrame(() => {
+                mathRenderQueued = false;
+                if (window.MathJax && MathJax.typesetPromise) {
+                    if (mathObserver) {
+                        mathObserver.disconnect();
+                    }
+                    MathJax.typesetPromise()
+                        .catch(err => console.log('渲染错误:', err))
+                        .finally(() => {
+                            startMathObserver();
+                        });
+                } else {
+                    setTimeout(scheduleMathRender, 160);
+                }
+            });
+        }
+
+        window.scheduleMathRender = scheduleMathRender;
+
+        function renderMath() {
+            scheduleMathRender();
+        }
+
+        function ensureMathReady() {
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', () => {
+                    startMathObserver();
+                    scheduleMathRender();
+                });
+            } else {
+                startMathObserver();
+                scheduleMathRender();
+            }
+        }
+
+        ensureMathReady();
+
+        function toggleReturnPanel(event) {
+            event.stopPropagation();
+            const panel = document.querySelector('.return-home-panel');
+            if (panel) {
+                panel.classList.toggle('open');
+            }
+        }
+
+        document.addEventListener('click', event => {
+            const panel = document.querySelector('.return-home-panel');
+            if (!panel) {
+                return;
+            }
+            if (panel.classList.contains('open') && !panel.contains(event.target)) {
+                panel.classList.remove('open');
+            }
+        });
+
+        window.addEventListener('pageshow', () => {
+            scheduleMathRender();
+        });
+
+        function switchPanel(id, btn) {
+            document.querySelectorAll('.content').forEach(panel => panel.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+            btn.classList.add('active');
+            setTimeout(() => {
+                drawContour();
+                drawHessianDiagram();
+            }, 80);
+        }
+
+        function updateCriticalPoints() {
+            const key = document.getElementById('functionSelect').value;
+            const func = functions[key];
+            const tbody = document.getElementById('criticalTable');
+            tbody.innerHTML = '';
+            func.critical.forEach((pt, idx) => {
+                const tr = document.createElement('tr');
+                const value = func.value(pt.x, pt.y);
+                tr.innerHTML = `<td>${idx + 1}</td><td>(${pt.x.toFixed(2)}, ${pt.y.toFixed(2)})</td><td>${value.toFixed(3)}</td>`;
+                tbody.appendChild(tr);
+            });
+            document.getElementById('criticalInfo').innerHTML = `<span class="status-tag">临界点</span> 共找到 ${func.critical.length} 个候选点。`;
+            drawContour();
+            updateHessianInfo();
+            scanPath();
+            renderMath();
+        }
+
+        function drawContour() {
+            const ctx = resizeCanvas(contourCanvas);
+            const width = contourCanvas.clientWidth - 20;
+            const height = contourCanvas.clientHeight - 20;
+            drawAxis(ctx, width, height);
+            const key = document.getElementById('functionSelect').value;
+            const func = functions[key];
+            ctx.save();
+            ctx.translate(50, height - 40);
+            ctx.scale(1, -1);
+            const scale = 80;
+            for (let angle = 0; angle < Math.PI * 2; angle += Math.PI / 12) {
+                ctx.strokeStyle = 'rgba(99,102,241,0.2)';
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.lineTo(Math.cos(angle) * 200, Math.sin(angle) * 200);
+                ctx.stroke();
+            }
+            ctx.strokeStyle = '#6366f1';
+            for (let level = -2; level <= 2; level += 0.5) {
+                ctx.beginPath();
+                for (let x = -2; x <= 2; x += 0.05) {
+                    const y = Math.sin((x + level) * Math.PI / 2) * 0.8;
+                    const px = x * scale;
+                    const py = y * scale;
+                    if (x === -2) ctx.moveTo(px, py);
+                    else ctx.lineTo(px, py);
+                }
+                ctx.stroke();
+            }
+            func.critical.forEach(pt => {
+                ctx.fillStyle = '#10b981';
+                ctx.beginPath();
+                ctx.arc(pt.x * scale, pt.y * scale, 6, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            ctx.restore();
+        }
+
+        function scanPath() {
+            const t = parseFloat(document.getElementById('guessSlider').value);
+            const key = document.getElementById('functionSelect').value;
+            const func = functions[key];
+            const point = { x: t, y: t / 2 };
+            const grad = func.grad(point.x, point.y);
+            document.getElementById('scanInfo').innerHTML = `<span class="status-tag">梯度</span> 在 $(x,y)=(${point.x.toFixed(2)},${point.y.toFixed(2)})$ 处，$\\nabla f=(${grad.gx.toFixed(2)}, ${grad.gy.toFixed(2)})$。`;
+            drawContour();
+            const ctx = contourCanvas.getContext('2d');
+            const width = contourCanvas.clientWidth - 20;
+            const height = contourCanvas.clientHeight - 20;
+            ctx.save();
+            ctx.translate(50, height - 40);
+            ctx.scale(1, -1);
+            const scale = 80;
+            ctx.strokeStyle = '#ef4444';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(point.x * scale, point.y * scale);
+            ctx.lineTo((point.x + grad.gx * 0.2) * scale, (point.y + grad.gy * 0.2) * scale);
+            ctx.stroke();
+            ctx.restore();
+            renderMath();
+        }
+
+        function updateHessianInfo() {
+            const key = document.getElementById('functionSelect').value;
+            const func = functions[key];
+            const info = func.critical.map(pt => {
+                const h = func.hessian(pt.x, pt.y);
+                const D = h.a * h.c - (h.b || 0) * (h.b || 0);
+                let type = '鞍点';
+                let tag = 'warning';
+                if (D > 0 && h.a > 0) { type = '极小值'; tag = 'success'; }
+                else if (D > 0 && h.a < 0) { type = '极大值'; tag = 'danger'; }
+                else if (D < 0) { type = '鞍点'; tag = 'warning'; }
+                else { type = '无法判定'; tag = 'warning'; }
+                return `<tr><td>(${pt.x.toFixed(2)}, ${pt.y.toFixed(2)})</td><td>${h.a.toFixed(2)}</td><td>${(h.b || 0).toFixed(2)}</td><td>${h.c.toFixed(2)}</td><td><span class="status-tag ${tag}">${type}</span></td></tr>`;
+            }).join('');
+            document.getElementById('hessianInfo').innerHTML = `<span class="status-tag">Hessian</span> 计算结果如下表。`;
+            document.getElementById('classificationInfo').innerHTML = `<table><thead><tr><th>点</th><th>$f_{xx}$</th><th>$f_{xy}$</th><th>$f_{yy}$</th><th>结论</th></tr></thead><tbody>${info}</tbody></table>`;
+            renderMath();
+            drawHessianDiagram();
+        }
+
+        function drawHessianDiagram() {
+            const ctx = resizeCanvas(hessianCanvas);
+            const width = hessianCanvas.clientWidth - 20;
+            const height = hessianCanvas.clientHeight - 20;
+            ctx.clearRect(0, 0, width, height);
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, width, height);
+            
+            const key = document.getElementById('functionSelect').value;
+            const func = functions[key];
+            
+            // 绘制判定流程图
+            const centerX = width / 2;
+            const centerY = height / 2;
+            
+            ctx.font = 'bold 16px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            // 标题
+            ctx.fillStyle = '#1f2937';
+            ctx.font = 'bold 18px sans-serif';
+            ctx.fillText('Hessian 判定法', centerX, 30);
+            
+            ctx.font = '14px sans-serif';
+            
+            // 绘制判定树
+            const boxWidth = 140;
+            const boxHeight = 50;
+            
+            // 顶部：计算 D
+            ctx.fillStyle = '#ede9fe';
+            ctx.fillRect(centerX - boxWidth/2, 60, boxWidth, boxHeight);
+            ctx.strokeStyle = '#4f46e5';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(centerX - boxWidth/2, 60, boxWidth, boxHeight);
+            ctx.fillStyle = '#4f46e5';
+            ctx.fillText('D = f_xx·f_yy - f_xy²', centerX, 85);
+            
+            // 分支：D > 0
+            ctx.strokeStyle = '#10b981';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(centerX - 40, 110);
+            ctx.lineTo(centerX - 100, 150);
+            ctx.stroke();
+            
+            ctx.fillStyle = '#dcfce7';
+            ctx.fillRect(centerX - boxWidth - 20, 150, boxWidth, boxHeight);
+            ctx.strokeStyle = '#10b981';
+            ctx.strokeRect(centerX - boxWidth - 20, 150, boxWidth, boxHeight);
+            ctx.fillStyle = '#10b981';
+            ctx.fillText('D > 0', centerX - 100, 165);
+            ctx.fillText('(极值点)', centerX - 100, 185);
+            
+            // 分支：D < 0
+            ctx.strokeStyle = '#f59e0b';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(centerX + 40, 110);
+            ctx.lineTo(centerX + 100, 150);
+            ctx.stroke();
+            
+            ctx.fillStyle = '#fef3c7';
+            ctx.fillRect(centerX + 20, 150, boxWidth, boxHeight);
+            ctx.strokeStyle = '#f59e0b';
+            ctx.strokeRect(centerX + 20, 150, boxWidth, boxHeight);
+            ctx.fillStyle = '#f59e0b';
+            ctx.fillText('D < 0', centerX + 100, 165);
+            ctx.fillText('(鞍点)', centerX + 100, 185);
+            
+            // D > 0 的子分支
+            ctx.strokeStyle = '#10b981';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(centerX - 100, 200);
+            ctx.lineTo(centerX - 100, 230);
+            ctx.stroke();
+            
+            ctx.fillStyle = '#dcfce7';
+            ctx.fillRect(centerX - boxWidth - 20, 230, boxWidth - 20, 40);
+            ctx.strokeStyle = '#10b981';
+            ctx.strokeRect(centerX - boxWidth - 20, 230, boxWidth - 20, 40);
+            ctx.fillStyle = '#10b981';
+            ctx.font = '12px sans-serif';
+            ctx.fillText('f_xx > 0: 极小值', centerX - 100, 250);
+            
+            ctx.fillStyle = '#fee2e2';
+            ctx.fillRect(centerX - 40, 230, boxWidth - 20, 40);
+            ctx.strokeStyle = '#ef4444';
+            ctx.strokeRect(centerX - 40, 230, boxWidth - 20, 40);
+            ctx.fillStyle = '#ef4444';
+            ctx.fillText('f_xx < 0: 极大值', centerX + 20, 250);
+            
+            // 当前函数的判定结果
+            if (func.critical && func.critical.length > 0) {
+                const pt = func.critical[0];
+                const h = func.hessian(pt.x, pt.y);
+                const D = h.a * h.c - (h.b || 0) * (h.b || 0);
+                let result = '';
+                let color = '#6b7280';
+                
+                if (D > 0 && h.a > 0) { result = `当前: 极小值 (${pt.x.toFixed(1)},${pt.y.toFixed(1)})`; color = '#10b981'; }
+                else if (D > 0 && h.a < 0) { result = `当前: 极大值 (${pt.x.toFixed(1)},${pt.y.toFixed(1)})`; color = '#ef4444'; }
+                else if (D < 0) { result = `当前: 鞍点 (${pt.x.toFixed(1)},${pt.y.toFixed(1)})`; color = '#f59e0b'; }
+                
+                ctx.fillStyle = color;
+                ctx.font = 'bold 14px sans-serif';
+                ctx.fillText(result, centerX, height - 20);
+            }
+        }
+
+        window.addEventListener('resize', () => {
+            drawContour();
+            drawHessianDiagram();
+        });
+
+        // 自定义下拉框控制函数
+        function toggleCustomSelect(trigger) {
+            const container = trigger.parentElement;
+            const isOpen = container.classList.contains('open');
+            document.querySelectorAll('.custom-select-container.open').forEach(el => el.classList.remove('open'));
+            if (!isOpen) container.classList.add('open');
+        }
+
+        function selectCustomOption(option, selectId) {
+            const container = option.closest('.custom-select-container');
+            const trigger = container.querySelector('.selected-formula');
+            const hiddenInput = document.getElementById(selectId);
+            container.querySelectorAll('.custom-option').forEach(opt => opt.classList.remove('selected'));
+            option.classList.add('selected');
+            trigger.innerHTML = option.innerHTML;
+            hiddenInput.value = option.dataset.value;
+            container.classList.remove('open');
+            if (typeof MathJax !== 'undefined') MathJax.typesetPromise([container]).catch(err => console.log(err));
+            if (selectId === 'functionSelect') updateCriticalPoints();
+        }
+
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.custom-select-container')) {
+                document.querySelectorAll('.custom-select-container.open').forEach(el => el.classList.remove('open'));
+            }
+        });
+
+        updateCriticalPoints();
+    </script>
+</body>
+</html>

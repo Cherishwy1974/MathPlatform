@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab 5.4 部分分式分解实验室</title>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            startup: {
+                pageReady: () => {
+                    return MathJax.startup.defaultPageReady().then(() => {
+                        console.log('MathJax加载完成');
+                    });
+                }
+            }
+        };
+    </script>
+    <script defer src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js"></script>
+    <style>
+        :root {
+            --primary: #4f46e5; --primary-dark: #3730a3;
+            --success: #10b981; --danger: #ef4444;
+            --gray-50: #f9fafb; --gray-100: #f3f4f6; --gray-200: #e5e7eb; --gray-600: #4b5563; --gray-700: #1f2937; --white: #ffffff;
+            --border: #e5e7eb; --h1-size: 22px; --h3-size: 18px; --text-size: 16px; --formula-size: 20px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        *::-webkit-scrollbar { width: 0; background: transparent; }
+        * { scrollbar-width: none; -ms-overflow-style: none; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", Arial, sans-serif; font-size: var(--text-size); line-height: 1.5; background: var(--gray-50); color: var(--gray-700); }
+        .container { width: 100%; max-width: 1400px; height: min(100vh, 700px); margin: 0 auto; display: flex; flex-direction: column; background: var(--white); border-radius: 12px; box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08); overflow: hidden; }
+        .header { height: 40px; background: var(--primary); color: var(--white); display: flex; align-items: center; padding: 0 20px; }
+        .header h1 { font-size: var(--h1-size); font-weight: 600; }
+        .main { flex: 1; display: flex; overflow: hidden; }
+        .sidebar { width: 120px; background: var(--gray-50); border-right: 1px solid var(--border); padding: 12px 10px; display: flex; flex-direction: column; gap: 8px; }
+        .nav-btn { width: 100%; padding: 8px; background: transparent; border: none; border-radius: 8px; cursor: pointer; font-size: var(--text-size); color: var(--gray-600); text-align: left; transition: background 0.2s ease; }
+        .nav-btn:hover { background: var(--gray-100); }
+        .nav-btn.active { background: var(--primary); color: var(--white); }
+        .content { flex: 1; display: none; padding: 16px; overflow-y: auto; }
+        .content.active { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+        .column { display: flex; flex-direction: column; gap: 14px; overflow-y: auto; }
+        .card { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 16px; box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04); }
+        .card h3 { font-size: var(--h3-size); color: var(--primary); margin-bottom: 10px; }
+        .formula-box { background: #f0f7ff; border-left: 3px solid var(--primary); border-radius: 8px; padding: 12px; text-align: center; font-size: var(--formula-size); }
+        .input-group { margin: 10px 0; }
+        .input-group label { display: block; margin-bottom: 6px; font-weight: 600; color: var(--gray-600); }
+        .input-group input { width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; font-size: var(--text-size); background: var(--gray-50); }
+        .btn { padding: 10px; background: var(--primary); color: var(--white); border: none; border-radius: 8px; cursor: pointer; font-size: var(--text-size); width: 100%; transition: background 0.2s ease; }
+        .btn:hover { background: var(--primary-dark); }
+        .step-indicator { padding: 8px 12px; background: #f0f7ff; border-radius: 6px; font-weight: 600; color: var(--primary); margin-bottom: 8px; }
+        .canvas-container { border: 1px solid var(--gray-200); border-radius: 12px; background: #fafafa; padding: 16px; min-height: 400px; display: flex; align-items: center; justify-content: center; }
+        
+        .return-home-panel { position: fixed; bottom: 12px; right: 12px; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; z-index: 40; }
+        .return-toggle { width: 40px; height: 40px; border-radius: 50%; border: none; background: linear-gradient(135deg, rgba(79,70,229,0.96), rgba(99,102,241,0.9)); color: #fff; font-size: 20px; cursor: pointer; box-shadow: 0 10px 18px rgba(79,70,229,0.28); transition: transform 0.2s, box-shadow 0.2s; }
+        .return-toggle:hover { transform: translateY(-1px) scale(1.03); box-shadow: 0 14px 26px rgba(79,70,229,0.35); }
+        .return-links { display: none; flex-direction: column; gap: 6px; padding: 10px; border-radius: 10px; background: rgba(255,255,255,0.96); border: 1px solid rgba(79,70,229,0.18); box-shadow: 0 10px 30px rgba(15,23,42,0.14); opacity: 0; transition: opacity 0.16s; }
+        .return-link { text-decoration: none; font-size: 15px; color: var(--primary-dark); padding: 6px 12px; border-radius: 8px; background: rgba(99,102,241,0.12); transition: background 0.2s; }
+        .return-link:hover { background: rgba(79,70,229,0.18); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header"><h1>Lab 5.4｜部分分式分解实验室</h1></header>
+        <div class="main">
+            <nav class="sidebar">
+                <button class="nav-btn active" onclick="switchPanel('concept')">分解动机</button>
+                <button class="nav-btn" onclick="switchPanel('verify')">代数验证</button>
+                <button class="nav-btn" onclick="switchPanel('integrate')">积分应用</button>
+            </nav>
+
+            <!-- 面板1: 为什么需要分解 -->
+            <div class="content active" id="concept">
+                <div class="column">
+                    <div class="card">
+                        <h3>问题</h3>
+                        <p>计算积分 $\int \dfrac{1}{x^2-1} dx$</p>
+                    </div>
+                    <div class="card">
+                        <h3>困难</h3>
+                        <p>❌ 原形式难以直接积分</p>
+                        <p>分母是二次式,无法套用基本积分公式</p>
+                    </div>
+                    <div class="card">
+                        <h3>分解策略</h3>
+                        <div class="formula-box">$$ x^2 - 1 = (x-1)(x+1) $$</div>
+                    </div>
+                    <div class="card">
+                        <h3>设待定系数</h3>
+                        <div class="formula-box">$$ \frac{1}{x^2-1} = \frac{A}{x-1} + \frac{B}{x+1} $$</div>
+                    </div>
+                    <div class="card">
+                        <h3>求解结果</h3>
+                        <p>$A = \dfrac{1}{2}$, $B = -\dfrac{1}{2}$</p>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="card" style="flex: 1;">
+                        <h3>积分难度对比</h3>
+                        <div class="canvas-container">
+                            <canvas id="motivationCanvas"></canvas>
+                        </div>
+                        <div style="margin-top: 12px; padding: 12px; background: #f0fdf4; border-radius: 8px;">
+                            <p style="color: var(--success); font-weight: 600;">✓ 分解后易积分</p>
+                            <div class="formula-box" style="background: white; margin-top: 8px;">
+                                $$ \int \frac{1}{x^2-1} dx = \frac{1}{2}\ln|x-1| - \frac{1}{2}\ln|x+1| + C $$
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 面板2: 代数验证 -->
+            <div class="content" id="verify">
+                <div class="column">
+                    <div class="card">
+                        <h3>分解结果</h3>
+                        <div class="formula-box">$$ \frac{1}{x^2-1} = \frac{1/2}{x-1} - \frac{1/2}{x+1} $$</div>
+                    </div>
+                    <div class="card">
+                        <h3>第1步: 通分</h3>
+                        <div class="step-indicator" id="step1">准备通分...</div>
+                        <div id="step1Content"></div>
+                    </div>
+                    <div class="card">
+                        <h3>第2步: 展开</h3>
+                        <div class="step-indicator" id="step2">等待步骤1...</div>
+                        <div id="step2Content"></div>
+                    </div>
+                    <div class="card">
+                        <h3>第3步: 化简</h3>
+                        <div class="step-indicator" id="step3">等待步骤2...</div>
+                        <div id="step3Content"></div>
+                    </div>
+                    <div class="card">
+                        <button class="btn" onclick="startVerification()">▶ 开始验证</button>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="card" style="flex: 1;">
+                        <h3>代数操作动画</h3>
+                        <div class="canvas-container">
+                            <canvas id="verifyCanvas"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 面板3: 积分练习 -->
+            <div class="content" id="integrate">
+                <div class="column">
+                    <div class="card">
+                        <h3>练习题</h3>
+                        <p>计算 $\int \dfrac{2x}{x^2+3x+2} dx$</p>
+                    </div>
+                    <div class="card">
+                        <h3>步骤1: 分解</h3>
+                        <div class="formula-box">$$ \frac{2x}{(x+1)(x+2)} = \frac{A}{x+1} + \frac{B}{x+2} $$</div>
+                    </div>
+                    <div class="card">
+                        <h3>输入系数 A</h3>
+                        <input type="number" id="inputA" step="0.1" placeholder="A = ?" style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px;">
+                    </div>
+                    <div class="card">
+                        <h3>输入系数 B</h3>
+                        <input type="number" id="inputB" step="0.1" placeholder="B = ?" style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px;">
+                    </div>
+                    <div class="card">
+                        <button class="btn" onclick="checkIntegral()">✓ 检查并积分</button>
+                        <div id="integralResult" style="margin-top: 12px; padding: 12px; border-radius: 8px; display: none;"></div>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="card" style="flex: 1;">
+                        <h3>函数图像验证</h3>
+                        <div class="canvas-container">
+                            <canvas id="integralCanvas"></canvas>
+                        </div>
+                        <p style="margin-top: 10px; font-size: 14px;">
+                            <span style="color: #4f46e5;">■</span> 原函数
+                            <span style="color: #10b981;">■</span> 你的分解
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function resizeCanvas(canvas) {
+            const container = canvas.parentElement;
+            canvas.width = container.clientWidth - 32;
+            canvas.height = container.clientHeight - 32;
+            return canvas.getContext('2d');
+        }
+
+        function drawAxes(ctx, w, h) {
+            ctx.strokeStyle = '#374151'; ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(40, h - 40); ctx.lineTo(w - 20, h - 40);
+            ctx.moveTo(40, h - 40); ctx.lineTo(40, 20);
+            ctx.stroke();
+            ctx.fillStyle = '#374151'; ctx.font = '14px sans-serif';
+            ctx.fillText('x', w - 30, h - 25); ctx.fillText('y', 50, 15);
+        }
+
+        // 面板1: 积分难度对比动画
+        function drawMotivation() {
+            const canvas = document.getElementById('motivationCanvas');
+            if (!canvas) return;
+            const ctx = resizeCanvas(canvas);
+            const w = canvas.width, h = canvas.height;
+
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, w, h);
+
+            // 左侧: 原积分(困难)
+            ctx.fillStyle = '#ef4444';
+            ctx.fillRect(20, 60, w/2 - 40, 120);
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 16px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('原积分 (困难)', w/4, 100);
+            ctx.font = '14px sans-serif';
+            ctx.fillText('∫ 1/(x²-1) dx', w/4, 130);
+            ctx.fillText('❌ 无法直接套用公式', w/4, 155);
+
+            // 右侧: 分解后(简单)
+            ctx.fillStyle = '#10b981';
+            ctx.fillRect(w/2 + 20, 60, w/2 - 40, 120);
+            ctx.fillStyle = '#ffffff';
+            ctx.fillText('分解后 (简单)', w*3/4, 100);
+            ctx.fillText('∫ [1/2/(x-1) - 1/2/(x+1)] dx', w*3/4, 125);
+            ctx.fillText('✓ 分别积分', w*3/4, 150);
+            ctx.fillText('= 1/2 ln|x-1| - 1/2 ln|x+1| + C', w*3/4, 170);
+
+            // 箭头
+            ctx.strokeStyle = '#4f46e5';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(w/2 - 60, 120);
+            ctx.lineTo(w/2 + 60, 120);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(w/2 + 60, 120);
+            ctx.lineTo(w/2 + 45, 110);
+            ctx.moveTo(w/2 + 60, 120);
+            ctx.lineTo(w/2 + 45, 130);
+            ctx.stroke();
+
+            ctx.fillStyle = '#4f46e5';
+            ctx.font = 'bold 14px sans-serif';
+            ctx.fillText('部分分式分解', w/2, 105);
+        }
+
+        // 面板2: 代数验证动画
+        let verifyStep = 0;
+        function startVerification() {
+            verifyStep = 0;
+            animateVerification();
+        }
+
+        function animateVerification() {
+            const canvas = document.getElementById('verifyCanvas');
+            if (!canvas) return;
+            const ctx = resizeCanvas(canvas);
+            const w = canvas.width, h = canvas.height;
+
+            setTimeout(() => {
+                if (verifyStep === 0) {
+                    document.getElementById('step1').textContent = '✓ 通分中...';
+                    document.getElementById('step1Content').innerHTML =
+                        '<div class="formula-box">$$ \\frac{1/2}{x-1} - \\frac{1/2}{x+1} = \\frac{(1/2)(x+1) - (1/2)(x-1)}{(x-1)(x+1)} $$</div>';
+
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(0, 0, w, h);
+                    ctx.fillStyle = '#4f46e5';
+                    ctx.font = 'bold 18px sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('第1步: 通分', w/2, 60);
+                    ctx.font = '16px sans-serif';
+                    ctx.fillText('两个分式合并为一个分式', w/2, 100);
+                    ctx.fillText('分母 = (x-1)(x+1)', w/2, 130);
+
+                    if (typeof MathJax !== 'undefined') MathJax.typesetPromise();
+                    verifyStep = 1;
+                    setTimeout(animateVerification, 2000);
+                }
+                else if (verifyStep === 1) {
+                    document.getElementById('step2').textContent = '✓ 展开中...';
+                    document.getElementById('step2Content').innerHTML =
+                        '<div class="formula-box">$$ = \\frac{(x+1)/2 - (x-1)/2}{(x-1)(x+1)} = \\frac{(x+1-x+1)/2}{x^2-1} $$</div>';
+
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(0, 0, w, h);
+                    ctx.fillStyle = '#10b981';
+                    ctx.font = 'bold 18px sans-serif';
+                    ctx.fillText('第2步: 展开分子', w/2, 60);
+                    ctx.font = '16px sans-serif';
+                    ctx.fillText('(x+1) - (x-1) = x + 1 - x + 1', w/2, 100);
+                    ctx.fillText('= 2', w/2, 130);
+
+                    if (typeof MathJax !== 'undefined') MathJax.typesetPromise();
+                    verifyStep = 2;
+                    setTimeout(animateVerification, 2000);
+                }
+                else if (verifyStep === 2) {
+                    document.getElementById('step3').textContent = '✓ 验证完成';
+                    document.getElementById('step3Content').innerHTML =
+                        '<div class="formula-box" style="background: #f0fdf4;">$$ = \\frac{2/2}{x^2-1} = \\frac{1}{x^2-1} $$ ✓ 验证成功!</div>';
+
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(0, 0, w, h);
+                    ctx.fillStyle = '#10b981';
+                    ctx.font = 'bold 20px sans-serif';
+                    ctx.fillText('✓ 验证完成', w/2, 60);
+                    ctx.font = '16px sans-serif';
+                    ctx.fillText('分子 2/2 = 1', w/2, 100);
+                    ctx.fillText('得到原式 1/(x²-1)', w/2, 130);
+                    ctx.strokeStyle = '#10b981';
+                    ctx.lineWidth = 4;
+                    ctx.strokeRect(w/4, 160, w/2, 60);
+                    ctx.fillText('分解正确!', w/2, 195);
+
+                    if (typeof MathJax !== 'undefined') MathJax.typesetPromise();
+                }
+            }, 100);
+        }
+
+        // 面板3: 积分练习
+        function checkIntegral() {
+            const A = parseFloat(document.getElementById('inputA').value);
+            const B = parseFloat(document.getElementById('inputB').value);
+            const result = document.getElementById('integralResult');
+
+            result.style.display = 'block';
+
+            if (Math.abs(A + 2) < 0.01 && Math.abs(B - 4) < 0.01) {
+                result.style.background = '#f0fdf4';
+                result.style.border = '1px solid var(--success)';
+                result.style.color = 'var(--success)';
+                result.innerHTML = '<strong>✓ 正确!</strong> $A=-2, B=4$<br><br>积分结果:<div class="formula-box" style="margin-top: 8px;">$$ \\int \\frac{2x}{x^2+3x+2} dx = -2\\ln|x+1| + 4\\ln|x+2| + C $$</div>';
+                drawIntegralGraph(A, B, true);
+            } else {
+                result.style.background = '#fef2f2';
+                result.style.border = '1px solid var(--danger)';
+                result.style.color = 'var(--danger)';
+                result.innerHTML = '<strong>✗ 不正确</strong> 再试试看<br>提示: 通分后比较系数';
+                drawIntegralGraph(A, B, false);
+            }
+
+            if (typeof MathJax !== 'undefined') MathJax.typesetPromise([result]);
+        }
+
+        function drawIntegralGraph(A, B, correct) {
+            const canvas = document.getElementById('integralCanvas');
+            if (!canvas) return;
+            const ctx = resizeCanvas(canvas);
+            const w = canvas.width, h = canvas.height;
+
+            drawAxes(ctx, w, h);
+
+            // 绘制原函数
+            ctx.strokeStyle = '#4f46e5';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            let started = false;
+            for (let x = -3.5; x <= 0.5; x += 0.02) {
+                if (Math.abs(x + 1) < 0.1 || Math.abs(x + 2) < 0.1) continue;
+                const y = (2*x) / (x*x + 3*x + 2);
+                if (Math.abs(y) > 10) continue;
+                const px = 40 + (x + 4) / 4 * (w - 60);
+                const py = h - 40 - (y + 5) / 10 * (h - 60);
+                if (!started) { ctx.moveTo(px, py); started = true; } else { ctx.lineTo(px, py); }
+            }
+            ctx.stroke();
+
+            // 绘制用户的分解
+            if (!isNaN(A) && !isNaN(B)) {
+                ctx.strokeStyle = correct ? '#10b981' : '#ef4444';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([5, 5]);
+                ctx.beginPath();
+                started = false;
+                for (let x = -3.5; x <= 0.5; x += 0.02) {
+                    if (Math.abs(x + 1) < 0.1 || Math.abs(x + 2) < 0.1) continue;
+                    const y = A/(x+1) + B/(x+2);
+                    if (Math.abs(y) > 10) continue;
+                    const px = 40 + (x + 4) / 4 * (w - 60);
+                    const py = h - 40 - (y + 5) / 10 * (h - 60);
+                    if (!started) { ctx.moveTo(px, py); started = true; } else { ctx.lineTo(px, py); }
+                }
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+        }
+
+        function switchPanel(id) {
+            document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            event.target.classList.add('active');
+
+            setTimeout(() => {
+                if (id === 'concept') drawMotivation();
+                else if (id === 'integrate') drawIntegralGraph(NaN, NaN, false);
+                if (typeof MathJax !== 'undefined') MathJax.typesetPromise();
+            }, 100);
+        }
+
+        window.addEventListener('load', () => {
+            drawMotivation();
+            if (typeof MathJax !== 'undefined') MathJax.typesetPromise();
+        });
+
+        window.addEventListener('resize', () => {
+            drawMotivation();
+            drawIntegralGraph(NaN, NaN, false);
+        });
+
+        function toggleReturnLinks() { const p = document.querySelector('.return-links'); if (!p) return; if (p.style.display === 'flex') { p.style.opacity = '0'; setTimeout(() => p.style.display = 'none', 160); } else { p.style.display = 'flex'; requestAnimationFrame(() => p.style.opacity = '1'); } }
+    </script>
+
+    <div class="return-home-panel"><button class="return-toggle" onclick="toggleReturnLinks()"><i class="fa-solid fa-house"></i></button><div class="return-links"><a class="return-link" href="index.html"><i class="fa-solid fa-arrow-left"></i> 返回目录</a><a class="return-link" href="../index.html"><i class="fa-solid fa-house"></i> 返回主站</a></div></div>
+</body>
+</html>

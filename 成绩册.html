@@ -1,0 +1,4159 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学生成绩管理系统</title>
+    <script src="common-assets/js/xlsx.full.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background: #f5f5f5;
+        }
+        
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 0 5px;
+            font-size: 13px;
+        }
+        
+        .btn-primary { background: #3498db; color: white; }
+        .btn-success { background: #27ae60; color: white; }
+        .btn-danger { background: #e74c3c; color: white; }
+        .btn-warning { background: #f39c12; color: white; }
+        
+        .control-bar {
+            background: #ecf0f1;
+            padding: 15px;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+                .suffix-tools {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 10px;
+            background: #fff;
+            border: 1px solid #dcdfe6;
+            border-radius: 6px;
+        }
+
+        .suffix-tools label {
+            font-size: 13px;
+            color: #555;
+        }
+
+        .suffix-tools input[type="text"],
+        .suffix-tools input[type="number"],
+        .suffix-tools select {
+            padding: 6px 8px;
+            border: 1px solid #cfd4da;
+            border-radius: 4px;
+            font-size: 13px;
+            min-width: 90px;
+        }
+
+        .suffix-hit {
+            box-shadow: inset 0 0 0 2px #ffb74d;
+            background: #fff8e1 !important;
+        }
+
+        .table-container {
+            max-height: calc(100vh - 200px);
+            overflow: auto;
+            background: white;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th {
+            background: #34495e;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            font-size: 13px;
+        }
+        
+        td {
+            padding: 8px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        tr:hover { background: #f8f9fa; }
+        
+        /* 应电1班和应电2班的颜色区分 */
+        tr.yingdian-class1 {
+            background: #fff;
+        }
+        
+        tr.yingdian-class2 {
+            background: #f0f8ff;
+        }
+        
+        tr.yingdian-class1:hover {
+            background: #e8f4f8;
+        }
+        
+        tr.yingdian-class2:hover {
+            background: #e0efff;
+        }
+        
+        .class-indicator {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 11px;
+            margin-left: 5px;
+        }
+        
+        .class1-badge {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+        
+        .class2-badge {
+            background: #fce4ec;
+            color: #c2185b;
+        }
+        
+        .editable {
+            cursor: pointer;
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+        
+        .editable:hover { background: #e3f2fd; }
+        
+        .welcome {
+            padding: 100px 20px;
+            text-align: center;
+        }
+        
+        .class-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 300px);
+            gap: 20px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+        
+        .class-btn {
+            padding: 30px;
+            background: white;
+            border: 2px solid #3498db;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .class-btn:hover {
+            background: #3498db;
+            color: white;
+        }
+        
+        .stats {
+            background: white;
+            padding: 10px 20px;
+            border-top: 2px solid #34495e;
+            display: flex;
+            gap: 30px;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .modal.show { display: flex; }
+        
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            min-width: 400px;
+            max-width: 600px;
+        }
+        
+        .form-group {
+            margin: 15px 0;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        .form-group input[type="text"],
+        .form-group input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .group-badge {
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        
+        .score-good { color: #27ae60; font-weight: bold; }
+        .score-warn { color: #f39c12; font-weight: bold; }
+        .score-bad { color: #e74c3c; font-weight: bold; }
+        .score-negative { color: #9c27b0; font-weight: bold; }
+        
+        .score-info {
+            background: #fff3cd;
+            padding: 10px;
+            margin: 10px;
+            border-radius: 5px;
+            border-left: 4px solid #f39c12;
+        }
+        
+        .select-range {
+            background: #bbdefb !important;
+        }
+        
+        .class-status {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 11px;
+            margin-left: 10px;
+        }
+        
+        .status-loaded { background: #d4edda; color: #155724; }
+        .status-empty { background: #f8d7da; color: #721c24; }
+        
+        .sub-class-info {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        /* WPS API 集成样式 */
+        .wps-status {
+            position: fixed;
+            bottom: 12px;
+            right: 12px;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            z-index: 1000;
+            transition: all 0.3s;
+        }
+        
+        .wps-status.connected {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .wps-status.disconnected {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .wps-status.syncing {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        
+        .wps-config {
+            background: #f8f9fa;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border-left: 4px solid #28a745;
+        }
+        
+        .wps-config input {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .control-bar {
+            background: white;
+            padding: 10px;
+            border-bottom: 2px solid #34495e;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .sync-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        
+        .sync-indicator.synced { background: #28a745; }
+        .sync-indicator.syncing { background: #ffc107; animation: pulse 1s infinite; }
+        .sync-indicator.error { background: #dc3545; }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        /* Toast通知样式 */
+        .toast {
+            position: fixed;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.85);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 14px;
+            z-index: 10000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            animation: slideDown 0.3s ease-out;
+            max-width: 80%;
+            text-align: center;
+        }
+        
+        .toast.success {
+            background: rgba(46, 125, 50, 0.95);
+        }
+        
+        .toast.error {
+            background: rgba(211, 47, 47, 0.95);
+        }
+        
+        .toast.warning {
+            background: rgba(245, 124, 0, 0.95);
+        }
+        
+        .toast.info {
+            background: rgba(2, 136, 209, 0.95);
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -20px);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, 0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div>
+            <span style="font-size: 18px; font-weight: bold;">学生成绩管理系统</span>
+            <span style="margin-left: 20px;">
+                <select id="classSelector" onchange="selectClassFromDropdown()" style="padding: 8px 15px; font-size: 14px; border: 2px solid #fff; border-radius: 4px; background: #34495e; color: white; cursor: pointer;">
+                    <option value="">-- 请选择班级 --</option>
+                    <option value="25无人机三班">25无人机三班（陆军）- 40人</option>
+                    <option value="25液压三班">25液压三班（陆军）- 30人</option>
+                    <option value="25无人机四班">25无人机四班（空军）- 40人</option>
+                    <option value="25应电12班">25应电1-2班 - 86人</option>
+                </select>
+            </span>
+        </div>
+        <div>
+            <button class="btn btn-success" onclick="pushToGitee(); return false;" style="font-weight:bold;">💾 保存到云端</button>
+            <button class="btn btn-primary" onclick="pullFromGitee(); return false;">🔄 加载最新数据</button>
+            <button class="btn btn-warning" onclick="window.open('https://gitee.com/swywy_admin/123', '_blank'); return false;">📂 查看仓库</button>
+            <button class="btn btn-success" onclick="showPasteImport(); return false;" style="margin-left:10px;">📋 从Excel导入</button>
+            <input type="file" id="fileInput" style="display:none;" accept=".xlsx,.xls" onchange="loadFile(event)">
+        </div>
+    </div>
+    
+    
+    <div id="main">
+        <div class="control-bar">
+            <button class="btn btn-primary" onclick="showHistoryModal()">📜 查看历史记录</button>
+            <button class="btn btn-success" onclick="showRandomPickModal()">🎲 随机抽号</button>
+            
+            <!-- 批量操作区（折叠） -->
+            <div class="suffix-tools" style="display: none;">
+                <label for="suffixField">调整项目:</label>
+                <select id="suffixField">
+                    <option value="ketang">课堂表现</option>
+                    <option value="xiaozu">小组活动</option>
+                    <option value="kaoshi">考试成绩</option>
+                </select>
+                <label for="suffixDelta">分值:</label>
+                <input type="number" id="suffixDelta" value="1" min="-20" max="20" style="width:80px;">
+                <button class="btn btn-primary" onclick="selectBySuffix()">定位</button>
+                <button class="btn btn-success" onclick="adjustSuffix(true)">批量加分</button>
+                <button class="btn btn-danger" onclick="adjustSuffix(false)">批量扣分</button>
+                <button class="btn btn-warning" onclick="clearSuffixHighlight()">清除标记</button>
+    </div>
+    
+            <select id="groupFilter" onchange="filterGroup()">
+                <option value="">全部组别</option>
+            </select>
+            <button class="btn btn-primary" onclick="selectCurrentGroup()">选中当前组</button>
+            <button class="btn btn-primary" onclick="invertSelection()">反选</button>
+            <button class="btn btn-danger" onclick="clearSelection()">清除选择</button>
+            
+            <select id="batchType">
+                <option value="1">课堂表现</option>
+                <option value="2">小组活动</option>
+                <option value="3">笔记检查</option>
+            </select>
+            <input type="number" id="batchScore" value="1" min="-20" max="20" style="width:80px;">
+            <button class="btn btn-success" onclick="batchAdd()">批量加分</button>
+            <button class="btn btn-warning" onclick="batchDeduct()">批量扣分</button>
+            
+            <input type="text" id="search" placeholder="搜索学号或姓名" onkeyup="doSearch()">
+        </div>
+        
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th><input type="checkbox" id="selectAll" onchange="toggleAll()"></th>
+                        <th>序号</th>
+                        <th>学号</th>
+                        <th>姓名</th>
+                        <th>组别</th>
+                        <th>课堂表现(20)</th>
+                        <th>小组活动(20)</th>
+                        <th>笔记检查(10)</th>
+                        <th>平时总分(50)</th>
+                        <th>考试成绩(50)</th>
+                        <th>总分(100)</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="tbody"></tbody>
+            </table>
+        </div>
+        
+        <div class="stats">
+            <span>总人数: <b id="total">0</b></span>
+            <span>已选择: <b id="selected">0</b></span>
+            <span>平均分: <b id="avg">0</b></span>
+            <span>及格率: <b id="pass">0%</b></span>
+            <span style="margin-left:20px;color:#666;">共20次课，16次小组任务</span>
+        </div>
+    </div>
+    
+    <div id="noteModal" class="modal">
+        <div class="modal-content">
+            <h3>笔记检查 - <span id="noteName"></span></h3>
+            <p style="color: #666; margin: 10px 0;">每次检查5分，共2次，满分10分</p>
+            <div class="form-group">
+                <label><input type="checkbox" id="note1"> 第一次检查 (5分)</label>
+            </div>
+            <div class="form-group">
+                <label><input type="checkbox" id="note2"> 第二次检查 (5分)</label>
+            </div>
+            <button class="btn btn-success" onclick="saveNote()">保存</button>
+            <button class="btn btn-danger" onclick="closeNote()">取消</button>
+        </div>
+    </div>
+    
+    <div id="exportModal" class="modal">
+        <div class="modal-content">
+            <h3>选择导出选项</h3>
+            <p style="margin: 20px 0;">请选择要导出的数据范围：</p>
+            <button id="exportCurrentBtn" class="btn btn-primary" onclick="exportCurrentClass()" style="width: 100%; margin: 10px 0; padding: 15px;">
+                导出当前班级
+            </button>
+            <button class="btn btn-success" onclick="exportAllClasses()" style="width: 100%; margin: 10px 0; padding: 15px;">
+                导出所有班级 (4个班级)
+            </button>
+            <button class="btn btn-danger" onclick="closeExportModal()" style="width: 100%; margin: 10px 0;">
+                取消
+            </button>
+            <div style="margin-top: 20px; padding: 10px; background: #e3f2fd; border-radius: 5px;">
+                <strong>数据状态：</strong><br>
+                <span id="exportDebugInfo">检查中...</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 粘贴导入模态窗口 -->
+    <div id="pasteImportModal" class="modal">
+        <div class="modal-content">
+            <h3>📋 从WPS粘贴导入</h3>
+            <div style="background: #e8f5e9; padding: 15px; margin: 15px 0; border-radius: 5px; border-left: 4px solid #4caf50;">
+                <strong><i class="fa-solid fa-book"></i> 三步导入：</strong><br>
+                <i class="fa-solid fa-circle-1"></i> 打开 <a href="https://www.kdocs.cn/l/cvodF5Uw2mxZ" target="_blank">WPS表格</a>，在"班级汇总"中 <kbd>Ctrl+A</kbd> 全选 → <kbd>Ctrl+C</kbd> 复制<br>
+                <i class="fa-solid fa-circle-2"></i> 在下方文本框 <kbd>Ctrl+V</kbd> 粘贴<br>
+                <i class="fa-solid fa-circle-3"></i> 点击"导入数据"，完成！✨
+            </div>
+            <textarea id="pasteTextarea" placeholder="请在此处粘贴从WPS复制的数据...&#10;&#10;格式示例：&#10;班级	学号	姓名	组别	课堂表现	小组活动	笔记1	笔记2	笔记总分	平时总分	考试成绩	总分&#10;25无人机三班	25090300301	安忠睿	第1组	0	19			0	19	0	19&#10;..." 
+                style="width: 100%; height: 300px; padding: 10px; font-family: 'Courier New', monospace; font-size: 12px; border: 2px solid #ddd; border-radius: 4px; resize: vertical;"
+            ></textarea>
+            <div style="margin-top: 15px;">
+                <button class="btn btn-success" onclick="processPasteImport()" style="padding: 12px 30px; font-size: 16px;">
+                    ✅ 导入数据
+                </button>
+                <button class="btn btn-warning" onclick="clearPasteTextarea()" style="padding: 12px 30px; margin-left: 10px;">
+                    🗑️ 清空
+                </button>
+                <button class="btn btn-danger" onclick="closePasteImport()" style="padding: 12px 30px; margin-left: 10px;">
+                    ❌ 取消
+                </button>
+            </div>
+            <div id="pasteImportResult" style="margin-top: 15px; padding: 10px; background: #f8f9fa; border-radius: 4px; display: none;">
+                <strong>导入结果：</strong><br>
+                <span id="pasteImportResultText"></span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- WPS配置界面 -->
+    <div id="wpsConfigModal" class="modal">
+        <div class="modal-content">
+            <h3>⚙️ WPS在线协作配置</h3>
+            <div class="wps-config">
+                <label>🔗 Worker服务地址:</label>
+                <input type="text" id="wpsWorkerUrl" placeholder="https://your-worker.your-subdomain.workers.dev" value="">
+                <small style="color: #666; display: block; margin: 5px 0 15px;">
+                    部署Cloudflare Worker后获得的URL
+                </small>
+                
+                <label>📄 WPS文档ID:</label>
+                <input type="text" id="wpsFileId" placeholder="从WPS文档链接中提取" value="">
+                <small style="color: #666; display: block; margin: 5px 0 15px;">
+                    打开WPS表格后，在URL或开发者工具中找到fileId
+                </small>
+                
+                <label>
+                    <input type="checkbox" id="wpsAutoSyncCheck"> 启用自动同步（每60秒）
+                </label>
+                
+                <div style="margin-top: 20px; padding: 10px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px;">
+                    <strong><i class="fa-solid fa-book"></i> 配置步骤：</strong><br>
+                    1. 部署Cloudflare Worker（见wps-sync-worker.js）<br>
+                    2. 获取Worker URL并填入上方<br>
+                    3. 从WPS文档获取文件ID并填入<br>
+                    4. 保存配置后即可双向同步
+                </div>
+                </div>
+            <button class="btn btn-success" onclick="saveWPSConfigReal()">💾 保存配置</button>
+            <button class="btn btn-primary" onclick="testWPSConnection()">🔌 测试连接</button>
+            <button class="btn btn-danger" onclick="closeWPSConfigReal()">取消</button>
+        </div>
+    </div>
+    
+    <!-- 历史记录模态窗口 -->
+    <div id="historyModal" class="modal">
+        <div class="modal-content" style="max-width: 1000px;">
+            <h3>📜 历史数据记录</h3>
+            <div style="background: #f8f9fa; padding: 15px; margin: 15px 0; border-radius: 5px; text-align: center;">
+                <strong>历史记录总数：</strong><span id="historyCount" style="font-size: 20px; color: #2196f3; margin: 0 5px;">0</span>条
+            </div>
+            
+            <div style="max-height: 500px; overflow-y: auto; border: 1px solid #ddd; border-radius: 4px;">
+                <table style="width: 100%;">
+                    <thead>
+                        <tr style="background: #f5f5f5; position: sticky; top: 0;">
+                            <th style="padding: 10px;">时间</th>
+                            <th style="padding: 10px;">班级</th>
+                            <th style="padding: 10px;">操作类型</th>
+                            <th style="padding: 10px;">影响人数</th>
+                            <th style="padding: 10px;">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyTableBody">
+                        <tr>
+                            <td colspan="5" style="text-align: center; padding: 30px; color: #999;">
+                                暂无历史记录
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: space-between;">
+                <button class="btn btn-danger" onclick="clearAllHistory()" style="background: #dc3545;">
+                    🗑️ 清除所有历史
+                </button>
+                <div>
+                    <button class="btn btn-success" onclick="exportHistory()">
+                        💾 导出历史记录
+                    </button>
+                    <button class="btn btn-danger" onclick="closeHistoryModal()">
+                        关闭
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 随机抽号模态窗口 -->
+    <div id="randomPickModal" class="modal">
+        <div class="modal-content" style="max-width: 650px;">
+            <h3>🎲 随机抽号器</h3>
+            
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 25px; margin: 20px 0; border-radius: 10px; color: white;">
+                <div style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 200px;">
+                        <label style="font-size: 14px; display: block; margin-bottom: 8px;">号码范围：</label>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <input type="number" id="randomRangeStart" min="1" value="1" 
+                                   onchange="updateRandomPickStats()"
+                                   style="width: 80px; padding: 10px; font-size: 18px; border: none; border-radius: 5px; font-weight: bold;">
+                            <span style="font-size: 20px; font-weight: bold;">～</span>
+                            <input type="number" id="randomRangeEnd" min="1" value="40" 
+                                   onchange="updateRandomPickStats()"
+                                   style="width: 80px; padding: 10px; font-size: 18px; border: none; border-radius: 5px; font-weight: bold;">
+                        </div>
+                    </div>
+                    
+                    <div style="flex: 1; min-width: 150px;">
+                        <label style="font-size: 14px; display: block; margin-bottom: 8px;">抽取数量：</label>
+                        <input type="number" id="randomPickCount" min="1" value="1" 
+                               style="width: 100px; padding: 10px; font-size: 18px; border: none; border-radius: 5px; font-weight: bold;">
+                    </div>
+                </div>
+                
+                <button class="btn btn-success" onclick="doRandomPick()" 
+                        style="width: 100%; margin-top: 20px; font-size: 20px; padding: 15px; background: #28a745; font-weight: bold;">
+                    🎯 开始抽号
+                </button>
+            </div>
+            
+            <div style="background: #f8f9fa; padding: 15px; margin: 15px 0; border-radius: 5px; text-align: center;">
+                <strong>总号码数：</strong><span id="randomTotalCount">40</span> | 
+                <strong>已抽取：</strong><span id="randomPickedCount" style="color: #dc3545;">0</span> | 
+                <strong>剩余：</strong><span id="randomRemainingCount" style="color: #28a745;">40</span>
+            </div>
+            
+            <div id="randomPickResult" style="margin: 20px 0; display: none;">
+                <h4 style="color: #2196f3; border-bottom: 2px solid #2196f3; padding-bottom: 10px; margin-bottom: 15px;">
+                    🎊 抽取结果
+                </h4>
+                <div id="randomPickResultList" style="display: flex; flex-wrap: wrap; gap: 10px;"></div>
+            </div>
+            
+            <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: space-between;">
+                <button class="btn btn-warning" onclick="resetRandomPick()" style="padding: 10px 20px; font-size: 14px;">
+                    🔄 重置
+                </button>
+                <button class="btn btn-danger" onclick="closeRandomPickModal()" style="padding: 10px 20px; font-size: 14px;">
+                    关闭
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+    // ⭐ Gitee 云同步配置（必须最先定义）
+    const GITEE_CONFIG = {
+        owner: 'swywy_admin',
+        repo: '123',
+        token: 'fcef0a1c75d0e5b4cbbb91a398735e11',
+        branch: 'master',
+        filePath: 'grades-data.json'
+    };
+
+    // 全局变量
+    let students = [];
+    let currentClass = '';
+    let currentNoteIndex = -1;
+    let currentFilter = '';
+    let allClassesData = {};
+    let suffixMatches = [];
+    let historyRecords = []; // 历史记录数组
+    let pickedNumbers = []; // 已抽取的号码（防止重复）
+    let currentNumberRange = { start: 1, end: 40 }; // 当前号码范围
+
+    // Gitee同步相关变量
+    let giteeConfig = loadGiteeConfigFromStorage();
+    let syncInProgress = false;
+    let lastSyncTime = null;
+
+    function loadGiteeConfigFromStorage() {
+        try {
+            const saved = localStorage.getItem('giteeConfig_v1');
+            if (saved) {
+                return JSON.parse(saved);
+            }
+        } catch (e) {
+            console.error('加载Gitee配置失败:', e);
+        }
+        return {
+            owner: GITEE_CONFIG.owner,
+            repo: GITEE_CONFIG.repo,
+            token: GITEE_CONFIG.token,
+            branch: GITEE_CONFIG.branch,
+            filePath: GITEE_CONFIG.filePath,
+            autoSync: true,
+            pollingInterval: 30000,
+            lastSyncTime: null,
+            sha: null
+        };
+    }
+
+    function saveGiteeConfigToStorage() {
+        try {
+            localStorage.setItem('giteeConfig_v1', JSON.stringify(giteeConfig));
+        } catch (e) {
+            console.error('保存Gitee配置失败:', e);
+        }
+    }
+
+    // Toast通知函数
+    function showToast(message, type = 'info', duration = 3000) {
+        // 同步相关的提示改为底部小字
+        const syncMessages = ['正在推送', '正在从Gitee', '正在拉取', '推送到Gitee', '从Gitee拉取', '数据已同步', '自动同步', 'Gitee'];
+        const isSync = syncMessages.some(msg => message.includes(msg));
+
+        if (isSync) {
+            // 同步提示：底部小字
+            updateSyncStatus(message, type);
+            return;
+        }
+
+        // 其他重要提示：保留原样
+        const existingToast = document.querySelector('.toast');
+        if (existingToast) {
+            existingToast.remove();
+        }
+
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+            toast.style.animation = 'slideDown 0.3s ease-out reverse';
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.remove();
+                }
+            }, 300);
+        }, duration);
+    }
+
+    // 底部同步状态提示
+    function updateSyncStatus(message, type = 'info') {
+        let statusBar = document.getElementById('syncStatusBar');
+        if (!statusBar) {
+            statusBar = document.createElement('div');
+            statusBar.id = 'syncStatusBar';
+            statusBar.style.cssText = `
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: #f8f9fa;
+                color: #6c757d;
+                padding: 4px 10px;
+                font-size: 11px;
+                text-align: center;
+                border-top: 1px solid #dee2e6;
+                z-index: 999;
+                opacity: 0.8;
+            `;
+            document.body.appendChild(statusBar);
+        }
+
+        // 根据类型设置颜色
+        const colors = {
+            'info': '#6c757d',
+            'success': '#28a745',
+            'warning': '#ffc107',
+            'error': '#dc3545'
+        };
+        statusBar.style.color = colors[type] || colors.info;
+        statusBar.textContent = message;
+
+        // 3秒后淡出
+        setTimeout(() => {
+            statusBar.style.opacity = '0';
+            setTimeout(() => {
+                if (statusBar.textContent === message) {
+                    statusBar.textContent = '';
+                    statusBar.style.opacity = '0.8';
+                }
+            }, 500);
+        }, 3000);
+    }
+    
+    function saveWPSConfigToStorage() {
+        try {
+            localStorage.setItem('wpsConfig_v2', JSON.stringify(wpsConfig));
+        } catch (e) {
+            console.error('保存WPS配置失败:', e);
+        }
+    }
+
+    let wpsConnected = false;
+
+    // 批量选择相关变量
+    let isSelecting = false;
+    let startSelectIndex = -1;
+    let endSelectIndex = -1;
+    let lastClickedIndex = -1;
+    
+    // 班级数据 - 确保数据准确
+    const classesData = {
+        '25无人机三班': [
+            ['25090300301', '安忠睿'], ['25090300302', '曹兆雄'], ['25090300303', '陈炳臻'],
+            ['25090300304', '成硕'], ['25090300305', '樊稼乐'], ['25090300306', '何兆文'],
+            ['25090300307', '贺文韬'], ['25090300308', '侯笑宇'], ['25090300309', '侯奕辰'],
+            ['25090300310', '姜鉴罡'], ['25090300311', '姜杉泽'], ['25090300312', '景博楷'],
+            ['25090300313', '康家豪'], ['25090300314', '雷鎔阳'], ['25090300315', '李斌'],
+            ['25090300316', '李孔戟'], ['25090300317', '李骑东'], ['25090300318', '林禹辰阳'],
+            ['25090300319', '刘浩园'], ['25090300320', '刘佳祈'], ['25090300321', '吕延博'],
+            ['25090300322', '马子杰'], ['25090300323', '潘政旭'], ['25090300324', '蒲岩松'],
+            ['25090300325', '任嘉鑫'], ['25090300326', '苏兆宇'], ['25090300327', '唐森林'],
+            ['25090300328', '王帅'], ['25090300329', '王晓东'], ['25090300330', '王卓悦'],
+            ['25090300331', '魏毅阳'], ['25090300332', '徐子轩'], ['25090300333', '袁浩'],
+            ['25090300334', '袁子豪'], ['25090300335', '张博森'], ['25090300336', '张伟然'],
+            ['25090300337', '郑帅涛'], ['25090300338', '朱秦东阳'], ['25090300339', '朱怡凡'],
+            ['25090300340', '左天雨']
+        ],
+        '25液压三班': [
+            ['25090200301', '陈润龙'], ['25090200302', '陈楠'], ['25090200303', '段宇轩'],
+            ['25090200304', '侯一诺'], ['25090200305', '黄佳强'], ['25090200306', '冀志远'],
+            ['25090200307', '金旭阳'], ['25090200308', '金子航'], ['25090200309', '乐思炎'],
+            ['25090200310', '李茂源'], ['25090200311', '李铠君'], ['25090200312', '刘崇智'],
+            ['25090200313', '吕一铭'], ['25090200314', '骆研宇'], ['25090200315', '石靖楠'],
+            ['25090200316', '宋浩然'], ['25090200317', '宋世杰'], ['25090200318', '谭思翰'],
+            ['25090200319', '汤译博'], ['25090200320', '王德福'], ['25090200321', '魏源培'],
+            ['25090200322', '吴迪'], ['25090200323', '吴松睿'], ['25090200324', '席子辰'],
+            ['25090200325', '曾圣俊'], ['25090200326', '张家豪'], ['25090200327', '张文译'],
+            ['25090200328', '周秦宇'], ['25090200329', '朱伯恩'], ['25090200330', '朱小宇']
+        ],
+        '25无人机四班': [
+            ['25090300401', '白石权'], ['25090300402', '蔡宇轩'], ['25090300403', '陈定基'],
+            ['25090300404', '陈科早'], ['25090300405', '陈绍武'], ['25090300406', '陈天一'],
+            ['25090300407', '陈宇涵'], ['25090300408', '陈鑫'], ['25090300409', '崔峻冉'],
+            ['25090300410', '丁文龙'], ['25090300411', '杜叶晨'], ['25090300412', '樊镇宇'],
+            ['25090300413', '范一哲'], ['25090300414', '郝玉洁'], ['25090300415', '洪其荣'],
+            ['25090300416', '胡锦熙'], ['25090300417', '黄耀杰'], ['25090300418', '孔惪'],
+            ['25090300419', '李彦臻'], ['25090300420', '李睿康'], ['25090300421', '梁家辉'],
+            ['25090300422', '刘浩展'], ['25090300423', '刘景晖'], ['25090300424', '罗毅涛'],
+            ['25090300425', '骆岳宏'], ['25090300426', '牟嘉豪'], ['25090300427', '宁俊熙'],
+            ['25090300428', '邱世显'], ['25090300429', '施斌豪'], ['25090300430', '唐文杰'],
+            ['25090300431', '杨济玮'], ['25090300432', '杨柠铖'], ['25090300433', '员晨阳'],
+            ['25090300434', '张锦程'], ['25090300435', '张晓宁'], ['25090300436', '张展鹏'],
+            ['25090300437', '张志杰'], ['25090300438', '张鑫鹏'], ['25090300439', '周杰'],
+            ['25090300440', '周通']
+        ],
+        '25应电12班': [  // 原通航运维班
+            ['25010030101', '安文娜'], ['25010030102', '陈胜'], ['25010030103', '单天璞'],
+            ['25010030104', '段天宇'], ['25010030105', '范晨希'], ['25010030106', '高硕果'],
+            ['25010030107', '郭世雄'], ['25010030108', '黄俊宁'], ['25010030109', '金欣雨'],
+            ['25010030110', '井锐航'], ['25010030111', '亢鑫钰'], ['25010030112', '李朝阳'],
+            ['25010030113', '李登辉'], ['25010030114', '李芬竹'], ['25010030115', '李希言'],
+            ['25010030116', '李姿怡'], ['25010030117', '刘思彤'], ['25010030118', '刘毅坤'],
+            ['25010030119', '毛鑫冰'], ['25010030120', '彭彩玲'], ['25010030121', '齐园明'],
+            ['25010030122', '任思源'], ['25010030123', '孙鹤卿'], ['25010030124', '孙明哲'],
+            ['25010030125', '王锦楠'], ['25010030126', '王思杰'], ['25010030127', '魏晨怡'],
+            ['25010030128', '魏旭岩'], ['25010030129', '温玉荣'], ['25010030130', '乌·特尼格尔'],
+            ['25010030131', '薛淇文'], ['25010030132', '杨瑜泽'], ['25010030133', '姚锦莉'],
+            ['25010030134', '易小雨'], ['25010030135', '袁程军'], ['25010030136', '张晨'],
+            ['25010030137', '张美豪'], ['25010030138', '张心源'], ['25010030139', '张亚川'],
+            ['25010030140', '张宇轩'], ['25010030141', '张子怡'], ['25010030142', '赵佳宾'],
+            ['25010030143', '赵子怡'], ['25010030201', '安橦橦'], ['25010030202', '陈坤'],
+            ['25010030203', '程志远'], ['25010030204', '代韶涵'], ['25010030205', '懂阳宁'],
+            ['25010030206', '冯子青'], ['25010030207', '付孟璞'], ['25010030208', '高延杰'],
+            ['25010030209', '郝星宇'], ['25010030210', '蒋秦湘'], ['25010030211', '靳惠琪'],
+            ['25010030212', '康轶'], ['25010030213', '雷智浩'], ['25010030214', '黎含昕'],
+            ['25010030215', '李承泽'], ['25010030216', '李键'], ['25010030217', '李知萱'],
+            ['25010030218', '刘凌飞'], ['25010030219', '刘莎'], ['25010030220', '刘颖然'],
+            ['25010030221', '马晨东'], ['25010030222', '孟成坤'], ['25010030223', '秦诚诚'],
+            ['25010030224', '尚明'], ['25010030225', '邵欣怡'], ['25010030226', '孙嘉浩'],
+            ['25010030227', '孙宇晨'], ['25010030228', '王鹏磊'], ['25010030229', '王宇翔'],
+            ['25010030230', '魏振驰'], ['25010030231', '许佳乐'], ['25010030232', '薛博文'],
+            ['25010030233', '杨嘉瑶'], ['25010030234', '杨鑫宇'], ['25010030235', '尹雪齐'],
+            ['25010030236', '张非凡'], ['25010030237', '张瑞嘉'], ['25010030238', '张水涵'],
+            ['25010030239', '张毅航'], ['25010030240', '张育萌'], ['25010030241', '张泽豪'],
+            ['25010030242', '赵焕彤'], ['25010030243', '左阳']
+        ]
+    };
+    
+    // 判断是应电1班还是应电2班
+    function getSubClass(studentId) {
+        if (studentId.startsWith('250100301')) {
+            return '应电1班';
+        } else if (studentId.startsWith('250100302')) {
+            return '应电2班';
+        }
+        return '';
+    }
+    
+    // 获取分组函数 - 根据实际分组规则
+    function getGroupForStudent(className, index) {
+        if (className === '25液压三班') {
+            // 30人分15组：每组2人
+            return '第' + (Math.floor(index / 2) + 1) + '组';
+        } else if (className === '25无人机三班' || className === '25无人机四班') {
+            // 40人分13组：前12组每组3人(36人)，第13组4人
+            if (index < 36) {
+                return '第' + (Math.floor(index / 3) + 1) + '组';
+            } else {
+                return '第13组';
+            }
+        } else if (className === '25应电12班') {
+            // 86人分14组：前7组每组6人(42人)，第8-14组分配剩余44人
+            if (index < 42) {
+                return '第' + (Math.floor(index / 6) + 1) + '组';
+            } else {
+                // 第8-14组：44人分7组，约每组6-7人
+                const remaining = index - 42;
+                return '第' + (Math.floor(remaining / 6.3) + 8) + '组';
+            }
+        }
+        return '未分组';
+    }
+    
+    // 根据您提供的表格获取准确分组（应电12班）
+    function getGroupForYingDian(index) {
+        // 根据您的表格分组
+        if (index < 6) return '第一组';
+        else if (index < 12) return '第二组';
+        else if (index < 18) return '第三组';
+        else if (index < 24) return '第四组';
+        else if (index < 30) return '第五组';
+        else if (index < 36) return '第六组';
+        else if (index < 42) return '第七组';
+        else if (index < 48) return '第8组';
+        else if (index < 54) return '第9组';
+        else if (index < 60) return '第10组';
+        else if (index < 66) return '第11组';
+        else if (index < 72) return '第12组';
+        else if (index < 79) return '第13组';
+        else return '第14组';
+    }
+    
+    // 更新班级状态显示
+    function updateClassStatus() {
+        ['25无人机三班', '25液压三班', '25无人机四班', '25应电12班'].forEach(className => {
+            const statusEl = document.getElementById('status-' + className);
+            if (statusEl) {
+                if (allClassesData[className] && allClassesData[className].length > 0) {
+                    const hasScores = allClassesData[className].some(s => 
+                        s.课堂表现 !== 0 || s.小组活动 !== 0 || s.考试成绩 !== 0
+                    );
+                    statusEl.textContent = hasScores ? '有数据' : '已加载';
+                    statusEl.className = 'class-status status-loaded';
+                } else {
+                    statusEl.textContent = '未加载';
+                    statusEl.className = 'class-status status-empty';
+                }
+            }
+        });
+    }
+    
+    // 选择班级
+    function selectClass(className) {
+        // 保存当前班级数据
+        if (currentClass && students.length > 0) {
+            allClassesData[currentClass] = JSON.parse(JSON.stringify(students));
+            saveToLocalStorage();
+        }
+        
+        currentClass = className;
+        
+        console.log('✅ 开始加载班级:', className);
+        console.log('classesData:', Object.keys(classesData));
+        console.log('allClassesData:', Object.keys(allClassesData));
+        
+        // 检查是否有已保存的数据
+        if (allClassesData[className] && allClassesData[className].length > 0) {
+            students = JSON.parse(JSON.stringify(allClassesData[className]));
+            console.log('✅ 加载已保存的班级数据:', className, '学生数:', students.length);
+        } else {
+            // 创建新的班级数据
+            console.log('<i class="fa-solid fa-file-pen"></i> 创建新的班级数据...');
+            const data = classesData[className];
+            
+            if (!data) {
+                console.error('❌ classesData中没有这个班级:', className);
+                showToast('找不到该班级的数据', 'error');
+                return;
+            }
+            
+            console.log('<i class="fa-solid fa-chart-bar"></i> 原始数据数量:', data.length);
+            students = data.map((item, i) => {
+                let group;
+                if (className === '25应电12班') {
+                    group = getGroupForYingDian(i);
+                } else {
+                    group = getGroupForStudent(className, i);
+                }
+                
+                return {
+                    学号: item[0],
+                    姓名: item[1],
+                    组别: group,
+                    子班级: className === '25应电12班' ? getSubClass(item[0]) : '',
+                    课堂表现: 0,  // 改为课堂表现
+                    小组活动: 0,
+                    笔记1: false,
+                    笔记2: false,
+                    笔记总分: 0,
+                    考试成绩: 0,
+                    平时总分: 0,
+                    总分: 0,
+                    selected: false
+                };
+            });
+            console.log('创建新的班级数据:', className, '学生数:', students.length);
+        }
+        
+        // 重新计算所有分数
+        console.log('重新计算分数...');
+        students.forEach((s, i) => calc(i));
+        
+        currentFilter = '';
+        
+        // 更新下拉框选中状态
+        const selector = document.getElementById('classSelector');
+        if (selector) {
+            selector.value = className;
+        }
+        
+        console.log('显示主界面...');
+        showMain();
+        
+        console.log('更新组别...');
+        updateGroups();
+        
+        console.log('渲染表格..., students.length=', students.length);
+        render();
+        
+        console.log('更新班级状态...');
+        updateClassStatus();
+        
+        // 保存选择的班级
+        localStorage.setItem('currentClass', className);
+        
+        console.log('=== 班级切换完成 ===', className, '学生数:', students.length);
+        
+        // 显示成功消息
+        if (students.length > 0) {
+            showToast(`✅ 已加载 ${className}，共 ${students.length} 名学生`, 'success', 2000);
+        } else {
+            showToast('<i class="fa-solid fa-triangle-exclamation"></i> 该班级暂无数据', 'warning');
+        }
+    }
+    
+    // 从下拉框选择班级
+    function selectClassFromDropdown() {
+        const selector = document.getElementById('classSelector');
+        const className = selector.value;
+        
+        if (!className) {
+            showToast('请选择班级', 'warning');
+            return;
+        }
+        
+        console.log('下拉框选择班级:', className);
+        selectClass(className);
+        showToast(`已切换到 ${className}`, 'success');
+    }
+    
+    // 显示主界面（已删除welcome页面，直接显示main）
+    function showMain() {
+        const main = document.getElementById('main');
+        if (main) main.style.display = 'block';
+    }
+    
+    // 渲染表格
+    function render() {
+        const tbody = document.getElementById('tbody');
+        tbody.innerHTML = '';
+        
+        let visibleStudents = students;
+        if (currentFilter) {
+            visibleStudents = students.filter(s => s.组别 === currentFilter);
+        }
+        
+        visibleStudents.forEach((s, displayIndex) => {
+            const i = students.indexOf(s);
+            const tr = tbody.insertRow();
+            
+            // 分数颜色类
+            let scoreClass = 'score-bad';
+            if (s.总分 < 0) {
+                scoreClass = 'score-negative';
+            } else if (s.总分 >= 85) {
+                scoreClass = 'score-good';
+            } else if (s.总分 >= 60) {
+                scoreClass = 'score-warn';
+            }
+            
+            // 应电班级的行背景色
+            let rowClass = '';
+            if (currentClass === '25应电12班') {
+                if (s.子班级 === '应电1班') {
+                    rowClass = 'yingdian-class1';
+                } else if (s.子班级 === '应电2班') {
+                    rowClass = 'yingdian-class2';
+                }
+            }
+            
+            tr.className = rowClass;
+            if (s.selected) tr.classList.add('selected');
+            
+            // 如果是匹配的学生，添加高亮
+            if (suffixMatches.includes(i)) {
+                tr.classList.add('suffix-hit');
+            }
+            
+            // 课堂表现分数颜色
+            let ketangClass = '';
+            if (s.课堂表现 < 0) ketangClass = 'score-negative';
+            else if (s.课堂表现 >= 18) ketangClass = 'score-good';
+            else if (s.课堂表现 >= 12) ketangClass = 'score-warn';
+            else ketangClass = 'score-bad';
+            
+            // 小组活动分数颜色
+            let xiaozuClass = '';
+            if (s.小组活动 < 0) xiaozuClass = 'score-negative';
+            else if (s.小组活动 >= 18) xiaozuClass = 'score-good';
+            else if (s.小组活动 >= 12) xiaozuClass = 'score-warn';
+            else xiaozuClass = 'score-bad';
+            
+            // 平时总分颜色
+            let pingshiClass = '';
+            if (s.平时总分 < 0) pingshiClass = 'score-negative';
+            else if (s.平时总分 >= 45) pingshiClass = 'score-good';
+            else if (s.平时总分 >= 30) pingshiClass = 'score-warn';
+            else pingshiClass = 'score-bad';
+            
+            tr.innerHTML = `
+                <td><input type="checkbox" ${s.selected ? 'checked' : ''} onchange="toggle(${i})"></td>
+                <td>${displayIndex + 1}</td>
+                <td>${s.学号}${s.子班级 ? `<span class="class-indicator ${s.子班级 === '应电1班' ? 'class1-badge' : 'class2-badge'}">${s.子班级.replace('应电', '')}</span>` : ''}</td>
+                <td>${s.姓名}</td>
+                <td><span class="group-badge">${s.组别}</span></td>
+                <td class="editable ${ketangClass}" contenteditable onblur="update(${i},'课堂表现',this.textContent)">${s.课堂表现}</td>
+                <td class="editable ${xiaozuClass}" contenteditable onblur="update(${i},'小组活动',this.textContent)">${s.小组活动}</td>
+                <td>${s.笔记总分} <button class="btn btn-primary" onclick="editNote(${i})" style="padding:2px 8px;font-size:12px;">编辑</button></td>
+                <td class="${pingshiClass}">${s.平时总分}</td>
+                <td class="editable" contenteditable onblur="update(${i},'考试成绩',this.textContent)">${s.考试成绩}</td>
+                <td class="${scoreClass}">${s.总分}</td>
+                <td>
+                    <button class="btn btn-success" onclick="quickAdd(${i})" style="padding:2px 6px;font-size:12px;">+1</button>
+                    <button class="btn btn-danger" onclick="quickDeduct(${i})" style="padding:2px 6px;font-size:12px;">-1</button>
+                </td>
+            `;
+            
+            // 添加拖拽选择事件
+            tr.addEventListener('mousedown', (e) => handleRowMouseDown(e, i));
+            tr.addEventListener('mouseenter', (e) => handleRowMouseEnter(e, i));
+            tr.addEventListener('mouseup', (e) => handleRowMouseUp(e, i));
+            
+            // 阻止在可编辑元素上触发选择
+            tr.querySelectorAll('.editable, button, input').forEach(el => {
+                el.addEventListener('mousedown', (e) => e.stopPropagation());
+            });
+        });
+        
+        updateStats();
+        updateSelectAll();
+    }
+    
+    // 更新组别选项
+    function updateGroups() {
+        const groups = [...new Set(students.map(s => s.组别))];
+        const select = document.getElementById('groupFilter');
+        select.innerHTML = '<option value="">全部组别</option>';
+        
+        // 按组号排序
+        groups.sort((a, b) => {
+            const numA = parseInt(a.replace(/[^0-9]/g, '')) || 0;
+            const numB = parseInt(b.replace(/[^0-9]/g, '')) || 0;
+            return numA - numB;
+        });
+        
+        groups.forEach(g => {
+            const count = students.filter(s => s.组别 === g).length;
+            select.innerHTML += `<option value="${g}">${g} (${count}人)</option>`;
+        });
+    }
+    
+    // 更新统计
+    function updateStats() {
+        let visibleStudents = students;
+        if (currentFilter) {
+            visibleStudents = students.filter(s => s.组别 === currentFilter);
+        }
+        
+        const total = visibleStudents.length;
+        const selected = visibleStudents.filter(s => s.selected).length;
+        const avg = total > 0 ? (visibleStudents.reduce((sum, s) => sum + s.总分, 0) / total).toFixed(1) : 0;
+        const pass = visibleStudents.filter(s => s.总分 >= 60).length;
+        const passRate = total > 0 ? (pass / total * 100).toFixed(1) : 0;
+        
+        document.getElementById('total').textContent = total;
+        document.getElementById('selected').textContent = selected;
+        document.getElementById('avg').textContent = avg;
+        document.getElementById('pass').textContent = passRate + '%';
+    }
+    
+    // 计算分数 - 允许负分
+    function calc(i) {
+        const s = students[i];
+        s.课堂表现 = parseFloat(s.课堂表现) || 0;
+        s.小组活动 = parseFloat(s.小组活动) || 0;
+        s.考试成绩 = Math.min(50, Math.max(0, parseFloat(s.考试成绩) || 0));
+        s.笔记总分 = (s.笔记1 ? 5 : 0) + (s.笔记2 ? 5 : 0);
+        s.平时总分 = s.课堂表现 + s.小组活动 + s.笔记总分;
+        s.总分 = s.平时总分 + s.考试成绩;
+    }
+    
+    // 更新分数 - 允许负分
+    function update(i, field, value) {
+        const v = parseFloat(value) || 0;
+        if (field === '考试成绩') {
+            students[i][field] = Math.min(50, Math.max(0, v));
+        } else {
+            students[i][field] = v;  // 允许负分
+        }
+        calc(i);
+        render();
+        saveToLocalStorage();
+        
+        // 如果启用了自动同步，使用防抖同步
+        if (wpsConfig.autoSync && wpsConnected) {
+            debouncedSync();
+        }
+    }
+    
+    // 切换选择
+    function toggle(i) {
+        students[i].selected = !students[i].selected;
+        updateSelectAll();
+        updateStats();
+    }
+    
+    // 全选/取消全选
+    function toggleAll() {
+        const checked = document.getElementById('selectAll').checked;
+        
+        if (currentFilter) {
+            students.forEach(s => {
+                if (s.组别 === currentFilter) {
+                    s.selected = checked;
+                }
+            });
+        } else {
+            students.forEach(s => s.selected = checked);
+        }
+        
+        render();
+    }
+    
+    // 更新全选框状态
+    function updateSelectAll() {
+        let visibleStudents = students;
+        if (currentFilter) {
+            visibleStudents = students.filter(s => s.组别 === currentFilter);
+        }
+        
+        const allSelected = visibleStudents.length > 0 && visibleStudents.every(s => s.selected);
+        document.getElementById('selectAll').checked = allSelected;
+    }
+    
+    // 清除选择
+    function clearSelection() {
+        students.forEach(s => s.selected = false);
+        document.getElementById('selectAll').checked = false;
+        lastClickedIndex = -1;
+        render();
+    }
+    
+    // 反选
+    function invertSelection() {
+        if (currentFilter) {
+            students.forEach(s => {
+                if (s.组别 === currentFilter) {
+                    s.selected = !s.selected;
+                }
+            });
+        } else {
+            students.forEach(s => s.selected = !s.selected);
+        }
+        render();
+    }
+    
+    // 选中当前组
+    function selectCurrentGroup() {
+        if (currentFilter) {
+            students.forEach(s => {
+                s.selected = (s.组别 === currentFilter);
+            });
+        } else {
+            students.forEach(s => s.selected = true);
+        }
+        render();
+    }
+    
+    // 快速加分
+    function quickAdd(i) {
+        students[i].课堂表现 = students[i].课堂表现 + 1;
+        calc(i);
+        
+        // 添加历史记录
+        addHistory('单个学生加分', 1, {
+            '学生': students[i].姓名,
+            '学号': students[i].学号,
+            '项目': '课堂表现',
+            '分值': '+1'
+        });
+        
+        render();
+        saveToLocalStorage();
+        
+        // 如果启用了自动同步，使用防抖同步
+        if (wpsConfig.autoSync && wpsConnected) {
+            debouncedSync();
+        }
+    }
+    
+    // 快速扣分 - 允许扣成负分
+    function quickDeduct(i) {
+        students[i].课堂表现 = students[i].课堂表现 - 1;
+        calc(i);
+        
+        // 添加历史记录
+        addHistory('单个学生扣分', 1, {
+            '学生': students[i].姓名,
+            '学号': students[i].学号,
+            '项目': '课堂表现',
+            '分值': '-1'
+        });
+        
+        render();
+        saveToLocalStorage();
+        
+        // 如果启用了自动同步，使用防抖同步
+        if (wpsConfig.autoSync && wpsConnected) {
+            debouncedSync();
+        }
+    }
+    
+    // 兼容旧函数名
+    function quick(i) {
+        quickAdd(i);
+    }
+    
+    // 批量加分
+    function batchAdd() {
+        const type = document.getElementById('batchType').value;
+        const score = Math.abs(parseFloat(document.getElementById('batchScore').value) || 1);
+        const selected = students.filter(s => s.selected);
+        
+        if (selected.length === 0) {
+            alert('请先选择学生');
+            return;
+        }
+        
+        const typeNames = { '1': '课堂表现', '2': '小组活动', '3': '笔记检查' };
+        
+        selected.forEach(s => {
+            const i = students.indexOf(s);
+            if (type === '1') {
+                s.课堂表现 = s.课堂表现 + score;
+            } else if (type === '2') {
+                s.小组活动 = s.小组活动 + score;
+            } else if (type === '3') {
+                if (!s.笔记1) s.笔记1 = true;
+                else if (!s.笔记2) s.笔记2 = true;
+            }
+            calc(i);
+        });
+        
+        // 添加历史记录
+        addHistory('批量加分', selected.length, {
+            '类型': typeNames[type],
+            '分值': score
+        });
+        
+        clearSelection();
+        saveToLocalStorage();
+        showToast(`✅ 成功为${selected.length}名学生加分`, 'success');
+        
+        // 如果启用了自动同步，使用防抖同步
+        if (wpsConfig.autoSync && wpsConnected) {
+            debouncedSync();
+        }
+    }
+    
+    // 批量扣分 - 允许扣成负分
+    function batchDeduct() {
+        const type = document.getElementById('batchType').value;
+        const score = Math.abs(parseFloat(document.getElementById('batchScore').value) || 1);
+        const selected = students.filter(s => s.selected);
+        
+        if (selected.length === 0) {
+            alert('请先选择学生');
+            return;
+        }
+        
+        if (!confirm(`确定要为${selected.length}名学生扣${score}分吗？`)) {
+            return;
+        }
+        
+        const typeNames = { '1': '课堂表现', '2': '小组活动', '3': '笔记检查' };
+        
+        selected.forEach(s => {
+            const i = students.indexOf(s);
+            if (type === '1') {
+                s.课堂表现 = s.课堂表现 - score;  // 允许负分
+            } else if (type === '2') {
+                s.小组活动 = s.小组活动 - score;  // 允许负分
+            } else if (type === '3') {
+                if (s.笔记2) s.笔记2 = false;
+                else if (s.笔记1) s.笔记1 = false;
+            }
+            calc(i);
+        });
+        
+        // 添加历史记录
+        addHistory('批量扣分', selected.length, {
+            '类型': typeNames[type],
+            '分值': score
+        });
+        
+        clearSelection();
+        saveToLocalStorage();
+        showToast(`✅ 成功为${selected.length}名学生扣分`, 'success');
+        
+        // 如果启用了自动同步，使用防抖同步
+        if (wpsConfig.autoSync && wpsConnected) {
+            debouncedSync();
+        }
+    }
+    
+    // 编辑笔记
+    function editNote(i) {
+        currentNoteIndex = i;
+        const s = students[i];
+        document.getElementById('noteName').textContent = s.姓名;
+        document.getElementById('note1').checked = s.笔记1;
+        document.getElementById('note2').checked = s.笔记2;
+        document.getElementById('noteModal').classList.add('show');
+    }
+    
+    // 保存笔记
+    function saveNote() {
+        const s = students[currentNoteIndex];
+        s.笔记1 = document.getElementById('note1').checked;
+        s.笔记2 = document.getElementById('note2').checked;
+        calc(currentNoteIndex);
+        closeNote();
+        render();
+        saveToLocalStorage();
+        
+        // 如果启用了自动同步，使用防抖同步
+        if (wpsConfig.autoSync && wpsConnected) {
+            debouncedSync();
+        }
+    }
+    
+    // 关闭笔记
+    function closeNote() {
+        document.getElementById('noteModal').classList.remove('show');
+    }
+    
+    // 筛选组别
+    function filterGroup() {
+        currentFilter = document.getElementById('groupFilter').value;
+        clearSelection();
+        render();
+    }
+    
+    // 搜索
+    function doSearch() {
+        const term = document.getElementById('search').value.toLowerCase();
+        const tbody = document.getElementById('tbody');
+        const rows = tbody.rows;
+        
+        let visibleStudents = students;
+        if (currentFilter) {
+            visibleStudents = students.filter(s => s.组别 === currentFilter);
+        }
+        
+        for (let i = 0; i < rows.length; i++) {
+            const s = visibleStudents[i];
+            const match = s.学号.includes(term) || s.姓名.includes(term);
+            rows[i].style.display = match ? '' : 'none';
+        }
+    }
+    
+     // ==================== 历史记录功能 ====================
+     
+     // 添加历史记录
+     function addHistory(actionType, affectedStudents, details = {}) {
+         if (!currentClass) {
+             console.warn('⚠ 未选择班级，无法记录历史');
+             return;
+         }
+         
+         // 确保当前班级数据是最新的
+         if (students.length > 0) {
+             allClassesData[currentClass] = JSON.parse(JSON.stringify(students));
+         }
+         
+         const record = {
+             id: Date.now(),
+             timestamp: new Date().toISOString(),
+             className: currentClass,
+             actionType: actionType,
+             affectedCount: affectedStudents,
+             details: details,
+             snapshot: JSON.parse(JSON.stringify(allClassesData[currentClass] || []))
+         };
+         
+         historyRecords.unshift(record); // 添加到数组开头
+         
+         // 只保留最近100条记录
+         if (historyRecords.length > 100) {
+             historyRecords = historyRecords.slice(0, 100);
+         }
+         
+         saveHistoryToStorage();
+         
+         console.log('📝 已添加历史记录:', {
+             操作: actionType,
+             影响学生: affectedStudents,
+             班级: currentClass,
+             时间: new Date().toLocaleString('zh-CN')
+         });
+     }
+     
+     // 保存历史记录到本地存储
+     function saveHistoryToStorage() {
+         try {
+             localStorage.setItem('gradeHistory_v1', JSON.stringify(historyRecords));
+         } catch (e) {
+             console.error('保存历史记录失败:', e);
+         }
+     }
+     
+     // 从本地存储加载历史记录
+     function loadHistoryFromStorage() {
+         try {
+             const saved = localStorage.getItem('gradeHistory_v1');
+             if (saved) {
+                 historyRecords = JSON.parse(saved);
+                 console.log('✅ 已加载历史记录:', historyRecords.length, '条');
+             } else {
+                 console.log('📝 暂无历史记录');
+                 historyRecords = [];
+             }
+         } catch (e) {
+             console.error('❌ 加载历史记录失败:', e);
+             historyRecords = [];
+         }
+     }
+     
+     // 显示历史记录模态窗口
+     function showHistoryModal() {
+         console.log('📜 打开历史记录窗口');
+         console.log('历史记录总数:', historyRecords.length);
+         
+         // 直接显示所有记录
+         renderHistoryTable();
+         
+         document.getElementById('historyModal').classList.add('show');
+         console.log('✅ 历史记录窗口已显示');
+     }
+     
+     // 渲染历史记录表格
+     function renderHistoryTable() {
+         // 显示所有记录
+         const displayRecords = historyRecords;
+         
+         console.log('显示记录数:', displayRecords.length);
+         
+         document.getElementById('historyCount').textContent = displayRecords.length;
+         
+         const tbody = document.getElementById('historyTableBody');
+         tbody.innerHTML = '';
+         
+         if (displayRecords.length === 0) {
+             tbody.innerHTML = `
+                 <tr>
+                     <td colspan="5" style="text-align: center; padding: 30px; color: #999;">
+                         暂无历史记录<br>
+                         <small style="color: #aaa; margin-top: 10px; display: block;">
+                             执行批量加分、批量扣分等操作后会自动记录
+                         </small>
+                     </td>
+                 </tr>
+             `;
+         } else {
+             displayRecords.forEach((record, index) => {
+                 const row = tbody.insertRow();
+                 const date = new Date(record.timestamp);
+                 const timeStr = date.toLocaleString('zh-CN', {
+                     year: 'numeric',
+                     month: '2-digit',
+                     day: '2-digit',
+                     hour: '2-digit',
+                     minute: '2-digit',
+                     second: '2-digit'
+                 });
+                 
+                 row.innerHTML = `
+                     <td style="padding: 10px; white-space: nowrap;">${timeStr}</td>
+                     <td style="padding: 10px; font-weight: bold; color: #2196f3;">${record.className}</td>
+                     <td style="padding: 10px;">${record.actionType}</td>
+                     <td style="padding: 10px;">${record.affectedCount}人</td>
+                     <td style="padding: 10px; white-space: nowrap;">
+                         <button class="btn btn-primary" onclick="viewHistorySnapshot(${record.id})" style="padding: 4px 8px; font-size: 12px;">
+                             查看
+                         </button>
+                         <button class="btn btn-success" onclick="restoreHistorySnapshot(${record.id})" style="padding: 4px 8px; font-size: 12px;">
+                             恢复
+                         </button>
+                         <button class="btn btn-danger" onclick="deleteHistoryRecord(${record.id})" style="padding: 4px 8px; font-size: 12px;">
+                             删除
+                         </button>
+                     </td>
+                 `;
+             });
+         }
+     }
+     
+     // 关闭历史记录模态窗口
+     function closeHistoryModal() {
+         document.getElementById('historyModal').classList.remove('show');
+     }
+     
+     // 查看历史快照
+     function viewHistorySnapshot(recordId) {
+         const record = historyRecords.find(r => r.id === recordId);
+         if (!record) {
+             alert('未找到该历史记录');
+             return;
+         }
+
+         // 创建一个临时的数据展示
+         const snapshot = record.snapshot;
+         const date = new Date(record.timestamp).toLocaleString('zh-CN');
+         
+         let message = `历史快照详情\n\n`;
+         message += `时间：${date}\n`;
+         message += `班级：${record.className}\n`;
+         message += `操作：${record.actionType}\n`;
+         message += `影响学生：${record.affectedCount}人\n\n`;
+         
+         if (record.details && Object.keys(record.details).length > 0) {
+             message += '详细信息：\n';
+             for (let key in record.details) {
+                 message += `  ${key}: ${record.details[key]}\n`;
+             }
+         }
+         
+         message += `\n总学生数：${snapshot.length}人\n`;
+         message += `平均分：${(snapshot.reduce((sum, s) => sum + s.总分, 0) / snapshot.length).toFixed(2)}`;
+         
+         alert(message);
+     }
+     
+     // 恢复历史快照
+     function restoreHistorySnapshot(recordId) {
+         const record = historyRecords.find(r => r.id === recordId);
+         if (!record) {
+             alert('未找到该历史记录');
+             return;
+         }
+         
+         const date = new Date(record.timestamp).toLocaleString('zh-CN');
+         if (!confirm(`确定要恢复到以下时间点的数据吗？\n\n时间：${date}\n班级：${record.className}\n\n当前数据将被覆盖！`)) {
+            return;
+        }
+         
+         // 恢复数据
+         allClassesData[record.className] = JSON.parse(JSON.stringify(record.snapshot));
+         
+         // 如果当前正在查看该班级，更新显示
+         if (currentClass === record.className) {
+             students = JSON.parse(JSON.stringify(record.snapshot));
+             render();
+         }
+         
+         saveToLocalStorage();
+         closeHistoryModal();
+         
+         showToast('✅ 数据已恢复到历史快照', 'success');
+         
+         // 添加恢复操作的历史记录
+         addHistory('恢复历史快照', record.snapshot.length, {
+             '恢复时间': date
+         });
+     }
+     
+     // 删除单条历史记录
+     function deleteHistoryRecord(recordId) {
+         const record = historyRecords.find(r => r.id === recordId);
+         if (!record) {
+             alert('未找到该历史记录');
+             return;
+         }
+         
+         const date = new Date(record.timestamp).toLocaleString('zh-CN');
+         if (!confirm(`确定要删除这条历史记录吗？\n\n时间：${date}\n操作：${record.actionType}\n班级：${record.className}`)) {
+             return;
+         }
+         
+         // 从数组中删除
+         const index = historyRecords.findIndex(r => r.id === recordId);
+         if (index > -1) {
+             historyRecords.splice(index, 1);
+             saveHistoryToStorage();
+             
+             // 刷新显示
+             renderHistoryTable();
+             
+             showToast('历史记录已删除', 'success');
+             console.log('✅ 已删除历史记录:', recordId);
+         }
+     }
+     
+     // 清除所有历史记录
+     function clearAllHistory() {
+         if (historyRecords.length === 0) {
+             alert('当前没有历史记录');
+             return;
+         }
+         
+         if (!confirm(`确定要清除所有历史记录吗？\n\n共有 ${historyRecords.length} 条记录\n此操作不可恢复！`)) {
+             return;
+         }
+         
+         historyRecords = [];
+         saveHistoryToStorage();
+         
+         // 刷新显示
+         renderHistoryTable();
+         
+         showToast('所有历史记录已清除', 'success');
+     }
+     
+     // 导出历史记录
+     function exportHistory() {
+         try {
+             const exportData = {
+                 version: '1.0',
+                 exportTime: new Date().toISOString(),
+                 totalRecords: historyRecords.length,
+                 records: historyRecords
+             };
+             
+             const dataStr = JSON.stringify(exportData, null, 2);
+             const dataBlob = new Blob([dataStr], {type: 'application/json'});
+             const url = URL.createObjectURL(dataBlob);
+             
+             const link = document.createElement('a');
+             link.href = url;
+             link.download = `成绩历史记录_${new Date().toISOString().split('T')[0]}.json`;
+             link.click();
+             
+             URL.revokeObjectURL(url);
+             showToast('历史记录导出成功', 'success');
+         } catch (error) {
+             console.error('导出失败:', error);
+             alert('导出失败：' + error.message);
+         }
+     }
+
+     // ==================== 随机抽号功能 ====================
+     
+     // 显示随机抽号窗口
+     function showRandomPickModal() {
+         console.log('🎲 打开随机抽号窗口');
+         
+         // 读取当前设置
+         const start = parseInt(document.getElementById('randomRangeStart').value) || 1;
+         const end = parseInt(document.getElementById('randomRangeEnd').value) || 40;
+         
+         currentNumberRange = { start, end };
+         updateRandomPickStats();
+         
+         document.getElementById('randomPickModal').classList.add('show');
+     }
+     
+     // 关闭随机抽号窗口
+     function closeRandomPickModal() {
+         document.getElementById('randomPickModal').classList.remove('show');
+     }
+     
+     // 更新统计信息
+     function updateRandomPickStats() {
+         const start = parseInt(document.getElementById('randomRangeStart').value) || 1;
+         const end = parseInt(document.getElementById('randomRangeEnd').value) || 40;
+         
+         const total = end - start + 1;
+         const picked = pickedNumbers.length;
+         const remaining = total - picked;
+         
+         document.getElementById('randomTotalCount').textContent = total;
+         document.getElementById('randomPickedCount').textContent = picked;
+         document.getElementById('randomRemainingCount').textContent = remaining;
+     }
+     
+     // 执行随机抽号
+     function doRandomPick() {
+         const start = parseInt(document.getElementById('randomRangeStart').value);
+         const end = parseInt(document.getElementById('randomRangeEnd').value);
+         const count = parseInt(document.getElementById('randomPickCount').value);
+         
+         // 验证输入
+         if (!start || !end || start < 1 || end < 1) {
+             alert('请输入有效的号码范围（必须大于0）');
+             return;
+         }
+         
+         if (start > end) {
+             alert('起始号码不能大于结束号码');
+             return;
+         }
+         
+         if (!count || count < 1) {
+             alert('请输入有效的抽取数量（至少1个）');
+             return;
+         }
+         
+         // 检查范围是否改变
+         if (currentNumberRange.start !== start || currentNumberRange.end !== end) {
+             if (pickedNumbers.length > 0) {
+                 if (!confirm('号码范围已改变，是否重置已抽取记录？')) {
+                     return;
+                 }
+                 pickedNumbers = [];
+             }
+             currentNumberRange = { start, end };
+         }
+         
+         // 生成可用号码池
+         const available = [];
+         for (let i = start; i <= end; i++) {
+             if (!pickedNumbers.includes(i)) {
+                 available.push(i);
+             }
+         }
+         
+         // 检查剩余数量
+         if (available.length === 0) {
+             alert('所有号码都已抽取完毕！\n\n请点击"重置"按钮开始新一轮抽号。');
+             return;
+         }
+         
+         if (count > available.length) {
+             alert(`剩余号码不足！\n\n可抽取数量：${available.length}个\n您要抽取：${count}个`);
+             return;
+         }
+         
+         // 随机抽取
+         const picked = [];
+         const tempAvailable = [...available];
+         
+         for (let i = 0; i < count; i++) {
+             const randomIndex = Math.floor(Math.random() * tempAvailable.length);
+             const number = tempAvailable[randomIndex];
+             picked.push(number);
+             tempAvailable.splice(randomIndex, 1);
+         }
+         
+         // 排序（从小到大）
+         picked.sort((a, b) => a - b);
+         
+         // 添加到已抽取列表
+         pickedNumbers.push(...picked);
+         pickedNumbers.sort((a, b) => a - b);
+         
+         // 显示结果
+         displayRandomPickResult(picked);
+         updateRandomPickStats();
+         
+         console.log('✅ 抽取完成:', picked);
+         console.log('已抽取:', pickedNumbers);
+     }
+     
+     // 显示抽取结果
+     function displayRandomPickResult(numbers) {
+         const resultDiv = document.getElementById('randomPickResult');
+         const resultList = document.getElementById('randomPickResultList');
+         
+         resultDiv.style.display = 'block';
+         resultList.innerHTML = '';
+         
+         numbers.forEach(num => {
+             const badge = document.createElement('div');
+             badge.style.cssText = `
+                 display: inline-flex;
+                 align-items: center;
+                 justify-content: center;
+                 min-width: 60px;
+                 height: 60px;
+                 background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                 color: white;
+                 font-size: 24px;
+                 font-weight: bold;
+                 border-radius: 10px;
+                 box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+                 animation: popIn 0.5s ease-out;
+             `;
+             badge.textContent = num;
+             resultList.appendChild(badge);
+         });
+         
+         // 添加动画样式（如果还没有）
+         if (!document.getElementById('randomPickAnimationStyle')) {
+             const style = document.createElement('style');
+             style.id = 'randomPickAnimationStyle';
+             style.textContent = `
+                 @keyframes popIn {
+                     0% {
+                         transform: scale(0);
+                         opacity: 0;
+                     }
+                     50% {
+                         transform: scale(1.2);
+                     }
+                     100% {
+                         transform: scale(1);
+                         opacity: 1;
+                     }
+                 }
+             `;
+             document.head.appendChild(style);
+         }
+     }
+     
+     // 重置抽号
+     function resetRandomPick() {
+         if (pickedNumbers.length === 0) {
+             alert('当前没有已抽取的号码');
+             return;
+         }
+         
+         if (!confirm(`确定要重置吗？\n\n这将清除已抽取的 ${pickedNumbers.length} 个号码`)) {
+             return;
+         }
+         
+         pickedNumbers = [];
+         document.getElementById('randomPickResult').style.display = 'none';
+         updateRandomPickStats();
+         
+         showToast('已重置，可以重新抽号', 'success');
+     }
+
+     
+     // 按学号后缀批量调整分数（改为基于复选框选中）
+     function adjustSuffix(isAdd) {
+         // 获取所有勾选的学生
+         const selected = students.filter(s => s.selected);
+         
+        if (selected.length === 0) {
+            showToast('请先勾选学生！可用"定位"按钮快速选择', 'warning');
+            return;
+        }
+         
+         const field = document.getElementById('suffixField').value;
+         const delta = parseFloat(document.getElementById('suffixDelta').value) || 1;
+         const score = isAdd ? Math.abs(delta) : -Math.abs(delta);
+         
+         const fieldNames = {
+             'ketang': '课堂表现',
+             'xiaozu': '小组活动',
+             'kaoshi': '考试成绩'
+         };
+         
+         const fieldName = fieldNames[field];
+         const action = isAdd ? '加' : '减';
+         
+         if (!confirm(`确定要为${selected.length}名学生的${fieldName}${action}${Math.abs(score)}分吗？`)) {
+             return;
+         }
+         
+         selected.forEach(s => {
+             const idx = students.indexOf(s);
+             if (field === 'ketang') {
+                 s.课堂表现 += score;
+             } else if (field === 'xiaozu') {
+                 s.小组活动 += score;
+             } else if (field === 'kaoshi') {
+                 s.考试成绩 = Math.min(50, Math.max(0, s.考试成绩 + score));
+             }
+             calc(idx);
+         });
+         
+         // 清除选中状态
+         clearSelection();
+         render();
+         saveToLocalStorage();
+         
+         showToast(`✅ 成功为${selected.length}名学生${action}分！`, 'success');
+         
+         // 如果启用了自动同步，使用防抖同步
+         if (wpsConfig.autoSync && wpsConnected) {
+             debouncedSync();
+         }
+     }
+     
+     // 清除学号后缀高亮
+     function clearSuffixHighlight() {
+         suffixMatches = [];
+         
+         // 重新渲染以清除高亮
+         render();
+    }
+    
+    // 鼠标事件处理
+    function handleRowMouseDown(e, index) {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON' || e.target.contentEditable === 'true') {
+            return;
+        }
+        
+        e.preventDefault();
+        
+        if (e.shiftKey && lastClickedIndex !== -1) {
+            selectRange(lastClickedIndex, index);
+        } else if (e.ctrlKey || e.metaKey) {
+            toggle(index);
+            lastClickedIndex = index;
+        } else {
+            isSelecting = true;
+            startSelectIndex = index;
+            endSelectIndex = index;
+            lastClickedIndex = index;
+            
+            if (!e.ctrlKey && !e.metaKey) {
+                clearSelection();
+            }
+            
+            students[index].selected = true;
+            updateSelectAll();
+            updateStats();
+        }
+    }
+    
+    function handleRowMouseEnter(e, index) {
+        if (isSelecting && startSelectIndex !== -1) {
+            endSelectIndex = index;
+            updateSelectionVisual();
+        }
+    }
+    
+    function handleRowMouseUp(e, index) {
+        if (isSelecting) {
+            isSelecting = false;
+            endSelectIndex = index;
+            
+            if (startSelectIndex !== -1) {
+                selectRange(startSelectIndex, endSelectIndex);
+            }
+            
+            clearSelectionVisual();
+        }
+    }
+    
+    function selectRange(start, end) {
+        const startIdx = Math.min(start, end);
+        const endIdx = Math.max(start, end);
+        
+        for (let i = startIdx; i <= endIdx; i++) {
+            students[i].selected = true;
+        }
+        
+        updateSelectAll();
+        updateStats();
+        render();
+    }
+    
+    function updateSelectionVisual() {
+        if (startSelectIndex === -1 || endSelectIndex === -1) return;
+        
+        const startIdx = Math.min(startSelectIndex, endSelectIndex);
+        const endIdx = Math.max(startSelectIndex, endSelectIndex);
+        
+        const tbody = document.getElementById('tbody');
+        const rows = tbody.rows;
+        
+        clearSelectionVisual();
+        
+        for (let i = startIdx; i <= endIdx; i++) {
+            if (rows[i]) {
+                rows[i].classList.add('select-range');
+            }
+        }
+    }
+    
+    function clearSelectionVisual() {
+        const tbody = document.getElementById('tbody');
+        const rows = tbody.rows;
+        
+        for (let i = 0; i < rows.length; i++) {
+            rows[i].classList.remove('select-range');
+        }
+    }
+    
+    // 切换班级
+    function switchClass() {
+        // 保存当前班级数据
+        if (currentClass && students.length > 0) {
+            allClassesData[currentClass] = JSON.parse(JSON.stringify(students));
+            saveToLocalStorage();
+        }
+        
+        document.getElementById('main').style.display = 'none';
+        document.getElementById('welcome').style.display = 'block';
+        currentFilter = '';
+        document.getElementById('groupFilter').value = '';
+        updateClassStatus();
+    }
+    
+    // 导入Excel
+    function importExcel() {
+        document.getElementById('fileInput').click();
+    }
+    
+    // 加载文件
+    function loadFile(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, {type: 'array'});
+                
+                if (workbook.SheetNames.includes('所有班级汇总')) {
+                    importAllClasses(workbook);
+                } else {
+                    importSingleClass(workbook);
+                }
+                
+                alert('导入成功！');
+            } catch (error) {
+                alert('导入失败：' + error.message);
+                console.error('导入错误:', error);
+            }
+        };
+        reader.readAsArrayBuffer(file);
+        event.target.value = '';
+    }
+    
+    // 导入单个班级
+    function importSingleClass(workbook) {
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        const json = XLSX.utils.sheet_to_json(sheet);
+        
+        let className;
+        if (json[0] && json[0]['班级']) {
+            className = json[0]['班级'];
+        } else {
+            className = workbook.SheetNames[0];
+        }
+        
+        // 处理班级名称兼容性
+        if (className === '25通航运维班') {
+            className = '25应电12班';
+        }
+        
+        if (!classesData[className]) {
+            alert('未知的班级：' + className);
+            return;
+        }
+        
+        const originalData = classesData[className];
+        students = originalData.map((item, i) => {
+            const importedStudent = json.find(row => 
+                row['学号'] === item[0] || row['姓名'] === item[1]
+            );
+            
+            let group;
+            if (className === '25应电12班') {
+                group = getGroupForYingDian(i);
+            } else {
+                group = getGroupForStudent(className, i);
+            }
+            
+            // 兼容旧字段名
+            let ketangScore = 0;
+            let xiaozuScore = 0;
+            
+            if (importedStudent) {
+                ketangScore = parseFloat(importedStudent['课堂表现']) || 
+                            parseFloat(importedStudent['平时表现']) || 0;
+                xiaozuScore = parseFloat(importedStudent['小组活动']) || 0;
+            }
+            
+            return {
+                学号: item[0],
+                姓名: item[1],
+                组别: group,
+                子班级: className === '25应电12班' ? getSubClass(item[0]) : '',
+                课堂表现: ketangScore,
+                小组活动: xiaozuScore,
+                笔记1: importedStudent ? (importedStudent['笔记1'] === '√' || importedStudent['笔记1'] === true) : false,
+                笔记2: importedStudent ? (importedStudent['笔记2'] === '√' || importedStudent['笔记2'] === true) : false,
+                笔记总分: 0,
+                考试成绩: importedStudent ? (parseFloat(importedStudent['考试成绩']) || 0) : 0,
+                平时总分: 0,
+                总分: 0,
+                selected: false
+            };
+        });
+        
+        students.forEach((s, i) => calc(i));
+        currentClass = className;
+        allClassesData[currentClass] = JSON.parse(JSON.stringify(students));
+        
+        currentFilter = '';
+        showMain();
+        updateGroups();
+        render();
+        updateClassStatus();
+        saveToLocalStorage();
+    }
+    
+    // 导入所有班级
+    function importAllClasses(workbook) {
+        allClassesData = {};
+        let firstClass = null;
+        let importCount = 0;
+        
+        // 从汇总表导入
+        if (workbook.SheetNames.includes('所有班级汇总')) {
+            const sheet = workbook.Sheets['所有班级汇总'];
+            const json = XLSX.utils.sheet_to_json(sheet);
+            
+            // 按班级分组处理
+            const classGroups = {};
+            json.forEach(row => {
+                let className = row['班级'];
+                if (className === '25通航运维班') {
+                    className = '25应电12班';
+                }
+                if (!className || !classesData[className]) return;
+                
+                if (!classGroups[className]) {
+                    classGroups[className] = [];
+                    if (!firstClass) firstClass = className;
+                }
+                
+                classGroups[className].push(row);
+            });
+            
+            // 为每个班级处理数据
+            Object.keys(classGroups).forEach(className => {
+                const classRows = classGroups[className];
+                const originalData = classesData[className];
+                
+                allClassesData[className] = originalData.map((item, i) => {
+                    const importedStudent = classRows.find(row => 
+                        row['学号'] === item[0] || row['姓名'] === item[1]
+                    );
+                    
+                    let group;
+                    if (className === '25应电12班') {
+                        group = getGroupForYingDian(i);
+                    } else {
+                        group = getGroupForStudent(className, i);
+                    }
+                    
+                    let ketangScore = 0;
+                    let xiaozuScore = 0;
+                    
+                    if (importedStudent) {
+                        ketangScore = parseFloat(importedStudent['课堂表现']) || 
+                                    parseFloat(importedStudent['平时表现']) || 0;
+                        xiaozuScore = parseFloat(importedStudent['小组活动']) || 0;
+                    }
+                    
+                    return {
+                        学号: item[0],
+                        姓名: item[1],
+                        组别: group,
+                        子班级: className === '25应电12班' ? getSubClass(item[0]) : '',
+                        课堂表现: ketangScore,
+                        小组活动: xiaozuScore,
+                        笔记1: importedStudent ? (importedStudent['笔记1'] === '√' || importedStudent['笔记1'] === true) : false,
+                        笔记2: importedStudent ? (importedStudent['笔记2'] === '√' || importedStudent['笔记2'] === true) : false,
+                        笔记总分: 0,
+                        考试成绩: importedStudent ? (parseFloat(importedStudent['考试成绩']) || 0) : 0,
+                        平时总分: 0,
+                        总分: 0,
+                        selected: false
+                    };
+                });
+                
+                // 重新计算分数
+                allClassesData[className].forEach(s => {
+                    s.笔记总分 = (s.笔记1 ? 5 : 0) + (s.笔记2 ? 5 : 0);
+                    s.平时总分 = s.课堂表现 + s.小组活动 + s.笔记总分;
+                    s.总分 = s.平时总分 + s.考试成绩;
+                });
+                
+                importCount++;
+            });
+        }
+        
+        // 显示第一个班级
+        if (firstClass && allClassesData[firstClass]) {
+            currentClass = firstClass;
+            students = JSON.parse(JSON.stringify(allClassesData[firstClass]));
+            document.getElementById('className').textContent = currentClass;
+            currentFilter = '';
+            showMain();
+            updateGroups();
+            render();
+            updateClassStatus();
+            saveToLocalStorage();
+            
+            alert(`成功导入 ${importCount} 个班级的数据！\n当前显示：${currentClass}`);
+        }
+    }
+    
+    // 显示导出选项
+    function showExportOptions() {
+        // 保存当前班级数据
+        if (currentClass && students.length > 0) {
+            allClassesData[currentClass] = JSON.parse(JSON.stringify(students));
+            saveToLocalStorage();
+        }
+        
+        const btn = document.getElementById('exportCurrentBtn');
+        btn.innerHTML = `导出当前班级 (${currentClass || '未选择'})`;
+        
+        // 更新调试信息
+        const debugInfo = document.getElementById('exportDebugInfo');
+        const classInfo = ['25无人机三班', '25液压三班', '25无人机四班', '25应电12班'].map(className => {
+            const data = allClassesData[className];
+            if (data) {
+                const hasScores = data.some(s => s.课堂表现 !== 0 || s.小组活动 !== 0 || s.考试成绩 !== 0);
+                return `${className}: ${data.length}人 ${hasScores ? '(有成绩)' : '(无成绩)'}`;
+            } else {
+                return `${className}: 未加载`;
+            }
+        });
+        debugInfo.innerHTML = classInfo.join('<br>');
+        
+        document.getElementById('exportModal').classList.add('show');
+    }
+    
+    // 关闭导出模态窗口
+    function closeExportModal() {
+        document.getElementById('exportModal').classList.remove('show');
+    }
+    
+    // 导出当前班级
+    function exportCurrentClass() {
+        if (!currentClass || students.length === 0) {
+            alert('请先选择一个班级');
+            return;
+        }
+        
+        const data = students.map(s => ({
+            '班级': currentClass,
+            '学号': s.学号,
+            '姓名': s.姓名,
+            '组别': s.组别,
+            '课堂表现': s.课堂表现,
+            '小组活动': s.小组活动,
+            '笔记1': s.笔记1 ? '√' : '',
+            '笔记2': s.笔记2 ? '√' : '',
+            '笔记总分': s.笔记总分,
+            '平时总分': s.平时总分,
+            '考试成绩': s.考试成绩,
+            '总分': s.总分
+        }));
+        
+        const ws = XLSX.utils.json_to_sheet(data);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, currentClass);
+        
+        const date = new Date().toLocaleDateString('zh-CN').replace(/\//g, '-');
+        XLSX.writeFile(wb, currentClass + '_成绩_' + date + '.xlsx');
+        
+        console.log('导出当前班级:', currentClass, '学生数:', data.length);
+        closeExportModal();
+    }
+    
+    // 导出所有班级
+    function exportAllClasses() {
+        // 保存当前班级数据
+        if (currentClass && students.length > 0) {
+            allClassesData[currentClass] = JSON.parse(JSON.stringify(students));
+        }
+        
+        const wb = XLSX.utils.book_new();
+        const allData = [];
+        let totalExported = 0;
+        
+        // 确保所有班级都有数据
+        ['25无人机三班', '25液压三班', '25无人机四班', '25应电12班'].forEach(className => {
+            let classStudents;
+            
+            // 优先使用已保存的数据
+            if (allClassesData[className] && allClassesData[className].length > 0) {
+                classStudents = allClassesData[className];
+                console.log('使用已保存的数据:', className, '学生数:', classStudents.length);
+            } else {
+                // 创建初始数据
+                const data = classesData[className];
+                classStudents = data.map((item, i) => {
+                    let group;
+                    if (className === '25应电12班') {
+                        group = getGroupForYingDian(i);
+                    } else {
+                        group = getGroupForStudent(className, i);
+                    }
+                    
+                    return {
+                        学号: item[0],
+                        姓名: item[1],
+                        组别: group,
+                        子班级: className === '25应电12班' ? getSubClass(item[0]) : '',
+                        课堂表现: 0,
+                        小组活动: 0,
+                        笔记1: false,
+                        笔记2: false,
+                        笔记总分: 0,
+                        考试成绩: 0,
+                        平时总分: 0,
+                        总分: 0
+                    };
+                });
+                console.log('创建初始数据:', className, '学生数:', classStudents.length);
+            }
+            
+            totalExported += classStudents.length;
+            
+            // 添加到总数据中
+            classStudents.forEach(s => {
+                allData.push({
+                    '班级': className,
+                    '学号': s.学号,
+                    '姓名': s.姓名,
+                    '组别': s.组别,
+                    '课堂表现': s.课堂表现,
+                    '小组活动': s.小组活动,
+                    '笔记1': s.笔记1 ? '√' : '',
+                    '笔记2': s.笔记2 ? '√' : '',
+                    '笔记总分': s.笔记总分 || 0,
+                    '平时总分': s.平时总分,
+                    '考试成绩': s.考试成绩 || 0,
+                    '总分': s.总分
+                });
+            });
+            
+            // 为每个班级创建单独的sheet
+            const sheetData = classStudents.map(s => ({
+                '学号': s.学号,
+                '姓名': s.姓名,
+                '组别': s.组别,
+                '课堂表现': s.课堂表现,
+                '小组活动': s.小组活动,
+                '笔记1': s.笔记1 ? '√' : '',
+                '笔记2': s.笔记2 ? '√' : '',
+                '笔记总分': s.笔记总分 || 0,
+                '平时总分': s.平时总分,
+                '考试成绩': s.考试成绩 || 0,
+                '总分': s.总分
+            }));
+            
+            const ws = XLSX.utils.json_to_sheet(sheetData);
+            XLSX.utils.book_append_sheet(wb, ws, className);
+        });
+        
+        // 创建汇总sheet
+        const summaryWs = XLSX.utils.json_to_sheet(allData);
+        XLSX.utils.book_append_sheet(wb, summaryWs, '所有班级汇总');
+        
+        const date = new Date().toLocaleDateString('zh-CN').replace(/\//g, '-');
+        XLSX.writeFile(wb, '全部班级成绩_' + date + '.xlsx');
+        
+        console.log('导出所有班级完成，总人数:', totalExported);
+        console.log('各班级人数:', {
+            '25无人机三班': 40,
+            '25液压三班': 30,
+            '25无人机四班': 40,
+            '25应电12班': 86
+        });
+        
+        closeExportModal();
+        alert(`导出成功！\n总共导出 ${totalExported} 名学生的数据\n包含4个班级的完整名单`);
+    }
+    
+    // 重置当前班级
+    function resetCurrentClass() {
+        if (!currentClass) {
+            alert('请先选择一个班级');
+            return;
+        }
+        
+        if (!confirm(`确定要重置 ${currentClass} 的所有成绩吗？\n这将清除该班级的所有成绩数据！`)) {
+            return;
+        }
+        
+        const data = classesData[currentClass];
+        students = data.map((item, i) => {
+            let group;
+            if (currentClass === '25应电12班') {
+                group = getGroupForYingDian(i);
+            } else {
+                group = getGroupForStudent(currentClass, i);
+            }
+            
+            return {
+                学号: item[0],
+                姓名: item[1],
+                组别: group,
+                子班级: currentClass === '25应电12班' ? getSubClass(item[0]) : '',
+                课堂表现: 0,
+                小组活动: 0,
+                笔记1: false,
+                笔记2: false,
+                笔记总分: 0,
+                考试成绩: 0,
+                平时总分: 0,
+                总分: 0,
+                selected: false
+            };
+        });
+        
+        // 添加历史记录
+        addHistory('重置班级', students.length, {
+            '班级': currentClass
+        });
+        
+        allClassesData[currentClass] = JSON.parse(JSON.stringify(students));
+        render();
+        saveToLocalStorage();
+        updateClassStatus();
+        alert(`${currentClass} 的成绩已重置！`);
+    }
+    
+    // 检查数据状态
+    function checkDataStatus() {
+        let status = '数据状态检查：\n\n';
+        
+        ['25无人机三班', '25液压三班', '25无人机四班', '25应电12班'].forEach(className => {
+            const expectedCount = classesData[className].length;
+            const actualData = allClassesData[className];
+            
+            if (actualData) {
+                const hasScores = actualData.some(s => 
+                    s.课堂表现 !== 0 || s.小组活动 !== 0 || s.考试成绩 !== 0
+                );
+                status += `${className}：\n`;
+                status += `  - 预期人数：${expectedCount}\n`;
+                status += `  - 实际人数：${actualData.length}\n`;
+                status += `  - 状态：${hasScores ? '有成绩数据' : '无成绩数据'}\n`;
+                
+                // 统计负分情况
+                const negativeScores = actualData.filter(s => s.课堂表现 < 0 || s.小组活动 < 0);
+                if (negativeScores.length > 0) {
+                    status += `  - 负分学生：${negativeScores.length}人\n`;
+                }
+                status += '\n';
+            } else {
+                status += `${className}：未加载（预期 ${expectedCount} 人）\n\n`;
+            }
+        });
+        
+        status += '\n总计：196人（40+30+40+86）';
+        
+        alert(status);
+    }
+    
+    // 保存到本地存储
+    let localDirtyFlag = false;
+    let autoPushTimer = null;
+
+    function saveToLocalStorage(options = {}) {
+        const { skipDirty = false, skipAutoSync = false } = options;
+        try {
+            if (currentClass && students.length > 0) {
+                allClassesData[currentClass] = JSON.parse(JSON.stringify(students));
+            }
+            localStorage.setItem('allClassesData_v3', JSON.stringify(allClassesData));
+            localStorage.setItem('currentClass_v3', currentClass);
+        } catch (e) {
+            console.error('保存失败:', e);
+        }
+
+        // 【已禁用】不再自动推送到Gitee，只能手动点击"保存到云端"按钮
+        // if (!skipDirty && !skipAutoSync && giteeConfig.autoSync) {
+        //     scheduleAutoPushToGitee();
+        // }
+    }
+
+    // 延迟推送到Gitee（避免频繁推送）- 已禁用
+    function scheduleAutoPushToGitee() {
+        // 已禁用自动推送功能
+        console.log('⚠ 自动推送已禁用，请手动点击"保存到云端"按钮');
+    }
+    
+    // 从本地存储加载
+    function loadFromLocalStorage() {
+        try {
+            const saved = localStorage.getItem('allClassesData_v3');
+            const savedClass = localStorage.getItem('currentClass_v3');
+            
+            if (saved) {
+                allClassesData = JSON.parse(saved);
+                console.log('加载保存的数据，班级数:', Object.keys(allClassesData).length);
+                
+                // 验证并修复数据
+                Object.keys(allClassesData).forEach(className => {
+                    if (classesData[className]) {
+                        const expectedCount = classesData[className].length;
+                        const actualCount = allClassesData[className].length;
+                        
+                        if (actualCount !== expectedCount) {
+                            console.warn(`${className} 人数不匹配：预期 ${expectedCount}，实际 ${actualCount}，重新初始化`);
+                            delete allClassesData[className];
+                        } else {
+                            // 确保字段名正确，添加子班级字段
+                            allClassesData[className].forEach((s, i) => {
+                                // 兼容旧字段名
+                                if (s.平时表现 !== undefined && s.课堂表现 === undefined) {
+                                    s.课堂表现 = s.平时表现;
+                                    delete s.平时表现;
+                                }
+                                // 添加子班级字段
+                                if (className === '25应电12班' && !s.子班级) {
+                                    s.子班级 = getSubClass(classesData[className][i][0]);
+                                }
+                            });
+                        }
+                    }
+                });
+                
+                updateClassStatus();
+            }
+            
+            if (savedClass && allClassesData[savedClass]) {
+                selectClass(savedClass);
+            }
+        } catch (e) {
+            console.error('加载失败:', e);
+        }
+    }
+    
+    // 全局鼠标事件处理
+    document.addEventListener('mouseup', function() {
+        if (isSelecting) {
+            isSelecting = false;
+            clearSelectionVisual();
+        }
+    });
+    
+    document.addEventListener('mouseleave', function() {
+        if (isSelecting) {
+            isSelecting = false;
+            clearSelectionVisual();
+        }
+    });
+    
+    // ==================== WPS API 集成功能 ====================
+    const REMOTE_SYNC = {
+        lastRevision: null,
+        pollingTimer: null,
+        pendingPush: null,
+        lastPullTime: null
+    };
+
+    function hasCloudEndpoint() {
+        return currentCloudEndpoint().length > 0;
+    }
+
+    function ensureBooleanFlag(value) {
+        if (value === true || value === false) return value;
+        if (typeof value === 'number') return value > 0;
+        if (typeof value === 'string') {
+            const normalized = value.trim();
+            return normalized === '√' || normalized === 'true' || normalized === '1' || normalized === '是';
+        }
+        return false;
+    }
+
+    function createBaseStudent(className, baseTuple, index) {
+        const studentId = baseTuple[0];
+        const studentName = baseTuple[1];
+        const baseGroup = className === '25应电12班'
+            ? getGroupForYingDian(index)
+            : getGroupForStudent(className, index);
+
+        return {
+            学号: studentId,
+            姓名: studentName,
+            组别: baseGroup,
+            子班级: className === '25应电12班' ? getSubClass(studentId) : '',
+            课堂表现: 0,
+            小组活动: 0,
+            笔记1: false,
+            笔记2: false,
+            笔记总分: 0,
+            考试成绩: 0,
+            平时总分: 0,
+            总分: 0,
+            最后更新: null,
+            selected: false
+        };
+    }
+
+    function recalcStudentRecord(record) {
+        record.课堂表现 = parseFloat(record.课堂表现) || 0;
+        record.小组活动 = parseFloat(record.小组活动) || 0;
+        record.考试成绩 = Math.min(50, Math.max(0, parseFloat(record.考试成绩) || 0));
+        record.笔记1 = ensureBooleanFlag(record.笔记1);
+        record.笔记2 = ensureBooleanFlag(record.笔记2);
+        record.笔记总分 = (record.笔记1 ? 5 : 0) + (record.笔记2 ? 5 : 0);
+        record.平时总分 = record.课堂表现 + record.小组活动 + record.笔记总分;
+        record.总分 = record.平时总分 + record.考试成绩;
+        record.selected = false;
+        return record;
+    }
+
+    function mergeStudentData(baseStudent, snapshot) {
+        if (!snapshot) {
+            return recalcStudentRecord(baseStudent);
+        }
+
+        const merged = { ...baseStudent };
+        const numericFields = ['课堂表现', '小组活动', '笔记总分', '平时总分', '考试成绩', '总分'];
+        numericFields.forEach(field => {
+            if (snapshot[field] !== undefined && snapshot[field] !== null && snapshot[field] !== '') {
+                merged[field] = snapshot[field];
+            }
+        });
+
+        if (snapshot.笔记1 !== undefined) merged.笔记1 = ensureBooleanFlag(snapshot.笔记1);
+        if (snapshot.笔记2 !== undefined) merged.笔记2 = ensureBooleanFlag(snapshot.笔记2);
+        if (snapshot.组别) merged.组别 = snapshot.组别;
+        if (snapshot.子班级) merged.子班级 = snapshot.子班级;
+        if (snapshot.备注) merged.备注 = snapshot.备注;
+        merged.最后更新 = snapshot.最后更新 || snapshot.lastUpdated || merged.最后更新 || null;
+
+        return recalcStudentRecord(merged);
+    }
+
+    function buildClassSnapshot(className, remoteList = []) {
+        const baseline = classesData[className] || [];
+        const remoteMap = new Map();
+        remoteList.forEach(item => {
+            if (!item) return;
+            if (item.学号) {
+                remoteMap.set(String(item.学号).trim(), item);
+            }
+        });
+
+        return baseline.map((entry, index) => {
+            const baseStudent = createBaseStudent(className, entry, index);
+            const remote = remoteMap.get(baseStudent.学号) || remoteList.find(s => s && s.姓名 === baseStudent.姓名);
+            return mergeStudentData(baseStudent, remote);
+        });
+    }
+
+    function serializeStudentForRemote(student) {
+        const timestamp = new Date().toISOString();
+        const payload = {
+            学号: student.学号,
+            姓名: student.姓名,
+            组别: student.组别,
+            子班级: student.子班级 || '',
+            课堂表现: student.课堂表现,
+            小组活动: student.小组活动,
+            笔记1: !!student.笔记1,
+            笔记2: !!student.笔记2,
+            笔记总分: student.笔记总分,
+            平时总分: student.平时总分,
+            考试成绩: student.考试成绩,
+            总分: student.总分,
+            最后更新: student.最后更新 || timestamp
+        };
+        student.最后更新 = payload.最后更新;
+        return payload;
+    }
+
+    function applyRemoteSnapshot(snapshot = {}, options = {}) {
+        if (!snapshot || !snapshot.classes) {
+            return;
+        }
+
+        let hasUpdates = false;
+        Object.keys(classesData).forEach(className => {
+            const remoteStudents = snapshot.classes[className];
+            if (remoteStudents) {
+                allClassesData[className] = buildClassSnapshot(className, remoteStudents);
+                hasUpdates = true;
+            } else if (!allClassesData[className]) {
+                allClassesData[className] = buildClassSnapshot(className, []);
+            }
+        });
+
+        if (hasUpdates || options.forceRender) {
+            if (currentClass && allClassesData[currentClass]) {
+                students = JSON.parse(JSON.stringify(allClassesData[currentClass]));
+                updateGroups();
+                render();
+            }
+            updateClassStatus();
+            saveToLocalStorage({ skipDirty: true });
+        }
+    }
+
+    async function fetchRemoteSnapshot(options = {}) {
+        const endpoint = currentCloudEndpoint();
+        if (!endpoint) {
+            updateWPSStatus('disconnected', '未配置同步服务');
+            return null;
+        }
+
+        try {
+            syncInProgress = true;
+            if (!options.silent) {
+                updateWPSStatus('syncing', '正在从WPS加载数据...');
+            }
+
+            const payload = {
+                fileId: wpsConfig.fileId
+            };
+            
+            const response = await axios.post(`${endpoint}/api/load`, payload, {
+                timeout: 30000,
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            const result = response.data || {};
+
+            if (result.success) {
+                const data = result.data || {};
+                REMOTE_SYNC.lastRevision = result.timestamp || Date.now();
+                REMOTE_SYNC.lastPullTime = new Date();
+                
+                // 应用远程数据
+                const snapshot = { classes: data };
+                applyRemoteSnapshot(snapshot, { forceRender: !currentClass });
+                
+                wpsConnected = true;
+                localDirtyFlag = false;
+                wpsConfig.lastSyncTime = new Date().toISOString();
+                saveWPSConfigToStorage();
+                updateWPSStatus('connected', `已拉取 ${new Date().toLocaleTimeString()}`);
+                
+                if (options.toast) {
+                    const totalStudents = Object.values(data).reduce((sum, students) => sum + students.length, 0);
+                    alert(`✅ 已从WPS加载最新数据\n\n共 ${totalStudents} 条学生记录`);
+                }
+                
+                if (wpsConfig.autoSync) {
+                    startRemotePolling();
+                }
+                return data;
+            }
+
+            throw new Error(result.error || 'WPS接口返回未知错误');
+        } catch (error) {
+            console.error('从WPS加载数据失败:', error);
+            if (!options.silent) {
+                alert('❌ 从WPS加载数据失败\n\n' +
+                      '错误：' + (error.message || '未知错误') + '\n\n' +
+                      '请检查：\n' +
+                      '1. Worker服务是否正常运行\n' +
+                      '2. WPS文档ID是否正确\n' +
+                      '3. 网络连接是否正常');
+            }
+            updateWPSStatus('disconnected', '离线模式');
+            wpsConnected = false;
+            throw error;
+        } finally {
+            syncInProgress = false;
+        }
+    }
+    
+    // 手动刷新功能
+    async function refreshFromWPS() {
+        try {
+            await fetchRemoteSnapshot({ toast: true });
+        } catch (error) {
+            // 错误已在fetchRemoteSnapshot中处理
+        }
+    }
+
+    function scheduleAutoPush(delay = 3000) {
+        if (!wpsConfig.autoSync) return;
+        if (!hasCloudEndpoint() || !wpsConnected) return;
+        if (REMOTE_SYNC.pendingPush) {
+            clearTimeout(REMOTE_SYNC.pendingPush);
+        }
+        REMOTE_SYNC.pendingPush = setTimeout(() => {
+            if (!localDirtyFlag || syncInProgress) {
+                return;
+            }
+            pushRemoteSnapshot({ silent: true }).catch(() => {});
+        }, delay);
+    }
+
+    async function pushRemoteSnapshot(options = {}) {
+        const endpoint = currentCloudEndpoint();
+        if (!endpoint) {
+            if (!options.silent) {
+                alert('尚未配置同步服务地址。\n\n请先点击"⚙️ WPS配置"按钮进行配置。');
+            }
+            return null;
+        }
+
+        if (syncInProgress && !options.force) {
+            return;
+        }
+
+        // 准备同步数据
+        const syncData = prepareSyncData();
+
+        const requestPayload = {
+            fileId: wpsConfig.fileId,
+            data: syncData.classes
+        };
+
+        try {
+            syncInProgress = true;
+            if (!options.silent) {
+                updateWPSStatus('syncing', '正在同步至WPS...');
+            }
+
+            const response = await axios.post(`${endpoint}/api/sync`, requestPayload, {
+                timeout: 30000,
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            const result = response.data || {};
+
+            if (result.success) {
+                REMOTE_SYNC.lastRevision = result.timestamp || Date.now();
+                REMOTE_SYNC.lastPullTime = new Date();
+                wpsConnected = true;
+                localDirtyFlag = false;
+                wpsConfig.lastSyncTime = new Date().toISOString();
+                saveWPSConfigToStorage();
+                updateWPSStatus('connected', `已同步 ${new Date().toLocaleTimeString()}`);
+                if (options.toast !== false) {
+                    const total = syncData.totalStudents || 0;
+                    alert(`🎉 同步成功！\n\n已推送 ${total} 条学生记录到WPS在线表格`);
+                }
+                return result;
+            }
+
+            throw new Error(result.error || '同步失败');
+        } catch (error) {
+            console.error('同步到WPS失败:', error);
+            if (!options.silent) {
+                alert('❌ 同步到WPS失败\n\n' +
+                      '错误：' + (error.message || '未知错误') + '\n\n' +
+                      '请检查：\n' +
+                      '1. Worker服务是否正常运行\n' +
+                      '2. WPS文档ID是否正确\n' +
+                      '3. 网络连接是否正常');
+            }
+            updateWPSStatus('disconnected', '同步失败');
+            wpsConnected = false;
+            throw error;
+        } finally {
+            syncInProgress = false;
+        }
+    }
+
+    function startRemotePolling() {
+        if (!wpsConfig.autoSync) return;
+        if (!hasCloudEndpoint()) return;
+        stopRemotePolling();
+        const interval = Number.isFinite(wpsConfig.pollingInterval) ? wpsConfig.pollingInterval : 60000;
+        REMOTE_SYNC.pollingTimer = setInterval(() => {
+            fetchRemoteSnapshot({ silent: true }).catch(() => {});
+        }, Math.max(interval, 15000));
+    }
+
+    function stopRemotePolling() {
+        if (REMOTE_SYNC.pollingTimer) {
+            clearInterval(REMOTE_SYNC.pollingTimer);
+            REMOTE_SYNC.pollingTimer = null;
+        }
+    }
+
+    async function initializeRemoteSync() {
+        // 更新按钮显示状态
+        const hasConfig = hasCloudEndpoint();
+        document.getElementById('wpsSyncBtn').style.display = 'inline-block'; // 总是显示同步按钮
+        document.getElementById('wpsRefreshBtn').style.display = hasConfig ? 'inline-block' : 'none';
+        
+        if (!hasConfig) {
+            updateWPSStatus('disconnected', '未配置 - 点击"⚙️ WPS配置"');
+            console.log('<i class="fa-solid fa-lightbulb"></i> 提示：点击"⚙️ WPS配置"按钮配置Worker服务');
+            return;
+        }
+        
+        updateWPSStatus('disconnected', '已配置 - 点击"同步"测试');
+        console.log('✅ 已配置WPS同步服务');
+        
+        // 如果启用自动同步，尝试拉取最新数据
+        if (wpsConfig.autoSync) {
+        try {
+            await fetchRemoteSnapshot({ silent: true });
+        } catch (error) {
+            console.warn('初始化WPS同步失败:', error.message || error);
+            }
+        }
+    }
+
+    async function refreshFromWPS() {
+        try {
+            await fetchRemoteSnapshot({ toast: true });
+        } catch (error) {
+            console.warn('手动拉取WPS数据失败:', error.message || error);
+        }
+    }
+
+    
+    // WPS 辅助函数
+    function currentCloudEndpoint() {
+        return (wpsConfig.syncEndpoint || DEFAULT_CLOUD_FUNCTION_URL || '').trim();
+    }
+
+    console.log('WPS 云端同步模块已加载');
+
+    async function testWPSConnection() {
+        if (!hasCloudEndpoint()) {
+            alert('<i class="fa-solid fa-lightbulb"></i> 提示：您尚未配置同步服务地址\n\n' +
+                  '当前为【手动同步模式】，功能说明：\n' +
+                  '━━━━━━━━━━━━━━━━━━━\n' +
+                  '✅ 本地存储：数据安全保存在浏览器\n' +
+                  '✅ 手动同步：点击"📤 同步"按钮\n' +
+                  '✅ 自动复制：数据自动复制到剪贴板\n' +
+                  '✅ 简单粘贴：在WPS表格中按Ctrl+V粘贴\n\n' +
+                  '━━━━━━━━━━━━━━━━━━━\n' +
+                  '如需自动同步，请配置同步服务地址（Worker URL）');
+            return false;
+        }
+
+        try {
+            await fetchRemoteSnapshot({ silent: false });
+            alert('✅ WPS同步服务连接成功！');
+            return true;
+        } catch (error) {
+            console.error('WPS连接测试失败:', error);
+            updateWPSStatus('disconnected', '离线模式');
+            alert('<i class="fa-solid fa-triangle-exclamation"></i> 暂时无法连接到WPS同步服务，请稍后再试。');
+            return false;
+        }
+    }
+
+    // ==================== Gitee 云同步功能 ====================
+
+    // 更新Gitee状态显示
+    function updateGiteeStatus(status, color = '#666') {
+        const statusEl = document.getElementById('giteeStatusText');
+        if (statusEl) {
+            statusEl.textContent = status;
+            statusEl.style.color = color;
+        }
+    }
+
+    // 推送数据到Gitee
+    async function pushToGitee() {
+        console.log('💾 pushToGitee函数被调用');
+
+        if (syncInProgress) {
+            showToast('正在同步中，请稍候...', 'warning');
+            console.log('⚠ 已有同步进行中');
+            return;
+        }
+
+        try {
+            syncInProgress = true;
+            updateGiteeStatus('推送中...', '#ff9800');
+            showToast('正在推送到Gitee...', 'info', 2000);
+            console.log('🚀 开始推送数据');
+
+            // 保存当前班级数据
+            if (currentClass && students.length > 0) {
+                allClassesData[currentClass] = JSON.parse(JSON.stringify(students));
+            }
+
+            // 准备JSON数据
+            const jsonData = {
+                version: '1.0',
+                timestamp: new Date().toISOString(),
+                lastModified: new Date().toLocaleString('zh-CN'),
+                classes: allClassesData
+            };
+
+            const content = JSON.stringify(jsonData, null, 2);
+            const base64Content = btoa(unescape(encodeURIComponent(content)));
+            console.log('📦 数据已编码，大小:', content.length, '字节');
+
+            // 【关键改进】总是重新获取最新的SHA，避免冲突
+            let sha = null;
+            console.log('🔍 获取最新文件SHA...');
+                try {
+                    const getResponse = await fetch(
+                        `https://gitee.com/api/v5/repos/${giteeConfig.owner}/${giteeConfig.repo}/contents/${giteeConfig.filePath}?access_token=${giteeConfig.token}&ref=${giteeConfig.branch}`,
+                        { method: 'GET' }
+                    );
+                    if (getResponse.ok) {
+                        const fileData = await getResponse.json();
+                        sha = fileData.sha;
+                        console.log('✅ 获取SHA成功:', sha.substring(0, 8));
+                } else if (getResponse.status === 404) {
+                    console.log('📝 文件不存在，将创建新文件');
+                } else {
+                    console.warn('⚠ 获取SHA失败，状态码:', getResponse.status);
+                    }
+                } catch (e) {
+                console.log('⚠ 获取SHA异常:', e.message);
+            }
+
+            // 推送到Gitee
+            console.log('📤 正在推送到Gitee API...');
+            const url = `https://gitee.com/api/v5/repos/${giteeConfig.owner}/${giteeConfig.repo}/contents/${giteeConfig.filePath}`;
+            const body = {
+                access_token: giteeConfig.token,
+                content: base64Content,
+                message: `更新成绩数据 - ${new Date().toLocaleString('zh-CN')}`,
+                branch: giteeConfig.branch
+            };
+
+            // 如果有SHA，说明文件已存在，需要提供SHA用于更新
+            if (sha) {
+                body.sha = sha;
+                console.log('📝 更新现有文件，SHA:', sha.substring(0, 8));
+            } else {
+                console.log('📝 创建新文件');
+            }
+
+            // Gitee API：创建和更新都使用PUT方法
+            const response = await fetch(url, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+
+            console.log('📡 API响应状态:', response.status);
+
+            if (!response.ok) {
+                let errorMsg = '推送失败';
+                try {
+                const error = await response.json();
+                    console.error('❌ API错误详情:', error);
+                    errorMsg = error.message || error.error || errorMsg;
+                    
+                    // 特殊错误处理
+                    if (response.status === 400) {
+                        errorMsg = '请求参数错误，请检查token和仓库配置';
+                    } else if (response.status === 401) {
+                        errorMsg = 'Token无效或已过期，请检查配置';
+                    } else if (response.status === 403) {
+                        errorMsg = '没有权限，请检查Token权限';
+                    } else if (response.status === 404) {
+                        errorMsg = '仓库不存在，请检查owner和repo配置';
+                    }
+                } catch (e) {
+                    errorMsg = `HTTP ${response.status}: ${response.statusText}`;
+                }
+                throw new Error(errorMsg);
+            }
+
+            const result = await response.json();
+            giteeConfig.sha = result.content.sha;
+            giteeConfig.lastSyncTime = new Date().toISOString();
+            saveGiteeConfigToStorage();
+            lastSyncTime = new Date();
+
+            const totalStudents = Object.values(allClassesData).reduce((sum, arr) => sum + arr.length, 0);
+            // 成功推送，底部小字提示
+            updateSyncStatus(`已保存 ${totalStudents} 条记录到云端 ${new Date().toLocaleTimeString()}`, 'success');
+            updateGiteeStatus(`已同步 ${new Date().toLocaleTimeString()}`, '#4caf50');
+            console.log('✅ Gitee推送成功');
+            
+            // 添加历史记录
+            addHistory('保存到云端', totalStudents, {
+                '时间': new Date().toLocaleString('zh-CN')
+            });
+
+        } catch (error) {
+            console.error('❌ Gitee推送失败:', error);
+            
+            // 更详细的错误提示
+            let userMessage = `推送失败: ${error.message}\n\n`;
+            if (error.message.includes('Token')) {
+                userMessage += '请检查：\n1. Token是否正确\n2. Token是否有写入权限';
+            } else if (error.message.includes('仓库')) {
+                userMessage += '请检查：\n1. 仓库地址是否正确\n2. 仓库是否存在';
+            } else if (error.message.includes('网络') || error.message.includes('Failed to fetch')) {
+                userMessage += '请检查网络连接';
+            } else {
+                userMessage += '请查看控制台获取详细错误信息';
+            }
+            
+            showToast(`❌ ${userMessage}`, 'error', 8000);
+            updateGiteeStatus('推送失败', '#f44336');
+        } finally {
+            syncInProgress = false;
+            console.log('🏁 推送流程结束');
+        }
+    }
+
+    // 从Gitee拉取数据
+    async function pullFromGitee() {
+        if (syncInProgress) {
+            showToast('正在同步中，请稍候...', 'warning');
+            return;
+        }
+
+        try {
+            syncInProgress = true;
+            updateGiteeStatus('拉取中...', '#2196f3');
+            showToast('正在从Gitee拉取数据...', 'info', 2000);
+
+            const url = `https://gitee.com/api/v5/repos/${giteeConfig.owner}/${giteeConfig.repo}/contents/${giteeConfig.filePath}?access_token=${giteeConfig.token}&ref=${giteeConfig.branch}`;
+
+            const response = await fetch(url, { method: 'GET' });
+
+            if (!response.ok) {
+                if (response.status === 404) {
+                    showToast('<i class="fa-solid fa-triangle-exclamation"></i> Gitee仓库中还没有数据，请先推送', 'warning', 4000);
+                    updateGiteeStatus('无数据', '#ff9800');
+                    return;
+                }
+                throw new Error('拉取失败');
+            }
+
+            const fileData = await response.json();
+            console.log('📦 Gitee返回的数据结构:', fileData);
+
+            // 检查是否返回空数组（文件不存在）
+            if (Array.isArray(fileData) && fileData.length === 0) {
+                console.log('<i class="fa-solid fa-triangle-exclamation"></i> 文件不存在，这是首次使用');
+                throw new Error('文件不存在，请先点击"保存到云端"创建数据文件');
+            }
+
+            if (!fileData.content) {
+                console.error('❌ Gitee返回数据缺少content字段:', fileData);
+                throw new Error('Gitee返回数据格式错误：缺少content字段');
+            }
+
+            giteeConfig.sha = fileData.sha;
+
+            // 解码Base64内容（先去除换行符）
+            const base64Content = fileData.content.replace(/\s/g, '');
+            const content = decodeURIComponent(escape(atob(base64Content)));
+            const jsonData = JSON.parse(content);
+            console.log('✅ Base64解码成功');
+
+            // 应用数据
+            if (jsonData.classes) {
+                allClassesData = jsonData.classes;
+
+                // 如果当前有选中的班级，更新显示
+                if (currentClass && allClassesData[currentClass]) {
+                    students = JSON.parse(JSON.stringify(allClassesData[currentClass]));
+                    render();
+                }
+
+                updateClassStatus();
+                saveToLocalStorage();
+                giteeConfig.lastSyncTime = new Date().toISOString();
+                saveGiteeConfigToStorage();
+                lastSyncTime = new Date();
+
+                const totalStudents = Object.values(allClassesData).reduce((sum, arr) => sum + arr.length, 0);
+                // 成功拉取，底部小字提示
+                updateSyncStatus(`已从云端加载 ${totalStudents} 条记录 ${new Date().toLocaleTimeString()}`, 'success');
+                updateGiteeStatus(`已同步 ${new Date().toLocaleTimeString()}`, '#4caf50');
+                console.log('✅ Gitee拉取成功');
+            }
+
+        } catch (error) {
+            console.error('Gitee拉取失败:', error);
+            showToast(`❌ 拉取失败: ${error.message}`, 'error', 5000);
+            updateGiteeStatus('拉取失败', '#f44336');
+        } finally {
+            syncInProgress = false;
+        }
+    }
+
+    // 自动同步（定期拉取）- 已禁用
+    let autoSyncTimer = null;
+    function startAutoSync() {
+        // 已禁用自动同步功能
+        console.log('⚠ 自动同步已禁用，请手动点击"🔄 加载最新数据"按钮');
+        return;
+    }
+
+    function stopAutoSync() {
+        if (autoSyncTimer) {
+            clearInterval(autoSyncTimer);
+            autoSyncTimer = null;
+        }
+    }
+
+    // 同步到WPS（保留原功能作为备用）
+    function syncToWPS() {
+        // 保存当前班级数据
+        if (currentClass && students.length > 0) {
+            allClassesData[currentClass] = JSON.parse(JSON.stringify(students));
+        }
+        
+        const allData = [];
+        let totalRecords = 0;
+        
+        // 收集所有班级数据到汇总
+        const classOrder = ['25无人机三班', '25液压三班', '25无人机四班', '25应电12班'];
+        
+        classOrder.forEach(className => {
+            let classStudents;
+            
+            // 获取班级数据
+            if (allClassesData[className] && allClassesData[className].length > 0) {
+                classStudents = allClassesData[className];
+            } else {
+                // 如果没有数据，创建空模板
+                const data = classesData[className];
+                classStudents = data.map((item, i) => {
+                    let group;
+                    if (className === '25应电12班') {
+                        group = getGroupForYingDian(i);
+                    } else {
+                        group = getGroupForStudent(className, i);
+                    }
+                    
+                    return {
+                        学号: item[0],
+                        姓名: item[1],
+                        组别: group,
+                        子班级: className === '25应电12班' ? getSubClass(item[0]) : '',
+                        课堂表现: 0,
+                        小组活动: 0,
+                        笔记1: false,
+                        笔记2: false,
+                        笔记总分: 0,
+                        考试成绩: 0,
+                        平时总分: 0,
+                        总分: 0
+                    };
+                });
+            }
+            
+            totalRecords += classStudents.length;
+            
+            // 收集到汇总数据（使用数组，方便生成TSV）
+            classStudents.forEach(s => {
+                allData.push([
+                    className,
+                    s.学号,
+                    s.姓名,
+                    s.组别,
+                    s.课堂表现,
+                    s.小组活动,
+                    s.笔记1 ? '√' : '',
+                    s.笔记2 ? '√' : '',
+                    s.笔记总分,
+                    s.平时总分,
+                    s.考试成绩,
+                    s.总分
+                ]);
+            });
+        });
+        
+        // 生成TSV格式（制表符分隔，适合直接粘贴到表格）
+        const headers = ['班级', '学号', '姓名', '组别', '课堂表现', '小组活动', '笔记1', '笔记2', '笔记总分', '平时总分', '考试成绩', '总分'];
+        let tsvContent = headers.join('\t') + '\n';
+        allData.forEach(row => {
+            tsvContent += row.join('\t') + '\n';
+        });
+        
+        // 复制到剪贴板
+        navigator.clipboard.writeText(tsvContent).then(() => {
+            showToast(`✅ 已复制 ${totalRecords} 条记录到剪贴板`, 'success', 3000);
+            // 自动打开WPS表格
+            window.open('https://www.kdocs.cn/l/cvodF5Uw2mxZ', '_blank');
+            showToast('📋 请在WPS表格中粘贴（Ctrl+V）', 'info', 5000);
+        }).catch(err => {
+            console.error('复制失败:', err);
+            
+            // 如果剪贴板API失败，显示数据让用户手动复制
+            const textarea = document.createElement('textarea');
+            textarea.value = tsvContent;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            
+            try {
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                showToast(`✅ 已复制 ${totalRecords} 条记录`, 'success');
+                window.open('https://www.kdocs.cn/l/cvodF5Uw2mxZ', '_blank');
+                showToast('📋 请在WPS表格中粘贴（Ctrl+V）', 'info', 5000);
+            } catch (e) {
+                document.body.removeChild(textarea);
+                showToast('<i class="fa-solid fa-triangle-exclamation"></i> 复制失败，请使用"从WPS导入"功能', 'error');
+            }
+        });
+    }
+    
+    // 准备同步数据
+    function prepareSyncData() {
+        // 确保最新编辑的班级已写回缓存
+        saveToLocalStorage({ skipDirty: true, skipAutoSync: true });
+
+        const classesSnapshot = {};
+        let totalStudents = 0;
+
+        Object.keys(classesData).forEach(className => {
+            const classStudents = allClassesData[className] && allClassesData[className].length > 0
+                ? allClassesData[className]
+                : buildClassSnapshot(className, []);
+
+            classesSnapshot[className] = classStudents.map(student => serializeStudentForRemote(student));
+            totalStudents += classesSnapshot[className].length;
+        });
+
+        return {
+            generatedAt: new Date().toISOString(),
+            totalStudents,
+            classes: classesSnapshot
+        };
+    }
+    
+    // 处理从WPS获取的数据
+    function processWPSData(wpsData) {
+        if (!wpsData.data || !Array.isArray(wpsData.data)) {
+            console.error('WPS数据格式错误');
+            return;
+        }
+        
+        // 按班级分组数据
+        const classGroups = {};
+        wpsData.data.forEach(row => {
+            const className = row['班级'];
+            if (!classGroups[className]) {
+                classGroups[className] = [];
+            }
+            classGroups[className].push(row);
+        });
+        
+        // 更新本地数据
+        Object.keys(classGroups).forEach(className => {
+            if (classesData[className]) {
+                const classRows = classGroups[className];
+                const originalData = classesData[className];
+                
+                allClassesData[className] = originalData.map((item, i) => {
+                    const wpsStudent = classRows.find(row => 
+                        row['学号'] === item[0] || row['姓名'] === item[1]
+                    );
+                    
+                    let group;
+                    if (className === '25应电12班') {
+                        group = getGroupForYingDian(i);
+                    } else {
+                        group = getGroupForStudent(className, i);
+                    }
+                    
+                    if (wpsStudent) {
+                        return {
+                            学号: item[0],
+                            姓名: item[1],
+                            组别: group,
+                            子班级: className === '25应电12班' ? getSubClass(item[0]) : '',
+                            课堂表现: parseFloat(wpsStudent['课堂表现']) || 0,
+                            小组活动: parseFloat(wpsStudent['小组活动']) || 0,
+                            笔记1: wpsStudent['笔记1'] === '√' || wpsStudent['笔记1'] === true,
+                            笔记2: wpsStudent['笔记2'] === '√' || wpsStudent['笔记2'] === true,
+                            笔记总分: 0,
+                            考试成绩: parseFloat(wpsStudent['考试成绩']) || 0,
+                            平时总分: 0,
+                            总分: 0,
+                            selected: false
+                        };
+                    } else {
+                        // 保持原始数据
+                        return {
+                            学号: item[0],
+                            姓名: item[1],
+                            组别: group,
+                            子班级: className === '25应电12班' ? getSubClass(item[0]) : '',
+                            课堂表现: 0,
+                            小组活动: 0,
+                            笔记1: false,
+                            笔记2: false,
+                            笔记总分: 0,
+                            考试成绩: 0,
+                            平时总分: 0,
+                            总分: 0,
+                            selected: false
+                        };
+                    }
+                });
+                
+                // 重新计算分数
+                allClassesData[className].forEach((s, i) => {
+                    s.笔记总分 = (s.笔记1 ? 5 : 0) + (s.笔记2 ? 5 : 0);
+                    s.平时总分 = s.课堂表现 + s.小组活动 + s.笔记总分;
+                    s.总分 = s.平时总分 + s.考试成绩;
+                });
+            }
+        });
+        
+        // 如果当前有选中的班级，更新显示
+        if (currentClass && allClassesData[currentClass]) {
+            students = JSON.parse(JSON.stringify(allClassesData[currentClass]));
+            render();
+        }
+        
+        updateClassStatus();
+        saveToLocalStorage();
+    }
+    
+    // 更新WPS状态显示
+    function updateWPSStatus(status, message) {
+        const statusEl = document.getElementById('wpsStatus');
+        
+        // 如果状态元素不存在，忽略（已简化UI，可能已移除该元素）
+        if (!statusEl) {
+            console.log('WPS状态:', status, message);
+            return;
+        }
+        
+        statusEl.className = `wps-status ${status}`;
+        statusEl.innerHTML = `<span class="sync-indicator ${status}"></span>${message}`;
+    }
+    
+     // 显示WPS配置界面
+    function showWPSConfig() {
+         document.getElementById('wpsWorkerUrl').value = wpsConfig.syncEndpoint || '';
+         document.getElementById('wpsFileId').value = wpsConfig.fileId || '';
+         document.getElementById('wpsAutoSyncCheck').checked = wpsConfig.autoSync || false;
+        document.getElementById('wpsConfigModal').classList.add('show');
+    }
+    
+    // 保存WPS配置
+    function saveWPSConfigReal() {
+        const workerUrl = document.getElementById('wpsWorkerUrl').value.trim();
+        const fileId = document.getElementById('wpsFileId').value.trim();
+        const autoSync = document.getElementById('wpsAutoSyncCheck').checked;
+        
+        if (!workerUrl) {
+            alert('请输入Worker服务地址');
+            return;
+        }
+        
+        if (!fileId) {
+            alert('请输入WPS文档ID');
+            return;
+        }
+        
+        // 验证URL格式
+        try {
+            new URL(workerUrl);
+        } catch (e) {
+            alert('Worker URL格式不正确，请检查');
+            return;
+        }
+        
+        wpsConfig.syncEndpoint = workerUrl;
+        wpsConfig.fileId = fileId;
+        wpsConfig.autoSync = autoSync;
+        
+        saveWPSConfigToStorage();
+        
+        alert('✅ WPS配置已保存！\n\n' +
+              '现在可以：\n' +
+              '• 点击"📤 同步"按钮将数据推送到WPS\n' +
+              '• 点击"🔄 拉取最新"从WPS获取最新数据\n' +
+              (autoSync ? '• 系统将每60秒自动同步' : ''));
+        
+        closeWPSConfigReal();
+        
+        // 如果启用自动同步，初始化
+        if (autoSync) {
+                initializeRemoteSync();
+            } else {
+            stopRemotePolling();
+        }
+        
+        // 更新状态
+        updateWPSStatus('disconnected', hasCloudEndpoint() ? '已配置，点击同步测试' : '未配置');
+        
+        // 显示同步按钮
+        document.getElementById('wpsSyncBtn').style.display = hasCloudEndpoint() ? 'inline-block' : 'none';
+        document.getElementById('openWPSBtn').style.display = 'inline-block';
+    }
+    
+    // 测试WPS连接
+    async function testWPSConnection() {
+        const workerUrl = document.getElementById('wpsWorkerUrl').value.trim();
+        const fileId = document.getElementById('wpsFileId').value.trim();
+        
+        if (!workerUrl || !fileId) {
+            alert('请先填写Worker URL和文档ID');
+            return;
+        }
+        
+        try {
+            updateWPSStatus('syncing', '正在测试连接...');
+            
+            // 测试Worker健康检查接口
+            const response = await axios.get(`${workerUrl}/api/health`, { timeout: 5000 });
+            
+            if (response.data && response.data.status === 'ok') {
+                alert('✅ Worker连接成功！\n\n' +
+                      '服务状态：正常\n' +
+                      '现在可以保存配置并开始使用');
+                updateWPSStatus('connected', 'Worker连接正常');
+            } else {
+                throw new Error('Worker响应格式异常');
+            }
+        } catch (error) {
+            console.error('连接测试失败:', error);
+            alert('❌ 连接测试失败\n\n' +
+                  '错误信息：' + (error.message || '未知错误') + '\n\n' +
+                  '请检查：\n' +
+                  '1. Worker URL是否正确\n' +
+                  '2. Worker是否已部署\n' +
+                  '3. 网络连接是否正常');
+            updateWPSStatus('disconnected', '连接失败');
+        }
+    }
+    
+    // 关闭WPS配置
+    function closeWPSConfigReal() {
+        document.getElementById('wpsConfigModal').classList.remove('show');
+    }
+    
+    // 检查是否配置了云端点
+    function hasCloudEndpoint() {
+        return !!(wpsConfig.syncEndpoint && wpsConfig.fileId);
+    }
+    
+    // 获取当前云端点
+    function currentCloudEndpoint() {
+        if (!wpsConfig.syncEndpoint || !wpsConfig.fileId) {
+            return null;
+        }
+        return wpsConfig.syncEndpoint;
+    }
+    
+    // 自动同步功能已简化（使用防抖机制）
+    
+    // 防抖同步 - 避免频繁同步
+    let syncTimeout = null;
+    function debouncedSync() {
+        localDirtyFlag = true;
+        if (syncTimeout) {
+            clearTimeout(syncTimeout);
+        }
+        syncTimeout = setTimeout(() => {
+            scheduleAutoPush();
+        }, 2000);
+    }
+    
+    // 增强的同步功能 - 包含重试机制
+    async function syncToWPSWithRetry(maxRetries = 3) {
+        let retryCount = 0;
+        
+        while (retryCount < maxRetries) {
+            try {
+                await syncToWPS();
+                return true;
+            } catch (error) {
+                retryCount++;
+                console.warn(`WPS同步失败，重试第${retryCount}次:`, error);
+                
+                if (retryCount < maxRetries) {
+                    // 等待一段时间后重试
+                    await new Promise(resolve => setTimeout(resolve, 2000 * retryCount));
+                } else {
+                    console.error('WPS同步最终失败:', error);
+                    updateWPSStatus('disconnected', '同步失败');
+                    return false;
+                }
+            }
+        }
+    }
+    
+    // 连接状态检查已简化（不再需要OAuth方式）
+    
+    // 显示CORS帮助信息
+    function showCORSHelp() {
+        const helpMessage = `
+        CORS跨域问题解决方案：
+        
+        方案1：使用代理服务器（推荐）
+        1. 安装Node.js: https://nodejs.org/
+        2. 在项目目录运行：
+           npm install
+           npm start
+        3. 访问: http://localhost:3001/成绩册.html
+        
+        方案2：使用本地存储增强
+        系统已自动启用本地存储增强功能，
+        数据会安全保存在浏览器中。
+        
+        方案3：部署到Web服务器
+        将文件上传到支持HTTPS的Web服务器。
+        `;
+        
+        alert(helpMessage);
+        
+        // 启用本地存储增强模式
+        enableLocalStorageMode();
+    }
+    
+    // 启用离线模式
+    function enableOfflineMode() {
+        console.log('启用离线模式');
+        updateWPSStatus('disconnected', '离线模式');
+        stopRemotePolling();
+        wpsConnected = false;
+
+        // 显示离线模式提示
+        showOfflineModeHelp();
+
+        // 增强本地存储功能
+        enhanceLocalStorage();
+    }
+    
+    // 显示离线模式帮助
+    function showOfflineModeHelp() {
+        const helpMessage = `
+        系统已启用离线模式！
+        
+        ✅ 数据安全：所有数据保存在浏览器本地
+        ✅ 自动备份：每30秒自动备份一次
+        ✅ 数据导出：支持JSON格式导出
+        ✅ 完全离线：无需网络连接
+        
+        如需使用WPS云端同步：
+        1. 启动代理服务器：npm start
+        2. 访问：http://localhost:3001/成绩册.html
+        
+        当前功能完全正常，可以正常使用所有成绩管理功能！
+        `;
+        
+        // 延迟显示，避免阻塞初始化
+        setTimeout(() => {
+            alert(helpMessage);
+        }, 1000);
+    }
+    
+    // 启用本地存储增强模式
+    function enableLocalStorageMode() {
+        console.log('启用本地存储增强模式');
+        updateWPSStatus('disconnected', '本地存储模式');
+        stopRemotePolling();
+
+        // 增强本地存储功能
+        enhanceLocalStorage();
+    }
+    
+    // 增强本地存储功能
+    function enhanceLocalStorage() {
+        // 增加数据备份频率
+        setInterval(() => {
+            saveToLocalStorage({ skipDirty: true, skipAutoSync: true });
+            console.log('本地数据已备份');
+        }, 30000); // 每30秒备份一次
+        
+        // 添加数据导出功能
+        addLocalExportFeatures();
+    }
+    
+    // 添加本地导出功能
+    function addLocalExportFeatures() {
+        // 在控制栏添加本地导出按钮
+        const controlBar = document.querySelector('.control-bar');
+        if (controlBar && !document.getElementById('localExportBtn')) {
+            const localExportBtn = document.createElement('button');
+            localExportBtn.id = 'localExportBtn';
+            localExportBtn.className = 'btn btn-primary';
+            localExportBtn.textContent = '导出本地数据';
+            localExportBtn.onclick = exportLocalData;
+            controlBar.appendChild(localExportBtn);
+        }
+    }
+    
+    // 导出本地数据
+    function exportLocalData() {
+        try {
+            // 保存当前班级数据
+            if (currentClass && students.length > 0) {
+                allClassesData[currentClass] = JSON.parse(JSON.stringify(students));
+            }
+            
+            // 准备导出数据
+            const exportData = {
+                timestamp: new Date().toISOString(),
+                version: '1.0',
+                classes: {},
+                summary: {
+                    totalClasses: Object.keys(allClassesData).length,
+                    totalStudents: Object.values(allClassesData).reduce((sum, arr) => sum + arr.length, 0)
+                }
+            };
+            
+            // 导出所有班级数据
+            Object.keys(allClassesData).forEach(className => {
+                const classStudents = allClassesData[className];
+                exportData.classes[className] = classStudents.map(s => ({
+                    学号: s.学号,
+                    姓名: s.姓名,
+                    组别: s.组别,
+                    子班级: s.子班级,
+                    课堂表现: s.课堂表现,
+                    小组活动: s.小组活动,
+                    笔记1: s.笔记1,
+                    笔记2: s.笔记2,
+                    笔记总分: s.笔记总分,
+                    平时总分: s.平时总分,
+                    考试成绩: s.考试成绩,
+                    总分: s.总分
+                }));
+            });
+            
+            // 创建下载链接
+            const dataStr = JSON.stringify(exportData, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `成绩册数据_${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            
+            URL.revokeObjectURL(url);
+            
+            alert('本地数据导出成功！');
+            
+        } catch (error) {
+            console.error('导出失败:', error);
+            alert('导出失败：' + error.message);
+        }
+    }
+    
+    // 导入本地数据
+    function importLocalData() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.json';
+        input.onchange = function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    
+                    if (data.classes) {
+                        // 恢复班级数据
+                        Object.keys(data.classes).forEach(className => {
+                            if (classesData[className]) {
+                                allClassesData[className] = data.classes[className].map(s => ({
+                                    ...s,
+                                    selected: false
+                                }));
+                            }
+                        });
+                        
+                        // 更新显示
+                        if (currentClass && allClassesData[currentClass]) {
+                            students = JSON.parse(JSON.stringify(allClassesData[currentClass]));
+                            render();
+                        }
+                        
+                        updateClassStatus();
+                        saveToLocalStorage();
+                        
+                        alert('本地数据导入成功！');
+                    } else {
+                        alert('数据格式错误！');
+                    }
+                } catch (error) {
+                    console.error('导入失败:', error);
+                    alert('导入失败：' + error.message);
+                }
+            };
+            reader.readAsText(file);
+        };
+        input.click();
+    }
+    
+    // 加载WPS配置
+    function loadWPSConfig() {
+        try {
+            const saved = localStorage.getItem('wpsConfig');
+            if (saved) {
+                const savedConfig = JSON.parse(saved);
+                wpsConfig = { ...wpsConfig, ...savedConfig };
+            }
+            if (!wpsConfig.syncEndpoint) {
+                wpsConfig.syncEndpoint = DEFAULT_CLOUD_FUNCTION_URL;
+            }
+            if (!wpsConfig.pollingInterval) {
+                wpsConfig.pollingInterval = 60000;
+            }
+        } catch (error) {
+            console.error('加载WPS配置失败:', error);
+        }
+    }
+    
+    // ==================== 粘贴导入功能 ====================
+    
+    function showPasteImport() {
+        document.getElementById('pasteImportModal').classList.add('show');
+        document.getElementById('pasteTextarea').value = '';
+        document.getElementById('pasteImportResult').style.display = 'none';
+        setTimeout(() => document.getElementById('pasteTextarea').focus(), 100);
+    }
+    
+    function closePasteImport() {
+        document.getElementById('pasteImportModal').classList.remove('show');
+    }
+    
+    function clearPasteTextarea() {
+        document.getElementById('pasteTextarea').value = '';
+        document.getElementById('pasteImportResult').style.display = 'none';
+    }
+    
+    function processPasteImport() {
+        const text = document.getElementById('pasteTextarea').value.trim();
+        if (!text) {
+            alert('<i class="fa-solid fa-triangle-exclamation"></i> 请先粘贴数据！\n\n在WPS表格中复制"班级汇总"sheet的数据后，粘贴到文本框中。');
+            return;
+        }
+        
+        try {
+            const lines = text.split('\n').map(l => l.trim()).filter(l => l);
+            if (lines.length < 2) throw new Error('数据行数太少，请确保复制了完整的数据（包含表头）');
+            
+            const headers = lines[0].split('\t');
+            const required = ['班级', '学号', '姓名', '组别', '课堂表现', '小组活动'];
+            if (!required.every(h => headers.includes(h))) {
+                throw new Error('表头格式不正确。请确保包含：' + required.join('、'));
+            }
+            
+            const idx = {
+                班级: headers.indexOf('班级'), 学号: headers.indexOf('学号'), 姓名: headers.indexOf('姓名'),
+                组别: headers.indexOf('组别'), 子班级: headers.indexOf('子班级'), 课堂表现: headers.indexOf('课堂表现'),
+                小组活动: headers.indexOf('小组活动'), 笔记1: headers.indexOf('笔记1'), 笔记2: headers.indexOf('笔记2'),
+                考试成绩: headers.indexOf('考试成绩')
+            };
+            
+            const parsed = { '25无人机三班': [], '25液压三班': [], '25无人机四班': [], '25应电12班': [] };
+            let imported = 0, skipped = 0;
+            
+            for (let i = 1; i < lines.length; i++) {
+                const c = lines[i].split('\t');
+                if (c.length < 4) { skipped++; continue; }
+                
+                const cls = c[idx.班级]?.trim();
+                if (!parsed[cls]) { skipped++; continue; }
+                
+                const s = {
+                    学号: c[idx.学号]?.trim() || '', 姓名: c[idx.姓名]?.trim() || '', 组别: c[idx.组别]?.trim() || '',
+                    子班级: idx.子班级 >= 0 ? (c[idx.子班级]?.trim() || '') : '',
+                    课堂表现: parseFloat(c[idx.课堂表现]) || 0, 小组活动: parseFloat(c[idx.小组活动]) || 0,
+                    笔记1: c[idx.笔记1]?.trim() === '√', 笔记2: c[idx.笔记2]?.trim() === '√',
+                    笔记总分: 0, 考试成绩: idx.考试成绩 >= 0 ? (parseFloat(c[idx.考试成绩]) || 0) : 0,
+                    平时总分: 0, 总分: 0, selected: false
+                };
+                
+                s.笔记总分 = (s.笔记1 ? 5 : 0) + (s.笔记2 ? 5 : 0);
+                s.平时总分 = s.课堂表现 + s.小组活动 + s.笔记总分;
+                s.总分 = s.平时总分 + s.考试成绩;
+                if (cls === '25应电12班' && !s.子班级) s.子班级 = getSubClass(s.学号);
+                
+                parsed[cls].push(s);
+                imported++;
+            }
+            
+            for (const cls in parsed) parsed[cls].sort((a, b) => a.学号.localeCompare(b.学号));
+            
+            let updated = [];
+            for (const cls in parsed) {
+                if (parsed[cls].length > 0) {
+                    allClassesData[cls] = parsed[cls];
+                    updated.push(`${cls}(${parsed[cls].length}人)`);
+                }
+            }
+            
+            if (currentClass && allClassesData[currentClass]) {
+                students = JSON.parse(JSON.stringify(allClassesData[currentClass]));
+                render();
+            }
+            
+            saveToLocalStorage();
+            updateClassStatus();
+            
+            // 添加历史记录
+            addHistory('粘贴导入数据', imported, {
+                '更新班级': updated.join('、'),
+                '跳过': skipped
+            });
+            
+            const res = document.getElementById('pasteImportResult');
+            const txt = document.getElementById('pasteImportResultText');
+            txt.innerHTML = `✅ 导入成功！<br><i class="fa-solid fa-chart-bar"></i> 共导入 <strong>${imported}</strong> 条记录<br>` +
+                `📚 更新班级：${updated.join('、')}<br>${skipped > 0 ? `<i class="fa-solid fa-triangle-exclamation"></i> 跳过 ${skipped} 条<br>` : ''}` +
+                `<br><i class="fa-solid fa-lightbulb"></i> 数据已保存，可切换班级查看。`;
+            res.style.display = 'block';
+            res.style.background = '#d4edda';
+            res.style.border = '1px solid #c3e6cb';
+            
+            setTimeout(() => {
+                closePasteImport();
+                alert(`✅ 导入成功！\n\n共导入 ${imported} 条记录\n更新班级：${updated.join('、')}`);
+            }, 3000);
+            
+        } catch (error) {
+            console.error('粘贴导入失败:', error);
+            const res = document.getElementById('pasteImportResult');
+            const txt = document.getElementById('pasteImportResultText');
+            txt.innerHTML = `❌ 导入失败<br>错误：${error.message}<br><br>请检查：<br>` +
+                `1. 是否从WPS"班级汇总"复制<br>2. 是否包含表头行<br>3. 数据格式是否正确`;
+            res.style.display = 'block';
+            res.style.background = '#f8d7da';
+            res.style.border = '1px solid #f5c6cb';
+        }
+    }
+    
+    // 初始化
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('🚀 系统初始化开始...');
+
+        // 先加载本地数据（保底方案）
+        loadFromLocalStorage();
+        loadHistoryFromStorage(); // 加载历史记录
+        updateClassStatus();
+
+        // 定期保存到本地（每5秒）
+        setInterval(() => saveToLocalStorage({ skipDirty: true, skipAutoSync: true }), 5000);
+
+        // 显示加载提示
+        showToast('🔄 正在从Gitee同步最新数据...', 'info', 10000);
+
+        // 初始化Gitee同步
+        console.log('☁️ 初始化Gitee云同步...');
+        console.log('Gitee配置:', {
+            owner: giteeConfig.owner,
+            repo: giteeConfig.repo,
+            branch: giteeConfig.branch,
+            autoSync: giteeConfig.autoSync
+        });
+
+        // 【关键】强制从Gitee拉取最新数据
+        pullFromGitee()
+            .then(() => {
+                console.log('✅ 已从Gitee同步最新数据');
+                // 成功时底部小字提示
+                updateSyncStatus('云端数据已加载', 'success');
+
+                // 【已禁用】自动同步功能
+                // if (giteeConfig.autoSync) {
+                //     startAutoSync();
+                //     console.log('✅ 自动同步已启动');
+                // }
+            })
+            .catch(err => {
+                console.warn('<i class="fa-solid fa-triangle-exclamation"></i> Gitee拉取失败:', err.message);
+
+                // 判断是否是文件不存在
+                if (err.message.includes('文件不存在')) {
+                    showToast('<i class="fa-solid fa-triangle-exclamation"></i> 首次使用，请点击"💾 保存到云端"创建数据文件', 'warning', 6000);
+                    updateGiteeStatus('未初始化', '#ff9800');
+                } else {
+                    // 网络错误时底部小字提示
+                    updateSyncStatus('离线模式，使用本地数据', 'warning');
+                    updateGiteeStatus('离线模式', '#ff9800');
+                }
+
+                // 【已禁用】自动同步功能
+                // if (giteeConfig.autoSync) {
+                //     startAutoSync();
+                // }
+            });
+
+        // 如果没有选择班级，提示用户
+        if (!currentClass) {
+            setTimeout(() => {
+                showToast('👆 请从顶部下拉框选择班级开始', 'info', 5000);
+            }, 2000);
+        }
+
+        // 【已禁用】页面关闭前只保存到本地，不自动推送
+        window.addEventListener('beforeunload', function(e) {
+            // 只保存当前数据到本地
+            saveToLocalStorage({ skipDirty: true, skipAutoSync: true });
+            console.log('💾 页面关闭，数据已保存到本地');
+        });
+
+        console.log('✅ 系统初始化完成');
+        console.log('<i class="fa-solid fa-chart-bar"></i> 班级数据:', {
+            '25无人机三班': 40,
+            '25液压三班': 30,
+            '25无人机四班': 40,
+            '25应电12班': 86
+        });
+    });
+    </script>
+</body>
+</html>
+
+
+

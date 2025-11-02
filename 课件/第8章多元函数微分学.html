@@ -1,0 +1,5246 @@
+﻿<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+    <link rel="stylesheet" href="../common-assets/css/fontawesome.min.css">
+    <link rel="stylesheet" href="../common-assets/css/solid.min.css">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>第八章：多元函数微分学 (交互式课件)</title>
+<script src="../common-assets/js/d3-7.8.5.min.js"></script>
+<script src="../common-assets/js/three-0.160.0.min.js"></script>
+<!-- 使用统一的MathJax配置文件 -->
+<script src="../common-assets/js/mathjax-config.js"></script>
+<script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true,
+                processEnvironments: true
+            },
+            svg: {
+                fontCache: 'global'
+            },
+            startup: {
+                pageReady: () => {
+                    return window.MathJax.startup.defaultPageReady().then(() => {
+                        console.log('MathJax is ready!');
+                    });
+                }
+            }
+        };
+    </script>
+<script async="" id="MathJax-script" src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js" type="text/javascript">
+</script>
+<style>
+        /* === RESET AND BASE STYLES === */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: 16px;
+            height: 100%;
+        }
+
+        body {
+            font-family: 'Inter', 'Source Han Sans SC', 'Noto Sans SC', 'Microsoft YaHei', system-ui, -apple-system, sans-serif;
+            background: #FAFAFA;
+            overflow: hidden;
+            color: #1a1a1a;
+            height: 100%;
+            line-height: 1.6;
+            font-weight: 400;
+        }
+
+        /* === SLIDE LAYOUT === */
+        .slide-container {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            position: relative;
+            gap: 0;
+            padding: 0;
+        }
+
+        /* Left Content Area - Academic Journal Style */
+        .left-content {
+            width: 50%;
+            height: 100vh;
+            padding: 60px 80px 60px 60px;
+            background: #FBFBFB;
+            overflow-y: auto;
+            font-size: 16px;
+            line-height: 1.6;
+            border: none;
+            box-shadow: none;
+            border-radius: 0;
+        }
+
+        .slide-container.single-column .left-content {
+            width: 100%;
+            max-width: 960px;
+            border-right: none;
+        }
+
+        /* Right Visualization Area - Subtle Contrast */
+        .right-visual {
+            width: 50%;
+            height: 100vh;
+            background: #F8F9FA;
+            display: flex;
+            align-items: stretch;
+            justify-content: center;
+            position: relative;
+            border: none;
+            box-shadow: none;
+            border-radius: 0;
+            overflow: hidden;
+        }
+
+        .slide-container.single-column .right-visual {
+            display: none;
+        }
+
+        /* 可视化容器样式 */
+        .right-visual > div {
+            width: 100%;
+            height: 100%;
+            min-height: 260px;
+            overflow: hidden;
+            position: relative; /* 允许内部信息面板绝对定位 */
+        }
+
+        .right-visual > div > * {
+            width: 100%;
+            height: 100%;
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        .right-visual canvas,
+        .right-visual svg {
+            max-width: 100%;
+            max-height: 100%;
+            display: block;
+            overflow: visible;
+        }
+
+        .right-visual svg text {
+            font-family: 'Arial', 'Microsoft YaHei', sans-serif !important;
+            user-select: none;
+        }
+
+        /* 目录页右侧插画不拦截点击，避免遮住导航 */
+        #vis-contents-8, #vis-contents-8 svg { pointer-events: none; }
+
+        /* Responsive: stack on small screens to prevent clipping */
+        @media (max-width: 1200px) {
+            .slide-container { flex-direction: column; }
+            .left-content { width: 100%; height: 42vh; padding: 32px 24px 24px 24px; }
+            .right-visual { width: 100%; height: 58vh; padding: 12px; }
+            .right-visual > div { height: 100%; }
+        }
+
+        /* === SLIDE TRANSITIONS === */
+        .slide {
+            display: none;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .slide.active {
+            display: flex;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* === 统一的字体系统 === */
+        h1 {
+            color: #003366;
+            font-size: 24px;
+            line-height: 1.2;
+            font-weight: 700;
+            margin: 0 0 16px 0;
+            padding: 0;
+            letter-spacing: -0.02em;
+        }
+
+        h2 {
+            color: #008080;
+            font-size: 20px;
+            line-height: 1.3;
+            font-weight: 600;
+            margin: 20px 0 12px 0;
+            position: relative;
+            padding-left: 0;
+        }
+
+        h2::before {
+            content: '';
+            position: absolute;
+            left: -20px;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: #008080;
+            border-radius: 2px;
+        }
+
+        h3 {
+            color: #1a1a1a;
+            font-size: 18px;
+            line-height: 1.3;
+            font-weight: 600;
+            margin: 16px 0 8px 0;
+        }
+
+        h4 {
+            color: #333333;
+            font-size: 16px;
+            line-height: 1.3;
+            font-weight: 500;
+            margin: 12px 0 6px 0;
+        }
+
+        h5 {
+            color: #555555;
+            font-size: 14px;
+            line-height: 1.3;
+            font-weight: 500;
+            margin: 10px 0 6px 0;
+        }
+
+        p {
+            margin-bottom: 12px;
+            color: #2d2d2d;
+            font-weight: 400;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+
+        ul, ol {
+            margin: 0 0 12px 0;
+            line-height: 1.5;
+            padding-left: 20px;
+            font-size: 15px;
+        }
+
+        li {
+            margin-bottom: 6px;
+            color: #2d2d2d;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+
+        /* === CONTENT MODULES - 去框化设计 === */
+        .definition, .theorem, .example, .note {
+            background: transparent;
+            border: none;
+            border-left: 4px solid;
+            padding: 12px 0 12px 16px;
+            margin: 16px 0;
+        }
+
+        .definition {
+            border-left-color: #1e40af;
+        }
+
+        .theorem {
+            border-left-color: #059669;
+        }
+
+        .example {
+            border-left-color: #dc2626;
+        }
+
+        .note {
+            border-left-color: #6b7280;
+            font-style: italic;
+            color: #4b5563;
+        }
+
+        .formula-highlight, .math-formula {
+            background: transparent;
+            padding: 16px 0;
+            margin: 16px 0;
+            text-align: center;
+            font-size: 16px;
+            border: none;
+            box-shadow: none;
+        }
+
+        .highlight {
+            color: #008080;
+            font-weight: 600;
+        }
+
+        /* === 导航控制 - 第二章极简设计 === */
+        .nav-controls {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            z-index: 9999;
+            pointer-events: auto;
+        }
+
+        .nav-btn {
+            background: rgba(0, 0, 0, 0.15);
+            color: transparent;
+            border: none;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 0;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .nav-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 8px;
+            height: 8px;
+            border-top: 2px solid rgba(0, 0, 0, 0.5);
+            border-right: 2px solid rgba(0, 0, 0, 0.5);
+        }
+
+        .nav-btn:first-child::before {
+            transform: translate(-40%, -50%) rotate(-135deg);
+        }
+
+        .nav-btn:last-child::before {
+            transform: translate(-60%, -50%) rotate(45deg);
+        }
+
+        .nav-btn:hover {
+            background: rgba(0, 0, 0, 0.25);
+        }
+
+        .nav-btn:hover::before {
+            border-color: rgba(0, 0, 0, 0.7);
+        }
+
+        .slide-number {
+            font-size: 11px;
+            color: #9ca3af;
+            font-weight: 400;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* === MATHJAX FORMULA STYLING === */
+        .MathJax {
+            outline: none;
+            display: inline-block;
+        }
+
+        .MathJax_Display {
+            text-align: center !important;
+            margin: 20px 0 !important;
+        }
+
+        /* SVG Container Styling */
+        mjx-container[jax="SVG"] {
+            display: inline-block !important;
+            line-height: 1;
+            vertical-align: baseline;
+        }
+
+        mjx-container[jax="SVG"][display="true"] {
+            display: block !important;
+            text-align: center !important;
+            margin: 20px 0 !important;
+        }
+
+        mjx-container[jax="SVG"] svg {
+            display: inline-block !important;
+            vertical-align: baseline;
+            max-width: 100%;
+            height: auto;
+        }
+
+        mjx-container[jax="SVG"][display="true"] svg {
+            display: block !important;
+            margin: 0 auto !important;
+        }
+
+        /* Enhanced SVG Rendering */
+        mjx-container svg {
+            shape-rendering: geometricPrecision;
+            text-rendering: geometricPrecision;
+            font-family: 'MJXZERO', 'MJXTEX';
+        }
+
+        /* Force Visibility and Proper Display */
+        mjx-container[jax="SVG"] {
+            visibility: visible !important;
+            opacity: 1 !important;
+            overflow: visible !important;
+        }
+
+        mjx-container[jax="SVG"] svg {
+            visibility: visible !important;
+            opacity: 1 !important;
+            width: auto !important;
+            height: auto !important;
+        }
+
+        /* Content Area Formula Display */
+        .left-content mjx-container {
+            display: inline-block !important;
+            margin: 0 3px;
+        }
+
+        .left-content mjx-container[display="true"] {
+            display: block !important;
+            text-align: center !important;
+            margin: 20px 0 !important;
+        }
+
+        /* === SIMPLIFIED INTERACTIVE ELEMENTS === */
+        .step-stack {
+            margin: 24px 0;
+        }
+
+        .step-item {
+            border: none;
+            border-left: 3px solid #008080;
+            border-radius: 0;
+            padding: 0 0 0 16px;
+            background: transparent;
+            display: none;
+            margin: 16px 0;
+        }
+
+        .step-item.active {
+            display: block;
+            background: transparent;
+            border-left-color: #003366;
+        }
+
+        .step-btn {
+            margin-top: 12px;
+            padding: 6px 12px;
+            border-radius: 0;
+            border: 1px solid #E5E7EB;
+            background: transparent;
+            cursor: pointer;
+            font-size: 13px;
+            color: #003366;
+            transition: all 0.2s ease;
+        }
+
+        .step-btn:hover {
+            background: #003366;
+            color: white;
+            border-color: #003366;
+        }
+
+        .prompt-card {
+            background: transparent;
+            border: none;
+            border-left: 3px solid #008080;
+            border-radius: 0;
+            padding: 0 0 0 20px;
+            margin: 32px 0;
+        }
+
+        .teacher-note {
+            background: transparent;
+            border: none;
+            border-left: 3px solid #CC5500;
+            border-radius: 0;
+            padding: 0 0 0 20px;
+            margin: 32px 0;
+            font-style: normal;
+        }
+
+        /* === CANVAS STYLING === */
+        canvas {
+            max-width: 95%;
+            max-height: 95%;
+            border-radius: 0;
+            box-shadow: none;
+        }
+
+        /* === 导航控制 - 第二章极简设计 === */
+        .nav-controls {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            z-index: 9999;
+            pointer-events: auto;
+        }
+
+        .nav-btn {
+            background: rgba(0, 0, 0, 0.15);
+            color: transparent;
+            border: none;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 0;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .nav-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 8px;
+            height: 8px;
+            border-top: 2px solid rgba(0, 0, 0, 0.5);
+            border-right: 2px solid rgba(0, 0, 0, 0.5);
+        }
+
+        .nav-btn:first-child::before {
+            transform: translate(-40%, -50%) rotate(-135deg);
+        }
+
+        .nav-btn:last-child::before {
+            transform: translate(-60%, -50%) rotate(45deg);
+        }
+
+        .nav-btn:hover {
+            background: rgba(0, 0, 0, 0.25);
+        }
+
+        .nav-btn:hover::before {
+            border-color: rgba(0, 0, 0, 0.7);
+        }
+
+        .nav-btn:disabled {
+            background: rgba(0, 0, 0, 0.05);
+            cursor: not-allowed;
+        }
+
+        .nav-btn:disabled::before {
+            border-color: rgba(0, 0, 0, 0.2);
+        }
+
+        .slide-number {
+            font-size: 11px;
+            color: #9ca3af;
+            font-weight: 400;
+            display: flex;
+            align-items: center;
+            gap: 0;
+            opacity: 0.6;
+        }
+
+        .slide-number input {
+            width: 50px;
+            text-align: right;
+            border: none;
+            background: transparent;
+            font-size: 11px;
+            padding: 0 2px;
+            margin: 0;
+            color: #000000;
+            font-weight: 700;
+        }
+
+        .slide-number input::-webkit-outer-spin-button,
+        .slide-number input::-webkit-inner-spin-button {
+            display: none;
+        }
+
+        .slide-number input[type=number] {
+            -moz-appearance: textfield;
+            appearance: textfield;
+        }
+
+        .slide-number input:focus {
+            outline: none;
+            color: #000000;
+        }
+
+        #slideNumberTotal {
+            color: #9ca3af;
+            font-size: 14px;
+            font-weight: 400;
+            padding: 0 12px;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+        }
+
+        .directory-toggle {
+            border: none;
+            background: transparent;
+            color: #003366;
+            padding: 8px 12px;
+            border-radius: 0;
+            cursor: pointer;
+            border: 1px solid #E5E7EB;
+            transition: all 0.2s ease;
+        }
+
+        .directory-toggle:hover {
+            background: #003366;
+            color: white;
+            border-color: #003366;
+        }
+
+        .directory-menu {
+            position: fixed;
+            bottom: 90px;
+            right: 24px;
+            width: 320px;
+            max-height: 60vh;
+            overflow-y: auto;
+            background: rgba(251, 251, 251, 0.95);
+            border: 1px solid #E5E7EB;
+            border-radius: 0;
+            padding: 20px;
+            box-shadow: none;
+            display: none;
+            z-index: 1200;
+            backdrop-filter: blur(10px);
+        }
+
+        .directory-menu.active {
+            display: block;
+        }
+
+        .directory-menu h3 {
+            margin-bottom: 16px;
+            font-size: 16px;
+            color: #003366;
+        }
+
+        .directory-item {
+            margin-bottom: 12px;
+            color: #2d2d2d;
+            text-decoration: none;
+            display: block;
+            padding: 10px 12px;
+            border-radius: 0;
+            transition: background 0.2s ease;
+            border: 1px solid transparent;
+        }
+
+        .directory-item:hover {
+            background: #003366;
+            color: white;
+            border-color: #003366;
+        }
+
+        .slide-note {
+            font-size: 14px;
+            color: #666666;
+            margin-top: 12px;
+            font-style: italic;
+        }
+
+        /* === RESPONSIVE DESIGN === */
+        @media (max-width: 768px) {
+            .slide-container {
+                flex-direction: column;
+                gap: 16px;
+                padding: 16px;
+            }
+
+            .left-content,
+            .right-visual {
+                width: 100%;
+                height: auto;
+                min-height: 300px;
+            }
+
+            .left-content {
+                padding: 24px;
+                font-size: 16px;
+            }
+
+            .nav-container {
+                bottom: 10px;
+                right: 10px;
+                padding: 6px 10px;
+            }
+                
+            .nav-btn {
+                padding: 4px 8px;
+                font-size: 14px;
+            }
+
+        }
+
+        /* === UTILITY CLASSES === */
+        .loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 16px;
+            color: #003366;
+            z-index: 9999;
+            font-weight: 500;
+        }
+
+        /* === VISUAL HINTS AND UTILITY === */
+        .visual-hint {
+            font-style: italic;
+            color: #666666;
+            font-size: 15px;
+            margin: 24px 0;
+            padding-left: 20px;
+            border-left: 2px solid #E5E7EB;
+        }
+
+        /* === CLEAN SCROLLBAR === */
+        .left-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .left-content::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .left-content::-webkit-scrollbar-thumb {
+            background: #E5E7EB;
+            border-radius: 3px;
+        }
+
+        .left-content::-webkit-scrollbar-thumb:hover {
+            background: #D1D5DB;
+        }
+
+        .error-message {
+            color: #ef4444;
+            text-align: center;
+            padding: 20px;
+            font-size: 16px;
+            background: #fef2f2;
+        }
+
+        /* === ADDITIONAL CLASSES FOR MATH CONTENT === */
+        .example-box {
+            background: transparent;
+            border: none;
+            border-left: 4px solid #dc2626;
+            padding: 16px 0 16px 20px;
+            margin: 20px 0;
+        }
+
+        .tip-text {
+            background: transparent;
+            border: none;
+            border-left: 4px solid #059669;
+            padding: 16px 0 16px 20px;
+            margin: 20px 0;
+            font-style: italic;
+            color: #059669;
+        }
+
+        @media print {
+            body {
+                overflow: visible;
+            }
+            .slide {
+                display: block !important;
+                page-break-after: always;
+            }
+            .nav-container,
+            .directory-menu,
+            .directory-toggle {
+                display: none !important;
+            }
+        }
+    </style>
+    <style>
+        /* 悬浮控制与面板（统一样式） */
+        .floating-control-btn { position: fixed; bottom: 20px; left: 20px; width: 56px; height: 56px; border: none; border-radius: 16px; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 1100; background: rgba(15,23,42,0.7); color: #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.25); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); transition: transform .2s ease, box-shadow .2s ease; }
+        .floating-control-btn:hover { transform: translateY(-2px); box-shadow: 0 16px 36px rgba(0,0,0,0.32); }
+        .floating-control-btn .btn-icon { font-size: 22px; font-weight: 700; }
+        .floating-menu-items { position: fixed; bottom: 20px; left: 86px; display: none; gap: 10px; z-index: 1100; }
+        .floating-menu-items.active { display: flex; }
+        .floating-menu-item { display: inline-flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 14px; cursor: pointer; background: rgba(255,255,255,0.9); color: #0f172a; box-shadow: 0 10px 30px rgba(0,0,0,0.18); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); transition: transform .18s ease, box-shadow .18s ease; }
+        .floating-menu-item:hover { transform: translateY(-1px); box-shadow: 0 14px 36px rgba(0,0,0,0.24); }
+        .floating-menu-item .item-icon { font-size: 16px; width: 18px; text-align: center; }
+        .lab-submenu, .chapter-submenu { position: fixed; left: 20px; bottom: 86px; display: none; z-index: 1100; }
+        .course-submenu { position: fixed; right: 20px; top: 70px; display: none; z-index: 1100; }
+        .submenu-content { position: relative; width: min(920px, calc(100vw - 40px)); max-height: min(70vh, 620px); overflow-y: auto; background: rgba(255,255,255,0.88); border: 1px solid rgba(0,0,0,0.06); border-radius: 16px; padding: 16px; box-shadow: 0 20px 50px rgba(0,0,0,0.25); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+        .submenu-title { font-weight: 700; color: #0f172a; margin-bottom: 10px; }
+        .submenu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; }
+        .submenu-item { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 12px; cursor: pointer; background: rgba(255,255,255,0.95); border: 1px solid rgba(0,0,0,0.05); transition: background .15s ease, transform .15s ease; }
+        .submenu-item:hover { background: rgba(241,245,249,0.95); transform: translateY(-1px); }
+        .submenu-icon { width: 18px; text-align: center; color: #64748b; }
+        .submenu-text { color: #111827; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .submenu-close { position: absolute; right: 10px; top: 6px; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; background: rgba(0,0,0,0.55); color: #fff; font-weight: 700; }
+        .submenu-close:hover { background: rgba(0,0,0,0.72); }
+
+        /* 3D 信息面板（叠加在右侧可视化容器内） */
+        .info-panel {
+            position: absolute;
+            left: 12px;
+            bottom: 12px;
+            width: auto;
+            height: auto;
+            max-width: 280px;
+            padding: 8px 10px;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.9);
+            color: #0f172a;
+            border: 1px solid rgba(0,0,0,0.06);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.18);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 1000;
+            pointer-events: auto; /* 允许点击折叠按钮 */
+        }
+        .info-panel h4 { margin: 0 0 6px 0; font-size: 14px; font-weight: 700; color: #111827; }
+        .info-panel .formula-display { margin: 4px 0 4px; padding: 6px 8px; border-radius: 8px; background: rgba(241,245,249,0.9); color: #111827; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, 'Microsoft YaHei', sans-serif; font-size: 13px; }
+        .info-panel .info-toggle { position: absolute; right: 6px; top: 6px; width: 22px; height: 22px; border: none; border-radius: 50%; cursor: pointer; background: rgba(15,23,42,0.8); color: #fff; font-size: 13px; line-height: 22px; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.25); }
+        .info-panel .info-toggle:hover { background: rgba(15,23,42,0.95); }
+        .info-panel.minimized { width: 36px; height: 36px; padding: 0; border-radius: 999px; display: flex; align-items: center; justify-content: center; }
+        .info-panel.minimized .info-content { display: none; }
+        @media (max-width: 1200px) { .info-panel { max-width: 240px; } }
+
+        /* 将右侧覆盖式信息面板隐藏（避免遮挡），改为左侧精简信息块 */
+        .right-visual .info-panel { display: none !important; }
+        .left-content .info-box-left {
+            margin: 10px 0 6px 0;
+            padding: 8px 10px;
+            border-left: 4px solid #3b82f6;
+            background: rgba(59,130,246,0.06);
+            border-radius: 0 8px 8px 0;
+            color: #0f172a;
+            font-size: 14px;
+            line-height: 1.5;
+            max-height: 160px; /* 控制高度不过高 */
+            overflow: auto;
+        }
+    </style>
+    <style>
+        /* 统一封面样式（与第1–7章一致） */
+        .slide-container.cover { align-items: stretch; }
+        .cover-left { padding: 60px; display: flex; flex-direction: column; justify-content: center; }
+        .cover-badge { display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(90deg, #4a90e2, #9b59b6); color: #fff; padding: 6px 12px; border-radius: 999px; font-size: 14px; width: fit-content; box-shadow: 0 6px 16px rgba(74,144,226,0.35); }
+        .cover-title { font-size: 4rem; line-height: 1.1; margin: 18px 0 8px 0; color: #1a1a2e; background: linear-gradient(90deg, #1a1a2e 0%, #4a90e2 60%, #9b59b6 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+        .cover-subtitle { font-size: 1.6rem; color: #4f5b6a; margin: 10px 0 18px 0; }
+        .cover-meta { display: flex; gap: 14px; flex-wrap: wrap; color: #6b7b8c; font-size: 0.95rem; }
+        .cover-meta span { display: inline-flex; align-items: center; gap: 6px; }
+        .cover-actions { display: flex; gap: 14px; margin-top: 26px; flex-wrap: wrap; }
+        .cover-right { position: relative; overflow: hidden; }
+        .cover-visual { position: relative; width: 100%; height: 100%; background:
+                radial-gradient(1200px 800px at 80% 20%, rgba(155, 89, 182, 0.18), transparent 60%),
+                radial-gradient(900px 700px at 20% 80%, rgba(74, 144, 226, 0.18), transparent 60%),
+                linear-gradient(135deg, #ffffff 0%, #f7faff 50%, #f9f6ff 100%);
+        }
+        .cover-visual::after { content: ""; position: absolute; inset: 0; background: radial-gradient(600px 300px at 50% -10%, rgba(255,255,255,0.7), transparent 70%); pointer-events: none; }
+        .cover-visual::before { content: ""; position: absolute; inset: -15%; background: conic-gradient(from 0deg, rgba(74,144,226,0.16), rgba(155,89,182,0.16), rgba(99,102,241,0.16), rgba(74,144,226,0.16)); filter: blur(80px); opacity: 0.18; animation: rotateAurora 30s linear infinite; pointer-events: none; }
+        .math-badge { position: absolute; padding: 0; background: transparent; border: none; border-radius: 0; box-shadow: none; color: #334155; font-weight: 700; animation: floatY 6s ease-in-out infinite; backdrop-filter: none; }
+        .math-badge::after { display: none; }
+        @keyframes rotateAurora { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .math-badge.b1 { left: 12%; top: 22%; animation-delay: 0s; }
+        .math-badge.b2 { right: 14%; top: 30%; animation-delay: 0.8s; }
+        .math-badge.b3 { left: 20%; bottom: 18%; animation-delay: 1.5s; }
+        .math-badge.b4 { right: 18%; bottom: 22%; animation-delay: 2.2s; }
+        @keyframes floatY { 0% { transform: translateY(0px); } 50% { transform: translateY(-12px); } 100% { transform: translateY(0px); } }
+        .orbit { position: absolute; left: 50%; top: 50%; width: 320px; height: 320px; margin-left: -160px; margin-top: -160px; border-radius: 50%; border: 1px dashed rgba(52, 152, 219, 0.35); animation: spin 18s linear infinite; }
+        .orbit .dot { position: absolute; top: -6px; left: 50%; width: 12px; height: 12px; margin-left: -6px; background: #4a90e2; border-radius: 50%; box-shadow: 0 0 0 6px rgba(74,144,226,0.15); }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+<style>
+        .return-home-panel {
+            position: fixed;
+            top: 16px;
+            left: 16px;
+            display: flex;
+            gap: 10px;
+            z-index: 9999;
+            flex-wrap: wrap;
+        }
+        .return-home-panel .return-link {
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: rgba(15, 23, 42, 0.8);
+            color: #f8fafc;
+            font-size: 14px;
+            text-decoration: none;
+            box-shadow: 0 6px 20px rgba(15, 23, 42, 0.25);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .return-home-panel .return-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(15, 23, 42, 0.35);
+        }
+        .return-home-panel .return-link.return-main {
+            background: rgba(79, 70, 229, 0.85);
+        }
+        @media (max-width: 640px) {
+            .return-home-panel {
+                top: 12px;
+                left: 12px;
+                right: 12px;
+                justify-content: center;
+            }
+            .return-home-panel .return-link {
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
+    <style>
+        /* 返回按钮样式（统一为第1/2章风格） */
+        .return-home-panel {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            z-index: 9999;
+            display: flex;
+            gap: 10px;
+            opacity: 0.3;
+            transition: opacity 0.3s ease;
+        }
+        .return-home-panel:hover { opacity: 1; }
+        .return-home-panel .return-link {
+            padding: 6px 12px;
+            background: rgba(15, 23, 42, 0.7);
+            color: #f8fafc;
+            text-decoration: none;
+            border-radius: 999px;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+        .return-home-panel .return-link:hover {
+            background: rgba(15, 23, 42, 0.9);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(15, 23, 42, 0.3);
+        }
+        .return-home-panel .return-link.return-main {
+            background: rgba(79, 70, 229, 0.7);
+        }
+        .return-home-panel .return-link.return-main:hover {
+            background: rgba(79, 70, 229, 0.9);
+            box-shadow: 0 8px 16px rgba(79, 70, 229, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="return-home-panel">
+        <a class="return-link" href="../index.html"><i class="fa-solid fa-house"></i> 返回主站</a>
+        <a class="return-link return-main" href="javascript:void(0)" onclick="event.stopPropagation(); toggleCourseSubmenu()"><i class="fa-solid fa-arrow-left"></i> 返回目录</a>
+    </div>
+<div id="slidesContainer">
+<!-- 第1页：封面 -->
+<div class="slide active"><div class="slide-container cover"><div class="left-content tex2jax_process cover-left">
+<div class="cover-badge"><i class="fa-solid fa-seedling"></i><span> 第八章</span></div>
+<h1 class="cover-title">多元函数微分学</h1>
+<p class="cover-subtitle">从平面走向空间</p>
+<div class="cover-meta">
+<span><i class="fa-solid fa-book-open"></i> 基础篇</span>
+<span><i class="fa-solid fa-bolt"></i> 关键概念速览</span>
+</div>
+<div class="cover-actions">
+<a class="home-link-btn" href="../index.html"><span>主页</span></a>
+<a class="home-link-btn" href="../故事书/第8章/通往产量山巅的路径.html"><span>故事书</span></a>
+<a class="home-link-btn" href="../习题/index.html"><span>习题</span></a>
+<a class="home-link-btn" href="../产教结合/index.html"><span>产教融合</span></a>
+</div>
+</div><div class="right-visual cover-right"><div class="cover-visual">
+<div class="math-badge b1">∂f/∂x</div>
+<div class="math-badge b2">∇f</div>
+<div class="math-badge b3">Hessian</div>
+<div class="math-badge b4">differentials</div>
+<div class="orbit"><span class="dot"></span></div>
+<div id="vis-title"></div>
+</div></div></div></div>
+<!-- 第2页：目录 -->
+<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
+<h2 style="text-align: center; font-size: 2.4rem; margin-bottom: 16px; letter-spacing: 2px">本章目录</h2>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; padding: 10px 10px 0">
+<div style="padding: 10px">
+<h3 style="padding-bottom: 5px; color: #3498db; font-size: 1.2rem; margin: 0 0 8px 0">8.1 多元函数的基本概念</h3>
+<ul>
+<li>多元函数的定义</li>
+<li>定义域与值域</li>
+<li>二元函数图像与等高线</li>
+<li>极限与连续（直观）</li>
+</ul>
+</div>
+<div style="padding: 10px">
+<h3 style="padding-bottom: 5px; color: #2ecc71; font-size: 1.2rem; margin: 0 0 8px 0">8.2 偏导数</h3>
+<ul>
+<li>几何意义</li>
+<li>偏导计算</li>
+<li>高阶偏导</li>
+<li>链式法则（多元）</li>
+</ul>
+</div>
+<div style="padding: 10px">
+<h3 style="padding-bottom: 5px; color: #9b59b6; font-size: 1.2rem; margin: 0 0 8px 0">8.3 全微分</h3>
+<ul>
+<li>全微分概念</li>
+<li>线性近似与误差</li>
+<li>全微分计算</li>
+<li>应用示例</li>
+</ul>
+</div>
+<div style="padding: 10px">
+<h3 style="padding-bottom: 5px; color: #e74c3c; font-size: 1.2rem; margin: 0 0 8px 0">8.4 方向导数与梯度</h3>
+<ul>
+<li>方向导数定义</li>
+<li>梯度与最陡上升</li>
+<li>计算与应用</li>
+</ul>
+</div>
+<div style="padding: 10px">
+<h3 style="padding-bottom: 5px; color: #16a085; font-size: 1.2rem; margin: 0 0 8px 0">8.5 多元函数的极值</h3>
+<ul>
+<li>无约束极值</li>
+<li>拉格朗日乘数法</li>
+<li>应用问题</li>
+</ul>
+</div>
+</div>
+</div><div class="right-visual"><div id="vis-contents-8"></div></div></div></div>
+<!-- 第3页：过渡页 - 多元函数基本概念 -->
+<div class="slide"><div class="slide-container single-column"><div class="left-content tex2jax_process">
+<h2 style="font-size: 3rem; text-align: center; margin-top: 150px; color: #003366">8.1</h2>
+<p style="font-size: 2rem; text-align: center; color: #008080; margin-top: 40px">多元函数的基本概念</p>
+<div style="width: 200px; height: 4px; background: linear-gradient(to right, #003366, #008080); margin: 60px auto;"></div>
+<p style="text-align: center; color: #666; font-size: 1.2rem; margin-top: 60px">
+理解多元函数的定义、定义域与几何意义
+</p>
+</div></div></div>
+<!-- 第4页：为什么需要多元函数 -->
+<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
+<h2>生活中的多元函数</h2>
+<p>现实中很多事情<span class="highlight">不只由一个因素决定</span></p>
+<div class="example-box">
+<h4>手机信号强度</h4>
+<p>信号 = f(距离, 障碍物, 天气)</p>
+</div>
+<div class="example-box">
+<h4>披萨价格</h4>
+<p>价格 = f(尺寸, 配料数量, 送餐距离)</p>
+</div>
+<div class="example-box">
+<h4>考试成绩</h4>
+<p>成绩 = f(学习时间, 理解程度, 考试技巧)</p>
+</div>
+<div class="tip-text">
+                这就是为什么我们需要学习多元函数！
+            </div>
+</div><div class="right-visual"><div id="vis-intro"></div></div></div></div>
+<!-- 第3页：二元函数基本概念 -->
+<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
+<h2>什么是二元函数？</h2>
+<p>最简单的多元函数：<span class="highlight">两个输入，一个输出</span></p>
+<div class="math-formula">
+                $z = f(x, y)$
+            </div>
+<h3>通俗理解</h3>
+<p>想象一个<span class="highlight">函数机器</span>：</p>
+<ul>
+<li>投入两个数字 x 和 y</li>
+<li>机器按照规则 f 处理</li>
+<li>输出一个结果 z</li>
+</ul>
+<div class="example-box">
+<h4>例子：计算长方形面积</h4>
+<p>面积 = 长 × 宽</p>
+<p>$S = f(x, y) = x \cdot y$</p>
+</div>
+</div><div class="right-visual"><div id="vis-binary-function"></div></div></div></div>
+<!-- 第4页：定义域 -->
+<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
+<h2>定义域</h2>
+<p>让函数<span class="highlight">有意义</span>的所有(x,y)点的集合</p>
+<h3>三个常见限制</h3>
+<ol>
+<li><span class="highlight">分母不能为零</span>
+<p>例：$z = \frac{1}{x-y}$，要求 $x \neq y$</p>
+</li>
+<li><span class="highlight">根号下不能为负</span>
+<p>例：$z = \sqrt{x+y}$，要求 $x+y \geq 0$</p>
+</li>
+<li><span class="highlight">对数真数必须为正</span>
+<p>例：$z = \ln(xy)$，要求 $xy &gt; 0$</p>
+</li>
+</ol>
+<div class="tip-text">
+                <i class="fa-solid fa-lightbulb"></i> 定义域就像是函数的"活动范围"
+            </div>
+</div><div class="right-visual"><div id="vis-domain"></div></div></div></div>
+<!-- 第5页：二元函数的图像 -->
+<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
+<h2>二元函数的图像</h2>
+<p>二元函数的图像是<span class="highlight">三维空间中的曲面</span></p>
+<h3>生活中的例子</h3>
+<ul>
+<li>山地地形图</li>
+<li>水波纹</li>
+<li>帐篷顶部</li>
+<li>碗的形状</li>
+</ul>
+<div class="example-box">
+<h4>右边展示：抛物面</h4>
+<p>$z = x^2 + y^2$</p>
+<p>像一个倒扣的碗</p>
+</div>
+<p><span class="highlight">拖动鼠标旋转查看</span></p>
+</div><div class="right-visual"><div id="vis-3d-surface"></div></div></div></div>
+<!-- 第6页：等高线 -->
+<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
+<h2>等高线</h2>
+<p>把3D曲面<span class="highlight">投影到平面</span>的方法</p>
+<h3>什么是等高线？</h3>
+<p>高度相同的点连成的线</p>
+<h3>生活中的等高线</h3>
+<ul>
+<li>地形图的等高线</li>
+<li>天气图的等温线</li>
+<li>气压图的等压线</li>
+</ul>
+<div class="tip-text">
+                等高线密集 = 坡度陡
+                <br/>等高线稀疏 = 坡度缓
+            </div>
+</div><div class="right-visual"><div id="vis-contour"></div></div></div></div>
+<!-- 第7页：极限概念（简化版） -->
+<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
+<h2>二元函数的极限</h2>
+<p>从<span class="highlight">各个方向</span>接近一个点时的趋势</p>
+<div class="math-formula">
+                $\lim\limits_{(x,y) \to (x_0,y_0)} f(x,y) = L$
+            </div>
+<h3>通俗理解</h3>
+<p>不管从哪条路走向目标点，函数值都趋向同一个数</p>
+<div class="example-box">
+<h4>注意</h4>
+<p>必须从<span class="highlight">所有方向</span>接近都得到相同结果</p>
+<p>否则极限不存在！</p>
+</div>
+</div><div class="right-visual"><div id="vis-limit"></div></div></div></div>
+<!-- 第8页：偏导数引入 -->
+<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
+<h2>偏导数的引入</h2>
+<p>问题：曲面怎么描述<span class="highlight">变化率</span>？</p>
+<h3>思路</h3>
+<p>一次只让一个变量变化，其他保持不变</p>
+<div class="example-box">
+<h4>开车爬山</h4>
+<ul>
+<li>向东的坡度？（x方向）</li>
+<li>向北的坡度？（y方向）</li>
+</ul>
+</div>
+<p>偏导数 = <span class="highlight">沿坐标轴方向的变化率</span></p>
+</div><div class="right-visual"><div id="vis-partial-intro"></div></div></div></div>
+<!-- 第9页：偏导数定义 -->
+<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
+<h2>偏导数</h2>
+<h3>对x的偏导数</h3>
+<div class="math-formula">
+                $\frac{\partial f}{\partial x}$
+            </div>
+<p>把y当<span class="highlight">常数</span>，对x求导</p>
+<h3>对y的偏导数</h3>
+<div class="math-formula">
+                $\frac{\partial f}{\partial y}$
+            </div>
+<p>把x当<span class="highlight">常数</span>，对y求导</p>
+<div class="tip-text">
+                记忆技巧：偏导数就是"偏心"，只关注一个变量
+            </div>
+</div><div class="right-visual"><div id="vis-partial-def"></div></div></div></div>
+<!-- 第10页：过渡页 - 偏导数 -->
+<div class="slide"><div class="slide-container single-column"><div class="left-content tex2jax_process">
+<h2 style="font-size: 3rem; text-align: center; margin-top: 150px; color: #003366">8.2</h2>
+<p style="font-size: 2rem; text-align: center; color: #008080; margin-top: 40px">偏导数</p>
+<div style="width: 200px; height: 4px; background: linear-gradient(to right, #003366, #008080); margin: 60px auto;"></div>
+<p style="text-align: center; color: #666; font-size: 1.2rem; margin-top: 60px">
+掌握偏导数的概念、计算方法及几何意义
+</p>
+</div></div></div>
+<!-- 第11页：偏导数计算例题1 -->
+<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
+<h2>例题1：偏导数计算</h2>
+<div class="example-box">
+<h4>例题</h4>
+<p>设 $z = x^2y + 3xy^2$，求 $\frac{\partial z}{\partial x}$ 和 $\frac{\partial z}{\partial y}$</p>
+</div>
+<h3>知识要点</h3>
+<p>计算偏导数时，把其他变量当作常数处理</p>
+<ul>
+<li>对 $x$ 求偏导：把 $y$ 看作常数</li>
+<li>对 $y$ 求偏导：把 $x$ 看作常数</li>
+</ul>
+<div class="note">
+提示：右侧查看详细解题步骤
+            </div>
+</div><div class="right-visual"><div id="vis-partial-calc"></div></div></div></div>
+<!-- 第12页：偏导数计算例题2 -->
+<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
+<h2>例题2：复合函数的偏导数</h2>
+<div class="example-box">
+<h4>例题</h4>
+<p>设 $z = e^{xy} \sin(x+y)$，求 $\frac{\partial z}{\partial x}$</p>
+</div>
+<h3>知识要点</h3>
+<p>使用<span class="highlight">乘积法则</span>和<span class="highlight">链式法则</span></p>
+<p>$(uv)' = u'v + uv'$</p>
+<p>把 $y$ 看作常数，对 $x$ 求导</p>
+<div class="note">
+提示：注意复合函数求导的顺序
+</div>
+</div><div class="right-visual"><div id="vis-partial-calc2"></div></div></div></div>
+<!-- 第13页：高阶偏导数 -->
+<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
+<h2>高阶偏导数</h2>
+<p>对偏导数<span class="highlight">再次求偏导</span>，得到高阶偏导数</p>
+<h3>二阶偏导数</h3>
+<div class="math-formula">
+                $\frac{\partial^2 z}{\partial x^2} = \frac{\partial}{\partial x}\left(\frac{\partial z}{\partial x}\right)$
+            </div>
+<div class="math-formula">
+                $\frac{\partial^2 z}{\partial y^2} = \frac{\partial}{\partial y}\left(\frac{\partial z}{\partial y}\right)$
+            </div>
+<h3>混合偏导数</h3>
+<div class="math-formula">
+                $\frac{\partial^2 z}{\partial x \partial y} = \frac{\partial}{\partial x}\left(\frac{\partial z}{\partial y}\right)$
+            </div>
+<div class="math-formula">
+                $\frac{\partial^2 z}{\partial y \partial x} = \frac{\partial}{\partial y}\left(\frac{\partial z}{\partial x}\right)$
+            </div>
+<div class="theorem">
+<p><span class="highlight">定理</span>：如果混合偏导数连续，则<br/>$\frac{\partial^2 z}{\partial x \partial y} = \frac{\partial^2 z}{\partial y \partial x}$</p>
+</div>
+</div><div class="right-visual"><div id="vis-higher-order"></div></div></div></div>
+<!-- 第14页：高阶偏导数例题 -->
+<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
+<h2>例题3：高阶偏导数计算</h2>
+<div class="example-box">
+<h4>例题</h4>
+<p>设 $z = x^3 + 2x^2y + y^3$，求所有二阶偏导数</p>
+</div>
+<h3>知识要点</h3>
+<p><span class="highlight">二阶偏导数</span>：对一阶偏导数再求偏导</p>
+<ul>
+<li>$\frac{\partial^2 z}{\partial x^2}$：对 $\frac{\partial z}{\partial x}$ 再对 $x$ 求偏导</li>
+<li>$\frac{\partial^2 z}{\partial y^2}$：对 $\frac{\partial z}{\partial y}$ 再对 $y$ 求偏导</li>
+<li>$\frac{\partial^2 z}{\partial x \partial y}$：对 $\frac{\partial z}{\partial y}$ 再对 $x$ 求偏导</li>
+</ul>
+<div class="theorem">
+<p><span class="highlight">定理</span>：若混合偏导数连续，则</p>
+<p>$\frac{\partial^2 z}{\partial x \partial y} = \frac{\partial^2 z}{\partial y \partial x}$</p>
+</div>
+</div><div class="right-visual"><div id="vis-higher-calc"></div></div></div></div>
+<!-- 第15页：过渡页 - 全微分 -->
+<div class="slide"><div class="slide-container single-column"><div class="left-content tex2jax_process">
+<h2 style="font-size: 3rem; text-align: center; margin-top: 150px; color: #003366">8.3</h2>
+<p style="font-size: 2rem; text-align: center; color: #008080; margin-top: 40px">全微分</p>
+<div style="width: 200px; height: 4px; background: linear-gradient(to right, #003366, #008080); margin: 60px auto;"></div>
+<p style="text-align: center; color: #666; font-size: 1.2rem; margin-top: 60px">
+理解全微分的概念，掌握全微分的计算方法
+</p>
+</div></div></div>
+<!-- 第16页：全微分概念 -->
+<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
+<h2>全微分</h2>
+<p>函数的<span class="highlight">全增量</span>可以用线性形式近似表示</p>
+<h3>全增量</h3>
+<div class="math-formula">
+                $\Delta z = f(x+\Delta x, y+\Delta y) - f(x,y)$
+            </div>
+<h3>全微分定义</h3>
+<p>如果全增量可以表示为：</p>
+<div class="math-formula">
+                $\Delta z = A\Delta x + B\Delta y + o(\rho)$
+            </div>
+<p>其中 $\rho = \sqrt{(\Delta x)^2 + (\Delta y)^2}$，则称函数<span class="highlight">可微</span></p>
+<div class="formula-highlight">
+                $dz = A\Delta x + B\Delta y$
+            </div>
+<p>称为函数的<span class="highlight">全微分</span></p>
+</div><div class="right-visual"><div id="vis-total-diff"></div></div></div></div>
+<!-- 第17页：全微分计算例题 -->
+<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
+<h2>例题4：全微分计算</h2>
+<div class="example-box">
+<h4>例题</h4>
+<p>求函数 $z = x^2 + 3xy + y^2$ 在点 $(1, 2)$ 处的全微分</p>
+</div>
+<h3>知识要点</h3>
+<div class="theorem">
+<p>全微分公式：</p>
+<p>$dz = \frac{\partial z}{\partial x}dx + \frac{\partial z}{\partial y}dy$</p>
+</div>
+<h3>解题步骤</h3>
+<p><span class="highlight">第一步</span>：求偏导数</p>
+<p><span class="highlight">第二步</span>：代入给定点</p>
+<p><span class="highlight">第三步</span>：写出全微分</p>
+<div class="note">
+右侧查看详细解题过程
+</div>
+</div><div class="right-visual"><div id="vis-total-diff-calc"></div></div></div></div>
+<!-- 第18页：全微分应用例题 -->
+<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
+<h2>例题5：全微分的应用</h2>
+<div class="example-box">
+<h4>例题</h4>
+<p>用全微分近似计算 $(1.02)^2 + 3(1.02)(1.98) + (1.98)^2$ 的值</p>
+</div>
+<h3>知识要点</h3>
+<p>当 $\Delta x$、$\Delta y$ 很小时：</p>
+<p>$\Delta z \approx dz = f_x(x_0, y_0)\Delta x + f_y(x_0, y_0)\Delta y$</p>
+<h3>解题思路</h3>
+<ul>
+<li>选择合适的函数：$z = x^2 + 3xy + y^2$</li>
+<li>选择计算点：$(x_0, y_0) = (1, 2)$</li>
+<li>计算增量：$\Delta x = 0.02$，$\Delta y = -0.02$</li>
+<li>用全微分近似</li>
+</ul>
+</div><div class="right-visual"><div id="vis-total-diff-app"></div></div></div></div>
+<!-- 第19页：过渡页 - 方向导数与梯度 -->
+<div class="slide"><div class="slide-container single-column"><div class="left-content tex2jax_process">
+<h2 style="font-size: 3rem; text-align: center; margin-top: 150px; color: #003366">8.4</h2>
+<p style="font-size: 2rem; text-align: center; color: #008080; margin-top: 40px">方向导数与梯度</p>
+<div style="width: 200px; height: 4px; background: linear-gradient(to right, #003366, #008080); margin: 60px auto;"></div>
+<p style="text-align: center; color: #666; font-size: 1.2rem; margin-top: 60px">
+掌握方向导数和梯度的概念及其相互关系
+</p>
+</div></div></div>
+<!-- 第20页：全微分的几何意义 -->
+<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
+<h2>全微分的几何意义</h2>
+<p>全微分表示曲面的<span class="highlight">切平面</span>的增量</p>
+<h3>切平面方程</h3>
+<p>曲面 $z = f(x,y)$ 在点 $(x_0, y_0, z_0)$ 处的切平面方程：</p>
+<div class="math-formula">
+                $z - z_0 = f_x(x_0, y_0)(x - x_0) + f_y(x_0, y_0)(y - y_0)$
+            </div>
+<h3>几何解释</h3>
+<ul>
+<li>曲面的增量 $\approx$ 切平面的增量</li>
+<li>当 $\Delta x, \Delta y$ 很小时，近似程度很高</li>
+<li>全微分是函数增量的<span class="highlight">线性主部</span></li>
+</ul>
+<div class="tip-text">
+                应用：可用于近似计算和误差估计
+            </div>
+</div><div class="right-visual"><div id="vis-tangent-plane"></div></div></div></div>
+<!-- 第16页：方向导数 -->
+<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
+<h2>方向导数</h2>
+<p>沿<span class="highlight">任意方向</span>的变化率</p>
+<h3>定义</h3>
+<p>设 $\vec{l} = (\cos\alpha, \cos\beta)$ 是单位方向向量</p>
+<div class="math-formula">
+                $\frac{\partial f}{\partial l} = \lim_{\rho \to 0} \frac{f(x_0 + \rho\cos\alpha, y_0 + \rho\cos\beta) - f(x_0, y_0)}{\rho}$
+            </div>
+<h3>计算公式</h3>
+<p>如果函数可微，则</p>
+<div class="formula-highlight">
+                $\frac{\partial f}{\partial l} = f_x\cos\alpha + f_y\cos\beta$
+            </div>
+<div class="note">
+                特例：沿x轴正方向，$\alpha = 0, \beta = 90°$<br/>
+                $\frac{\partial f}{\partial x} = f_x$
+            </div>
+</div><div class="right-visual"><div id="vis-directional"></div></div></div></div>
+<!-- 第17页：梯度 -->
+<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
+<h2>梯度</h2>
+<p>指向函数<span class="highlight">增长最快</span>的方向</p>
+<h3>定义</h3>
+<div class="formula-highlight">
+                $\nabla f = \left(\frac{\partial f}{\partial x}, \frac{\partial f}{\partial y}\right)$
+            </div>
+<h3>梯度的性质</h3>
+<ul>
+<li>梯度是一个<span class="highlight">向量</span></li>
+<li>梯度方向是函数增长最快的方向</li>
+<li>梯度的模是最大方向导数</li>
+</ul>
+<h3>方向导数与梯度的关系</h3>
+<div class="math-formula">
+                $\frac{\partial f}{\partial l} = \nabla f \cdot \vec{l} = |\nabla f| \cos\theta$
+            </div>
+<p>其中 $\theta$ 是梯度与方向 $\vec{l}$ 的夹角</p>
+</div><div class="right-visual"><div id="vis-gradient"></div></div></div></div>
+<!-- 第21页：方向导数例题 -->
+<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
+<h2>例题6：方向导数计算</h2>
+<div class="example-box">
+<h4>例题</h4>
+<p>求函数 $z = x^2 + y^2$ 在点 $P(1,1)$ 处沿方向 $\vec{l} = (1, 1)$ 的方向导数</p>
+</div>
+<h3>知识要点</h3>
+<div class="theorem">
+<p>方向导数公式：</p>
+<p>$\frac{\partial f}{\partial \vec{l}} = f_x\cos\alpha + f_y\cos\beta$</p>
+<p>其中 $(\cos\alpha, \cos\beta)$ 是单位方向向量</p>
+</div>
+<h3>解题步骤</h3>
+<ol>
+<li>求偏导数 $f_x$、$f_y$</li>
+<li>将方向向量单位化</li>
+<li>代入方向导数公式</li>
+</ol>
+</div><div class="right-visual"><div id="vis-directional-calc"></div></div></div></div>
+<!-- 第22页：梯度计算例题 -->
+<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
+<h2>例题7：梯度的应用</h2>
+<div class="example-box">
+<h4>例题</h4>
+<p>求函数 $f(x,y) = x^2 + y^2$ 在点 $(1,1)$ 处的梯度，并求函数增长最快的方向和变化率</p>
+</div>
+<h3>知识要点</h3>
+<div class="theorem">
+<p>梯度：$\nabla f = (f_x, f_y)$</p>
+<ul>
+<li>梯度方向是函数增长最快的方向</li>
+<li>梯度的模是最大方向导数</li>
+</ul>
+</div>
+<h3>解题要点</h3>
+<p>梯度向量直接给出了增长最快的方向及变化率</p>
+</div><div class="right-visual"><div id="vis-grad-calc"></div></div></div></div>
+<!-- 第23页：过渡页 - 多元函数极值 -->
+<div class="slide"><div class="slide-container single-column"><div class="left-content tex2jax_process">
+<h2 style="font-size: 3rem; text-align: center; margin-top: 150px; color: #003366">8.5</h2>
+<p style="font-size: 2rem; text-align: center; color: #008080; margin-top: 40px">多元函数的极值</p>
+<div style="width: 200px; height: 4px; background: linear-gradient(to right, #003366, #008080); margin: 60px auto;"></div>
+<p style="text-align: center; color: #666; font-size: 1.2rem; margin-top: 60px">
+掌握无条件极值和条件极值的求解方法
+</p>
+</div></div></div>
+<!-- 第24页：多元函数极值 -->
+<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
+<h2>多元函数的极值</h2>
+<p>寻找函数的<span class="highlight">最大值和最小值</span></p>
+<h3>极值的必要条件</h3>
+<p>如果函数 $f(x,y)$ 在点 $(x_0, y_0)$ 处取得极值，且偏导数存在，则</p>
+<div class="math-formula">
+                $f_x(x_0, y_0) = 0, \quad f_y(x_0, y_0) = 0$
+            </div>
+<p>满足此条件的点称为<span class="highlight">驻点</span></p>
+<h3>极值的充分条件</h3>
+<p>设 $(x_0, y_0)$ 是驻点，令</p>
+<p>$A = f_{xx}(x_0, y_0)$，$B = f_{xy}(x_0, y_0)$，$C = f_{yy}(x_0, y_0)$</p>
+<ul>
+<li>若 $AC - B^2 > 0$ 且 $A < 0$，则为<span class="highlight">极大值</span></li>
+<li>若 $AC - B^2 > 0$ 且 $A > 0$，则为<span class="highlight">极小值</span></li>
+<li>若 $AC - B^2 < 0$，则不是极值</li>
+<li>若 $AC - B^2 = 0$，则需进一步判断</li>
+</ul>
+</div><div class="right-visual"><div id="vis-extremum"></div></div></div></div>
+<!-- 第25页：无条件极值例题 -->
+<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
+<h2>例题8：无条件极值</h2>
+<div class="example-box">
+<h4>例题</h4>
+<p>求函数 $f(x,y) = x^2 + y^2 - 2x + 4y + 5$ 的极值</p>
+</div>
+<h3>解题步骤</h3>
+<div class="theorem">
+<p><span class="highlight">第一步</span>：求驻点</p>
+<p>令 $f_x = 0$，$f_y = 0$</p>
+<p><span class="highlight">第二步</span>：计算二阶偏导数</p>
+<p>$A = f_{xx}$，$B = f_{xy}$，$C = f_{yy}$</p>
+<p><span class="highlight">第三步</span>：判定极值</p>
+<ul>
+<li>$AC - B^2 > 0$ 且 $A < 0$ → 极大值</li>
+<li>$AC - B^2 > 0$ 且 $A > 0$ → 极小值</li>
+<li>$AC - B^2 < 0$ → 不是极值</li>
+</ul>
+</div>
+<div class="note">
+右侧查看完整解题步骤
+</div>
+</div><div class="right-visual"><div id="vis-extremum-calc"></div></div></div></div>
+<!-- 第26页：条件极值例题 -->
+<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
+<h2>条件极值与拉格朗日乘数法</h2>
+<p>在<span class="highlight">约束条件</span>下求极值</p>
+<h3>问题</h3>
+<p>求函数 $z = f(x,y)$ 在约束条件 $\varphi(x,y) = 0$ 下的极值</p>
+<h3>拉格朗日乘数法</h3>
+<p>构造辅助函数：</p>
+<div class="formula-highlight">
+                $L(x,y,\lambda) = f(x,y) + \lambda\varphi(x,y)$
+            </div>
+<p>求解方程组：</p>
+<div class="math-formula">
+                $\begin{cases}
+                L_x = f_x + \lambda\varphi_x = 0\\
+                L_y = f_y + \lambda\varphi_y = 0\\
+                L_\lambda = \varphi(x,y) = 0
+                \end{cases}$
+            </div>
+</div><div class="right-visual"><div id="vis-lagrange"></div></div></div></div>
+<!-- 第27页：条件极值例题 -->
+<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
+<h2>例题9：拉格朗日乘数法</h2>
+<div class="example-box">
+<h4>例题</h4>
+<p>求函数 $f(x,y) = x^2 + y^2$ 在约束条件 $x + y = 1$ 下的极值</p>
+</div>
+<h3>解题步骤</h3>
+<div class="theorem">
+<p><span class="highlight">拉格朗日乘数法</span></p>
+<p>第一步：构造拉格朗日函数</p>
+<p>$L(x,y,\lambda) = f(x,y) + \lambda\varphi(x,y)$</p>
+<p>第二步：求解方程组</p>
+<p>$\begin{cases}
+L_x = 0\\
+L_y = 0\\
+L_\lambda = 0
+\end{cases}$</p>
+<p>第三步：计算极值</p>
+</div>
+<div class="note">
+右侧查看详细计算过程
+</div>
+</div><div class="right-visual"><div id="vis-lagrange-calc"></div></div></div></div>
+<!-- 第28页：实际应用例题 -->
+<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
+<h2>例题10：实际应用问题</h2>
+<div class="example-box">
+<h4>例题</h4>
+<p>某厂生产两种产品，设产量分别为 $x$ 和 $y$，总成本函数为</p>
+<p>$C(x,y) = x^2 + 2y^2 + 2xy + 100$</p>
+<p>若总产量固定为 $x + y = 10$，求使总成本最小的产量分配方案</p>
+</div>
+<h3>解题思路</h3>
+<ul>
+<li>目标函数：$C(x,y) = x^2 + 2y^2 + 2xy + 100$</li>
+<li>约束条件：$x + y = 10$</li>
+<li>方法：拉格朗日乘数法</li>
+</ul>
+<div class="note">
+这是典型的生产成本优化问题
+</div>
+</div><div class="right-visual"><div id="vis-application-example"></div></div></div></div>
+<!-- 第29页：最小二乘法 -->
+<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
+<h2>最小二乘法</h2>
+<p>数据拟合的重要方法</p>
+<h3>问题</h3>
+<p>给定数据点 $(x_1, y_1), (x_2, y_2), \ldots, (x_n, y_n)$</p>
+<p>求直线 $y = a + bx$ 使得偏差平方和最小</p>
+<h3>目标函数</h3>
+<div class="math-formula">
+                $Q(a,b) = \sum_{i=1}^{n}(y_i - a - bx_i)^2$
+            </div>
+<h3>求解</h3>
+<p>令 $\frac{\partial Q}{\partial a} = 0$，$\frac{\partial Q}{\partial b} = 0$</p>
+<p>解方程组得到最优参数 $a$ 和 $b$</p>
+</div><div class="right-visual"><div id="vis-least-squares"></div></div></div></div>
+<!-- 第24页：应用实例 -->
+<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
+<h2>工程应用实例</h2>
+<h3>1. 温度场分析</h3>
+<p>温度分布函数 $T(x,y)$，梯度指向温度上升最快的方向</p>
+<h3>2. 地形高度</h3>
+<p>高度函数 $h(x,y)$，梯度表示地形的坡度和方向</p>
+<h3>3. 成本优化</h3>
+<p>成本函数 $C(x,y)$，求极值可以找到最优生产方案</p>
+<h3>4. 信号强度</h3>
+<p>信号强度 $S(x,y)$，方向导数表示某个方向上信号的变化</p>
+<div class="note">
+                多元函数微分学是分析多变量系统的重要工具
+            </div>
+</div><div class="right-visual"><div id="vis-applications"></div></div></div></div>
+<!-- 第25页：总结 -->
+<div class="slide"><div class="slide-container single-column"><div class="left-content tex2jax_process">
+<h2>本章总结</h2>
+<h3>核心概念</h3>
+<ul>
+<li><span class="highlight">偏导数</span>：沿坐标轴方向的变化率</li>
+<li><span class="highlight">全微分</span>：函数增量的线性主部</li>
+<li><span class="highlight">方向导数</span>：沿任意方向的变化率</li>
+<li><span class="highlight">梯度</span>：增长最快的方向</li>
+<li><span class="highlight">极值</span>：函数的最大值和最小值</li>
+</ul>
+<h3>计算方法</h3>
+<ul>
+<li>偏导数：把其他变量当常数</li>
+<li>全微分：$dz = f_xdx + f_ydy$</li>
+<li>方向导数：$\frac{\partial f}{\partial l} = f_x\cos\alpha + f_y\cos\beta$</li>
+<li>梯度：$\nabla f = (f_x, f_y)$</li>
+<li>极值：驻点 + 二阶判别法</li>
+</ul>
+<h3>应用领域</h3>
+<p>温度场分析、地形测量、成本优化、信号处理、机器学习等</p>
+</div></div></div>
+<!-- 导航按钮 -->
+</div>
+<div class="nav-controls" role="navigation" aria-label="幻灯片导航">
+    <button class="nav-btn" id="prevSlideBtn" aria-label="上一页" title="上一页 (←)"><i class="fa-solid fa-arrow-left"></i> 上一页</button>
+    <div class="slide-number" role="status" aria-live="polite">
+        <input type="number" id="slideNumberInput" min="1" max="32" value="1" aria-label="当前页码">/<span id="slideNumberTotal">32</span>
+    </div>
+    <button class="nav-btn" id="nextSlideBtn" aria-label="下一页" title="下一页 (→)">下一页 →</button>
+</div>
+<script>
+    let slides, totalSlides, currentSlide = 0;
+    let scene, camera, renderer, mesh, controls;
+    let animationFrameId;
+
+    // 全局定时器跟踪与清理（D3/动画）
+    const __timers = { intervals: new Set(), timeouts: new Set() };
+    (function(){
+        const __origSetInterval = window.setInterval;
+        const __origClearInterval = window.clearInterval;
+        const __origSetTimeout = window.setTimeout;
+        const __origClearTimeout = window.clearTimeout;
+        window.setInterval = function(fn, delay, ...args) {
+            const id = __origSetInterval(fn, delay, ...args);
+            __timers.intervals.add(id);
+            return id;
+        };
+        window.clearInterval = function(id) {
+            __timers.intervals.delete(id);
+            return __origClearInterval(id);
+        };
+        window.setTimeout = function(fn, delay, ...args) {
+            const id = __origSetTimeout(fn, delay, ...args);
+            __timers.timeouts.add(id);
+            return id;
+        };
+        window.clearTimeout = function(id) {
+            __timers.timeouts.delete(id);
+            return __origClearTimeout(id);
+        };
+    })();
+
+    function cleanupD3() {
+        try {
+            __timers.intervals.forEach(id => { try { clearInterval(id); } catch(_){} });
+            __timers.timeouts.forEach(id => { try { clearTimeout(id); } catch(_){} });
+            __timers.intervals.clear();
+            __timers.timeouts.clear();
+            if (window.d3 && d3.selectAll) {
+                d3.selectAll('.slide .right-visual *').interrupt();
+            }
+        } catch (e) {
+            console.warn('D3 cleanup warning:', e);
+        }
+    }
+
+    // 初始化
+    document.addEventListener('DOMContentLoaded', function() {
+        slides = document.querySelectorAll('.slide');
+        totalSlides = slides.length;
+        showSlide(0);
+
+        // 按钮与输入绑定
+        const prevBtnEl = document.getElementById('prevSlideBtn');
+        const nextBtnEl = document.getElementById('nextSlideBtn');
+        const numberInputEl = document.getElementById('slideNumberInput');
+        if (prevBtnEl) prevBtnEl.addEventListener('click', () => { if (typeof previousSlide === 'function') previousSlide(); });
+        if (nextBtnEl) nextBtnEl.addEventListener('click', () => { if (typeof nextSlide === 'function') nextSlide(); });
+        if (numberInputEl) numberInputEl.addEventListener('change', (ev) => { if (typeof jumpToSlide === 'function') jumpToSlide(ev.target.value); });
+
+        // 键盘导航
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') nextSlide();
+            else if (e.key === 'ArrowLeft') previousSlide();
+        });
+
+        // 鼠标滚轮导航
+        document.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            if (e.deltaY > 0) nextSlide();
+            else previousSlide();
+        }, { passive: false });
+        
+        // 自适应：窗口尺寸或方向变化时重绘当前页可视化
+        let __resizeTimer;
+        function __rerenderCurrent() {
+            if (typeof showSlide === 'function') {
+                showSlide(currentSlide);
+            }
+        }
+        window.addEventListener('resize', () => {
+            clearTimeout(__resizeTimer);
+            __resizeTimer = setTimeout(__rerenderCurrent, 200);
+        });
+        window.addEventListener('orientationchange', () => {
+            setTimeout(__rerenderCurrent, 250);
+        });
+    });
+
+    window.nextSlide = function() {
+        if (currentSlide < totalSlides - 1) {
+            currentSlide++;
+            showSlide(currentSlide);
+        }
+    }
+
+    window.previousSlide = function() {
+        if (currentSlide > 0) {
+            currentSlide--;
+            showSlide(currentSlide);
+        }
+    }
+
+    window.jumpToSlide = function(value) {
+        const slideNumber = parseInt(value);
+        if (slideNumber >= 1 && slideNumber <= totalSlides) {
+            currentSlide = slideNumber - 1;
+            showSlide(currentSlide);
+        }
+    }
+
+    window.showSlide = function(index) {
+        // 清理之前的D3与Three资源
+        cleanupD3();
+        cleanupThreeJS();
+        
+        slides.forEach(slide => slide.classList.remove('active'));
+        currentSlide = index;
+        slides[currentSlide].classList.add('active');
+        
+        // 更新页码输入框
+        const slideInput = document.getElementById('slideNumberInput');
+        const slideTotal = document.getElementById('slideNumberTotal');
+        if (slideInput) {
+            slideInput.value = currentSlide + 1;
+            slideInput.max = totalSlides;
+        }
+        if (slideTotal) {
+            slideTotal.textContent = totalSlides;
+        }
+        
+        const prevBtn = document.querySelector('.nav-btn:first-child');
+        const nextBtn = document.querySelector('.nav-btn:last-child');
+        if (prevBtn) prevBtn.disabled = currentSlide === 0;
+        if (nextBtn) nextBtn.disabled = currentSlide === totalSlides - 1;
+        
+        // 延迟运行可视化，确保DOM已渲染
+        requestAnimationFrame(() => {
+            runVisualization(currentSlide);
+            // 可视化可能会在右侧插入 info-panel，迁移到左侧精简信息块
+            setTimeout(() => {
+                relocateInfoPanelForCurrentSlide();
+                observeInfoPanelForCurrentSlide();
+            }, 100);
+        });
+        
+        // 渲染数学公式
+        if (window.MathJax && window.MathJax.typesetPromise) {
+            setTimeout(() => {
+                window.MathJax.typesetPromise([slides[currentSlide]]).catch(err => {
+                    console.warn('MathJax rendering failed:', err);
+                });
+            }, 100);
+        }
+    }
+
+    // 将右侧覆盖式信息面板迁移到左侧，避免遮挡3D
+    let __infoPanelObserver = null;
+    function relocateInfoPanelForCurrentSlide() {
+        try {
+            const slideEl = slides && slides[currentSlide];
+            if (!slideEl) return;
+            const left = slideEl.querySelector('.left-content');
+            if (!left) return;
+            const right = slideEl.querySelector('.right-visual');
+            if (!right) return;
+
+            // 1) 标准 info-panel
+            const rightPanel = right.querySelector('.info-panel');
+            if (rightPanel) {
+                const box = document.createElement('div');
+                box.className = 'info-box-left';
+                const cloned = rightPanel.cloneNode(true);
+                const tgl = cloned.querySelector('.info-toggle');
+                if (tgl) tgl.remove();
+                const content = cloned.querySelector('.info-content') || cloned;
+                box.innerHTML = content.innerHTML || content.textContent || '';
+                left.appendChild(box);
+                rightPanel.remove();
+                return;
+            }
+
+            // 2) 旧式覆盖 DIV（通过 inline style 绝对定位的提示块）
+            const candidates = Array.from(right.querySelectorAll('div'))
+                .filter(el => {
+                    const styleAttr = (el.getAttribute && el.getAttribute('style')) || '';
+                    // 粗筛：定位为绝对 + 内边距 + 浅色背景
+                    return /position\s*:\s*absolute/i.test(styleAttr) && /padding\s*:\s*\d/.test(styleAttr);
+                });
+            if (candidates.length) {
+                const target = candidates[0];
+                const box = document.createElement('div');
+                box.className = 'info-box-left';
+                box.innerHTML = target.innerHTML || target.textContent || '';
+                left.appendChild(box);
+                target.remove();
+            }
+        } catch(_) {}
+    }
+    function observeInfoPanelForCurrentSlide() {
+        try {
+            if (__infoPanelObserver) { __infoPanelObserver.disconnect(); __infoPanelObserver = null; }
+            const slideEl = slides && slides[currentSlide];
+            if (!slideEl) return;
+            const right = slideEl.querySelector('.right-visual');
+            if (!right) return;
+            __infoPanelObserver = new MutationObserver((mutations) => {
+                for (const m of mutations) {
+                    for (const node of m.addedNodes) {
+                        if (node.nodeType !== 1) continue;
+                        let el = node.matches && node.matches('.info-panel') ? node : (node.querySelector ? node.querySelector('.info-panel') : null);
+                        if (el) { relocateInfoPanelForCurrentSlide(); continue; }
+                        // 也监听绝对定位的 DIV 提示块
+                        if (node.nodeType === 1) {
+                            const styleAttr = node.getAttribute && node.getAttribute('style');
+                            if (styleAttr && /position\s*:\s*absolute/i.test(styleAttr)) {
+                                relocateInfoPanelForCurrentSlide();
+                            }
+                        }
+                    }
+                }
+            });
+            __infoPanelObserver.observe(right, { childList: true, subtree: true });
+        } catch(_) {}
+    }
+
+    function cleanupThreeJS() {
+        if (animationFrameId) {
+            cancelAnimationFrame(animationFrameId);
+            animationFrameId = null;
+        }
+        if (renderer) {
+            renderer.dispose();
+            renderer = null;
+        }
+        if (scene) {
+            // 清理场景中的所有对象
+            while(scene.children.length > 0) { 
+                const child = scene.children[0];
+                if (child.geometry) child.geometry.dispose();
+                if (child.material) {
+                    if (Array.isArray(child.material)) {
+                        child.material.forEach(m => m.dispose());
+                    } else {
+                        child.material.dispose();
+                    }
+                }
+                scene.remove(child); 
+            }
+            scene = null;
+        }
+        if (camera) {
+            camera = null;
+        }
+        if (controls) {
+            controls = null;
+        }
+    }
+
+    // Three.js: 兼容 ParametricGeometry 的简易实现（本地无示例库时使用）
+    function createParametricGeometry(paramFn, uSegments = 30, vSegments = 30) {
+        const geometry = new THREE.BufferGeometry();
+        const positions = [];
+        const indices = [];
+        const nx = Math.max(1, uSegments);
+        const ny = Math.max(1, vSegments);
+
+        for (let i = 0; i <= nx; i++) {
+            const u = i / nx;
+            for (let j = 0; j <= ny; j++) {
+                const v = j / ny;
+                const target = new THREE.Vector3();
+                // 兼容 (u,v,target) 与 (u,v)=>Vector3 两种写法
+                if (paramFn.length >= 3) {
+                    paramFn(u, v, target);
+                } else {
+                    const res = paramFn(u, v);
+                    if (res && res.isVector3) {
+                        target.copy(res);
+                    } else if (Array.isArray(res)) {
+                        target.set(res[0], res[1], res[2]);
+                    }
+                }
+                positions.push(target.x, target.y, target.z);
+            }
+        }
+
+        for (let i = 0; i < nx; i++) {
+            for (let j = 0; j < ny; j++) {
+                const a = i * (ny + 1) + j;
+                const b = (i + 1) * (ny + 1) + j;
+                const c = (i + 1) * (ny + 1) + (j + 1);
+                const d = i * (ny + 1) + (j + 1);
+                indices.push(a, b, d, b, c, d);
+            }
+        }
+
+        geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+        geometry.setIndex(indices);
+        geometry.computeVertexNormals();
+        return geometry;
+    }
+
+    // 获取容器尺寸（带下限，避免初始0尺寸导致内容缺失）
+    function getSizeFor(containerEl) {
+        const rect = containerEl.getBoundingClientRect();
+        let width = Math.floor(rect.width || containerEl.clientWidth || 800);
+        let height = Math.floor(rect.height || containerEl.clientHeight || 500);
+        if (!width || width < 320) width = 320;
+        if (!height || height < 280) height = 280;
+        return { width, height };
+    }
+
+    // D3.js辅助函数
+    
+    const rootStyles = getComputedStyle(document.documentElement);
+    const themeColors = {
+        text: rootStyles.getPropertyValue('--text-color').trim() || '#34495e',
+        axis: rootStyles.getPropertyValue('--axis-color').trim() || '#475569',
+        muted: rootStyles.getPropertyValue('--muted-color').trim() || '#94a3b8',
+        surface: rootStyles.getPropertyValue('--card-bg').trim() || '#ffffff'
+    };
+
+function setupD3(containerId, margins = {top: 32, right: 32, bottom: 56, left: 56}) {
+        const container = d3.select(`#${containerId}`);
+        if (container.empty()) return null;
+        
+        container.html('');
+        const parent = container.node().parentElement || container.node();
+        const pb = parent.getBoundingClientRect();
+        let svgWidth = Math.floor(pb.width || parent.clientWidth || 800);
+        let svgHeight = Math.floor(pb.height || parent.clientHeight || 500);
+        if (!svgWidth || svgWidth < 320) svgWidth = 320;
+        if (!svgHeight || svgHeight < 280) svgHeight = 280;
+        const width = Math.max(svgWidth - margins.left - margins.right, 120);
+        const height = Math.max(svgHeight - margins.top - margins.bottom, 120);
+        
+        const svg = container.append('svg')
+            .attr('width', svgWidth)
+            .attr('height', svgHeight)
+            .attr('viewBox', `0 0 ${svgWidth} ${svgHeight}`)
+            .attr('preserveAspectRatio', 'xMidYMid meet')
+            .style('max-width', '100%')
+            .style('max-height', '100%')
+            .style('display', 'block');
+            
+        const g = svg.append('g')
+            .attr('transform', `translate(${margins.left}, ${margins.top})`);
+            
+        return { container, svg, g, width, height, bounds: {width: svgWidth, height: svgHeight} };
+    }
+
+    // 辅助函数：渲染解题步骤（使用HTML以支持MathJax）
+    function renderSolutionSteps(containerId, steps) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        
+        // 清空容器
+        container.innerHTML = '';
+        
+        // 创建简洁的步骤容器
+        const stepsDiv = document.createElement('div');
+        stepsDiv.className = 'solution-steps';
+        stepsDiv.style.cssText = `
+            width: 100%;
+            height: 100%;
+            padding: 40px 30px;
+            background: #ffffff;
+            overflow-y: auto;
+        `;
+        
+        // 渲染每个步骤
+        steps.forEach(step => {
+            const stepDiv = document.createElement('div');
+            stepDiv.className = 'step-item tex2jax_process';
+            stepDiv.style.cssText = `
+                font-size: ${step.size || '16px'};
+                color: ${step.color || '#2d2d2d'};
+                font-weight: ${step.bold ? 'bold' : 'normal'};
+                font-style: ${step.italic ? 'italic' : 'normal'};
+                margin: 10px 0;
+                line-height: 2;
+                opacity: 0;
+                transition: opacity 0.4s ease;
+                font-family: 'Inter', 'Microsoft YaHei', sans-serif;
+            `;
+            stepDiv.innerHTML = step.text;
+            stepsDiv.appendChild(stepDiv);
+            
+            // 延迟显示动画
+            setTimeout(() => {
+                stepDiv.style.opacity = '1';
+            }, step.delay || 0);
+        });
+        
+        container.appendChild(stepsDiv);
+        
+        // 触发MathJax渲染
+        if (window.MathJax && window.MathJax.typesetPromise) {
+            setTimeout(() => {
+                window.MathJax.typesetPromise([stepsDiv]).catch(err => {
+                    console.warn('MathJax rendering failed in solution steps:', err);
+                });
+            }, 150);
+        }
+    }
+
+    // 运行可视化
+    function runVisualization(slideIndex) {
+        switch(slideIndex) {
+            case 0: break; // 封面
+            case 1: visualizeContents8(); break; // 目录
+            case 2: break; // 过渡页 8.1
+            case 3: visualizeIntro(); break;
+            case 4: visualizeBinaryFunction(); break;
+            case 5: visualizeDomain(); break;
+            case 6: visualize3DSurface(); break;
+            case 7: visualizeContour(); break;
+            case 8: visualizeLimit(); break;
+            case 9: visualizePartialIntro(); break;
+            case 10: visualizePartialDef(); break; // 定义
+            case 11: break; // 过渡页 8.2
+            case 12: visualizePartialCalc(); break; // 例题1
+            case 13: visualizePartialCalc2(); break; // 例题2
+            case 14: visualizeHigherOrder(); break;
+            case 15: visualizeHigherCalc(); break; // 例题3（重制）
+            case 16: break; // 过渡页 8.3
+            case 17: visualizeTotalDiff(); break;
+            case 18: visualizeTotalDiffCalc(); break; // 例题4
+            case 19: visualizeTotalDiffApp(); break; // 例题5
+            case 20: break; // 过渡页 8.4
+            case 21: visualizeTangentPlane(); break;
+            case 22: visualizeDirectional(); break; // 概念
+            case 23: visualizeGradient(); break; // 概念
+            case 24: visualizeDirectionalCalc(); break; // 例题6
+            case 25: visualizeGradCalc(); break; // 例题7
+            case 26: break; // 过渡页 8.5
+            case 27: visualizeExtremum(); break;
+            case 28: visualizeExtremumCalc(); break; // 例题8
+            case 29: visualizeLagrange(); break;
+            case 30: visualizeLagrangeCalc(); break; // 例题9
+            case 31: visualizeApplicationExample(); break; // 例题10
+            case 32: visualizeLeastSquares(); break;
+            case 33: visualizeApplications(); break;
+            case 34: break; // 总结
+        }
+    }
+
+    // 可视化函数实现
+
+    // 第1页：标题页可视化
+    function visualizeTitle8() {
+        const setup = setupD3('vis-title');
+        if (!setup) return;
+        const { g, width, height } = setup;
+        
+        const centerX = width / 2;
+        const centerY = height / 2;
+        
+        // 偏导数符号
+        const symbolGroup = g.append('g')
+            .attr('transform', `translate(${centerX}, ${centerY})`);
+        
+        symbolGroup.append('text')
+            .attr('text-anchor', 'middle')
+            .attr('y', -20)
+            .attr('font-size', '80px')
+            .attr('fill', '#3498db')
+            .attr('font-weight', 'bold')
+            .text('∂z')
+            .style('opacity', 0)
+            .transition()
+            .duration(1000)
+            .style('opacity', 1);
+        
+        symbolGroup.append('line')
+            .attr('x1', -60)
+            .attr('x2', 60)
+            .attr('y1', 15)
+            .attr('y2', 15)
+            .attr('stroke', '#2c3e50')
+            .attr('stroke-width', 3)
+            .style('opacity', 0)
+            .transition()
+            .delay(600)
+            .duration(800)
+            .style('opacity', 1);
+        
+        symbolGroup.append('text')
+            .attr('text-anchor', 'middle')
+            .attr('y', 75)
+            .attr('font-size', '80px')
+            .attr('fill', '#e74c3c')
+            .attr('font-weight', 'bold')
+            .text('∂x')
+            .style('opacity', 0)
+            .transition()
+            .delay(1200)
+            .duration(1000)
+            .style('opacity', 1);
+        
+        // 装饰
+        symbolGroup.append('circle')
+            .attr('r', 0)
+            .attr('fill', 'none')
+            .attr('stroke', '#9b59b6')
+            .attr('stroke-width', 2)
+            .attr('stroke-dasharray', '10,5')
+            .transition()
+            .delay(1800)
+            .duration(1500)
+            .attr('r', 150);
+    }
+
+    // 第2页：目录页可视化（概念插画：等高线 + 梯度场）
+    function visualizeContents8() {
+        const setup = setupD3('vis-contents-8', { top: 20, right: 20, bottom: 24, left: 20 });
+        if (!setup) return;
+        const { svg, g, width, height } = setup;
+
+        // 说明标题
+        g.append('text')
+            .attr('x', 8)
+            .attr('y', 18)
+            .attr('fill', '#334155')
+            .attr('font-size', 14)
+            .attr('font-weight', '700')
+            .text('等高线与梯度（示意图）');
+
+        // 定义中心与半径
+        const cx = width / 2;
+        const cy = height / 2 + 6;
+        const maxR = Math.min(width, height) * 0.38;
+
+        // 背景柔光
+        g.append('circle').attr('cx', cx - maxR * 0.6).attr('cy', cy - maxR * 0.8).attr('r', maxR * 0.9).attr('fill', '#4a90e214');
+        g.append('circle').attr('cx', cx + maxR * 0.7).attr('cy', cy - maxR * 0.9).attr('r', maxR * 0.7).attr('fill', '#9b59b614');
+
+        // 等高线（用同心圆近似 z = x^2 + y^2 的水平集）
+        const contourGroup = g.append('g').attr('opacity', 0.9);
+        const contourLevels = [0.25, 0.45, 0.65, 0.85, 1.05].map(t => t * maxR);
+        contourLevels.forEach((r, i) => {
+            contourGroup.append('circle')
+                .attr('cx', cx)
+                .attr('cy', cy)
+                .attr('r', r)
+                .attr('fill', 'none')
+                .attr('stroke', '#94a3b8')
+                .attr('stroke-width', 1.5)
+                .attr('stroke-opacity', 0.6 - i * 0.08)
+                .attr('stroke-dasharray', i % 2 === 0 ? '6,6' : '0');
+        });
+
+        // 梯度箭头（∇f 指向最陡上升方向，这里取径向方向）
+        const defs = svg.append('defs');
+        defs.append('marker')
+            .attr('id', 'arrow-8')
+            .attr('viewBox', '0 0 10 10')
+            .attr('refX', 10)
+            .attr('refY', 5)
+            .attr('markerWidth', 6)
+            .attr('markerHeight', 6)
+            .attr('orient', 'auto-start-reverse')
+            .append('path')
+            .attr('d', 'M 0 0 L 10 5 L 0 10 z')
+            .attr('fill', '#0ea5e9');
+
+        const fieldGroup = g.append('g');
+        const step = Math.max(18, Math.floor(maxR / 4));
+        for (let x = cx - maxR; x <= cx + maxR; x += step) {
+            for (let y = cy - maxR; y <= cy + maxR; y += step) {
+                const dx = x - cx;
+                const dy = y - cy;
+                const r = Math.hypot(dx, dy);
+                if (r < maxR * 0.1 || r > maxR * 0.98) continue; // 内外圈稀疏
+                const ux = dx / r;
+                const uy = dy / r;
+                const len = 10 + 12 * (r / maxR); // 稍随半径变长
+                fieldGroup.append('line')
+                    .attr('x1', x)
+                    .attr('y1', y)
+                    .attr('x2', x + ux * len)
+                    .attr('y2', y + uy * len)
+                    .attr('stroke', '#0ea5e9')
+                    .attr('stroke-width', 2)
+                    .attr('stroke-opacity', 0.7)
+                    .attr('marker-end', 'url(#arrow-8)');
+            }
+        }
+
+        // 例示标签
+        g.append('text').attr('x', cx + maxR * 0.05).attr('y', cy - maxR * 0.75).attr('fill', '#0f172a').attr('font-size', 12).attr('font-weight', '700').text('等高线');
+        g.append('text').attr('x', cx - maxR * 0.9).attr('y', cy + maxR * 0.2).attr('fill', '#0ea5e9').attr('font-size', 12).attr('font-weight', '700').text('∇f 梯度方向');
+        
+        // 中心标记
+        g.append('circle').attr('cx', cx).attr('cy', cy).attr('r', 3).attr('fill', '#0f172a').attr('opacity', 0.6);
+    }
+
+    // 第2页：引入动画 - 多因素影响的动态展示
+    function visualizeIntro() {
+        const setup = setupD3('vis-intro');
+        if (!setup) return;
+        const { g, width, height } = setup;
+
+        // 中心的结果圆
+        const centerX = width/2;
+        const centerY = height/2;
+        
+        const resultCircle = g.append('circle')
+            .attr('cx', centerX)
+            .attr('cy', centerY)
+            .attr('r', 60)
+            .attr('fill', '#f39c12')
+            .attr('stroke', '#d68910')
+            .attr('stroke-width', 3)
+            .style('filter', 'drop-shadow(0 0 10px rgba(243, 156, 18, 0.5))');
+
+        g.append('text')
+            .attr('x', centerX)
+            .attr('y', centerY)
+            .attr('text-anchor', 'middle')
+            .attr('dy', '0.3em')
+            .attr('fill', themeColors.text)
+            .style('font-size', '20px')
+            .style('font-weight', 'bold')
+            .text('结果');
+
+        // 输入因素
+        const factors = [
+            { name: '因素1', angle: 0, color: '#3498db' },
+            { name: '因素2', angle: 120, color: '#e74c3c' },
+            { name: '因素3', angle: 240, color: '#2ecc71' }
+        ];
+
+        const radius = 150;
+        
+        factors.forEach((factor, i) => {
+            const angle = factor.angle * Math.PI / 180;
+            const x = centerX + radius * Math.cos(angle);
+            const y = centerY + radius * Math.sin(angle);
+
+            // 因素圆圈
+            const factorCircle = g.append('circle')
+                .attr('cx', x)
+                .attr('cy', y)
+                .attr('r', 0)
+                .attr('fill', factor.color)
+                .attr('stroke', d3.color(factor.color).darker())
+                .attr('stroke-width', 2);
+
+            factorCircle.transition()
+                .delay(i * 300)
+                .duration(800)
+                .attr('r', 40)
+                .ease(d3.easeBounceOut);
+
+            // 因素文字
+            g.append('text')
+                .attr('x', x)
+                .attr('y', y)
+                .attr('text-anchor', 'middle')
+                .attr('dy', '0.3em')
+                .attr('fill', themeColors.text)
+                .style('font-size', '14px')
+                .style('opacity', 0)
+                .text(factor.name)
+                .transition()
+                .delay(i * 300 + 400)
+                .duration(500)
+                .style('opacity', 1);
+
+            // 连线动画
+            const line = g.append('line')
+                .attr('x1', x)
+                .attr('y1', y)
+                .attr('x2', x)
+                .attr('y2', y)
+                .attr('stroke', factor.color)
+                .attr('stroke-width', 2)
+                .attr('stroke-dasharray', '5,5')
+                .style('opacity', 0.6);
+
+            line.transition()
+                .delay(i * 300 + 800)
+                .duration(1000)
+                .attr('x2', centerX)
+                .attr('y2', centerY);
+
+            // 粒子流动效果
+            function createParticle() {
+                const particle = g.append('circle')
+                    .attr('cx', x)
+                    .attr('cy', y)
+                    .attr('r', 4)
+                    .attr('fill', factor.color);
+
+                particle.transition()
+                    .duration(2000)
+                    .ease(d3.easeLinear)
+                    .attr('cx', centerX)
+                    .attr('cy', centerY)
+                    .style('opacity', 0)
+                    .remove();
+            }
+
+            setInterval(createParticle, 1000);
+        });
+    }
+
+    // 第3页：二元函数机器
+    function visualizeBinaryFunction() {
+        const setup = setupD3('vis-binary-function');
+        if (!setup) return;
+        const { g, width, height } = setup;
+
+        // 函数机器
+        const machineX = width/2;
+        const machineY = height/2;
+        
+        const machine = g.append('rect')
+            .attr('x', machineX - 80)
+            .attr('y', machineY - 50)
+            .attr('width', 160)
+            .attr('height', 100)
+            .attr('fill', '#34495e')
+            .attr('rx', 10)
+            .style('filter', 'drop-shadow(0 5px 10px rgba(15, 23, 42, 0.2))');
+
+        g.append('text')
+            .attr('x', machineX)
+            .attr('y', machineY)
+            .attr('text-anchor', 'middle')
+            .attr('fill', themeColors.text)
+            .style('font-size', '24px')
+            .style('font-weight', 'bold')
+            .text('f(x,y)');
+
+        // 输入漏斗
+        const funnel = g.append('path')
+            .attr('d', `M ${machineX-60} ${machineY-100} 
+                       L ${machineX-40} ${machineY-50} 
+                       L ${machineX+40} ${machineY-50} 
+                       L ${machineX+60} ${machineY-100} Z`)
+            .attr('fill', themeColors.muted)
+            .attr('stroke', '#7f8c8d')
+            .attr('stroke-width', 2);
+
+        // 输出管道
+        const pipe = g.append('rect')
+            .attr('x', machineX - 20)
+            .attr('y', machineY + 50)
+            .attr('width', 40)
+            .attr('height', 60)
+            .attr('fill', themeColors.muted)
+            .attr('stroke', '#7f8c8d')
+            .attr('stroke-width', 2);
+
+        // 动画输入输出
+        function animateFunction() {
+            // 输入 x
+            const xBall = g.append('circle')
+                .attr('cx', machineX - 30)
+                .attr('cy', machineY - 150)
+                .attr('r', 15)
+                .attr('fill', '#3498db');
+
+            g.append('text')
+                .attr('x', machineX - 30)
+                .attr('y', machineY - 150)
+                .attr('text-anchor', 'middle')
+                .attr('dy', '0.3em')
+                .attr('fill', themeColors.text)
+                .style('font-size', '12px')
+                .text('x');
+
+            xBall.transition()
+                .duration(1000)
+                .attr('cy', machineY - 75)
+                .transition()
+                .duration(500)
+                .attr('cy', machineY)
+                .style('opacity', 0);
+
+            // 输入 y
+            setTimeout(() => {
+                const yBall = g.append('circle')
+                    .attr('cx', machineX + 30)
+                    .attr('cy', machineY - 150)
+                    .attr('r', 15)
+                    .attr('fill', '#e74c3c');
+
+                g.append('text')
+                    .attr('x', machineX + 30)
+                    .attr('y', machineY - 150)
+                    .attr('text-anchor', 'middle')
+                    .attr('dy', '0.3em')
+                    .attr('fill', themeColors.text)
+                    .style('font-size', '12px')
+                    .text('y');
+
+                yBall.transition()
+                    .duration(1000)
+                    .attr('cy', machineY - 75)
+                    .transition()
+                    .duration(500)
+                    .attr('cy', machineY)
+                    .style('opacity', 0);
+            }, 500);
+
+            // 输出 z
+            setTimeout(() => {
+                const zBall = g.append('circle')
+                    .attr('cx', machineX)
+                    .attr('cy', machineY + 80)
+                    .attr('r', 0)
+                    .attr('fill', '#f39c12');
+
+                zBall.transition()
+                    .duration(500)
+                    .attr('r', 20)
+                    .transition()
+                    .duration(1000)
+                    .attr('cy', machineY + 150);
+
+                g.append('text')
+                    .attr('x', machineX)
+                    .attr('y', machineY + 150)
+                    .attr('text-anchor', 'middle')
+                    .attr('dy', '0.3em')
+                    .attr('fill', '#f39c12')
+                    .style('font-size', '16px')
+                    .style('opacity', 0)
+                    .text('z = f(x,y)')
+                    .transition()
+                    .delay(1500)
+                    .duration(500)
+                    .style('opacity', 1);
+            }, 2000);
+        }
+
+        animateFunction();
+        setInterval(animateFunction, 4000);
+    }
+
+    // 第4页：定义域可视化
+    function visualizeDomain() {
+        const setup = setupD3('vis-domain');
+        if (!setup) return;
+        const { g, width, height } = setup;
+
+        const xScale = d3.scaleLinear().domain([-3, 3]).range([0, width]);
+        const yScale = d3.scaleLinear().domain([-3, 3]).range([height, 0]);
+
+        // 坐标轴
+        g.append('g')
+            .attr('transform', `translate(0, ${height/2})`)
+            .call(d3.axisBottom(xScale).ticks(7))
+            .style('color', '#7f8c8d');
+
+        g.append('g')
+            .attr('transform', `translate(${width/2}, 0)`)
+            .call(d3.axisLeft(yScale).ticks(7))
+            .style('color', '#7f8c8d');
+
+        // 轴标签
+        g.append('text')
+            .attr('x', width - 10)
+            .attr('y', height/2 - 10)
+            .style('font-size', '14px')
+            .text('x');
+
+        g.append('text')
+            .attr('x', width/2 + 10)
+            .attr('y', 15)
+            .style('font-size', '14px')
+            .text('y');
+
+        // 圆形定义域动画
+        const circle = g.append('circle')
+            .attr('cx', xScale(0))
+            .attr('cy', yScale(0))
+            .attr('r', 0)
+            .attr('fill', '#3498db')
+            .attr('fill-opacity', 0.3)
+            .attr('stroke', '#2980b9')
+            .attr('stroke-width', 3);
+
+        circle.transition()
+            .duration(1500)
+            .ease(d3.easeBounceOut)
+            .attr('r', xScale(2) - xScale(0));
+
+        // 添加说明文字
+        g.append('text')
+            .attr('x', width/2)
+            .attr('y', 30)
+            .attr('text-anchor', 'middle')
+            .style('font-size', '18px')
+            .style('font-weight', 'bold')
+            .style('opacity', 0)
+            .text('x² + y² ≤ 4 (圆盘区域)')
+            .transition()
+            .delay(1000)
+            .duration(500)
+            .style('opacity', 1);
+
+        // 添加动画点
+        function addRandomPoint() {
+            const angle = Math.random() * 2 * Math.PI;
+            const r = Math.random() * 2;
+            const x = r * Math.cos(angle);
+            const y = r * Math.sin(angle);
+
+            const point = g.append('circle')
+                .attr('cx', xScale(x))
+                .attr('cy', yScale(y))
+                .attr('r', 3)
+                .attr('fill', '#e74c3c')
+                .style('opacity', 0);
+
+            point.transition()
+                .duration(500)
+                .style('opacity', 1)
+                .transition()
+                .delay(1000)
+                .duration(500)
+                .style('opacity', 0)
+                .remove();
+        }
+
+        setInterval(addRandomPoint, 500);
+    }
+
+    // 第5页：3D曲面（使用Three.js）
+    function visualize3DSurface() {
+        const container = document.getElementById('vis-3d-surface');
+        if (!container) return;
+
+        const { width, height } = getSizeFor(container);
+
+        // 初始化Three.js场景
+        scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xf0f0f0);
+
+        camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+        camera.position.set(5, 5, 5);
+        camera.lookAt(0, 0, 0);
+
+        renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setPixelRatio(window.devicePixelRatio || 1);
+        renderer.setSize(width, height);
+        container.innerHTML = '';
+        container.appendChild(renderer.domElement);
+
+        // 添加光源
+        const light1 = new THREE.DirectionalLight(0xffffff, 0.8);
+        light1.position.set(5, 5, 5);
+        scene.add(light1);
+
+        const light2 = new THREE.AmbientLight(0x404040);
+        scene.add(light2);
+
+        // 创建抛物面
+        const geometry = createParametricGeometry((u, v, target) => {
+            const x = (u - 0.5) * 4;
+            const y = (v - 0.5) * 4;
+            const z = x * x + y * y;
+            target.set(x, z/2, y);
+        }, 50, 50);
+
+        // 彩虹渐变材质
+        const material = new THREE.MeshPhongMaterial({
+            color: 0x3498db,
+            specular: 0x222222,
+            shininess: 100,
+            side: THREE.DoubleSide,
+            vertexColors: true
+        });
+
+        // 设置顶点颜色
+        const colors = [];
+        const color = new THREE.Color();
+        const positions = geometry.attributes.position.array;
+        
+        for (let i = 0; i < positions.length; i += 3) {
+            const y = positions[i + 1];
+            color.setHSL(y / 4, 1, 0.5);
+            colors.push(color.r, color.g, color.b);
+        }
+        
+        geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+
+        mesh = new THREE.Mesh(geometry, material);
+        scene.add(mesh);
+
+        // 添加坐标轴
+        const axesHelper = new THREE.AxesHelper(3);
+        scene.add(axesHelper);
+
+        // 添加网格
+        const gridHelper = new THREE.GridHelper(6, 10, 0x888888, 0xcccccc);
+        gridHelper.rotation.x = Math.PI / 2;
+        scene.add(gridHelper);
+
+        // 鼠标控制
+        let mouseX = 0, mouseY = 0;
+        let isMouseDown = false;
+
+        container.addEventListener('mousedown', () => isMouseDown = true);
+        container.addEventListener('mouseup', () => isMouseDown = false);
+        container.addEventListener('mousemove', (e) => {
+            if (isMouseDown) {
+                mouseX = (e.offsetX / width) * 2 - 1;
+                mouseY = -(e.offsetY / height) * 2 + 1;
+            }
+        });
+
+        // 动画
+        function animate() {
+            animationFrameId = requestAnimationFrame(animate);
+            
+            if (isMouseDown) {
+                mesh.rotation.z += mouseX * 0.05;
+                mesh.rotation.x += mouseY * 0.05;
+            } else {
+                mesh.rotation.z += 0.005;
+            }
+            
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // 添加信息面板
+        const infoPanel = document.createElement('div');
+        infoPanel.className = 'info-panel';
+        infoPanel.innerHTML = `
+            <button class="info-toggle" title="折叠/展开" aria-label="折叠/展开">i</button>
+            <div class="info-content">
+                <h4>抛物面</h4>
+                <div class="formula-display">z = x² + y²</div>
+                <p>拖动鼠标旋转查看</p>
+            </div>
+        `;
+        container.appendChild(infoPanel);
+        const toggleBtn1 = infoPanel.querySelector('.info-toggle');
+        if (toggleBtn1) toggleBtn1.addEventListener('click', (ev) => { ev.stopPropagation(); infoPanel.classList.toggle('minimized'); });
+        setTimeout(() => { infoPanel.classList.add('minimized'); }, 3500);
+    }
+
+    // 第6页：等高线可视化
+    function visualizeContour() {
+        const setup = setupD3('vis-contour');
+        if (!setup) return;
+        const { svg, g, width, height } = setup;
+
+        const xScale = d3.scaleLinear().domain([-3, 3]).range([0, width]);
+        const yScale = d3.scaleLinear().domain([-3, 3]).range([height, 0]);
+
+        // 生成等高线数据
+        const levels = [0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4];
+        const colors = d3.scaleSequential(d3.interpolateRainbow)
+            .domain([0, levels.length]);
+
+        levels.forEach((level, i) => {
+            const points = [];
+            for (let angle = 0; angle <= 2 * Math.PI; angle += 0.05) {
+                const r = Math.sqrt(level);
+                points.push([
+                    r * Math.cos(angle),
+                    r * Math.sin(angle)
+                ]);
+            }
+
+            const line = d3.line()
+                .x(d => xScale(d[0]))
+                .y(d => yScale(d[1]))
+                .curve(d3.curveCardinalClosed);
+
+            const path = g.append('path')
+                .datum(points)
+                .attr('d', line)
+                .attr('fill', 'none')
+                .attr('stroke', colors(i))
+                .attr('stroke-width', 2)
+                .style('opacity', 0);
+
+            path.transition()
+                .delay(i * 200)
+                .duration(1000)
+                .style('opacity', 1);
+
+            // 标注高度值
+            g.append('text')
+                .attr('x', xScale(Math.sqrt(level)))
+                .attr('y', yScale(0))
+                .text(`h=${level}`)
+                .style('font-size', '12px')
+                .style('fill', colors(i))
+                .style('font-weight', 'bold')
+                .style('opacity', 0)
+                .transition()
+                .delay(i * 200 + 500)
+                .duration(500)
+                .style('opacity', 1);
+        });
+
+        // 添加标题
+        g.append('text')
+            .attr('x', width/2)
+            .attr('y', -20)
+            .attr('text-anchor', 'middle')
+            .style('font-size', '18px')
+            .style('font-weight', 'bold')
+            .text('z = x² + y² 的等高线');
+
+        // 坐标轴
+        g.append('g')
+            .attr('transform', `translate(0, ${height/2})`)
+            .call(d3.axisBottom(xScale).ticks(5))
+            .style('opacity', 0.5);
+
+        g.append('g')
+            .attr('transform', `translate(${width/2}, 0)`)
+            .call(d3.axisLeft(yScale).ticks(5))
+            .style('opacity', 0.5);
+    }
+
+    // 第7页：极限概念
+    function visualizeLimit() {
+        const setup = setupD3('vis-limit');
+        if (!setup) return;
+        const { g, width, height } = setup;
+
+        const centerX = width/2;
+        const centerY = height/2;
+
+        // 目标点
+        const targetPoint = g.append('circle')
+            .attr('cx', centerX)
+            .attr('cy', centerY)
+            .attr('r', 8)
+            .attr('fill', '#e74c3c')
+            .style('filter', 'drop-shadow(0 0 10px rgba(231, 76, 60, 0.8))');
+
+        g.append('text')
+            .attr('x', centerX)
+            .attr('y', centerY - 20)
+            .attr('text-anchor', 'middle')
+            .style('font-size', '14px')
+            .style('font-weight', 'bold')
+            .text('(x₀, y₀)');
+
+        // 从不同方向接近的动画路径
+        const directions = [
+            { angle: 0, color: '#3498db', label: '从右' },
+            { angle: 90, color: '#2ecc71', label: '从上' },
+            { angle: 180, color: '#f39c12', label: '从左' },
+            { angle: 270, color: '#9b59b6', label: '从下' },
+            { angle: 45, color: '#1abc9c', label: '从右上' },
+            { angle: 135, color: '#e67e22', label: '从左上' }
+        ];
+
+        directions.forEach((dir, i) => {
+            const angle = dir.angle * Math.PI / 180;
+            const startX = centerX + 150 * Math.cos(angle);
+            const startY = centerY - 150 * Math.sin(angle);
+
+            // 创建移动的点
+            const movingPoint = g.append('circle')
+                .attr('cx', startX)
+                .attr('cy', startY)
+                .attr('r', 5)
+                .attr('fill', dir.color)
+                .style('opacity', 0);
+
+            // 路径线
+            const path = g.append('line')
+                .attr('x1', startX)
+                .attr('y1', startY)
+                .attr('x2', startX)
+                .attr('y2', startY)
+                .attr('stroke', dir.color)
+                .attr('stroke-width', 2)
+                .attr('stroke-dasharray', '5,3')
+                .style('opacity', 0.3);
+
+            // 标签
+            g.append('text')
+                .attr('x', startX + 20 * Math.cos(angle))
+                .attr('y', startY - 20 * Math.sin(angle))
+                .style('font-size', '12px')
+                .style('fill', dir.color)
+                .text(dir.label)
+                .style('opacity', 0)
+                .transition()
+                .delay(i * 200)
+                .duration(500)
+                .style('opacity', 1);
+
+            // 动画
+            movingPoint.transition()
+                .delay(i * 300)
+                .duration(200)
+                .style('opacity', 1)
+                .transition()
+                .duration(2000)
+                .ease(d3.easeQuadIn)
+                .attr('cx', centerX)
+                .attr('cy', centerY)
+                .style('opacity', 0);
+
+            path.transition()
+                .delay(i * 300)
+                .duration(2200)
+                .attr('x2', centerX)
+                .attr('y2', centerY);
+        });
+
+        // 结果显示
+        setTimeout(() => {
+            g.append('text')
+                .attr('x', width/2)
+                .attr('y', height - 30)
+                .attr('text-anchor', 'middle')
+                .style('font-size', '16px')
+                .style('font-weight', 'bold')
+                .style('fill', '#2ecc71')
+                .style('opacity', 0)
+                .text('所有方向都趋向于同一个值 L')
+                .transition()
+                .duration(500)
+                .style('opacity', 1);
+        }, 3000);
+    }
+
+    // 第8页：偏导数引入 - 3D曲面上的切线
+    function visualizePartialIntro() {
+        const container = document.getElementById('vis-partial-intro');
+        if (!container) return;
+
+        const { width, height } = getSizeFor(container);
+
+        // 创建Three.js场景
+        scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xf5f5f5);
+
+        camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+        camera.position.set(4, 3, 4);
+        camera.lookAt(0, 0, 0);
+
+        renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setPixelRatio(window.devicePixelRatio || 1);
+        renderer.setSize(width, height);
+        container.innerHTML = '';
+        container.appendChild(renderer.domElement);
+
+        // 光源
+        const light = new THREE.DirectionalLight(0xffffff, 1);
+        light.position.set(5, 5, 5);
+        scene.add(light);
+        scene.add(new THREE.AmbientLight(0x404040));
+
+        // 创建曲面
+        const geometry = createParametricGeometry((u, v, target) => {
+            const x = (u - 0.5) * 4;
+            const y = (v - 0.5) * 4;
+            const z = Math.sin(x) * Math.cos(y);
+            target.set(x, z, y);
+        }, 30, 30);
+
+        const material = new THREE.MeshPhongMaterial({
+            color: 0x3498db,
+            transparent: true,
+            opacity: 0.7,
+            side: THREE.DoubleSide
+        });
+
+        mesh = new THREE.Mesh(geometry, material);
+        scene.add(mesh);
+
+        // 添加切线（沿x方向）
+        const xLineGeometry = new THREE.BufferGeometry();
+        const xLinePoints = [];
+        for (let t = -2; t <= 2; t += 0.1) {
+            xLinePoints.push(new THREE.Vector3(t, Math.sin(t), 0));
+        }
+        xLineGeometry.setFromPoints(xLinePoints);
+        const xLineMaterial = new THREE.LineBasicMaterial({ color: 0xff0000, linewidth: 3 });
+        const xLine = new THREE.Line(xLineGeometry, xLineMaterial);
+        scene.add(xLine);
+
+        // 添加切线（沿y方向）
+        const yLineGeometry = new THREE.BufferGeometry();
+        const yLinePoints = [];
+        for (let t = -2; t <= 2; t += 0.1) {
+            yLinePoints.push(new THREE.Vector3(0, Math.cos(t), t));
+        }
+        yLineGeometry.setFromPoints(yLinePoints);
+        const yLineMaterial = new THREE.LineBasicMaterial({ color: 0x00ff00, linewidth: 3 });
+        const yLine = new THREE.Line(yLineGeometry, yLineMaterial);
+        scene.add(yLine);
+
+        // 坐标轴
+        const axes = new THREE.AxesHelper(3);
+        scene.add(axes);
+
+        // 动画
+        function animate() {
+            animationFrameId = requestAnimationFrame(animate);
+            mesh.rotation.z += 0.003;
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // 添加说明
+        const infoPanel = document.createElement('div');
+        infoPanel.className = 'info-panel';
+        infoPanel.innerHTML = `
+            <button class="info-toggle" title="折叠/展开" aria-label="折叠/展开">i</button>
+            <div class="info-content">
+                <h4>偏导数的几何意义</h4>
+                <p style="color: #ff0000;">红线：沿x方向的切线</p>
+                <p style="color: #00ff00;">绿线：沿y方向的切线</p>
+            </div>
+        `;
+        container.appendChild(infoPanel);
+        const toggleBtn2 = infoPanel.querySelector('.info-toggle');
+        if (toggleBtn2) toggleBtn2.addEventListener('click', (ev) => { ev.stopPropagation(); infoPanel.classList.toggle('minimized'); });
+        setTimeout(() => { infoPanel.classList.add('minimized'); }, 3500);
+    }
+
+    // 第9页：偏导数定义
+    function visualizePartialDef() {
+        const setup = setupD3('vis-partial-def');
+        if (!setup) return;
+        const { g, width, height } = setup;
+
+        // 创建两个子图
+        const leftG = g.append('g').attr('transform', `translate(0, 0)`);
+        const rightG = g.append('g').attr('transform', `translate(${width/2}, 0)`);
+
+        // 左图：对x的偏导
+        leftG.append('text')
+            .attr('x', width/4)
+            .attr('y', 30)
+            .attr('text-anchor', 'middle')
+            .style('font-size', '18px')
+            .style('font-weight', 'bold')
+            .style('fill', '#e74c3c')
+            .text('∂f/∂x (y固定)');
+
+        // 绘制曲线
+        const xScale = d3.scaleLinear().domain([-2, 2]).range([20, width/2 - 20]);
+        const yScale = d3.scaleLinear().domain([-1, 3]).range([height - 40, 60]);
+
+        const data = d3.range(-2, 2.1, 0.1).map(x => ({
+            x: x,
+            y: x * x
+        }));
+
+        const line = d3.line()
+            .x(d => xScale(d.x))
+            .y(d => yScale(d.y))
+            .curve(d3.curveBasis);
+
+        leftG.append('path')
+            .datum(data)
+            .attr('d', line)
+            .attr('fill', 'none')
+            .attr('stroke', '#3498db')
+            .attr('stroke-width', 3);
+
+        // 坐标轴
+        leftG.append('g')
+            .attr('transform', `translate(0, ${yScale(0)})`)
+            .call(d3.axisBottom(xScale).ticks(5));
+
+        leftG.append('g')
+            .attr('transform', `translate(${xScale(0)}, 0)`)
+            .call(d3.axisLeft(yScale).ticks(5));
+
+        // 切线动画
+        const x0 = 1;
+        const y0 = 1;
+        const slope = 2 * x0;
+
+        const tangentLine = leftG.append('line')
+            .attr('x1', xScale(x0 - 0.5))
+            .attr('y1', yScale(y0 - 0.5 * slope))
+            .attr('x2', xScale(x0 + 0.5))
+            .attr('y2', yScale(y0 + 0.5 * slope))
+            .attr('stroke', '#e74c3c')
+            .attr('stroke-width', 3)
+            .style('opacity', 0);
+
+        tangentLine.transition()
+            .delay(1000)
+            .duration(1000)
+            .style('opacity', 1);
+
+        // 切点
+        leftG.append('circle')
+            .attr('cx', xScale(x0))
+            .attr('cy', yScale(y0))
+            .attr('r', 0)
+            .attr('fill', '#e74c3c')
+            .transition()
+            .delay(500)
+            .duration(500)
+            .attr('r', 5);
+
+        // 右图：对y的偏导
+        rightG.append('text')
+            .attr('x', width/4)
+            .attr('y', 30)
+            .attr('text-anchor', 'middle')
+            .style('font-size', '18px')
+            .style('font-weight', 'bold')
+            .style('fill', '#2ecc71')
+            .text('∂f/∂y (x固定)');
+
+        const data2 = d3.range(-2, 2.1, 0.1).map(y => ({
+            x: y,
+            y: Math.sin(y) + 1
+        }));
+
+        rightG.append('path')
+            .datum(data2)
+            .attr('d', line)
+            .attr('fill', 'none')
+            .attr('stroke', '#2ecc71')
+            .attr('stroke-width', 3);
+
+        // 坐标轴
+        rightG.append('g')
+            .attr('transform', `translate(0, ${yScale(0)})`)
+            .call(d3.axisBottom(xScale).ticks(5));
+
+        rightG.append('g')
+            .attr('transform', `translate(${xScale(0)}, 0)`)
+            .call(d3.axisLeft(yScale).ticks(5));
+    }
+
+    // 例题1：偏导数计算 - 3D曲面可视化
+    function visualizePartialCalc() {
+        const container = document.getElementById('vis-partial-calc');
+        if (!container) return;
+        container.innerHTML = '';
+        
+        // 创建Three.js场景
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xffffff);
+        
+        const { width, height } = getSizeFor(container);
+        const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+        camera.position.set(8, 8, 8);
+        
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setPixelRatio(window.devicePixelRatio || 1);
+        renderer.setSize(width, height);
+        container.appendChild(renderer.domElement);
+        
+        // 光源
+        const light = new THREE.DirectionalLight(0xffffff, 0.8);
+        light.position.set(5, 5, 5);
+        scene.add(light);
+        scene.add(new THREE.AmbientLight(0x404040, 0.6));
+        
+        // 绘制曲面 z = x²y + 3xy²
+        const resolution = 30;
+        const geometry = new THREE.BufferGeometry();
+        const vertices = [];
+        const colors = [];
+        
+        for (let i = 0; i < resolution; i++) {
+            for (let j = 0; j < resolution; j++) {
+                const x = (i / resolution - 0.5) * 4;
+                const y = (j / resolution - 0.5) * 4;
+                const z = x * x * y + 3 * x * y * y;
+                vertices.push(x, z * 0.3, y);
+                
+                const color = new THREE.Color();
+                color.setHSL((z + 5) / 10, 0.7, 0.6);
+                colors.push(color.r, color.g, color.b);
+            }
+        }
+        
+        const indices = [];
+        for (let i = 0; i < resolution - 1; i++) {
+            for (let j = 0; j < resolution - 1; j++) {
+                const a = i * resolution + j;
+                const b = i * resolution + j + 1;
+                const c = (i + 1) * resolution + j;
+                const d = (i + 1) * resolution + j + 1;
+                indices.push(a, b, d, a, d, c);
+            }
+        }
+        
+        geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+        geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+        geometry.setIndex(indices);
+        geometry.computeVertexNormals();
+        
+        const material = new THREE.MeshPhongMaterial({
+            vertexColors: true,
+            side: THREE.DoubleSide,
+            shininess: 30,
+            transparent: true,
+            opacity: 0.9
+        });
+        
+        const surface = new THREE.Mesh(geometry, material);
+        scene.add(surface);
+        
+        // 特定点 (1, 1)
+        const x0 = 1, y0 = 1;
+        const z0 = x0 * x0 * y0 + 3 * x0 * y0 * y0;
+        
+        // 点标记
+        const pointGeom = new THREE.SphereGeometry(0.15, 16, 16);
+        const pointMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+        const point = new THREE.Mesh(pointGeom, pointMat);
+        point.position.set(x0, z0 * 0.3, y0);
+        scene.add(point);
+        
+        // 偏导数方向的切线 - x方向
+        const dx = 0.5;
+        const z_x1 = (x0 - dx) * (x0 - dx) * y0 + 3 * (x0 - dx) * y0 * y0;
+        const z_x2 = (x0 + dx) * (x0 + dx) * y0 + 3 * (x0 + dx) * y0 * y0;
+        const lineXGeom = new THREE.BufferGeometry().setFromPoints([
+            new THREE.Vector3(x0 - dx, z_x1 * 0.3, y0),
+            new THREE.Vector3(x0 + dx, z_x2 * 0.3, y0)
+        ]);
+        const lineXMat = new THREE.LineBasicMaterial({ color: 0xe74c3c, linewidth: 3 });
+        scene.add(new THREE.Line(lineXGeom, lineXMat));
+        
+        // 偏导数方向的切线 - y方向
+        const dy = 0.5;
+        const z_y1 = x0 * x0 * (y0 - dy) + 3 * x0 * (y0 - dy) * (y0 - dy);
+        const z_y2 = x0 * x0 * (y0 + dy) + 3 * x0 * (y0 + dy) * (y0 + dy);
+        const lineYGeom = new THREE.BufferGeometry().setFromPoints([
+            new THREE.Vector3(x0, z_y1 * 0.3, y0 - dy),
+            new THREE.Vector3(x0, z_y2 * 0.3, y0 + dy)
+        ]);
+        const lineYMat = new THREE.LineBasicMaterial({ color: 0x2ecc71, linewidth: 3 });
+        scene.add(new THREE.Line(lineYGeom, lineYMat));
+        
+        // 坐标轴
+        const axesHelper = new THREE.AxesHelper(3);
+        scene.add(axesHelper);
+        
+        // 添加文本说明
+        const infoDiv = document.createElement('div');
+        infoDiv.style.cssText = `
+            position: absolute; top: 20px; left: 20px; right: 20px;
+            background: rgba(255,255,255,0.95); padding: 15px;
+            border-radius: 8px; font-size: 14px; line-height: 1.8;
+        `;
+        infoDiv.innerHTML = `
+            <strong style="color:#003366">$z = x^2y + 3xy^2$ 在点 $(1,1)$</strong><br>
+            <span style="color:#e74c3c">━</span> $\\displaystyle\\frac{\\partial z}{\\partial x} = 2xy + 3y^2 = 5$<br>
+            <span style="color:#2ecc71">━</span> $\\displaystyle\\frac{\\partial z}{\\partial y} = x^2 + 6xy = 7$
+        `;
+        container.appendChild(infoDiv);
+        
+        // 动画
+        let angle = 0;
+        function animate() {
+            angle += 0.005;
+            camera.position.x = 8 * Math.cos(angle);
+            camera.position.z = 8 * Math.sin(angle);
+            camera.lookAt(0, 2, 0);
+            renderer.render(scene, camera);
+            requestAnimationFrame(animate);
+        }
+        animate();
+        
+        // MathJax渲染
+        if (window.MathJax && window.MathJax.typesetPromise) {
+            setTimeout(() => {
+                window.MathJax.typesetPromise([infoDiv]).catch(err => console.warn(err));
+            }, 100);
+        }
+    }
+
+    // 例题2：复合函数的偏导数
+    function visualizePartialCalc2() {
+        const setup = setupD3('vis-partial-calc2');
+        if (!setup) return;
+        const { g, width, height } = setup;
+        
+        const centerX = width / 2;
+        const startY = 80;
+        
+        // 绘制乘积法则流程图
+        // 主函数
+        g.append('rect')
+            .attr('x', centerX - 100)
+            .attr('y', 20)
+            .attr('width', 200)
+            .attr('height', 50)
+            .attr('fill', '#3498db')
+            .attr('rx', 8);
+        
+        g.append('text')
+            .attr('x', centerX)
+            .attr('y', 50)
+            .attr('text-anchor', 'middle')
+            .attr('fill', '#fff')
+            .attr('font-size', '16px')
+            .attr('font-weight', 'bold')
+            .text('z = e^(xy) · sin(x+y)');
+        
+        // 分支箭头
+        g.append('line')
+            .attr('x1', centerX)
+            .attr('y1', 70)
+            .attr('x2', centerX)
+            .attr('y2', 100)
+            .attr('stroke', '#2c3e50')
+            .attr('stroke-width', 2);
+        
+        // 左分支 - u
+        g.append('line')
+            .attr('x1', centerX)
+            .attr('y1', 100)
+            .attr('x2', centerX - 120)
+            .attr('y2', 140)
+            .attr('stroke', '#e74c3c')
+            .attr('stroke-width', 2);
+        
+        g.append('rect')
+            .attr('x', centerX - 190)
+            .attr('y', 140)
+            .attr('width', 140)
+            .attr('height', 50)
+            .attr('fill', '#e74c3c')
+            .attr('rx', 8);
+        
+        g.append('text')
+            .attr('x', centerX - 120)
+            .attr('y', 170)
+            .attr('text-anchor', 'middle')
+            .attr('fill', '#fff')
+            .attr('font-size', '14px')
+            .attr('font-weight', 'bold')
+            .text('u = e^(xy)');
+        
+        // 左分支导数
+        g.append('line')
+            .attr('x1', centerX - 120)
+            .attr('y1', 190)
+            .attr('x2', centerX - 120)
+            .attr('y2', 220)
+            .attr('stroke', '#e74c3c')
+            .attr('stroke-width', 2)
+            .attr('marker-end', 'url(#arrow-red)');
+        
+        g.append('text')
+            .attr('x', centerX - 120)
+            .attr('y', 250)
+            .attr('text-anchor', 'middle')
+            .attr('fill', '#e74c3c')
+            .attr('font-size', '13px')
+            .attr('font-weight', 'bold')
+            .text('∂u/∂x = ye^(xy)');
+        
+        // 右分支 - v
+        g.append('line')
+            .attr('x1', centerX)
+            .attr('y1', 100)
+            .attr('x2', centerX + 120)
+            .attr('y2', 140)
+            .attr('stroke', '#2ecc71')
+            .attr('stroke-width', 2);
+        
+        g.append('rect')
+            .attr('x', centerX + 50)
+            .attr('y', 140)
+            .attr('width', 140)
+            .attr('height', 50)
+            .attr('fill', '#2ecc71')
+            .attr('rx', 8);
+        
+        g.append('text')
+            .attr('x', centerX + 120)
+            .attr('y', 170)
+            .attr('text-anchor', 'middle')
+            .attr('fill', '#fff')
+            .attr('font-size', '14px')
+            .attr('font-weight', 'bold')
+            .text('v = sin(x+y)');
+        
+        // 右分支导数
+        g.append('line')
+            .attr('x1', centerX + 120)
+            .attr('y1', 190)
+            .attr('x2', centerX + 120)
+            .attr('y2', 220)
+            .attr('stroke', '#2ecc71')
+            .attr('stroke-width', 2)
+            .attr('marker-end', 'url(#arrow-green)');
+        
+        g.append('text')
+            .attr('x', centerX + 120)
+            .attr('y', 250)
+            .attr('text-anchor', 'middle')
+            .attr('fill', '#2ecc71')
+            .attr('font-size', '13px')
+            .attr('font-weight', 'bold')
+            .text('∂v/∂x = cos(x+y)');
+        
+        // 合并箭头
+        g.append('line')
+            .attr('x1', centerX - 120)
+            .attr('y1', 260)
+            .attr('x2', centerX)
+            .attr('y2', 300)
+            .attr('stroke', '#9b59b6')
+            .attr('stroke-width', 2);
+        
+        g.append('line')
+            .attr('x1', centerX + 120)
+            .attr('y1', 260)
+            .attr('x2', centerX)
+            .attr('y2', 300)
+            .attr('stroke', '#9b59b6')
+            .attr('stroke-width', 2);
+        
+        // 最终结果
+        g.append('rect')
+            .attr('x', centerX - 140)
+            .attr('y', 300)
+            .attr('width', 280)
+            .attr('height', 60)
+            .attr('fill', '#9b59b6')
+            .attr('rx', 8);
+        
+        g.append('text')
+            .attr('x', centerX)
+            .attr('y', 325)
+            .attr('text-anchor', 'middle')
+            .attr('fill', '#fff')
+            .attr('font-size', '13px')
+            .text('乘积法则：(uv)\' = u\'v + uv\'');
+        
+        g.append('text')
+            .attr('x', centerX)
+            .attr('y', 345)
+            .attr('text-anchor', 'middle')
+            .attr('fill', '#fff')
+            .attr('font-size', '12px')
+            .text('∂z/∂x = [ye^(xy)]sin(x+y) + e^(xy)cos(x+y)');
+        
+        // 定义箭头
+        const defs = g.append('defs');
+        defs.append('marker')
+            .attr('id', 'arrow-red')
+            .attr('markerWidth', 10)
+            .attr('markerHeight', 10)
+            .attr('refX', 9)
+            .attr('refY', 3)
+            .attr('orient', 'auto')
+            .append('polygon')
+            .attr('points', '0 0, 10 3, 0 6')
+            .attr('fill', '#e74c3c');
+        
+        defs.append('marker')
+            .attr('id', 'arrow-green')
+            .attr('markerWidth', 10)
+            .attr('markerHeight', 10)
+            .attr('refX', 9)
+            .attr('refY', 3)
+            .attr('orient', 'auto')
+            .append('polygon')
+            .attr('points', '0 0, 10 3, 0 6')
+            .attr('fill', '#2ecc71');
+    }
+
+    // 第11页：高阶偏导数可视化
+    function visualizeHigherOrder() {
+        const setup = setupD3('vis-higher-order');
+        if (!setup) return;
+        const { g, width, height } = setup;
+
+        const centerX = width / 2;
+        const centerY = height / 2;
+
+        // 绘制偏导数树
+        g.append('text')
+            .attr('x', centerX)
+            .attr('y', 60)
+            .attr('text-anchor', 'middle')
+            .style('font-size', '20px')
+            .style('font-weight', 'bold')
+            .text('z = f(x, y)');
+
+        // 一阶偏导
+        const level1Y = 140;
+        const spacing = 200;
+        
+        g.append('text')
+            .attr('x', centerX - spacing/2)
+            .attr('y', level1Y)
+            .attr('text-anchor', 'middle')
+            .style('font-size', '18px')
+            .style('fill', '#e74c3c')
+            .text('∂z/∂x');
+
+        g.append('text')
+            .attr('x', centerX + spacing/2)
+            .attr('y', level1Y)
+            .attr('text-anchor', 'middle')
+            .style('font-size', '18px')
+            .style('fill', '#2ecc71')
+            .text('∂z/∂y');
+
+        // 连线
+                g.append('line')
+            .attr('x1', centerX)
+            .attr('y1', 80)
+            .attr('x2', centerX - spacing/2)
+            .attr('y2', level1Y - 20)
+            .attr('stroke', '#e74c3c')
+            .attr('stroke-width', 2);
+
+        g.append('line')
+            .attr('x1', centerX)
+            .attr('y1', 80)
+            .attr('x2', centerX + spacing/2)
+            .attr('y2', level1Y - 20)
+            .attr('stroke', '#2ecc71')
+            .attr('stroke-width', 2);
+
+        // 二阶偏导
+        const level2Y = 220;
+        const positions = [
+            { x: centerX - spacing, y: level2Y, text: '∂²z/∂x²', from: centerX - spacing/2 },
+            { x: centerX, y: level2Y, text: '∂²z/∂x∂y', from: centerX - spacing/2 },
+            { x: centerX + spacing, y: level2Y, text: '∂²z/∂y²', from: centerX + spacing/2 }
+        ];
+
+        positions.forEach(pos => {
+            g.append('text')
+                .attr('x', pos.x)
+                .attr('y', pos.y)
+                .attr('text-anchor', 'middle')
+                .style('font-size', '16px')
+                .style('fill', '#3498db')
+                .text(pos.text);
+
+            g.append('line')
+                .attr('x1', pos.from)
+                .attr('y1', level1Y + 10)
+                .attr('x2', pos.x)
+                .attr('y2', level2Y - 20)
+                .attr('stroke', '#3498db')
+                .attr('stroke-width', 1.5);
+        });
+    }
+
+    // 例题3：高阶偏导数计算（重制：步骤化呈现）
+    function visualizeHigherCalc() {
+        const steps = [
+            { text: '<strong>给定函数</strong>：$\\, z = x^3 + 2x^2y + y^3$', size: '18px', color: '#1f2937', bold: true, delay: 0 },
+            { text: '<strong>一阶偏导</strong>：$\\, z_x = 3x^2 + 4xy,\\quad z_y = 2x^2 + 3y^2$', size: '16px', color: '#0f766e', delay: 200 },
+            { text: '<strong>二阶偏导</strong>：$\\, z_{xx} = 6x + 4y,\\quad z_{xy} = z_{yx} = 4x,\\quad z_{yy} = 6y$', size: '16px', color: '#1d4ed8', delay: 350 },
+            { text: '<strong>Schwarz 定理</strong>：若二阶偏导连续，则 $z_{xy}=z_{yx}$', size: '15px', color: '#6b7280', delay: 500 }
+        ];
+        renderSolutionSteps('vis-higher-calc', steps);
+    }
+
+    // 第13页：全微分可视化
+    function visualizeTotalDiff() {
+        const setup = setupD3('vis-total-diff');
+        if (!setup) return;
+        const { g, width, height } = setup;
+
+        const centerX = width / 2;
+        const centerY = height / 2;
+
+        // 绘制增量示意图
+        const x0 = centerX - 80;
+        const y0 = centerY;
+        const dx = 100;
+        const dy = -60;
+
+        // 原点
+        g.append('circle')
+            .attr('cx', x0)
+            .attr('cy', y0)
+            .attr('r', 5)
+            .attr('fill', '#3498db');
+
+        g.append('text')
+            .attr('x', x0 - 30)
+            .attr('y', y0)
+            .attr('text-anchor', 'end')
+            .text('(x, y)');
+
+        // 终点
+        g.append('circle')
+            .attr('cx', x0 + dx)
+            .attr('cy', y0 + dy)
+            .attr('r', 5)
+            .attr('fill', '#e74c3c');
+
+        g.append('text')
+            .attr('x', x0 + dx + 30)
+            .attr('y', y0 + dy)
+            .text('(x+Δx, y+Δy)');
+
+        // Δx箭头
+        g.append('line')
+            .attr('x1', x0)
+            .attr('y1', y0)
+            .attr('x2', x0 + dx)
+            .attr('y2', y0)
+            .attr('stroke', '#2ecc71')
+            .attr('stroke-width', 2);
+
+        g.append('text')
+            .attr('x', x0 + dx/2)
+            .attr('y', y0 + 20)
+            .attr('text-anchor', 'middle')
+            .style('fill', '#2ecc71')
+            .text('Δx');
+
+        // Δy箭头
+        g.append('line')
+            .attr('x1', x0 + dx)
+            .attr('y1', y0)
+            .attr('x2', x0 + dx)
+            .attr('y2', y0 + dy)
+            .attr('stroke', '#9b59b6')
+            .attr('stroke-width', 2);
+
+        g.append('text')
+            .attr('x', x0 + dx + 30)
+            .attr('y', y0 + dy/2)
+            .style('fill', '#9b59b6')
+            .text('Δy');
+    }
+
+    // 例题4：全微分计算
+    function visualizeTotalDiffCalc() {
+        const setup = setupD3('vis-total-diff-calc');
+        if (!setup) return;
+        const { g, width, height } = setup;
+        
+        const xScale = d3.scaleLinear().domain([0, 3]).range([0, width]);
+        const yScale = d3.scaleLinear().domain([0, 4]).range([height, 0]);
+        
+        // 绘制等高线 z = x² + 3xy + y²
+        const levels = [6, 9, 12, 15, 18, 24];
+        levels.forEach(level => {
+            const points = [];
+            for (let t = 0; t < 2 * Math.PI; t += 0.1) {
+                const x = 1 + Math.sqrt(level / 5) * Math.cos(t);
+                const y = 2 + Math.sqrt(level / 5) * Math.sin(t) * 0.8;
+                if (x >= 0 && x <= 3 && y >= 0 && y <= 4) {
+                    points.push([xScale(x), yScale(y)]);
+                }
+            }
+            if (points.length > 0) {
+                g.append('path')
+                    .datum(points)
+                    .attr('d', d3.line())
+                    .attr('fill', 'none')
+                    .attr('stroke', '#3498db')
+                    .attr('stroke-width', 1)
+                    .attr('opacity', 0.5);
+            }
+        });
+        
+        // 点 (1,2)
+        g.append('circle')
+            .attr('cx', xScale(1))
+            .attr('cy', yScale(2))
+            .attr('r', 7)
+            .attr('fill', '#e74c3c');
+        
+        g.append('text')
+            .attr('x', xScale(1) + 12)
+            .attr('y', yScale(2) + 5)
+            .attr('font-size', '14px')
+            .attr('fill', '#e74c3c')
+            .attr('font-weight', 'bold')
+            .text('(1,2)');
+        
+        // 切平面的法向量
+        const dx = 0.5, dy = 0.5;
+        
+        // x方向微分
+        g.append('line')
+            .attr('x1', xScale(1))
+            .attr('y1', yScale(2))
+            .attr('x2', xScale(1 + dx))
+            .attr('y2', yScale(2))
+            .attr('stroke', '#2ecc71')
+            .attr('stroke-width', 3)
+            .attr('marker-end', 'url(#arrow-dx)');
+        
+        g.append('text')
+            .attr('x', xScale(1 + dx) + 5)
+            .attr('y', yScale(2) - 5)
+            .attr('font-size', '12px')
+            .attr('fill', '#2ecc71')
+            .text('dx');
+        
+        // y方向微分
+        g.append('line')
+            .attr('x1', xScale(1))
+            .attr('y1', yScale(2))
+            .attr('x2', xScale(1))
+            .attr('y2', yScale(2 + dy))
+            .attr('stroke', '#9b59b6')
+            .attr('stroke-width', 3)
+            .attr('marker-end', 'url(#arrow-dy)');
+        
+        g.append('text')
+            .attr('x', xScale(1) - 25)
+            .attr('y', yScale(2 + dy) - 5)
+            .attr('font-size', '12px')
+            .attr('fill', '#9b59b6')
+            .text('dy');
+        
+        // 箭头定义
+        const defs = g.append('defs');
+        defs.append('marker')
+            .attr('id', 'arrow-dx')
+            .attr('markerWidth', 8)
+            .attr('markerHeight', 8)
+            .attr('refX', 7)
+            .attr('refY', 3)
+            .attr('orient', 'auto')
+            .append('polygon')
+            .attr('points', '0 0, 8 3, 0 6')
+            .attr('fill', '#2ecc71');
+        
+        defs.append('marker')
+            .attr('id', 'arrow-dy')
+            .attr('markerWidth', 8)
+            .attr('markerHeight', 8)
+            .attr('refX', 7)
+            .attr('refY', 3)
+            .attr('orient', 'auto')
+            .append('polygon')
+            .attr('points', '0 0, 8 3, 0 6')
+            .attr('fill', '#9b59b6');
+        
+        // 坐标轴
+        g.append('g')
+            .attr('transform', `translate(0, ${yScale(0)})`)
+            .call(d3.axisBottom(xScale).ticks(5));
+        
+        g.append('g')
+            .attr('transform', `translate(${xScale(0)}, 0)`)
+            .call(d3.axisLeft(yScale).ticks(5));
+        
+        // 说明文字
+        g.append('text')
+            .attr('x', 10)
+            .attr('y', 20)
+            .attr('font-size', '13px')
+            .attr('fill', '#2c3e50')
+            .attr('font-weight', 'bold')
+            .text('z = x² + 3xy + y² 在 (1,2) 处');
+        
+        g.append('text')
+            .attr('x', 10)
+            .attr('y', height - 10)
+            .attr('font-size', '14px')
+            .attr('fill', '#e74c3c')
+            .attr('font-weight', 'bold')
+            .text('dz = 8dx + 7dy');
+    }
+
+    // 例题5：全微分的应用
+    function visualizeTotalDiffApp() {
+        const setup = setupD3('vis-total-diff-app');
+        if (!setup) return;
+        const { g, width, height } = setup;
+        
+        const xScale = d3.scaleLinear().domain([0.8, 1.2]).range([0, width]);
+        const yScale = d3.scaleLinear().domain([1.8, 2.2]).range([height, 0]);
+        
+        // 原点 (1, 2)
+        g.append('circle')
+            .attr('cx', xScale(1))
+            .attr('cy', yScale(2))
+            .attr('r', 8)
+            .attr('fill', '#3498db')
+            .attr('stroke', '#fff')
+            .attr('stroke-width', 2);
+        
+        g.append('text')
+            .attr('x', xScale(1) - 35)
+            .attr('y', yScale(2) - 10)
+            .attr('font-size', '13px')
+            .attr('fill', '#3498db')
+            .attr('font-weight', 'bold')
+            .text('(1, 2)');
+        
+        g.append('text')
+            .attr('x', xScale(1) - 40)
+            .attr('y', yScale(2) + 20)
+            .attr('font-size', '12px')
+            .attr('fill', '#3498db')
+            .text('z₀ = 11');
+        
+        // 新点 (1.02, 1.98)
+        g.append('circle')
+            .attr('cx', xScale(1.02))
+            .attr('cy', yScale(1.98))
+            .attr('r', 8)
+            .attr('fill', '#e74c3c')
+            .attr('stroke', '#fff')
+            .attr('stroke-width', 2);
+        
+        g.append('text')
+            .attr('x', xScale(1.02) + 10)
+            .attr('y', yScale(1.98) + 5)
+            .attr('font-size', '13px')
+            .attr('fill', '#e74c3c')
+            .attr('font-weight', 'bold')
+            .text('(1.02, 1.98)');
+        
+        g.append('text')
+            .attr('x', xScale(1.02) + 10)
+            .attr('y', yScale(1.98) + 20)
+            .attr('font-size', '12px')
+            .attr('fill', '#e74c3c')
+            .text('z ≈ 11.02');
+        
+        // Δx 箭头
+        g.append('line')
+            .attr('x1', xScale(1))
+            .attr('y1', yScale(2))
+            .attr('x2', xScale(1.02))
+            .attr('y2', yScale(2))
+            .attr('stroke', '#2ecc71')
+            .attr('stroke-width', 3)
+            .attr('marker-end', 'url(#arrow-app-x)');
+        
+        g.append('text')
+            .attr('x', xScale(1.01))
+            .attr('y', yScale(2) - 5)
+            .attr('font-size', '12px')
+            .attr('fill', '#2ecc71')
+            .attr('text-anchor', 'middle')
+            .text('Δx=0.02');
+        
+        // Δy 箭头
+        g.append('line')
+            .attr('x1', xScale(1.02))
+            .attr('y1', yScale(2))
+            .attr('x2', xScale(1.02))
+            .attr('y2', yScale(1.98))
+            .attr('stroke', '#9b59b6')
+            .attr('stroke-width', 3)
+            .attr('marker-end', 'url(#arrow-app-y)');
+        
+        g.append('text')
+            .attr('x', xScale(1.02) + 35)
+            .attr('y', yScale(1.99))
+            .attr('font-size', '12px')
+            .attr('fill', '#9b59b6')
+            .text('Δy=-0.02');
+        
+        // 连接线（虚线）
+        g.append('line')
+            .attr('x1', xScale(1))
+            .attr('y1', yScale(2))
+            .attr('x2', xScale(1.02))
+            .attr('y2', yScale(1.98))
+            .attr('stroke', '#95a5a6')
+            .attr('stroke-width', 2)
+            .attr('stroke-dasharray', '5,3')
+            .attr('opacity', 0.6);
+        
+        // 箭头定义
+        const defs = g.append('defs');
+        defs.append('marker')
+            .attr('id', 'arrow-app-x')
+            .attr('markerWidth', 8)
+            .attr('markerHeight', 8)
+            .attr('refX', 7)
+            .attr('refY', 3)
+            .attr('orient', 'auto')
+            .append('polygon')
+            .attr('points', '0 0, 8 3, 0 6')
+            .attr('fill', '#2ecc71');
+        
+        defs.append('marker')
+            .attr('id', 'arrow-app-y')
+            .attr('markerWidth', 8)
+            .attr('markerHeight', 8)
+            .attr('refX', 7)
+            .attr('refY', 3)
+            .attr('orient', 'auto')
+            .append('polygon')
+            .attr('points', '0 0, 8 3, 0 6')
+            .attr('fill', '#9b59b6');
+        
+        // 坐标轴
+        g.append('g')
+            .attr('transform', `translate(0, ${yScale(1.8)})`)
+            .call(d3.axisBottom(xScale).ticks(5));
+        
+        g.append('g')
+            .attr('transform', `translate(${xScale(0.8)}, 0)`)
+            .call(d3.axisLeft(yScale).ticks(5));
+        
+        // 公式
+        g.append('text')
+            .attr('x', 10)
+            .attr('y', 25)
+            .attr('font-size', '13px')
+            .attr('fill', '#2c3e50')
+            .attr('font-weight', 'bold')
+            .text('全微分近似');
+        
+        g.append('text')
+            .attr('x', 10)
+            .attr('y', 45)
+            .attr('font-size', '12px')
+            .attr('fill', '#2c3e50')
+            .text('Δz ≈ dz = z_x·Δx + z_y·Δy');
+        
+        g.append('text')
+            .attr('x', 10)
+            .attr('y', 65)
+            .attr('font-size', '12px')
+            .attr('fill', '#2c3e50')
+            .text('= 8(0.02) + 7(-0.02) = 0.02');
+    }
+
+    // 例题6：方向导数计算
+    function visualizeDirectionalCalc() {
+        const setup = setupD3('vis-directional-calc');
+        if (!setup) return;
+        const { g, width, height } = setup;
+        
+        // 绘制等高线 z = x² + y²
+        const levels = [0.5, 1, 2, 3, 4, 5];
+        const xScale = d3.scaleLinear().domain([-3, 3]).range([0, width]);
+        const yScale = d3.scaleLinear().domain([-3, 3]).range([height, 0]);
+        
+        levels.forEach(level => {
+            const radius = Math.sqrt(level);
+            const circle = g.append('circle')
+                .attr('cx', xScale(0))
+                .attr('cy', yScale(0))
+                .attr('r', xScale(radius) - xScale(0))
+                .attr('fill', 'none')
+                .attr('stroke', '#3498db')
+                .attr('stroke-width', 1.5)
+                .attr('opacity', 0.6);
+            
+            g.append('text')
+                .attr('x', xScale(radius * 0.707))
+                .attr('y', yScale(radius * 0.707))
+                .attr('font-size', '11px')
+                .attr('fill', '#3498db')
+                .text(`z=${level}`);
+        });
+        
+        // 点 P(1,1)
+        const px = 1, py = 1;
+        g.append('circle')
+            .attr('cx', xScale(px))
+            .attr('cy', yScale(py))
+            .attr('r', 6)
+            .attr('fill', '#e74c3c');
+        
+        g.append('text')
+            .attr('x', xScale(px) + 10)
+            .attr('y', yScale(py) - 10)
+            .attr('font-size', '14px')
+            .attr('fill', '#e74c3c')
+            .attr('font-weight', 'bold')
+            .text('P(1,1)');
+        
+        // 方向向量 (1,1)
+        const arrowLength = 1.5;
+        const angle = Math.PI / 4; // 45度
+        const endX = px + arrowLength * Math.cos(angle);
+        const endY = py + arrowLength * Math.sin(angle);
+        
+        // 方向箭头
+        g.append('line')
+            .attr('x1', xScale(px))
+            .attr('y1', yScale(py))
+            .attr('x2', xScale(endX))
+            .attr('y2', yScale(endY))
+            .attr('stroke', '#9b59b6')
+            .attr('stroke-width', 3)
+            .attr('marker-end', 'url(#arrowhead2)');
+        
+        // 定义箭头
+        g.append('defs').append('marker')
+            .attr('id', 'arrowhead2')
+            .attr('markerWidth', 10)
+            .attr('markerHeight', 10)
+            .attr('refX', 9)
+            .attr('refY', 3)
+            .attr('orient', 'auto')
+            .append('polygon')
+            .attr('points', '0 0, 10 3, 0 6')
+            .attr('fill', '#9b59b6');
+        
+        g.append('text')
+            .attr('x', xScale(endX) + 5)
+            .attr('y', yScale(endY))
+            .attr('font-size', '13px')
+            .attr('fill', '#9b59b6')
+            .attr('font-weight', 'bold')
+            .text('方向 l⃗=(1,1)');
+        
+        // 梯度向量 ∇f = (2, 2)
+        const gradEndX = px + 0.8;
+        const gradEndY = py + 0.8;
+        
+        g.append('line')
+            .attr('x1', xScale(px))
+            .attr('y1', yScale(py))
+            .attr('x2', xScale(gradEndX))
+            .attr('y2', yScale(gradEndY))
+            .attr('stroke', '#f39c12')
+            .attr('stroke-width', 3)
+            .attr('stroke-dasharray', '5,3')
+            .attr('marker-end', 'url(#arrowhead3)');
+        
+        g.append('defs').append('marker')
+            .attr('id', 'arrowhead3')
+            .attr('markerWidth', 10)
+            .attr('markerHeight', 10)
+            .attr('refX', 9)
+            .attr('refY', 3)
+            .attr('orient', 'auto')
+            .append('polygon')
+            .attr('points', '0 0, 10 3, 0 6')
+            .attr('fill', '#f39c12');
+        
+        g.append('text')
+            .attr('x', xScale(px) - 60)
+            .attr('y', yScale(gradEndY) - 20)
+            .attr('font-size', '13px')
+            .attr('fill', '#f39c12')
+            .text('∇f=(2,2)');
+        
+        // 坐标轴
+        g.append('g')
+            .attr('transform', `translate(0, ${yScale(0)})`)
+            .call(d3.axisBottom(xScale).ticks(5));
+        
+        g.append('g')
+            .attr('transform', `translate(${xScale(0)}, 0)`)
+            .call(d3.axisLeft(yScale).ticks(5));
+        
+        // 文字说明
+        g.append('text')
+            .attr('x', width - 10)
+            .attr('y', 20)
+            .attr('text-anchor', 'end')
+            .attr('font-size', '13px')
+            .attr('fill', '#2c3e50')
+            .attr('font-weight', 'bold')
+            .text('∂f/∂l⃗ = 2√2 ≈ 2.83');
+    }
+
+    // 第15页：切平面可视化
+    function visualizeTangentPlane() {
+        const container = document.getElementById('vis-tangent-plane');
+        if (!container) return;
+
+        const { width, height } = getSizeFor(container);
+
+        scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xf5f5f5);
+
+        camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+        camera.position.set(3, 3, 3);
+        camera.lookAt(0, 0, 0);
+
+        renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setPixelRatio(window.devicePixelRatio || 1);
+        renderer.setSize(width, height);
+        container.innerHTML = '';
+        container.appendChild(renderer.domElement);
+
+        const light = new THREE.DirectionalLight(0xffffff, 1);
+        light.position.set(5, 5, 5);
+        scene.add(light);
+        scene.add(new THREE.AmbientLight(0x404040));
+
+        // 创建曲面
+        const geometry = createParametricGeometry((u, v, target) => {
+            const x = (u - 0.5) * 4;
+            const y = (v - 0.5) * 4;
+            const z = x * x + y * y;
+            target.set(x, z * 0.3, y);
+        }, 30, 30);
+
+        const material = new THREE.MeshPhongMaterial({
+            color: 0x3498db,
+            transparent: true,
+            opacity: 0.6,
+            side: THREE.DoubleSide
+        });
+
+        mesh = new THREE.Mesh(geometry, material);
+        scene.add(mesh);
+
+        // 添加切平面
+        const planeGeometry = new THREE.PlaneGeometry(2, 2);
+        const planeMaterial = new THREE.MeshBasicMaterial({
+            color: 0xe74c3c,
+            transparent: true,
+            opacity: 0.5,
+            side: THREE.DoubleSide
+        });
+        const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+        plane.position.y = 0.3;
+        plane.rotation.x = -0.3;
+        scene.add(plane);
+
+        const axes = new THREE.AxesHelper(2);
+        scene.add(axes);
+
+        function animate() {
+            animationFrameId = requestAnimationFrame(animate);
+            mesh.rotation.z += 0.005;
+            renderer.render(scene, camera);
+        }
+        animate();
+    }
+
+    // 第16页：方向导数可视化
+    function visualizeDirectional() {
+        const setup = setupD3('vis-directional');
+        if (!setup) return;
+        const { g, width, height } = setup;
+
+        const centerX = width / 2;
+        const centerY = height / 2;
+
+        // 原点
+        g.append('circle')
+            .attr('cx', centerX)
+            .attr('cy', centerY)
+            .attr('r', 8)
+            .attr('fill', '#e74c3c');
+
+        // 多个方向的箭头
+        const angles = [0, 45, 90, 135, 180, 225, 270, 315];
+        const radius = 100;
+
+        angles.forEach((angle, i) => {
+            const rad = angle * Math.PI / 180;
+            const x = centerX + radius * Math.cos(rad);
+            const y = centerY - radius * Math.sin(rad);
+
+            // 箭头
+            g.append('line')
+                .attr('x1', centerX)
+                .attr('y1', centerY)
+                .attr('x2', centerX)
+                .attr('y2', centerY)
+                .attr('stroke', '#3498db')
+                    .attr('stroke-width', 2)
+                .style('opacity', 0)
+                    .transition()
+                .delay(i * 100)
+                    .duration(800)
+                .attr('x2', x)
+                .attr('y2', y)
+                .style('opacity', 1);
+
+            // 终点圆圈
+            g.append('circle')
+                .attr('cx', x)
+                .attr('cy', y)
+                .attr('r', 0)
+                .attr('fill', '#3498db')
+                .transition()
+                .delay(i * 100 + 800)
+                .duration(300)
+                .attr('r', 4);
+        });
+
+        // 标签
+        g.append('text')
+            .attr('x', centerX)
+            .attr('y', centerY - 20)
+            .attr('text-anchor', 'middle')
+            .style('font-size', '14px')
+            .style('font-weight', 'bold')
+            .text('P₀');
+    }
+
+    // 第17页：梯度可视化
+    function visualizeGradient() {
+        const setup = setupD3('vis-gradient');
+        if (!setup) return;
+        const { g, width, height } = setup;
+
+        const centerX = width / 2;
+        const centerY = height / 2;
+
+        // 绘制等值线
+        const levels = [1, 2, 3, 4];
+        const colorScale = d3.scaleSequential(d3.interpolateBlues)
+            .domain([0, levels.length]);
+
+        levels.forEach((level, i) => {
+            const radius = level * 40;
+            
+            g.append('circle')
+                .attr('cx', centerX)
+                .attr('cy', centerY)
+                .attr('r', 0)
+                .attr('fill', 'none')
+                .attr('stroke', colorScale(i))
+                .attr('stroke-width', 2)
+                .transition()
+                .delay(i * 300)
+                .duration(800)
+                .attr('r', radius);
+
+            g.append('text')
+                .attr('x', centerX + radius)
+                .attr('y', centerY)
+                .attr('dy', '0.3em')
+                .style('font-size', '12px')
+                .style('fill', colorScale(i))
+                .style('opacity', 0)
+                .text(`f=${level}`)
+                .transition()
+                .delay(i * 300 + 400)
+                .duration(400)
+                .style('opacity', 1);
+        });
+
+        // 梯度向量
+        setTimeout(() => {
+            const gradLength = 80;
+            
+            g.append('line')
+                .attr('x1', centerX)
+                .attr('y1', centerY)
+                .attr('x2', centerX)
+                .attr('y2', centerY)
+                .attr('stroke', '#e74c3c')
+                .attr('stroke-width', 4)
+                .transition()
+                .duration(1000)
+                .attr('x2', centerX + gradLength)
+                .attr('y2', centerY - gradLength);
+
+            g.append('text')
+                .attr('x', centerX + gradLength + 20)
+                .attr('y', centerY - gradLength)
+                .style('font-size', '18px')
+                .style('fill', '#e74c3c')
+                .style('font-weight', 'bold')
+                .style('opacity', 0)
+                .text('∇f')
+                .transition()
+                .delay(1000)
+                .duration(500)
+                .style('opacity', 1);
+        }, 1500);
+    }
+
+    // 例题7：梯度计算
+    function visualizeGradCalc() {
+        const setup = setupD3('vis-grad-calc');
+        if (!setup) return;
+        const { g, width, height } = setup;
+        
+        const xScale = d3.scaleLinear().domain([-2, 2]).range([0, width]);
+        const yScale = d3.scaleLinear().domain([-2, 2]).range([height, 0]);
+        
+        // 绘制等高线
+        const levels = [0.5, 1, 2, 3];
+        levels.forEach(level => {
+            const radius = Math.sqrt(level);
+            g.append('circle')
+                .attr('cx', xScale(0))
+                .attr('cy', yScale(0))
+                .attr('r', xScale(radius) - xScale(0))
+                .attr('fill', 'none')
+                .attr('stroke', '#bdc3c7')
+                .attr('stroke-width', 1)
+                .attr('opacity', 0.5);
+        });
+        
+        // 绘制梯度向量场
+        const gridSize = 5;
+        for (let i = 0; i < gridSize; i++) {
+            for (let j = 0; j < gridSize; j++) {
+                const x = -1.5 + (i / (gridSize - 1)) * 3;
+                const y = -1.5 + (j / (gridSize - 1)) * 3;
+                
+                // 梯度 ∇f = (2x, 2y)
+                const gx = 2 * x;
+                const gy = 2 * y;
+                const magnitude = Math.sqrt(gx * gx + gy * gy);
+                
+                if (magnitude > 0.1) {
+                    const scale = 0.15;
+                    const endX = x + gx * scale;
+                    const endY = y + gy * scale;
+                    
+                    g.append('line')
+                        .attr('x1', xScale(x))
+                        .attr('y1', yScale(y))
+                        .attr('x2', xScale(endX))
+                        .attr('y2', yScale(endY))
+                        .attr('stroke', '#3498db')
+                        .attr('stroke-width', 1.5)
+                        .attr('marker-end', 'url(#grad-arrow)');
+                }
+            }
+        }
+        
+        // 箭头标记
+        g.append('defs').append('marker')
+            .attr('id', 'grad-arrow')
+            .attr('markerWidth', 8)
+            .attr('markerHeight', 8)
+            .attr('refX', 7)
+            .attr('refY', 3)
+            .attr('orient', 'auto')
+            .append('polygon')
+            .attr('points', '0 0, 8 3, 0 6')
+            .attr('fill', '#3498db');
+        
+        // 特殊点 (1,1)
+        g.append('circle')
+            .attr('cx', xScale(1))
+            .attr('cy', yScale(1))
+            .attr('r', 7)
+            .attr('fill', '#e74c3c');
+        
+        g.append('text')
+            .attr('x', xScale(1) + 12)
+            .attr('y', yScale(1) + 5)
+            .attr('font-size', '14px')
+            .attr('fill', '#e74c3c')
+            .attr('font-weight', 'bold')
+            .text('(1,1)');
+        
+        // 该点的梯度向量（特别标注）
+        const scale = 0.4;
+        g.append('line')
+            .attr('x1', xScale(1))
+            .attr('y1', yScale(1))
+            .attr('x2', xScale(1 + 2 * scale))
+            .attr('y2', yScale(1 + 2 * scale))
+            .attr('stroke', '#e74c3c')
+            .attr('stroke-width', 4)
+            .attr('marker-end', 'url(#grad-arrow-red)');
+        
+        g.append('defs').append('marker')
+            .attr('id', 'grad-arrow-red')
+            .attr('markerWidth', 10)
+            .attr('markerHeight', 10)
+            .attr('refX', 9)
+            .attr('refY', 3)
+            .attr('orient', 'auto')
+            .append('polygon')
+            .attr('points', '0 0, 10 3, 0 6')
+            .attr('fill', '#e74c3c');
+        
+        g.append('text')
+            .attr('x', xScale(1 + 2 * scale) + 5)
+            .attr('y', yScale(1 + 2 * scale) - 5)
+            .attr('font-size', '13px')
+            .attr('fill', '#e74c3c')
+            .attr('font-weight', 'bold')
+            .text('∇f=(2,2)');
+        
+        // 坐标轴
+        g.append('g')
+            .attr('transform', `translate(0, ${yScale(0)})`)
+            .call(d3.axisBottom(xScale).ticks(5));
+        
+        g.append('g')
+            .attr('transform', `translate(${xScale(0)}, 0)`)
+            .call(d3.axisLeft(yScale).ticks(5));
+        
+        // 说明文字
+        g.append('text')
+            .attr('x', 10)
+            .attr('y', 20)
+            .attr('font-size', '13px')
+            .attr('fill', '#2c3e50')
+            .text('梯度向量场 ∇f(x,y) = (2x, 2y)');
+        
+        g.append('text')
+            .attr('x', 10)
+            .attr('y', 40)
+            .attr('font-size', '13px')
+            .attr('fill', '#2c3e50')
+            .text('|∇f(1,1)| = 2√2 ≈ 2.83');
+    }
+
+    // 第19页：极值可视化
+    function visualizeExtremum() {
+        const container = document.getElementById('vis-extremum');
+        if (!container) return;
+
+        const { width, height } = getSizeFor(container);
+
+        scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xf5f5f5);
+
+        camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+        camera.position.set(4, 4, 4);
+        camera.lookAt(0, 0, 0);
+
+        renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setPixelRatio(window.devicePixelRatio || 1);
+        renderer.setSize(width, height);
+        container.innerHTML = '';
+        container.appendChild(renderer.domElement);
+
+        const light = new THREE.DirectionalLight(0xffffff, 1);
+        light.position.set(5, 5, 5);
+        scene.add(light);
+        scene.add(new THREE.AmbientLight(0x404040));
+
+        // 创建有极值的曲面
+        const geometry = createParametricGeometry((u, v, target) => {
+            const x = (u - 0.5) * 4;
+            const y = (v - 0.5) * 4;
+            const z = -(x * x + y * y) * 0.3;
+            target.set(x, z, y);
+        }, 30, 30);
+
+        const material = new THREE.MeshPhongMaterial({
+            color: 0x3498db,
+            side: THREE.DoubleSide
+        });
+
+        mesh = new THREE.Mesh(geometry, material);
+        scene.add(mesh);
+
+        // 标记极大值点
+        const sphereGeometry = new THREE.SphereGeometry(0.2, 16, 16);
+        const sphereMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+        const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+        sphere.position.set(0, 0, 0);
+        scene.add(sphere);
+
+        const axes = new THREE.AxesHelper(3);
+        scene.add(axes);
+
+        function animate() {
+            animationFrameId = requestAnimationFrame(animate);
+            mesh.rotation.z += 0.005;
+            renderer.render(scene, camera);
+        }
+        animate();
+    }
+
+    // 例题8：极值计算
+    function visualizeExtremumCalc() {
+        const container = document.getElementById('vis-extremum-calc');
+        if (!container) return;
+        container.innerHTML = '';
+        
+        // 创建Three.js场景
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xffffff);
+        
+        const { width, height } = getSizeFor(container);
+        const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+        camera.position.set(6, 6, 6);
+        
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setPixelRatio(window.devicePixelRatio || 1);
+        renderer.setSize(width, height);
+        container.appendChild(renderer.domElement);
+        
+        // 光源
+        const light = new THREE.DirectionalLight(0xffffff, 0.8);
+        light.position.set(5, 5, 5);
+        scene.add(light);
+        scene.add(new THREE.AmbientLight(0x404040, 0.6));
+        
+        // 绘制曲面 f(x,y) = x² + y² - 2x + 4y + 5 = (x-1)² + (y+2)² 极小值点(1,-2)
+        const resolution = 40;
+        const geometry = new THREE.BufferGeometry();
+        const vertices = [];
+        const colors = [];
+        
+        for (let i = 0; i < resolution; i++) {
+            for (let j = 0; j < resolution; j++) {
+                const x = (i / resolution - 0.5) * 6 + 1; // 中心在 x=1
+                const y = (j / resolution - 0.5) * 6 - 2; // 中心在 y=-2
+                const z = x * x + y * y - 2 * x + 4 * y + 5;
+                vertices.push(x - 1, z * 0.5, y + 2);
+                
+                const color = new THREE.Color();
+                color.setHSL(Math.max(0, Math.min(0.6, 0.6 - z / 30)), 0.8, 0.6);
+                colors.push(color.r, color.g, color.b);
+            }
+        }
+        
+        const indices = [];
+        for (let i = 0; i < resolution - 1; i++) {
+            for (let j = 0; j < resolution - 1; j++) {
+                const a = i * resolution + j;
+                const b = i * resolution + j + 1;
+                const c = (i + 1) * resolution + j;
+                const d = (i + 1) * resolution + j + 1;
+                indices.push(a, b, d, a, d, c);
+            }
+        }
+        
+        geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+        geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+        geometry.setIndex(indices);
+        geometry.computeVertexNormals();
+        
+        const material = new THREE.MeshPhongMaterial({
+            vertexColors: true,
+            side: THREE.DoubleSide,
+            shininess: 30,
+            transparent: true,
+            opacity: 0.85
+        });
+        
+        const surface = new THREE.Mesh(geometry, material);
+        scene.add(surface);
+        
+        // 极小值点 (1, -2)
+        const pointGeom = new THREE.SphereGeometry(0.2, 16, 16);
+        const pointMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+        const point = new THREE.Mesh(pointGeom, pointMat);
+        point.position.set(0, 0, 0); // 极小值点，z=0
+        scene.add(point);
+        
+        // 坐标轴
+        const axesHelper = new THREE.AxesHelper(3);
+        scene.add(axesHelper);
+        
+        // 添加文本说明
+        const infoDiv = document.createElement('div');
+        infoDiv.style.cssText = `
+            position: absolute; top: 20px; left: 20px; right: 20px;
+            background: rgba(255,255,255,0.95); padding: 15px;
+            border-radius: 8px; font-size: 14px; line-height: 1.8;
+        `;
+        infoDiv.innerHTML = `
+            <strong style="color:#003366">$f(x,y) = x^2+y^2-2x+4y+5$</strong><br>
+            <span style="color:#e74c3c">●</span> 极小值点：$(1, -2)$<br>
+            极小值：$f(1,-2) = 0$<br>
+            <span style="color:#666;font-size:12px">$AC-B^2 = 4 > 0$，$A>0$</span>
+        `;
+        container.appendChild(infoDiv);
+        
+        // 动画
+        let angle = 0;
+        function animate() {
+            angle += 0.005;
+            camera.position.x = 6 * Math.cos(angle);
+            camera.position.z = 6 * Math.sin(angle);
+            camera.lookAt(0, 2, 0);
+            renderer.render(scene, camera);
+            requestAnimationFrame(animate);
+        }
+        animate();
+        
+        // MathJax渲染
+        if (window.MathJax && window.MathJax.typesetPromise) {
+            setTimeout(() => {
+                window.MathJax.typesetPromise([infoDiv]).catch(err => console.warn(err));
+            }, 100);
+        }
+    }
+
+    // 第21页：拉格朗日乘数法可视化
+    function visualizeLagrange() {
+        const setup = setupD3('vis-lagrange');
+        if (!setup) return;
+        const { g, width, height } = setup;
+
+        const xScale = d3.scaleLinear().domain([-2, 2]).range([0, width]);
+        const yScale = d3.scaleLinear().domain([-2, 2]).range([height, 0]);
+
+        // 绘制约束曲线
+        const constraintPoints = [];
+        for (let t = 0; t <= 2 * Math.PI; t += 0.1) {
+            const x = Math.cos(t);
+            const y = Math.sin(t);
+            constraintPoints.push([xScale(x), yScale(y)]);
+        }
+
+        const constraintLine = d3.line()(constraintPoints);
+        g.append('path')
+            .attr('d', constraintLine)
+            .attr('stroke', '#e74c3c')
+            .attr('stroke-width', 3)
+            .attr('fill', 'none');
+
+        g.append('text')
+            .attr('x', xScale(1.2))
+            .attr('y', yScale(0))
+            .style('fill', '#e74c3c')
+            .style('font-weight', 'bold')
+            .text('约束: φ(x,y)=0');
+
+        // 绘制目标函数的等值线
+        const levels = [0.5, 1, 1.5];
+        levels.forEach((level, i) => {
+            const points = [];
+            for (let angle = 0; angle <= 2 * Math.PI; angle += 0.1) {
+                const r = Math.sqrt(level);
+                points.push([xScale(r * Math.cos(angle)), yScale(r * Math.sin(angle))]);
+            }
+            
+            const line = d3.line()(points);
+            g.append('path')
+                .attr('d', line)
+                .attr('stroke', '#3498db')
+                .attr('stroke-width', 1.5)
+                .attr('stroke-dasharray', '5,5')
+                .attr('fill', 'none')
+                .style('opacity', 0.6);
+        });
+
+        g.append('text')
+            .attr('x', xScale(0))
+            .attr('y', yScale(1.5))
+            .attr('text-anchor', 'middle')
+            .style('fill', '#3498db')
+            .text('目标函数等值线');
+
+        // 极值点
+        g.append('circle')
+            .attr('cx', xScale(0.707))
+            .attr('cy', yScale(0.707))
+            .attr('r', 6)
+            .attr('fill', '#f39c12');
+
+        g.append('text')
+            .attr('x', xScale(0.707) + 15)
+            .attr('y', yScale(0.707))
+            .style('fill', '#f39c12')
+            .style('font-weight', 'bold')
+            .text('极值点');
+    }
+
+    // 例题9：拉格朗日乘数法
+    function visualizeLagrangeCalc() {
+        const setup = setupD3('vis-lagrange-calc');
+        if (!setup) return;
+        const { g, width, height } = setup;
+        
+        const xScale = d3.scaleLinear().domain([-0.5, 2]).range([0, width]);
+        const yScale = d3.scaleLinear().domain([-0.5, 2]).range([height, 0]);
+        
+        // 绘制目标函数 f=x²+y² 的等高线
+        const levels = [0.25, 0.5, 1, 1.5, 2, 3];
+        levels.forEach(level => {
+            const radius = Math.sqrt(level);
+            g.append('circle')
+                .attr('cx', xScale(0))
+                .attr('cy', yScale(0))
+                .attr('r', Math.min(xScale(radius) - xScale(0), width))
+                .attr('fill', 'none')
+                .attr('stroke', '#3498db')
+                .attr('stroke-width', 1.5)
+                .attr('opacity', 0.6)
+                .attr('stroke-dasharray', '5,3');
+            
+            if (radius < 1.8) {
+                g.append('text')
+                    .attr('x', xScale(radius * 0.707) + 5)
+                    .attr('y', yScale(radius * 0.707))
+                    .attr('font-size', '11px')
+                    .attr('fill', '#3498db')
+                    .text(`f=${level.toFixed(2)}`);
+            }
+        });
+        
+        // 绘制约束条件 x+y=1
+        g.append('line')
+            .attr('x1', xScale(0))
+            .attr('y1', yScale(1))
+            .attr('x2', xScale(1))
+            .attr('y2', yScale(0))
+            .attr('stroke', '#e74c3c')
+            .attr('stroke-width', 3);
+        
+        // 延长约束线以便看清
+        g.append('line')
+            .attr('x1', xScale(-0.3))
+            .attr('y1', yScale(1.3))
+            .attr('x2', xScale(1.3))
+            .attr('y2', yScale(-0.3))
+            .attr('stroke', '#e74c3c')
+            .attr('stroke-width', 3)
+            .attr('opacity', 0.3);
+        
+        g.append('text')
+            .attr('x', xScale(1.1))
+            .attr('y', yScale(-0.1))
+            .attr('font-size', '14px')
+            .attr('fill', '#e74c3c')
+            .attr('font-weight', 'bold')
+            .text('x+y=1');
+        
+        // 最优点 (1/2, 1/2)
+        const optX = 0.5, optY = 0.5;
+        g.append('circle')
+            .attr('cx', xScale(optX))
+            .attr('cy', yScale(optY))
+            .attr('r', 8)
+            .attr('fill', '#f39c12')
+            .attr('stroke', '#fff')
+            .attr('stroke-width', 2);
+        
+        g.append('text')
+            .attr('x', xScale(optX) + 15)
+            .attr('y', yScale(optY) - 10)
+            .attr('font-size', '14px')
+            .attr('fill', '#f39c12')
+            .attr('font-weight', 'bold')
+            .text('(½, ½)');
+        
+        // 标注最小值等高线（与约束相切）
+        const minRadius = Math.sqrt(0.5);
+        g.append('circle')
+            .attr('cx', xScale(0))
+            .attr('cy', yScale(0))
+            .attr('r', xScale(minRadius) - xScale(0))
+            .attr('fill', 'none')
+            .attr('stroke', '#f39c12')
+            .attr('stroke-width', 3)
+            .attr('opacity', 0.8);
+        
+        // 坐标轴
+        g.append('g')
+            .attr('transform', `translate(0, ${yScale(0)})`)
+            .call(d3.axisBottom(xScale).ticks(5));
+        
+        g.append('g')
+            .attr('transform', `translate(${xScale(0)}, 0)`)
+            .call(d3.axisLeft(yScale).ticks(5));
+        
+        // 说明文字
+        g.append('text')
+            .attr('x', 10)
+            .attr('y', 20)
+            .attr('font-size', '13px')
+            .attr('fill', '#2c3e50')
+            .attr('font-weight', 'bold')
+            .text('约束最优化：min f(x,y) = x²+y²');
+        
+        g.append('text')
+            .attr('x', 10)
+            .attr('y', 40)
+            .attr('font-size', '13px')
+            .attr('fill', '#2c3e50')
+            .text('约束：x+y=1');
+        
+        g.append('text')
+            .attr('x', 10)
+            .attr('y', height - 10)
+            .attr('font-size', '13px')
+            .attr('fill', '#f39c12')
+            .attr('font-weight', 'bold')
+            .text('最小值：f(½,½) = ½');
+    }
+
+    // 例题10：应用问题
+    function visualizeApplicationExample() {
+        const setup = setupD3('vis-application-example');
+        if (!setup) return;
+        const { g, width, height } = setup;
+        
+        const xScale = d3.scaleLinear().domain([0, 12]).range([0, width]);
+        const yScale = d3.scaleLinear().domain([0, 12]).range([height, 0]);
+        
+        // 绘制成本函数等高线 C = x² + 2y² + 2xy + 100
+        const levels = [150, 200, 250, 300, 350, 400];
+        levels.forEach(level => {
+            const points = [];
+            for (let x = 0; x <= 12; x += 0.2) {
+                // C(x,y) = x² + 2y² + 2xy + 100 = level
+                // 2y² + 2xy + (x² + 100 - level) = 0
+                const a = 2;
+                const b = 2 * x;
+                const c = x * x + 100 - level;
+                const discriminant = b * b - 4 * a * c;
+                
+                if (discriminant >= 0) {
+                    const y1 = (-b + Math.sqrt(discriminant)) / (2 * a);
+                    const y2 = (-b - Math.sqrt(discriminant)) / (2 * a);
+                    
+                    if (y1 >= 0 && y1 <= 12) {
+                        points.push([xScale(x), yScale(y1)]);
+                    }
+                }
+            }
+            
+            if (points.length > 5) {
+                g.append('path')
+                    .datum(points)
+                    .attr('d', d3.line())
+                    .attr('fill', 'none')
+                    .attr('stroke', '#95a5a6')
+                    .attr('stroke-width', 1)
+                    .attr('opacity', 0.6);
+            }
+        });
+        
+        // 约束线 x + y = 10
+        g.append('line')
+            .attr('x1', xScale(0))
+            .attr('y1', yScale(10))
+            .attr('x2', xScale(10))
+            .attr('y2', yScale(0))
+            .attr('stroke', '#e74c3c')
+            .attr('stroke-width', 3);
+        
+        g.append('text')
+            .attr('x', xScale(9))
+            .attr('y', yScale(1) - 10)
+            .attr('font-size', '13px')
+            .attr('fill', '#e74c3c')
+            .attr('font-weight', 'bold')
+            .text('x+y=10');
+        
+        // 最优点 (20/3, 10/3)
+        const optX = 20 / 3;
+        const optY = 10 / 3;
+        
+        g.append('circle')
+            .attr('cx', xScale(optX))
+            .attr('cy', yScale(optY))
+            .attr('r', 8)
+            .attr('fill', '#f39c12')
+            .attr('stroke', '#fff')
+            .attr('stroke-width', 2);
+        
+        g.append('text')
+            .attr('x', xScale(optX) + 12)
+            .attr('y', yScale(optY) + 5)
+            .attr('font-size', '13px')
+            .attr('fill', '#f39c12')
+            .attr('font-weight', 'bold')
+            .text('(6.67, 3.33)');
+        
+        // 坐标轴
+        g.append('g')
+            .attr('transform', `translate(0, ${yScale(0)})`)
+            .call(d3.axisBottom(xScale).ticks(6));
+        
+        g.append('g')
+            .attr('transform', `translate(${xScale(0)}, 0)`)
+            .call(d3.axisLeft(yScale).ticks(6));
+        
+        // 标签
+        g.append('text')
+            .attr('x', width - 10)
+            .attr('y', yScale(0) - 10)
+            .attr('text-anchor', 'end')
+            .attr('font-size', '12px')
+            .attr('fill', '#2c3e50')
+            .text('产品1 (x)');
+        
+        g.append('text')
+            .attr('x', xScale(0) + 5)
+            .attr('y', 15)
+            .attr('font-size', '12px')
+            .attr('fill', '#2c3e50')
+            .text('产品2 (y)');
+        
+        // 说明
+        g.append('text')
+            .attr('x', 10)
+            .attr('y', height - 30)
+            .attr('font-size', '12px')
+            .attr('fill', '#2c3e50')
+            .text('成本函数：C = x² + 2y² + 2xy + 100');
+        
+        g.append('text')
+            .attr('x', 10)
+            .attr('y', height - 10)
+            .attr('font-size', '12px')
+            .attr('fill', '#f39c12')
+            .attr('font-weight', 'bold')
+            .text('最优方案：产品1约6.67单位，产品2约3.33单位');
+    }
+
+    // 第23页：最小二乘法可视化
+    function visualizeLeastSquares() {
+        const setup = setupD3('vis-least-squares');
+        if (!setup) return;
+        const { g, width, height } = setup;
+
+        const xScale = d3.scaleLinear().domain([0, 10]).range([0, width]);
+        const yScale = d3.scaleLinear().domain([0, 10]).range([height, 0]);
+
+        // 生成随机数据点
+        const data = [
+            { x: 1, y: 2.2 },
+            { x: 2, y: 3.8 },
+            { x: 3, y: 4.5 },
+            { x: 4, y: 6.1 },
+            { x: 5, y: 7.3 },
+            { x: 6, y: 8.2 },
+            { x: 7, y: 9.0 }
+        ];
+
+        // 拟合直线
+        const lineData = [[0, 1], [10, 10]];
+        const line = d3.line()
+            .x(d => xScale(d[0]))
+            .y(d => yScale(d[1]));
+
+        g.append('path')
+            .datum(lineData)
+            .attr('d', line)
+            .attr('stroke', '#e74c3c')
+            .attr('stroke-width', 2)
+            .attr('fill', 'none');
+
+        g.append('text')
+            .attr('x', xScale(8))
+            .attr('y', yScale(8.5))
+            .style('fill', '#e74c3c')
+            .text('y = a + bx');
+
+        // 数据点
+        data.forEach((d, i) => {
+            g.append('circle')
+                .attr('cx', xScale(d.x))
+                .attr('cy', yScale(d.y))
+                .attr('r', 0)
+                .attr('fill', '#3498db')
+                .transition()
+                .delay(i * 100)
+                .duration(500)
+                .attr('r', 5);
+
+            // 误差线
+            const yFit = 1 + d.x;
+            g.append('line')
+                .attr('x1', xScale(d.x))
+                .attr('y1', yScale(d.y))
+                .attr('x2', xScale(d.x))
+                .attr('y2', yScale(d.y))
+                .attr('stroke', '#95a5a6')
+                .attr('stroke-width', 1)
+                .attr('stroke-dasharray', '3,3')
+                .transition()
+                .delay(i * 100 + 500)
+                .duration(400)
+                .attr('y2', yScale(yFit));
+        });
+
+        // 坐标轴
+        g.append('g')
+            .attr('transform', `translate(0, ${height})`)
+            .call(d3.axisBottom(xScale).ticks(5))
+            .style('opacity', 0.5);
+
+        g.append('g')
+            .call(d3.axisLeft(yScale).ticks(5))
+            .style('opacity', 0.5);
+    }
+
+    // 第24页：应用实例可视化
+    function visualizeApplications() {
+        const setup = setupD3('vis-applications');
+        if (!setup) return;
+        const { g, width, height } = setup;
+
+        const centerX = width / 2;
+        const centerY = height / 2;
+
+        // 绘制应用场景图标
+        const applications = [
+            { name: '温度场', x: centerX - 150, y: centerY - 80, color: '#e74c3c' },
+            { name: '地形分析', x: centerX + 150, y: centerY - 80, color: '#3498db' },
+            { name: '成本优化', x: centerX - 150, y: centerY + 80, color: '#2ecc71' },
+            { name: '信号处理', x: centerX + 150, y: centerY + 80, color: '#f39c12' }
+        ];
+
+        applications.forEach((app, i) => {
+            const circle = g.append('circle')
+                .attr('cx', app.x)
+                .attr('cy', app.y)
+                .attr('r', 0)
+                .attr('fill', app.color)
+                .attr('fill-opacity', 0.3)
+                .attr('stroke', app.color)
+                .attr('stroke-width', 2);
+
+            circle.transition()
+                .delay(i * 200)
+                .duration(800)
+                .attr('r', 40);
+
+            g.append('text')
+                .attr('x', app.x)
+                .attr('y', app.y)
+                .attr('text-anchor', 'middle')
+                .attr('dy', '0.3em')
+                .style('font-size', '14px')
+                .style('font-weight', 'bold')
+                .style('fill', app.color)
+                .style('opacity', 0)
+                .text(app.name)
+                .transition()
+                .delay(i * 200 + 400)
+                .duration(400)
+                .style('opacity', 1);
+
+            // 连接到中心
+            g.append('line')
+                .attr('x1', centerX)
+                .attr('y1', centerY)
+                .attr('x2', centerX)
+                .attr('y2', centerY)
+                .attr('stroke', app.color)
+                .attr('stroke-width', 1.5)
+                .attr('stroke-dasharray', '5,5')
+                .transition()
+                .delay(i * 200 + 800)
+                .duration(600)
+                .attr('x2', app.x)
+                .attr('y2', app.y);
+        });
+
+        // 中心标题
+        g.append('text')
+            .attr('x', centerX)
+            .attr('y', centerY)
+            .attr('text-anchor', 'middle')
+            .style('font-size', '18px')
+            .style('font-weight', 'bold')
+            .text('多元函数');
+
+        g.append('text')
+            .attr('x', centerX)
+            .attr('y', centerY + 20)
+            .attr('text-anchor', 'middle')
+            .style('font-size', '18px')
+            .style('font-weight', 'bold')
+            .text('微分学应用');
+    }
+</script>
+
+<!-- 悬浮控制按钮与二级菜单（统一样式） -->
+<button class="floating-control-btn" id="floating-control-btn"><span class="btn-icon">+</span></button>
+<div class="floating-menu-items" id="floating-menu-items">
+    <div class="floating-menu-item" onclick="event.stopPropagation(); toggleLabSubmenu()">
+        <span class="item-icon"><i class="fa-solid fa-flask"></i></span>
+        <span class="item-text">实验室</span>
+    </div>
+    <div class="floating-menu-item" onclick="event.stopPropagation(); toggleChapterSubmenu()">
+        <span class="item-icon"><i class="fa-solid fa-clipboard-list"></i></span>
+        <span class="item-text">本章目录</span>
+    </div>
+</div>
+
+<!-- 实验室弹层（第八章） -->
+<div class="lab-submenu" id="lab-submenu" style="display: none;">
+    <div class="submenu-content">
+        <div class="submenu-title">第八章实验室</div>
+        <div class="submenu-grid">
+            <div class="submenu-item" onclick="window.open('../网页资源/index.html','_blank')"><span class="submenu-icon"><i class="fa-solid fa-list"></i></span><span class="submenu-text">资源总览</span></div>
+            <div class="submenu-item" onclick="window.open('../网页资源/lab 8-1.html','_blank')"><span class="submenu-icon"><i class="fa-solid fa-vial"></i></span><span class="submenu-text">二元函数图像与等高线实验室</span></div>
+            <div class="submenu-item" onclick="window.open('../网页资源/lab 8-2.html','_blank')"><span class="submenu-icon"><i class="fa-solid fa-vial"></i></span><span class="submenu-text">极限与连续实验室</span></div>
+            <div class="submenu-item" onclick="window.open('../网页资源/lab 8-3.html','_blank')"><span class="submenu-icon"><i class="fa-solid fa-vial"></i></span><span class="submenu-text">偏导数与梯度实验室</span></div>
+            <div class="submenu-item" onclick="window.open('../网页资源/lab 8-4.html','_blank')"><span class="submenu-icon"><i class="fa-solid fa-vial"></i></span><span class="submenu-text">方向导数与梯度场实验室</span></div>
+            <div class="submenu-item" onclick="window.open('../网页资源/lab 8-5.html','_blank')"><span class="submenu-icon"><i class="fa-solid fa-vial"></i></span><span class="submenu-text">全微分与线性近似实验室</span></div>
+            <div class="submenu-item" onclick="window.open('../网页资源/lab 8-6.html','_blank')"><span class="submenu-icon"><i class="fa-solid fa-vial"></i></span><span class="submenu-text">拉格朗日乘子与极值实验室</span></div>
+        </div>
+        <div class="submenu-close" onclick="toggleLabSubmenu()">×</div>
+    </div>
+</div>
+
+<!-- 本章目录弹层（自动生成） -->
+<div class="chapter-submenu" id="chapter-submenu" style="display:none;">
+    <div class="submenu-content">
+        <div class="submenu-title">第八章目录</div>
+        <div class="submenu-grid" id="chapter-submenu-grid"></div>
+        <div class="submenu-close" onclick="toggleChapterSubmenu()">×</div>
+    </div>
+</div>
+
+<!-- 全部课件目录弹层 -->
+<div class="course-submenu" id="course-submenu" style="display: none;">
+    <div class="submenu-content">
+        <div class="submenu-title">全部课件目录</div>
+        <div class="submenu-grid">
+            <div class="submenu-item" onclick="window.location.href='第1章代数.html';"><span class="submenu-icon"><i class="fa-solid fa-1"></i></span><span class="submenu-text">第1章 代数</span></div>
+            <div class="submenu-item" onclick="window.location.href='第2章极限与连续.html';"><span class="submenu-icon"><i class="fa-solid fa-2"></i></span><span class="submenu-text">第2章 极限与连续</span></div>
+            <div class="submenu-item" onclick="window.location.href='第3章导数与微分.html';"><span class="submenu-icon"><i class="fa-solid fa-3"></i></span><span class="submenu-text">第3章 导数与微分</span></div>
+            <div class="submenu-item" onclick="window.location.href='第4章导数应用.html';"><span class="submenu-icon"><i class="fa-solid fa-4"></i></span><span class="submenu-text">第4章 导数应用</span></div>
+            <div class="submenu-item" onclick="window.location.href='第5章不定积分.html';"><span class="submenu-icon"><i class="fa-solid fa-5"></i></span><span class="submenu-text">第5章 不定积分</span></div>
+            <div class="submenu-item" onclick="window.location.href='第6章定积分.html';"><span class="submenu-icon"><i class="fa-solid fa-6"></i></span><span class="submenu-text">第6章 定积分</span></div>
+            <div class="submenu-item" onclick="window.location.href='第7章常微分方程.html';"><span class="submenu-icon"><i class="fa-solid fa-7"></i></span><span class="submenu-text">第7章 常微分方程</span></div>
+            <div class="submenu-item" onclick="window.location.href='第8章多元函数微分学.html';"><span class="submenu-icon"><i class="fa-solid fa-8"></i></span><span class="submenu-text">第8章 多元函数微分学</span></div>
+            <div class="submenu-item" onclick="window.location.href='第9章多元函数积分学初步.html';"><span class="submenu-icon"><i class="fa-solid fa-9"></i></span><span class="submenu-text">第9章 多元函数积分学初步</span></div>
+            <div class="submenu-item" onclick="window.location.href='第10章线性代数.html';"><span class="submenu-icon"><i class="fa-solid fa-folder"></i></span><span class="submenu-text">第10章 线性代数</span></div>
+            <div class="submenu-item" onclick="window.location.href='第11章无穷级数.html';"><span class="submenu-icon"><i class="fa-solid fa-folder"></i></span><span class="submenu-text">第11章 无穷级数</span></div>
+            <div class="submenu-item" onclick="window.location.href='第12章向量代数与空间解析几何.html';"><span class="submenu-icon"><i class="fa-solid fa-folder"></i></span><span class="submenu-text">第12章 向量代数与空间解析几何</span></div>
+            <div class="submenu-item" onclick="window.location.href='第13章概率与统计.html';"><span class="submenu-icon"><i class="fa-solid fa-folder"></i></span><span class="submenu-text">第13章 概率与统计</span></div>
+        </div>
+        <div class="submenu-close" onclick="toggleCourseSubmenu()">×</div>
+    </div>
+</div>
+
+<script>
+// 统一导航API（兼容前面章节）
+window.goToSlide = window.goToSlide || function(index) {
+    try {
+        if (typeof window.showSlide === 'function') { window.showSlide(index); }
+        else if (typeof window.jumpToSlide === 'function') { window.jumpToSlide(index + 1); }
+    } catch(e) {}
+};
+
+// 悬浮菜单互斥控制与切换
+function closeAllSubmenus(exceptId) {
+    ['lab-submenu','chapter-submenu','course-submenu'].forEach(id => {
+        if (id !== exceptId) {
+            const el = document.getElementById(id);
+            if (el) el.style.display = 'none';
+        }
+    });
+}
+function toggleLabSubmenu() {
+    const el = document.getElementById('lab-submenu');
+    if (!el) return;
+    const willOpen = el.style.display !== 'block';
+    closeAllSubmenus('lab-submenu');
+    el.style.display = willOpen ? 'block' : 'none';
+}
+function toggleChapterSubmenu() {
+    const el = document.getElementById('chapter-submenu');
+    if (!el) return;
+    const willOpen = el.style.display !== 'block';
+    closeAllSubmenus('chapter-submenu');
+    if (willOpen) buildChapterMenuCh8();
+    el.style.display = willOpen ? 'block' : 'none';
+}
+function toggleCourseSubmenu() {
+    const el = document.getElementById('course-submenu');
+    if (!el) return;
+    const willOpen = el.style.display !== 'block';
+    closeAllSubmenus('course-submenu');
+    el.style.display = willOpen ? 'block' : 'none';
+}
+function initFloatingControl() {
+    const floatingBtn = document.getElementById('floating-control-btn');
+    const floatingMenu = document.getElementById('floating-menu-items');
+    if (!floatingBtn || !floatingMenu) return;
+    floatingBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        floatingBtn.classList.toggle('active');
+        floatingMenu.classList.toggle('active');
+    });
+}
+
+// 自动构建“第八章目录”
+function buildChapterMenuCh8() {
+    const grid = document.getElementById('chapter-submenu-grid');
+    if (!grid) return;
+    grid.innerHTML = '';
+    const cover = document.createElement('div');
+    cover.className = 'submenu-item';
+    cover.innerHTML = '<span class="submenu-icon"><i class="fa-solid fa-house"></i></span><span class="submenu-text">封面</span>';
+    cover.onclick = function() { try { goToSlide(0); } catch(_) {} toggleChapterSubmenu(); };
+    grid.appendChild(cover);
+    const toc = document.createElement('div');
+    toc.className = 'submenu-item';
+    toc.innerHTML = '<span class="submenu-icon"><i class="fa-solid fa-list-ul"></i></span><span class="submenu-text">目录页</span>';
+    toc.onclick = function() { try { goToSlide(1); } catch(_) {} toggleChapterSubmenu(); };
+    grid.appendChild(toc);
+    const slides = document.querySelectorAll('#slidesContainer > .slide');
+    slides.forEach((slide, idx) => {
+        const h1 = slide.querySelector('.left-content h1');
+        const h2 = slide.querySelector('.left-content h2');
+        const title = (h1 && h1.textContent.trim()) || (h2 && h2.textContent.trim()) || '';
+        if (!title) return;
+        if (title.includes('目录')) return;
+        const item = document.createElement('div');
+        item.className = 'submenu-item';
+        item.innerHTML = '<span class="submenu-icon"><i class="fa-solid fa-file-lines"></i></span><span class="submenu-text">' + title.replace(/\s+/g,' ') + '</span>';
+        item.onclick = function() { try { goToSlide(idx); } catch(_) {} toggleChapterSubmenu(); };
+        grid.appendChild(item);
+    });
+}
+
+// 安装全局关闭与键盘Esc
+document.addEventListener('DOMContentLoaded', function() {
+    initFloatingControl();
+    ['lab-submenu','chapter-submenu','course-submenu'].forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const content = el.querySelector('.submenu-content');
+        if (content) content.addEventListener('click', ev => ev.stopPropagation());
+    });
+    document.addEventListener('click', () => {
+        closeAllSubmenus();
+        const floatingBtn = document.getElementById('floating-control-btn');
+        const floatingMenu = document.getElementById('floating-menu-items');
+        if (floatingBtn && floatingMenu) {
+            floatingBtn.classList.remove('active');
+            floatingMenu.classList.remove('active');
+        }
+    });
+    document.addEventListener('keydown', (ev) => {
+        if (ev.key === 'Escape') {
+            closeAllSubmenus();
+            const floatingBtn = document.getElementById('floating-control-btn');
+            const floatingMenu = document.getElementById('floating-menu-items');
+            if (floatingBtn && floatingMenu) {
+                floatingBtn.classList.remove('active');
+                floatingMenu.classList.remove('active');
+            }
+        }
+    });
+});
+</script>
+
+</script>
+<script>
+// 目录页（第2页）点击跳转绑定（回忆第6章做法）
+document.addEventListener('DOMContentLoaded', function() {
+    const slides = Array.from(document.querySelectorAll('#slidesContainer > .slide'));
+    if (!slides.length) return;
+    const dirSlide = slides[1];
+    if (!dirSlide) return;
+
+    // 收集标题（h1/h2/h3）用于匹配
+    const slideTitles = slides.map(slide => {
+        const t1 = slide.querySelector('.left-content h1');
+        const t2 = slide.querySelector('.left-content h2');
+        const t3 = slide.querySelector('.left-content h3');
+        return ((t1 && t1.textContent) || (t2 && t2.textContent) || (t3 && t3.textContent) || '').trim();
+    });
+    function findIndexByPatterns(patterns) {
+        for (let i = 0; i < slideTitles.length; i++) {
+            const t = slideTitles[i] || '';
+            for (const p of patterns) {
+                if (p && t.includes(p)) return i;
+            }
+        }
+        return null;
+    }
+
+    // 绑定各小节标题（h3）跳转到对应小节起始页（通过“8.x”关键字匹配）
+    const sectionHeaders = dirSlide.querySelectorAll('h3');
+    sectionHeaders.forEach(h3 => {
+        const text = (h3.textContent || '').trim();
+        const sectionTag = text.split(/\s+/)[0]; // 例如 "8.1"
+        if (!sectionTag) return;
+        const idx = findIndexByPatterns([sectionTag]);
+        if (idx != null) {
+            h3.style.cursor = 'pointer';
+            h3.addEventListener('click', () => { try { goToSlide(idx); } catch(_) {} });
+        }
+    });
+
+    // 绑定列表项（li）到更细分的页面，通过关键字映射
+    const manualMap = new Map([
+        ['多元函数的定义', ['什么是二元函数', '二元函数', '多元函数']],
+        ['定义域与值域', ['定义域']],
+        ['二元函数图像', ['二元函数的图像', '3D', '曲面']],
+        ['等高线', ['等高线']],
+        ['极限与连续', ['二元函数的极限', '极限']],
+        ['几何意义', ['偏导数', '几何意义', '方向导数', '梯度']],
+        ['偏导计算', ['偏导数', '偏导数定义与计算']],
+        ['高阶偏导', ['高阶偏导']],
+        ['链式法则', ['链式法则']],
+        ['全微分概念', ['全微分']],
+        ['线性近似', ['线性近似']],
+        ['方向导数定义', ['方向导数']],
+        ['梯度', ['梯度']],
+        ['计算与应用', ['应用']],
+        ['无约束极值', ['极值']],
+        ['拉格朗日乘数', ['拉格朗日']],
+        ['应用问题', ['应用']]
+    ]);
+    const listItems = dirSlide.querySelectorAll('li');
+    listItems.forEach(li => {
+        const raw = (li.textContent || '').trim();
+        let key = raw.replace(/[（(].*[）)]/g, ''); // 去掉括号说明
+        let patterns = manualMap.get(key);
+        if (!patterns) {
+            // 宽松匹配：按关键词拆分
+            patterns = [];
+            if (/定义域|值域/.test(raw)) patterns.push('定义域');
+            if (/图像|曲面/.test(raw)) patterns.push('二元函数的图像');
+            if (/等高线/.test(raw)) patterns.push('等高线');
+            if (/极限|连续/.test(raw)) patterns.push('极限');
+            if (/偏导/.test(raw)) patterns.push('偏导');
+            if (/高阶/.test(raw)) patterns.push('高阶');
+            if (/链式/.test(raw)) patterns.push('链式');
+            if (/全微分/.test(raw)) patterns.push('全微分');
+            if (/线性近似|误差/.test(raw)) patterns.push('线性近似');
+            if (/方向导数/.test(raw)) patterns.push('方向导数');
+            if (/梯度/.test(raw)) patterns.push('梯度');
+            if (/极值/.test(raw)) patterns.push('极值');
+            if (/拉格朗日/.test(raw)) patterns.push('拉格朗日');
+            if (/应用/.test(raw)) patterns.push('应用');
+        }
+        const idx = findIndexByPatterns(patterns || []);
+        if (idx != null) {
+            li.style.cursor = 'pointer';
+            li.addEventListener('click', () => { try { goToSlide(idx); } catch(_) {} });
+        }
+    });
+});
+</script>
+
+</body>
+</html>

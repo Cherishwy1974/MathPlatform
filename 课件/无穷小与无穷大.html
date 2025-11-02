@@ -1,0 +1,1390 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>无穷小与无穷大 - 互动演示</title>
+    <script>
+    // --- MathJax 3 Configuration for rendering LaTeX ---
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']]
+      },
+      svg: {
+        fontCache: 'local'
+      },
+      startup: {
+        ready: () => {
+          console.log('iframe内MathJax准备就绪');
+          MathJax.startup.defaultReady();
+          MathJax.startup.promise.then(() => {
+            console.log('iframe内MathJax启动完成');
+            document.dispatchEvent(new Event('MathJaxReady'));
+          });
+        }
+      }
+    };
+    </script>
+    <script id="MathJax-script" async src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js"></script>
+    <style>
+        /* --- Core Styles for a clean, app-like experience --- */
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden; /* Prevent scrolling */
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f8fafc; /* Tailwind's gray-50 */
+        }
+        #slider-container {
+            display: flex;
+            height: 100%;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .slide {
+            width: 100vw;
+            height: 100vh;
+            flex-shrink: 0;
+            display: flex;
+            padding: 2rem;
+            box-sizing: border-box;
+            align-items: center;
+            justify-content: center;
+        }
+        .problem-title {
+            font-size: 2rem; /* Increased size for better focus */
+            line-height: 2.5rem;
+            font-weight: 600;
+            color: #1f2937; /* gray-800 */
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+        canvas {
+            /* Removed all borders, shadows, and backgrounds */
+            width: 100%;
+            height: auto;
+            max-width: 900px;
+        }
+        .solution-container {
+            min-height: 220px;
+        }
+        .solution-step {
+            opacity: 0;
+            transform: translateY(10px);
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.4s ease-out;
+            font-size: 1rem;
+            color: #374151;
+        }
+        .solution-step.visible {
+            opacity: 1;
+            transform: translateY(0);
+            max-height: 5rem;
+            margin-top: 1rem;
+        }
+        .info-panel {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 3rem;
+            width: 100%;
+            max-width: 1100px;
+            padding: 1rem 0;
+        }
+        .info-panel.no-visual {
+            flex-direction: column;
+            text-align: center;
+        }
+        .info-text {
+            width: 42%;
+            max-width: 460px;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .info-panel.no-visual .info-text {
+            width: 100%;
+            max-width: 720px;
+            text-align: center;
+        }
+        .info-text h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #111827;
+            margin: 0;
+        }
+        .info-text h2 {
+            font-size: 1.4rem;
+            font-weight: 400;
+            color: #4b5563;
+            margin: 0;
+            line-height: 1.8rem;
+        }
+        .info-visual {
+            width: 58%;
+            max-width: 620px;
+        }
+        .info-visual canvas {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 12px;
+            background-color: #f9fafb;
+            box-shadow: 0 8px 20px rgba(17, 24, 39, 0.08);
+        }
+        .info-panel.no-visual .info-caption {
+            max-width: 720px;
+        }
+        .info-caption {
+            max-width: 560px;
+            font-size: 1rem;
+            line-height: 1.6rem;
+            color: #6b7280;
+        }
+        
+        #page-counter {
+            position: absolute;
+            bottom: 1.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(249, 250, 251, 0.9); /* gray-50 with transparency */
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #4b5563; /* gray-600 */
+            /* Removed shadow */
+        }
+        .hidden {
+            display: none !important;
+        }
+        mjx-container {
+            font-size: 85% !important;
+        }
+        .solution-step mjx-container {
+            font-size: 90% !important;
+        }
+        .info-text mjx-container {
+            font-size: 95% !important;
+        }
+        .content-wrapper {
+            width: 100%;
+            max-width: 1200px; /* Limit max width for better readability */
+            display: flex;
+            flex-direction: row;
+            align-items: stretch;
+            justify-content: center;
+        }
+        .text-panel {
+             width: 45%;
+             padding: 1.5rem;
+             display: flex;
+             flex-direction: column;
+             justify-content: center;
+             gap: 1.5rem;
+        }
+        .rule-info {
+            display: none;
+        }
+        .teaser-text {
+            display: none;
+        }
+        .viz-panel {
+            width: 55%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        @media (max-width: 960px) {
+            .content-wrapper {
+                flex-direction: column;
+                gap: 2rem;
+            }
+            .text-panel, .viz-panel {
+                width: 100%;
+            }
+            .info-panel {
+                flex-direction: column;
+                gap: 2rem;
+            }
+            .info-text, .info-visual {
+                width: 100%;
+                max-width: none;
+                text-align: center;
+            }
+            .info-text h1 {
+                font-size: 2.25rem;
+            }
+            .info-text h2 {
+                font-size: 1.25rem;
+            }
+            .info-caption {
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <main id="slider-container"></main>
+
+    <div id="page-counter"></div>
+
+    <template id="slide-template">
+        <div class="slide">
+            <div class="problem-layout hidden content-wrapper">
+                <div class="viz-panel">
+                    <canvas width="600" height="400"></canvas>
+                </div>
+                <div class="text-panel">
+                    <h1 class="problem-title"></h1>
+                    <div class="solution-container"></div>
+                </div>
+            </div>
+            <div class="info-layout hidden">
+                <div class="info-panel"></div>
+            </div>
+        </div>
+    </template>
+
+<script>
+// --- DATA: SLIDES ---
+const slides = [
+    // === 第一组：函数 f(x) = 1/x ===
+    {
+        type: 'info',
+        title: '函数一：$f(x) = \\frac{1}{x}$ - 最经典的无穷示例',
+        subtitle: '函数在远离原点时逐渐逼近 $x$ 轴，而靠近原点时迅速发散',
+        visual: {
+            func: x => 1 / x,
+            xRange: [-5, 5], 
+            yRange: [-5, 5],
+            highlightPoints: [
+                { x: 2, label: 'f(2) = 0.5', offset: [12, -24], color: '#2563eb' },
+                { x: -2, label: 'f(-2) = -0.5', offset: [12, -24], color: '#14b8a6' }
+            ],
+            asymptotes: { vertical: [0], horizontal: [0] },
+            caption: '这是最经典的无穷示例：函数 $f(x) = \\frac{1}{x}$ 在 $x \\to \\pm\\infty$ 时趋向 $0$（无穷小），而在 $x \\to 0$ 时趋向 $\\pm\\infty$（无穷大）。'
+        }
+    },
+    {
+        type: 'info',
+        title: '$\\lim\\limits_{x \\to +\\infty} \\frac{1}{x} = 0$',
+        subtitle: '当 $x$ 持续增大时，函数图像无限贴近 $x$ 轴，这是一个无穷小量',
+        visual: {
+            func: x => 1 / x,
+            xRange: [0.1, 20], 
+            yRange: [-1.5, 1.5],
+            asymptotes: { vertical: [0], horizontal: [0] },
+            caption: '观察函数曲线如何逐渐贴近 $x$ 轴，这就是"无穷小量"的几何含义。'
+        }
+    },
+    {
+        type: 'info',
+        title: '$\\lim\\limits_{x \\to -\\infty} \\frac{1}{x} = 0$',
+        subtitle: '当 $x$ 持续减小时，函数图像同样无限贴近 $x$ 轴',
+        visual: {
+            func: x => 1 / x,
+            xRange: [-20, -0.1], 
+            yRange: [-1.5, 1.5],
+            asymptotes: { vertical: [0], horizontal: [0] },
+            caption: '从负方向看，函数值同样趋向 $0$。'
+        }
+    },
+    {
+        type: 'info',
+        title: '$\\lim\\limits_{x \\to 0^+} \\frac{1}{x} = +\\infty$',
+        subtitle: '当 $x$ 从正方向趋近 $0$ 时，函数值变得无限大',
+        visual: {
+            func: x => 1 / x,
+            xRange: [-1, 4], 
+            yRange: [-10, 20],
+            asymptotes: { vertical: [0], horizontal: [0] },
+            caption: '这是"无穷大量"的直观体现：当 $x$ 趋向 $0$ 时，函数值迅速增长。'
+        }
+    },
+    {
+        type: 'info',
+        title: '$\\lim\\limits_{x \\to 0^-} \\frac{1}{x} = -\\infty$',
+        subtitle: '当 $x$ 从负方向趋近 $0$ 时，函数值趋向负无穷',
+        visual: {
+            func: x => 1 / x,
+            xRange: [-4, 1], 
+            yRange: [-20, 10],
+            asymptotes: { vertical: [0], horizontal: [0] },
+            caption: '从负方向接近 $0$ 时，函数值趋向负无穷。'
+        }
+    },
+    {
+        type: 'info',
+        title: '$\\lim\\limits_{x \\to 0} \\frac{1}{x}$ 不存在',
+        subtitle: '左极限 $-\\infty$ ≠ 右极限 $+\\infty$，所以双侧极限不存在',
+        visual: {
+            func: x => 1 / x,
+            xRange: [-4, 4], 
+            yRange: [-20, 20],
+            asymptotes: { vertical: [0], horizontal: [0] },
+            caption: '左右两侧的极限不相等，因此双侧极限不存在。'
+        }
+    },
+    {
+        type: 'problem',
+        func: x => 1 / x,
+        latex: "当自变量 $x \\to -\\infty$ 时，情况又如何？",
+        a: -Infinity,
+        limit: 0,
+        xRange: [-20, -0.1], yRange: [-1.5, 1.5],
+        solution: [
+            { content: '观察图像：当 $x$ 持续减小时，函数图像同样无限贴近 $x$ 轴。' },
+            { content: '例如，$x=-100$ 时，$f(x)=-0.01$；$x=-10000$ 时，$f(x)=-0.0001$。' },
+            { content: '函数值从负方向无限趋近于 $0$。' },
+            { content: '结论：$\\lim\\limits_{x \\to -\\infty} \\frac{1}{x} = 0$，这同样是一个<strong>无穷小量</strong>。' }
+        ]
+    },
+    {
+        type: 'problem',
+        func: x => 1 / x,
+        latex: "当 $x$ 从正方向趋近 $0$ 时，会发生什么？",
+        a: 0,
+        isOneSided: 'right',
+        limit: Infinity,
+        xRange: [-1, 4], yRange: [-10, 20],
+        solution: [
+            { content: '这是在研究右极限：$x \\to 0^+$。' },
+            { content: '例如，$x=0.1$ 时，$f(x)=10$；$x=0.001$ 时，$f(x)=1000$。' },
+            { content: '当 $x$ 无限趋近于 $0$ 时，函数值变得无限大。' },
+            { content: '结论：$\\lim\\limits_{x \\to 0^+} \\frac{1}{x} = +\\infty$，这是一个<strong>无穷大量</strong>。' }
+        ]
+    },
+    {
+        type: 'problem',
+        func: x => 1 / x,
+        latex: "那么，$x$ 从负方向趋近 $0$ 呢？",
+        a: 0,
+        isOneSided: 'left',
+        limit: -Infinity,
+        xRange: [-4, 1], yRange: [-20, 10],
+        solution: [
+            { content: '这是在研究左极限：$x \\to 0^-$。' },
+            { content: '例如，$x=-0.1$ 时，$f(x)=-10$；$x=-0.001$ 时，$f(x)=-1000$。' },
+            { content: '当 $x$ 从负方向无限趋近于 $0$ 时，函数值趋向负无穷。' },
+            { content: '结论：$\\lim\\limits_{x \\to 0^-} \\frac{1}{x} = -\\infty$，这是一个<strong>负无穷大量</strong>。' }
+        ]
+    },
+    {
+        type: 'problem',
+        func: x => 1 / x,
+        latex: "综合来看，$\\lim\\limits_{x \\to 0} \\frac{1}{x}$ 的极限存在吗？",
+        a: 0,
+        limit: 'DNE', // Does Not Exist
+        xRange: [-4, 4], yRange: [-20, 20],
+        solution: [
+            { content: '根据极限存在的充要条件：左极限必须等于右极限。' },
+            { content: '我们已经知道：左极限 $\\lim\\limits_{x \\to 0^-} \\frac{1}{x} = -\\infty$。' },
+            { content: '而右极限 $\\lim\\limits_{x \\to 0^+} \\frac{1}{x} = +\\infty$。' },
+            { content: '因为 $-\\infty \\neq +\\infty$，所以双侧极限<strong>不存在</strong>。' }
+        ]
+    },
+
+    // === 第二组：函数 f(x) = e^x ===
+    {
+        type: 'info',
+        title: '函数二：$f(x) = e^x$',
+        subtitle: '指数增长的威力',
+        visual: {
+            func: x => Math.exp(x),
+            xRange: [-3, 3],
+            yRange: [0, 22],
+            highlightPoints: [
+                { x: 0, label: 'f(0) = 1', offset: [12, -24], color: '#16a34a' },
+                { x: 2, label: 'f(2) \u2248 7.39', offset: [12, -24], color: '#f97316' }
+            ],
+            asymptotes: {
+                horizontal: [0]
+            },
+            caption: '指数函数在 $x$ 轴右侧快速上升，而在 $x$ 趋向负无穷时贴近 $x$ 轴，体现出“无穷大量”与“无穷小量”的统一。'
+        }
+    },
+    {
+        type: 'problem',
+        func: x => Math.exp(x),
+        latex: "我们来探索 $\\lim\\limits_{x \\to +\\infty} e^x$",
+        a: Infinity,
+        limit: Infinity,
+        xRange: [-2, 5], yRange: [-5, 150],
+        solution: [
+            { content: '观察图像：当 $x$ 增大时，函数值以极快的速度增长。' },
+            { content: '例如，$e^5 \\approx 148$，$e^{10} \\approx 22026$。' },
+            { content: '这种增长是无界的。' },
+            { content: '结论：$\\lim\\limits_{x \\to +\\infty} e^x = +\\infty$，这是一个<strong>无穷大量</strong>。' }
+        ]
+    },
+    {
+        type: 'problem',
+        func: x => Math.exp(x),
+        latex: "反过来，$\\lim\\limits_{x \\to -\\infty} e^x$ 是多少？",
+        a: -Infinity,
+        limit: 0,
+        xRange: [-8, 2], yRange: [-0.5, 4],
+        solution: [
+            { content: '观察图像：当 $x$ 趋向负无穷时，函数图像无限贴近 $x$ 轴。' },
+            { content: '例如，$e^{-5} \\approx 0.0067$，$e^{-10} \\approx 0.000045$。' },
+            { content: '函数值无限趋近于 $0$。' },
+            { content: '结论：$\\lim\\limits_{x \\to -\\infty} e^x = 0$，这是一个<strong>无穷小量</strong>。' }
+        ]
+    },
+    {
+        type: 'problem',
+        func: x => Math.exp(x),
+        latex: "在一个普通点，例如 $x \\to 0$ 时，极限是多少？",
+        a: 0,
+        limit: 1,
+        xRange: [-4, 4], yRange: [-1, 10],
+        solution: [
+            { content: '$f(x)=e^x$ 是一个连续函数，在定义域内任何一点的极限都等于其函数值。' },
+            { content: '左极限：$\\lim\\limits_{x \\to 0^-} e^x = e^0 = 1$。' },
+            { content: '右极限：$\\lim\\limits_{x \\to 0^+} e^x = e^0 = 1$。' },
+            { content: '结论：左右极限相等，所以 $\\lim\\limits_{x \\to 0} e^x = 1$。' }
+        ]
+    },
+
+    // === 第三组：函数 f(x) = ln(x) ===
+    {
+        type: 'info',
+        title: '函数三：$f(x) = \\ln(x)$',
+        subtitle: '定义域与边界行为',
+        visual: {
+            func: x => Math.log(x),
+            xRange: [0.01, 8],
+            yRange: [-5, 3],
+            highlightPoints: [
+                { x: 1, label: 'f(1) = 0', offset: [12, -24], color: '#16a34a' },
+                { x: Math.E, label: 'f(e) ≈ 1', offset: [12, -24], color: '#f97316' }
+            ],
+            asymptotes: {
+                vertical: [0]
+            },
+            caption: '对数函数增长缓慢但无上界，其定义域 $(0, +\\infty)$ 决定了它在 $x=0$ 处有垂直渐近线，这是研究其极限行为的关键。'
+        }
+    },
+    {
+        type: 'problem',
+        func: x => Math.log(x),
+        latex: "对于对数函数，$\\lim\\limits_{x \\to +\\infty} \\ln(x)$ 是什么？",
+        a: Infinity,
+        limit: Infinity,
+        xRange: [0.1, 100], yRange: [-2, 5],
+        solution: [
+            { content: '观察图像：虽然 $\\ln(x)$ 增长很慢，但它会持续增长，没有上界。' },
+            { content: '例如，$\\ln(100) \\approx 4.6$，$\\ln(10000) \\approx 9.2$。' },
+            { content: '只要 $x$ 可以无限增大，$\\ln(x)$ 也可以。' },
+            { content: '结论：$\\lim\\limits_{x \\to +\\infty} \\ln(x) = +\\infty$，这是一个<strong>无穷大量</strong>。' }
+        ]
+    },
+    {
+        type: 'problem',
+        func: x => Math.log(x),
+        latex: "对数函数的边界：$\\lim\\limits_{x \\to 0^+} \\ln(x)$ 呢？",
+        a: 0,
+        isOneSided: 'right',
+        limit: -Infinity,
+        xRange: [0.001, 3], yRange: [-8, 2],
+        solution: [
+            { content: '注意：$\\ln(x)$ 的定义域是 $x > 0$，所以我们只能从右侧趋近 $0$。' },
+            { content: '观察图像：当 $x$ 越靠近 $0$，$y$ 值越小，函数图像沿着 $y$ 轴负方向无限延伸。' },
+            { content: '例如，$\\ln(0.1) \\approx -2.3$，$\\ln(0.001) \\approx -6.9$。' },
+            { content: '结论：$\\lim\\limits_{x \\to 0^+} \\ln(x) = -\\infty$，这是一个<strong>负无穷大量</strong>。' }
+        ]
+    },
+    // === 第四组：分段函数 ===
+    {
+        type: 'info',
+        title: '函数四：分段函数',
+        subtitle: '分界点处的极限分析',
+        visual: {
+            func: x => (x < 1) ? (x * x) : (3 - x),
+            xRange: [-2, 4],
+            yRange: [-1, 5],
+            highlightPoints: [
+                { x: 0.9, label: 'x → 1⁻, f(x) → 1', offset: [-120, -15], color: '#2563eb' },
+                { x: 1.1, label: 'x → 1⁺, f(x) → 2', offset: [15, -15], color: '#f97316' }
+            ],
+            discontinuityAt: 1,
+            caption: '分段函数在分界点 $x=1$ 两侧的表达式不同，导致函数图像在此处可能发生"断裂"。分析其极限时，必须分别考察左、右两侧的趋势。'
+        }
+    },
+    {
+        type: 'problem',
+        func: x => (x < 1) ? (x * x) : (3 - x),
+        latex: "分析函数 $f(x) = \\begin{cases} x^2, & x<1 \\\\ 3-x, & x \\geq 1 \\end{cases}$ 在 $x \\to 1$ 时的极限",
+        a: 1,
+        limit: 'DNE',
+        xRange: [-2, 4], yRange: [-1, 5],
+        solution: [
+            { content: '对于分段函数，我们需要在分界点分别考察左极限和右极限。' },
+            { content: '我们先看左极限 $\\lim\\limits_{x \\to 1^-} f(x)$' },
+            { content: '再看右极限 $\\lim\\limits_{x \\to 1^+} f(x)$' },
+            { content: '最后比较两者是否相等，以判断双侧极限是否存在。' }
+        ]
+    },
+    {
+        type: 'problem',
+        func: x => (x < 1) ? (x * x) : (3 - x),
+        latex: "首先，求左极限 $\\lim\\limits_{x \\to 1^-} f(x)$",
+        a: 1,
+        isOneSided: 'left',
+        limit: 1,
+        xRange: [-2, 4], yRange: [-1, 5],
+        solution: [
+            { content: '当 $x \\to 1^-$ 时，$x$ 从小于 $1$ 的一侧逼近 $1$。' },
+            { content: '此时，我们应该使用函数的第一个分支：$f(x) = x^2$。' },
+            { content: '直接代入计算：$\\lim\\limits_{x \\to 1^-} x^2 = (1)^2 = 1$。' },
+            { content: '结论：左极限是 $1$。' }
+        ]
+    },
+    {
+        type: 'problem',
+        func: x => (x < 1) ? (x * x) : (3 - x),
+        latex: "接下来，求右极限 $\\lim\\limits_{x \\to 1^+} f(x)$",
+        a: 1,
+        isOneSided: 'right',
+        limit: 2,
+        xRange: [-2, 4], yRange: [-1, 5],
+        solution: [
+            { content: '当 $x \\to 1^+$ 时，$x$ 从大于 $1$ 的一侧逼近 $1$。' },
+            { content: '此时，我们应该使用函数的第二个分支：$f(x) = 3-x$。' },
+            { content: '直接代入计算：$\\lim\\limits_{x \\to 1^+} (3-x) = 3 - 1 = 2$。' },
+            { content: '结论：右极限是 $2$。' }
+        ]
+    },
+    {
+        type: 'problem',
+        func: x => (x < 1) ? (x * x) : (3 - x),
+        latex: "所以，双侧极限 $\\lim\\limits_{x \\to 1} f(x)$ 存在吗？",
+        a: 1,
+        limit: 'DNE',
+        xRange: [-2, 4], yRange: [-1, 5],
+        solution: [
+            { content: '我们已经得到：' },
+            { content: '左极限 $\\lim\\limits_{x \\to 1^-} f(x) = 1$。' },
+            { content: '右极限 $\\lim\\limits_{x \\to 1^+} f(x) = 2$。' },
+            { content: '由于左极限 $\\neq$ 右极限 ($1 \\neq 2$)，所以该函数在 $x=1$ 处的极限<strong>不存在</strong>。' }
+        ]
+    }
+];
+
+// --- APP STATE & ELEMENTS ---
+const slider = document.getElementById('slider-container');
+const pageCounter = document.getElementById('page-counter');
+const template = document.getElementById('slide-template');
+
+let currentSlide = 0;
+const visualizations = [];
+const slideUIs = [];
+
+// --- CORE FUNCTIONS ---
+function createSlides() {
+    slides.forEach((slideData) => {
+        const clone = template.content.cloneNode(true);
+        const problemLayout = clone.querySelector('.problem-layout');
+        const infoLayout = clone.querySelector('.info-layout');
+        const infoPanel = clone.querySelector('.info-panel');
+
+        if (slideData.type === 'problem') {
+            infoLayout.remove();
+            problemLayout.classList.remove('hidden');
+
+            const canvas = problemLayout.querySelector('canvas');
+            const titleEl = problemLayout.querySelector('.problem-title');
+            const solutionContainer = problemLayout.querySelector('.solution-container');
+
+            // 使用 textContent 保留 LaTeX 原始语法供 MathJax 渲染
+            titleEl.textContent = `${slideData.latex}`;
+            
+            visualizations.push(new LimitVisualizer(canvas, slideData));
+            
+            slideData.solution.forEach(stepData => {
+                const stepEl = document.createElement('div');
+                stepEl.classList.add('solution-step');
+                stepEl.innerHTML = stepData.content; // Directly use innerHTML for mixed text/formula
+                solutionContainer.appendChild(stepEl);
+            });
+            
+            const steps = Array.from(solutionContainer.querySelectorAll('.solution-step'));
+            const uiState = { steps, timers: [] };
+            slideUIs.push(uiState);
+
+        } else if (slideData.type === 'info') {
+            problemLayout.remove();
+            infoLayout.classList.remove('hidden');
+            infoPanel.innerHTML = '';
+
+            const infoText = document.createElement('div');
+            infoText.classList.add('info-text');
+
+            const titleEl = document.createElement('h1');
+            titleEl.textContent = slideData.title;
+            infoText.appendChild(titleEl);
+
+            if (slideData.subtitle) {
+                const subtitleEl = document.createElement('h2');
+                subtitleEl.textContent = slideData.subtitle;
+                infoText.appendChild(subtitleEl);
+            }
+
+            let infoVisualizer = null;
+            if (slideData.visual) {
+                const visualWrap = document.createElement('div');
+                visualWrap.classList.add('info-visual');
+
+                const canvas = document.createElement('canvas');
+                canvas.width = slideData.visual.width || 720;
+                canvas.height = slideData.visual.height || 420;
+                visualWrap.appendChild(canvas);
+                infoPanel.appendChild(infoText);
+                infoPanel.appendChild(visualWrap);
+
+                infoVisualizer = new InfoVisualizer(canvas, slideData.visual);
+
+                if (slideData.visual.caption) {
+                    const captionEl = document.createElement('p');
+                    captionEl.classList.add('info-caption');
+                    captionEl.textContent = slideData.visual.caption;
+                    infoText.appendChild(captionEl);
+                }
+            }
+
+            if (!slideData.visual) {
+                infoPanel.classList.add('no-visual');
+                infoPanel.appendChild(infoText);
+            }
+
+            visualizations.push(infoVisualizer);
+            slideUIs.push(null);
+        }
+        slider.appendChild(clone);
+    });
+}
+
+function resetSlideUI(index) {
+    if (!slideUIs[index]) return;
+    const uiState = slideUIs[index];
+    if (uiState.timers) {
+        uiState.timers.forEach(timer => clearTimeout(timer));
+        uiState.timers.length = 0;
+    }
+    uiState.steps.forEach(step => step.classList.remove('visible'));
+}
+
+function playSlideUI(index) {
+    if (!slideUIs[index]) return;
+    const uiState = slideUIs[index];
+    uiState.steps.forEach((step, idx) => {
+        const timer = setTimeout(() => {
+            step.classList.add('visible');
+        }, 250 + idx * 420);
+        uiState.timers.push(timer);
+    });
+}
+
+
+function goToSlide(index) {
+    if (index < 0 || index >= slides.length) return;
+    
+    if(slideUIs[currentSlide]) resetSlideUI(currentSlide);
+    if(visualizations[currentSlide]) visualizations[currentSlide].stop();
+
+    slider.style.transform = `translateX(-${index * 100}vw)`;
+    currentSlide = index;
+    
+    if(visualizations[currentSlide]) {
+        visualizations[currentSlide].start();
+    }
+    pageCounter.textContent = `${index + 1} / ${slides.length}`;
+    
+    // 直接播放UI动画，不再重新渲染MathJax（已在初始化时全部渲染）
+    playSlideUI(index);
+}
+
+// --- VISUALIZATION CLASS ---
+class LimitVisualizer {
+    constructor(canvas, problem) {
+        this.canvas = canvas;
+        this.ctx = canvas.getContext('2d');
+        this.problem = problem;
+        this.animationFrameId = null;
+        this.isInfiniteProcess = !isFinite(this.problem.a);
+        this.colors = {
+            process: '#3b82f6', // blue-500
+            result: '#1f2937',  // gray-800
+            axis: '#9ca3af',   // gray-400
+            guide: '#d1d5db',  // gray-300
+            labelBg: 'rgba(255, 255, 255, 0.8)',
+            funcLine: '#ef4444' // red-500
+        };
+        this.time = 0;
+    }
+
+    start() {
+        this.time = 0;
+        this.progress = 0;
+        this.animate();
+    }
+
+    stop() {
+        if (this.animationFrameId) {
+            cancelAnimationFrame(this.animationFrameId);
+            this.animationFrameId = null;
+        }
+    }
+    
+    animate() {
+        this.time += 0.015;
+        // 平滑递增，接近1但永不到达（模拟极限过程）
+        this.progress += (1 - this.progress) * 0.02;
+        this.draw();
+        this.animationFrameId = requestAnimationFrame(() => this.animate());
+    }
+    
+    draw() {
+        const { func, a, limit, xRange, yRange, isOneSided } = this.problem;
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+        const padding = 50;
+        const w = this.canvas.width;
+        const h = this.canvas.height;
+        
+        const toCanvasX = x => padding + (x - xRange[0]) / (xRange[1] - xRange[0]) * (w - 2 * padding);
+        const toCanvasY = y => h - padding - (y - yRange[0]) / (yRange[1] - yRange[0]) * (h - 2 * padding);
+        
+        this.drawAxes(toCanvasX, toCanvasY, padding, w, h);
+        this.drawFunctionCurve(func, xRange, yRange, toCanvasX, toCanvasY, padding, w, h);
+
+        if (this.isInfiniteProcess) {
+             let currentX;
+             if (a === Infinity) {
+                // x 从左边界逐渐向右移动（趋向 +∞）
+                currentX = xRange[0] + (xRange[1] - xRange[0]) * (0.1 + 0.85 * this.progress);
+                this.drawMovingPoint(currentX, toCanvasX, toCanvasY);
+                const xAxisY = toCanvasY(0);
+                const pointX = toCanvasX(currentX);
+                // 箭头指向右（趋向 +∞）
+                this.drawArrow(pointX - 25, xAxisY + 20, pointX, xAxisY + 20, this.colors.process, 2);
+             } else { // -Infinity
+                // x 从右边界逐渐向左移动（趋向 -∞）
+                currentX = xRange[1] - (xRange[1] - xRange[0]) * (0.1 + 0.85 * this.progress);
+                this.drawMovingPoint(currentX, toCanvasX, toCanvasY);
+                const xAxisY = toCanvasY(0);
+                const pointX = toCanvasX(currentX);
+                // 箭头指向左（趋向 -∞）
+                this.drawArrow(pointX + 25, xAxisY + 20, pointX, xAxisY + 20, this.colors.process, 2);
+             }
+
+             if(isFinite(limit)){
+                const finalY = toCanvasY(limit);
+                this.ctx.setLineDash([5, 5]);
+                this.ctx.strokeStyle = this.colors.result;
+                this.ctx.lineWidth = 1.5;
+                this.ctx.beginPath();
+                this.ctx.moveTo(padding, finalY);
+                this.ctx.lineTo(w - padding, finalY);
+                this.ctx.stroke();
+                this.ctx.setLineDash([]);
+             } else if (limit === Infinity) {
+                // Draw upward arrows to indicate positive infinity
+                this.drawInfinityIndicator(toCanvasX(currentX), padding + 20, 'up');
+             } else if (limit === -Infinity) {
+                // Draw downward arrows to indicate negative infinity  
+                this.drawInfinityIndicator(toCanvasX(currentX), h - padding - 20, 'down');
+             }
+
+        } else { // Finite 'a'
+            const targetX = a;
+            const range = Math.min(Math.abs(targetX - xRange[0]), Math.abs(xRange[1] - targetX));
+            // offset 从大到小，点逐渐接近目标
+            const offset = range * (0.7 - 0.65 * this.progress);
+
+            if (isOneSided === 'left') {
+                // 从左边接近 a
+                const x = targetX - offset;
+                this.drawMovingPoint(x, toCanvasX, toCanvasY);
+                this.drawApproachingArrow(x, toCanvasX, toCanvasY, 'left');
+            } else if (isOneSided === 'right') {
+                // 从右边接近 a
+                const x = targetX + offset;
+                this.drawMovingPoint(x, toCanvasX, toCanvasY);
+                this.drawApproachingArrow(x, toCanvasX, toCanvasY, 'right');
+            } else { // Two-sided
+                // 两个点同时从两边接近 a
+                const xLeft = targetX - offset;
+                const xRight = targetX + offset;
+                this.drawMovingPoint(xLeft, toCanvasX, toCanvasY, this.colors.process);
+                this.drawMovingPoint(xRight, toCanvasX, toCanvasY, '#10b981'); // a different color for the second point
+                this.drawApproachingArrow(xLeft, toCanvasX, toCanvasY, 'left');
+                this.drawApproachingArrow(xRight, toCanvasX, toCanvasY, 'right', '#10b981');
+            }
+             // Draw vertical line at 'a'
+            this.ctx.setLineDash([4, 4]);
+            this.ctx.strokeStyle = this.colors.guide;
+            this.ctx.lineWidth = 1;
+            this.ctx.beginPath();
+            this.ctx.moveTo(toCanvasX(a), padding);
+            this.ctx.lineTo(toCanvasX(a), h - padding);
+            this.ctx.stroke();
+            this.ctx.setLineDash([]);
+
+            // Draw horizontal line for finite limits or infinity indicators
+            if (isFinite(limit)) {
+                const finalY = toCanvasY(limit);
+                this.ctx.setLineDash([5, 5]);
+                this.ctx.strokeStyle = this.colors.result;
+                this.ctx.lineWidth = 1.5;
+                this.ctx.beginPath();
+                this.ctx.moveTo(padding, finalY);
+                this.ctx.lineTo(w - padding, finalY);
+                this.ctx.stroke();
+                this.ctx.setLineDash([]);
+            } else if (limit === Infinity) {
+                // Draw upward arrows for positive infinity
+                if (isOneSided === 'left') {
+                    this.drawInfinityIndicator(toCanvasX(targetX - offset), padding + 30, 'up');
+                } else if (isOneSided === 'right') {
+                    this.drawInfinityIndicator(toCanvasX(targetX + offset), padding + 30, 'up');
+                } else {
+                    this.drawInfinityIndicator(toCanvasX(targetX), padding + 30, 'up');
+                }
+            } else if (limit === -Infinity) {
+                // Draw downward arrows for negative infinity
+                if (isOneSided === 'left') {
+                    this.drawInfinityIndicator(toCanvasX(targetX - offset), h - padding - 30, 'down');
+                } else if (isOneSided === 'right') {
+                    this.drawInfinityIndicator(toCanvasX(targetX + offset), h - padding - 30, 'down');
+                } else {
+                    this.drawInfinityIndicator(toCanvasX(targetX), h - padding - 30, 'down');
+                }
+            }
+        }
+    }
+    
+    drawMovingPoint(x, toCanvasX, toCanvasY, color = this.colors.process) {
+        const y = this.problem.func(x);
+        if (!isFinite(y)) return;
+
+        const canvasX = toCanvasX(x);
+        const canvasY = toCanvasY(y);
+
+        // Point on curve
+        this.ctx.fillStyle = color;
+        this.ctx.beginPath();
+        this.ctx.arc(canvasX, canvasY, 7, 0, 2 * Math.PI);
+        this.ctx.fill();
+
+        // Point on x-axis
+        this.ctx.beginPath();
+        this.ctx.arc(canvasX, toCanvasY(0), 5, 0, 2 * Math.PI);
+        this.ctx.fill();
+
+        // Guide line
+        this.ctx.strokeStyle = this.colors.guide;
+        this.ctx.lineWidth = 1;
+        this.ctx.setLineDash([2, 3]);
+        this.ctx.beginPath();
+        this.ctx.moveTo(canvasX, toCanvasY(0));
+        this.ctx.lineTo(canvasX, canvasY);
+        this.ctx.stroke();
+        this.ctx.setLineDash([]);
+    }
+
+    drawApproachingArrow(x, toCanvasX, toCanvasY, direction, color = this.colors.process) {
+        const canvasX = toCanvasX(x);
+        const yBase = toCanvasY(0) + 20;
+        if (direction === 'left') {
+            // 从左边接近，箭头指向右
+            this.drawArrow(canvasX - 20, yBase, canvasX, yBase, color, 2);
+        } else {
+            // 从右边接近，箭头指向左
+            this.drawArrow(canvasX + 20, yBase, canvasX, yBase, color, 2);
+        }
+    }
+
+    drawAxes(toCanvasX, toCanvasY, padding, w, h) {
+        const { xRange, yRange } = this.problem;
+        this.ctx.strokeStyle = this.colors.axis;
+        this.ctx.fillStyle = this.colors.axis;
+        this.ctx.lineWidth = 1.5;
+        this.ctx.font = '12px Arial';
+
+        // X-Axis
+        if (yRange[0] <= 0 && yRange[1] >= 0) {
+            const y_axis_pos = toCanvasY(0);
+            this.ctx.beginPath();
+            this.ctx.moveTo(padding, y_axis_pos);
+            this.ctx.lineTo(w - padding, y_axis_pos);
+            this.ctx.stroke();
+            this.drawArrow(w - padding - 10, y_axis_pos, w - padding, y_axis_pos, this.colors.axis, 1.5);
+        }
+        
+        // Y-Axis
+        if (xRange[0] <= 0 && xRange[1] >= 0) {
+            const x_axis_pos = toCanvasX(0);
+            this.ctx.beginPath();
+            this.ctx.moveTo(x_axis_pos, h - padding);
+            this.ctx.lineTo(x_axis_pos, padding);
+            this.ctx.stroke();
+            this.drawArrow(x_axis_pos, padding + 10, x_axis_pos, padding, this.colors.axis, 1.5);
+        }
+
+        // Ticks and Labels
+        this.ctx.lineWidth = 1;
+        // ... Ticks logic can be added here if needed, keeping it simple for now ...
+    }
+
+    drawFunctionCurve(func, xRange, yRange, toCanvasX, toCanvasY, padding, w, h){
+        this.ctx.strokeStyle = this.colors.funcLine;
+        this.ctx.lineWidth = 2.5;
+        this.ctx.beginPath();
+        let lastPointVisible = false;
+        
+        for (let i = 0; i <= w - 2 * padding; i++) {
+            const x = xRange[0] + i / (w - 2 * padding) * (xRange[1] - xRange[0]);
+            const y = func(x);
+            const currentPointVisible = isFinite(y);
+            
+            if (currentPointVisible) {
+                const cx = toCanvasX(x);
+                const cy = toCanvasY(y);
+                
+                // Clamp to visible area to avoid extreme lines
+                const clampedY = Math.max(padding, Math.min(h - padding, cy));
+                
+                if (lastPointVisible) {
+                    this.ctx.lineTo(cx, clampedY);
+                } else {
+                    this.ctx.moveTo(cx, clampedY);
+                }
+            }
+            lastPointVisible = currentPointVisible;
+        }
+        this.ctx.stroke();
+    }
+    
+    drawArrow(fromx, fromy, tox, toy, color, lw) {
+        if (!isFinite(fromx) || !isFinite(fromy) || !isFinite(tox) || !isFinite(toy)) return;
+        const headlen = 10;
+        const dx = tox - fromx;
+        const dy = toy - fromy;
+        const angle = Math.atan2(dy, dx);
+        this.ctx.strokeStyle = color; this.ctx.lineWidth = lw;
+        this.ctx.fillStyle = color;
+        this.ctx.beginPath();
+        this.ctx.moveTo(fromx, fromy); this.ctx.lineTo(tox, toy);
+        this.ctx.stroke();
+        this.ctx.beginPath();
+        this.ctx.moveTo(tox, toy);
+        this.ctx.lineTo(tox - headlen * Math.cos(angle - Math.PI / 6), toy - headlen * Math.sin(angle - Math.PI / 6));
+        this.ctx.lineTo(tox - headlen * Math.cos(angle + Math.PI / 6), toy - headlen * Math.sin(angle + Math.PI / 6));
+        this.ctx.closePath();
+        this.ctx.fill();
+    }
+
+    drawInfinityIndicator(x, y, direction) {
+        const ctx = this.ctx;
+        ctx.strokeStyle = this.colors.result;
+        ctx.fillStyle = this.colors.result;
+        ctx.lineWidth = 2;
+        
+        const arrowSize = 12;
+        const spacing = 8;
+        
+        for (let i = 0; i < 3; i++) {
+            const yOffset = direction === 'up' ? -i * spacing : i * spacing;
+            const currentY = y + yOffset;
+            
+            ctx.beginPath();
+            if (direction === 'up') {
+                ctx.moveTo(x, currentY);
+                ctx.lineTo(x - arrowSize/2, currentY + arrowSize);
+                ctx.lineTo(x + arrowSize/2, currentY + arrowSize);
+            } else {
+                ctx.moveTo(x, currentY);
+                ctx.lineTo(x - arrowSize/2, currentY - arrowSize);
+                ctx.lineTo(x + arrowSize/2, currentY - arrowSize);
+            }
+            ctx.closePath();
+            ctx.fill();
+        }
+    }
+}
+
+class InfoVisualizer {
+    constructor(canvas, config) {
+        this.canvas = canvas;
+        this.ctx = canvas.getContext('2d');
+        this.config = config;
+        this.time = 0;
+        this.animationFrameId = null;
+        this.colors = {
+            axis: '#9ca3af',
+            grid: '#e5e7eb',
+            func: '#f97316',
+            highlight: '#2563eb',
+            label: '#111827'
+        };
+    }
+
+    start() {
+        this.time = 0;
+        this.animate();
+    }
+
+    stop() {
+        if (this.animationFrameId) {
+            cancelAnimationFrame(this.animationFrameId);
+            this.animationFrameId = null;
+        }
+    }
+
+    animate() {
+        this.time += 0.012;
+        this.draw();
+        this.animationFrameId = requestAnimationFrame(() => this.animate());
+    }
+
+    draw() {
+        const { func, xRange, yRange } = this.config;
+        const ctx = this.ctx;
+        const { width, height } = this.canvas;
+        const padding = 55;
+
+        ctx.clearRect(0, 0, width, height);
+
+        const toCanvasX = x => padding + (x - xRange[0]) / (xRange[1] - xRange[0]) * (width - 2 * padding);
+        const toCanvasY = y => height - padding - (y - yRange[0]) / (yRange[1] - yRange[0]) * (height - 2 * padding);
+
+        this.drawGrid(toCanvasX, toCanvasY, padding, width, height);
+        this.drawAxes(toCanvasX, toCanvasY, padding, width, height);
+        this.drawFunction(func, toCanvasX, toCanvasY, padding, width);
+        this.drawAsymptotes(toCanvasX, toCanvasY, padding, width, height);
+        this.drawDiscontinuity(toCanvasX, toCanvasY);
+        this.drawHighlights(toCanvasX, toCanvasY);
+    }
+
+    drawGrid(toCanvasX, toCanvasY, padding, width, height) {
+        const ctx = this.ctx;
+        const { xRange, yRange } = this.config;
+        ctx.strokeStyle = `${this.colors.grid}`;
+        ctx.lineWidth = 1;
+        ctx.setLineDash([4, 6]);
+
+        const xStep = this.chooseStep(xRange);
+        for (let x = Math.ceil(xRange[0] / xStep) * xStep; x <= xRange[1]; x += xStep) {
+            const cx = toCanvasX(x);
+            ctx.beginPath();
+            ctx.moveTo(cx, padding);
+            ctx.lineTo(cx, height - padding);
+            ctx.stroke();
+        }
+
+        const yStep = this.chooseStep(yRange);
+        for (let y = Math.ceil(yRange[0] / yStep) * yStep; y <= yRange[1]; y += yStep) {
+            const cy = toCanvasY(y);
+            ctx.beginPath();
+            ctx.moveTo(padding, cy);
+            ctx.lineTo(width - padding, cy);
+            ctx.stroke();
+        }
+
+        ctx.setLineDash([]);
+    }
+
+    drawAxes(toCanvasX, toCanvasY, padding, width, height) {
+        const ctx = this.ctx;
+        const { xRange, yRange } = this.config;
+        ctx.strokeStyle = this.colors.axis;
+        ctx.fillStyle = this.colors.axis;
+        ctx.lineWidth = 1.5;
+        ctx.font = '12px "Segoe UI", Arial, sans-serif';
+
+        if (yRange[0] <= 0 && yRange[1] >= 0) {
+            const yAxisPos = toCanvasY(0);
+            ctx.beginPath();
+            ctx.moveTo(padding, yAxisPos);
+            ctx.lineTo(width - padding, yAxisPos);
+            ctx.stroke();
+            this.drawArrow(width - padding - 12, yAxisPos, width - padding, yAxisPos, this.colors.axis, 1.5);
+        }
+
+        if (xRange[0] <= 0 && xRange[1] >= 0) {
+            const xAxisPos = toCanvasX(0);
+            ctx.beginPath();
+            ctx.moveTo(xAxisPos, height - padding);
+            ctx.lineTo(xAxisPos, padding);
+            ctx.stroke();
+            this.drawArrow(xAxisPos, padding + 12, xAxisPos, padding, this.colors.axis, 1.5);
+        }
+    }
+
+    drawFunction(func, toCanvasX, toCanvasY, padding, width) {
+        const ctx = this.ctx;
+        const { xRange, discontinuityAt } = this.config;
+        ctx.strokeStyle = this.colors.func;
+        ctx.lineWidth = 3;
+        
+        // For piecewise functions, draw segments separately
+        if (discontinuityAt) {
+            this.drawPiecewiseFunction(func, toCanvasX, toCanvasY, padding, width, discontinuityAt);
+        } else {
+            this.drawContinuousFunction(func, toCanvasX, toCanvasY, padding, width);
+        }
+    }
+
+    drawContinuousFunction(func, toCanvasX, toCanvasY, padding, width) {
+        const ctx = this.ctx;
+        const { xRange } = this.config;
+        ctx.beginPath();
+        let hasStarted = false;
+
+        for (let i = 0; i <= width - 2 * padding; i++) {
+            const x = xRange[0] + (i / (width - 2 * padding)) * (xRange[1] - xRange[0]);
+            const y = func(x);
+            if (!isFinite(y)) {
+                hasStarted = false;
+                continue;
+            }
+            const cx = toCanvasX(x);
+            const cy = toCanvasY(y);
+            if (!hasStarted) {
+                ctx.moveTo(cx, cy);
+                hasStarted = true;
+            } else {
+                ctx.lineTo(cx, cy);
+            }
+        }
+        ctx.stroke();
+    }
+
+    drawPiecewiseFunction(func, toCanvasX, toCanvasY, padding, width, discontinuityAt) {
+        const ctx = this.ctx;
+        const { xRange } = this.config;
+        
+        // Draw left piece
+        ctx.beginPath();
+        let hasStarted = false;
+        for (let i = 0; i <= width - 2 * padding; i++) {
+            const x = xRange[0] + (i / (width - 2 * padding)) * (xRange[1] - xRange[0]);
+            if (x >= discontinuityAt) break;
+            
+            const y = func(x);
+            if (!isFinite(y)) continue;
+            
+            const cx = toCanvasX(x);
+            const cy = toCanvasY(y);
+            if (!hasStarted) {
+                ctx.moveTo(cx, cy);
+                hasStarted = true;
+            } else {
+                ctx.lineTo(cx, cy);
+            }
+        }
+        ctx.stroke();
+
+        // Draw right piece
+        ctx.beginPath();
+        hasStarted = false;
+        for (let i = 0; i <= width - 2 * padding; i++) {
+            const x = xRange[0] + (i / (width - 2 * padding)) * (xRange[1] - xRange[0]);
+            if (x < discontinuityAt) continue;
+            
+            const y = func(x);
+            if (!isFinite(y)) continue;
+            
+            const cx = toCanvasX(x);
+            const cy = toCanvasY(y);
+            if (!hasStarted) {
+                ctx.moveTo(cx, cy);
+                hasStarted = true;
+            } else {
+                ctx.lineTo(cx, cy);
+            }
+        }
+        ctx.stroke();
+    }
+
+    drawAsymptotes(toCanvasX, toCanvasY, padding, width, height) {
+        const ctx = this.ctx;
+        const { asymptotes } = this.config;
+        if (!asymptotes) return;
+
+        ctx.strokeStyle = '#d1d5db';
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([6, 6]);
+
+        if (asymptotes.vertical) {
+            asymptotes.vertical.forEach(x0 => {
+                const cx = toCanvasX(x0);
+                ctx.beginPath();
+                ctx.moveTo(cx, padding);
+                ctx.lineTo(cx, height - padding);
+                ctx.stroke();
+            });
+        }
+
+        if (asymptotes.horizontal) {
+            asymptotes.horizontal.forEach(y0 => {
+                const cy = toCanvasY(y0);
+                ctx.beginPath();
+                ctx.moveTo(padding, cy);
+                ctx.lineTo(width - padding, cy);
+                ctx.stroke();
+            });
+        }
+
+        ctx.setLineDash([]);
+    }
+
+    drawDiscontinuity(toCanvasX, toCanvasY) {
+        const ctx = this.ctx;
+        const { discontinuityAt, func } = this.config;
+        if (!discontinuityAt) return;
+
+        const cx = toCanvasX(discontinuityAt);
+        const leftY = toCanvasY(func(discontinuityAt - 0.001));
+        const rightY = toCanvasY(func(discontinuityAt + 0.001));
+
+        // Draw open circles at discontinuity points
+        ctx.strokeStyle = '#ef4444';
+        ctx.fillStyle = '#ffffff';
+        ctx.lineWidth = 2;
+
+        // Left limit point (filled)
+        ctx.beginPath();
+        ctx.arc(cx, leftY, 6, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.stroke();
+
+        // Right limit point (open)
+        ctx.beginPath();
+        ctx.arc(cx, rightY, 6, 0, 2 * Math.PI);
+        ctx.stroke();
+
+        // Actual function value (if different)
+        const actualY = toCanvasY(func(discontinuityAt));
+        if (Math.abs(actualY - rightY) > 2) {
+            ctx.fillStyle = '#ef4444';
+            ctx.beginPath();
+            ctx.arc(cx, actualY, 6, 0, 2 * Math.PI);
+            ctx.fill();
+        }
+    }
+
+    drawHighlights(toCanvasX, toCanvasY) {
+        const ctx = this.ctx;
+        const { highlightPoints, func } = this.config;
+        if (!highlightPoints) return;
+
+        highlightPoints.forEach(point => {
+            const color = point.color || this.colors.highlight;
+            const pulse = 0.7 + 0.3 * Math.sin(this.time * 2 + (point.x * 0.5));
+            const radius = 7 + 3 * pulse;
+            const cx = toCanvasX(point.x);
+            const cy = toCanvasY(func(point.x));
+
+            ctx.fillStyle = `${color}33`;
+            ctx.beginPath();
+            ctx.arc(cx, cy, radius + 6, 0, 2 * Math.PI);
+            ctx.fill();
+
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.arc(cx, cy, radius, 0, 2 * Math.PI);
+            ctx.fill();
+
+            if (point.label) {
+                const [offsetX, offsetY] = point.offset || [10, -10];
+                ctx.fillStyle = this.colors.label;
+                ctx.font = '14px "Segoe UI", Arial, sans-serif';
+                ctx.textAlign = 'left';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(point.label, cx + offsetX, cy + offsetY);
+            }
+        });
+    }
+
+    drawArrow(fromx, fromy, tox, toy, color, lw) {
+        const ctx = this.ctx;
+        const headlen = 10;
+        const dx = tox - fromx;
+        const dy = toy - fromy;
+        const angle = Math.atan2(dy, dx);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = lw;
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.moveTo(fromx, fromy);
+        ctx.lineTo(tox, toy);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(tox, toy);
+        ctx.lineTo(tox - headlen * Math.cos(angle - Math.PI / 6), toy - headlen * Math.sin(angle - Math.PI / 6));
+        ctx.lineTo(tox - headlen * Math.cos(angle + Math.PI / 6), toy - headlen * Math.sin(angle + Math.PI / 6));
+        ctx.closePath();
+        ctx.fill();
+    }
+
+    chooseStep([min, max]) {
+        const range = max - min;
+        const roughStep = range / 6;
+        const pow = Math.pow(10, Math.floor(Math.log10(roughStep)));
+        const candidates = [1, 2, 5, 10];
+        for (let factor of candidates) {
+            const step = factor * pow;
+            if (roughStep <= step) return step;
+        }
+        return pow * 10;
+    }
+}
+
+// --- INITIALIZATION ---
+function init() {
+    console.log('iframe: 初始化无穷小与无穷大演示...');
+    createSlides();
+    
+    // 等待两帧以确保 DOM 完全渲染后再调用 MathJax
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            console.log('iframe: 准备渲染MathJax公式');
+            console.log('iframe: 幻灯片数量:', slides.length);
+            console.log('iframe: slider子元素数量:', slider.children.length);
+            
+            // 渲染所有幻灯片中的公式
+            window.MathJax.typesetPromise([slider]).then(() => {
+                console.log('iframe: MathJax渲染完成，显示第一页');
+                goToSlide(0);
+                
+                // 键盘事件监听
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'ArrowRight') goToSlide(currentSlide + 1);
+                    if (e.key === 'ArrowLeft') goToSlide(currentSlide - 1);
+                    if (e.key === 'ArrowDown') {
+                        e.preventDefault();
+                        playSlideUI(currentSlide);
+                    }
+                });
+            }).catch(err => {
+                console.error('iframe: MathJax渲染失败:', err);
+                goToSlide(0);
+            });
+        });
+    });
+}
+
+// 监听 MathJaxReady 事件，确保 MathJax 加载后再初始化
+document.addEventListener('MathJaxReady', () => {
+    console.log('iframe: 收到MathJaxReady事件');
+    init();
+});
+
+</script>
+</body>
+</html>

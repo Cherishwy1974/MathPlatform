@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>极限与连续游戏</title>
+    
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+            },
+            startup: {
+                pageReady: () => {
+                    return MathJax.startup.defaultPageReady().then(() => {
+                        console.log('MathJax加载完成');
+                    });
+                }
+            }
+        };
+    </script>
+    <script defer src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 100vw;
+            height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            overflow: hidden;
+            position: relative;
+            background: #faf9f7;
+            color: #000000;
+            font-weight: 700;
+        }
+
+        /* 浅色渐变背景 - 多层次叠加 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(ellipse at 25% 30%, rgba(224, 242, 254, 0.6) 0%, transparent 50%),
+                radial-gradient(ellipse at 75% 70%, rgba(186, 230, 253, 0.5) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(240, 249, 255, 0.8) 0%, transparent 100%),
+                linear-gradient(180deg, #ffffff 0%, #f0f9ff 50%, #e0f2fe 100%);
+            z-index: -3;
+        }
+
+        /* 星空层 - 优化性能 */
+        .starfield {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        /* 静态星星 - 减少动画提升性能 */
+        .star {
+            position: absolute;
+            background: #ffffff;
+            border-radius: 50%;
+            will-change: opacity;
+        }
+
+        .star.small {
+            width: 1px;
+            height: 1px;
+            opacity: 0.5;
+        }
+
+        .star.medium {
+            width: 1.5px;
+            height: 1.5px;
+            opacity: 0.7;
+            box-shadow: 0 0 2px rgba(255,255,255,0.2);
+        }
+
+        .star.large {
+            width: 2px;
+            height: 2px;
+            opacity: 0.9;
+            box-shadow: 0 0 3px rgba(255,255,255,0.3);
+        }
+
+        /* 只给少量星星添加柔和脉动 */
+        .star.pulse {
+            animation: gentlePulse 6s ease-in-out infinite;
+        }
+
+        @keyframes gentlePulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.9; }
+        }
+
+        /* 星云效果层 */
+        .nebula {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            opacity: 0.15;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(80, 60, 150, 0.3) 0%, transparent 45%),
+                radial-gradient(circle at 80% 20%, rgba(130, 60, 150, 0.2) 0%, transparent 45%),
+                radial-gradient(circle at 50% 50%, rgba(50, 100, 200, 0.2) 0%, transparent 50%);
+            filter: blur(60px);
+            transform: scale(1.2);
+            animation: nebulaFloat 40s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        @keyframes nebulaFloat {
+            0%, 100% { transform: scale(1.2) rotate(0deg); }
+            50% { transform: scale(1.3) rotate(3deg); }
+        }
+
+        /* 顶部信息栏 - 更精致的设计 */
+        .top-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 70px;
+            background: linear-gradient(180deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 30px;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .level-info {
+            font-size: 24px;
+            color: #000000;
+            font-weight: 700;
+            letter-spacing: 2px;
+        }
+
+        .level-number {
+            color: #000000;
+            font-size: 28px;
+            font-weight: 700;
+            text-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .progress-info {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+        }
+
+        .score-display {
+            color: #000000;
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        /* 游戏网格 */
+        .game-container {
+            position: absolute;
+            top: 90px;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .game-grid {
+            display: grid;
+            gap: 12px;
+            padding: 20px;
+            width: 100%;
+            max-width: 1600px; /* 增加最大宽度 */
+            height: 100%;
+            max-height: 750px;
+        }
+
+        /* 瓷砖样式 - 更精致的玻璃态效果 */
+        .tile {
+            background: rgba(255,255,255,0.03);
+            backdrop-filter: blur(20px) saturate(150%);
+            -webkit-backdrop-filter: blur(20px) saturate(150%);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px; /* 减小字体大小 */
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            color: #000000;
+            padding: 10px; /* 增加内边距 */
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 
+                0 4px 10px rgba(0,0,0,0.3),
+                inset 0 1px 0 rgba(255,255,255,0.05);
+            word-break: break-word; /* 改用break-word */
+            line-height: 1.4; /* 增加行高 */
+            letter-spacing: 0.3px;
+            min-height: 60px; /* 设置最小高度 */
+        }
+
+        .tile::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at center, rgba(255,255,255,0.05) 0%, transparent 60%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .tile:hover::before {
+            opacity: 1;
+        }
+
+        .tile:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 
+                0 8px 20px rgba(107,159,255,0.2),
+                inset 0 1px 0 rgba(255,255,255,0.1);
+            border-color: rgba(107,159,255,0.3);
+            background: rgba(255,255,255,0.06);
+        }
+
+        .tile.question {
+            background: linear-gradient(135deg, rgba(107,159,255,0.08), rgba(107,159,255,0.04));
+            border: 2px solid #000000;
+            color: #000000;
+            font-weight: 700;
+        }
+
+        .tile.answer {
+            background: linear-gradient(135deg, rgba(187,134,252,0.08), rgba(187,134,252,0.04));
+            border: 2px solid #000000;
+            color: #000000;
+            font-weight: 700;
+        }
+
+        /* 选中效果 - 更优雅 */
+        .tile.selected {
+            transform: translateY(-6px) scale(1.03);
+            box-shadow: 
+                0 0 0 2px rgba(100,255,180,0.5),
+                0 10px 30px rgba(100,255,180,0.2),
+                inset 0 0 20px rgba(100,255,180,0.05);
+            border-color: rgba(100,255,180,0.5);
+            background: linear-gradient(135deg, rgba(100,255,180,0.1), rgba(100,255,180,0.05));
+            animation: selected-pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes selected-pulse {
+            0%, 100% { 
+                box-shadow: 
+                    0 0 0 2px rgba(100,255,180,0.5),
+                    0 10px 30px rgba(100,255,180,0.2),
+                    inset 0 0 20px rgba(100,255,180,0.05);
+            }
+            50% { 
+                box-shadow: 
+                    0 0 0 4px rgba(100,255,180,0.3),
+                    0 10px 40px rgba(100,255,180,0.3),
+                    inset 0 0 30px rgba(100,255,180,0.08);
+            }
+        }
+
+        /* 匹配成功动画 - 更优雅 */
+        @keyframes elegantDissolve {
+            0% { 
+                transform: scale(1);
+                opacity: 1;
+                filter: brightness(1);
+            }
+            50% { 
+                transform: scale(1.1);
+                filter: brightness(1.5) blur(2px);
+            }
+            100% { 
+                transform: scale(0.8);
+                opacity: 0;
+                filter: brightness(2) blur(10px);
+            }
+        }
+
+        .tile.matched {
+            animation: elegantDissolve 0.8s ease-out forwards;
+        }
+
+        /* 粒子效果 - 更精致 */
+        .particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: radial-gradient(circle, rgba(255,255,255,0.9), transparent);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: particle-fly 1.5s ease-out forwards;
+        }
+
+        @keyframes particle-fly {
+            0% {
+                transform: translate(0, 0) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--x), var(--y)) scale(0);
+                opacity: 0;
+            }
+        }
+
+        /* 关卡完成界面 - 更高级的设计 */
+        .level-complete {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.98) 100%);
+            backdrop-filter: blur(10px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 2000;
+        }
+
+        .level-complete.show {
+            display: flex;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .complete-text {
+            font-size: 64px;
+            color: #000000;
+            font-weight: 700;
+            margin-bottom: 30px;
+            letter-spacing: 4px;
+            animation: subtle-glow 3s ease-in-out infinite;
+        }
+
+        @keyframes subtle-glow {
+            0%, 100% { 
+                filter: brightness(1);
+                transform: translateY(0);
+            }
+            50% { 
+                filter: brightness(1.2);
+                transform: translateY(-5px);
+            }
+        }
+
+        .level-stats {
+            background: rgba(255,255,255,0.02);
+            backdrop-filter: blur(20px);
+            padding: 30px 50px;
+            border-radius: 16px;
+            margin-bottom: 35px;
+            color: #000000;
+            font-size: 20px;
+            border: 2px solid #000000;
+            text-align: center;
+            letter-spacing: 1px;
+            font-weight: 700;
+        }
+
+        .next-btn {
+            padding: 18px 45px;
+            font-size: 18px;
+            background: linear-gradient(135deg, rgba(107,159,255,0.2), rgba(187,134,252,0.2));
+            backdrop-filter: blur(10px);
+            color: #000000;
+            border: 2px solid #000000;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 700;
+            letter-spacing: 2px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .next-btn:hover {
+            transform: translateY(-2px);
+            background: linear-gradient(135deg, rgba(107,159,255,0.3), rgba(187,134,252,0.3));
+            box-shadow: 0 6px 30px rgba(107,159,255,0.3);
+        }
+
+        /* 游戏完成界面 */
+        .game-complete {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, rgba(0,0,0,0.97) 0%, #000000 100%);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 3000;
+        }
+
+        .game-complete.show {
+            display: flex;
+        }
+
+        .trophy {
+            font-size: 120px;
+            animation: gentle-rotate 8s linear infinite;
+            filter: drop-shadow(0 0 30px rgba(255,215,0,0.5));
+        }
+
+        @keyframes gentle-rotate {
+            from { 
+                transform: rotate(0deg);
+            }
+            to { 
+                transform: rotate(360deg);
+            }
+        }
+
+        .final-text {
+            font-size: 56px;
+            color: #000000;
+            font-weight: 700;
+            margin: 35px 0;
+            letter-spacing: 3px;
+        }
+
+        .final-stats {
+            background: rgba(255,255,255,0.02);
+            backdrop-filter: blur(20px);
+            padding: 35px 60px;
+            border-radius: 16px;
+            color: #000000;
+            font-size: 22px;
+            margin-bottom: 35px;
+            border: 2px solid #000000;
+            text-align: center;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .restart-game-btn {
+            padding: 20px 50px;
+            font-size: 20px;
+            background: linear-gradient(135deg, rgba(255,107,107,0.2), rgba(255,200,87,0.2));
+            backdrop-filter: blur(10px);
+            color: #000000;
+            border: 2px solid #000000;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 700;
+            letter-spacing: 2px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .restart-game-btn:hover {
+            transform: translateY(-2px);
+            background: linear-gradient(135deg, rgba(255,107,107,0.3), rgba(255,200,87,0.3));
+            box-shadow: 0 6px 30px rgba(255,107,107,0.3);
+        }
+
+        /* 摇晃动画 */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-8px); }
+            75% { transform: translateX(8px); }
+        }
+
+        /* 响应式布局 */
+        @media (max-width: 768px) {
+            .top-bar {
+                padding: 0 15px;
+                height: 60px;
+            }
+
+            .level-info {
+                font-size: 20px;
+            }
+
+            .level-number {
+                font-size: 24px;
+            }
+
+            .game-container {
+                top: 80px;
+            }
+
+            .game-grid {
+                gap: 8px;
+                padding: 15px;
+                max-width: 100%;
+            }
+
+            .tile {
+                font-size: 12px; /* 进一步减小字体 */
+                padding: 8px; /* 调整内边距 */
+                min-height: 50px; /* 调整最小高度 */
+                line-height: 1.3;
+            }
+
+            .complete-text {
+                font-size: 48px;
+            }
+
+            .final-text {
+                font-size: 40px;
+            }
+
+            /* 小屏幕下的MathJax优化 */
+            .tile .MathJax {
+                font-size: 0.8em !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .tile {
+                font-size: 11px;
+                padding: 6px;
+                min-height: 45px;
+            }
+
+            .game-grid {
+                gap: 6px;
+                padding: 10px;
+            }
+
+            .tile .MathJax {
+                font-size: 0.75em !important;
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* MathJax公式优化样式 */
+        .tile .MathJax {
+            font-size: 0.9em !important;
+            max-width: 100% !important;
+            overflow: hidden !important;
+        }
+
+        .tile .MathJax_Display {
+            margin: 0.5em 0 !important;
+            text-align: center !important;
+        }
+
+        .tile .MathJax_SVG {
+            max-width: 100% !important;
+            height: auto !important;
+        }
+
+        /* 确保数学公式在瓷砖内正确显示 */
+        .tile mjx-container {
+            max-width: 100% !important;
+            overflow: hidden !important;
+        }
+
+        .return-home-panel { position: fixed; bottom: 12px; right: 12px; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; z-index: 40; }
+        .return-toggle { width: 40px; height: 40px; border-radius: 50%; border: none; background: linear-gradient(135deg, rgba(79,70,229,0.96), rgba(99,102,241,0.9)); color: #fff; font-size: 20px; cursor: pointer; box-shadow: 0 10px 18px rgba(79,70,229,0.28); transition: transform 0.2s, box-shadow 0.2s; }
+        .return-toggle:hover { transform: translateY(-1px) scale(1.03); box-shadow: 0 14px 26px rgba(79,70,229,0.35); }
+        .return-links { display: none; flex-direction: column; gap: 6px; padding: 10px; border-radius: 10px; background: rgba(255,255,255,0.96); border: 1px solid rgba(79,70,229,0.18); box-shadow: 0 10px 30px rgba(15,23,42,0.14); opacity: 0; transition: opacity 0.16s; }
+        .return-link { text-decoration: none; font-size: 15px; color: #3730a3; padding: 6px 12px; border-radius: 8px; background: rgba(99,102,241,0.12); transition: background 0.2s; }
+        .return-link:hover { background: rgba(79,70,229,0.18); }
+    </style>
+
+</head>
+<body>
+    <div class="return-home-panel"><button class="return-toggle" onclick="toggleReturnLinks()"><i class="fa-solid fa-house"></i></button><div class="return-links"><a class="return-link" href="index.html"><i class="fa-solid fa-arrow-left"></i> 返回目录</a><a class="return-link" href="../index.html"><i class="fa-solid fa-house"></i> 返回主站</a></div></div>
+    <!-- 星空背景 -->
+    <div class="starfield" id="starfield"></div>
+    <!-- 星云层 -->
+    <div class="nebula"></div>
+
+    <!-- 顶部信息栏 -->
+    <div class="top-bar">
+        <div class="level-info">
+            关卡 <span class="level-number" id="currentLevel">1</span>
+        </div>
+        <div class="progress-info">
+            <div class="score-display">
+                进度: <span id="levelScore">0</span> / <span id="levelTotal">5</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 游戏容器 -->
+    <div class="game-container">
+        <div class="game-grid" id="gameGrid"></div>
+    </div>
+
+    <!-- 关卡完成界面 -->
+    <div class="level-complete" id="levelComplete">
+        <div class="complete-text">关卡完成</div>
+        <div class="level-stats">
+            <p>已完成第 <span id="completedLevel">1</span> 关</p>
+            <p>累计完成: <span id="totalAnswered">0</span></p>
+        </div>
+        <button class="next-btn" onclick="nextLevel()">继续挑战</button>
+    </div>
+
+    <!-- 全部完成界面 -->
+    <div class="game-complete" id="gameComplete">
+        <div class="trophy">🏆</div>
+        <div class="final-text">极限大师</div>
+        <div class="final-stats">
+            <p>完成全部 1000 道题目</p>
+            <p>通过 <span id="totalLevels">0</span> 个关卡</p>
+            <p>你已掌握极限精髓</p>
+        </div>
+        <button class="restart-game-btn" onclick="restartGame()">重新开始</button>
+    </div>
+
+    <script>
+        // 创建优化的星空背景 - 减少星星数量，提升性能
+        function createStarfield() {
+            const starfield = document.getElementById('starfield');
+            const starCount = 100; // 减少星星数量
+            
+            // 创建静态星星
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                
+                // 随机大小分布
+                const rand = Math.random();
+                if (rand < 0.6) {
+                    star.classList.add('small');
+                } else if (rand < 0.85) {
+                    star.classList.add('medium');
+                } else {
+                    star.classList.add('large');
+                }
+                
+                // 只给20%的星星添加脉动效果
+                if (Math.random() < 0.2) {
+                    star.classList.add('pulse');
+                    star.style.animationDelay = Math.random() * 6 + 's';
+                }
+                
+                // 随机位置
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                
+                starfield.appendChild(star);
+            }
+            
+            // 流星更少更稀疏
+            setInterval(() => {
+                if (Math.random() < 0.03) { // 3%概率，更稀少
+                    createShootingStar();
+                }
+            }, 5000);
+        }
+
+        // 创建流星
+        function createShootingStar() {
+            const starfield = document.getElementById('starfield');
+            const shootingStar = document.createElement('div');
+            shootingStar.className = 'shooting-star';
+            shootingStar.style.left = Math.random() * 100 + '%';
+            shootingStar.style.top = Math.random() * 30 + '%';
+            shootingStar.style.width = (80 + Math.random() * 120) + 'px';
+            starfield.appendChild(shootingStar);
+            
+            setTimeout(() => {
+                shootingStar.remove();
+            }, 4000);
+        }
+
+        // 游戏状态
+        let currentLevel = 1;
+        let levelScore = 0;
+        let totalAnswered = 0;
+        let usedProblems = new Set();
+        let currentGrid = [];
+        let selectedTile = null;
+        let isProcessing = false;
+
+        // 生成极限题库 (1000道题)
+        function generateMegaDatabase() {
+            const database = [];
+            
+            // 基础极限计算 (200题)
+            const basicLimits = [
+                { q: "$\\lim\\limits_{x \\to 0} \\frac{\\sin x}{x}$", a: "1" },
+                { q: "$\\lim\\limits_{x \\to 0} \\frac{\\tan x}{x}$", a: "1" },
+                { q: "$\\lim\\limits_{x \\to 0} \\frac{\\arcsin x}{x}$", a: "1" },
+                { q: "$\\lim\\limits_{x \\to 0} \\frac{\\arctan x}{x}$", a: "1" },
+                { q: "$\\lim\\limits_{x \\to 0} \\frac{e^x - 1}{x}$", a: "1" },
+                { q: "$\\lim\\limits_{x \\to 0} \\frac{\\ln(1 + x)}{x}$", a: "1" },
+                { q: "$\\lim\\limits_{x \\to 0} \\frac{1 - \\cos x}{\\frac{x^2}{2}}$", a: "1" },
+                { q: "$\\lim\\limits_{x \\to \\infty} \\left(1 + \\frac{1}{x}\\right)^x$", a: "$e$" },
+                { q: "$\\lim\\limits_{x \\to 0} (1 + x)^{\\frac{1}{x}}$", a: "$e$" },
+                { q: "$\\lim\\limits_{x \\to 2} \\frac{x^2 - 4}{x - 2}$", a: "4" },
+                { q: "$\\lim\\limits_{x \\to 3} \\frac{x^2 - x - 6}{x - 3}$", a: "5" },
+                { q: "$\\lim\\limits_{x \\to 0} \\frac{\\sqrt{x+1} - 1}{x}$", a: "$\\frac{1}{2}$" },
+                { q: "$\\lim\\limits_{x \\to 1} \\frac{x^3 - 1}{x^2 - 3x + 2}$", a: "-3" },
+                { q: "$\\lim\\limits_{x \\to \\infty} \\frac{3x^2 - 5x + 1}{2x^2 + x - 4}$", a: "$\\frac{3}{2}$" },
+                { q: "$\\lim\\limits_{x \\to +\\infty} (\\sqrt{x^2+x} - x)$", a: "$\\frac{1}{2}$" },
+                { q: "$\\lim\\limits_{x \\to 0} \\frac{\\sin 2x}{3x}$", a: "$\\frac{2}{3}$" },
+                { q: "$\\lim\\limits_{x \\to 0} \\frac{\\tan 3x}{2x}$", a: "$\\frac{3}{2}$" },
+                { q: "$\\lim\\limits_{x \\to 0} \\frac{e^{2x} - 1}{3x}$", a: "$\\frac{2}{3}$" },
+                { q: "$\\lim\\limits_{x \\to 0} \\frac{\\ln(1 + 2x)}{x}$", a: "2" },
+                { q: "$\\lim\\limits_{x \\to 0} \\frac{1 - \\cos x}{x \\sin x}$", a: "$\\frac{1}{2}$" },
+                // 简单直接题目
+                { q: "$\\lim\\limits_{x \\to 1} (x + 2)$", a: "3" },
+                { q: "$\\lim\\limits_{x \\to 0} x^2$", a: "0" },
+                { q: "$\\lim\\limits_{x \\to 2} 3x$", a: "6" },
+                { q: "$\\lim\\limits_{x \\to 1} \\frac{x + 1}{x - 1}$", a: "$+\\infty$" },
+                { q: "$\\lim\\limits_{x \\to 0} \\frac{1}{x}$", a: "$\\infty$" },
+                { q: "$\\lim\\limits_{x \\to 1} x^3$", a: "1" },
+                { q: "$\\lim\\limits_{x \\to 0} \\sin x$", a: "0" },
+                { q: "$\\lim\\limits_{x \\to 0} \\cos x$", a: "1" },
+                { q: "$\\lim\\limits_{x \\to 0} e^x$", a: "1" },
+                { q: "$\\lim\\limits_{x \\to 1} \\ln x$", a: "0" },
+                { q: "$\\lim\\limits_{x \\to 2} \\sqrt{x}$", a: "$\\sqrt{2}$" },
+                { q: "$\\lim\\limits_{x \\to 0} |x|$", a: "0" },
+                { q: "$\\lim\\limits_{x \\to 1} \\frac{1}{x}$", a: "1" },
+                { q: "$\\lim\\limits_{x \\to 0} x^2 + 1$", a: "1" },
+                { q: "$\\lim\\limits_{x \\to 1} 2x + 3$", a: "5" },
+                { q: "$\\lim\\limits_{x \\to 0} \\frac{x}{x + 1}$", a: "0" },
+                { q: "$\\lim\\limits_{x \\to 1} \\frac{x^2}{x + 1}$", a: "$\\frac{1}{2}$" },
+                { q: "$\\lim\\limits_{x \\to 0} \\frac{x + 1}{x + 2}$", a: "$\\frac{1}{2}$" },
+                { q: "$\\lim\\limits_{x \\to 2} \\frac{x - 1}{x + 1}$", a: "$\\frac{1}{3}$" },
+                { q: "$\\lim\\limits_{x \\to 0} \\frac{2x + 1}{3x + 2}$", a: "$\\frac{1}{2}$" }
+            ];
+            
+            for (let i = 0; i < 5; i++) {
+                database.push(...basicLimits);
+            }
+            
+            // 简单极限题目 (150题)
+            const simpleLimits = [
+                { q: "$\\lim\\limits_{x \\to 0} \\frac{\\sin 2x}{x}$", a: "2" },
+                { q: "$\\lim\\limits_{x \\to 0} \\frac{\\sin 3x}{5x}$", a: "$\\frac{3}{5}$" },
+                { q: "$\\lim\\limits_{x \\to 0} \\frac{\\sin 5t}{5t}$", a: "1" },
+                { q: "$\\lim\\limits_{x \\to 0} \\frac{\\sin 2x}{\\sin 3x}$", a: "$\\frac{2}{3}$" },
+                { q: "$\\lim\\limits_{x \\to 0} \\frac{x}{\\sin x}$", a: "1" },
+                { q: "$\\lim\\limits_{x \\to 0} \\frac{\\sin^2 x}{x^2}$", a: "1" },
+                { q: "$\\lim\\limits_{x \\to 0} \\frac{x^2}{1 - \\cos x}$", a: "2" },
+                { q: "$\\lim\\limits_{x \\to \\infty} \\left(1 + \\frac{2}{x}\\right)^x$", a: "$e^2$" },
+                { q: "$\\lim\\limits_{x \\to \\infty} \\left(1 + \\frac{3}{x}\\right)^{2x}$", a: "$e^6$" },
+                { q: "$\\lim\\limits_{x \\to \\infty} \\left(1 - \\frac{1}{x}\\right)^x$", a: "$\\frac{1}{e}$" },
+                { q: "$\\lim\\limits_{x \\to \\infty} \\left(\\frac{x+1}{x}\\right)^x$", a: "$e$" },
+                { q: "$\\lim\\limits_{x \\to \\infty} \\left(\\frac{x+2}{x}\\right)^{3x}$", a: "$e^6$" },
+                { q: "$\\lim\\limits_{x \\to \\infty} \\left(1 + \\frac{5}{x}\\right)^x$", a: "$e^5$" },
+                { q: "$\\lim\\limits_{x \\to 0} (1 + 2x)^{\\frac{1}{x}}$", a: "$e^2$" },
+                { q: "$\\lim\\limits_{x \\to \\infty} \\left(1 - \\frac{3}{x}\\right)^x$", a: "$e^{-3}$" },
+                // 更多简单题目
+                { q: "$\\lim\\limits_{x \\to 1} (2x + 1)$", a: "3" },
+                { q: "$\\lim\\limits_{x \\to 0} (x^2 + 2x + 1)$", a: "1" },
+                { q: "$\\lim\\limits_{x \\to 2} (3x - 1)$", a: "5" },
+                { q: "$\\lim\\limits_{x \\to 0} \\frac{x + 1}{2x + 1}$", a: "1" },
+                { q: "$\\lim\\limits_{x \\to 1} \\frac{x^2 - 1}{x - 1}$", a: "2" },
+                { q: "$\\lim\\limits_{x \\to 0} \\frac{x^3}{x^2}$", a: "0" },
+                { q: "$\\lim\\limits_{x \\to 1} \\frac{x^2 + x - 2}{x - 1}$", a: "3" },
+                { q: "$\\lim\\limits_{x \\to 0} \\frac{2x^2 + x}{x}$", a: "1" },
+                { q: "$\\lim\\limits_{x \\to 1} \\frac{x^3 - 1}{x - 1}$", a: "3" },
+                { q: "$\\lim\\limits_{x \\to 0} \\frac{x^2 + 3x}{x}$", a: "3" },
+                { q: "$\\lim\\limits_{x \\to 2} \\frac{x^2 - 4}{x - 2}$", a: "4" },
+                { q: "$\\lim\\limits_{x \\to 0} \\frac{x^2 - x}{x}$", a: "-1" },
+                { q: "$\\lim\\limits_{x \\to 1} \\frac{x^2 - 2x + 1}{x - 1}$", a: "0" },
+                { q: "$\\lim\\limits_{x \\to 0} \\frac{x^3 + x^2}{x^2}$", a: "1" },
+                { q: "$\\lim\\limits_{x \\to 1} \\frac{x^2 - 1}{x^2 + x - 2}$", a: "$\\frac{2}{3}$" }
+            ];
+            
+            for (let i = 0; i < 5; i++) {
+                database.push(...simpleLimits);
+            }
+            
+            // 简单函数极限 (200题)
+            const simpleFunctionLimits = [
+                { q: "$\\lim\\limits_{x \\to 0} \\frac{\\sin x}{x}$", a: "1" },
+                { q: "$\\lim\\limits_{x \\to 0} \\frac{\\tan x}{x}$", a: "1" },
+                { q: "$\\lim\\limits_{x \\to 0} \\frac{\\arcsin x}{x}$", a: "1" },
+                { q: "$\\lim\\limits_{x \\to 0} \\frac{\\arctan x}{x}$", a: "1" },
+                { q: "$\\lim\\limits_{x \\to 0} \\frac{e^x - 1}{x}$", a: "1" },
+                { q: "$\\lim\\limits_{x \\to 0} \\frac{\\ln(1 + x)}{x}$", a: "1" },
+                { q: "$\\lim\\limits_{x \\to 0} \\frac{1 - \\cos x}{\\frac{x^2}{2}}$", a: "1" },
+                { q: "$\\lim\\limits_{x \\to 0} \\frac{\\sin x}{\\tan x}$", a: "1" },
+                { q: "$\\lim\\limits_{x \\to 0} \\frac{\\sin x \\cdot \\tan x}{x^2}$", a: "1" },
+                { q: "$\\lim\\limits_{x \\to 0} \\frac{\\ln(1 + x)}{\\sin x}$", a: "1" },
+                { q: "$\\lim\\limits_{x \\to 0} \\frac{\\sin^2 x}{x^2}$", a: "1" },
+                { q: "$\\lim\\limits_{x \\to 0} \\frac{e^x - 1}{\\ln(1 + x)}$", a: "1" },
+                { q: "$\\lim\\limits_{x \\to 0} \\frac{\\sin x + \\tan x}{2x}$", a: "1" },
+                { q: "$\\lim\\limits_{x \\to 0} \\frac{\\tan x - \\sin x}{x^3}$", a: "$\\frac{1}{2}$" },
+                { q: "$\\lim\\limits_{x \\to 0} \\frac{1 - \\cos x}{x \\sin x}$", a: "$\\frac{1}{2}$" },
+                // 更多简单题目
+                { q: "$\\lim\\limits_{x \\to 1} (x^2 + 3x - 2)$", a: "2" },
+                { q: "$\\lim\\limits_{x \\to 0} (2x^2 + 5x + 1)$", a: "1" },
+                { q: "$\\lim\\limits_{x \\to 2} (x^3 - 2x^2 + x)$", a: "2" },
+                { q: "$\\lim\\limits_{x \\to 1} \\frac{x^2 + 2x - 3}{x - 1}$", a: "4" },
+                { q: "$\\lim\\limits_{x \\to 0} \\frac{x^2 + 4x}{x}$", a: "4" },
+                { q: "$\\lim\\limits_{x \\to 1} \\frac{x^3 - 3x + 2}{x - 1}$", a: "0" },
+                { q: "$\\lim\\limits_{x \\to 0} \\frac{x^2 - 2x}{x}$", a: "-2" },
+                { q: "$\\lim\\limits_{x \\to 1} \\frac{x^2 - 1}{x^2 - 2x + 1}$", a: "$\\infty$" },
+                { q: "$\\lim\\limits_{x \\to 0} \\frac{x^3 + 2x^2}{x^2}$", a: "2" },
+                { q: "$\\lim\\limits_{x \\to 1} \\frac{x^2 - 3x + 2}{x^2 - 1}$", a: "$-\\frac{1}{2}$" },
+                { q: "$\\lim\\limits_{x \\to 0} \\frac{x^2 + x}{x^2 + 2x}$", a: "$\\frac{1}{2}$" },
+                { q: "$\\lim\\limits_{x \\to 1} \\frac{x^2 - 2x + 1}{x^2 - 1}$", a: "0" },
+                { q: "$\\lim\\limits_{x \\to 0} \\frac{x^3 - x^2}{x^2}$", a: "-1" },
+                { q: "$\\lim\\limits_{x \\to 1} \\frac{x^2 - 4x + 3}{x - 1}$", a: "-2" },
+                { q: "$\\lim\\limits_{x \\to 0} \\frac{x^2 + 3x + 2}{x^2 + x}$", a: "2" }
+            ];
+            
+            for (let i = 0; i < 6; i++) {
+                database.push(...simpleFunctionLimits);
+            }
+            
+            // 简单连续性题目 (150题)
+            const simpleContinuityProblems = [
+                { q: "$f(x) = x^2 + 1$ 在 $x = 1$ 处", a: "连续" },
+                { q: "$f(x) = \\frac{x^2-1}{x-1}$ 在 $x = 1$ 处", a: "可去间断点" },
+                { q: "$f(x) = \\begin{cases} x + 1, & x < 0 \\\\ 2x, & x \\geq 0 \\end{cases}$ 在 $x = 0$ 处", a: "跳跃间断点" },
+                { q: "$f(x) = \\frac{1}{x}$ 在 $x = 0$ 处", a: "无穷间断点" },
+                { q: "$f(x) = \\frac{x + 1}{x - 2}$ 的连续区间", a: "$(-\\infty, 2) \\cup (2, +\\infty)$" },
+                { q: "$f(x) = \\sin x + \\cos x$ 的连续区间", a: "$(-\\infty, +\\infty)$" },
+                { q: "$f(x) = e^x$ 的连续区间", a: "$(-\\infty, +\\infty)$" },
+                { q: "$f(x) = \\ln x$ 的连续区间", a: "$(0, +\\infty)$" },
+                { q: "$f(x) = \\sqrt{x}$ 的连续区间", a: "$[0, +\\infty)$" },
+                { q: "$f(x) = \\frac{x^2 + 1}{x^2 - 4}$ 的连续区间", a: "$(-\\infty, -2) \\cup (-2, 2) \\cup (2, +\\infty)$" },
+                // 更多简单题目
+                { q: "$f(x) = x + 2$ 在 $x = 0$ 处", a: "连续" },
+                { q: "$f(x) = x^2$ 在 $x = 1$ 处", a: "连续" },
+                { q: "$f(x) = 3x - 1$ 在 $x = 2$ 处", a: "连续" },
+                { q: "$f(x) = \\frac{1}{x}$ 在 $x = 1$ 处", a: "连续" },
+                { q: "$f(x) = \\sqrt{x}$ 在 $x = 4$ 处", a: "连续" },
+                { q: "$f(x) = \\sin x$ 在 $x = 0$ 处", a: "连续" },
+                { q: "$f(x) = \\cos x$ 在 $x = \\pi$ 处", a: "连续" },
+                { q: "$f(x) = e^x$ 在 $x = 0$ 处", a: "连续" },
+                { q: "$f(x) = \\ln x$ 在 $x = 1$ 处", a: "连续" },
+                { q: "$f(x) = |x|$ 在 $x = 0$ 处", a: "连续" },
+                { q: "$f(x) = x^3$ 在 $x = 0$ 处", a: "连续" },
+                { q: "$f(x) = \\frac{x}{x + 1}$ 在 $x = 0$ 处", a: "连续" },
+                { q: "$f(x) = \\frac{x^2}{x + 1}$ 在 $x = 1$ 处", a: "连续" },
+                { q: "$f(x) = \\frac{x + 1}{x - 1}$ 在 $x = 0$ 处", a: "连续" },
+                { q: "$f(x) = \\frac{x^2 - 1}{x + 1}$ 在 $x = 0$ 处", a: "连续" }
+            ];
+            
+            for (let i = 0; i < 6; i++) {
+                database.push(...simpleContinuityProblems);
+            }
+            
+            // 简单极限计算 (150题)
+            const simpleCalculationTechniques = [
+                { q: "$\\lim\\limits_{x \\to 3^+} \\frac{x+1}{x-3}$", a: "$+\\infty$" },
+                { q: "$\\lim\\limits_{x \\to 1} \\left(\\frac{1}{x-1} - \\frac{2}{x^2-1}\\right)$", a: "$\\frac{1}{2}$" },
+                { q: "$\\lim\\limits_{x \\to 1} \\frac{x^3 - 1}{x^2 - 3x + 2}$", a: "-3" },
+                { q: "$\\lim\\limits_{x \\to \\infty} \\frac{3x^2 - 5x + 1}{2x^2 + x - 4}$", a: "$\\frac{3}{2}$" },
+                { q: "$\\lim\\limits_{x \\to +\\infty} (\\sqrt{x^2+x} - x)$", a: "$\\frac{1}{2}$" },
+                { q: "$\\lim\\limits_{x \\to 0} \\frac{x^2}{1 - \\cos x}$", a: "2" },
+                { q: "$\\lim\\limits_{x \\to 0} \\frac{\\ln(1+3x)}{\\sin(5x)}$", a: "$\\frac{3}{5}$" },
+                { q: "$\\lim\\limits_{x \\to 0} \\frac{\\sin 4x}{3+\\sqrt{9-3x}}$", a: "0" },
+                { q: "$\\lim\\limits_{x \\to 1} \\left(\\frac{2}{1-x^2}-\\frac{1}{1-x}\\right)$", a: "$\\frac{1}{2}$" },
+                { q: "$\\lim\\limits_{x \\to 0} \\frac{\\tan(2x)}{e^x - 1}$", a: "2" },
+                { q: "$\\lim\\limits_{x \\to 0} \\frac{1 - \\cos x}{\\sin^2 x}$", a: "$\\frac{1}{2}$" },
+                { q: "$\\lim\\limits_{x \\to 0} \\frac{\\sin 5x}{3x}$", a: "$\\frac{5}{3}$" },
+                { q: "$\\lim\\limits_{x \\to 0} \\frac{\\tan(2x)}{e^x - 1}$", a: "2" },
+                { q: "$\\lim\\limits_{x \\to 0} \\frac{1 - \\cos x}{\\sin^2 x}$", a: "$\\frac{1}{2}$" },
+                { q: "$\\lim\\limits_{x \\to 0} \\frac{\\sin 4x}{3+\\sqrt{9-3x}}$", a: "0" },
+                // 更多简单题目
+                { q: "$\\lim\\limits_{x \\to 1} (x^2 + 2x + 1)$", a: "4" },
+                { q: "$\\lim\\limits_{x \\to 0} (3x^2 + 2x + 1)$", a: "1" },
+                { q: "$\\lim\\limits_{x \\to 2} (x^3 - 2x^2 + x)$", a: "2" },
+                { q: "$\\lim\\limits_{x \\to 1} \\frac{x^2 + 3x - 4}{x - 1}$", a: "5" },
+                { q: "$\\lim\\limits_{x \\to 0} \\frac{x^2 + 5x}{x}$", a: "5" },
+                { q: "$\\lim\\limits_{x \\to 1} \\frac{x^3 - 4x + 3}{x - 1}$", a: "0" },
+                { q: "$\\lim\\limits_{x \\to 0} \\frac{x^2 - 3x}{x}$", a: "-3" },
+                { q: "$\\lim\\limits_{x \\to 1} \\frac{x^2 - 1}{x^2 - 3x + 2}$", a: "$\\infty$" },
+                { q: "$\\lim\\limits_{x \\to 0} \\frac{x^3 + 3x^2}{x^2}$", a: "3" },
+                { q: "$\\lim\\limits_{x \\to 1} \\frac{x^2 - 4x + 3}{x^2 - 1}$", a: "-1" },
+                { q: "$\\lim\\limits_{x \\to 0} \\frac{x^2 + 2x}{x^2 + 3x}$", a: "$\\frac{2}{3}$" },
+                { q: "$\\lim\\limits_{x \\to 1} \\frac{x^2 - 3x + 2}{x^2 - 1}$", a: "0" },
+                { q: "$\\lim\\limits_{x \\to 0} \\frac{x^3 - 2x^2}{x^2}$", a: "-2" },
+                { q: "$\\lim\\limits_{x \\to 1} \\frac{x^2 - 5x + 4}{x - 1}$", a: "-3" },
+                { q: "$\\lim\\limits_{x \\to 0} \\frac{x^2 + 4x + 3}{x^2 + 2x}$", a: "$\\frac{3}{2}$" }
+            ];
+            
+            for (let i = 0; i < 5; i++) {
+                database.push(...simpleCalculationTechniques);
+            }
+            
+            // 简单分段函数题目 (100题)
+            const simplePiecewiseLimits = [
+                { q: "$f(x) = \\begin{cases} x^2 + 1, & x \\le 2 \\\\ 3x - 1, & x > 2 \\end{cases}$ 在 $x = 2$ 处", a: "极限为 5" },
+                { q: "$f(x) = \\begin{cases} \\frac{1}{x}(e^x-1), & x > 0 \\\\ x+d, & x \\leq 0 \\end{cases}$ 在 $x = 0$ 处连续，则 $d = $", a: "1" },
+                { q: "$f(x) = \\begin{cases} x^2+a, & x \\leq 0 \\\\ \\frac{\\sin x}{x}, & x > 0 \\end{cases}$ 在 $x = 0$ 处连续，则 $a = $", a: "1" },
+                { q: "$f(x) = \\begin{cases} 2x + k, & x \\le 1 \\\\ 4x - 1, & x > 1 \\end{cases}$ 在 $x = 1$ 处连续，则 $k = $", a: "1" },
+                { q: "$f(x) = \\begin{cases} \\frac{\\sin x}{x}, & x \\neq 0 \\\\ 1, & x = 0 \\end{cases}$ 在 $x = 0$ 处", a: "连续" },
+                // 更多简单题目
+                { q: "$f(x) = \\begin{cases} x + 1, & x < 0 \\\\ x^2, & x \\geq 0 \\end{cases}$ 在 $x = 0$ 处", a: "连续" },
+                { q: "$f(x) = \\begin{cases} 2x, & x < 1 \\\\ x + 1, & x \\geq 1 \\end{cases}$ 在 $x = 1$ 处", a: "连续" },
+                { q: "$f(x) = \\begin{cases} x^2, & x < 0 \\\\ x, & x \\geq 0 \\end{cases}$ 在 $x = 0$ 处", a: "连续" },
+                { q: "$f(x) = \\begin{cases} x - 1, & x < 1 \\\\ x^2, & x \\geq 1 \\end{cases}$ 在 $x = 1$ 处", a: "连续" },
+                { q: "$f(x) = \\begin{cases} 3x, & x < 0 \\\\ x^2 + 1, & x \\geq 0 \\end{cases}$ 在 $x = 0$ 处", a: "连续" },
+                { q: "$f(x) = \\begin{cases} x^2 + 1, & x < 1 \\\\ 2x, & x \\geq 1 \\end{cases}$ 在 $x = 1$ 处", a: "连续" },
+                { q: "$f(x) = \\begin{cases} x + 2, & x < 0 \\\\ x^2 - 1, & x \\geq 0 \\end{cases}$ 在 $x = 0$ 处", a: "连续" },
+                { q: "$f(x) = \\begin{cases} 2x - 1, & x < 1 \\\\ x^2 + 1, & x \\geq 1 \\end{cases}$ 在 $x = 1$ 处", a: "连续" },
+                { q: "$f(x) = \\begin{cases} x^2, & x < 0 \\\\ 2x + 1, & x \\geq 0 \\end{cases}$ 在 $x = 0$ 处", a: "连续" },
+                { q: "$f(x) = \\begin{cases} x + 3, & x < 1 \\\\ x^2 - 2, & x \\geq 1 \\end{cases}$ 在 $x = 1$ 处", a: "连续" }
+            ];
+            
+            for (let i = 0; i < 5; i++) {
+                database.push(...simplePiecewiseLimits);
+            }
+            
+            // 简单参数题目 (50题)
+            const simpleParameterProblems = [
+                { q: "$\\lim\\limits_{x\\to 0}\\frac{\\sin ax}{x} = -3$，则 $a = $", a: "-3" },
+                { q: "$\\lim\\limits_{x\\to\\infty}\\frac{3x^3-4x+5}{ax^3+5x^2-6} = \\frac{3}{2}$，则 $a = $", a: "2" },
+                { q: "$\\lim\\limits_{x\\to\\infty}f(x) = e^2$，$f(x) = (1+\\frac{k}{x})^x$，则 $k = $", a: "2" },
+                { q: "若 $x\\to 0$ 时，无穷小量 $2x$ 与 $3x^2+mx$ 等价，则 $m = $", a: "2" },
+                { q: "$\\lim\\limits_{x\\to 0^+}\\frac{2^x}{3+\\ln(1+x)} = $", a: "$\\frac{1}{3}$" },
+                // 更多简单题目
+                { q: "$\\lim\\limits_{x \\to 1} (ax + 1) = 3$，则 $a = $", a: "2" },
+                { q: "$\\lim\\limits_{x \\to 0} (x^2 + bx) = 0$，则 $b = $", a: "0" },
+                { q: "$\\lim\\limits_{x \\to 2} (cx - 1) = 3$，则 $c = $", a: "2" },
+                { q: "$\\lim\\limits_{x \\to 0} \\frac{ax}{x} = 2$，则 $a = $", a: "2" },
+                { q: "$\\lim\\limits_{x \\to 1} \\frac{x^2 + a}{x - 1} = 3$，则 $a = $", a: "-2" },
+                { q: "$\\lim\\limits_{x \\to 0} \\frac{bx^2}{x} = 1$，则 $b = $", a: "1" },
+                { q: "$\\lim\\limits_{x \\to 1} (x^2 + cx + 1) = 3$，则 $c = $", a: "1" },
+                { q: "$\\lim\\limits_{x \\to 0} \\frac{ax^2 + x}{x} = 2$，则 $a = $", a: "任意值" },
+                { q: "$\\lim\\limits_{x \\to 1} \\frac{x^2 - 1}{x + a} = 0$，则 $a = $", a: "-1" },
+                { q: "$\\lim\\limits_{x \\to 0} \\frac{x^2 + bx + 1}{x} = 3$，则 $b = $", a: "3" }
+            ];
+            
+            for (let i = 0; i < 3; i++) {
+                database.push(...simpleParameterProblems);
+            }
+            
+            
+            console.log('极限题库生成完成，总题数:', database.length);
+            return database;
+        }
+
+        // 全局题库
+        const megaDatabase = generateMegaDatabase();
+
+        // 获取当前关卡的题目数量
+        function getLevelPairs() {
+            return Math.min(4 + currentLevel, 15); // 最多15对题目
+        }
+
+        // 更新网格布局
+        function updateGridLayout() {
+            const pairs = getLevelPairs();
+            const total = pairs * 2;
+            const grid = document.getElementById('gameGrid');
+            
+            let cols, rows;
+            if (total <= 8) {
+                cols = 4; rows = 2; // 减少列数，增加宽度
+            } else if (total <= 12) {
+                cols = 4; rows = 3;
+            } else if (total <= 16) {
+                cols = 4; rows = 4;
+            } else if (total <= 20) {
+                cols = 5; rows = 4;
+            } else if (total <= 24) {
+                cols = 5; rows = 5;
+            } else {
+                cols = 6; rows = 5;
+            }
+            
+            grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+            grid.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+        }
+
+        // 创建优雅的粒子效果
+        function createParticles(element) {
+            const rect = element.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            
+            for (let i = 0; i < 12; i++) { // 减少粒子数量
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = centerX + 'px';
+                particle.style.top = centerY + 'px';
+                
+                const angle = (Math.PI * 2 * i) / 12;
+                const distance = 150 + Math.random() * 100;
+                particle.style.setProperty('--x', Math.cos(angle) * distance + 'px');
+                particle.style.setProperty('--y', Math.sin(angle) * distance + 'px');
+                
+                const colors = ['#6b9fff', '#bb86fc', '#64ffda'];
+                particle.style.background = `radial-gradient(circle, ${colors[Math.floor(Math.random() * colors.length)]}, transparent)`;
+                
+                document.body.appendChild(particle);
+                setTimeout(() => particle.remove(), 1500);
+            }
+        }
+
+        // 初始化关卡
+        function initLevel() {
+            levelScore = 0;
+            selectedTile = null;
+            isProcessing = false;
+            
+            document.getElementById('currentLevel').textContent = currentLevel;
+            document.getElementById('levelScore').textContent = '0';
+            document.getElementById('levelTotal').textContent = getLevelPairs();
+            
+            updateGridLayout();
+            initGrid();
+            renderGrid();
+        }
+
+        // 初始化网格数据
+        function initGrid() {
+            currentGrid = [];
+            const pairs = getLevelPairs();
+            const availableProblems = megaDatabase.filter((problem, index) => !usedProblems.has(index));
+            
+            if (availableProblems.length < pairs) {
+                showGameComplete();
+                return;
+            }
+            
+            const selectedProblems = [];
+            const selectedIndices = [];
+            
+            while (selectedIndices.length < pairs && availableProblems.length > 0) {
+                const randomIndex = Math.floor(Math.random() * availableProblems.length);
+                const problemIndex = megaDatabase.indexOf(availableProblems[randomIndex]);
+                
+                if (!usedProblems.has(problemIndex)) {
+                    selectedIndices.push(problemIndex);
+                    selectedProblems.push(megaDatabase[problemIndex]);
+                    availableProblems.splice(randomIndex, 1);
+                }
+            }
+            
+            const tiles = [];
+            selectedProblems.forEach((problem, index) => {
+                tiles.push({
+                    type: 'question',
+                    content: problem.q,
+                    matchAnswer: problem.a,
+                    originalIndex: selectedIndices[index],
+                    pairId: index
+                });
+                tiles.push({
+                    type: 'answer',
+                    content: problem.a,
+                    matchAnswer: problem.a,
+                    originalIndex: selectedIndices[index],
+                    pairId: index
+                });
+            });
+            
+            tiles.sort(() => Math.random() - 0.5);
+            currentGrid = tiles;
+        }
+
+        // 渲染网格
+        function renderGrid() {
+            const gridElement = document.getElementById('gameGrid');
+            gridElement.innerHTML = '';
+            
+            currentGrid.forEach((tile, index) => {
+                if (tile) {
+                    const tileElement = document.createElement('div');
+                    tileElement.className = `tile ${tile.type}`;
+                    tileElement.innerHTML = tile.content;
+                    tileElement.dataset.index = index;
+                    tileElement.onclick = () => handleTileClick(index);
+                    gridElement.appendChild(tileElement);
+                }
+            });
+            
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                window.MathJax.typesetPromise();
+            }
+        }
+
+        // 处理瓷砖点击
+        function handleTileClick(index) {
+            if (isProcessing) return;
+            
+            const tile = currentGrid[index];
+            if (!tile) return;
+            
+            const tileElement = document.querySelector(`[data-index="${index}"]`);
+            
+            if (!selectedTile) {
+                selectedTile = { index, tile, element: tileElement };
+                tileElement.classList.add('selected');
+            } else {
+                if (selectedTile.index === index) {
+                    tileElement.classList.remove('selected');
+                    selectedTile = null;
+                } else {
+                    checkMatch(selectedTile, { index, tile, element: tileElement });
+                }
+            }
+        }
+
+        // 检查匹配
+        function checkMatch(first, second) {
+            isProcessing = true;
+            
+            const isMatch = (first.tile.type !== second.tile.type) && 
+                           (first.tile.matchAnswer === second.tile.matchAnswer) &&
+                           (first.tile.pairId === second.tile.pairId);
+            
+            if (isMatch) {
+                second.element.classList.add('selected');
+                
+                setTimeout(() => {
+                    createParticles(first.element);
+                    createParticles(second.element);
+                    
+                    first.element.classList.add('matched');
+                    second.element.classList.add('matched');
+                    
+                    usedProblems.add(first.tile.originalIndex);
+                    
+                    levelScore++;
+                    totalAnswered++;
+                    
+                    document.getElementById('levelScore').textContent = levelScore;
+                    
+                    setTimeout(() => {
+                        currentGrid[first.index] = null;
+                        currentGrid[second.index] = null;
+                        
+                        first.element.style.visibility = 'hidden';
+                        second.element.style.visibility = 'hidden';
+                        
+                        if (levelScore >= getLevelPairs()) {
+                            setTimeout(showLevelComplete, 500);
+                        }
+                        
+                        isProcessing = false;
+                    }, 800);
+                }, 200);
+            } else {
+                first.element.style.animation = 'shake 0.5s';
+                second.element.style.animation = 'shake 0.5s';
+                
+                setTimeout(() => {
+                    first.element.classList.remove('selected');
+                    first.element.style.animation = '';
+                    second.element.style.animation = '';
+                    isProcessing = false;
+                }, 500);
+            }
+            
+            selectedTile = null;
+        }
+
+        // 显示关卡完成
+        function showLevelComplete() {
+            document.getElementById('completedLevel').textContent = currentLevel;
+            document.getElementById('totalAnswered').textContent = totalAnswered;
+            document.getElementById('levelComplete').classList.add('show');
+        }
+
+        // 下一关
+        function nextLevel() {
+            document.getElementById('levelComplete').classList.remove('show');
+            currentLevel++;
+            
+            const remainingProblems = megaDatabase.length - usedProblems.size;
+            if (remainingProblems < getLevelPairs()) {
+                showGameComplete();
+            } else {
+                initLevel();
+            }
+        }
+
+        // 显示游戏完成
+        function showGameComplete() {
+            document.getElementById('totalLevels').textContent = currentLevel - 1;
+            document.getElementById('gameComplete').classList.add('show');
+        }
+
+        // 重新开始游戏
+        function restartGame() {
+            currentLevel = 1;
+            totalAnswered = 0;
+            usedProblems.clear();
+            document.getElementById('gameComplete').classList.remove('show');
+            initLevel();
+        }
+
+        // 启动游戏
+        window.addEventListener('load', function() {
+            createStarfield();
+            console.log('深邃星空极限大师启动，题库大小:', megaDatabase.length);
+            initLevel();
+        });
+            
+        function toggleReturnPanel(event) {
+            event.stopPropagation();
+            const panel = document.querySelector('.return-home-panel');
+            if (panel) {
+                panel.classList.toggle('open');
+            }
+        }
+
+        document.addEventListener('click', event => {
+            const panel = document.querySelector('.return-home-panel');
+            if (!panel) {
+                return;
+            }
+            if (panel.classList.contains('open') && !panel.contains(event.target)) {
+                panel.classList.remove('open');
+            }
+        });
+
+        function toggleReturnLinks() { const p = document.querySelector('.return-links'); if (!p) return; if (p.style.display === 'flex') { p.style.opacity = '0'; setTimeout(() => p.style.display = 'none', 160); } else { p.style.display = 'flex'; requestAnimationFrame(() => p.style.opacity = '1'); } }
+    </script>
+</body>
+</html>

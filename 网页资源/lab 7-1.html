@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab 7.1 可分离变量与齐次方程求解实验室</title>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            startup: {
+                pageReady: () => {
+                    return MathJax.startup.defaultPageReady().then(() => {
+                        if (typeof window.scheduleMathRender === 'function') {
+                            window.scheduleMathRender();
+                        }
+                        console.log('MathJax加载完成');
+                    });
+                }
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+            }
+        };
+    </script>
+    <script defer src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js"></script>
+    <script defer src="../common-assets/js/lab-math-enhancer.js"></script>
+    <style>
+        :root {
+            --h1-size: 22px;
+            --h2-size: 20px;
+            --h3-size: 18px;
+            --btn-size: 16px;
+            --formula-size: 20px;
+            --text-size: 16px;
+            --primary: #4f46e5;
+            --primary-light: #6366f1;
+            --primary-dark: #3730a3;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --light: #ffffff;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-400: #9ca3af;
+            --gray-600: #4b5563;
+            --gray-800: #1f2937;
+            --border: #e5e7eb;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        *::-webkit-scrollbar {
+            width: 0;
+            background: transparent;
+        }
+
+        * {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
+            font-size: var(--text-size);
+            line-height: 1.5;
+            background: var(--gray-50);
+            color: var(--gray-800);
+        }
+
+        .return-home-panel {
+            position: fixed;
+            top: 12px;
+            right: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+            z-index: 40;
+        }
+
+        .return-toggle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.95), rgba(99, 102, 241, 0.9));
+            color: #ffffff;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 10px 18px rgba(79, 70, 229, 0.28);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .return-toggle:focus-visible {
+            outline: 2px solid rgba(129, 140, 248, 0.6);
+            outline-offset: 3px;
+        }
+
+        .return-toggle:hover {
+            transform: translateY(-1px) scale(1.03);
+            box-shadow: 0 14px 26px rgba(79, 70, 229, 0.35);
+        }
+
+        .return-links {
+            display: none;
+            flex-direction: column;
+            gap: 6px;
+            padding: 10px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(79, 70, 229, 0.15);
+            box-shadow: 0 16px 30px rgba(15, 23, 42, 0.18);
+            backdrop-filter: blur(6px);
+        }
+
+        .return-home-panel.open .return-links {
+            display: flex;
+        }
+
+        .return-link {
+            padding: 6px 12px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 14px;
+            color: var(--primary);
+            background: rgba(79, 70, 229, 0.12);
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+
+        .return-link.return-main {
+            color: var(--success);
+            background: rgba(16, 185, 129, 0.12);
+        }
+
+        .return-link:hover {
+            background: rgba(79, 70, 229, 0.2);
+            color: var(--primary-dark);
+        }
+
+        .return-link.return-main:hover {
+            background: rgba(16, 185, 129, 0.22);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            height: 100vh;
+            max-height: 700px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            background: var(--light);
+            border-radius: 12px;
+            box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(90deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: var(--light);
+            padding: 10px 24px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: var(--h1-size);
+            font-weight: 600;
+        }
+
+        .main {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 120px;
+            background: var(--gray-50);
+            border-right: 1px solid var(--border);
+            padding: 12px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .nav-btn {
+            width: 100%;
+            padding: 8px;
+            border: none;
+            border-radius: 6px;
+            background: transparent;
+            color: var(--gray-600);
+            text-align: left;
+            font-size: var(--text-size);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .nav-btn:hover {
+            background: var(--gray-100);
+        }
+
+        .nav-btn.active {
+            background: var(--primary);
+            color: var(--light);
+        }
+
+        .content {
+            flex: 1;
+            display: none;
+            padding: 18px;
+            overflow-y: auto;
+        }
+
+        .content.active {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 20px;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow-y: auto;
+        }
+
+        .card {
+            background: var(--light);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+        }
+
+        .card h3 {
+            font-size: var(--h3-size);
+            color: var(--primary);
+            margin-bottom: 12px;
+        }
+
+        .input-group {
+            margin-bottom: 12px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: var(--gray-600);
+        }
+
+        .input-group select,
+        .input-group input {
+            width: 100%;
+            padding: 8px 10px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            font-size: var(--text-size);
+            background: var(--gray-50);
+        }
+
+        .input-group input:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: var(--light);
+        }
+
+        .btn,
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 16px;
+            font-size: var(--btn-size);
+            border: none;
+            border-radius: 6px;
+            background: var(--primary);
+            color: var(--light);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            gap: 6px;
+        }
+
+        .btn.secondary {
+            background: var(--gray-200);
+            color: var(--gray-600);
+        }
+
+        .btn:hover,
+        .action-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn.secondary:hover {
+            background: var(--gray-400);
+            color: var(--light);
+        }
+
+        .info-box {
+            background: var(--gray-50);
+            border-left: 3px solid var(--primary);
+            padding: 12px;
+            border-radius: 6px;
+            font-size: var(--text-size);
+            line-height: 1.6;
+        }
+
+        .formula-box {
+            background: #eef2ff;
+            border-radius: 6px;
+            padding: 10px;
+            text-align: center;
+            font-size: var(--formula-size);
+            border: 1px solid rgba(79, 70, 229, 0.2);
+        }
+
+        .steps {
+            background: #fff7ed;
+            border-radius: 6px;
+            padding: 12px;
+            border-left: 3px solid var(--warning);
+            font-size: var(--text-size);
+            line-height: 1.7;
+        }
+
+        .drag-area {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .drag-source,
+        .drop-targets {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .drag-item {
+            padding: 6px 10px;
+            background: var(--gray-100);
+            border-radius: 6px;
+            border: 1px dashed var(--primary);
+            cursor: grab;
+            user-select: none;
+        }
+
+        .drop-zone {
+            flex: 1;
+            min-height: 70px;
+            border: 2px dashed var(--gray-200);
+            border-radius: 8px;
+            padding: 8px;
+            background: #fafafa;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .drop-zone.valid {
+            border-color: var(--success);
+            background: rgba(16, 185, 129, 0.08);
+        }
+
+        .drop-zone.invalid {
+            border-color: var(--danger);
+            background: rgba(239, 68, 68, 0.08);
+        }
+
+        .result-badge {
+            margin-top: 8px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            background: rgba(16, 185, 129, 0.12);
+            color: var(--success);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+        }
+
+        .result-badge.error {
+            background: rgba(239, 68, 68, 0.12);
+            color: var(--danger);
+        }
+
+        .animation-board {
+            position: relative;
+            height: 220px;
+            border: 1px dashed rgba(79, 70, 229, 0.4);
+            border-radius: 10px;
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.08), rgba(99, 102, 241, 0.08));
+            overflow: hidden;
+        }
+
+        .formula-token {
+            position: absolute;
+            padding: 8px 12px;
+            background: var(--light);
+            border-radius: 999px;
+            border: 1px solid rgba(79, 70, 229, 0.3);
+            box-shadow: 0 6px 16px rgba(79, 70, 229, 0.12);
+            transition: transform 0.8s ease, background 0.3s;
+        }
+
+        .formula-token.y-side.active {
+            transform: translate(-120px, -60px);
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .formula-token.x-side.active {
+            transform: translate(120px, 60px);
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .canvas-container {
+            border: 1px solid var(--gray-200);
+            border-radius: 10px;
+            background: var(--gray-50);
+            padding: 12px;
+            min-height: 240px;
+            position: relative;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            border-radius: 6px;
+            background: #ffffff;
+        }
+
+        .slider-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--gray-50);
+            padding: 10px;
+            border-radius: 6px;
+        }
+
+        .slider-group label {
+            min-width: 80px;
+            color: var(--gray-600);
+        }
+
+        .slider-group input[type="range"] {
+            flex: 1;
+        }
+
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 12px;
+            font-size: 14px;
+            color: var(--gray-600);
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 15px;
+        }
+
+        th, td {
+            border-bottom: 1px solid var(--border);
+            padding: 8px 10px;
+            text-align: center;
+        }
+
+        th {
+            background: var(--gray-100);
+            color: var(--gray-600);
+        }
+
+        .answer-check {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .answer-check input {
+            width: 120px;
+            text-align: center;
+        }
+
+        .answer-feedback {
+            margin-top: 8px;
+            font-size: 14px;
+            color: var(--success);
+        }
+
+        .answer-feedback.error {
+            color: var(--danger);
+        }
+
+        @media (max-width: 960px) {
+            .content.active {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                flex-direction: row;
+                overflow-x: auto;
+            }
+
+            .nav-btn {
+                flex: 1;
+                text-align: center;
+            }
+
+            .container {
+                height: auto;
+                max-height: none;
+            }
+        }
+    
+        /* 内联公式排版 */
+        .formula-box {
+            display: inline-flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+            gap: 8px;
+            margin: 4px 12px 4px 0;
+            width: auto;
+            max-width: 100%;
+            text-align: left;
+        }
+
+        .formula-box::before {
+            content: attr(data-prefix);
+            font-weight: 600;
+            color: var(--primary, #4f46e5);
+            margin-right: 6px;
+        }
+
+        .formula-box[data-prefix=""]::before,
+        .formula-box:not([data-prefix])::before {
+            content: none;
+        }
+
+        .formula-box mjx-container {
+            margin: 0;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="return-home-panel">
+        <button class="return-toggle" type="button" aria-label="打开返回导航" onclick="toggleReturnPanel(event)"><i class="fa-solid fa-house"></i></button>
+        <div class="return-links">
+            <a class="return-link return-sub" href="index.html"><i class="fa-solid fa-arrow-left"></i> 返回目录</a>
+            <a class="return-link return-main" href="../index.html"><i class="fa-solid fa-house"></i> 返回主站</a>
+        </div>
+    </div>
+    <div class="container">
+        <header class="header">
+            <h1>Lab 7.1｜可分离变量与齐次方程求解实验室</h1>
+        </header>
+        <div class="main">
+            <nav class="sidebar">
+                <button class="nav-btn active"  data-panel="separable"onclick="switchPanel(event, 'separable')">可分离变量方程</button>
+                <button class="nav-btn"  data-panel="homogeneous"onclick="switchPanel(event, 'homogeneous')">齐次方程</button>
+            </nav>
+            <div class="content active" id="separable">
+                <div class="column">
+                    <div class="card">
+                        <h3>方程类型识别器</h3>
+                        <div class="input-group">
+                            <label>选择待分析的微分方程</label>
+                            <select id="sepEquation" onchange="updateSeparableInfo()">
+                                <option value="xy/(1+x^2)">y' = \frac{x y}{1+x^2}</option>
+                                <option value="(x+1)(y^2+1)">y' = (x+1)(y^2+1)</option>
+                                <option value="(x^2-1)/(2y)">y' = \frac{x^2-1}{2y}</option>
+                            </select>
+                        </div>
+                        <div class="info-box" id="sepInfo">这是可分离变量方程：将所有含$y$的项放左侧，含$x$的项放右侧即可。</div>
+                        <p class="formula-box" id="sepFormula" data-prefix="公式：">$\int \frac{1}{y}\,dy = \int \frac{x}{1+x^2}\,dx$</p>
+                    </div>
+                    <div class="card">
+                        <h3>变量分离拖拽练习</h3>
+                        <div class="info-box">拖动每个表达式，将含$y$的项放到左侧，含$x$的项放到右侧。</div>
+                        <div class="drag-area">
+                            <div class="drag-source" id="dragSource"></div>
+                            <div class="drop-targets">
+                                <div class="drop-zone" id="leftZone"><strong>左侧 (y-项)</strong></div>
+                                <div class="drop-zone" id="rightZone"><strong>右侧 (x-项)</strong></div>
+                            </div>
+                            <div>
+                                <button class="btn" onclick="checkDragResult()">检查结果</button>
+                                <button class="btn secondary" onclick="resetDrag()">重置</button>
+                            </div>
+                            <div id="dragFeedback" class="result-badge" style="display:none;">做得好！变量已成功分离。</div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3>积分步骤填空</h3>
+                        <div class="steps">以 $y' = \frac{x y}{1+x^2}$ 为例，变量分离后得到 $\frac{1}{y}dy = \frac{x}{1+x^2}dx$。</div>
+                        <div class="answer-check">
+                            <input type="text" id="ans1" placeholder="∫ (1/y) dy = ?">
+                            <input type="text" id="ans2" placeholder="∫ x/(1+x^2) dx = ?">
+                        </div>
+                        <div>
+                            <button class="btn" onclick="checkIntegrals()">核对答案</button>
+                        </div>
+                        <div id="answerFeedback" class="answer-feedback"></div>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="card">
+                        <h3>公式移动动画</h3>
+                        <div class="animation-board">
+                            <div class="formula-token y-side" id="tokenY" style="top:120px; left:160px;">$\frac{1}{y}\,dy$</div>
+                            <div class="formula-token x-side" id="tokenX" style="top:60px; left:220px;">$\frac{x}{1+x^2}\,dx$</div>
+                            <div class="formula-token" style="top:90px; left:200px; background: rgba(79,70,229,0.12);">$y' = \frac{x y}{1+x^2}$</div>
+                        </div>
+                        <div class="status-bar">
+                            <span>点击按钮观看含$y$的项向左、含$x$的项向右移动。</span>
+                            <button class="action-btn" onclick="playSeparation()">开始动画</button>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3>通解曲线探索</h3>
+                        <div class="slider-group">
+                            <label>常数 C</label>
+                            <input type="range" id="constSlider" min="-3" max="3" step="0.5" value="1" oninput="updateSeparableCurve()">
+                            <span id="constValue">1</span>
+                        </div>
+                        <div class="canvas-container">
+                            <canvas id="separableCanvas"></canvas>
+                        </div>
+                        <div class="info-box">解为 $y = C\,e^{\frac{x^2}{2}}$。调节常数可以观察到不同初始条件下的解曲线走势。</div>
+                    </div>
+                </div>
+            </div>
+            <div class="content" id="homogeneous">
+                <div class="column">
+                    <div class="card">
+                        <h3>齐次方程判别</h3>
+                        <div class="input-group">
+                            <label>选择微分方程</label>
+                            <select id="homEquation" onchange="updateHomInfo()">
+                                <option value="(x+y)/x">y' = \frac{x+y}{x}</option>
+                                <option value="(x^2+y^2)/(xy)">y' = \frac{x^2+y^2}{xy}</option>
+                                <option value="(y-x)/(y+x)">y' = \frac{y-x}{y+x}</option>
+                            </select>
+                        </div>
+                        <div class="info-box" id="homInfo">将方程写成 $y' = F(\frac{y}{x})$ 即可判断其齐次性，常用替换是 $y = vx$。</div>
+                        <p class="formula-box" id="homFormula" data-prefix="公式：">$y = vx \Rightarrow y' = v + x\frac{dv}{dx}$</p>
+                    </div>
+                    <div class="card">
+                        <h3>$v$-方程构建器</h3>
+                        <div class="steps" id="vSteps">对于 $y' = \frac{x+y}{x}$，代入 $y = vx$ 得 $v + x\frac{dv}{dx} = 1 + v$，进一步整理得到 $x\frac{dv}{dx} = 1$。</div>
+                        <div class="answer-check">
+                            <input type="text" id="vAns1" placeholder="dv/dx = ?">
+                            <input type="text" id="vAns2" placeholder="积分结果 v = ?">
+                        </div>
+                        <button class="btn" onclick="checkVSteps()">检查替换</button>
+                        <div id="vFeedback" class="answer-feedback"></div>
+                    </div>
+                    <div class="card">
+                        <h3>关键概念速记</h3>
+                        <ul class="steps" style="list-style: none;">
+                            <li>① 利用变量替换 $y = vx$ 将齐次方程转化为可分离变量方程。</li>
+                            <li>② 解出 $v(x)$ 后再代回 $y = vx$。</li>
+                            <li>③ 常见结论：$\int \frac{dv}{v} = \ln|v| + C$。</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="card">
+                        <h3>等值线可视化</h3>
+                        <div class="canvas-container">
+                            <canvas id="homCanvas"></canvas>
+                        </div>
+                        <div class="slider-group">
+                            <label>选择$v$初值</label>
+                            <input type="range" id="vSlider" min="-2" max="2" step="0.5" value="0.5" oninput="updateHomCurve()">
+                            <span id="vValue">0.5</span>
+                        </div>
+                        <div class="info-box">示例方程 $y' = \frac{x+y}{x}$ 的解为 $y = x(\ln|x| + C)$。曲线在对数尺度上缓慢抬升。</div>
+                    </div>
+                    <div class="card">
+                        <h3>常见齐次模型表</h3>
+                        <div class="table-wrapper">
+                            <table>
+                                <thead>
+                                    <tr><th>方程形式</th><th>替换提示</th><th>解的特点</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td>$y' = F(\frac{y}{x})$</td><td>$y = vx$</td><td>转为$\frac{dv}{dx}$可分离</td></tr>
+                                    <tr><td>$y' = F(\frac{ax+by}{cx+dy})$</td><td>线性变换降阶</td><td>配合平移更方便</td></tr>
+                                    <tr><td>$y' = \frac{y}{x} + G(\frac{y}{x})$</td><td>$y = vx$</td><td>对数项常见</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        let mathObserver = null;
+        let mathRenderQueued = false;
+
+        function startMathObserver() {
+            if (typeof MutationObserver === 'undefined' || !document.body) {
+                return;
+            }
+            if (mathObserver) {
+                mathObserver.disconnect();
+            }
+            mathObserver = new MutationObserver(mutations => {
+                for (const mutation of mutations) {
+                    if (mutation.type === 'childList' || mutation.type === 'characterData') {
+                        scheduleMathRender();
+                        break;
+                    }
+                }
+            });
+            mathObserver.observe(document.body, { childList: true, subtree: true, characterData: true });
+        }
+
+        function scheduleMathRender() {
+            if (mathRenderQueued) {
+                return;
+            }
+            mathRenderQueued = true;
+            requestAnimationFrame(() => {
+                mathRenderQueued = false;
+                if (window.MathJax && MathJax.typesetPromise) {
+                    if (mathObserver) {
+                        mathObserver.disconnect();
+                    }
+                    MathJax.typesetPromise()
+                        .catch(err => console.log('渲染错误:', err))
+                        .finally(() => {
+                            startMathObserver();
+                        });
+                } else {
+                    setTimeout(scheduleMathRender, 160);
+                }
+            });
+        }
+
+        window.scheduleMathRender = scheduleMathRender;
+
+        function renderMath() {
+            scheduleMathRender();
+        }
+
+        function ensureMathReady() {
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', () => {
+                    startMathObserver();
+                    scheduleMathRender();
+                });
+            } else {
+                startMathObserver();
+                scheduleMathRender();
+            }
+        }
+
+        ensureMathReady();
+
+        function toggleReturnPanel(event) {
+            event.stopPropagation();
+            const panel = document.querySelector('.return-home-panel');
+            if (panel) {
+                panel.classList.toggle('open');
+            }
+        }
+
+        document.addEventListener('click', event => {
+            const panel = document.querySelector('.return-home-panel');
+            if (!panel) {
+                return;
+            }
+            if (panel.classList.contains('open') && !panel.contains(event.target)) {
+                panel.classList.remove('open');
+            }
+        });
+
+        window.addEventListener('pageshow', () => {
+            scheduleMathRender();
+        });
+
+        function switchPanel(evt, panel) {
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.content').forEach(section => section.classList.remove('active'));
+            evt.target.classList.add('active');
+            document.getElementById(panel).classList.add('active');
+            setTimeout(() => {
+                renderMath();
+                if (panel === 'separable') {
+                    updateSeparableCurve();
+                } else if (panel === 'homogeneous') {
+                    updateHomCurve();
+                }
+            }, 60);
+        }
+
+                function updateSeparableInfo() {
+
+                    const select = document.getElementById('sepEquation');
+
+                    const value = select.value;
+
+                    const info = document.getElementById('sepInfo');
+
+                    const formula = document.getElementById('sepFormula');
+
+                    let text = '';
+
+                    let formulaText = '';
+
+                    if (value === 'xy/(1+x^2)') {
+
+                        text = '这是可分离变量方程：$\\frac{1}{y}dy = \\frac{x}{1+x^2}dx$，积分后得到 $\\ln|y| = \\frac{x^2}{2} + C$。';
+
+                        formulaText = '$\\int \\frac{1}{y}\\,dy = \\int \\frac{x}{1+x^2}\\,dx$';
+            } else if (value === '(x+1)(y^2+1)') {
+                text = '先整理为 $\\frac{1}{y^2+1}dy = (x+1)dx$，左侧是反正切积分，右侧是多项式积分。';
+                formulaText = '$\\int \\frac{1}{y^2+1}\\,dy = \\int (x+1)\\,dx$';
+            } else {
+                text = '写成 $2y\\,dy = (x^2-1)dx$，积分后得到 $y^2 = \\frac{x^3}{3} - x + C$。';
+                formulaText = '$\int 2y\,dy = \int (x^2-1)\,dx$';
+            }
+            info.innerHTML = text;
+            formula.innerHTML = formulaText;
+            renderMath();
+        }
+
+        const dragItemsConfig = [
+            { text: '\\frac{1}{y}\\,dy', target: 'left' },
+            { text: '\\frac{x}{1+x^2}\\,dx', target: 'right' },
+            { text: '\\frac{1}{y^2+1}\\,dy', target: 'left' },
+            { text: '(x+1)\\,dx', target: 'right' }
+        ];
+
+        function createDragItem(text, target) {
+            const span = document.createElement('span');
+            span.className = 'drag-item';
+            span.dataset.tex = text;
+            span.innerHTML = `\\(${text}\\)`;
+            span.dataset.target = target;
+            span.draggable = true;
+            span.addEventListener('dragstart', dragStart);
+            return span;
+        }
+
+        function dragStart(event) {
+            const tex = event.target.dataset.tex || event.target.textContent;
+            event.dataTransfer.setData('text/plain', tex);
+            event.dataTransfer.setData('target', event.target.dataset.target);
+        }
+
+        function allowDrop(event) {
+            event.preventDefault();
+        }
+
+        document.getElementById('leftZone').addEventListener('dragover', allowDrop);
+        document.getElementById('rightZone').addEventListener('dragover', allowDrop);
+        document.getElementById('leftZone').addEventListener('drop', dropItem);
+        document.getElementById('rightZone').addEventListener('drop', dropItem);
+
+        function dropItem(event) {
+            event.preventDefault();
+            const targetType = event.dataTransfer.getData('target');
+            const text = event.dataTransfer.getData('text/plain');
+            const zone = event.currentTarget;
+            const newToken = createDragItem(text, targetType);
+            zone.appendChild(newToken);
+            renderMath();
+        }
+
+        function checkDragResult() {
+            const leftZone = document.getElementById('leftZone');
+            const rightZone = document.getElementById('rightZone');
+            const feedback = document.getElementById('dragFeedback');
+            let correct = true;
+            leftZone.querySelectorAll('.drag-item').forEach(item => {
+                if (item.dataset.target !== 'left') correct = false;
+            });
+            rightZone.querySelectorAll('.drag-item').forEach(item => {
+                if (item.dataset.target !== 'right') correct = false;
+            });
+            if (leftZone.querySelectorAll('.drag-item').length < 2 || rightZone.querySelectorAll('.drag-item').length < 2) {
+                correct = false;
+            }
+            feedback.style.display = 'inline-flex';
+            if (correct) {
+                feedback.textContent = '做得好！变量已成功分离。';
+                feedback.classList.remove('error');
+            } else {
+                feedback.textContent = '还差一点点，把含y的项放左侧，含x的项放右侧哦。';
+                feedback.classList.add('error');
+            }
+            renderMath();
+        }
+
+        function resetDrag() {
+            document.getElementById('leftZone').innerHTML = '<strong>左侧 (y-项)</strong>';
+            document.getElementById('rightZone').innerHTML = '<strong>右侧 (x-项)</strong>';
+            const source = document.getElementById('dragSource');
+            source.innerHTML = '';
+            dragItemsConfig.forEach(item => {
+                source.appendChild(createDragItem(item.text, item.target));
+            });
+            document.getElementById('dragFeedback').style.display = 'none';
+            renderMath();
+        }
+
+        function normalizeAnswer(value) {
+            return value.replace(/\s+/g, '').toLowerCase();
+        }
+
+        function checkIntegrals() {
+            const ans1 = normalizeAnswer(document.getElementById('ans1').value);
+            const ans2 = normalizeAnswer(document.getElementById('ans2').value);
+            const feedback = document.getElementById('answerFeedback');
+            const correct1 = ['ln|y|', 'ln|y|+c'];
+            const correct2 = ['0.5ln(1+x^2)', '0.5ln(1+x^2)+c', '0.5*ln(1+x^2)', '0.5*ln(1+x^2)+c', '0.5ln(1+x^2)+c'];
+            const isAns1 = correct1.some(v => ans1 === v);
+            const isAns2 = correct2.some(v => ans2 === v);
+            if (isAns1 && isAns2) {
+                feedback.innerHTML = '积分正确：$\\ln|y| = \\frac{1}{2}\\ln(1+x^2) + C$。';
+                feedback.classList.remove('error');
+            } else {
+                feedback.innerHTML = '提示：左侧是对数积分，右侧可用换元 $u = 1+x^2$。';
+                feedback.classList.add('error');
+            }
+            renderMath();
+        }
+
+        function playSeparation() {
+            document.getElementById('tokenY').classList.toggle('active');
+            document.getElementById('tokenX').classList.toggle('active');
+            setTimeout(renderMath, 120);
+        }
+
+        function resizeCanvas(canvas) {
+            const container = canvas.parentElement;
+            const width = container.clientWidth - 20;
+            const height = 240;
+            canvas.style.width = width + 'px';
+            canvas.style.height = height + 'px';
+            const ratio = window.devicePixelRatio || 1;
+            canvas.width = width * ratio;
+            canvas.height = height * ratio;
+            const ctx = canvas.getContext('2d');
+            ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+            return ctx;
+        }
+
+        function drawAxis(ctx, width, height) {
+            ctx.clearRect(0, 0, width, height);
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, width, height);
+            ctx.strokeStyle = '#374151';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(40, height - 40);
+            ctx.lineTo(width - 20, height - 40);
+            ctx.moveTo(40, 20);
+            ctx.lineTo(40, height - 40);
+            ctx.stroke();
+            ctx.strokeStyle = '#d1d5db';
+            ctx.lineWidth = 1;
+            for (let i = 1; i <= 6; i++) {
+                const x = 40 + i * 60;
+                ctx.beginPath();
+                ctx.moveTo(x, 20);
+                ctx.lineTo(x, height - 40);
+                ctx.stroke();
+            }
+            for (let j = 1; j <= 4; j++) {
+                const y = height - 40 - j * 40;
+                ctx.beginPath();
+                ctx.moveTo(40, y);
+                ctx.lineTo(width - 20, y);
+                ctx.stroke();
+            }
+            ctx.fillStyle = '#4b5563';
+            ctx.font = '12px sans-serif';
+            ctx.fillText('x', width - 25, height - 44);
+            ctx.fillText('y', 26, 28);
+        }
+
+        function updateSeparableCurve() {
+            const slider = document.getElementById('constSlider');
+            const C = parseFloat(slider.value);
+            document.getElementById('constValue').textContent = C;
+            const canvas = document.getElementById('separableCanvas');
+            const ctx = resizeCanvas(canvas);
+            const width = canvas.clientWidth;
+            const height = canvas.clientHeight;
+            drawAxis(ctx, width, height);
+            ctx.strokeStyle = 'rgba(79,70,229,0.85)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            for (let x = -3; x <= 3; x += 0.05) {
+                const y = C * Math.exp(0.5 * x * x);
+                const canvasX = 40 + (x + 3) * ((width - 60) / 6);
+                const canvasY = (height - 40) - (Math.min(y, 8)) * 30;
+                if (x === -3) {
+                    ctx.moveTo(canvasX, canvasY);
+                } else {
+                    ctx.lineTo(canvasX, canvasY);
+                }
+            }
+            ctx.stroke();
+            ctx.fillStyle = '#ef4444';
+            ctx.beginPath();
+            const y0 = C * Math.exp(0);
+            const pointX = 40 + (3) * ((width - 60) / 6);
+            const pointY = (height - 40) - Math.min(y0, 8) * 30;
+            ctx.arc(pointX, pointY, 5, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function updateHomInfo() {
+            const value = document.getElementById('homEquation').value;
+            const info = document.getElementById('homInfo');
+            const formula = document.getElementById('homFormula');
+            const vSteps = document.getElementById('vSteps');
+            if (value === '(x+y)/x') {
+                info.innerHTML = '函数只依赖于 $\\frac{y}{x}$，令 $y = vx$ 后可化为 $v + x\\frac{dv}{dx} = 1 + v$。';
+                formula.innerHTML = "$y = vx \\Rightarrow y' = v + x\\frac{dv}{dx}$";
+                vSteps.innerHTML = "对于 $y' = \\frac{x+y}{x}$，代入 $y = vx$ 得 $v + x\\frac{dv}{dx} = 1 + v$，整理得 $x\\frac{dv}{dx} = 1$。";
+            } else if (value === '(x^2+y^2)/(xy)') {
+                info.innerHTML = "写成 $y' = \\frac{x}{y} + \\frac{y}{x}$。用 $y = vx$ 后得到 $v + x\\frac{dv}{dx} = \\frac{1}{v} + v$。";
+                formula.innerHTML = "$v + x\\frac{dv}{dx} = v + \\frac{1}{v}$";
+                vSteps.innerHTML = "整理得 $x\\frac{dv}{dx} = \\frac{1}{v}$，进一步化为 $v\\,dv = \\frac{dx}{x}$ 并积分。";
+            } else {
+                info.innerHTML = "将 $y' = \\frac{y-x}{y+x}$ 写成 $F(\\frac{y}{x})$ 形式，同样用 $y = vx$ 处理。";
+                formula.innerHTML = "$v + x\\frac{dv}{dx} = \\frac{v-1}{v+1}$";
+                vSteps.innerHTML = "整理后得到 $x\\frac{dv}{dx} = \\frac{v-1}{v+1} - v$，进一步分离变量求积分。";
+            }
+            renderMath();
+        }
+
+        function checkVSteps() {
+            const ans1 = normalizeAnswer(document.getElementById('vAns1').value);
+            const ans2 = normalizeAnswer(document.getElementById('vAns2').value);
+            const feedback = document.getElementById('vFeedback');
+            if (ans1.includes('1/x') && ans2.includes('ln')) {
+                feedback.innerHTML = '思路正确：$\\frac{dv}{dx} = \\frac{1}{x}$，积分得 $v = \\ln|x| + C$。记得代回 $y = vx$。';
+                feedback.classList.remove('error');
+            } else {
+                feedback.innerHTML = '提示：$x\\frac{dv}{dx} = 1$ ⇒ $\\frac{dv}{dx} = \\frac{1}{x}$。积分是对数函数。';
+                feedback.classList.add('error');
+            }
+            renderMath();
+        }
+
+        function updateHomCurve() {
+            const slider = document.getElementById('vSlider');
+            const C = parseFloat(slider.value);
+            document.getElementById('vValue').textContent = C;
+            const canvas = document.getElementById('homCanvas');
+            const ctx = resizeCanvas(canvas);
+            const width = canvas.clientWidth;
+            const height = canvas.clientHeight;
+            drawAxis(ctx, width, height);
+            ctx.strokeStyle = 'rgba(16,185,129,0.9)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            for (let x = 0.5; x <= 6; x += 0.02) {
+                const y = x * (Math.log(x) + C);
+                const canvasX = 40 + (x / 6) * (width - 60);
+                const canvasY = (height - 40) - (y * 25);
+                if (x === 0.5) {
+                    ctx.moveTo(canvasX, canvasY);
+                } else {
+                    ctx.lineTo(canvasX, canvasY);
+                }
+            }
+            ctx.stroke();
+        }
+
+        window.addEventListener('resize', () => {
+            updateSeparableCurve();
+            updateHomCurve();
+        });
+
+        updateSeparableInfo();
+        resetDrag();
+        updateSeparableCurve();
+        updateHomInfo();
+        updateHomCurve();
+    </script>
+</body>
+</html>

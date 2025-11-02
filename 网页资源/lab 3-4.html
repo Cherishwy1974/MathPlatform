@@ -1,0 +1,851 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>复合函数求导 - 正确版</title>
+    
+    <!-- MathJax配置 -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            }
+        };
+    </script>
+    <script src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js" defer></script>
+    
+    <style>
+        /* 用户要求：字号统一 */
+        :root {
+            --h1-size: 22px;      
+            --h2-size: 20px;      
+            --h3-size: 18px;      
+            --btn-size: 16px;     
+            --formula-size: 20px; 
+            --text-size: 16px;
+            
+            --primary: #4f46e5;
+            --primary-light: #6366f1;
+            --primary-dark: #3730a3;
+            --light: #ffffff;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-600: #4b5563;
+            --gray-800: #1f2937;
+            --border: #e5e7eb;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #06b6d4;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* 滚动条生效但不显示 */
+        *::-webkit-scrollbar {
+            width: 0;
+            background: transparent;
+        }
+        
+        * {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
+            font-size: var(--text-size);
+            line-height: 1.5;
+            background: var(--gray-50);
+            color: var(--gray-800);
+        }
+
+        /* 横向布局（宽是高的2倍），压缩高度 */
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            height: 100vh;
+            max-height: 700px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            background: var(--light);
+        }
+
+        .header {
+            background: var(--primary);
+            color: var(--light);
+            padding: 8px 20px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: var(--h2-size);
+            margin: 0;
+        }
+
+        .main {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* 侧边栏不动 */
+        .sidebar {
+            width: 120px;
+            background: var(--gray-50);
+            border-right: 1px solid var(--border);
+            padding: 10px 8px;
+        }
+
+        .nav-btn {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 4px;
+            background: transparent;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: var(--text-size);
+            color: var(--gray-600);
+            text-align: left;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover {
+            background: var(--gray-100);
+        }
+
+        .nav-btn.active {
+            background: var(--primary);
+            color: var(--light);
+        }
+
+        /* 最多左右两栏，必须有可视化 */
+        .content {
+            flex: 1;
+            display: none;
+            padding: 16px;
+            overflow-y: auto;
+        }
+
+        .content.active {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow-y: auto;
+        }
+
+        .card {
+            background: var(--light);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .card h3 {
+            font-size: var(--h3-size);
+            color: var(--primary);
+            margin-bottom: 12px;
+        }
+
+        /* 重点提示框 - 黄色醒目 */
+        .key-point {
+            background: #fef3c7;
+            border: 2px solid var(--warning);
+            padding: 12px;
+            border-radius: 6px;
+            margin: 12px 0;
+            text-align: center;
+            font-size: var(--formula-size);
+            font-weight: bold;
+        }
+
+        /* 简单步骤框 */
+        .simple-step {
+            background: var(--gray-50);
+            padding: 12px;
+            border-left: 4px solid var(--primary);
+            border-radius: 4px;
+            margin: 10px 0;
+            font-size: var(--text-size);
+        }
+
+        .step-num {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 24px;
+            margin-right: 8px;
+            font-weight: bold;
+        }
+
+        /* 生活例子框 - 绿色 */
+        .life-example {
+            background: #d1fae5;
+            border: 2px solid var(--success);
+            padding: 15px;
+            border-radius: 6px;
+            margin: 12px 0;
+        }
+
+        /* 错误提示框 - 红色 */
+        .error-box {
+            background: #fee2e2;
+            border: 2px solid var(--danger);
+            padding: 15px;
+            border-radius: 6px;
+            margin: 12px 0;
+        }
+
+        /* 公式框 - 蓝色 */
+        .formula-box {
+            background: #dbeafe;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid var(--primary);
+            margin: 12px 0;
+            text-align: center;
+            font-size: var(--formula-size);
+        }
+
+        /* 画布容器 */
+        .canvas-container {
+            border: 2px solid var(--primary);
+            border-radius: 6px;
+            background: white;
+            padding: 10px;
+            min-height: 250px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .canvas-container canvas {
+            display: block;
+            max-width: 100%;
+        }
+
+        /* 练习输入框 */
+        .practice-input {
+            padding: 8px;
+            border: 2px solid var(--gray-200);
+            border-radius: 4px;
+            font-size: var(--text-size);
+            width: 150px;
+            margin: 0 8px;
+        }
+
+        .check-btn {
+            padding: 8px 16px;
+            background: var(--success);
+            color: var(--light);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: var(--btn-size);
+            transition: all 0.2s;
+        }
+
+        .check-btn:hover {
+            background: #059669;
+        }
+
+        /* 反馈信息 */
+        .feedback {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .feedback.correct {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .feedback.wrong {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        /* 强调文字 */
+        .highlight {
+            color: var(--danger);
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .highlight-blue {
+            color: var(--primary);
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .main {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+                padding: 8px 16px;
+                display: flex;
+                flex-direction: row;
+                gap: 8px;
+                overflow-x: auto;
+            }
+
+            .nav-btn {
+                min-width: 90px;
+                text-align: center;
+                white-space: nowrap;
+            }
+
+            .content.active {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                max-height: none;
+                height: 100vh;
+            }
+        }
+
+        .return-home-panel { position: fixed; bottom: 12px; right: 12px; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; z-index: 40; }
+        .return-toggle { width: 40px; height: 40px; border-radius: 50%; border: none; background: linear-gradient(135deg, rgba(79,70,229,0.96), rgba(99,102,241,0.9)); color: #fff; font-size: 20px; cursor: pointer; box-shadow: 0 10px 18px rgba(79,70,229,0.28); transition: transform 0.2s, box-shadow 0.2s; }
+        .return-toggle:hover { transform: translateY(-1px) scale(1.03); box-shadow: 0 14px 26px rgba(79,70,229,0.35); }
+        .return-links { display: none; flex-direction: column; gap: 6px; padding: 10px; border-radius: 10px; background: rgba(255,255,255,0.96); border: 1px solid rgba(79,70,229,0.18); box-shadow: 0 10px 30px rgba(15,23,42,0.14); opacity: 0; transition: opacity 0.16s; }
+        .return-link { text-decoration: none; font-size: 15px; color: var(--primary-dark); padding: 6px 12px; border-radius: 8px; background: rgba(99,102,241,0.12); transition: background 0.2s; }
+        .return-link:hover { background: rgba(79,70,229,0.18); }
+    </style>
+
+</head>
+<body>
+    <div class="return-home-panel"><button class="return-toggle" onclick="toggleReturnLinks()"><i class="fa-solid fa-house"></i></button><div class="return-links"><a class="return-link" href="index.html"><i class="fa-solid fa-arrow-left"></i> 返回目录</a><a class="return-link" href="../index.html"><i class="fa-solid fa-house"></i> 返回主站</a></div></div>
+    <div class="container">
+        <header class="header">
+            <h1>复合函数求导 - 链式法则</h1>
+        </header>
+
+        <div class="main">
+            <!-- 侧边栏 -->
+            <nav class="sidebar">
+                <button class="nav-btn active" onclick="switchPanel('understand')">理解相乘</button>
+                <button class="nav-btn" onclick="switchPanel('visualize')">看图理解</button>
+                <button class="nav-btn" onclick="switchPanel('practice')">简单练习</button>
+                <button class="nav-btn" onclick="switchPanel('summary')">记住要点</button>
+            </nav>
+
+            <!-- 理解相乘页面 -->
+            <div class="content active" id="understand">
+                <div class="column">
+                    <div class="card">
+                        <h3>🤔 为什么是相乘？</h3>
+                        
+                        <div class="key-point">
+                            链式法则：导数要<span class="highlight">相乘</span>，不是相加！
+                        </div>
+
+                        <div class="life-example">
+                            <strong>🔍 放大镜的例子：</strong><br>
+                            第一个放大镜：放大 <strong>2倍</strong><br>
+                            第二个放大镜：放大 <strong>3倍</strong><br>
+                            两个叠加使用：放大 <strong>2 × 3 = 6倍</strong><br><br>
+                            <span class="highlight-blue">是相乘，不是相加！</span>
+                        </div>
+
+                        <div class="error-box">
+                            <strong>❌ 错误理解：</strong><br>
+                            不是像速度相加（60 + 2 = 62）<br>
+                            <strong>✅ 正确理解：</strong><br>
+                            是像放大倍数相乘（2 × 3 = 6）
+                        </div>
+
+                        <div class="formula-box">
+                            复合函数：$y = (2x + 1)^3$<br>
+                            内层变化率：2<br>
+                            外层变化率：$3u^2$<br>
+                            总变化率：$2 \times 3u^2 = 6(2x+1)^2$
+                        </div>
+                    </div>
+                </div>
+
+                <div class="column">
+                    <div class="card">
+                        <h3>⚙️ 齿轮传动原理</h3>
+                        
+                        <div class="canvas-container">
+                            <canvas id="gearCanvas" width="450" height="250"></canvas>
+                        </div>
+
+                        <div class="life-example">
+                            <strong>齿轮比喻：</strong><br>
+                            • 第一个齿轮：转1圈 → 第二个齿轮转2圈<br>
+                            • 第二个齿轮：转1圈 → 第三个齿轮转3圈<br>
+                            • 总效果：第一个转1圈 → 第三个转 <strong>2×3=6圈</strong><br><br>
+                            这就是为什么要<span class="highlight">相乘</span>！
+                        </div>
+
+                        <div class="simple-step">
+                            <strong>数学语言：</strong><br>
+                            $\frac{dy}{dx} = \frac{dy}{du} \times \frac{du}{dx}$<br>
+                            （y对x的变化率 = y对u的变化率 × u对x的变化率）
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 看图理解页面 -->
+            <div class="content" id="visualize">
+                <div class="column">
+                    <div class="card">
+                        <h3><i class="fa-solid fa-chart-bar"></i> 看斜率相乘</h3>
+                        
+                        <div class="key-point">
+                            导数 = 切线斜率<br>
+                            复合函数导数 = 两个斜率<span class="highlight">相乘</span>
+                        </div>
+
+                        <div class="simple-step">
+                            <span class="step-num">1</span>
+                            内层函数 $g(x) = 2x$<br>
+                            斜率（导数）= 2
+                        </div>
+                        
+                        <div class="simple-step">
+                            <span class="step-num">2</span>
+                            外层函数 $f(u) = u^2$<br>
+                            在 $u = 4$ 时，斜率 = 8
+                        </div>
+                        
+                        <div class="simple-step">
+                            <span class="step-num">3</span>
+                            复合函数 $f(g(x)) = (2x)^2$<br>
+                            总斜率 = <span class="highlight">2 × 8 = 16</span>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3><i class="fa-solid fa-lightbulb"></i> 直观理解</h3>
+                        
+                        <div class="life-example">
+                            <strong>想象爬山：</strong><br>
+                            • 山坡倾斜度 = 30度（外层）<br>
+                            • 你走的路是斜的 = 2倍陡（内层）<br>
+                            • 实际爬升 = 坡度 × 路径陡度<br><br>
+                            两个因素<span class="highlight-blue">相乘</span>决定最终的陡度！
+                        </div>
+                    </div>
+                </div>
+
+                <div class="column">
+                    <div class="card">
+                        <h3><i class="fa-solid fa-chart-line"></i> 三个函数对比</h3>
+                        
+                        <div class="canvas-container">
+                            <canvas id="slopeCanvas" width="450" height="400"></canvas>
+                        </div>
+
+                        <div class="formula-box">
+                            观察：第三个图的斜率 = 前两个斜率相乘
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 简单练习页面 -->
+            <div class="content" id="practice">
+                <div class="column">
+                    <div class="card">
+                        <h3>✏️ 最简单的练习</h3>
+                        
+                        <div class="formula-box">
+                            题目：求 $(3x)^2$ 的导数
+                        </div>
+
+                        <div class="simple-step">
+                            <span class="step-num">1</span>
+                            内层是什么？
+                            <input type="text" class="practice-input" id="answer1" placeholder="括号里的">
+                            <button class="check-btn" onclick="checkAnswer(1)">检查</button>
+                            <div id="feedback1"></div>
+                        </div>
+                        
+                        <div class="simple-step" id="step2" style="display: none;">
+                            <span class="step-num">2</span>
+                            $3x$ 的导数是？
+                            <input type="text" class="practice-input" id="answer2" placeholder="很简单">
+                            <button class="check-btn" onclick="checkAnswer(2)">检查</button>
+                            <div id="feedback2"></div>
+                        </div>
+                        
+                        <div class="simple-step" id="step3" style="display: none;">
+                            <span class="step-num">3</span>
+                            外层 $u^2$ 的导数是 $2u = 2(3x) = 6x$<br>
+                            最终答案：<span class="highlight-blue">外导 × 内导</span><br>
+                            $6x \times 3 = ?$
+                            <input type="text" class="practice-input" id="answer3" placeholder="相乘">
+                            <button class="check-btn" onclick="checkAnswer(3)">检查</button>
+                            <div id="feedback3"></div>
+                        </div>
+
+                        <div class="key-point" id="success" style="display: none; background: #d1fae5; border-color: var(--success);">
+                            🎉 太棒了！<br>
+                            记住：是 6x × 3 = 18x（相乘）<br>
+                            不是 6x + 3 = 6x + 3（相加）
+                        </div>
+                    </div>
+                </div>
+
+                <div class="column">
+                    <div class="card">
+                        <h3><i class="fa-solid fa-chart-bar"></i> 再练一个</h3>
+                        
+                        <div class="formula-box">
+                            试试：$\sin(2x)$ 的导数
+                        </div>
+
+                        <div class="simple-step">
+                            提示：<br>
+                            • 内层：$2x$，导数 = 2<br>
+                            • 外层：$\sin u$，导数 = $\cos u$<br>
+                            • 答案：$\cos(2x) \times 2 = ?$
+                        </div>
+
+                        <div class="life-example">
+                            <strong>记住口诀：</strong><br>
+                            "外导乘内导"<br>
+                            1. 外层函数求导<br>
+                            2. <span class="highlight">乘以</span>（不是加！）<br>
+                            3. 内层函数的导数
+                        </div>
+
+                        <div class="error-box">
+                            <strong>常见错误：</strong><br>
+                            ❌ $\sin(2x)$ 的导数 = $\cos(2x)$（忘了乘2）<br>
+                            ✅ $\sin(2x)$ 的导数 = $2\cos(2x)$（记得乘内导）
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 记住要点页面 -->
+            <div class="content" id="summary">
+                <div class="column">
+                    <div class="card">
+                        <h3><i class="fa-solid fa-file-pen"></i> 最重要的三句话</h3>
+                        
+                        <div class="key-point">
+                            <span class="highlight">1. 导数要相乘，不是相加</span>
+                        </div>
+
+                        <div class="key-point" style="background: #dbeafe; border-color: var(--primary);">
+                            <span class="highlight-blue">2. 外导 × 内导</span>
+                        </div>
+
+                        <div class="key-point" style="background: #d1fae5; border-color: var(--success);">
+                            3. 永远不要忘记内层导数
+                        </div>
+
+                        <div class="simple-step">
+                            <strong>四个最常见的：</strong><br>
+                            • $(ax)^n$ → $n(ax)^{n-1} \times a$<br>
+                            • $\sin(ax)$ → $\cos(ax) \times a$<br>
+                            • $e^{ax}$ → $e^{ax} \times a$<br>
+                            • $\ln(ax)$ → $\frac{1}{ax} \times a = \frac{1}{x}$
+                        </div>
+                    </div>
+                </div>
+
+                <div class="column">
+                    <div class="card">
+                        <h3>✅ 最后检验</h3>
+                        
+                        <div class="formula-box">
+                            自测：$(5x)^3$ 的导数是？
+                        </div>
+
+                        <div class="simple-step">
+                            <strong>思考过程：</strong><br>
+                            1. 内层：$5x$，导数 = 5<br>
+                            2. 外层：$u^3$，导数 = $3u^2 = 3(5x)^2$<br>
+                            3. 相乘：$3(5x)^2 \times 5 = 15(5x)^2 = 375x^2$
+                        </div>
+
+                        <div class="life-example">
+                            <strong>恭喜！如果你理解了这个，你就掌握了链式法则！</strong><br><br>
+                            记住：<br>
+                            🔍 像放大镜叠加 = 倍数相乘<br>
+                            ⚙️ 像齿轮传动 = 比例相乘<br>
+                            <i class="fa-solid fa-chart-bar"></i> 像斜率组合 = 斜率相乘<br><br>
+                            <span class="highlight">永远是相乘！</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 切换页面
+        function switchPanel(panel) {
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(panel).classList.add('active');
+            
+            // 延迟渲染
+            setTimeout(() => {
+                if (window.MathJax) {
+                    MathJax.typesetPromise();
+                }
+                
+                switch (panel) {
+                    case 'understand':
+                        drawGears();
+                        break;
+                    case 'visualize':
+                        drawSlopeComparison();
+                        break;
+                }
+            }, 100);
+        }
+
+        // 画齿轮示意图
+        function drawGears() {
+            const canvas = document.getElementById('gearCanvas');
+            if (!canvas) return;
+            
+            const ctx = canvas.getContext('2d');
+            const width = 450;
+            const height = 250;
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            // 画三个圆代表齿轮
+            ctx.strokeStyle = '#4f46e5';
+            ctx.lineWidth = 3;
+            
+            // 第一个齿轮
+            ctx.beginPath();
+            ctx.arc(100, height/2, 40, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.fillStyle = '#4f46e5';
+            ctx.font = '16px Arial';
+            ctx.fillText('×1', 90, height/2 + 5);
+            
+            // 箭头
+            ctx.strokeStyle = '#374151';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(140, height/2);
+            ctx.lineTo(180, height/2);
+            ctx.stroke();
+            
+            // 标注
+            ctx.fillStyle = '#f59e0b';
+            ctx.font = '14px Arial';
+            ctx.fillText('转2倍', 145, height/2 - 20);
+            
+            // 第二个齿轮
+            ctx.strokeStyle = '#10b981';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(220, height/2, 30, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.fillStyle = '#10b981';
+            ctx.font = '16px Arial';
+            ctx.fillText('×2', 210, height/2 + 5);
+            
+            // 箭头
+            ctx.strokeStyle = '#374151';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(250, height/2);
+            ctx.lineTo(290, height/2);
+            ctx.stroke();
+            
+            // 标注
+            ctx.fillStyle = '#f59e0b';
+            ctx.font = '14px Arial';
+            ctx.fillText('转3倍', 255, height/2 - 20);
+            
+            // 第三个齿轮
+            ctx.strokeStyle = '#ef4444';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(330, height/2, 25, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.fillStyle = '#ef4444';
+            ctx.font = '16px Arial';
+            ctx.fillText('×6', 320, height/2 + 5);
+            
+            // 总结
+            ctx.fillStyle = '#374151';
+            ctx.font = '18px Arial';
+            ctx.fillText('总传动比 = 2 × 3 = 6', 140, height - 30);
+        }
+
+        // 画斜率对比图
+        function drawSlopeComparison() {
+            const canvas = document.getElementById('slopeCanvas');
+            if (!canvas) return;
+            
+            const ctx = canvas.getContext('2d');
+            const width = 450;
+            const height = 400;
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            // 画三个小图
+            const graphs = [
+                { y: 20, title: '内层 g(x) = 2x', slope: '斜率 = 2', color: '#4f46e5' },
+                { y: 150, title: '外层 f(u) = u²', slope: '斜率 = 2u', color: '#10b981' },
+                { y: 280, title: '复合 (2x)²', slope: '斜率 = 8x', color: '#ef4444' }
+            ];
+            
+            graphs.forEach(graph => {
+                // 画小坐标轴
+                ctx.strokeStyle = '#9ca3af';
+                ctx.lineWidth = 1;
+                
+                ctx.beginPath();
+                ctx.moveTo(50, graph.y + 50);
+                ctx.lineTo(400, graph.y + 50);
+                ctx.stroke();
+                
+                ctx.beginPath();
+                ctx.moveTo(225, graph.y + 20);
+                ctx.lineTo(225, graph.y + 80);
+                ctx.stroke();
+                
+                // 画函数
+                ctx.strokeStyle = graph.color;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                
+                if (graph.title.includes('2x')) {
+                    // 直线
+                    ctx.moveTo(50, graph.y + 80);
+                    ctx.lineTo(400, graph.y + 20);
+                } else if (graph.title.includes('u²')) {
+                    // 抛物线
+                    for (let px = 50; px <= 400; px++) {
+                        const x = (px - 225) / 50;
+                        const y = x * x;
+                        const py = graph.y + 50 - y * 10;
+                        if (px === 50) ctx.moveTo(px, py);
+                        else ctx.lineTo(px, py);
+                    }
+                } else {
+                    // 陡抛物线
+                    for (let px = 50; px <= 400; px++) {
+                        const x = (px - 225) / 50;
+                        const y = 4 * x * x;
+                        const py = graph.y + 50 - y * 5;
+                        if (px === 50) ctx.moveTo(px, py);
+                        else ctx.lineTo(px, py);
+                    }
+                }
+                ctx.stroke();
+                
+                // 标题
+                ctx.fillStyle = '#374151';
+                ctx.font = '14px Arial';
+                ctx.fillText(graph.title, 60, graph.y + 15);
+                ctx.fillText(graph.slope, 320, graph.y + 15);
+            });
+            
+            // 画相乘符号
+            ctx.fillStyle = '#f59e0b';
+            ctx.font = '20px Arial';
+            ctx.fillText('×', 215, 130);
+            ctx.fillText('=', 215, 260);
+        }
+
+        // 练习答案检查
+        function checkAnswer(step) {
+            if (step === 1) {
+                const answer = document.getElementById('answer1').value.toLowerCase().replace(/\s/g, '');
+                const feedback = document.getElementById('feedback1');
+                
+                if (answer === '3x') {
+                    feedback.className = 'feedback correct';
+                    feedback.textContent = '✅ 正确！内层是 3x';
+                    document.getElementById('step2').style.display = 'block';
+                } else {
+                    feedback.className = 'feedback wrong';
+                    feedback.textContent = '❌ 提示：看括号里面';
+                }
+            }
+            
+            if (step === 2) {
+                const answer = document.getElementById('answer2').value.replace(/\s/g, '');
+                const feedback = document.getElementById('feedback2');
+                
+                if (answer === '3') {
+                    feedback.className = 'feedback correct';
+                    feedback.textContent = '✅ 对！3x 的导数是 3';
+                    document.getElementById('step3').style.display = 'block';
+                } else {
+                    feedback.className = 'feedback wrong';
+                    feedback.textContent = '❌ 提示：3是常数，x的导数是1，所以3x的导数是3';
+                }
+            }
+            
+            if (step === 3) {
+                const answer = document.getElementById('answer3').value.replace(/\s/g, '');
+                const feedback = document.getElementById('feedback3');
+                
+                if (answer === '18x') {
+                    feedback.className = 'feedback correct';
+                    feedback.textContent = '✅ 完美！记住是相乘：6x × 3 = 18x';
+                    document.getElementById('success').style.display = 'block';
+                } else {
+                    feedback.className = 'feedback wrong';
+                    feedback.textContent = '❌ 提示：6x × 3 = ? (是乘法哦)';
+                }
+            }
+        }
+
+        // 初始化
+        window.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                drawGears();
+                if (window.MathJax) {
+                    MathJax.typesetPromise();
+                }
+            }, 100);
+        });
+
+        function toggleReturnLinks() { const p = document.querySelector('.return-links'); if (!p) return; if (p.style.display === 'flex') { p.style.opacity = '0'; setTimeout(() => p.style.display = 'none', 160); } else { p.style.display = 'flex'; requestAnimationFrame(() => p.style.opacity = '1'); } }
+    </script>
+</body>
+</html>

@@ -1,0 +1,941 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>聆听宇宙的谐波</title>
+    <script src="../../common-assets/js/tailwind.min.js"></script>    <style>
+        @font-face {
+            font-family: 'Iansui-Regular';
+            src: url('../../common-assets/fonts/Iansui-Regular.ttf') format('truetype');
+            font-weight: 400;
+            font-style: normal;
+        }
+        
+        /* 美化滚动条 - 竖向 */
+        *::-webkit-scrollbar {
+            width: 12px;
+        }
+        *::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+        }
+        *::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #3b82f6, #1d4ed8);
+            border-radius: 6px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+        *::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #60a5fa, #3b82f6);
+        }
+        *::-webkit-scrollbar-thumb:active {
+            background: linear-gradient(180deg, #1d4ed8, #1e40af);
+        }
+        
+        /* 隐藏横向滚动条 */
+        *::-webkit-scrollbar:horizontal {
+            display: none;
+        }
+        
+        :root {
+            /* 学术蓝紫色调主题 - 19世纪法国学术氛围 */
+            --bg-start: #1a1a2e;
+            --bg-scene1: linear-gradient(135deg, #16213e, #0f3460, #1a1a2e);
+            --bg-scene2: linear-gradient(180deg, #1f2937, #374151, #4b5563);
+            --bg-scene3: linear-gradient(45deg, #1e293b, #334155, #475569);
+            --bg-scene4: radial-gradient(circle, #1e1b4b, #312e81, #4c1d95);
+            --bg-scene5: linear-gradient(315deg, #581c87, #7c3aed);
+            --bg-scene6: linear-gradient(135deg, #1e3a8a, #2563eb, #3b82f6);
+            --bg-scene7: linear-gradient(180deg, #1e40af, #3b82f6);
+            --bg-scene8: linear-gradient(45deg, #4c1d95, #6d28d9, #7c3aed);
+            --bg-scene9: linear-gradient(135deg, #2563eb, #3b82f6, #60a5fa);
+            --bg-scene10: linear-gradient(180deg, #1e3a8a, #1e40af);
+            --bg-scene11: radial-gradient(circle, #4c1d95, #2563eb, #1e3a8a);
+        }
+
+        body {
+            font-family: 'Iansui-Regular', serif;
+            color: #e0e7ff;
+            overflow-x: hidden;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            background-color: var(--bg-start);
+            transition: background-color 1.5s ease-in-out;
+        }
+
+        #scroll-container {
+            height: 1400vh;
+            position: relative;
+        }
+
+        .sticky-element {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* 傅立叶波形动画背景 */
+        #waveCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
+        /* 热传导动画效果 */
+        #heatCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            opacity: 0;
+            transition: opacity 2s ease;
+            pointer-events: none;
+        }
+
+        #heatCanvas.active {
+            opacity: 0.3;
+        }
+
+        /* 几何过渡效果 */
+        .geometric-transition {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 0;
+            height: 0;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .wave-wipe {
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(90deg, 
+                transparent 0%, 
+                var(--transition-color, #3b82f6) 45%,
+                var(--transition-color, #3b82f6) 55%,
+                transparent 100%);
+            transform: scaleX(0);
+            transition: transform 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .wave-wipe.active {
+            transform: scaleX(3);
+        }
+
+        /* 正弦波过渡 */
+        .sine-transition {
+            width: 100vw;
+            height: 100vh;
+            position: absolute;
+            opacity: 0;
+            transition: opacity 0.8s ease;
+        }
+
+        .sine-wave {
+            width: 100%;
+            height: 20vh;
+            background: var(--transition-color, #7c3aed);
+            clip-path: polygon(
+                0% 50%,
+                10% 0%, 20% 100%,
+                30% 0%, 40% 100%,
+                50% 0%, 60% 100%,
+                70% 0%, 80% 100%,
+                90% 0%, 100% 50%
+            );
+            transform: translateY(-100vh);
+            transition: transform 1s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .sine-transition.active {
+            opacity: 1;
+        }
+
+        .sine-transition.active .sine-wave {
+            transform: translateY(0);
+        }
+
+        /* 场景样式 */
+        .scene {
+            opacity: 0;
+            transition: opacity 0.8s ease-in-out;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .scene-background {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            transition: opacity 1.5s ease-in-out;
+            z-index: -2;
+        }
+
+        /* 场景背景 */
+        .bg-scene1 { background: var(--bg-scene1); }
+        .bg-scene2 { background: var(--bg-scene2); }
+        .bg-scene3 { background: var(--bg-scene3); }
+        .bg-scene4 { background: var(--bg-scene4); }
+        .bg-scene5 { background: var(--bg-scene5); }
+        .bg-scene6 { background: var(--bg-scene6); }
+        .bg-scene7 { background: var(--bg-scene7); }
+        .bg-scene8 { background: var(--bg-scene8); }
+        .bg-scene9 { background: var(--bg-scene9); }
+        .bg-scene10 { background: var(--bg-scene10); }
+        .bg-scene11 { background: var(--bg-scene11); }
+
+        /* 图片样式 */
+        .illustration-wrapper {
+            position: absolute;
+            z-index: 5;
+            transition: all 1.5s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .illustration {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: all 1.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            opacity: 0;
+            transform: scale(0.85) translateY(30px);
+            filter: brightness(0.9) contrast(1.05) saturate(1.05);
+        }
+
+        .frame-elegant {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            border-radius: 20px;
+            box-shadow: 
+                0 15px 35px rgba(0, 0, 0, 0.4),
+                0 5px 15px rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(139, 92, 246, 0.3);
+        }
+
+        .frame-elegant::before {
+            content: '';
+            position: absolute;
+            inset: -1px;
+            background: linear-gradient(135deg, 
+                rgba(139, 92, 246, 0.2) 0%, 
+                rgba(139, 92, 246, 0) 50%,
+                rgba(139, 92, 246, 0.1) 100%
+            );
+            border-radius: inherit;
+            opacity: 0.6;
+            z-index: -1;
+        }
+
+        .illustration-appear {
+            opacity: 0.95;
+            transform: scale(1) translateY(0);
+        }
+
+        .illustration-left {
+            left: 10vw;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 35vw;
+            height: 55vh;
+        }
+
+        .illustration-right {
+            right: 10vw;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 35vw;
+            height: 55vh;
+        }
+
+        /* 文字样式 */
+        .story-text {
+            position: absolute;
+            font-size: 1.5rem;
+            text-shadow: 3px 3px 10px rgba(0,0,0,0.8);
+            transition: all 1s cubic-bezier(0.23, 1, 0.32, 1);
+            text-align: left;
+            padding: 2rem;
+            max-width: 280px;
+            line-height: 2.2;
+            font-weight: 500;
+            z-index: 8;
+            writing-mode: vertical-rl;
+            text-orientation: upright;
+            letter-spacing: 0.12em;
+            opacity: 0;
+            transform: translateY(20px);
+            color: #e0e7ff;
+        }
+
+        .story-text-appear {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .text-left {
+            left: 30vw;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .text-right {
+            right: 30vw;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        /* 逐字浮现动画 */
+        .char-float {
+            display: inline-block;
+            opacity: 0;
+            transform: translateY(15px);
+            animation: float-up 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+        }
+
+        @keyframes float-up {
+            0% {
+                opacity: 0;
+                transform: translateY(15px) scale(0.9);
+            }
+            50% {
+                opacity: 0.5;
+                transform: translateY(5px) scale(0.95);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* 特殊场景：拉格朗日质疑 */
+        #scene6 {
+            position: relative;
+        }
+
+        #debate-animation {
+            position: absolute;
+            width: 600px;
+            height: 400px;
+            opacity: 0;
+            transition: opacity 1.5s cubic-bezier(0.23, 1, 0.32, 1);
+            z-index: 20;
+        }
+
+        .debate-text {
+            position: absolute;
+            font-family: 'Iansui-Regular', serif;
+            font-size: 24px;
+            color: rgba(239, 68, 68, 0.6);
+            font-style: italic;
+            animation: debate-pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes debate-pulse {
+            0%, 100% { 
+                opacity: 0.3;
+                transform: scale(0.95);
+            }
+            50% { 
+                opacity: 0.7;
+                transform: scale(1.05);
+            }
+        }
+
+        /* 封面和封底样式 */
+        #scene-cover, #scene-end {
+            z-index: 10;
+        }
+
+        #scene-cover h1, #scene-cover p, #scene-end p {
+            position: relative;
+            z-index: 11;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.5);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1366px) {
+            .story-text {
+                font-size: 1.3rem;
+                max-width: 260px;
+            }
+            .illustration-left,
+            .illustration-right {
+                width: 33vw;
+                height: 50vh;
+            }
+            .text-left {
+               left: 30vw;            }
+            .text-right {
+                right: 30vw;            }
+        }
+        
+        @media (max-width: 768px) {
+            .scene { 
+                flex-direction: column; 
+                justify-content: center; 
+                align-items: center;
+                padding: 3vh 3vw;
+                gap: 1.5rem;
+            }
+            .illustration-wrapper { 
+                position: relative !important; 
+                left: auto !important;
+                right: auto !important;
+                width: 80vw !important;
+                height: 40vh !important;
+                margin: 0 auto;
+            }
+            .story-text { 
+                position: relative !important; 
+                left: auto !important;
+                right: auto !important;
+                max-width: 85vw; 
+                font-size: 1.1rem;
+                writing-mode: horizontal-tb;
+                text-orientation: initial;
+                letter-spacing: normal;
+                margin: 0 auto;
+                text-align: center;
+                padding: 1rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .story-text {
+                font-size: 1rem;
+                max-width: 90vw;
+                padding: 0.8rem;
+            }
+            .illustration-wrapper {
+                width: 90vw !important;
+                height: 35vh !important;
+            }
+        }
+    </style>
+
+    <style>
+        .return-home-panel {
+            position: fixed;
+            top: 12px;
+            left: 12px;
+            display: flex;
+            gap: 6px;
+            z-index: 9999;
+            flex-wrap: wrap;
+        }
+        .return-home-panel .return-link {
+            padding: 6px 10px;
+            border-radius: 10px;
+            background: rgba(15, 23, 42, 0.35);
+            color: #f8fafc;
+            font-size: 13px;
+            text-decoration: none;
+            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.18);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            border: 1px solid rgba(248, 250, 252, 0.12);
+            transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .return-home-panel .return-link:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.25);
+            background: rgba(15, 23, 42, 0.42);
+        }
+        .return-home-panel .return-link.return-main {
+            background: rgba(79, 70, 229, 0.18);
+            border-color: rgba(79, 70, 229, 0.25);
+        }
+        @media (max-width: 640px) {
+            .return-home-panel {
+                top: 12px;
+                left: 12px;
+                right: 12px;
+                justify-content: center;
+            }
+            .return-home-panel .return-link {
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="return-home-panel">
+         <a class="return-link return-sub" href="../index.html"><i class="fa-solid fa-arrow-left"></i> 返回目录</a>
+        <a class="return-link return-main" href="../../index.html"><i class="fa-solid fa-house"></i> 返回主站</a>
+    </div>
+
+
+    <!-- 傅立叶波形动画背景 -->
+    <canvas id="waveCanvas"></canvas>
+    
+    <!-- 热传导动画背景 -->
+    <canvas id="heatCanvas"></canvas>
+
+    <div id="scroll-container">
+        <div id="scene-container" class="sticky-element">
+
+            <!-- 场景背景 -->
+            <div id="bg-scene1" class="scene-background bg-scene1"></div>
+            <div id="bg-scene2" class="scene-background bg-scene2"></div>
+            <div id="bg-scene3" class="scene-background bg-scene3"></div>
+            <div id="bg-scene4" class="scene-background bg-scene4"></div>
+            <div id="bg-scene5" class="scene-background bg-scene5"></div>
+            <div id="bg-scene6" class="scene-background bg-scene6"></div>
+            <div id="bg-scene7" class="scene-background bg-scene7"></div>
+            <div id="bg-scene8" class="scene-background bg-scene8"></div>
+            <div id="bg-scene9" class="scene-background bg-scene9"></div>
+            <div id="bg-scene10" class="scene-background bg-scene10"></div>
+            <div id="bg-scene11" class="scene-background bg-scene11"></div>
+
+            <!-- 场景0: 封面 -->
+            <div id="scene-cover" class="scene flex-col">
+                <h1 class="text-5xl md:text-6xl font-bold text-center" style="color: #a78bfa;">聆听宇宙的谐波</h1>
+                <p class="text-xl md:text-2xl mt-4 text-center" style="color: #c4b5fd;">傅立叶级数的魔法</p>
+                <p class="absolute bottom-20 opacity-80 text-lg">向下滚动，开启故事</p>
+            </div>
+
+            <!-- 场景1: 1807年巴黎 -->
+            <div id="scene1" class="scene">
+                <div class="illustration-wrapper illustration-left depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="11- (1).png" alt="1807年巴黎" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-right depth-layer-3">1807年12月21日，巴黎法兰西学会。约瑟夫·傅立叶，刚从埃及远征归来的工程师，即将宣读他关于热传导的革命性论文。</p>
+            </div>
+
+            <!-- 场景2: 学会巨擘 -->
+            <div id="scene2" class="scene">
+                <div class="illustration-wrapper illustration-right depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="11- (2).png" alt="学会巨擘" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-left depth-layer-3">他与学会里的数学巨擘——拉格朗日、拉普拉斯——显得格格不入。傅立叶要解决的是一个具体问题：金属棒的热传导。</p>
+            </div>
+
+            <!-- 场景3: 热传导问题 -->
+            <div id="scene3" class="scene">
+                <div class="illustration-wrapper illustration-left depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="11- (3).png" alt="热传导" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-right depth-layer-3">为了解答这个问题，他建立了描述热量流动的微分方程。但真正的重头戏，是他求解这个方程的离经叛道的方法。</p>
+            </div>
+
+            <!-- 场景4: 革命性思想 -->
+            <div id="scene4" class="scene">
+                <div class="illustration-wrapper illustration-right depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="11- (4).png" alt="革命思想" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-left depth-layer-3">他宣称：任何函数，无论多么不规则，都可以表示为正弦波和余弦波的无穷叠加。他把这个叠加称为他的"级数"。</p>
+            </div>
+
+            <!-- 场景5: 数学之美 -->
+            <div id="scene5" class="scene">
+                <div class="illustration-wrapper illustration-left depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="11- (5).png" alt="数学之美" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-right depth-layer-3">在场的权威们认为，用无数光滑函数叠加出不连续函数，就像用圆形拼凑正方形。这在美学上丑陋，在逻辑上荒谬。</p>
+            </div>
+
+            <!-- 场景6: 拉格朗日质疑 -->
+            <div id="scene6" class="scene flex-col">
+                <!-- 辩论动画 -->
+                <div id="debate-animation">
+                    <div class="debate-text" style="top: 30%; left: 20%;">"这是无稽之谈！"</div>
+                    <div class="debate-text" style="top: 50%; right: 30%; animation-delay: 0.5s;">- 拉格朗日</div>
+                    <div class="debate-text" style="bottom: 30%; left: 40%; animation-delay: 1s;">收敛性何在？</div>
+                </div>
+                
+                <!-- 背景图片 -->
+                <div class="illustration-wrapper" style="position: absolute; opacity: 0.15; width: 100%; height: 100%;">
+                    <img src="11- (6).png" alt="质疑" style="object-fit: cover; width: 100%; height: 100%; filter: blur(2px);">
+                </div>
+                
+                <!-- 文字 -->
+                <div class="story-text" style="position: absolute; bottom: 10vh; text-align: center; max-width: 600px; writing-mode: horizontal-tb;">
+                    <p>拉格朗日当场提出尖锐质疑："你的级数怎么可能收敛？在断点处，光滑曲线如何模拟突变？"</p>
+                </div>
+            </div>
+
+            <!-- 场景7: 物理直觉 -->
+            <div id="scene7" class="scene">
+                <div class="illustration-wrapper illustration-right depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="11- (7).png" alt="物理直觉" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-left depth-layer-3">傅立叶无法在纯数学上完全回应。他的信心来自物理直觉：复杂音符可分解为基音和泛音的叠加。自然界在用这种方式谱写乐章！</p>
+            </div>
+
+            <!-- 场景8: 论文被拒 -->
+            <div id="scene8" class="scene">
+                <div class="illustration-wrapper illustration-left depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="11- (8).png" alt="被拒" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-right depth-layer-3">评审委员会拒绝了他的傅立叶级数。这是巨大的羞辱。一个挑战者，被科学界的最高殿堂拒之门外。</p>
+            </div>
+
+            <!-- 场景9: 坚持不懈 -->
+            <div id="scene9" class="scene">
+                <div class="illustration-wrapper illustration-right depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="11- (9).png" alt="坚持" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-left depth-layer-3">傅立叶没有被击垮。他带着"异端"思想回到格勒诺布尔，继续完善理论。他坚信真理站在他这一边。</p>
+            </div>
+
+            <!-- 场景10: 历史转折 -->
+            <div id="scene10" class="scene">
+                <div class="illustration-wrapper illustration-left depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="11- (10).png" alt="转折" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-right depth-layer-3">1822年，他出版《热的解析理论》。新一代科学家开始意识到傅立叶级数的惊人力量。</p>
+            </div>
+
+            <!-- 场景11: 万能钥匙 -->
+            <div id="scene11" class="scene">
+                <div class="illustration-wrapper illustration-right depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="11- (11).png" alt="万能钥匙" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-left depth-layer-3">这个理论成为解锁所有"波"和"周期性"问题的万能钥匙。今天，你的声音、你看到的图像，都在用傅立叶变换处理。</p>
+            </div>
+
+            <!-- 结局 -->
+            <div id="scene-end" class="scene flex-col">
+                <p class="text-5xl md:text-6xl font-bold" style="color: #a78bfa;">完</p>
+                <p class="text-xl mt-4" style="color: #c4b5fd;">聆听宇宙永恒的谐波</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const scenes = Array.from(document.querySelectorAll('.scene'));
+        const sceneBackgrounds = Array.from(document.querySelectorAll('.scene-background'));
+        const sceneCount = scenes.length;
+        const scrollContainer = document.getElementById('scroll-container');
+        const waveWipe = document.getElementById('wave-wipe');
+        const sineTransition = document.getElementById('sine-transition');
+        const debateAnimation = document.getElementById('debate-animation');
+        const heatCanvas = document.getElementById('heatCanvas');
+        
+        let lastSceneIndex = -1;
+        let isTransitioning = false;
+        let animatedTexts = new Set();
+        let debateAnimationStarted = false;
+
+        // ========= 傅立叶波形动画 =========
+        const waveCanvas = document.getElementById('waveCanvas');
+        const wCtx = waveCanvas.getContext('2d');
+        let canvasWidth = waveCanvas.width = window.innerWidth;
+        let canvasHeight = waveCanvas.height = window.innerHeight;
+
+        window.addEventListener('resize', () => {
+            canvasWidth = waveCanvas.width = window.innerWidth;
+            canvasHeight = waveCanvas.height = window.innerHeight;
+        });
+
+        // 傅立叶级数波形类
+        class FourierWave {
+            constructor(y) {
+                this.y = y;
+                this.amplitudes = [];
+                this.frequencies = [];
+                this.phases = [];
+                this.time = 0;
+                
+                // 生成随机谐波参数
+                const harmonics = 3 + Math.floor(Math.random() * 3);
+                for (let i = 0; i < harmonics; i++) {
+                    this.amplitudes.push(Math.random() * 30 + 10);
+                    this.frequencies.push((i + 1) * 0.5);
+                    this.phases.push(Math.random() * Math.PI * 2);
+                }
+            }
+
+            update() {
+                this.time += 0.01;
+            }
+
+            draw() {
+                wCtx.strokeStyle = 'rgba(139, 92, 246, 0.3)';
+                wCtx.lineWidth = 2;
+                wCtx.beginPath();
+                
+                for (let x = 0; x < canvasWidth; x += 5) {
+                    let y = this.y;
+                    
+                    // 叠加所有谐波
+                    for (let i = 0; i < this.amplitudes.length; i++) {
+                        y += this.amplitudes[i] * Math.sin(
+                            this.frequencies[i] * (x / 100 + this.time) + this.phases[i]
+                        );
+                    }
+                    
+                    if (x === 0) {
+                        wCtx.moveTo(x, y);
+                    } else {
+                        wCtx.lineTo(x, y);
+                    }
+                }
+                
+                wCtx.stroke();
+            }
+        }
+
+        // 热传导动画类
+        class HeatFlow {
+            constructor() {
+                this.particles = [];
+                this.reset();
+            }
+
+            reset() {
+                this.particles = [];
+                for (let i = 0; i < 50; i++) {
+                    this.particles.push({
+                        x: Math.random() * canvasWidth,
+                        y: Math.random() * canvasHeight,
+                        vx: (Math.random() - 0.5) * 2,
+                        vy: (Math.random() - 0.5) * 2,
+                        size: Math.random() * 20 + 10,
+                        heat: Math.random()
+                    });
+                }
+            }
+
+            update() {
+                this.particles.forEach(p => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    
+                    // 边界反弹
+                    if (p.x < 0 || p.x > canvasWidth) p.vx *= -1;
+                    if (p.y < 0 || p.y > canvasHeight) p.vy *= -1;
+                    
+                    // 热量衰减
+                    p.heat *= 0.995;
+                    if (p.heat < 0.1) p.heat = 1;
+                });
+            }
+
+            draw(ctx) {
+                ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+                
+                this.particles.forEach(p => {
+                    const gradient = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size);
+                    gradient.addColorStop(0, `rgba(239, 68, 68, ${p.heat * 0.5})`);
+                    gradient.addColorStop(0.5, `rgba(249, 115, 22, ${p.heat * 0.3})`);
+                    gradient.addColorStop(1, `rgba(251, 191, 36, 0)`);
+                    
+                    ctx.fillStyle = gradient;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+            }
+        }
+
+        const waves = [];
+        const heatFlow = new HeatFlow();
+        const hCtx = heatCanvas.getContext('2d');
+        heatCanvas.width = canvasWidth;
+        heatCanvas.height = canvasHeight;
+
+        // 创建多层波形
+        for (let i = 0; i < 5; i++) {
+            waves.push(new FourierWave((i + 1) * canvasHeight / 6));
+        }
+
+        function animateWaves() {
+            wCtx.clearRect(0, 0, canvasWidth, canvasHeight);
+            
+            waves.forEach(wave => {
+                wave.update();
+                wave.draw();
+            });
+            
+            requestAnimationFrame(animateWaves);
+        }
+
+        function animateHeat() {
+            heatFlow.update();
+            heatFlow.draw(hCtx);
+            requestAnimationFrame(animateHeat);
+        }
+
+        animateWaves();
+        animateHeat();
+
+        // 几何过渡效果
+        function triggerGeometricTransition(type, fromScene, toScene) {
+            if (isTransitioning) return;
+            isTransitioning = true;
+            
+            if (Math.abs(toScene - fromScene) > 2) {
+                // 大跨度使用正弦波效果
+                sineTransition.classList.add('active');
+                
+                setTimeout(() => {
+                    sineTransition.classList.remove('active');
+                    isTransitioning = false;
+                }, 1000);
+            } else {
+                // 小跨度使用波形擦除
+                waveWipe.style.setProperty('--transition-color', '#7c3aed');
+                waveWipe.classList.add('active');
+                
+                setTimeout(() => {
+                    waveWipe.classList.remove('active');
+                    isTransitioning = false;
+                }, 1500);
+            }
+        }
+
+        // 文字浮现动画
+        function animateTextFloat(element) {
+            if (animatedTexts.has(element)) return;
+            animatedTexts.add(element);
+            
+            const text = element.textContent;
+            element.textContent = '';
+            
+            [...text].forEach((char, index) => {
+                const span = document.createElement('span');
+                span.textContent = char;
+                span.className = 'char-float';
+                span.style.animationDelay = `${index * 0.02}s`;
+                element.appendChild(span);
+            });
+        }
+
+        // 主滚动处理
+        window.addEventListener('scroll', () => {
+            const scrollHeight = scrollContainer.scrollHeight - window.innerHeight;
+            const scrollTop = window.scrollY;
+            const scrollPercent = Math.min(scrollTop / scrollHeight, 1);
+            
+            updateScenes(scrollPercent);
+        });
+
+        function updateScenes(percent) {
+            const currentSceneIndex = Math.floor(percent * (sceneCount - 0.001));
+            const sceneProgress = getSceneProgress(percent, currentSceneIndex);
+            
+            // 触发场景转换效果
+            if (currentSceneIndex !== lastSceneIndex && lastSceneIndex !== -1) {
+                triggerGeometricTransition('wave', lastSceneIndex, currentSceneIndex);
+            }
+            lastSceneIndex = currentSceneIndex;
+
+            // 控制热传导动画（场景3附近显示）
+            if (currentSceneIndex >= 2 && currentSceneIndex <= 4) {
+                heatCanvas.classList.add('active');
+            } else {
+                heatCanvas.classList.remove('active');
+            }
+            
+            // 更新场景显示
+            scenes.forEach((scene, index) => {
+                const isActive = index === currentSceneIndex;
+                scene.style.opacity = isActive ? 1 : 0;
+                
+                if (isActive) {
+                    // 图片动画
+                    const img = scene.querySelector('.illustration');
+                    if (img && sceneProgress > 0.1) {
+                        setTimeout(() => {
+                            img.classList.add('illustration-appear');
+                        }, 100);
+                    }
+                    
+                    // 文字动画
+                    const text = scene.querySelector('.story-text');
+                    if (text && sceneProgress > 0.3) {
+                        text.classList.add('story-text-appear');
+                        if (!animatedTexts.has(text)) {
+                            animateTextFloat(text);
+                        }
+                    }
+                } else {
+                    // 重置非活动场景
+                    const img = scene.querySelector('.illustration');
+                    if (img) {
+                        img.classList.remove('illustration-appear');
+                    }
+                    const text = scene.querySelector('.story-text');
+                    if (text) {
+                        text.classList.remove('story-text-appear');
+                    }
+                }
+            });
+            
+            // 更新场景背景
+            sceneBackgrounds.forEach((bg, index) => {
+                const sceneNumber = index + 1;
+                const progress = getSceneProgress(percent, sceneNumber);
+                bg.style.opacity = progress > 0 ? Math.min(progress * 1.5, 1) : 0;
+            });
+            
+            // 场景6的辩论动画
+            const p6 = getSceneProgress(percent, 6);
+            if (p6 > 0.2 && !debateAnimationStarted) {
+                debateAnimationStarted = true;
+                debateAnimation.style.opacity = 1;
+            } else if (p6 === 0) {
+                debateAnimation.style.opacity = 0;
+                debateAnimationStarted = false;
+            }
+        }
+
+        function getSceneProgress(percent, sceneIndex) {
+            const sceneStart = sceneIndex / sceneCount;
+            const sceneEnd = (sceneIndex + 1) / sceneCount;
+            if (percent < sceneStart || percent > sceneEnd) return 0;
+            return (percent - sceneStart) / (sceneEnd - sceneStart);
+        }
+
+        // 初始化
+        window.scrollTo(0, 0);
+        updateScenes(0);
+    </script>
+</body>
+</html>

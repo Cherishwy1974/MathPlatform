@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab 11.4 泰勒级数展开与函数逼近实验室</title>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\(', '\)']],
+                displayMath: [['$$', '$$'], ['\[', '\]']],
+                processEscapes: true
+            },
+            startup: {
+                pageReady: () => {
+                    return MathJax.startup.defaultPageReady().then(() => {
+                        if (typeof window.scheduleMathRender === 'function') {
+                            window.scheduleMathRender();
+                        }
+                        console.log('MathJax加载完成');
+                    });
+                }
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+            }
+        };
+    </script>
+    <script defer src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js"></script>
+    <script defer src="../common-assets/js/lab-math-enhancer.js"></script>
+    <style>
+        :root {
+            --h1-size: 22px;
+            --h2-size: 20px;
+            --h3-size: 18px;
+            --btn-size: 16px;
+            --formula-size: 20px;
+            --text-size: 16px;
+            --primary: #4f46e5;
+            --primary-light: #6366f1;
+            --primary-dark: #3730a3;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --light: #ffffff;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-400: #9ca3af;
+            --gray-600: #4b5563;
+            --gray-800: #1f2937;
+            --border: #e5e7eb;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        *::-webkit-scrollbar {
+            width: 0;
+            background: transparent;
+        }
+
+        * {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
+            font-size: var(--text-size);
+            line-height: 1.5;
+            background: var(--gray-50);
+            color: var(--gray-800);
+        }
+
+        .return-home-panel {
+            position: fixed;
+            top: 12px;
+            right: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+            z-index: 40;
+        }
+
+        .return-toggle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.95), rgba(99, 102, 241, 0.9));
+            color: #ffffff;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 10px 18px rgba(79, 70, 229, 0.28);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .return-toggle:focus-visible {
+            outline: 2px solid rgba(129, 140, 248, 0.6);
+            outline-offset: 3px;
+        }
+
+        .return-toggle:hover {
+            transform: translateY(-1px) scale(1.03);
+            box-shadow: 0 14px 26px rgba(79, 70, 229, 0.35);
+        }
+
+        .return-links {
+            display: none;
+            flex-direction: column;
+            gap: 6px;
+            padding: 10px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(79, 70, 229, 0.15);
+            box-shadow: 0 16px 30px rgba(15, 23, 42, 0.18);
+            backdrop-filter: blur(6px);
+        }
+
+        .return-home-panel.open .return-links {
+            display: flex;
+        }
+
+        .return-link {
+            padding: 6px 12px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 14px;
+            color: var(--primary);
+            background: rgba(79, 70, 229, 0.12);
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+
+        .return-link.return-main {
+            color: var(--success);
+            background: rgba(16, 185, 129, 0.12);
+        }
+
+        .return-link:hover {
+            background: rgba(79, 70, 229, 0.2);
+            color: var(--primary-dark);
+        }
+
+        .return-link.return-main:hover {
+            background: rgba(16, 185, 129, 0.22);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            height: 100vh;
+            max-height: 700px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            background: var(--light);
+            border-radius: 12px;
+            box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(90deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: var(--light);
+            padding: 10px 24px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: var(--h1-size);
+            font-weight: 600;
+        }
+
+        .main {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 120px;
+            background: var(--gray-50);
+            border-right: 1px solid var(--border);
+            padding: 12px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .nav-btn {
+            width: 100%;
+            padding: 8px;
+            border: none;
+            border-radius: 6px;
+            background: transparent;
+            color: var(--gray-600);
+            text-align: left;
+            font-size: var(--text-size);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .nav-btn:hover {
+            background: var(--gray-100);
+        }
+
+        .nav-btn.active {
+            background: var(--primary);
+            color: var(--light);
+        }
+
+        .content {
+            flex: 1;
+            display: none;
+            padding: 18px;
+            overflow-y: auto;
+        }
+
+        .content.active {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow-y: auto;
+        }
+
+        .card {
+            background: var(--light);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+        }
+
+        .card h3 {
+            font-size: var(--h3-size);
+            color: var(--primary);
+            margin-bottom: 12px;
+        }
+
+        .input-group {
+            margin-bottom: 12px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: var(--gray-600);
+        }
+
+        .input-group select,
+        .input-group input,
+        .input-group input[type="range"] {
+            width: 100%;
+            padding: 8px 10px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            font-size: var(--text-size);
+            background: var(--gray-50);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 16px;
+            font-size: var(--btn-size);
+            border: none;
+            border-radius: 6px;
+            background: var(--primary);
+            color: var(--light);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            gap: 6px;
+        }
+
+        .btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .info-box {
+            background: var(--gray-50);
+            border-left: 3px solid var(--primary);
+            padding: 12px;
+            border-radius: 6px;
+            font-size: var(--text-size);
+            line-height: 1.6;
+        }
+
+        canvas {
+            width: 100%;
+            height: 260px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: #ffffff;
+        }
+
+        table.test-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table.test-table td {
+            border: 1px solid var(--gray-200);
+            padding: 6px 10px;
+        }
+        
+        /* 自定义下拉框支持LaTeX渲染 */
+        .custom-select-container { position: relative; width: 100%; }
+        .custom-select-trigger { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border: 1px solid #e5e7eb; border-radius: 6px; background: #f9fafb; cursor: pointer; transition: all 0.2s; min-height: 40px; }
+        .custom-select-trigger:hover { border-color: #4f46e5; background: #ffffff; }
+        .custom-select-container.open .custom-select-trigger { border-color: #4f46e5; background: #ffffff; }
+        .selected-formula { flex: 1; }
+        .arrow { font-size: 12px; transition: transform 0.2s; margin-left: 8px; color: #6b7280; }
+        .custom-select-container.open .arrow { transform: rotate(180deg); }
+        .custom-select-options { position: absolute; top: 100%; left: 0; right: 0; margin-top: 4px; background: #ffffff; border: 1px solid #e5e7eb; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); max-height: 200px; overflow-y: auto; display: none; z-index: 1000; }
+        .custom-select-container.open .custom-select-options { display: block; }
+        .custom-option { padding: 10px 12px; cursor: pointer; transition: background 0.2s; border-bottom: 1px solid #f3f4f6; background: #ffffff; }
+        .custom-option:last-child { border-bottom: none; }
+        .custom-option:hover { background: #f3f4f6; }
+        .custom-option.selected { background: #eef2ff; color: #4f46e5; font-weight: 500; }
+    </style>
+</head>
+<body>
+    <div class="return-home-panel">
+        <button class="return-toggle" type="button" aria-label="打开返回导航" onclick="toggleReturnPanel(event)"><i class="fa-solid fa-house"></i></button>
+        <div class="return-links">
+            <a class="return-link return-sub" href="index.html"><i class="fa-solid fa-arrow-left"></i> 返回目录</a>
+            <a class="return-link return-main" href="../index.html"><i class="fa-solid fa-house"></i> 返回主站</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <header class="header">
+            <h1>Lab 11.4 泰勒级数展开与函数逼近实验室</h1>
+        </header>
+
+        <div class="main">
+            <nav class="sidebar">
+                <button class="nav-btn active"  data-panel="module1"onclick="switchPanel('module1', this)">展开构建</button>
+                <button class="nav-btn"  data-panel="module2"onclick="switchPanel('module2', this)">逼近效果</button>
+            </nav>
+
+            <div class="content active" id="module1">
+                <div class="column">
+                    <div class="card">
+                        <h3>函数与展开点</h3>
+                        <div class="input-group">
+                            <label>选择函数</label>
+                            <div class="custom-select-container">
+                                <div class="custom-select-trigger" onclick="toggleCustomSelect(this)">
+                                    <span class="selected-formula">$f(x)=e^x$</span>
+                                    <span class="arrow">▼</span>
+                                </div>
+                                <div class="custom-select-options">
+                                    <div class="custom-option selected" data-value="exp" onclick="selectCustomOption(this, 'functionSelector')">
+                                        $f(x)=e^x$
+                                    </div>
+                                    <div class="custom-option" data-value="sin" onclick="selectCustomOption(this, 'functionSelector')">
+                                        $f(x)=\sin x$
+                                    </div>
+                                    <div class="custom-option" data-value="ln" onclick="selectCustomOption(this, 'functionSelector')">
+                                        $f(x)=\ln(1+x)$
+                                    </div>
+                                </div>
+                                <input type="hidden" id="functionSelector" value="exp">
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>展开中心 $a$</label>
+                            <input type="number" id="centerInput" value="0" step="0.5" onchange="updateTaylor()">
+                        </div>
+                        <div class="input-group">
+                            <label>展开阶数 $n$：<span id="degreeValue">4</span></label>
+                            <input type="range" id="degreeRange" min="1" max="10" value="4" oninput="changeDegree(this.value)">
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3>泰勒多项式</h3>
+                        <div class="info-box" id="taylorFormula">请选择函数与参数。</div>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="card">
+                        <h3>系数表</h3>
+                        <table class="test-table" id="coefficientTable"></table>
+                    </div>
+                    <div class="card">
+                        <h3>公式提示</h3>
+                        <div class="info-box">$T_n(x)=\sum_{k=0}^{n} \frac{f^{(k)}(a)}{k!}(x-a)^k$，麦克劳林展开为 $a=0$ 的特殊情况。</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content" id="module2">
+                <div class="column">
+                    <div class="card">
+                        <h3>逼近区间</h3>
+                        <div class="input-group">
+                            <label>观察区间 [a-L, a+L]，L = <span id="rangeValue">2</span></label>
+                            <input type="range" id="rangeSlider" min="1" max="4" value="2" step="0.5" oninput="changeRange(this.value)">
+                        </div>
+                        <div class="info-box" id="errorSummary">将鼠标移动到图上查看函数值与多项式值的差异。</div>
+                    </div>
+                    <div class="card">
+                        <h3>误差示例</h3>
+                        <table class="test-table" id="errorTable"></table>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="card">
+                        <h3>图形比较</h3>
+                        <canvas id="approxCanvas"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentDegree = 4;
+        let currentCenter = 0;
+        let currentFunction = 'exp';
+        let currentRange = 2;
+
+        function switchPanel(id, btn) {
+            document.querySelectorAll('.content').forEach(content => content.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            document.querySelectorAll('.nav-btn').forEach(button => button.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+            renderMath();
+        }
+
+        let mathObserver = null;
+        let mathRenderQueued = false;
+
+        function startMathObserver() {
+            if (typeof MutationObserver === 'undefined' || !document.body) {
+                return;
+            }
+            if (mathObserver) {
+                mathObserver.disconnect();
+            }
+            mathObserver = new MutationObserver(mutations => {
+                for (const mutation of mutations) {
+                    if (mutation.type === 'childList' || mutation.type === 'characterData') {
+                        scheduleMathRender();
+                        break;
+                    }
+                }
+            });
+            mathObserver.observe(document.body, { childList: true, subtree: true, characterData: true });
+        }
+
+        function scheduleMathRender() {
+            if (mathRenderQueued) {
+                return;
+            }
+            mathRenderQueued = true;
+            requestAnimationFrame(() => {
+                mathRenderQueued = false;
+                if (window.MathJax && MathJax.typesetPromise) {
+                    if (mathObserver) {
+                        mathObserver.disconnect();
+                    }
+                    MathJax.typesetPromise()
+                        .catch(err => console.log('渲染错误:', err))
+                        .finally(() => {
+                            startMathObserver();
+                        });
+                } else {
+                    setTimeout(scheduleMathRender, 160);
+                }
+            });
+        }
+
+        window.scheduleMathRender = scheduleMathRender;
+
+        function renderMath() {
+            scheduleMathRender();
+        }
+
+        function ensureMathReady() {
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', () => {
+                    startMathObserver();
+                    scheduleMathRender();
+                });
+            } else {
+                startMathObserver();
+                scheduleMathRender();
+            }
+        }
+
+        ensureMathReady();
+
+        function toggleReturnPanel(event) {
+            event.stopPropagation();
+            const panel = document.querySelector('.return-home-panel');
+            if (panel) {
+                panel.classList.toggle('open');
+            }
+        }
+
+        document.addEventListener('click', event => {
+            const panel = document.querySelector('.return-home-panel');
+            if (!panel) {
+                return;
+            }
+            if (panel.classList.contains('open') && !panel.contains(event.target)) {
+                panel.classList.remove('open');
+            }
+        });
+
+        window.addEventListener('pageshow', () => {
+            scheduleMathRender();
+        });
+
+        function changeDegree(value) {
+            currentDegree = parseInt(value, 10);
+            document.getElementById('degreeValue').textContent = currentDegree;
+            updateTaylor();
+        }
+
+        function changeRange(value) {
+            currentRange = parseFloat(value);
+            document.getElementById('rangeValue').textContent = currentRange;
+            drawApproximation();
+        }
+
+        function updateTaylor() {
+            currentFunction = document.getElementById('functionSelector').value;
+            currentCenter = parseFloat(document.getElementById('centerInput').value);
+            const coeffs = calculateCoefficients(currentFunction, currentCenter, currentDegree);
+            buildCoefficientTable(coeffs);
+            displayFormula(coeffs);
+            drawApproximation();
+        }
+
+        function calculateCoefficients(type, a, n) {
+            const coeffs = [];
+            for (let k = 0; k <= n; k++) {
+                let value = 0;
+                if (type === 'exp') {
+                    value = Math.exp(a);
+                } else if (type === 'sin') {
+                    const cycle = k % 4;
+                    if (cycle === 0) value = Math.sin(a);
+                    if (cycle === 1) value = Math.cos(a);
+                    if (cycle === 2) value = -Math.sin(a);
+                    if (cycle === 3) value = -Math.cos(a);
+                } else if (type === 'ln') {
+                    if (k === 0) value = Math.log(1 + a);
+                    else value = Math.pow(-1, k - 1) * factorial(k - 1) / Math.pow(1 + a, k);
+                }
+                coeffs.push(value / factorial(k));
+            }
+            return coeffs;
+        }
+
+        function factorial(n) {
+            if (n === 0) return 1;
+            let result = 1;
+            for (let i = 1; i <= n; i++) result *= i;
+            return result;
+        }
+
+        function buildCoefficientTable(coeffs) {
+            const table = document.getElementById('coefficientTable');
+            table.innerHTML = '<tr><td>k</td><td>f^{(k)}(a)</td><td>系数</td></tr>';
+            coeffs.forEach((coef, k) => {
+                const fDerivative = coef * factorial(k);
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td>${k}</td><td>${fDerivative.toFixed(4)}</td><td>${coef.toFixed(4)}</td>`;
+                table.appendChild(tr);
+            });
+        }
+
+        function displayFormula(coeffs) {
+            let formula = '';
+            coeffs.forEach((coef, k) => {
+                const term = coef.toFixed(4) + (k > 0 ? ` (x-${currentCenter})^{${k}}` : '');
+                formula += (k === 0 ? term : ` + ${term}`);
+            });
+            document.getElementById('taylorFormula').innerHTML = `$T_${currentDegree}(x) = ${formula}$`;
+            renderMath();
+        }
+
+        function drawApproximation() {
+            const canvas = document.getElementById('approxCanvas');
+            const ctx = resizeCanvas(canvas);
+            const width = canvas.width / (window.devicePixelRatio || 1);
+            const height = canvas.height / (window.devicePixelRatio || 1);
+            drawAxis(ctx, width, height);
+            const step = 100;
+            const coeffs = calculateCoefficients(currentFunction, currentCenter, currentDegree);
+            const fx = x => {
+                if (currentFunction === 'exp') return Math.exp(x);
+                if (currentFunction === 'sin') return Math.sin(x);
+                return Math.log(1 + x);
+            };
+            const tx = x => coeffs.reduce((sum, coef, k) => sum + coef * Math.pow(x - currentCenter, k), 0);
+            ctx.strokeStyle = '#ef4444';
+            ctx.beginPath();
+            for (let i = 0; i <= step; i++) {
+                const x = currentCenter - currentRange + (2 * currentRange * i / step);
+                const y = fx(x);
+                const plotX = scaleX(x, width);
+                const plotY = scaleY(y, height);
+                if (i === 0) ctx.moveTo(plotX, plotY);
+                else ctx.lineTo(plotX, plotY);
+            }
+            ctx.stroke();
+            ctx.strokeStyle = '#6366f1';
+            ctx.beginPath();
+            for (let i = 0; i <= step; i++) {
+                const x = currentCenter - currentRange + (2 * currentRange * i / step);
+                const y = tx(x);
+                const plotX = scaleX(x, width);
+                const plotY = scaleY(y, height);
+                if (i === 0) ctx.moveTo(plotX, plotY);
+                else ctx.lineTo(plotX, plotY);
+            }
+            ctx.stroke();
+            buildErrorTable(fx, tx);
+        }
+
+        function scaleX(x, width) {
+            return 60 + (width - 120) * ((x - (currentCenter - currentRange)) / (2 * currentRange));
+        }
+
+        function scaleY(y, height) {
+            const minY = -4;
+            const maxY = 4;
+            const clamped = Math.max(Math.min(y, maxY), minY);
+            return height - 60 - (clamped - minY) / (maxY - minY) * (height - 120);
+        }
+
+        function drawAxis(ctx, width, height) {
+            ctx.save();
+            ctx.strokeStyle = '#d1d5db';
+            ctx.strokeRect(60, 40, width - 120, height - 120);
+            ctx.strokeStyle = '#374151';
+            ctx.beginPath();
+            ctx.moveTo(60, height - 60);
+            ctx.lineTo(width - 60, height - 60);
+            ctx.moveTo(60, 40);
+            ctx.lineTo(60, height - 60);
+            ctx.stroke();
+            ctx.fillStyle = '#374151';
+            ctx.fillText('x', width - 70, height - 70);
+            ctx.fillText('y', 70, 50);
+            ctx.restore();
+        }
+
+        function buildErrorTable(fx, tx) {
+            const table = document.getElementById('errorTable');
+            table.innerHTML = '<tr><td>x</td><td>f(x)</td><td>T_n(x)</td><td>误差</td></tr>';
+            for (let i = 0; i <= 4; i++) {
+                const x = currentCenter - currentRange + i * currentRange / 2;
+                const actual = fx(x);
+                const approx = tx(x);
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td>${x.toFixed(2)}</td><td>${actual.toFixed(4)}</td><td>${approx.toFixed(4)}</td><td>${(actual - approx).toFixed(4)}</td>`;
+                table.appendChild(tr);
+            }
+        }
+
+        function resizeCanvas(canvas) {
+            const container = canvas.parentElement;
+            const width = container.clientWidth - 20;
+            const height = container.clientHeight - 20;
+            canvas.style.width = width + 'px';
+            canvas.style.height = height + 'px';
+            const ratio = window.devicePixelRatio || 1;
+            canvas.width = width * ratio;
+            canvas.height = height * ratio;
+            const ctx = canvas.getContext('2d');
+            ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            return ctx;
+        }
+
+        window.addEventListener('resize', drawApproximation);
+
+        updateTaylor();
+        renderMath();
+
+        // 自定义下拉框控制函数
+        function toggleCustomSelect(trigger) {
+            const container = trigger.parentElement;
+            const isOpen = container.classList.contains('open');
+            document.querySelectorAll('.custom-select-container.open').forEach(el => el.classList.remove('open'));
+            if (!isOpen) container.classList.add('open');
+        }
+
+        function selectCustomOption(option, selectId) {
+            const container = option.closest('.custom-select-container');
+            const trigger = container.querySelector('.selected-formula');
+            const hiddenInput = document.getElementById(selectId);
+            container.querySelectorAll('.custom-option').forEach(opt => opt.classList.remove('selected'));
+            option.classList.add('selected');
+            trigger.innerHTML = option.innerHTML;
+            hiddenInput.value = option.dataset.value;
+            container.classList.remove('open');
+            if (typeof MathJax !== 'undefined') MathJax.typesetPromise([container]).catch(err => console.log(err));
+            if (selectId === 'functionSelector') updateTaylor();
+        }
+
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.custom-select-container')) {
+                document.querySelectorAll('.custom-select-container.open').forEach(el => el.classList.remove('open'));
+            }
+        });
+
+        window.addEventListener('DOMContentLoaded', () => {
+            if (window.MathUIEnhancer) {
+                window.MathUIEnhancer.enhanceAllSelects();
+            }
+        });
+    </script>
+</body>
+</html>

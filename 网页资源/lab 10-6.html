@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab 10.6 逆矩阵求解与应用实验室</title>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\(', '\)']],
+                displayMath: [['$$', '$$'], ['\[', '\]']],
+                processEscapes: true
+            },
+            startup: {
+                pageReady: () => {
+                    return MathJax.startup.defaultPageReady().then(() => {
+                        if (typeof window.scheduleMathRender === 'function') {
+                            window.scheduleMathRender();
+                        }
+                        console.log('MathJax加载完成');
+                    });
+                }
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+            }
+        };
+    </script>
+    <script defer src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js"></script>
+    <script defer src="../common-assets/js/lab-math-enhancer.js"></script>
+    <style>
+        :root {
+            --h1-size: 22px;
+            --h2-size: 20px;
+            --h3-size: 18px;
+            --btn-size: 16px;
+            --formula-size: 20px;
+            --text-size: 16px;
+            --primary: #4f46e5;
+            --primary-light: #6366f1;
+            --primary-dark: #3730a3;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --light: #ffffff;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-400: #9ca3af;
+            --gray-600: #4b5563;
+            --gray-800: #1f2937;
+            --border: #e5e7eb;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        *::-webkit-scrollbar {
+            width: 0;
+            background: transparent;
+        }
+
+        * {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
+            font-size: var(--text-size);
+            line-height: 1.5;
+            background: var(--gray-50);
+            color: var(--gray-800);
+        }
+
+        .return-home-panel {
+            position: fixed;
+            top: 12px;
+            right: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+            z-index: 40;
+        }
+
+        .return-toggle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.95), rgba(99, 102, 241, 0.9));
+            color: #ffffff;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 10px 18px rgba(79, 70, 229, 0.28);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .return-toggle:focus-visible {
+            outline: 2px solid rgba(129, 140, 248, 0.6);
+            outline-offset: 3px;
+        }
+
+        .return-toggle:hover {
+            transform: translateY(-1px) scale(1.03);
+            box-shadow: 0 14px 26px rgba(79, 70, 229, 0.35);
+        }
+
+        .return-links {
+            display: none;
+            flex-direction: column;
+            gap: 6px;
+            padding: 10px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(79, 70, 229, 0.15);
+            box-shadow: 0 16px 30px rgba(15, 23, 42, 0.18);
+            backdrop-filter: blur(6px);
+        }
+
+        .return-home-panel.open .return-links {
+            display: flex;
+        }
+
+        .return-link {
+            padding: 6px 12px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 14px;
+            color: var(--primary);
+            background: rgba(79, 70, 229, 0.12);
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+
+        .return-link.return-main {
+            color: var(--success);
+            background: rgba(16, 185, 129, 0.12);
+        }
+
+        .return-link:hover {
+            background: rgba(79, 70, 229, 0.2);
+            color: var(--primary-dark);
+        }
+
+        .return-link.return-main:hover {
+            background: rgba(16, 185, 129, 0.22);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            height: 100vh;
+            max-height: 700px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            background: var(--light);
+            border-radius: 12px;
+            box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(90deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: var(--light);
+            padding: 10px 24px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: var(--h1-size);
+            font-weight: 600;
+        }
+
+        .main {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 120px;
+            background: var(--gray-50);
+            border-right: 1px solid var(--border);
+            padding: 12px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .nav-btn {
+            width: 100%;
+            padding: 8px;
+            border: none;
+            border-radius: 6px;
+            background: transparent;
+            color: var(--gray-600);
+            text-align: left;
+            font-size: var(--text-size);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .nav-btn:hover {
+            background: var(--gray-100);
+        }
+
+        .nav-btn.active {
+            background: var(--primary);
+            color: var(--light);
+        }
+
+        .content {
+            flex: 1;
+            display: none;
+            padding: 18px;
+            overflow-y: auto;
+        }
+
+        .content.active {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow-y: auto;
+        }
+
+        .card {
+            background: var(--light);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+        }
+
+        .card h3 {
+            font-size: var(--h3-size);
+            color: var(--primary);
+            margin-bottom: 12px;
+        }
+
+        .input-group {
+            margin-bottom: 12px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: var(--gray-600);
+        }
+
+        .input-group select,
+        .input-group input,
+        .input-group input[type="range"] {
+            width: 100%;
+            padding: 8px 10px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            font-size: var(--text-size);
+            background: var(--gray-50);
+        }
+
+        .input-group input:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: var(--light);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 16px;
+            font-size: var(--btn-size);
+            border: none;
+            border-radius: 6px;
+            background: var(--primary);
+            color: var(--light);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            gap: 6px;
+        }
+
+        .btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .info-box {
+            background: var(--gray-50);
+            border-left: 3px solid var(--primary);
+            padding: 12px;
+            border-radius: 6px;
+            font-size: var(--text-size);
+            line-height: 1.6;
+        }
+
+        canvas {
+            width: 100%;
+            height: 260px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: #ffffff;
+        }
+
+        table.matrix-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: center;
+        }
+
+        table.matrix-table td {
+            border: 1px solid var(--gray-200);
+            padding: 6px;
+            font-size: var(--text-size);
+        }
+
+        /* 自定义下拉框样式 */
+        .custom-select-container { position: relative; width: 100%; }
+        .custom-select-trigger { padding: 8px 32px 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; background: #f9fafb; cursor: pointer; display: flex; align-items: center; justify-content: space-between; transition: all 0.2s; }
+        .custom-select-trigger:hover { border-color: #9ca3af; background: #ffffff; }
+        .custom-select-container.open .custom-select-trigger { border-color: #4f46e5; background: #ffffff; }
+        .custom-select-trigger .arrow { font-size: 10px; color: #6b7280; transition: transform 0.2s; }
+        .custom-select-trigger .selected-formula { flex: 1; }
+        .custom-select-container.open .arrow { transform: rotate(180deg); }
+        .custom-select-options { display: none; position: absolute; top: 100%; left: 0; right: 0; background: #ffffff; border: 1px solid #d1d5db; border-radius: 6px; margin-top: 4px; max-height: 200px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        .custom-select-container.open .custom-select-options { display: block; }
+        .custom-option { padding: 8px 12px; cursor: pointer; transition: background 0.15s; }
+        .custom-option:hover { background: #f3f4f6; }
+        .custom-option.selected { background: #eef2ff; color: #4f46e5; font-weight: 500; }
+    </style>
+</head>
+<body>
+    <div class="return-home-panel">
+        <button class="return-toggle" type="button" aria-label="打开返回导航" onclick="toggleReturnPanel(event)"><i class="fa-solid fa-house"></i></button>
+        <div class="return-links">
+            <a class="return-link return-sub" href="index.html"><i class="fa-solid fa-arrow-left"></i> 返回目录</a>
+            <a class="return-link return-main" href="../index.html"><i class="fa-solid fa-house"></i> 返回主站</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <header class="header">
+            <h1>Lab 10.6 逆矩阵求解与应用实验室</h1>
+        </header>
+
+        <div class="main">
+            <nav class="sidebar">
+                <button class="nav-btn active"  data-panel="module1"onclick="switchPanel('module1', this)">逆矩阵求解</button>
+                <button class="nav-btn"  data-panel="module2"onclick="switchPanel('module2', this)">应用计算</button>
+            </nav>
+
+            <div class="content active" id="module1">
+                <div class="column">
+                    <div class="card">
+                        <h3>选择矩阵</h3>
+                        <div class="input-group">
+                            <label>示例矩阵</label>
+                            <div class="custom-select-container">
+                                <div class="custom-select-trigger" onclick="toggleCustomSelect(this)">
+                                    <span class="selected-formula">2×2 非奇异矩阵</span>
+                                    <span class="arrow">▼</span>
+                                </div>
+                                <div class="custom-select-options">
+                                    <div class="custom-option selected" data-value="0" onclick="selectCustomOption(this, 'inverseSelector')">
+                                        2×2 非奇异矩阵
+                                    </div>
+                                    <div class="custom-option" data-value="1" onclick="selectCustomOption(this, 'inverseSelector')">
+                                        3×3 可逆矩阵
+                                    </div>
+                                    <div class="custom-option" data-value="2" onclick="selectCustomOption(this, 'inverseSelector')">
+                                        含参数 $k$ 的矩阵
+                                    </div>
+                                </div>
+                                <input type="hidden" id="inverseSelector" value="0">
+                            </div>
+                        </div>
+                        <div class="input-group" id="paramBlock" style="display:none;">
+                            <label>参数 $k$：<span id="paramK">1</span></label>
+                            <input type="range" id="paramRange" min="-3" max="3" step="1" value="1">
+                        </div>
+                        <button class="btn" onclick="updateInverse()">开始求逆</button>
+                    </div>
+                    <div class="card">
+                        <h3>增广矩阵消元步骤</h3>
+                        <div class="input-group">
+                            <label>查看步骤 <span id="invStepIndex">1</span></label>
+                            <input type="range" id="invStepRange" min="1" max="1" value="1" oninput="showInverseStep(this.value)">
+                        </div>
+                        <div class="info-box" id="inverseDescription">通过将单位矩阵与原矩阵并列，执行行初等变换，将左侧化为单位矩阵即可得到逆矩阵。</div>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="card">
+                        <h3>增广矩阵展示</h3>
+                        <div id="inverseTable"></div>
+                        <div class="info-box" id="inverseSummary">请选择矩阵并执行求逆。</div>
+                    </div>
+                    <div class="card">
+                        <h3>线性变换可视化</h3>
+                        <canvas id="inverseCanvas"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content" id="module2">
+                <div class="column">
+                    <div class="card">
+                        <h3>线性方程组求解</h3>
+                        <div class="input-group">
+                            <label>选择系数矩阵</label>
+                            <div class="custom-select-container">
+                                <div class="custom-select-trigger" onclick="toggleCustomSelect(this)">
+                                    <span class="selected-formula">$A_1x=b_1$</span>
+                                    <span class="arrow">▼</span>
+                                </div>
+                                <div class="custom-select-options">
+                                    <div class="custom-option selected" data-value="0" onclick="selectCustomOption(this, 'applicationSelector')">
+                                        $A_1x=b_1$
+                                    </div>
+                                    <div class="custom-option" data-value="1" onclick="selectCustomOption(this, 'applicationSelector')">
+                                        $A_2x=b_2$
+                                    </div>
+                                </div>
+                                <input type="hidden" id="applicationSelector" value="0">
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>右端向量 $b$</label>
+                            <div class="custom-select-container">
+                                <div class="custom-select-trigger" onclick="toggleCustomSelect(this)">
+                                    <span class="selected-formula">默认向量</span>
+                                    <span class="arrow">▼</span>
+                                </div>
+                                <div class="custom-select-options">
+                                    <div class="custom-option selected" data-value="0" onclick="selectCustomOption(this, 'vectorSelector')">
+                                        默认向量
+                                    </div>
+                                    <div class="custom-option" data-value="1" onclick="selectCustomOption(this, 'vectorSelector')">
+                                        自定义输入
+                                    </div>
+                                </div>
+                                <input type="hidden" id="vectorSelector" value="0">
+                            </div>
+                        </div>
+                        <div class="input-group" id="customVectorGroup" style="display:none;">
+                            <label>输入向量（用逗号分隔）</label>
+                            <input type="text" id="customVector" placeholder="例如：1,2">
+                        </div>
+                        <button class="btn" onclick="solveSystem()">求解 $x = A^{-1}b$</button>
+                    </div>
+                    <div class="card">
+                        <h3>应用提示</h3>
+                        <div class="info-box" id="applicationInfo">利用逆矩阵可快速求解可逆系数矩阵的线性方程组，也可用于坐标变换、网络流量平衡等问题。</div>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="card">
+                        <h3>求解结果</h3>
+                        <div id="solutionDisplay"></div>
+                    </div>
+                    <div class="card">
+                        <h3>向量变换示意</h3>
+                        <canvas id="applicationCanvas"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 自定义下拉框控制函数
+        function toggleCustomSelect(trigger) {
+            const container = trigger.parentElement;
+            const allContainers = document.querySelectorAll('.custom-select-container');
+            allContainers.forEach(c => {
+                if (c !== container) c.classList.remove('open');
+            });
+            container.classList.toggle('open');
+        }
+
+        function selectCustomOption(option, selectId) {
+            const container = option.closest('.custom-select-container');
+            const trigger = container.querySelector('.custom-select-trigger span');
+            const hiddenInput = document.getElementById(selectId);
+            const allOptions = container.querySelectorAll('.custom-option');
+            
+            allOptions.forEach(opt => opt.classList.remove('selected'));
+            option.classList.add('selected');
+            
+            trigger.innerHTML = option.innerHTML;
+            hiddenInput.value = option.dataset.value;
+            
+            container.classList.remove('open');
+            
+            if (typeof MathJax !== 'undefined') {
+                MathJax.typesetPromise([trigger]).catch(err => console.log(err));
+            }
+            
+            // 触发对应的更新函数
+            if (selectId === 'inverseSelector') updateInverse();
+            if (selectId === 'vectorSelector') {
+                document.getElementById('customVectorGroup').style.display = 
+                    hiddenInput.value === '1' ? 'block' : 'none';
+            }
+        }
+
+        // 点击外部关闭下拉框
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.custom-select-container')) {
+                document.querySelectorAll('.custom-select-container').forEach(c => {
+                    c.classList.remove('open');
+                });
+            }
+        });
+
+        const inverseExamples = [
+            {
+                matrix: [[2, -1], [3, 4]],
+                description: '2×2 矩阵可直接使用公式 $A^{-1} = \\frac{1}{\\det A}\\begin{bmatrix} d & -b \\\\ -c & a \\end{bmatrix}$。'
+            },
+            {
+                matrix: [[1, 2, 0], [0, 1, 1], [2, 1, 3]],
+                description: '通过增广矩阵进行行初等变换，直观体验求逆步骤。'
+            },
+            {
+                matrix: k => [[1, k], [2, k + 1]],
+                description: '参数 $k$ 的不同取值会影响行列式，$\\det A = 1 + k - 2k = 1 - k$。'
+            }
+        ];
+
+        const applicationCases = [
+            { A: [[2, -1], [1, 1]], b: [1, 3] },
+            { A: [[1, 2, 0], [0, 1, 1], [2, 1, 3]], b: [3, 1, 4] }
+        ];
+
+        let inverseSteps = [];
+        let currentMatrix = [];
+        let currentInverse = [];
+
+        function switchPanel(id, btn) {
+            document.querySelectorAll('.content').forEach(content => content.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            document.querySelectorAll('.nav-btn').forEach(button => button.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+            renderMath();
+        }
+
+        let mathObserver = null;
+        let mathRenderQueued = false;
+
+        function startMathObserver() {
+            if (typeof MutationObserver === 'undefined' || !document.body) {
+                return;
+            }
+            if (mathObserver) {
+                mathObserver.disconnect();
+            }
+            mathObserver = new MutationObserver(mutations => {
+                for (const mutation of mutations) {
+                    if (mutation.type === 'childList' || mutation.type === 'characterData') {
+                        scheduleMathRender();
+                        break;
+                    }
+                }
+            });
+            mathObserver.observe(document.body, { childList: true, subtree: true, characterData: true });
+        }
+
+        function scheduleMathRender() {
+            if (mathRenderQueued) {
+                return;
+            }
+            mathRenderQueued = true;
+            requestAnimationFrame(() => {
+                mathRenderQueued = false;
+                if (window.MathJax && MathJax.typesetPromise) {
+                    if (mathObserver) {
+                        mathObserver.disconnect();
+                    }
+                    MathJax.typesetPromise()
+                        .catch(err => console.log('渲染错误:', err))
+                        .finally(() => {
+                            startMathObserver();
+                        });
+                } else {
+                    setTimeout(scheduleMathRender, 160);
+                }
+            });
+        }
+
+        window.scheduleMathRender = scheduleMathRender;
+
+        function renderMath() {
+            scheduleMathRender();
+        }
+
+        function ensureMathReady() {
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', () => {
+                    startMathObserver();
+                    scheduleMathRender();
+                });
+            } else {
+                startMathObserver();
+                scheduleMathRender();
+            }
+        }
+
+        ensureMathReady();
+
+        function toggleReturnPanel(event) {
+            event.stopPropagation();
+            const panel = document.querySelector('.return-home-panel');
+            if (panel) {
+                panel.classList.toggle('open');
+            }
+        }
+
+        document.addEventListener('click', event => {
+            const panel = document.querySelector('.return-home-panel');
+            if (!panel) {
+                return;
+            }
+            if (panel.classList.contains('open') && !panel.contains(event.target)) {
+                panel.classList.remove('open');
+            }
+        });
+
+        window.addEventListener('pageshow', () => {
+            scheduleMathRender();
+        });
+
+        function resizeCanvas(canvas) {
+            const container = canvas.parentElement;
+            const width = container.clientWidth - 20;
+            const height = container.clientHeight - 20;
+            canvas.style.width = width + 'px';
+            canvas.style.height = height + 'px';
+            const ratio = window.devicePixelRatio || 1;
+            canvas.width = width * ratio;
+            canvas.height = height * ratio;
+            const ctx = canvas.getContext('2d');
+            ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            return ctx;
+        }
+
+        function drawAxis(ctx, width, height) {
+            ctx.save();
+            ctx.strokeStyle = '#374151';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(50, height - 40);
+            ctx.lineTo(width - 30, height - 40);
+            ctx.moveTo(50, 30);
+            ctx.lineTo(50, height - 40);
+            ctx.stroke();
+            ctx.font = '14px sans-serif';
+            ctx.fillStyle = '#374151';
+            ctx.fillText('x', width - 60, height - 48);
+            ctx.fillText('y', 20, 50);
+            ctx.restore();
+        }
+
+        function cloneMatrix(matrix) {
+            return matrix.map(row => row.slice());
+        }
+
+        function augmentWithIdentity(matrix) {
+            const n = matrix.length;
+            const augmented = [];
+            for (let i = 0; i < n; i++) {
+                augmented.push([...matrix[i], ...Array.from({ length: n }, (_, j) => (i === j ? 1 : 0))]);
+            }
+            return augmented;
+        }
+
+        function gaussianJordan(augmented) {
+            const m = cloneMatrix(augmented);
+            const steps = [{ matrix: cloneMatrix(m), description: '初始增广矩阵' }];
+            const n = m.length;
+            const totalCols = m[0].length;
+            let determinant = 1;
+            for (let i = 0; i < n; i++) {
+                let pivotRow = i;
+                while (pivotRow < n && Math.abs(m[pivotRow][i]) < 1e-8) {
+                    pivotRow++;
+                }
+                if (pivotRow === n) {
+                    steps.push({ matrix: cloneMatrix(m), description: '出现零主元，矩阵不可逆。' });
+                    return { steps, invertible: false, determinant: 0 };
+                }
+                if (pivotRow !== i) {
+                    [m[pivotRow], m[i]] = [m[i], m[pivotRow]];
+                    determinant *= -1;
+                    steps.push({ matrix: cloneMatrix(m), description: `交换第 ${pivotRow + 1} 行与第 ${i + 1} 行` });
+                }
+                const pivot = m[i][i];
+                determinant *= pivot;
+                for (let j = 0; j < totalCols; j++) {
+                    m[i][j] /= pivot;
+                }
+                steps.push({ matrix: cloneMatrix(m), description: `第 ${i + 1} 行除以 ${pivot.toFixed(2)}` });
+                for (let r = 0; r < n; r++) {
+                    if (r !== i && Math.abs(m[r][i]) > 1e-8) {
+                        const factor = m[r][i];
+                        for (let c = 0; c < totalCols; c++) {
+                            m[r][c] -= factor * m[i][c];
+                        }
+                        steps.push({ matrix: cloneMatrix(m), description: `第 ${r + 1} 行减去 ${factor.toFixed(2)} \\times 第 ${i + 1} 行` });
+                    }
+                }
+            }
+            steps.push({ matrix: cloneMatrix(m), description: '左侧已化为单位矩阵，右侧即为逆矩阵。' });
+            const inverse = m.map(row => row.slice(n));
+            return { steps, invertible: true, inverse, determinant };
+        }
+
+        function matrixToTable(matrix) {
+            const table = document.createElement('table');
+            table.className = 'matrix-table';
+            matrix.forEach(row => {
+                const tr = document.createElement('tr');
+                row.forEach(value => {
+                    const td = document.createElement('td');
+                    td.textContent = Math.abs(value) < 1e-6 ? '0' : value.toFixed(2);
+                    tr.appendChild(td);
+                });
+                table.appendChild(tr);
+            });
+            return table;
+        }
+
+        function updateInverse() {
+            const idx = parseInt(document.getElementById('inverseSelector').value, 10);
+            document.getElementById('paramBlock').style.display = idx === 2 ? 'block' : 'none';
+            if (idx === 2) {
+                const k = parseInt(document.getElementById('paramRange').value, 10);
+                document.getElementById('paramK').textContent = k;
+                currentMatrix = inverseExamples[idx].matrix(k);
+            } else {
+                currentMatrix = inverseExamples[idx].matrix;
+            }
+            const augmented = augmentWithIdentity(currentMatrix);
+            const { steps, invertible, inverse, determinant } = gaussianJordan(augmented);
+            inverseSteps = steps;
+            currentInverse = invertible ? inverse : [];
+            document.getElementById('invStepRange').max = steps.length;
+            document.getElementById('invStepRange').value = 1;
+            document.getElementById('invStepIndex').textContent = 1;
+            document.getElementById('inverseDescription').innerHTML = inverseExamples[idx].description;
+            if (invertible) {
+                document.getElementById('inverseSummary').innerHTML = `行列式 det = ${determinant.toFixed(2)}，矩阵可逆。其逆矩阵在最后一步右侧读出。`;
+            } else {
+                document.getElementById('inverseSummary').innerHTML = '行列式为0，矩阵不可逆。';
+            }
+            showInverseStep(1);
+            drawInverseCanvas();
+            renderMath();
+        }
+
+        function showInverseStep(stepIndex) {
+            if (!inverseSteps.length) return;
+            const idx = stepIndex - 1;
+            const step = inverseSteps[idx];
+            document.getElementById('invStepIndex').textContent = stepIndex;
+            const descEl = document.getElementById('inverseDescription');
+            descEl.innerHTML = step.description.includes('\\times') ? `$${step.description}$` : step.description;
+            if (typeof MathJax !== 'undefined') {
+                MathJax.typesetPromise([descEl]).catch(err => console.log(err));
+            }
+            const container = document.getElementById('inverseTable');
+            container.innerHTML = '';
+            container.appendChild(matrixToTable(step.matrix));
+        }
+
+        function drawInverseCanvas() {
+            const canvas = document.getElementById('inverseCanvas');
+            const ctx = resizeCanvas(canvas);
+            const width = canvas.width / (window.devicePixelRatio || 1);
+            const height = canvas.height / (window.devicePixelRatio || 1);
+            drawAxis(ctx, width, height);
+            if (!currentMatrix.length || currentMatrix[0].length !== 2 || !currentInverse.length) return;
+            const basis = [[1, 0], [0, 1]];
+            const transformed = basis.map(vec => [
+                currentMatrix[0][0] * vec[0] + currentMatrix[0][1] * vec[1],
+                currentMatrix[1][0] * vec[0] + currentMatrix[1][1] * vec[1]
+            ]);
+            const restored = basis.map(vec => [
+                currentInverse[0][0] * vec[0] + currentInverse[0][1] * vec[1],
+                currentInverse[1][0] * vec[0] + currentInverse[1][1] * vec[1]
+            ]);
+            ctx.strokeStyle = '#6366f1';
+            ctx.beginPath();
+            ctx.moveTo(50, height - 40);
+            ctx.lineTo(50 + transformed[0][0] * 60, height - 40 - transformed[0][1] * 60);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(50, height - 40);
+            ctx.lineTo(50 + transformed[1][0] * 60, height - 40 - transformed[1][1] * 60);
+            ctx.stroke();
+            ctx.strokeStyle = '#10b981';
+            ctx.beginPath();
+            ctx.moveTo(50, height - 40);
+            ctx.lineTo(50 + restored[0][0] * 60, height - 40 - restored[0][1] * 60);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(50, height - 40);
+            ctx.lineTo(50 + restored[1][0] * 60, height - 40 - restored[1][1] * 60);
+            ctx.stroke();
+            ctx.fillStyle = '#374151';
+            ctx.fillText('蓝色：A 变换', width - 190, 45);
+            ctx.fillText('绿色：A^{-1} 恢复', width - 190, 65);
+        }
+
+        function solveSystem() {
+            const idx = parseInt(document.getElementById('applicationSelector').value, 10);
+            let { A, b } = applicationCases[idx];
+            if (document.getElementById('vectorSelector').value === '1') {
+                const input = document.getElementById('customVector').value.split(',').map(v => parseFloat(v.trim()));
+                if (input.some(isNaN) || input.length !== b.length) {
+                    alert('向量长度需与矩阵行数一致，并确保输入为数字。');
+                    return;
+                }
+                b = input;
+            }
+            const augmented = augmentWithIdentity(A);
+            const { invertible, inverse } = gaussianJordan(augmented);
+            if (!invertible) {
+                document.getElementById('solutionDisplay').innerHTML = '<div class="info-box">该矩阵不可逆，方程组可能无唯一解。</div>';
+                return;
+            }
+            const solution = inverse.map(row => row.reduce((sum, val, idx2) => sum + val * b[idx2], 0));
+            const container = document.getElementById('solutionDisplay');
+            container.innerHTML = '';
+            const list = document.createElement('ul');
+            list.className = 'info-box';
+            solution.forEach((val, i) => {
+                const li = document.createElement('li');
+                li.textContent = `x${i + 1} = ${val.toFixed(2)}`;
+                list.appendChild(li);
+            });
+            container.appendChild(list);
+            document.getElementById('applicationInfo').textContent = '逆矩阵将向量映射回原坐标系，得到唯一的解向量。';
+            drawApplicationCanvas(A, b, solution);
+        }
+
+        function drawApplicationCanvas(A, b, solution) {
+            const canvas = document.getElementById('applicationCanvas');
+            const ctx = resizeCanvas(canvas);
+            const width = canvas.width / (window.devicePixelRatio || 1);
+            const height = canvas.height / (window.devicePixelRatio || 1);
+            drawAxis(ctx, width, height);
+            if (A[0].length !== 2 || solution.length !== 2) {
+                ctx.fillStyle = '#ef4444';
+                ctx.fillText('仅显示二维情况。', width / 2 - 60, height / 2);
+                return;
+            }
+            const bVec = [b[0], b[1]];
+            ctx.strokeStyle = '#6366f1';
+            ctx.beginPath();
+            ctx.moveTo(50, height - 40);
+            ctx.lineTo(50 + bVec[0] * 60, height - 40 - bVec[1] * 60);
+            ctx.stroke();
+            ctx.strokeStyle = '#10b981';
+            ctx.beginPath();
+            ctx.moveTo(50, height - 40);
+            ctx.lineTo(50 + solution[0] * 60, height - 40 - solution[1] * 60);
+            ctx.stroke();
+            ctx.fillStyle = '#374151';
+            ctx.fillText('蓝：目标向量 b', width - 200, 45);
+            ctx.fillText('绿：求得解向量', width - 200, 65);
+        }
+
+        document.getElementById('inverseSelector').addEventListener('change', updateInverse);
+        document.getElementById('paramRange').addEventListener('input', updateInverse);
+        document.getElementById('vectorSelector').addEventListener('change', (e) => {
+            document.getElementById('customVectorGroup').style.display = e.target.value === '1' ? 'block' : 'none';
+        });
+        window.addEventListener('resize', () => {
+            drawInverseCanvas();
+        });
+
+        // 页面加载完成后初始化可视化
+        window.addEventListener('load', () => {
+            updateInverse();
+            
+            // 初始化自定义下拉框的LaTeX渲染
+            if (typeof MathJax !== 'undefined') {
+                MathJax.typesetPromise().catch(err => console.log(err));
+            }
+            renderMath();
+        });
+    </script>
+</body>
+</html>

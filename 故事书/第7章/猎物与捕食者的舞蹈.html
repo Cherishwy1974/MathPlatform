@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>猎物与捕食者的舞蹈</title>
+    <script src="../../common-assets/js/tailwind.min.js"></script>
+    <style>
+        @font-face {
+            font-family: 'Iansui-Regular';
+            src: url('../../common-assets/fonts/Iansui-Regular.ttf') format('truetype');
+            font-weight: 400;
+            font-style: normal;
+        }
+        
+        /* 美化滚动条 - 竖向 */
+        *::-webkit-scrollbar {
+            width: 12px;
+        }
+        *::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+        }
+        *::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #daa520, #b8860b);
+            border-radius: 6px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+        *::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #ffd700, #daa520);
+        }
+        *::-webkit-scrollbar-thumb:active {
+            background: linear-gradient(180deg, #b8860b, #8b7355);
+        }
+        
+        /* 隐藏横向滚动条 */
+        *::-webkit-scrollbar:horizontal {
+            display: none;
+        }
+        
+        :root {
+            --bg-start: #2d1810;
+            --bg-scene1: linear-gradient(135deg, #8b4513, #a0522d, #654321);
+            --bg-scene2: linear-gradient(180deg, #4a2c17, #6b3410, #8b4513);
+            --bg-scene3: linear-gradient(45deg, #654321, #8b4513, #a0522d);
+            --bg-scene4: radial-gradient(circle, #d2691e, #8b4513, #4a2c17);
+            --bg-scene5: linear-gradient(315deg, #cd853f, #daa520);
+            --bg-scene6: linear-gradient(135deg, #8b4513, #cd853f, #d2691e);
+            --bg-scene7: linear-gradient(180deg, #4a2c17, #8b4513);
+            --bg-scene8: linear-gradient(45deg, #654321, #a0522d);
+            --bg-scene9: linear-gradient(135deg, #6b3410, #8b4513, #a0522d);
+            --bg-scene10: radial-gradient(circle, #4a2c17, #654321);
+            --bg-scene11: linear-gradient(315deg, #8b4513, #d2691e);
+        }
+
+        body {
+            font-family: 'Iansui-Regular', serif;
+            color: #f4e4c1;
+            overflow-x: hidden;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            background-color: var(--bg-start);
+            transition: background-color 1.5s ease-in-out;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* 森林粒子背景 */
+        #forestCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
+        /* 滚动进度指示器 */
+        .scroll-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 6px;
+            background: linear-gradient(90deg, #8b4513, #cd853f, #daa520);
+            z-index: 1000;
+            transition: width 0.3s ease;
+            box-shadow: 0 2px 10px rgba(139, 69, 19, 0.5);
+        }
+
+        /* 循环提示 */
+        .loop-indicator {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: rgba(139, 69, 19, 0.9);
+            color: #f4e4c1;
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-size: 14px;
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 0.5s ease;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(244, 228, 193, 0.2);
+        }
+
+        .loop-indicator.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        #scroll-container {
+            height: 1300vh;
+            position: relative;
+        }
+
+        .sticky-element {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* 几何过渡效果 */
+        .geometric-transition {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 0;
+            height: 0;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .forest-wipe {
+            width: 100vmax;
+            height: 100vmax;
+            border-radius: 50%;
+            background: radial-gradient(circle, transparent 0%, rgba(139, 69, 19, 0.8) 100%);
+            transform: translate(-50%, -50%) scale(0);
+            transition: transform 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .forest-wipe.active {
+            transform: translate(-50%, -50%) scale(2);
+        }
+
+        /* 场景样式 */
+        .scene {
+            opacity: 0;
+            transition: opacity 0.8s ease-in-out;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .scene-background {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            transition: opacity 1.5s ease-in-out;
+            z-index: -2;
+        }
+
+        /* 场景背景 */
+        .bg-scene1 { background: var(--bg-scene1); }
+        .bg-scene2 { background: var(--bg-scene2); }
+        .bg-scene3 { background: var(--bg-scene3); }
+        .bg-scene4 { background: var(--bg-scene4); }
+        .bg-scene5 { background: var(--bg-scene5); }
+        .bg-scene6 { background: var(--bg-scene6); }
+        .bg-scene7 { background: var(--bg-scene7); }
+        .bg-scene8 { background: var(--bg-scene8); }
+        .bg-scene9 { background: var(--bg-scene9); }
+        .bg-scene10 { background: var(--bg-scene10); }
+        .bg-scene11 { background: var(--bg-scene11); }
+
+        /* 图片样式 */
+        .illustration-wrapper {
+            position: absolute;
+            z-index: 5;
+            transition: all 1.5s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .illustration {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: all 1.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            opacity: 0;
+            transform: scale(0.85) translateY(30px);
+            filter: brightness(1.0) contrast(1.1) saturate(1.0) sepia(0.1);
+        }
+
+        .frame-elegant {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            border-radius: 20px;
+            box-shadow: 
+                0 15px 35px rgba(139, 69, 19, 0.3),
+                0 5px 15px rgba(139, 69, 19, 0.2);
+            border: 1px solid rgba(139, 69, 19, 0.3);
+        }
+
+        .frame-elegant::before {
+            content: '';
+            position: absolute;
+            inset: -1px;
+            background: linear-gradient(135deg, 
+                rgba(244, 228, 193, 0.2) 0%, 
+                rgba(244, 228, 193, 0) 50%,
+                rgba(205, 133, 63, 0.1) 100%
+            );
+            border-radius: inherit;
+            opacity: 0.6;
+            z-index: -1;
+        }
+
+        .illustration-appear {
+            opacity: 0.95;
+            transform: scale(1) translateY(0);
+        }
+
+        .illustration-left {
+            left: 10vw;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 35vw;
+            height: 55vh;
+        }
+
+        .illustration-right {
+            right: 10vw;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 35vw;
+            height: 55vh;
+        }
+
+        /* 文字样式 */
+        .story-text {
+            position: absolute;
+            font-size: 1.5rem;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
+            transition: all 1s cubic-bezier(0.23, 1, 0.32, 1);
+            text-align: left;
+            padding: 2rem;
+            max-width: 280px;
+            line-height: 2.2;
+            font-weight: 500;
+            z-index: 8;
+            writing-mode: vertical-rl;
+            text-orientation: upright;
+            letter-spacing: 0.12em;
+            opacity: 0;
+            transform: translateY(20px);
+            color: #f4e4c1;
+        }
+
+        .story-text-appear {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .text-left {
+            left: 30vw;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .text-right {
+            right: 10vw;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        /* 逐字浮现动画 */
+        .char-float {
+            display: inline-block;
+            opacity: 0;
+            transform: translateY(15px);
+            animation: forest-float 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+        }
+
+        @keyframes forest-float {
+            0% {
+                opacity: 0;
+                transform: translateY(15px) scale(0.9) rotateZ(-2deg);
+            }
+            50% {
+                opacity: 0.5;
+                transform: translateY(5px) scale(0.95) rotateZ(1deg);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1) rotateZ(0deg);
+            }
+        }
+
+        /* 封面和封底样式 */
+        #scene-cover, #scene-end {
+            z-index: 10;
+        }
+
+        #scene-cover h1, #scene-cover p, #scene-end p {
+            position: relative;
+            z-index: 11;
+            text-shadow: 0 0 20px rgba(139, 69, 19, 0.8);
+        }
+
+        /* 数学公式样式 */
+        .math-formula {
+            position: absolute;
+            bottom: 20vh;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'Iansui-Regular', serif;
+            font-size: 1.8rem;
+            color: #daa520;
+            text-shadow: 0 0 15px rgba(218, 165, 32, 0.8);
+            opacity: 0;
+            transition: opacity 1s ease;
+            writing-mode: horizontal-tb;
+            text-orientation: initial;
+            background: rgba(74, 44, 23, 0.7);
+            padding: 15px 25px;
+            border-radius: 10px;
+            backdrop-filter: blur(5px);
+        }
+
+        .math-formula.show {
+            opacity: 1;
+        }
+
+        /* 特殊场景：方程式展示 */
+        #scene-formula {
+            position: relative;
+        }
+
+        #equation-display {
+            position: absolute;
+            width: 600px;
+            height: 300px;
+            opacity: 0;
+            transition: opacity 1.5s cubic-bezier(0.23, 1, 0.32, 1);
+            z-index: 20;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .equation {
+            font-family: 'Iansui-Regular', serif;
+            font-size: 2rem;
+            color: #daa520;
+            text-shadow: 0 0 20px rgba(218, 165, 32, 0.8);
+            margin: 10px 0;
+            background: rgba(74, 44, 23, 0.8);
+            padding: 15px 30px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(218, 165, 32, 0.3);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .scene { 
+                flex-direction: column; 
+                justify-content: center; 
+                align-items: center;
+                padding: 3vh 3vw;
+                gap: 1.5rem;
+            }
+            .illustration-wrapper { 
+                position: relative !important; 
+                left: auto !important;
+                right: auto !important;
+                width: 80vw !important;
+                height: 40vh !important;
+                margin: 0 auto;
+            }
+            .story-text { 
+                position: relative !important; 
+                left: auto !important;
+                right: auto !important;
+                max-width: 85vw; 
+                font-size: 1.1rem;
+                writing-mode: horizontal-tb;
+                text-orientation: initial;
+                letter-spacing: normal;
+                margin: 0 auto;
+                text-align: center;
+                padding: 1rem;
+            }
+            .loop-indicator {
+                bottom: 20px;
+                right: 20px;
+                padding: 10px 16px;
+                font-size: 12px;
+            }
+            #equation-display {
+                width: 90vw;
+                height: auto;
+            }
+            .equation {
+                font-size: 1.3rem;
+                padding: 10px 20px;
+                margin: 8px 0;
+            }
+        }
+    </style>
+
+    <style>
+        .return-home-panel {
+            position: fixed;
+            top: 12px;
+            left: 12px;
+            display: flex;
+            gap: 6px;
+            z-index: 9999;
+            flex-wrap: wrap;
+        }
+        .return-home-panel .return-link {
+            padding: 6px 10px;
+            border-radius: 10px;
+            background: rgba(15, 23, 42, 0.35);
+            color: #f8fafc;
+            font-size: 13px;
+            text-decoration: none;
+            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.18);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            border: 1px solid rgba(248, 250, 252, 0.12);
+            transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .return-home-panel .return-link:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.25);
+            background: rgba(15, 23, 42, 0.42);
+        }
+        .return-home-panel .return-link.return-main {
+            background: rgba(79, 70, 229, 0.18);
+            border-color: rgba(79, 70, 229, 0.25);
+        }
+        @media (max-width: 640px) {
+            .return-home-panel {
+                top: 12px;
+                left: 12px;
+                right: 12px;
+                justify-content: center;
+            }
+            .return-home-panel .return-link {
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="return-home-panel">
+         <a class="return-link return-sub" href="../index.html"><i class="fa-solid fa-arrow-left"></i> 返回目录</a>
+        <a class="return-link return-main" href="../../index.html"><i class="fa-solid fa-house"></i> 返回主站</a>
+    </div>
+    <!-- 滚动进度指示器 -->
+    <div class="scroll-progress" id="scrollProgress"></div>
+
+    <!-- 循环提示 -->
+    <div class="loop-indicator" id="loopIndicator">
+        <span>🔄 滚动到底部可循环到开头</span>
+    </div>
+
+    <!-- 几何过渡效果层 -->
+    <div class="geometric-transition">
+        <div id="forest-wipe" class="forest-wipe"></div>
+    </div>
+
+    <!-- 森林粒子背景 -->
+    <canvas id="forestCanvas"></canvas>
+
+    <div id="scroll-container">
+        <div id="scene-container" class="sticky-element">
+
+            <!-- 场景背景 -->
+            <div id="bg-scene1" class="scene-background bg-scene1"></div>
+            <div id="bg-scene2" class="scene-background bg-scene2"></div>
+            <div id="bg-scene3" class="scene-background bg-scene3"></div>
+            <div id="bg-scene4" class="scene-background bg-scene4"></div>
+            <div id="bg-scene5" class="scene-background bg-scene5"></div>
+            <div id="bg-scene6" class="scene-background bg-scene6"></div>
+            <div id="bg-scene7" class="scene-background bg-scene7"></div>
+            <div id="bg-scene8" class="scene-background bg-scene8"></div>
+            <div id="bg-scene9" class="scene-background bg-scene9"></div>
+            <div id="bg-scene10" class="scene-background bg-scene10"></div>
+            <div id="bg-scene11" class="scene-background bg-scene11"></div>
+
+            <!-- 场景0: 封面 -->
+            <div id="scene-cover" class="scene flex-col">
+                <h1 class="text-5xl md:text-6xl font-bold text-center">猎物与<br>捕食者的舞蹈</h1>
+                <p class="text-xl md:text-2xl mt-4 text-center">常微分方程的魔法</p>
+                <p class="absolute bottom-20 opacity-80 text-lg">向下滚动，开启故事</p>
+            </div>
+
+            <!-- 场景1: 哈德逊湾公司的困扰 -->
+            <div id="scene1" class="scene">
+                <div class="illustration-wrapper illustration-left depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="7- (1).png" alt="哈德逊湾公司" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-right depth-layer-3">1920年代的加拿大，哈德逊湾公司的账本上充满了焦虑。这家掌控着北美毛皮贸易长达数个世纪的巨头，正面临一个幽灵般的难题。</p>
+            </div>
+
+            <!-- 场景2: 猞猁毛皮的疯狂波动 -->
+            <div id="scene2" class="scene">
+                <div class="illustration-wrapper illustration-right depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="7- (2).png" alt="毛皮波动" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-left depth-layer-3">他们最宝贵的商品之一——加拿大猞猁的毛皮收购量，正在以一种毁灭性的方式疯狂波动。有的年份收获如山，有的年份却濒临绝迹。</p>
+            </div>
+
+            <!-- 场景3: 查尔斯·埃尔顿的使命 -->
+            <div id="scene3" class="scene">
+                <div class="illustration-wrapper illustration-left depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="7- (3).png" alt="埃尔顿" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-right depth-layer-3">商人们将其归咎于天气、神秘的疾病，甚至诅咒。但一位年轻的生态学家，查尔斯·埃尔顿，却不这么认为。他受邀前来解开这个谜题。</p>
+            </div>
+
+            <!-- 场景4: 数据中的规律 -->
+            <div id="scene4" class="scene">
+                <div class="illustration-wrapper illustration-right depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="7- (4).png" alt="数据规律" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-left depth-layer-3">埃尔顿手里没有猎枪，只有一支笔、一本笔记本和哈德逊湾公司近一百年的毛皮收购记录。当他把数据绘制成图表时，一幅惊人的景象出现了。</p>
+            </div>
+
+            <!-- 场景5: 洛特卡-沃尔泰拉方程 -->
+            <div id="scene-formula" class="scene flex-col">
+                <!-- 方程式展示 -->
+                <div id="equation-display">
+                    <div class="equation">dx/dt = αx - βxy</div>
+                    <div class="equation">dy/dt = δxy - γy</div>
+                    <p style="color: #f4e4c1; font-size: 1.2rem; margin-top: 20px;">洛特卡-沃尔泰拉方程</p>
+                </div>
+                
+                <!-- 背景图片 -->
+                <div class="illustration-wrapper" style="position: absolute; opacity: 0.15; width: 100%; height: 100%;">
+                    <img src="7- (5).png" alt="方程" style="object-fit: cover; width: 100%; height: 100%; filter: blur(2px);">
+                </div>
+                
+                <!-- 文字 -->
+                <div class="story-text" style="position: absolute; bottom: 10vh; text-align: center; max-width: 600px; writing-mode: horizontal-tb;">
+                    <p>埃尔顿偶然间读到了两位欧洲数学家——洛特卡和沃尔泰拉的理论。他们从未去过加拿大森林，却在纸上用两个简单的微分方程，构建了一个虚拟的生态系统。</p>
+                </div>
+            </div>
+
+            <!-- 场景6: 方程的含义 -->
+            <div id="scene6" class="scene">
+                <div class="illustration-wrapper illustration-left depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="7- (6).png" alt="方程含义" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-right depth-layer-3">兔子的增长率取决于它自身的繁殖能力。同时，它的减少率取决于被捕食者吃掉的概率。对于捕食者来说，增长率取决于它能吃到多少猎物。</p>
+            </div>
+
+            <!-- 场景7: 方程的预言 -->
+            <div id="scene7" class="scene">
+                <div class="illustration-wrapper illustration-right depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="7- (7).png" alt="预言" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-left depth-layer-3">当埃尔顿看到这组方程时，他仿佛被一道闪电击中：这不仅仅是数学游戏，这两个方程预言了一种周期性的摆荡！</p>
+            </div>
+
+            <!-- 场景8: 完美的闭环 -->
+            <div id="scene8" class="scene">
+                <div class="illustration-wrapper illustration-left depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="7- (8).png" alt="生命循环" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-right depth-layer-3">这是一个完美的闭环！一个由出生与死亡、追逐与被捕构成的永不停歇的生命循环。这正是他在哈德逊湾公司的数据图表上看到的景象。</p>
+            </div>
+
+            <!-- 场景9: 解开谜题 -->
+            <div id="scene9" class="scene">
+                <div class="illustration-wrapper illustration-right depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="7- (9).png" alt="解谜" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-left depth-layer-3">埃尔顿带着他的图表和洛特卡-沃尔泰拉方程，向哈德逊湾公司的董事们做了一次颠覆性的报告。他解释道："先生们，你们面对的不是随机的灾难。"</p>
+            </div>
+
+            <!-- 场景10: 拯救贸易 -->
+            <div id="scene10" class="scene">
+                <div class="illustration-wrapper illustration-left depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="7- (10).png" alt="拯救" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-right depth-layer-3">他提出了革命性的方案：公司不应该在高峰年份毫无节制地收购毛皮，而应该建立一套基于预测的管理系统。通过监测兔子的数量，可以提前预测猞猁数量的峰值和谷值。</p>
+            </div>
+
+            <!-- 场景11: 数学的胜利 -->
+            <div id="scene11" class="scene">
+                <div class="illustration-wrapper illustration-right depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="7- (11).png" alt="胜利" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-left depth-layer-3">起初，商人们对这些数学符号和曲线嗤之以鼻。但近百年的数据记录是如此铁证如山，与方程的预测完美契合。他们最终接受了埃尔顿的建议。</p>
+            </div>
+
+            <!-- 结局 -->
+            <div id="scene-end" class="scene flex-col">
+                <p class="text-5xl md:text-6xl font-bold">完</p>
+                <p class="text-xl mt-4">数学揭示自然的奥秘</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const scenes = Array.from(document.querySelectorAll('.scene'));
+        const sceneBackgrounds = Array.from(document.querySelectorAll('.scene-background'));
+        const sceneCount = scenes.length;
+        const scrollContainer = document.getElementById('scroll-container');
+        const forestWipe = document.getElementById('forest-wipe');
+        const scrollProgress = document.getElementById('scrollProgress');
+        const loopIndicator = document.getElementById('loopIndicator');
+        const equationDisplay = document.getElementById('equation-display');
+        
+        let lastSceneIndex = -1;
+        let isTransitioning = false;
+        let animatedTexts = new Set();
+        let hasLooped = false;
+        let equationAnimationStarted = false;
+
+        // ========= 森林粒子动画 =========
+        const forestCanvas = document.getElementById('forestCanvas');
+        const fCtx = forestCanvas.getContext('2d');
+        let forestWidth = forestCanvas.width = window.innerWidth;
+        let forestHeight = forestCanvas.height = window.innerHeight;
+
+        class ForestParticle {
+            constructor() {
+                this.reset();
+            }
+
+            reset() {
+                this.x = Math.random() * forestWidth;
+                this.y = Math.random() * forestHeight;
+                this.vx = (Math.random() - 0.5) * 0.5;
+                this.vy = (Math.random() - 0.5) * 0.5;
+                this.size = Math.random() * 3 + 1;
+                this.opacity = Math.random() * 0.5 + 0.1;
+                this.color = Math.random() > 0.5 ? '#8b4513' : '#cd853f';
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+
+                if (this.x < 0 || this.x > forestWidth || this.y < 0 || this.y > forestHeight) {
+                    this.reset();
+                }
+            }
+
+            draw() {
+                fCtx.globalAlpha = this.opacity;
+                fCtx.fillStyle = this.color;
+                fCtx.beginPath();
+                fCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                fCtx.fill();
+                fCtx.globalAlpha = 1;
+            }
+        }
+
+        const particles = [];
+        for (let i = 0; i < 50; i++) {
+            particles.push(new ForestParticle());
+        }
+
+        function animateForest() {
+            fCtx.clearRect(0, 0, forestWidth, forestHeight);
+            
+            particles.forEach(particle => {
+                particle.update();
+                particle.draw();
+            });
+
+            requestAnimationFrame(animateForest);
+        }
+        animateForest();
+
+        window.addEventListener('resize', () => {
+            forestWidth = forestCanvas.width = window.innerWidth;
+            forestHeight = forestCanvas.height = window.innerHeight;
+        });
+
+        // 滚动进度更新
+        function updateScrollProgress() {
+            const scrollHeight = scrollContainer.scrollHeight - window.innerHeight;
+            const scrollTop = window.scrollY;
+            const progress = Math.min(scrollTop / scrollHeight, 1) * 100;
+            scrollProgress.style.width = progress + '%';
+            
+            // 显示循环提示
+            if (progress > 90 && !hasLooped) {
+                loopIndicator.classList.add('show');
+            } else {
+                loopIndicator.classList.remove('show');
+            }
+        }
+
+        // 循环滚动功能
+        function handleLoopScroll() {
+            const scrollHeight = scrollContainer.scrollHeight - window.innerHeight;
+            const scrollTop = window.scrollY;
+            
+            if (scrollTop >= scrollHeight && !hasLooped) {
+                hasLooped = true;
+                setTimeout(() => {
+                    window.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    });
+                    setTimeout(() => {
+                        hasLooped = false;
+                    }, 1000);
+                }, 500);
+            }
+        }
+
+        // 几何过渡效果
+        function triggerGeometricTransition() {
+            if (isTransitioning) return;
+            isTransitioning = true;
+            
+            forestWipe.classList.add('active');
+            
+            setTimeout(() => {
+                forestWipe.classList.remove('active');
+                isTransitioning = false;
+            }, 1500);
+        }
+
+        // 文字浮现动画
+        function animateTextFloat(element) {
+            if (animatedTexts.has(element)) return;
+            animatedTexts.add(element);
+            
+            const text = element.textContent;
+            element.textContent = '';
+            
+            [...text].forEach((char, index) => {
+                const span = document.createElement('span');
+                span.textContent = char;
+                span.className = 'char-float';
+                span.style.animationDelay = `${index * 0.02}s`;
+                element.appendChild(span);
+            });
+        }
+
+        // 主滚动处理
+        window.addEventListener('scroll', () => {
+            const scrollHeight = scrollContainer.scrollHeight - window.innerHeight;
+            const scrollTop = window.scrollY;
+            const scrollPercent = Math.min(scrollTop / scrollHeight, 1);
+            
+            updateScrollProgress();
+            handleLoopScroll();
+            updateScenes(scrollPercent);
+        });
+
+        function updateScenes(percent) {
+            const currentSceneIndex = Math.floor(percent * (sceneCount - 0.001));
+            const sceneProgress = getSceneProgress(percent, currentSceneIndex);
+            
+            // 触发场景转换效果
+            if (currentSceneIndex !== lastSceneIndex && lastSceneIndex !== -1 && Math.abs(currentSceneIndex - lastSceneIndex) > 1) {
+                triggerGeometricTransition();
+            }
+            lastSceneIndex = currentSceneIndex;
+            
+            // 更新场景显示
+            scenes.forEach((scene, index) => {
+                const isActive = index === currentSceneIndex;
+                scene.style.opacity = isActive ? 1 : 0;
+                
+                if (isActive) {
+                    // 图片动画
+                    const img = scene.querySelector('.illustration');
+                    if (img && sceneProgress > 0.1) {
+                        setTimeout(() => {
+                            img.classList.add('illustration-appear');
+                        }, 100);
+                    }
+                    
+                    // 文字动画
+                    const text = scene.querySelector('.story-text');
+                    if (text && sceneProgress > 0.3) {
+                        text.classList.add('story-text-appear');
+                        if (!animatedTexts.has(text)) {
+                            animateTextFloat(text);
+                        }
+                    }
+                } else {
+                    // 重置非活动场景
+                    const img = scene.querySelector('.illustration');
+                    if (img) {
+                        img.classList.remove('illustration-appear');
+                    }
+                    const text = scene.querySelector('.story-text');
+                    if (text) {
+                        text.classList.remove('story-text-appear');
+                    }
+                }
+            });
+            
+            // 更新场景背景
+            sceneBackgrounds.forEach((bg, index) => {
+                const sceneNumber = index + 1;
+                const progress = getSceneProgress(percent, sceneNumber);
+                bg.style.opacity = progress > 0 ? Math.min(progress * 1.5, 1) : 0;
+            });
+
+            // 场景5的方程式展示动画
+            const p5 = getSceneProgress(percent, 5);
+            if (p5 > 0.2 && !equationAnimationStarted) {
+                equationAnimationStarted = true;
+                equationDisplay.style.opacity = 1;
+            } else if (p5 === 0) {
+                equationDisplay.style.opacity = 0;
+                equationAnimationStarted = false;
+            }
+        }
+
+        function getSceneProgress(percent, sceneIndex) {
+            const sceneStart = sceneIndex / sceneCount;
+            const sceneEnd = (sceneIndex + 1) / sceneCount;
+            if (percent < sceneStart || percent > sceneEnd) return 0;
+            return (percent - sceneStart) / (sceneEnd - sceneStart);
+        }
+
+        // 初始化
+        window.scrollTo(0, 0);
+        updateScenes(0);
+        updateScrollProgress();
+    </script>
+</body>
+</html>

@@ -1,0 +1,773 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>酒桶里的秘密宇宙</title>
+    <script src="../../common-assets/js/tailwind.min.js"></script>    <style>
+        @font-face {
+            font-family: 'Iansui-Regular';
+            src: url('../../common-assets/fonts/Iansui-Regular.ttf') format('truetype');
+            font-weight: 400;
+            font-style: normal;
+        }
+        
+        /* 美化滚动条 - 竖向 */
+        *::-webkit-scrollbar {
+            width: 12px;
+        }
+        *::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+        }
+        *::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #ff69b4, #ff1493);
+            border-radius: 6px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+        *::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #ffb6c1, #ff69b4);
+        }
+        *::-webkit-scrollbar-thumb:active {
+            background: linear-gradient(180deg, #ff1493, #dc143c);
+        }
+        
+        /* 隐藏横向滚动条 */
+        *::-webkit-scrollbar:horizontal {
+            display: none;
+        }
+        
+        :root {
+            /* 酒红色主题 */
+            --bg-start: #2c0810;
+            --bg-scene1: linear-gradient(135deg, #4a1626, #6b1f37, #8c2848);
+            --bg-scene2: linear-gradient(180deg, #5c1a2e, #7d243f, #9e2e50);
+            --bg-scene3: linear-gradient(45deg, #3e1220, #5f1b31, #802442);
+            --bg-scene4: radial-gradient(circle, #6b1f37, #4a1626, #2c0810);
+            --bg-scene5: linear-gradient(315deg, #8c2848, #ad3159);
+            --bg-scene6: linear-gradient(135deg, #5c1a2e, #7d243f, #9e2e50);
+            --bg-scene7: linear-gradient(180deg, #4a1626, #6b1f37);
+            --bg-scene8: linear-gradient(45deg, #2c0810, #4a1626, #6b1f37);
+            --bg-scene9: linear-gradient(135deg, #8c2848, #ad3159, #ce3a6a);
+        }
+
+        body {
+            font-family: 'Iansui-Regular', serif;
+            color: #ffe0e6;
+            overflow-x: hidden;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            background-color: var(--bg-start);
+            transition: background-color 1.5s ease-in-out;
+        }
+
+        #scroll-container {
+            height: 1200vh;
+            position: relative;
+        }
+
+        .sticky-element {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* 酒桶切片动画 */
+        #barrelCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        /* 几何过渡效果 */
+        .geometric-transition {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 0;
+            height: 0;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .wine-splash {
+            width: 100vmax;
+            height: 100vmax;
+            border-radius: 50%;
+            background: radial-gradient(circle, transparent 0%, var(--transition-color, #8c2848) 100%);
+            transform: translate(-50%, -50%) scale(0);
+            transition: transform 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .wine-splash.active {
+            transform: translate(-50%, -50%) scale(2);
+        }
+
+        /* 积分符号动画 */
+        .integral-symbol {
+            position: absolute;
+            font-family: 'Iansui-Regular', serif;
+            font-size: 36px;
+            color: rgba(255, 224, 230, 0.3);
+            animation: float-integral 12s infinite linear;
+            pointer-events: none;
+        }
+
+        @keyframes float-integral {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.3;
+            }
+            90% {
+                opacity: 0.3;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* 酒桶切片动画 */
+        .barrel-slice {
+            position: absolute;
+            width: 100px;
+            height: 5px;
+            background: rgba(140, 40, 72, 0.3);
+            animation: slide-slice 8s infinite linear;
+        }
+
+        @keyframes slide-slice {
+            0% {
+                transform: translateX(-100px);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.5;
+            }
+            90% {
+                opacity: 0.5;
+            }
+            100% {
+                transform: translateX(100vw);
+                opacity: 0;
+            }
+        }
+
+        /* 场景样式 */
+        .scene {
+            opacity: 0;
+            transition: opacity 0.8s ease-in-out;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .scene-background {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            transition: opacity 1.5s ease-in-out;
+            z-index: -2;
+        }
+
+        /* 场景背景 */
+        .bg-scene1 { background: var(--bg-scene1); }
+        .bg-scene2 { background: var(--bg-scene2); }
+        .bg-scene3 { background: var(--bg-scene3); }
+        .bg-scene4 { background: var(--bg-scene4); }
+        .bg-scene5 { background: var(--bg-scene5); }
+        .bg-scene6 { background: var(--bg-scene6); }
+        .bg-scene7 { background: var(--bg-scene7); }
+        .bg-scene8 { background: var(--bg-scene8); }
+        .bg-scene9 { background: var(--bg-scene9); }
+
+        /* 图片样式 */
+        .illustration-wrapper {
+            position: absolute;
+            z-index: 5;
+            transition: all 1.5s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .illustration {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: all 1.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            opacity: 0;
+            transform: scale(0.85) translateY(30px);
+            filter: brightness(0.95) contrast(1.05);
+        }
+
+        .frame-elegant {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            border-radius: 20px;
+            box-shadow: 
+                0 15px 35px rgba(0, 0, 0, 0.4),
+                0 5px 15px rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255, 147, 147, 0.3);
+        }
+
+        .illustration-appear {
+            opacity: 0.95;
+            transform: scale(1) translateY(0);
+        }
+
+        .illustration-left {
+            left: 10vw;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 35vw;
+            height: 55vh;
+        }
+
+        .illustration-right {
+            right: 10vw;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 35vw;
+            height: 55vh;
+        }
+
+        /* 文字样式 */
+        .story-text {
+            position: absolute;
+            font-size: 1.5rem;
+            text-shadow: 3px 3px 10px rgba(0,0,0,0.8);
+            transition: all 1s cubic-bezier(0.23, 1, 0.32, 1);
+            text-align: left;
+            padding: 2rem;
+            max-width: 280px;
+            line-height: 2.2;
+            font-weight: 500;
+            z-index: 8;
+            writing-mode: vertical-rl;
+            text-orientation: upright;
+            letter-spacing: 0.12em;
+            opacity: 0;
+            transform: translateY(20px);
+            color: #ffe0e6;
+        }
+
+        .story-text-appear {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .text-left {
+            left: 30vw;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .text-right {
+            right: 30vw;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        /* 逐字浮现动画 */
+        .char-float {
+            display: inline-block;
+            opacity: 0;
+            transform: translateY(15px);
+            animation: float-up 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+        }
+
+        @keyframes float-up {
+            0% {
+                opacity: 0;
+                transform: translateY(15px) scale(0.9);
+            }
+            50% {
+                opacity: 0.5;
+                transform: translateY(5px) scale(0.95);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* 特殊场景：积分公式 */
+        #scene5 {
+            position: relative;
+        }
+
+        #integral-formula {
+            position: absolute;
+            width: 400px;
+            height: 200px;
+            opacity: 0;
+            transition: opacity 1.5s cubic-bezier(0.23, 1, 0.32, 1);
+            z-index: 20;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .integral-display {
+            font-family: 'Iansui-Regular', serif;
+            font-size: 72px;
+            color: rgba(255, 224, 230, 0.8);
+            text-align: center;
+            animation: pulse-integral 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse-integral {
+            0%, 100% { 
+                opacity: 0.6;
+                transform: scale(0.95);
+            }
+            50% { 
+                opacity: 1;
+                transform: scale(1.05);
+            }
+        }
+
+        /* 封面和封底样式 */
+        #scene-cover, #scene-end {
+            z-index: 10;
+        }
+
+        #scene-cover h1, #scene-cover p, #scene-end p {
+            position: relative;
+            z-index: 11;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.5);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .scene { 
+                flex-direction: column; 
+                justify-content: center; 
+                align-items: center;
+                padding: 3vh 3vw;
+                gap: 1.5rem;
+            }
+            .illustration-wrapper { 
+                position: relative !important; 
+                left: auto !important;
+                right: auto !important;
+                width: 80vw !important;
+                height: 40vh !important;
+                margin: 0 auto;
+            }
+            .story-text { 
+                position: relative !important; 
+                left: auto !important;
+                right: auto !important;
+                max-width: 85vw; 
+                font-size: 1.1rem;
+                writing-mode: horizontal-tb;
+                text-orientation: initial;
+                letter-spacing: normal;
+                margin: 0 auto;
+                text-align: center;
+                padding: 1rem;
+            }
+        }
+    </style>
+
+    <style>
+        .return-home-panel {
+            position: fixed;
+            top: 12px;
+            left: 12px;
+            display: flex;
+            gap: 6px;
+            z-index: 9999;
+            flex-wrap: wrap;
+        }
+        .return-home-panel .return-link {
+            padding: 6px 10px;
+            border-radius: 10px;
+            background: rgba(15, 23, 42, 0.35);
+            color: #f8fafc;
+            font-size: 13px;
+            text-decoration: none;
+            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.18);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            border: 1px solid rgba(248, 250, 252, 0.12);
+            transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .return-home-panel .return-link:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.25);
+            background: rgba(15, 23, 42, 0.42);
+        }
+        .return-home-panel .return-link.return-main {
+            background: rgba(79, 70, 229, 0.18);
+            border-color: rgba(79, 70, 229, 0.25);
+        }
+        @media (max-width: 640px) {
+            .return-home-panel {
+                top: 12px;
+                left: 12px;
+                right: 12px;
+                justify-content: center;
+            }
+            .return-home-panel .return-link {
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="return-home-panel">
+         <a class="return-link return-sub" href="../index.html"><i class="fa-solid fa-arrow-left"></i> 返回目录</a>
+        <a class="return-link return-main" href="../../index.html"><i class="fa-solid fa-house"></i> 返回主站</a>
+    </div>
+    <!-- 几何过渡效果层 -->
+    <div class="geometric-transition">
+        <div id="wine-splash" class="wine-splash"></div>
+    </div>
+
+    <!-- 酒桶切片动画 -->
+    <canvas id="barrelCanvas"></canvas>
+
+    <div id="scroll-container">
+        <div id="scene-container" class="sticky-element">
+
+            <!-- 场景背景 -->
+            <div id="bg-scene1" class="scene-background bg-scene1"></div>
+            <div id="bg-scene2" class="scene-background bg-scene2"></div>
+            <div id="bg-scene3" class="scene-background bg-scene3"></div>
+            <div id="bg-scene4" class="scene-background bg-scene4"></div>
+            <div id="bg-scene5" class="scene-background bg-scene5"></div>
+            <div id="bg-scene6" class="scene-background bg-scene6"></div>
+            <div id="bg-scene7" class="scene-background bg-scene7"></div>
+            <div id="bg-scene8" class="scene-background bg-scene8"></div>
+            <div id="bg-scene9" class="scene-background bg-scene9"></div>
+
+            <!-- 场景0: 封面 -->
+            <div id="scene-cover" class="scene flex-col">
+                <h1 class="text-5xl md:text-6xl font-bold text-center" style="color: #ff9393;">酒桶里的秘密宇宙</h1>
+                <p class="text-xl md:text-2xl mt-4 text-center" style="color: #ffe0e6;">开普勒与积分的诞生</p>
+                <p class="absolute bottom-20 opacity-80 text-lg">向下滚动，开启故事</p>
+            </div>
+
+            <!-- 场景1 -->
+            <div id="scene1" class="scene">
+                <div class="illustration-wrapper illustration-left depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="5- (1).png" alt="17世纪奥地利" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-right depth-layer-3">17世纪初的奥地利，约翰内斯·开普勒发现了行星运动的三大定律。但很少有人知道，他对数学的伟大贡献，源于一件非常生活化的事情：为他的婚礼买酒。</p>
+            </div>
+
+            <!-- 场景2 -->
+            <div id="scene2" class="scene">
+                <div class="illustration-wrapper illustration-right depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="5- (2).png" alt="婚礼买酒" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-left depth-layer-3">1613年，开普勒为婚礼采购葡萄酒。酒商用一根长杆斜插进酒桶，根据浸入的长度报价。</p>
+            </div>
+
+            <!-- 场景3 -->
+            <div id="scene3" class="scene">
+                <div class="illustration-wrapper illustration-left depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="5- (3).png" alt="困惑" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-right depth-layer-3">这种方法让严谨的开普勒感到困惑。用一根直线去测量弯曲的体积，怎么可能精确呢？</p>
+            </div>
+
+            <!-- 场景4 -->
+            <div id="scene4" class="scene">
+                <div class="illustration-wrapper illustration-right depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="5- (4).png" alt="切片思想" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-left depth-layer-3">婚礼后，他把这个问题带回书房。他想象把酒桶切成无数薄片，就像切胡萝卜一样。</p>
+            </div>
+
+            <!-- 场景5: 积分符号 -->
+            <div id="scene5" class="scene flex-col">
+                <div id="integral-formula">
+                    <div class="integral-display">∫</div>
+                </div>
+                
+                <div class="illustration-wrapper" style="position: absolute; opacity: 0.15; width: 100%; height: 100%;">
+                    <img src="5- (5).png" alt="积分" style="object-fit: cover; width: 100%; height: 100%; filter: blur(2px);">
+                </div>
+                
+                <div class="story-text" style="position: absolute; bottom: 10vh; text-align: center; max-width: 600px; writing-mode: horizontal-tb;">
+                    <p>每一片都是一个圆柱体，体积容易计算。把所有薄片的体积加起来，就能得到整个酒桶的体积。</p>
+                </div>
+            </div>
+
+            <!-- 场景6 -->
+            <div id="scene6" class="scene">
+                <div class="illustration-wrapper illustration-left depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="5- (6).png" alt="无穷小" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-right depth-layer-3">这意味着需要计算无穷多个不同大小的圆片体积。开普勒没有被困难吓倒。</p>
+            </div>
+
+            <!-- 场景7 -->
+            <div id="scene7" class="scene">
+                <div class="illustration-wrapper illustration-right depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="5- (7).png" alt="新立体几何" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-left depth-layer-3">他将研究成果写成《酒桶的新立体几何》，用同样的方法计算了九十多种旋转体的体积。</p>
+            </div>
+
+            <!-- 场景8 -->
+            <div id="scene8" class="scene">
+                <div class="illustration-wrapper illustration-left depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="5- (8).png" alt="积分思想" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-right depth-layer-3">"积分"的拉丁词源integrare，意为"使之成为一个整体"。开普勒完美诠释了这个词的意义。</p>
+            </div>
+
+            <!-- 场景9 -->
+            <div id="scene9" class="scene">
+                <div class="illustration-wrapper illustration-right depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="5- (9).png" alt="积分起源" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-left depth-layer-3">下次看到积分符号"∫"时，想象400年前那位为婚礼买酒而烦恼的天文学家，如何揭开了酒桶中的秘密宇宙。</p>
+            </div>
+
+            <!-- 结局 -->
+            <div id="scene-end" class="scene flex-col">
+                <p class="text-5xl md:text-6xl font-bold" style="color: #ff9393;">完</p>
+                <p class="text-xl mt-4" style="color: #ffe0e6;">积分最朴素的起源</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const scenes = Array.from(document.querySelectorAll('.scene'));
+        const sceneBackgrounds = Array.from(document.querySelectorAll('.scene-background'));
+        const sceneCount = scenes.length;
+        const scrollContainer = document.getElementById('scroll-container');
+        const wineSplash = document.getElementById('wine-splash');
+        const integralFormula = document.getElementById('integral-formula');
+        
+        let lastSceneIndex = -1;
+        let isTransitioning = false;
+        let animatedTexts = new Set();
+        let integralAnimationStarted = false;
+
+        // ========= 酒桶切片动画 =========
+        const canvas = document.getElementById('barrelCanvas');
+        const ctx = canvas.getContext('2d');
+        let canvasWidth = canvas.width = window.innerWidth;
+        let canvasHeight = canvas.height = window.innerHeight;
+
+        window.addEventListener('resize', () => {
+            canvasWidth = canvas.width = window.innerWidth;
+            canvasHeight = canvas.height = window.innerHeight;
+        });
+
+        // 酒桶切片类
+        class BarrelSlice {
+            constructor(y) {
+                this.y = y;
+                this.x = -100;
+                this.width = 80 + Math.sin(y / 50) * 30;
+                this.height = 3;
+                this.speed = 1 + Math.random() * 0.5;
+                this.opacity = 0.3;
+            }
+
+            update() {
+                this.x += this.speed;
+                if (this.x > canvasWidth + 100) {
+                    this.x = -100;
+                }
+            }
+
+            draw() {
+                ctx.fillStyle = `rgba(140, 40, 72, ${this.opacity})`;
+                ctx.fillRect(this.x - this.width/2, this.y - this.height/2, this.width, this.height);
+            }
+        }
+
+        const barrelSlices = [];
+        for (let i = 0; i < 30; i++) {
+            barrelSlices.push(new BarrelSlice(100 + i * 12));
+        }
+
+        function animateBarrelSlices() {
+            ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+            
+            barrelSlices.forEach(slice => {
+                slice.update();
+                slice.draw();
+            });
+            
+            requestAnimationFrame(animateBarrelSlices);
+        }
+        animateBarrelSlices();
+
+        // 创建漂浮的积分符号
+        function createFloatingIntegrals() {
+            for (let i = 0; i < 6; i++) {
+                const symbol = document.createElement('div');
+                symbol.className = 'integral-symbol';
+                symbol.textContent = '∫';
+                symbol.style.left = `${Math.random() * 100}%`;
+                symbol.style.animationDelay = `${Math.random() * 12}s`;
+                symbol.style.animationDuration = `${12 + Math.random() * 6}s`;
+                document.body.appendChild(symbol);
+            }
+        }
+        createFloatingIntegrals();
+
+        // 几何过渡效果
+        function triggerGeometricTransition(fromScene, toScene) {
+            if (isTransitioning) return;
+            isTransitioning = true;
+            
+            wineSplash.style.setProperty('--transition-color', '#8c2848');
+            wineSplash.classList.add('active');
+            
+            setTimeout(() => {
+                wineSplash.classList.remove('active');
+                isTransitioning = false;
+            }, 1500);
+        }
+
+        // 文字浮现动画
+        function animateTextFloat(element) {
+            if (animatedTexts.has(element)) return;
+            animatedTexts.add(element);
+            
+            const text = element.textContent;
+            element.textContent = '';
+            
+            [...text].forEach((char, index) => {
+                const span = document.createElement('span');
+                span.textContent = char;
+                span.className = 'char-float';
+                span.style.animationDelay = `${index * 0.02}s`;
+                element.appendChild(span);
+            });
+        }
+
+        // 主滚动处理
+        window.addEventListener('scroll', () => {
+            const scrollHeight = scrollContainer.scrollHeight - window.innerHeight;
+            const scrollTop = window.scrollY;
+            const scrollPercent = Math.min(scrollTop / scrollHeight, 1);
+            
+            updateScenes(scrollPercent);
+        });
+
+        function updateScenes(percent) {
+            const currentSceneIndex = Math.floor(percent * (sceneCount - 0.001));
+            const sceneProgress = getSceneProgress(percent, currentSceneIndex);
+            
+            // 触发场景转换效果
+            if (currentSceneIndex !== lastSceneIndex && lastSceneIndex !== -1) {
+                triggerGeometricTransition(lastSceneIndex, currentSceneIndex);
+            }
+            lastSceneIndex = currentSceneIndex;
+            
+            // 更新场景显示
+            scenes.forEach((scene, index) => {
+                const isActive = index === currentSceneIndex;
+                scene.style.opacity = isActive ? 1 : 0;
+                
+                if (isActive) {
+                    // 图片动画
+                    const img = scene.querySelector('.illustration');
+                    if (img && sceneProgress > 0.1) {
+                        setTimeout(() => {
+                            img.classList.add('illustration-appear');
+                        }, 100);
+                    }
+                    
+                    // 文字动画
+                    const text = scene.querySelector('.story-text');
+                    if (text && sceneProgress > 0.3) {
+                        text.classList.add('story-text-appear');
+                        if (!animatedTexts.has(text)) {
+                            animateTextFloat(text);
+                        }
+                    }
+                } else {
+                    // 重置非活动场景
+                    const img = scene.querySelector('.illustration');
+                    if (img) {
+                        img.classList.remove('illustration-appear');
+                    }
+                    const text = scene.querySelector('.story-text');
+                    if (text) {
+                        text.classList.remove('story-text-appear');
+                    }
+                }
+            });
+            
+            // 更新场景背景
+            sceneBackgrounds.forEach((bg, index) => {
+                const sceneNumber = index + 1;
+                const progress = getSceneProgress(percent, sceneNumber);
+                bg.style.opacity = progress > 0 ? Math.min(progress * 1.5, 1) : 0;
+            });
+            
+            // 场景5的积分符号动画
+            const p5 = getSceneProgress(percent, 5);
+            if (p5 > 0.2 && !integralAnimationStarted) {
+                integralAnimationStarted = true;
+                integralFormula.style.opacity = 1;
+            } else if (p5 === 0) {
+                integralFormula.style.opacity = 0;
+                integralAnimationStarted = false;
+            }
+        }
+
+        function getSceneProgress(percent, sceneIndex) {
+            const sceneStart = sceneIndex / sceneCount;
+            const sceneEnd = (sceneIndex + 1) / sceneCount;
+            if (percent < sceneStart || percent > sceneEnd) return 0;
+            return (percent - sceneStart) / (sceneEnd - sceneStart);
+        }
+
+        // 初始化
+        window.scrollTo(0, 0);
+        updateScenes(0);
+    </script>
+</body>
+</html>

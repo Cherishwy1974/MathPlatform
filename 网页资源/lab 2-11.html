@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>函数连续性实验室</title>
+    
+    <!-- MathJax配置 -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            startup: {
+                pageReady: () => {
+                    return MathJax.startup.defaultPageReady().then(() => {
+                        console.log('MathJax加载完成');
+                    });
+                }
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+            }
+        };
+    </script>
+    <script defer src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js"></script>
+    
+    <style>
+        :root {
+            --h1-size: 22px;      
+            --h2-size: 20px;      
+            --h3-size: 18px;      
+            --btn-size: 16px;     
+            --formula-size: 20px; 
+            --text-size: 16px;
+            
+            --primary: #4f46e5;
+            --primary-light: #6366f1;
+            --primary-dark: #3730a3;
+            --light: #ffffff;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-600: #4b5563;
+            --gray-800: #1f2937;
+            --border: #e5e7eb;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #3b82f6;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        *::-webkit-scrollbar {
+            width: 0;
+            background: transparent;
+        }
+        
+        * {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
+            font-size: var(--text-size);
+            line-height: 1.5;
+            background: var(--gray-50);
+            color: var(--gray-800);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            height: 100vh;
+            max-height: 700px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            background: var(--light);
+        }
+
+        .header {
+            background: var(--primary);
+            color: var(--light);
+            padding: 8px 20px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: var(--h2-size);
+            margin: 0;
+        }
+
+        .main {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 120px;
+            background: var(--gray-50);
+            border-right: 1px solid var(--border);
+            padding: 10px 8px;
+        }
+
+        .nav-btn {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 4px;
+            background: transparent;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: var(--text-size);
+            color: var(--gray-600);
+            text-align: left;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover {
+            background: var(--gray-100);
+        }
+
+        .nav-btn.active {
+            background: var(--primary);
+            color: var(--light);
+        }
+
+        .content {
+            flex: 1;
+            display: none;
+            padding: 16px;
+            overflow-y: auto;
+        }
+
+        .content.active {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            overflow-y: auto;
+        }
+
+        .card {
+            background: var(--light);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+        }
+
+        .card h3 {
+            font-size: var(--h3-size);
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+
+        .input-group {
+            margin-bottom: 8px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 4px;
+            font-size: var(--text-size);
+            font-weight: 500;
+        }
+
+        .input-group input,
+        .input-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: var(--text-size);
+            background: var(--gray-50);
+        }
+
+        .btn {
+            padding: 8px 16px;
+            background: var(--primary);
+            color: var(--light);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: var(--btn-size);
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .result {
+            background: var(--gray-50);
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid var(--primary);
+            text-align: center;
+            font-size: var(--text-size);
+            margin: 8px 0;
+            min-height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .formula-box {
+            background: #f0f7ff;
+            padding: 8px 12px;
+            border-radius: 4px;
+            border-left: 3px solid var(--primary);
+            margin: 8px 0;
+            text-align: center;
+            font-size: var(--formula-size);
+        }
+
+        .info-box {
+            background: var(--gray-50);
+            padding: 8px;
+            border-radius: 4px;
+            margin: 6px 0;
+            font-size: var(--text-size);
+            text-align: center;
+        }
+
+        .steps {
+            background: #fff9e6;
+            padding: 10px;
+            border-radius: 4px;
+            border-left: 3px solid #f59e0b;
+            line-height: 1.6;
+            font-size: var(--text-size);
+        }
+
+        .canvas-container {
+            border: 1px solid var(--gray-200);
+            border-radius: 4px;
+            background: #fafafa;
+            padding: 10px;
+            min-height: 200px;
+            max-height: 400px;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .canvas-container canvas {
+            max-width: 100%;
+            max-height: 100%;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .continuity-check {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin: 8px 0;
+        }
+
+        .check-item {
+            padding: 8px;
+            border-radius: 4px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .check-pass {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--success);
+            color: var(--success);
+        }
+
+        .check-fail {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid var(--danger);
+            color: var(--danger);
+        }
+
+        .case-display {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin: 8px 0;
+        }
+
+        .case-card {
+            padding: 10px;
+            background: var(--gray-50);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .case-card:hover {
+            background: var(--gray-100);
+        }
+
+        .case-card.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .main {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+                padding: 8px 16px;
+                display: flex;
+                flex-direction: row;
+                gap: 8px;
+                overflow-x: auto;
+                flex-shrink: 0;
+                justify-content: center;
+            }
+
+            .nav-btn {
+                min-width: 90px;
+                text-align: center;
+                margin-bottom: 0;
+                white-space: nowrap;
+                flex-shrink: 0;
+            }
+
+            .content.active {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+        }
+
+        .return-home-panel { position: fixed; bottom: 12px; right: 12px; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; z-index: 40; }
+        .return-toggle { width: 40px; height: 40px; border-radius: 50%; border: none; background: linear-gradient(135deg, rgba(79,70,229,0.96), rgba(99,102,241,0.9)); color: #fff; font-size: 20px; cursor: pointer; box-shadow: 0 10px 18px rgba(79,70,229,0.28); transition: transform 0.2s, box-shadow 0.2s; }
+        .return-toggle:hover { transform: translateY(-1px) scale(1.03); box-shadow: 0 14px 26px rgba(79,70,229,0.35); }
+        .return-links { display: none; flex-direction: column; gap: 6px; padding: 10px; border-radius: 10px; background: rgba(255,255,255,0.96); border: 1px solid rgba(79,70,229,0.18); box-shadow: 0 10px 30px rgba(15,23,42,0.14); opacity: 0; transition: opacity 0.16s; }
+        .return-link { text-decoration: none; font-size: 15px; color: var(--primary-dark); padding: 6px 12px; border-radius: 8px; background: rgba(99,102,241,0.12); transition: background 0.2s; }
+        .return-link:hover { background: rgba(79,70,229,0.18); }
+    </style>
+
+</head>
+<body>
+    <div class="return-home-panel"><button class="return-toggle" onclick="toggleReturnLinks()"><i class="fa-solid fa-house"></i></button><div class="return-links"><a class="return-link" href="index.html"><i class="fa-solid fa-arrow-left"></i> 返回目录</a><a class="return-link" href="../index.html"><i class="fa-solid fa-house"></i> 返回主站</a></div></div>
+    <div class="container">
+        <header class="header">
+            <h1>函数连续性实验室</h1>
+        </header>
+
+        <div class="main">
+            <nav class="sidebar">
+                <button class="nav-btn active" onclick="switchPanel('definition')">连续定义</button>
+                <button class="nav-btn" onclick="switchPanel('types')">不连续类型</button>
+                <button class="nav-btn" onclick="switchPanel('check')">连续性检验</button>
+            </nav>
+
+            <!-- 连续定义页面 -->
+            <div class="content active" id="definition">
+                <div class="column">
+                    <div class="card">
+                        <h3>连续性定义</h3>
+                        <div class="formula-box">
+                            函数在 $x_0$ 连续 ⟺ $\lim\limits_{x \to x_0} f(x) = f(x_0)$
+                        </div>
+                        <div class="steps">
+                            <strong>三个条件：</strong><br>
+                            1. $f(x_0)$ 有定义<br>
+                            2. $\lim\limits_{x \to x_0} f(x)$ 存在<br>
+                            3. 极限值等于函数值
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>左连续与右连续</h3>
+                        <div class="info-box">
+                            右连续：$\lim\limits_{x \to x_0^+} f(x) = f(x_0)$
+                        </div>
+                        <div class="info-box">
+                            左连续：$\lim\limits_{x \to x_0^-} f(x) = f(x_0)$
+                        </div>
+                        <div class="steps">
+                            函数连续 = 既左连续又右连续
+                        </div>
+                    </div>
+                </div>
+
+                <div class="column">
+                    <div class="card">
+                        <h3>连续函数图像</h3>
+                        <div class="canvas-container">
+                            <canvas id="continuousGraph" width="600" height="300"></canvas>
+                        </div>
+                        <div class="info-box">
+                            连续函数的图像是一条不间断的曲线
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>连续性检查</h3>
+                        <div class="continuity-check">
+                            <div class="check-item check-pass">
+                                ✓ 有定义
+                            </div>
+                            <div class="check-item check-pass">
+                                ✓ 极限存在
+                            </div>
+                            <div class="check-item check-pass">
+                                ✓ 极限=函数值
+                            </div>
+                        </div>
+                        <div class="result" style="background: #f0fdf4; border-color: var(--success);">
+                            函数连续
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 不连续类型页面 -->
+            <div class="content" id="types">
+                <div class="column">
+                    <div class="card">
+                        <h3>三种不连续情况</h3>
+                        <div class="case-display">
+                            <div class="case-card active" onclick="selectCase(1)">
+                                情况1<br>极限不存在
+                            </div>
+                            <div class="case-card" onclick="selectCase(2)">
+                                情况2<br>左右极限不等
+                            </div>
+                            <div class="case-card" onclick="selectCase(3)">
+                                情况3<br>极限≠函数值
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>案例分析</h3>
+                        <div class="formula-box" id="caseFormula">
+                            $f(x) = \begin{cases} x, & x < 0 \\ \frac{1}{x}, & x > 0 \end{cases}$
+                        </div>
+                        <div class="steps" id="caseAnalysis">
+                            <strong>在 x = 0 处：</strong><br>
+                            左极限：$\lim\limits_{x \to 0^-} f(x) = 0$<br>
+                            右极限：$\lim\limits_{x \to 0^+} f(x) = +\infty$<br>
+                            结论：右极限不存在，函数不连续
+                        </div>
+                    </div>
+                </div>
+
+                <div class="column">
+                    <div class="card">
+                        <h3>不连续点图像</h3>
+                        <div class="canvas-container">
+                            <canvas id="discontinuousGraph" width="600" height="300"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>判断结果</h3>
+                        <div class="continuity-check" id="caseCheck">
+                            <div class="check-item check-fail">
+                                ✗ 无定义
+                            </div>
+                            <div class="check-item check-fail">
+                                ✗ 极限不存在
+                            </div>
+                            <div class="check-item check-fail">
+                                ✗ 不相等
+                            </div>
+                        </div>
+                        <div class="result" style="background: #fef2f2; border-color: var(--danger);">
+                            函数不连续
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 连续性检验页面 -->
+            <div class="content" id="check">
+                <div class="column">
+                    <div class="card">
+                        <h3>选择函数检验</h3>
+                        <div class="input-group">
+                            <label>选择函数</label>
+                            <select id="testFunc" onchange="testContinuity()">
+                                <option value="poly">f(x) = x² + 2x</option>
+                                <option value="rational">f(x) = 1/(x-1)</option>
+                                <option value="piecewise">分段函数</option>
+                                <option value="abs">f(x) = |x|</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>检验点 x₀</label>
+                            <input type="number" id="testPoint" value="0" step="0.1" onchange="testContinuity()">
+                        </div>
+                        <button class="btn" onclick="testContinuity()">检验连续性</button>
+                    </div>
+
+                    <div class="card">
+                        <h3>检验步骤</h3>
+                        <div class="steps" id="testSteps">
+                            1. 检查函数在 x₀ 是否有定义<br>
+                            2. 计算左极限<br>
+                            3. 计算右极限<br>
+                            4. 比较极限值与函数值
+                        </div>
+                    </div>
+                </div>
+
+                <div class="column">
+                    <div class="card">
+                        <h3>检验结果</h3>
+                        <div class="info-box" id="testResult">
+                            选择函数和检验点进行测试
+                        </div>
+                        <div class="continuity-check" id="testCheck">
+                            <div class="check-item">待检验</div>
+                            <div class="check-item">待检验</div>
+                            <div class="check-item">待检验</div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>函数图像</h3>
+                        <div class="canvas-container">
+                            <canvas id="testGraph" width="600" height="250"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function renderMath() {
+            if (window.MathJax && MathJax.typesetPromise) {
+                MathJax.typesetPromise().catch(err => console.log('渲染错误:', err));
+            }
+        }
+
+        let currentCase = 1;
+
+        function switchPanel(panel) {
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(panel).classList.add('active');
+            
+            setTimeout(() => {
+                renderMath();
+                if (panel === 'definition') {
+                    drawContinuousGraph();
+                } else if (panel === 'types') {
+                    drawDiscontinuousGraph();
+                } else if (panel === 'check') {
+                    testContinuity();
+                }
+            }, 50);
+        }
+
+        function drawContinuousGraph() {
+            const canvas = document.getElementById('continuousGraph');
+            if (!canvas) return;
+            
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            // 坐标轴
+            ctx.strokeStyle = '#374151';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(50, height - 40);
+            ctx.lineTo(width - 30, height - 40);
+            ctx.moveTo(width/2, 30);
+            ctx.lineTo(width/2, height - 40);
+            ctx.stroke();
+            
+            // 绘制连续函数 f(x) = x² - 2
+            ctx.strokeStyle = '#4f46e5';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            
+            for(let px = 50; px < width - 30; px++) {
+                const x = (px - width/2) / 50;
+                const y = x * x - 2;
+                const py = height - 40 - y * 30;
+                
+                if(px === 50) ctx.moveTo(px, py);
+                else ctx.lineTo(px, py);
+            }
+            ctx.stroke();
+            
+            // 标记连续点
+            const x0 = 0;
+            const y0 = -2;
+            const px0 = width/2;
+            const py0 = height - 40 - y0 * 30;
+            
+            ctx.fillStyle = '#10b981';
+            ctx.beginPath();
+            ctx.arc(px0, py0, 5, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 标注
+            ctx.fillStyle = '#374151';
+            ctx.font = '12px Arial';
+            ctx.fillText('连续点', px0 + 10, py0 - 10);
+        }
+
+        function selectCase(num) {
+            currentCase = num;
+            document.querySelectorAll('.case-card').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.case-card')[num - 1].classList.add('active');
+            
+            const cases = [
+                {
+                    formula: '$f(x) = \\begin{cases} x, & x < 0 \\\\ \\frac{1}{x}, & x > 0 \\end{cases}$',
+                    analysis: '<strong>在 x = 0 处：</strong><br>左极限：$\\lim\\limits_{x \\to 0^-} f(x) = 0$<br>右极限：$\\lim\\limits_{x \\to 0^+} f(x) = +\\infty$<br>结论：右极限不存在，函数不连续',
+                    checks: ['✗ 无定义', '✗ 极限不存在', '✗ 不相等']
+                },
+                {
+                    formula: '$f(x) = \\begin{cases} -1, & x < 0 \\\\ 1, & x \\geq 0 \\end{cases}$',
+                    analysis: '<strong>在 x = 0 处：</strong><br>左极限：$\\lim\\limits_{x \\to 0^-} f(x) = -1$<br>右极限：$\\lim\\limits_{x \\to 0^+} f(x) = 1$<br>结论：左右极限不相等，函数不连续',
+                    checks: ['✓ 有定义', '✗ 极限不存在', '✗ 不相等']
+                },
+                {
+                    formula: '$f(x) = \\begin{cases} x^2, & x \\neq 0 \\\\ 2, & x = 0 \\end{cases}$',
+                    analysis: '<strong>在 x = 0 处：</strong><br>左极限：$\\lim\\limits_{x \\to 0^-} f(x) = 0$<br>右极限：$\\lim\\limits_{x \\to 0^+} f(x) = 0$<br>函数值：$f(0) = 2$<br>结论：极限存在但不等于函数值',
+                    checks: ['✓ 有定义', '✓ 极限存在', '✗ 不相等']
+                }
+            ];
+            
+            const caseData = cases[num - 1];
+            document.getElementById('caseFormula').innerHTML = caseData.formula;
+            document.getElementById('caseAnalysis').innerHTML = caseData.analysis;
+            
+            const checkDiv = document.getElementById('caseCheck');
+            checkDiv.innerHTML = '';
+            caseData.checks.forEach(check => {
+                const div = document.createElement('div');
+                div.className = check.startsWith('✓') ? 'check-item check-pass' : 'check-item check-fail';
+                div.textContent = check;
+                checkDiv.appendChild(div);
+            });
+            
+            renderMath();
+            drawDiscontinuousGraph();
+        }
+
+        function drawDiscontinuousGraph() {
+            const canvas = document.getElementById('discontinuousGraph');
+            if (!canvas) return;
+            
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            // 坐标轴
+            ctx.strokeStyle = '#374151';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(50, height - 40);
+            ctx.lineTo(width - 30, height - 40);
+            ctx.moveTo(width/2, 30);
+            ctx.lineTo(width/2, height - 40);
+            ctx.stroke();
+            
+            ctx.strokeStyle = '#4f46e5';
+            ctx.lineWidth = 2.5;
+            
+            if(currentCase === 1) {
+                // 左侧：y = x
+                ctx.beginPath();
+                for(let px = 50; px < width/2 - 2; px++) {
+                    const x = (px - width/2) / 50;
+                    const y = x;
+                    const py = height - 40 - y * 50;
+                    if(px === 50) ctx.moveTo(px, py);
+                    else ctx.lineTo(px, py);
+                }
+                ctx.stroke();
+                
+                // 右侧：y = 1/x
+                ctx.beginPath();
+                for(let px = width/2 + 5; px < width - 30; px++) {
+                    const x = (px - width/2) / 50;
+                    if(x > 0.02) {
+                        const y = 1 / x;
+                        if(y < 10) {
+                            const py = height - 40 - y * 20;
+                            if(px === width/2 + 5) ctx.moveTo(px, py);
+                            else ctx.lineTo(px, py);
+                        }
+                    }
+                }
+                ctx.stroke();
+            } else if(currentCase === 2) {
+                // 阶跃函数
+                ctx.beginPath();
+                ctx.moveTo(50, height - 40 + 50);
+                ctx.lineTo(width/2 - 2, height - 40 + 50);
+                ctx.stroke();
+                
+                ctx.beginPath();
+                ctx.moveTo(width/2 + 2, height - 40 - 50);
+                ctx.lineTo(width - 30, height - 40 - 50);
+                ctx.stroke();
+            } else {
+                // y = x²，但在0处值为2
+                ctx.beginPath();
+                for(let px = 50; px < width - 30; px++) {
+                    const x = (px - width/2) / 50;
+                    if(Math.abs(x) > 0.05) {
+                        const y = x * x;
+                        const py = height - 40 - y * 100;
+                        if(px === 50 || Math.abs(x) <= 0.05) ctx.moveTo(px, py);
+                        else ctx.lineTo(px, py);
+                    }
+                }
+                ctx.stroke();
+                
+                // 标记不连续点
+                ctx.fillStyle = '#ef4444';
+                ctx.beginPath();
+                ctx.arc(width/2, height - 40 - 200, 5, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            // 标记间断点
+            ctx.strokeStyle = '#ef4444';
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(width/2, 30);
+            ctx.lineTo(width/2, height - 40);
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+
+        function testContinuity() {
+            const funcType = document.getElementById('testFunc').value;
+            const x0 = parseFloat(document.getElementById('testPoint').value);
+            
+            let hasDefinition = true;
+            let leftLimit, rightLimit, funcValue;
+            let continuous = false;
+            
+            switch(funcType) {
+                case 'poly':
+                    funcValue = x0 * x0 + 2 * x0;
+                    leftLimit = rightLimit = funcValue;
+                    continuous = true;
+                    break;
+                case 'rational':
+                    if(x0 === 1) {
+                        hasDefinition = false;
+                        leftLimit = -Infinity;
+                        rightLimit = Infinity;
+                    } else {
+                        funcValue = 1 / (x0 - 1);
+                        leftLimit = rightLimit = funcValue;
+                        continuous = true;
+                    }
+                    break;
+                case 'piecewise':
+                    if(x0 < 0) {
+                        funcValue = -1;
+                        leftLimit = rightLimit = -1;
+                        continuous = true;
+                    } else if(x0 > 0) {
+                        funcValue = 1;
+                        leftLimit = rightLimit = 1;
+                        continuous = true;
+                    } else {
+                        funcValue = 0;
+                        leftLimit = -1;
+                        rightLimit = 1;
+                        continuous = false;
+                    }
+                    break;
+                case 'abs':
+                    funcValue = Math.abs(x0);
+                    leftLimit = rightLimit = funcValue;
+                    continuous = true;
+                    break;
+            }
+            
+            document.getElementById('testSteps').innerHTML = 
+                `1. 函数在 x₀ = ${x0} ${hasDefinition ? '有' : '无'}定义<br>
+                2. 左极限 = ${leftLimit === Infinity ? '+∞' : leftLimit === -Infinity ? '-∞' : leftLimit.toFixed(2)}<br>
+                3. 右极限 = ${rightLimit === Infinity ? '+∞' : rightLimit === -Infinity ? '-∞' : rightLimit.toFixed(2)}<br>
+                4. ${hasDefinition ? `函数值 = ${funcValue.toFixed(2)}` : '函数无定义'}`;
+            
+            const checkDiv = document.getElementById('testCheck');
+            checkDiv.innerHTML = '';
+            
+            const checks = [
+                hasDefinition ? '✓ 有定义' : '✗ 无定义',
+                (leftLimit === rightLimit && isFinite(leftLimit)) ? '✓ 极限存在' : '✗ 极限不存在',
+                (hasDefinition && leftLimit === rightLimit && leftLimit === funcValue) ? '✓ 极限=函数值' : '✗ 不相等'
+            ];
+            
+            checks.forEach(check => {
+                const div = document.createElement('div');
+                div.className = check.startsWith('✓') ? 'check-item check-pass' : 'check-item check-fail';
+                div.textContent = check;
+                checkDiv.appendChild(div);
+            });
+            
+            document.getElementById('testResult').innerHTML = 
+                continuous ? 
+                `<span style="color: var(--success);">函数在 x = ${x0} 处连续</span>` :
+                `<span style="color: var(--danger);">函数在 x = ${x0} 处不连续</span>`;
+            
+            drawTestGraph(funcType, x0);
+        }
+
+        function drawTestGraph(funcType, x0) {
+            const canvas = document.getElementById('testGraph');
+            if (!canvas) return;
+            
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            // 坐标轴
+            ctx.strokeStyle = '#374151';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(50, height - 40);
+            ctx.lineTo(width - 30, height - 40);
+            ctx.moveTo(width/2, 30);
+            ctx.lineTo(width/2, height - 40);
+            ctx.stroke();
+            
+            // 绘制函数
+            ctx.strokeStyle = '#4f46e5';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            
+            for(let px = 50; px < width - 30; px++) {
+                const x = (px - width/2) / 50 + x0;
+                let y;
+                
+                switch(funcType) {
+                    case 'poly':
+                        y = x * x + 2 * x;
+                        break;
+                    case 'rational':
+                        if(Math.abs(x - 1) > 0.02) {
+                            y = 1 / (x - 1);
+                        }
+                        break;
+                    case 'piecewise':
+                        y = x < 0 ? -1 : x > 0 ? 1 : 0;
+                        break;
+                    case 'abs':
+                        y = Math.abs(x);
+                        break;
+                }
+                
+                if(y !== undefined && Math.abs(y) < 10) {
+                    const py = height - 40 - y * 20;
+                    if(px === 50 || y === undefined) ctx.moveTo(px, py);
+                    else ctx.lineTo(px, py);
+                }
+            }
+            ctx.stroke();
+            
+            // 标记检验点
+            ctx.strokeStyle = '#ef4444';
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(width/2, 30);
+            ctx.lineTo(width/2, height - 40);
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+
+        window.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                drawContinuousGraph();
+                renderMath();
+            }, 100);
+        });
+
+        function toggleReturnLinks() { const p = document.querySelector('.return-links'); if (!p) return; if (p.style.display === 'flex') { p.style.opacity = '0'; setTimeout(() => p.style.display = 'none', 160); } else { p.style.display = 'flex'; requestAnimationFrame(() => p.style.opacity = '1'); } }
+    </script>
+</body>
+</html>

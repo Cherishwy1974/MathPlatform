@@ -1,0 +1,1272 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>一颗心的两种画法</title>
+    <script src="../../common-assets/js/tailwind.min.js"></script>
+    <style>
+        @font-face {
+            font-family: 'Iansui-Regular';
+            src: url('../../common-assets/fonts/Iansui-Regular.ttf') format('truetype');
+            font-weight: 400;
+            font-style: normal;
+        }
+        
+        :root {
+            /* 传说部分 - 温暖复古色调 */
+            --bg-start: #f5f5dc;
+            --bg-legend1: linear-gradient(135deg, #8b4513, #d2691e, #daa520);
+            --bg-legend2: linear-gradient(180deg, #faebd7, #ffe4b5, #ffdead);
+            --bg-legend3: linear-gradient(45deg, #8b4513, #deb887, #f4a460);
+            --bg-legend4: radial-gradient(circle, #ff6b6b, #ff8e53, #ff6a88);
+            --bg-legend5: linear-gradient(315deg, #f7971e, #ffd200);
+             
+            /* 真实部分 - 理性冷色调 */
+            --bg-reality6: linear-gradient(135deg, #2c3e50, #3498db, #2c3e50);
+            --bg-reality7: linear-gradient(180deg, #000428, #004e92);
+            --bg-reality8: linear-gradient(45deg, #ffffff, #e0e0e0, #cccccc);
+            --bg-reality9: linear-gradient(135deg, #1e3c72, #2a5298, #0f2027);
+        }
+
+        body {
+            font-family: 'Iansui-Regular', serif;
+            color: #3a2e2e;
+            overflow-x: hidden;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            background-color: var(--bg-start);
+            transition: background-color 1.5s ease-in-out;
+        }
+
+        #scroll-container {
+            height: 1200vh;
+            position: relative;
+        }
+
+        .sticky-element {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* 几何过渡效果 */
+        .geometric-transition {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 0;
+            height: 0;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .circle-wipe {
+            width: 100vmax;
+            height: 100vmax;
+            border-radius: 50%;
+            background: radial-gradient(circle, transparent 0%, var(--transition-color, #2c3e50) 100%);
+            transform: translate(-50%, -50%) scale(0);
+            transition: transform 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .circle-wipe.active {
+            transform: translate(-50%, -50%) scale(2);
+        }
+
+        /* 万花筒过渡 */
+        .kaleidoscope {
+            width: 100vw;
+            height: 100vh;
+            position: absolute;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            opacity: 0;
+            transition: opacity 0.8s ease;
+        }
+
+        .kaleidoscope-piece {
+            background: linear-gradient(45deg, transparent, var(--transition-color, #3498db), transparent);
+            transform: rotate(0deg) scale(0);
+            transition: transform 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .kaleidoscope.active {
+            opacity: 1;
+        }
+
+        .kaleidoscope.active .kaleidoscope-piece {
+            transform: rotate(45deg) scale(1);
+        }
+
+        /* 改进的心形线场景 */
+        #scene4 {
+            position: relative;
+            background: radial-gradient(ellipse at center, rgba(231, 76, 60, 0.05), transparent);
+        }
+
+        #polar-system {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            opacity: 0;
+            transition: opacity 1.5s cubic-bezier(0.23, 1, 0.32, 1);
+            filter: drop-shadow(0 20px 40px rgba(231, 76, 60, 0.2));
+            z-index: 20;
+        }
+
+        .polar-grid {
+            stroke: rgba(100, 149, 237, 0.15);
+            stroke-width: 0.5;
+            fill: none;
+            animation: grid-pulse 4s ease-in-out infinite;
+        }
+
+        @keyframes grid-pulse {
+            0%, 100% { opacity: 0.15; }
+            50% { opacity: 0.25; }
+        }
+
+        .heart-tracer {
+            fill: #e74c3c;
+            filter: drop-shadow(0 0 20px rgba(231, 76, 60, 1));
+            animation: tracer-glow 2s ease-in-out infinite;
+        }
+
+        @keyframes tracer-glow {
+            0%, 100% { r: 5; opacity: 0.8; }
+            50% { r: 7; opacity: 1; }
+        }
+
+        .heart-trail {
+            stroke: #e74c3c;
+            stroke-width: 3;
+            fill: none;
+            opacity: 0.9;
+            filter: drop-shadow(0 0 10px rgba(231, 76, 60, 0.5));
+        }
+
+        .formula-text {
+            position: absolute;
+            top: -280px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 32px;
+            font-weight: bold;
+            color: #e74c3c;
+            text-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+            opacity: 0;
+            animation: formula-appear 2s ease-out 0.5s forwards;
+        }
+
+        @keyframes formula-appear {
+            0% { 
+                opacity: 0; 
+                transform: translateX(-50%) translateY(20px);
+            }
+            100% { 
+                opacity: 1; 
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+
+        /* 数学背景网格 */
+        .math-grid {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 1.5s ease;
+            pointer-events: none;
+        }
+
+        .grid-line {
+            stroke: rgba(52, 152, 219, 0.1);
+            stroke-width: 1;
+        }
+
+        .function-curve {
+            stroke: rgba(52, 152, 219, 0.3);
+            stroke-width: 2;
+            fill: none;
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            animation: draw-curve 3s ease forwards;
+        }
+
+        @keyframes draw-curve {
+            to { stroke-dashoffset: 0; }
+        }
+
+        /* 视差滚动层 */
+        .parallax-layer {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            will-change: transform;
+        }
+
+        .parallax-bg {
+            transform: translateZ(-2px) scale(1.2);
+        }
+
+        .parallax-mid {
+            transform: translateZ(-1px) scale(1.1);
+        }
+
+        .parallax-front {
+            transform: translateZ(0px) scale(1);
+        }
+
+        /* 场景样式 */
+        .scene {
+            opacity: 0;
+            transition: opacity 0.8s ease-in-out;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .scene-background {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            transition: opacity 1.5s ease-in-out;
+            z-index: -2;
+        }
+
+        /* 传说部分背景 */
+        .bg-legend1 { background: var(--bg-legend1); }
+        .bg-legend2 { background: var(--bg-legend2); }
+        .bg-legend3 { background: var(--bg-legend3); }
+        .bg-legend4 { background: var(--bg-legend4); }
+        .bg-legend5 { background: var(--bg-legend5); }
+
+        /* 真实部分背景 */
+        .bg-reality6 { background: var(--bg-reality6); }
+        .bg-reality7 { background: var(--bg-reality7); }
+        .bg-reality8 { background: var(--bg-reality8); }
+        .bg-reality9 { background: var(--bg-reality9); }
+
+        /* 优雅的图片样式 */
+        .illustration-wrapper {
+            position: absolute;
+            z-index: 5;
+            transition: all 1.5s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .illustration {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: all 1.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            opacity: 0;
+            transform: scale(0.85) translateY(30px);
+            filter: brightness(1.05) contrast(1.05) saturate(1.1);
+        }
+
+        /* 柔和的图片边缘 */
+        .frame-elegant {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            border-radius: 20px;
+            box-shadow: 
+                0 15px 35px rgba(0, 0, 0, 0.15),
+                0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .frame-elegant::before {
+            content: '';
+            position: absolute;
+            inset: -1px;
+            background: linear-gradient(135deg, 
+                rgba(255,255,255,0.2) 0%, 
+                rgba(255,255,255,0) 50%,
+                rgba(255,255,255,0.1) 100%
+            );
+            border-radius: inherit;
+            opacity: 0.6;
+            z-index: -1;
+        }
+
+        /* 图片出现动画 */
+        .illustration-appear {
+            opacity: 0.95;
+            transform: scale(1) translateY(0);
+        }
+
+        .illustration-left {
+            left: 10vw;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 35vw;
+            height: 55vh;
+        }
+
+        .illustration-right {
+            right: 10vw;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 35vw;
+            height: 55vh;
+        }
+
+        /* 精致的文字样式和动画 - 调整文字位置，让其更靠近图片 */
+        .story-text {
+            position: absolute;
+            font-size: 1.5rem;
+            text-shadow: 3px 3px 10px rgba(0,0,0,0.7);
+            transition: all 1s cubic-bezier(0.23, 1, 0.32, 1);
+            text-align: left;
+            padding: 2rem;
+            max-width: 280px;
+            line-height: 2.2;
+            font-weight: 500;
+            z-index: 8;
+            writing-mode: vertical-rl;
+            text-orientation: upright;
+            letter-spacing: 0.12em;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .story-text-appear {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* 去除文字背景框 */
+        .text-overlay {
+            background: none;
+            backdrop-filter: none;
+            border-radius: 0;
+            padding: 0;
+            box-shadow: none;
+        }
+
+        .text-left {
+            left: 20vw;  /* 从6vw调整到48vw，紧邻右侧图片 */
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .text-right {
+            right: 20vw;  /* 从6vw调整到48vw，紧邻左侧图片 */
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        /* 逐字浮现动画 */
+        .char-float {
+            display: inline-block;
+            opacity: 0;
+            transform: translateY(15px);
+            animation: float-up 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+        }
+
+        @keyframes float-up {
+            0% {
+                opacity: 0;
+                transform: translateY(15px) scale(0.9);
+            }
+            50% {
+                opacity: 0.5;
+                transform: translateY(5px) scale(0.95);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* 传说部分文字样式 */
+        .text-legend {
+            color: #fff8dc;
+            text-shadow: 
+                3px 3px 10px rgba(0,0,0,0.8), 
+                1px 1px 5px rgba(139,69,19,0.6),
+                0 0 30px rgba(255,215,0,0.2);
+        }
+
+        /* 真实部分文字样式 */
+        .text-reality {
+            color: #ecf0f1;
+            text-shadow: 
+                3px 3px 10px rgba(0,0,0,0.8), 
+                1px 1px 5px rgba(52,152,219,0.4),
+                0 0 30px rgba(52,152,219,0.1);
+        }
+
+        /* 颜色过渡分界线 */
+        .color-divide {
+            position: fixed;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, #ffd700, #3498db);
+            top: 50%;
+            transform: translateY(-50%) scaleX(0);
+            transform-origin: center;
+            transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 50;
+        }
+
+        .color-divide.active {
+            transform: translateY(-50%) scaleX(1);
+        }
+
+        /* 层次感增强 */
+        .depth-layer-1 { z-index: 3; }
+        .depth-layer-2 { z-index: 5; }
+        .depth-layer-3 { z-index: 8; }
+
+        /* 花瓣动画背景 - 仅用于封面和封底 */
+        #petalCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 2s ease;
+            z-index: 1;
+        }
+
+        #petalCanvas.active {
+            opacity: 1;
+        }
+
+        /* 封面和封底样式优化 */
+        #scene-cover, #scene-end {
+            z-index: 10;
+        }
+
+        #scene-cover h1, #scene-cover p, #scene-end p {
+            position: relative;
+            z-index: 11;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.5);
+        }
+
+        /* 响应式设计 - 比例缩放 */
+        @media (max-width: 1366px) {
+            .story-text {
+                font-size: 1.3rem;
+                max-width: 260px;
+            }
+            .illustration-left,
+            .illustration-right {
+                width: 33vw;
+                height: 50vh;
+            }
+            .text-left {
+                left: 30vw;  /* 调整为46vw */
+            }
+            .text-right {
+                right: 20vw;  /* 调整为46vw */
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .scene { 
+                flex-direction: column; 
+                justify-content: center; 
+                align-items: center;
+                padding: 3vh 3vw;
+                gap: 1.5rem;
+            }
+            .illustration-wrapper { 
+                position: relative !important; 
+                left: auto !important;
+                right: auto !important;
+                width: 80vw !important;
+                height: 40vh !important;
+                margin: 0 auto;
+            }
+            .story-text { 
+                position: relative !important; 
+                left: auto !important;
+                right: auto !important;
+                max-width: 85vw; 
+                font-size: 1.1rem;
+                writing-mode: horizontal-tb;
+                text-orientation: initial;
+                letter-spacing: normal;
+                margin: 0 auto;
+                text-align: center;
+                padding: 1rem;
+            }
+            #polar-system {
+                width: 90vw;
+                height: 90vw;
+                max-width: 400px;
+                max-height: 400px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .story-text {
+                font-size: 1rem;
+                max-width: 90vw;
+                padding: 0.8rem;
+            }
+            .illustration-wrapper {
+                width: 90vw !important;
+                height: 35vh !important;
+            }
+        }
+        
+        /* 大屏幕优化 - 文字更贴近图片 */
+        @media (min-width: 1920px) {
+            .sticky-element {
+                transform: scale(1.05);
+                transform-origin: center center;
+            }
+            .story-text {
+                font-size: 1.6rem;
+                max-width: 300px;
+            }
+            .illustration-left,
+            .illustration-right {
+                width: 38vw;
+                height: 58vh;
+            }
+            .text-left {
+                left: 30vw;  /* 调整为46vw */
+            }
+            .text-right {
+                right: 20vw;  /* 调整为46vw */
+            }
+        }
+        
+        @media (min-width: 2560px) {
+            .sticky-element {
+                transform: scale(1.15);
+                transform-origin: center center;
+            }
+            .story-text {
+                font-size: 1.8rem;
+                max-width: 320px;
+            }
+            .illustration-left,
+            .illustration-right {
+                width: 40vw;
+                height: 60vh;
+            }
+            .text-left {
+                left: 30vw;  /* 调整为44vw */
+            }
+            .text-right {
+                right: 20vw;  /* 调整为44vw */
+            }
+        }
+    </style>
+
+    <style>
+        .return-home-panel {
+            position: fixed;
+            top: 12px;
+            left: 12px;
+            display: flex;
+            gap: 6px;
+            z-index: 9999;
+            flex-wrap: wrap;
+        }
+        .return-home-panel .return-link {
+            padding: 6px 10px;
+            border-radius: 10px;
+            background: rgba(15, 23, 42, 0.35);
+            color: #f8fafc;
+            font-size: 13px;
+            text-decoration: none;
+            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.18);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            border: 1px solid rgba(248, 250, 252, 0.12);
+            transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .return-home-panel .return-link:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.25);
+            background: rgba(15, 23, 42, 0.42);
+        }
+        .return-home-panel .return-link.return-main {
+            background: rgba(79, 70, 229, 0.18);
+            border-color: rgba(79, 70, 229, 0.25);
+        }
+        @media (max-width: 640px) {
+            .return-home-panel {
+                top: 12px;
+                left: 12px;
+                right: 12px;
+                justify-content: center;
+            }
+            .return-home-panel .return-link {
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="return-home-panel">
+         <a class="return-link return-sub" href="../index.html"><i class="fa-solid fa-arrow-left"></i> 返回目录</a>
+        <a class="return-link return-main" href="../../index.html"><i class="fa-solid fa-house"></i> 返回主站</a>
+    </div>
+    <!-- 几何过渡效果层 -->
+    <div class="geometric-transition">
+        <div id="circle-wipe" class="circle-wipe"></div>
+    </div>
+
+    <div class="geometric-transition">
+        <div id="kaleidoscope" class="kaleidoscope">
+            <div class="kaleidoscope-piece"></div>
+            <div class="kaleidoscope-piece" style="transition-delay: 0.1s"></div>
+            <div class="kaleidoscope-piece" style="transition-delay: 0.2s"></div>
+            <div class="kaleidoscope-piece" style="transition-delay: 0.3s"></div>
+            <div class="kaleidoscope-piece" style="transition-delay: 0.4s"></div>
+            <div class="kaleidoscope-piece" style="transition-delay: 0.5s"></div>
+            <div class="kaleidoscope-piece" style="transition-delay: 0.6s"></div>
+            <div class="kaleidoscope-piece" style="transition-delay: 0.7s"></div>
+            <div class="kaleidoscope-piece" style="transition-delay: 0.8s"></div>
+        </div>
+    </div>
+
+    <!-- 颜色分界线 -->
+    <div id="color-divide" class="color-divide"></div>
+
+    <!-- 数学网格背景 -->
+    <svg class="math-grid" id="math-grid">
+        <!-- 坐标网格 -->
+        <defs>
+            <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                <path d="M 40 0 L 0 0 0 40" fill="none" class="grid-line"/>
+            </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#grid)" />
+         
+        <!-- 动态函数曲线 -->
+        <path class="function-curve" d="M0,250 Q150,100 300,250 T600,250" />
+        <path class="function-curve" style="animation-delay: 0.5s" d="M0,350 C100,200 200,500 300,350 S500,200 600,350" />
+    </svg>
+
+    <div id="scroll-container">
+        <div id="scene-container" class="sticky-element">
+
+            <!-- 花瓣动画背景画布 -->
+            <canvas id="petalCanvas"></canvas>
+
+            <!-- 场景背景 -->
+            <div id="bg-legend1" class="scene-background bg-legend1"></div>
+            <div id="bg-legend2" class="scene-background bg-legend2"></div>
+            <div id="bg-legend3" class="scene-background bg-legend3"></div>
+            <div id="bg-legend4" class="scene-background bg-legend4"></div>
+            <div id="bg-legend5" class="scene-background bg-legend5"></div>
+            <div id="bg-reality6" class="scene-background bg-reality6"></div>
+            <div id="bg-reality7" class="scene-background bg-reality7"></div>
+            <div id="bg-reality8" class="scene-background bg-reality8"></div>
+            <div id="bg-reality9" class="scene-background bg-reality9"></div>
+
+            <!-- 场景0: 封面 -->
+            <div id="scene-cover" class="scene flex-col">
+                <h1 class="text-5xl md:text-6xl font-bold text-center" style="color: #4a1809;">一颗心的<br>两种画法</h1>
+                <p class="text-xl md:text-2xl mt-4 text-center" style="color: #665e5e;">勒内·笛卡尔的传说与真实</p>
+                <p class="absolute bottom-20 opacity-80 text-lg">向下滚动，开启故事</p>
+            </div>
+
+            <!-- 场景1: 星光（传说） -->
+            <div id="scene1" class="scene">
+                <div class="illustration-wrapper illustration-left depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="unnamed(1).png" alt="绘本插图1" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-legend text-right depth-layer-3">在漫长的北欧冬夜里，流传着一个关于星辰与墨水的故事。据说，当伟大的哲学家笛卡尔流亡瑞典时，他将智慧的星光引入了克里斯蒂娜公主冰冷的宫殿...</p>
+            </div>
+
+            <!-- 场景2: 冰墙（传说） -->
+            <div id="scene2" class="scene">
+                <div class="illustration-wrapper illustration-right depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="unnamed(2).png" alt="绘本插图2" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-legend text-left depth-layer-3">然而，王权的尊严与爱情的真挚之间，隔着一道无法逾越的鸿沟。国王的禁令如同一道冰墙，将他们分隔。</p>
+            </div>
+
+            <!-- 场景3: 羽毛笔（传说） -->
+            <div id="scene3" class="scene">
+                <div class="illustration-wrapper illustration-left depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="unnamed(3).png" alt="绘本插图3" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-legend text-right depth-layer-3">被迫离开的笛卡尔，在异乡的病榻上，用尽最后的气力写下告别。他选择了一种只有他们两人能懂的密语。</p>
+            </div>
+
+            <!-- 场景4: 心形线（传说） - 重构版 -->
+            <div id="scene4" class="scene flex-col">
+                <!-- 极坐标系和动态绘制作为视觉中心 -->
+                <svg id="polar-system" width="600" height="600" viewBox="-300 -300 600 600">
+                    <!-- 极坐标网格 -->
+                    <g id="polar-grid">
+                        <circle cx="0" cy="0" r="60" class="polar-grid"/>
+                        <circle cx="0" cy="0" r="120" class="polar-grid"/>
+                        <circle cx="0" cy="0" r="180" class="polar-grid"/>
+                        <circle cx="0" cy="0" r="240" class="polar-grid"/>
+                         
+                        <line x1="-300" y1="0" x2="300" y2="0" class="polar-grid"/>
+                        <line x1="0" y1="-300" x2="0" y2="300" class="polar-grid"/>
+                         
+                        <line x1="-212" y1="-212" x2="212" y2="212" class="polar-grid"/>
+                        <line x1="-212" y1="212" x2="212" y2="-212" class="polar-grid"/>
+                    </g>
+                     
+                    <!-- 心形轨迹 -->
+                    <path id="heart-trail" class="heart-trail" d=""/>
+                     
+                    <!-- 追踪点 -->
+                    <circle id="heart-tracer" cx="0" cy="0" r="5" class="heart-tracer"/>
+                     
+                    <!-- 公式标注 -->
+                    <text class="formula-text" x="0" y="-260" text-anchor="middle">
+                        r = a(1 - sinθ)
+                    </text>
+                </svg>
+                 
+                <!-- 淡化的背景图片 -->
+                <div class="illustration-wrapper" style="position: absolute; opacity: 0.15; width: 100%; height: 100%;">
+                    <img src="unnamed(4).png" alt="绘本插图4" style="object-fit: cover; width: 100%; height: 100%; filter: blur(2px);">
+                </div>
+                
+                <!-- 文字作为点缀 -->
+                <div class="story-text text-legend" style="position: absolute; bottom: 10vh; text-align: center; max-width: 600px; writing-mode: horizontal-tb;">
+                    <p>她铺开坐标纸，将思念化为笔尖的每一个点。点连成线，一颗完美的心，在纸上为他最后一次跳动。</p>
+                </div>
+            </div>
+
+            <!-- 场景5: 尘埃（传说结束） -->
+            <div id="scene5" class="scene">
+                <div class="illustration-wrapper illustration-right depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="unnamed(5).png" alt="绘本插图5" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-legend text-left depth-layer-3">这个故事，象一枚被时光打磨得温润的琥珀...然而，当我们拂去传说的金色尘埃，会发现另一个关于"心"的故事。</p>
+            </div>
+
+            <!-- 场景6: 真实开始 -->
+            <div id="scene6" class="scene">
+                <div class="illustration-wrapper illustration-left depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="unnamed(6).png" alt="绘本插图6" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-reality text-right depth-layer-3">历史的聚光灯，首先照亮了另一位女性——波西米亚的伊丽莎白公主。她们的友谊建立在信件之上，是两个时代最顶尖大脑的共鸣。</p>
+            </div>
+
+            <!-- 场景7: 理性基石 -->
+            <div id="scene7" class="scene">
+                <div class="illustration-wrapper illustration-right depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="unnamed(7).png" alt="绘本插图7" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-reality text-left depth-layer-3">更关键的是，那条闻名于世的"心形线"，在笛卡尔的时代尚未诞生。他真正倾其一生的热爱，是为纷繁复杂的世界，找到一个绝对坚实的理性基石。</p>
+            </div>
+
+            <!-- 场景8: 解析几何 -->
+            <div id="scene8" class="scene">
+                <div class="illustration-wrapper illustration-left depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="unnamed(8).png" alt="绘本插图8" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-reality text-right depth-layer-3">他献给世界的这份"情书"，名为"解析几何"。它赋予了代数一双眼睛，也赋予了几何一种语言。</p>
+            </div>
+
+            <!-- 场景9: 结语 -->
+            <div id="scene9" class="scene">
+                <div class="illustration-wrapper illustration-right depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="unnamed(9).png" alt="绘本插图9" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-reality text-left depth-layer-3">因此，我们拥有了一颗心的两种画法。传说的画笔，蘸着爱情的泪水；历史的刻刀，循着理性的光芒。前者的爱属于一人，而后者的"心"，属于世界。</p>
+            </div>
+
+            <!-- 结局 -->
+            <div id="scene-end" class="scene flex-col">
+                <p class="text-5xl md:text-6xl font-bold" style="color: #ecf0f1;">完</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const scenes = Array.from(document.querySelectorAll('.scene'));
+        const sceneBackgrounds = Array.from(document.querySelectorAll('.scene-background'));
+        const sceneCount = scenes.length;
+        const scrollContainer = document.getElementById('scroll-container');
+        const circleWipe = document.getElementById('circle-wipe');
+        const kaleidoscope = document.getElementById('kaleidoscope');
+        const colorDivide = document.getElementById('color-divide');
+        const mathGrid = document.getElementById('math-grid');
+        const polarSystem = document.getElementById('polar-system');
+        const petalCanvas = document.getElementById('petalCanvas');
+         
+        let lastSceneIndex = -1;
+        let isTransitioning = false;
+        let animatedTexts = new Set();
+         
+        // 动态心形绘制相关
+        let heartAnimationStarted = false;
+        let heartPath = [];
+        const heartTrail = document.getElementById('heart-trail');
+        const heartTracer = document.getElementById('heart-tracer');
+
+        // ========= 花瓣动画代码开始 =========
+        const pctx = petalCanvas.getContext('2d');
+        let petalWidth = petalCanvas.width = window.innerWidth;
+        let petalHeight = petalCanvas.height = window.innerHeight;
+
+        window.addEventListener('resize', () => {
+            petalWidth = petalCanvas.width = window.innerWidth;
+            petalHeight = petalCanvas.height = window.innerHeight;
+        });
+
+        // 粒子类
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.color = color;
+                this.size = Math.random() * 1.2 + 0.3;
+                this.life = Math.random() * 40 + 20;
+                this.vx = (Math.random() - 0.5) * 1.0;
+                this.vy = (Math.random() - 0.5) * 1.0;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.life -= 1;
+            }
+
+            draw() {
+                pctx.globalAlpha = this.life / 40;
+                pctx.fillStyle = this.color;
+                pctx.beginPath();
+                pctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                pctx.fill();
+                pctx.globalAlpha = 1;
+            }
+        }
+
+        // 花瓣曲线类
+        class PetalCurve {
+            constructor() {
+                this.reset();
+            }
+
+            reset() {
+                this.x = Math.random() * petalWidth;
+                this.y = Math.random() * petalHeight;
+                this.n = Math.floor(Math.random() * 5) + 2;
+                this.d = Math.floor(Math.random() * 5) + 2;
+                if (this.n === this.d) this.d += 1;
+                this.k = this.n / this.d;
+                
+                this.size = Math.random() * 90 + 70;
+                this.angle = Math.random() * Math.PI * 2;
+                this.rotationSpeed = (Math.random() - 0.5) * 0.003;
+                
+                this.vx = (Math.random() - 0.5) * 0.3;
+                this.vy = (Math.random() - 0.5) * 0.3;
+
+                this.life = 0;
+                this.maxLife = Math.random() * 600 + 500;
+                
+                const hue = 45 + Math.random() * 15;
+                this.startColor = `hsla(${hue}, 100%, 95%, 0)`;
+                this.endColor = `hsla(${hue}, 90%, 85%, 1)`;
+
+                this.points = [];
+                this.particles = [];
+                this.growth = 0;
+            }
+            
+            update() {
+                this.life++;
+                if (this.life > this.maxLife) {
+                    this.reset();
+                }
+
+                this.x += this.vx;
+                this.y += this.vy;
+                this.angle += this.rotationSpeed;
+
+                if (this.x < -this.size || this.x > petalWidth + this.size || 
+                    this.y < -this.size || this.y > petalHeight + this.size) {
+                    this.reset();
+                }
+
+                if (this.growth < 1) {
+                    this.growth += 0.004;
+                }
+
+                this.particles.forEach((p, index) => {
+                    p.update();
+                    if (p.life <= 0) {
+                        this.particles.splice(index, 1);
+                    }
+                });
+            }
+
+            draw() {
+                pctx.save();
+                pctx.translate(this.x, this.y);
+                pctx.rotate(this.angle);
+
+                const gradient = pctx.createRadialGradient(0, 0, 0, 0, 0, this.size);
+                gradient.addColorStop(0, this.startColor);
+                gradient.addColorStop(1, this.endColor);
+                
+                pctx.strokeStyle = this.endColor;
+                
+                let alpha = 1.0;
+                const fadeDuration = 180;
+                if (this.life < fadeDuration) {
+                    alpha = this.life / fadeDuration;
+                } else if (this.life > this.maxLife - fadeDuration) {
+                    alpha = (this.maxLife - this.life) / fadeDuration;
+                }
+                pctx.globalAlpha = alpha;
+                
+                pctx.shadowColor = this.endColor;
+                pctx.shadowBlur = 10;
+
+                pctx.lineWidth = 1;
+                pctx.beginPath();
+                
+                const totalPoints = 360 * this.d;
+                const pointsToDraw = Math.floor(totalPoints * this.growth);
+
+                for (let i = 0; i <= pointsToDraw; i++) {
+                    const theta = (i / 180) * Math.PI;
+                    const r = this.size * Math.cos(this.k * theta);
+                    const px = r * Math.cos(theta);
+                    const py = r * Math.sin(theta);
+                    
+                    if (i === 0) {
+                        pctx.moveTo(px, py);
+                    } else {
+                        pctx.lineTo(px, py);
+                    }
+                    
+                    if (i % 45 === 0 && this.particles.length < 30 && alpha > 0.5) {
+                        this.particles.push(new Particle(this.x + px, this.y + py, this.endColor));
+                    }
+                }
+                pctx.closePath();
+                pctx.stroke();
+                
+                pctx.restore();
+                this.particles.forEach(p => p.draw());
+            }
+        }
+
+        const petals = [];
+        const numPetals = 5;
+
+        for (let i = 0; i < numPetals; i++) {
+            setTimeout(() => {
+                petals.push(new PetalCurve());
+            }, i * 800);
+        }
+        
+        function checkPetalInteractions() {
+            for (let i = 0; i < petals.length; i++) {
+                for (let j = i + 1; j < petals.length; j++) {
+                    const p1 = petals[i];
+                    const p2 = petals[j];
+                    const dx = p1.x - p2.x;
+                    const dy = p1.y - p2.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance < (p1.size + p2.size) / 2.5) {
+                        drawInteractionGlow(p1, p2, distance);
+                    }
+                }
+            }
+        }
+
+        function drawInteractionGlow(p1, p2, distance) {
+            const midX = (p1.x + p2.x) / 2;
+            const midY = (p1.y + p2.y) / 2;
+            const maxRadius = (p1.size + p2.size) / 4;
+            const radius = maxRadius * (1 - distance / ((p1.size + p2.size) / 2.5));
+            const opacity = 0.3 * (1 - distance / ((p1.size + p2.size) / 2.5));
+
+            const gradient = pctx.createRadialGradient(midX, midY, 0, midX, midY, radius);
+            gradient.addColorStop(0, `rgba(255, 255, 240, ${opacity})`);
+            gradient.addColorStop(1, `rgba(255, 255, 240, 0)`);
+            
+            pctx.fillStyle = gradient;
+            pctx.beginPath();
+            pctx.arc(midX, midY, radius, 0, Math.PI * 2);
+            pctx.fill();
+        }
+
+        let petalAnimationActive = false;
+
+        function animatePetals() {
+            if (!petalAnimationActive) return;
+            
+            // 透明背景，不使用大底色
+            pctx.clearRect(0, 0, petalWidth, petalHeight);
+            pctx.fillStyle = 'rgba(0, 0, 0, 0.08)';
+            pctx.fillRect(0, 0, petalWidth, petalHeight);
+
+            checkPetalInteractions();
+
+            petals.forEach(petal => {
+                petal.update();
+                petal.draw();
+            });
+
+            requestAnimationFrame(animatePetals);
+        }
+        // ========= 花瓣动画代码结束 =========
+         
+        // 心形线动画函数 - 增强版
+        function animateHeart() {
+            const a = 120;
+            let theta = 0;
+            const step = Math.PI / 180;
+            heartPath = [];
+             
+            function drawStep() {
+                if (theta > Math.PI * 2) {
+                    heartAnimationStarted = false;
+                    // 动画完成后添加脉动效果
+                    heartTrail.style.animation = 'pulse 2s ease-in-out infinite';
+                    return;
+                }
+                 
+                const r = a * (1 - Math.sin(theta));
+                const x = r * Math.cos(theta);
+                const y = -r * Math.sin(theta) - 30; // 微调位置
+                 
+                heartPath.push(`${x},${y}`);
+                heartTrail.setAttribute('d', `M ${heartPath.join(' L ')}`);
+                heartTracer.setAttribute('cx', x);
+                heartTracer.setAttribute('cy', y);
+                 
+                theta += step * 2.5; // 稍慢一点的绘制速度
+                requestAnimationFrame(drawStep);
+            }
+             
+            drawStep();
+        }
+         
+        // 几何过渡效果
+        function triggerGeometricTransition(type, fromScene, toScene) {
+            if (isTransitioning) return;
+            isTransitioning = true;
+             
+            // 判断是否跨越传说与真实的分界
+            const isCrossingBoundary = (fromScene <= 5 && toScene >= 6) || (fromScene >= 6 && toScene <= 5);
+             
+            if (isCrossingBoundary) {
+                // 触发颜色分界线动画
+                colorDivide.classList.add('active');
+                setTimeout(() => colorDivide.classList.remove('active'), 2000);
+                 
+                // 使用圆形擦除效果
+                circleWipe.style.setProperty('--transition-color', toScene >= 6 ? '#2c3e50' : '#d2691e');
+                circleWipe.classList.add('active');
+                 
+                setTimeout(() => {
+                    circleWipe.classList.remove('active');
+                    isTransitioning = false;
+                }, 1500);
+            } else if (Math.abs(toScene - fromScene) > 2) {
+                // 大跨度使用万花筒效果
+                kaleidoscope.style.setProperty('--transition-color', toScene >= 6 ? '#3498db' : '#ffd700');
+                kaleidoscope.classList.add('active');
+                 
+                setTimeout(() => {
+                    kaleidoscope.classList.remove('active');
+                    isTransitioning = false;
+                }, 800);
+            } else {
+                isTransitioning = false;
+            }
+        }
+         
+        // 优雅的文字浮现动画
+        function animateTextFloat(element) {
+            if (animatedTexts.has(element)) return;
+            animatedTexts.add(element);
+            
+            const text = element.textContent;
+            element.textContent = '';
+            
+            [...text].forEach((char, index) => {
+                const span = document.createElement('span');
+                span.textContent = char;
+                span.className = 'char-float';
+                span.style.animationDelay = `${index * 0.02}s`;
+                element.appendChild(span);
+            });
+        }
+         
+        // 主滚动处理
+        window.addEventListener('scroll', () => {
+            const scrollHeight = scrollContainer.scrollHeight - window.innerHeight;
+            const scrollTop = window.scrollY;
+            const scrollPercent = Math.min(scrollTop / scrollHeight, 1);
+             
+            updateScenes(scrollPercent);
+            updateParallax(scrollPercent);
+        });
+         
+        function updateScenes(percent) {
+            const currentSceneIndex = Math.floor(percent * (sceneCount - 0.001));
+            const sceneProgress = getSceneProgress(percent, currentSceneIndex);
+             
+            // 触发场景转换效果
+            if (currentSceneIndex !== lastSceneIndex && lastSceneIndex !== -1) {
+                triggerGeometricTransition('circle', lastSceneIndex, currentSceneIndex);
+            }
+            lastSceneIndex = currentSceneIndex;
+
+            // 控制花瓣动画的显示 - 只在封面和封底
+            if (currentSceneIndex === 0 || currentSceneIndex === sceneCount - 1) {
+                if (!petalAnimationActive) {
+                    petalAnimationActive = true;
+                    petalCanvas.classList.add('active');
+                    animatePetals();
+                }
+            } else {
+                petalAnimationActive = false;
+                petalCanvas.classList.remove('active');
+            }
+             
+            // 更新场景显示
+            scenes.forEach((scene, index) => {
+                const isActive = index === currentSceneIndex;
+                scene.style.opacity = isActive ? 1 : 0;
+                
+                if (isActive) {
+                    // 图片动画
+                    const img = scene.querySelector('.illustration');
+                    if (img && sceneProgress > 0.1) {
+                        setTimeout(() => {
+                            img.classList.add('illustration-appear');
+                        }, 100);
+                    }
+                    
+                    // 文字动画
+                    const text = scene.querySelector('.story-text');
+                    if (text && sceneProgress > 0.3) {
+                        text.classList.add('story-text-appear');
+                        if (!animatedTexts.has(text)) {
+                            animateTextFloat(text);
+                        }
+                    }
+                } else {
+                    // 重置非活动场景
+                    const img = scene.querySelector('.illustration');
+                    if (img) {
+                        img.classList.remove('illustration-appear');
+                    }
+                    const text = scene.querySelector('.story-text');
+                    if (text) {
+                        text.classList.remove('story-text-appear');
+                    }
+                }
+            });
+             
+            // 更新场景背景
+            sceneBackgrounds.forEach((bg, index) => {
+                const sceneNumber = index + 1;
+                const progress = getSceneProgress(percent, sceneNumber);
+                bg.style.opacity = progress > 0 ? Math.min(progress * 1.5, 1) : 0;
+            });
+             
+            // 场景4的心形动画
+            const p4 = getSceneProgress(percent, 4);
+            if (p4 > 0.2 && !heartAnimationStarted) {
+                heartAnimationStarted = true;
+                polarSystem.style.opacity = 1;
+                animateHeart();
+            } else if (p4 === 0) {
+                polarSystem.style.opacity = 0;
+                heartTrail.setAttribute('d', '');
+                heartTrail.style.animation = '';
+            }
+             
+            // 数学网格背景（场景6-8）
+            const mathProgress = Math.max(
+                getSceneProgress(percent, 6),
+                getSceneProgress(percent, 7),
+                getSceneProgress(percent, 8)
+            );
+            mathGrid.style.opacity = mathProgress * 0.3;
+        }
+         
+        function updateParallax(percent) {
+            // 获取当前场景中的视差层
+            const currentSceneIndex = Math.floor(percent * (sceneCount - 0.001));
+            const currentScene = scenes[currentSceneIndex];
+             
+            if (!currentScene) return;
+             
+            const parallaxLayers = currentScene.querySelectorAll('.parallax-layer');
+            const sceneProgress = getSceneProgress(percent, currentSceneIndex);
+             
+            parallaxLayers.forEach(layer => {
+                if (layer.classList.contains('parallax-bg')) {
+                    layer.style.transform = `translateY(${sceneProgress * -50}px) scale(1.2)`;
+                } else if (layer.classList.contains('parallax-mid')) {
+                    layer.style.transform = `translateY(${sceneProgress * -30}px) scale(1.1)`;
+                } else if (layer.classList.contains('parallax-front')) {
+                    layer.style.transform = `translateY(${sceneProgress * -10}px) scale(1)`;
+                }
+            });
+        }
+         
+        function getSceneProgress(percent, sceneIndex) {
+            const sceneStart = sceneIndex / sceneCount;
+            const sceneEnd = (sceneIndex + 1) / sceneCount;
+            if (percent < sceneStart || percent > sceneEnd) return 0;
+            return (percent - sceneStart) / (sceneEnd - sceneStart);
+        }
+         
+        // 初始化
+        window.scrollTo(0, 0);
+        updateScenes(0);
+        
+        // 启动封面的花瓣动画
+        petalAnimationActive = true;
+        petalCanvas.classList.add('active');
+        animatePetals();
+    </script>
+</body>
+</html>

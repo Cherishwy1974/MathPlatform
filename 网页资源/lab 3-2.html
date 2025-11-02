@@ -1,0 +1,1534 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>导数几何意义探索实验室</title>
+    
+    <!-- MathJax配置 -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            startup: {
+                pageReady: () => {
+                    return MathJax.startup.defaultPageReady().then(() => {
+                        console.log('MathJax加载完成');
+                    });
+                }
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+            }
+        };
+    </script>
+    <script src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js" defer></script>
+    
+    <style>
+        /* 用户要求：字号统一 */
+        :root {
+            --h1-size: 22px;      
+            --h2-size: 20px;      
+            --h3-size: 18px;      
+            --btn-size: 16px;     
+            --formula-size: 20px; 
+            --text-size: 16px;
+            
+            --primary: #4f46e5;
+            --primary-light: #6366f1;
+            --primary-dark: #3730a3;
+            --light: #ffffff;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-600: #4b5563;
+            --gray-800: #1f2937;
+            --border: #e5e7eb;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #06b6d4;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* 滚动条生效但不显示 */
+        *::-webkit-scrollbar {
+            width: 0;
+            background: transparent;
+        }
+        
+        * {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
+            font-size: var(--text-size);
+            line-height: 1.5;
+            background: var(--gray-50);
+            color: var(--gray-800);
+        }
+
+        /* 横向布局（宽是高的2倍），压缩高度 */
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            height: 100vh;
+            max-height: 700px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            background: var(--light);
+        }
+
+        .header {
+            background: var(--primary);
+            color: var(--light);
+            padding: 8px 20px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: var(--h2-size);
+            margin: 0;
+        }
+
+        .main {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* 侧边栏不动 */
+        .sidebar {
+            width: 120px;
+            background: var(--gray-50);
+            border-right: 1px solid var(--border);
+            padding: 10px 8px;
+        }
+
+        .nav-btn {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 4px;
+            background: transparent;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: var(--text-size);
+            color: var(--gray-600);
+            text-align: left;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover {
+            background: var(--gray-100);
+        }
+
+        .nav-btn.active {
+            background: var(--primary);
+            color: var(--light);
+        }
+
+        /* 最多左右两栏，必须有可视化 */
+        .content {
+            flex: 1;
+            display: none;
+            padding: 16px;
+            overflow-y: auto;
+        }
+
+        .content.active {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow-y: auto;
+        }
+
+        .card {
+            background: var(--light);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .card h3 {
+            font-size: var(--h3-size);
+            color: var(--primary);
+            margin-bottom: 12px;
+        }
+
+        .input-group {
+            margin-bottom: 12px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 4px;
+            font-size: var(--text-size);
+            font-weight: 500;
+        }
+
+        .input-group input,
+        .input-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: var(--text-size);
+            background: var(--gray-50);
+        }
+
+        .input-group input:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: var(--light);
+        }
+
+        .btn {
+            padding: 8px 16px;
+            background: var(--primary);
+            color: var(--light);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: var(--btn-size);
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .result {
+            background: var(--gray-50);
+            padding: 12px;
+            border-radius: 4px;
+            border: 1px solid var(--primary);
+            text-align: center;
+            font-size: var(--text-size);
+            margin: 12px 0;
+            min-height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .formula-box {
+            background: #f0f7ff;
+            padding: 12px;
+            border-radius: 4px;
+            border-left: 3px solid var(--primary);
+            margin: 12px 0;
+            text-align: center;
+            font-size: var(--formula-size);
+        }
+
+        .info-box {
+            background: var(--gray-50);
+            padding: 10px;
+            border-radius: 4px;
+            margin: 8px 0;
+            font-size: var(--text-size);
+            text-align: center;
+        }
+
+        .steps {
+            background: #fff9e6;
+            padding: 12px;
+            border-radius: 4px;
+            border-left: 3px solid #f59e0b;
+            line-height: 1.8;
+            font-size: var(--text-size);
+        }
+
+        .canvas-container {
+            border: 1px solid var(--gray-200);
+            border-radius: 4px;
+            background: #fafafa;
+            padding: 10px;
+            min-height: 200px;
+            max-height: 500px;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .canvas-container canvas {
+            max-width: 100%;
+            max-height: 100%;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .slider-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: var(--gray-50);
+            border-radius: 4px;
+            margin-top: 12px;
+        }
+
+        .slider-group label {
+            min-width: 80px;
+            font-size: var(--text-size);
+        }
+
+        .slider {
+            flex: 1;
+            height: 4px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: var(--gray-200);
+            outline: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+        }
+
+        .slider-value {
+            min-width: 60px;
+            text-align: center;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .legend {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 3px;
+            border-radius: 2px;
+        }
+
+        /* 特殊样式：动画控制 */
+        .animation-controls {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .animation-controls button {
+            flex: 1;
+        }
+
+        /* 数值显示表格 */
+        .value-table {
+            width: 100%;
+            margin-top: 12px;
+            border-collapse: collapse;
+        }
+
+        .value-table td {
+            padding: 8px;
+            border: 1px solid var(--border);
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .value-table td:first-child {
+            background: var(--gray-50);
+            font-weight: 600;
+        }
+
+        /* 几何解释卡片 */
+        .geometric-card {
+            display: grid;
+            grid-template-columns: 60px 1fr;
+            gap: 12px;
+            align-items: center;
+            padding: 12px;
+            background: var(--gray-50);
+            border-radius: 4px;
+            margin: 8px 0;
+        }
+
+        .geometric-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+        }
+
+        .geometric-text {
+            font-size: var(--text-size);
+            line-height: 1.5;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .main {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+                padding: 8px 16px;
+                display: flex;
+                flex-direction: row;
+                gap: 8px;
+                overflow-x: auto;
+                flex-shrink: 0;
+                justify-content: center;
+                flex-wrap: nowrap;
+            }
+
+            .nav-btn {
+                min-width: 90px;
+                text-align: center;
+                margin-bottom: 0;
+                white-space: nowrap;
+                flex-shrink: 0;
+                padding: 8px 12px;
+                font-size: 14px;
+            }
+
+            .content.active {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .container {
+                max-height: none;
+                height: 100vh;
+            }
+        }
+
+        .return-home-panel { position: fixed; bottom: 12px; right: 12px; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; z-index: 40; }
+        .return-toggle { width: 40px; height: 40px; border-radius: 50%; border: none; background: linear-gradient(135deg, rgba(79,70,229,0.96), rgba(99,102,241,0.9)); color: #fff; font-size: 20px; cursor: pointer; box-shadow: 0 10px 18px rgba(79,70,229,0.28); transition: transform 0.2s, box-shadow 0.2s; }
+        .return-toggle:hover { transform: translateY(-1px) scale(1.03); box-shadow: 0 14px 26px rgba(79,70,229,0.35); }
+        .return-links { display: none; flex-direction: column; gap: 6px; padding: 10px; border-radius: 10px; background: rgba(255,255,255,0.96); border: 1px solid rgba(79,70,229,0.18); box-shadow: 0 10px 30px rgba(15,23,42,0.14); opacity: 0; transition: opacity 0.16s; }
+        .return-link { text-decoration: none; font-size: 15px; color: var(--primary-dark); padding: 6px 12px; border-radius: 8px; background: rgba(99,102,241,0.12); transition: background 0.2s; }
+        .return-link:hover { background: rgba(79,70,229,0.18); }
+    </style>
+
+</head>
+<body>
+    <div class="return-home-panel"><button class="return-toggle" onclick="toggleReturnLinks()"><i class="fa-solid fa-house"></i></button><div class="return-links"><a class="return-link" href="index.html"><i class="fa-solid fa-arrow-left"></i> 返回目录</a><a class="return-link" href="../index.html"><i class="fa-solid fa-house"></i> 返回主站</a></div></div>
+    <div class="container">
+        <header class="header">
+            <h1>导数几何意义探索实验室</h1>
+        </header>
+
+        <div class="main">
+            <!-- 侧边栏 -->
+            <nav class="sidebar">
+                <button class="nav-btn active" onclick="switchPanel('secant')">割线到切线</button>
+                <button class="nav-btn" onclick="switchPanel('slope')">斜率意义</button>
+                <button class="nav-btn" onclick="switchPanel('tangent')">切线理解</button>
+                <button class="nav-btn" onclick="switchPanel('zoom')">局部线性</button>
+            </nav>
+
+            <!-- 割线到切线页面 -->
+            <div class="content active" id="secant">
+                <div class="column">
+                    <div class="card">
+                        <h3>从割线到切线的演变</h3>
+                        <div class="formula-box">
+                            割线斜率 = $\frac{f(x + h) - f(x)}{h}$
+                        </div>
+                        <div class="info-box">
+                            当 h → 0 时，割线 → 切线
+                        </div>
+                        <div class="steps">
+                            <strong>几何过程：</strong><br>
+                            1. 选择曲线上两个点 A 和 B<br>
+                            2. 连接 AB 得到割线<br>
+                            3. 让 B 点沿曲线向 A 点移动<br>
+                            4. 割线逐渐接近切线<br>
+                            5. 当 B 无限接近 A，割线变成切线
+                        </div>
+                        <div class="slider-group">
+                            <label>间距 h =</label>
+                            <input type="range" class="slider" id="hSlider" 
+                                   min="0.05" max="2" step="0.05" value="1">
+                            <span class="slider-value" id="hValue">1.00</span>
+                        </div>
+                        <div class="animation-controls">
+                            <button class="btn" onclick="animateSecant()">动画演示</button>
+                            <button class="btn" onclick="resetSecant()">重置</button>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>数值变化观察</h3>
+                        <table class="value-table">
+                            <tr>
+                                <td>h 值</td>
+                                <td id="hDisplay">1.00</td>
+                            </tr>
+                            <tr>
+                                <td>割线斜率</td>
+                                <td id="secantSlope">3.00</td>
+                            </tr>
+                            <tr>
+                                <td>切线斜率</td>
+                                <td id="tangentSlope">2.00</td>
+                            </tr>
+                            <tr>
+                                <td>误差</td>
+                                <td id="slopeError">1.00</td>
+                            </tr>
+                        </table>
+                        <div class="info-box" style="margin-top: 12px;">
+                            误差随 h 减小而减小！
+                        </div>
+                    </div>
+                </div>
+
+                <div class="column">
+                    <div class="card">
+                        <h3>割线逼近切线可视化</h3>
+                        <div class="canvas-container">
+                            <canvas id="secantCanvas" width="600" height="400"></canvas>
+                        </div>
+                        <div class="legend">
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: #4f46e5;"></div>
+                                <span>函数曲线</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: #10b981;"></div>
+                                <span>割线</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: #ef4444;"></div>
+                                <span>切线（极限）</span>
+                            </div>
+                        </div>
+                        <div class="info-box" id="secantInfo">
+                            拖动滑块观察割线如何逼近切线
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 斜率意义页面 -->
+            <div class="content" id="slope">
+                <div class="column">
+                    <div class="card">
+                        <h3>斜率的几何意义</h3>
+                        <div class="geometric-card">
+                            <div class="geometric-icon"><i class="fa-solid fa-drafting-compass"></i></div>
+                            <div class="geometric-text">
+                                斜率 = 垂直变化 ÷ 水平变化<br>
+                                = "陡峭程度"的数值描述
+                            </div>
+                        </div>
+                        <div class="geometric-card">
+                            <div class="geometric-icon"><i class="fa-solid fa-chart-line"></i></div>
+                            <div class="geometric-text">
+                                斜率 > 0：上升趋势<br>
+                                数值越大，上升越陡
+                            </div>
+                        </div>
+                        <div class="geometric-card">
+                            <div class="geometric-icon"><i class="fa-solid fa-arrow-right"></i></div>
+                            <div class="geometric-text">
+                                斜率 = 0：水平方向<br>
+                                没有上升或下降
+                            </div>
+                        </div>
+                        <div class="geometric-card">
+                            <div class="geometric-icon"><i class="fa-solid fa-chart-line-down"></i></div>
+                            <div class="geometric-text">
+                                斜率 < 0：下降趋势<br>
+                                数值越小，下降越陡
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>斜率与角度</h3>
+                        <div class="formula-box">
+                            斜率 k = tan(θ)
+                        </div>
+                        <div class="info-box">
+                            θ 是直线与 x 轴正方向的夹角
+                        </div>
+                        <table class="value-table">
+                            <tr>
+                                <td>角度 θ</td>
+                                <td>斜率 k</td>
+                            </tr>
+                            <tr>
+                                <td>0°</td>
+                                <td>0</td>
+                            </tr>
+                            <tr>
+                                <td>30°</td>
+                                <td>0.58</td>
+                            </tr>
+                            <tr>
+                                <td>45°</td>
+                                <td>1</td>
+                            </tr>
+                            <tr>
+                                <td>60°</td>
+                                <td>1.73</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="column">
+                    <div class="card">
+                        <h3>斜率直观体验</h3>
+                        <div class="canvas-container">
+                            <canvas id="slopeCanvas" width="600" height="400"></canvas>
+                        </div>
+                        <div class="slider-group">
+                            <label>调整斜率</label>
+                            <input type="range" class="slider" id="slopeSlider" 
+                                   min="-3" max="3" step="0.1" value="1">
+                            <span class="slider-value" id="slopeValue">1.0</span>
+                        </div>
+                        <div class="slider-group">
+                            <label>选择点 x =</label>
+                            <input type="range" class="slider" id="xSlider" 
+                                   min="-2" max="2" step="0.1" value="0">
+                            <span class="slider-value" id="xValue">0.0</span>
+                        </div>
+                        <div class="result" id="angleDisplay">
+                            角度 θ = 45°
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 切线理解页面 -->
+            <div class="content" id="tangent">
+                <div class="column">
+                    <div class="card">
+                        <h3>切线的本质</h3>
+                        <div class="info-box">
+                            切线 = 曲线在某点的"瞬时方向"
+                        </div>
+                        <div class="steps">
+                            <strong>切线的特点：</strong><br>
+                            ✓ 与曲线相切于一点<br>
+                            ✓ 在切点附近最接近曲线<br>
+                            ✓ 反映曲线在该点的变化趋势<br>
+                            ✓ 斜率等于函数在该点的导数
+                        </div>
+                        <div class="formula-box">
+                            切线方程：$y - f(a) = f'(a)(x - a)$
+                        </div>
+                        <div class="input-group">
+                            <label>选择演示函数</label>
+                            <select id="tangentFunc" onchange="updateTangentDemo()">
+                                <option value="parabola">抛物线 y = x²</option>
+                                <option value="cubic">三次曲线 y = x³</option>
+                                <option value="sqrt">平方根 y = √x</option>
+                                <option value="sine">正弦曲线 y = sin(x)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>切线与曲线的关系</h3>
+                        <div class="steps">
+                            <strong>观察要点：</strong><br>
+                            1. <strong>局部近似：</strong>在切点附近，切线几乎与曲线重合<br>
+                            2. <strong>远离分离：</strong>离切点越远，切线与曲线差别越大<br>
+                            3. <strong>唯一性：</strong>每个点只有一条切线<br>
+                            4. <strong>方向性：</strong>切线指示曲线的"前进方向"
+                        </div>
+                        <button class="btn" onclick="showMultipleTangents()">显示多条切线</button>
+                    </div>
+                </div>
+
+                <div class="column">
+                    <div class="card">
+                        <h3>切线动态演示</h3>
+                        <div class="canvas-container">
+                            <canvas id="tangentCanvas" width="600" height="400"></canvas>
+                        </div>
+                        <div class="slider-group">
+                            <label>移动切点</label>
+                            <input type="range" class="slider" id="tangentSlider" 
+                                   min="-2" max="2" step="0.05" value="0">
+                            <span class="slider-value" id="tangentValue">0.00</span>
+                        </div>
+                        <div class="result" id="tangentInfo">
+                            切点：(0, 0)，斜率：0
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 局部线性页面 -->
+            <div class="content" id="zoom">
+                <div class="column">
+                    <div class="card">
+                        <h3>局部线性化</h3>
+                        <div class="info-box">
+                            放大看：曲线在局部像直线！
+                        </div>
+                        <div class="steps">
+                            <strong>放大实验：</strong><br>
+                            1. 选择曲线上一点<br>
+                            2. 逐步放大该点附近区域<br>
+                            3. 观察曲线如何"变直"<br>
+                            4. 最终曲线与切线几乎重合<br><br>
+                            <strong>这就是微分的几何本质！</strong>
+                        </div>
+                        <div class="slider-group">
+                            <label>放大倍数</label>
+                            <input type="range" class="slider" id="zoomSlider" 
+                                   min="1" max="100" step="1" value="1">
+                            <span class="slider-value" id="zoomValue">1×</span>
+                        </div>
+                        <div class="animation-controls">
+                            <button class="btn" onclick="autoZoom()">自动放大</button>
+                            <button class="btn" onclick="resetZoom()">重置视图</button>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>线性近似的应用</h3>
+                        <div class="formula-box">
+                            $f(x) ≈ f(a) + f'(a)(x - a)$
+                        </div>
+                        <div class="info-box">
+                            在 x = a 附近，用切线近似曲线
+                        </div>
+                        <div class="steps">
+                            <strong>实际应用：</strong><br>
+                            • 工程计算的快速估算<br>
+                            • 物理中的小量近似<br>
+                            • 经济学的边际分析<br>
+                            • 计算机图形学的曲线绘制
+                        </div>
+                    </div>
+                </div>
+
+                <div class="column">
+                    <div class="card">
+                        <h3>局部线性可视化</h3>
+                        <div class="canvas-container">
+                            <canvas id="zoomCanvas" width="600" height="400"></canvas>
+                        </div>
+                        <div class="info-box" id="zoomInfo">
+                            使用滑块放大，观察曲线如何变成直线
+                        </div>
+                        <div class="legend">
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: #4f46e5;"></div>
+                                <span>原曲线</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: #ef4444;"></div>
+                                <span>切线</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: #10b981;"></div>
+                                <span>观察点</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // 技巧1：统一的MathJax渲染
+        // ==========================================
+        function renderMath() {
+            if (window.MathJax && MathJax.typesetPromise) {
+                MathJax.typesetPromise().catch(err => console.log('渲染错误:', err));
+            }
+        }
+
+        // ==========================================
+        // 技巧2：Canvas设置工具
+        // ==========================================
+        function setupCanvas(canvas) {
+            const ctx = canvas.getContext('2d');
+            const rect = canvas.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            canvas.style.width = rect.width + 'px';
+            canvas.style.height = rect.height + 'px';
+            
+            ctx.scale(dpr, dpr);
+            
+            return { ctx, width: rect.width, height: rect.height };
+        }
+
+        // ==========================================
+        // 技巧3：绘制坐标轴
+        // ==========================================
+        function drawAxes(ctx, width, height, padding = 40) {
+            ctx.strokeStyle = '#374151';
+            ctx.lineWidth = 2;
+            
+            // X轴
+            ctx.beginPath();
+            ctx.moveTo(padding, height - padding);
+            ctx.lineTo(width - padding, height - padding);
+            ctx.stroke();
+            
+            // Y轴
+            ctx.beginPath();
+            ctx.moveTo(padding, padding);
+            ctx.lineTo(padding, height - padding);
+            ctx.stroke();
+            
+            // 箭头
+            ctx.fillStyle = '#374151';
+            
+            // X轴箭头
+            ctx.beginPath();
+            ctx.moveTo(width - padding, height - padding);
+            ctx.lineTo(width - padding - 8, height - padding - 4);
+            ctx.lineTo(width - padding - 8, height - padding + 4);
+            ctx.fill();
+            
+            // Y轴箭头
+            ctx.beginPath();
+            ctx.moveTo(padding, padding);
+            ctx.lineTo(padding - 4, padding + 8);
+            ctx.lineTo(padding + 4, padding + 8);
+            ctx.fill();
+            
+            // 坐标轴标签
+            ctx.font = '14px Arial';
+            ctx.fillText('x', width - padding + 10, height - padding + 5);
+            ctx.fillText('y', padding - 5, padding - 10);
+        }
+
+        // ==========================================
+        // 技巧4：绘制网格
+        // ==========================================
+        function drawGrid(ctx, width, height, padding = 40, gridSize = 40) {
+            ctx.strokeStyle = '#e5e7eb';
+            ctx.lineWidth = 0.5;
+            
+            // 垂直网格线
+            for (let x = padding + gridSize; x < width - padding; x += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(x, padding);
+                ctx.lineTo(x, height - padding);
+                ctx.stroke();
+            }
+            
+            // 水平网格线
+            for (let y = padding + gridSize; y < height - padding; y += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(padding, y);
+                ctx.lineTo(width - padding, y);
+                ctx.stroke();
+            }
+        }
+
+        // ==========================================
+        // 技巧5：坐标转换（数学坐标到画布坐标）
+        // ==========================================
+        function mathToCanvas(x, y, width, height, xRange, yRange, padding = 40) {
+            const plotWidth = width - 2 * padding;
+            const plotHeight = height - 2 * padding;
+            
+            const canvasX = padding + (x - xRange[0]) / (xRange[1] - xRange[0]) * plotWidth;
+            const canvasY = height - padding - (y - yRange[0]) / (yRange[1] - yRange[0]) * plotHeight;
+            
+            return { x: canvasX, y: canvasY };
+        }
+
+        // ==========================================
+        // 割线到切线页面
+        // ==========================================
+        function drawSecantVisualization() {
+            const canvas = document.getElementById('secantCanvas');
+            if (!canvas) return;
+            
+            const { ctx, width, height } = setupCanvas(canvas);
+            
+            ctx.clearRect(0, 0, width, height);
+            drawGrid(ctx, width, height);
+            drawAxes(ctx, width, height);
+            
+            // 获取参数
+            const h = parseFloat(document.getElementById('hSlider').value);
+            
+            // 定义函数：简单的二次函数
+            const f = (x) => x * x;
+            const df = (x) => 2 * x; // 导数
+            
+            // 固定点A
+            const x0 = 1;
+            const y0 = f(x0);
+            
+            // 点B
+            const x1 = x0 + h;
+            const y1 = f(x1);
+            
+            // 数学坐标范围
+            const xRange = [-1, 4];
+            const yRange = [-1, 8];
+            
+            // 绘制函数曲线
+            ctx.strokeStyle = '#4f46e5';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            
+            for (let i = 0; i <= 100; i++) {
+                const x = xRange[0] + (xRange[1] - xRange[0]) * i / 100;
+                const y = f(x);
+                const point = mathToCanvas(x, y, width, height, xRange, yRange);
+                
+                if (i === 0) ctx.moveTo(point.x, point.y);
+                else ctx.lineTo(point.x, point.y);
+            }
+            ctx.stroke();
+            
+            // 绘制切线（目标线）
+            const tangentSlope = df(x0);
+            ctx.strokeStyle = '#ef4444';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            
+            const tangentX1 = xRange[0];
+            const tangentX2 = xRange[1];
+            const tangentY1 = y0 + tangentSlope * (tangentX1 - x0);
+            const tangentY2 = y0 + tangentSlope * (tangentX2 - x0);
+            
+            const tp1 = mathToCanvas(tangentX1, tangentY1, width, height, xRange, yRange);
+            const tp2 = mathToCanvas(tangentX2, tangentY2, width, height, xRange, yRange);
+            
+            ctx.moveTo(tp1.x, tp1.y);
+            ctx.lineTo(tp2.x, tp2.y);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            // 绘制割线
+            const secantSlope = (y1 - y0) / h;
+            ctx.strokeStyle = '#10b981';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            
+            const secantX1 = xRange[0];
+            const secantX2 = xRange[1];
+            const secantY1 = y0 + secantSlope * (secantX1 - x0);
+            const secantY2 = y0 + secantSlope * (secantX2 - x0);
+            
+            const sp1 = mathToCanvas(secantX1, secantY1, width, height, xRange, yRange);
+            const sp2 = mathToCanvas(secantX2, secantY2, width, height, xRange, yRange);
+            
+            ctx.moveTo(sp1.x, sp1.y);
+            ctx.lineTo(sp2.x, sp2.y);
+            ctx.stroke();
+            
+            // 绘制点A和点B
+            const pointA = mathToCanvas(x0, y0, width, height, xRange, yRange);
+            const pointB = mathToCanvas(x1, y1, width, height, xRange, yRange);
+            
+            // 点A（固定点）
+            ctx.fillStyle = '#ef4444';
+            ctx.beginPath();
+            ctx.arc(pointA.x, pointA.y, 6, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 点B（移动点）
+            ctx.fillStyle = '#10b981';
+            ctx.beginPath();
+            ctx.arc(pointB.x, pointB.y, 6, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 标注点
+            ctx.fillStyle = '#374151';
+            ctx.font = '14px Arial';
+            ctx.fillText('A', pointA.x - 15, pointA.y - 10);
+            ctx.fillText('B', pointB.x + 10, pointB.y - 10);
+            
+            // 更新数值显示
+            document.getElementById('hDisplay').textContent = h.toFixed(2);
+            document.getElementById('secantSlope').textContent = secantSlope.toFixed(2);
+            document.getElementById('tangentSlope').textContent = tangentSlope.toFixed(2);
+            document.getElementById('slopeError').textContent = Math.abs(secantSlope - tangentSlope).toFixed(2);
+            
+            // 更新信息
+            if (h < 0.2) {
+                document.getElementById('secantInfo').textContent = '割线几乎与切线重合了！';
+            } else if (h < 0.5) {
+                document.getElementById('secantInfo').textContent = '割线正在接近切线';
+            } else {
+                document.getElementById('secantInfo').textContent = '继续减小h值，观察割线逼近切线';
+            }
+        }
+
+        // 动画演示
+        let secantAnimationId = null;
+        
+        function animateSecant() {
+            if (secantAnimationId) return;
+            
+            let h = 2.0;
+            const step = 0.02;
+            
+            function animate() {
+                h -= step;
+                if (h < 0.05) {
+                    h = 0.05;
+                    cancelAnimationFrame(secantAnimationId);
+                    secantAnimationId = null;
+                    return;
+                }
+                
+                document.getElementById('hSlider').value = h;
+                document.getElementById('hValue').textContent = h.toFixed(2);
+                drawSecantVisualization();
+                
+                secantAnimationId = requestAnimationFrame(animate);
+            }
+            
+            animate();
+        }
+        
+        function resetSecant() {
+            if (secantAnimationId) {
+                cancelAnimationFrame(secantAnimationId);
+                secantAnimationId = null;
+            }
+            document.getElementById('hSlider').value = 1;
+            document.getElementById('hValue').textContent = '1.00';
+            drawSecantVisualization();
+        }
+
+        // ==========================================
+        // 斜率意义页面
+        // ==========================================
+        function drawSlopeVisualization() {
+            const canvas = document.getElementById('slopeCanvas');
+            if (!canvas) return;
+            
+            const { ctx, width, height } = setupCanvas(canvas);
+            
+            ctx.clearRect(0, 0, width, height);
+            drawGrid(ctx, width, height);
+            drawAxes(ctx, width, height);
+            
+            const slope = parseFloat(document.getElementById('slopeSlider').value);
+            const xPoint = parseFloat(document.getElementById('xSlider').value);
+            
+            // 绘制直线 y = slope * (x - xPoint) + yPoint
+            const yPoint = 2; // 固定y值
+            
+            const xRange = [-3, 3];
+            const yRange = [-4, 6];
+            
+            // 绘制直线
+            ctx.strokeStyle = '#4f46e5';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            
+            const lineX1 = xRange[0];
+            const lineX2 = xRange[1];
+            const lineY1 = yPoint + slope * (lineX1 - xPoint);
+            const lineY2 = yPoint + slope * (lineX2 - xPoint);
+            
+            const p1 = mathToCanvas(lineX1, lineY1, width, height, xRange, yRange);
+            const p2 = mathToCanvas(lineX2, lineY2, width, height, xRange, yRange);
+            
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.stroke();
+            
+            // 绘制参考点
+            const point = mathToCanvas(xPoint, yPoint, width, height, xRange, yRange);
+            ctx.fillStyle = '#ef4444';
+            ctx.beginPath();
+            ctx.arc(point.x, point.y, 6, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 技巧6：绘制直角三角形来展示斜率
+            if (Math.abs(slope) > 0.1) {
+                const dx = 1; // 水平距离
+                const dy = slope * dx; // 垂直距离
+                
+                const x2 = xPoint + dx;
+                const y2 = yPoint + dy;
+                
+                const p0 = mathToCanvas(xPoint, yPoint, width, height, xRange, yRange);
+                const px = mathToCanvas(x2, yPoint, width, height, xRange, yRange);
+                const py = mathToCanvas(x2, y2, width, height, xRange, yRange);
+                
+                // 绘制直角三角形
+                ctx.strokeStyle = '#10b981';
+                ctx.lineWidth = 1;
+                ctx.setLineDash([3, 3]);
+                
+                // 水平边
+                ctx.beginPath();
+                ctx.moveTo(p0.x, p0.y);
+                ctx.lineTo(px.x, px.y);
+                ctx.stroke();
+                
+                // 垂直边
+                ctx.beginPath();
+                ctx.moveTo(px.x, px.y);
+                ctx.lineTo(py.x, py.y);
+                ctx.stroke();
+                
+                ctx.setLineDash([]);
+                
+                // 标注
+                ctx.fillStyle = '#374151';
+                ctx.font = '12px Arial';
+                ctx.fillText('1', (p0.x + px.x) / 2, p0.y + 15);
+                ctx.fillText(slope.toFixed(1), px.x + 10, (px.y + py.y) / 2);
+            }
+            
+            // 计算角度
+            const angle = Math.atan(slope) * 180 / Math.PI;
+            document.getElementById('angleDisplay').textContent = 
+                `角度 θ = ${angle.toFixed(1)}°`;
+        }
+
+        // ==========================================
+        // 切线理解页面
+        // ==========================================
+        function drawTangentDemo() {
+            const canvas = document.getElementById('tangentCanvas');
+            if (!canvas) return;
+            
+            const { ctx, width, height } = setupCanvas(canvas);
+            
+            ctx.clearRect(0, 0, width, height);
+            drawGrid(ctx, width, height);
+            drawAxes(ctx, width, height);
+            
+            const funcType = document.getElementById('tangentFunc').value;
+            const xValue = parseFloat(document.getElementById('tangentSlider').value);
+            
+            // 定义不同的函数
+            let f, df, xRange, yRange;
+            switch (funcType) {
+                case 'parabola':
+                    f = (x) => x * x;
+                    df = (x) => 2 * x;
+                    xRange = [-3, 3];
+                    yRange = [-1, 6];
+                    break;
+                case 'cubic':
+                    f = (x) => x * x * x;
+                    df = (x) => 3 * x * x;
+                    xRange = [-2, 2];
+                    yRange = [-4, 4];
+                    break;
+                case 'sqrt':
+                    f = (x) => Math.sqrt(x + 2);
+                    df = (x) => 1 / (2 * Math.sqrt(x + 2));
+                    xRange = [-2, 4];
+                    yRange = [0, 3];
+                    break;
+                case 'sine':
+                    f = (x) => 2 * Math.sin(x);
+                    df = (x) => 2 * Math.cos(x);
+                    xRange = [-Math.PI, Math.PI];
+                    yRange = [-3, 3];
+                    break;
+            }
+            
+            // 绘制函数曲线
+            ctx.strokeStyle = '#4f46e5';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            
+            for (let i = 0; i <= 200; i++) {
+                const x = xRange[0] + (xRange[1] - xRange[0]) * i / 200;
+                const y = f(x);
+                const point = mathToCanvas(x, y, width, height, xRange, yRange);
+                
+                if (i === 0) ctx.moveTo(point.x, point.y);
+                else ctx.lineTo(point.x, point.y);
+            }
+            ctx.stroke();
+            
+            // 计算切点和切线
+            const y0 = f(xValue);
+            const slope = df(xValue);
+            
+            // 绘制切线
+            ctx.strokeStyle = '#ef4444';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            
+            const tangentLength = (xRange[1] - xRange[0]) / 2;
+            const tangentX1 = Math.max(xRange[0], xValue - tangentLength);
+            const tangentX2 = Math.min(xRange[1], xValue + tangentLength);
+            const tangentY1 = y0 + slope * (tangentX1 - xValue);
+            const tangentY2 = y0 + slope * (tangentX2 - xValue);
+            
+            const p1 = mathToCanvas(tangentX1, tangentY1, width, height, xRange, yRange);
+            const p2 = mathToCanvas(tangentX2, tangentY2, width, height, xRange, yRange);
+            
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.stroke();
+            
+            // 绘制切点
+            const point = mathToCanvas(xValue, y0, width, height, xRange, yRange);
+            ctx.fillStyle = '#10b981';
+            ctx.beginPath();
+            ctx.arc(point.x, point.y, 6, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 更新信息
+            document.getElementById('tangentInfo').textContent = 
+                `切点：(${xValue.toFixed(2)}, ${y0.toFixed(2)})，斜率：${slope.toFixed(2)}`;
+        }
+
+        // 显示多条切线
+        function showMultipleTangents() {
+            const canvas = document.getElementById('tangentCanvas');
+            if (!canvas) return;
+            
+            const { ctx, width, height } = setupCanvas(canvas);
+            
+            // 在现有图形上添加多条切线
+            const funcType = document.getElementById('tangentFunc').value;
+            
+            let f, df;
+            switch (funcType) {
+                case 'parabola':
+                    f = (x) => x * x;
+                    df = (x) => 2 * x;
+                    break;
+                case 'cubic':
+                    f = (x) => x * x * x;
+                    df = (x) => 3 * x * x;
+                    break;
+                case 'sqrt':
+                    f = (x) => Math.sqrt(x + 2);
+                    df = (x) => 1 / (2 * Math.sqrt(x + 2));
+                    break;
+                case 'sine':
+                    f = (x) => 2 * Math.sin(x);
+                    df = (x) => 2 * Math.cos(x);
+                    break;
+            }
+            
+            const xRange = [-3, 3];
+            const yRange = [-4, 6];
+            
+            // 绘制多条切线
+            const tangentPoints = [-1.5, -0.5, 0.5, 1.5];
+            
+            tangentPoints.forEach(x => {
+                const y = f(x);
+                const slope = df(x);
+                
+                ctx.strokeStyle = 'rgba(239, 68, 68, 0.3)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                
+                const tangentX1 = x - 0.5;
+                const tangentX2 = x + 0.5;
+                const tangentY1 = y + slope * (tangentX1 - x);
+                const tangentY2 = y + slope * (tangentX2 - x);
+                
+                const p1 = mathToCanvas(tangentX1, tangentY1, width, height, xRange, yRange);
+                const p2 = mathToCanvas(tangentX2, tangentY2, width, height, xRange, yRange);
+                
+                ctx.moveTo(p1.x, p1.y);
+                ctx.lineTo(p2.x, p2.y);
+                ctx.stroke();
+            });
+        }
+
+        // ==========================================
+        // 局部线性页面
+        // ==========================================
+        function drawZoomVisualization() {
+            const canvas = document.getElementById('zoomCanvas');
+            if (!canvas) return;
+            
+            const { ctx, width, height } = setupCanvas(canvas);
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            const zoom = parseFloat(document.getElementById('zoomSlider').value);
+            
+            // 固定观察点
+            const x0 = 1;
+            const y0 = Math.sin(x0); // 使用正弦函数
+            
+            // 根据放大倍数调整范围
+            const baseRange = 3;
+            const range = baseRange / zoom;
+            
+            const xRange = [x0 - range, x0 + range];
+            const yRange = [y0 - range, y0 + range];
+            
+            // 绘制坐标轴（根据缩放调整）
+            drawGrid(ctx, width, height, 40, 40 * zoom / 10);
+            drawAxes(ctx, width, height);
+            
+            // 绘制函数曲线
+            ctx.strokeStyle = '#4f46e5';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            
+            for (let i = 0; i <= 200; i++) {
+                const x = xRange[0] + (xRange[1] - xRange[0]) * i / 200;
+                const y = Math.sin(x);
+                const point = mathToCanvas(x, y, width, height, xRange, yRange);
+                
+                if (i === 0) ctx.moveTo(point.x, point.y);
+                else ctx.lineTo(point.x, point.y);
+            }
+            ctx.stroke();
+            
+            // 绘制切线
+            const slope = Math.cos(x0); // sin的导数是cos
+            
+            ctx.strokeStyle = '#ef4444';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            
+            const tangentX1 = xRange[0];
+            const tangentX2 = xRange[1];
+            const tangentY1 = y0 + slope * (tangentX1 - x0);
+            const tangentY2 = y0 + slope * (tangentX2 - x0);
+            
+            const p1 = mathToCanvas(tangentX1, tangentY1, width, height, xRange, yRange);
+            const p2 = mathToCanvas(tangentX2, tangentY2, width, height, xRange, yRange);
+            
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.stroke();
+            
+            // 绘制观察点
+            const point = mathToCanvas(x0, y0, width, height, xRange, yRange);
+            ctx.fillStyle = '#10b981';
+            ctx.beginPath();
+            ctx.arc(point.x, point.y, 6, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 更新信息
+            if (zoom > 50) {
+                document.getElementById('zoomInfo').textContent = 
+                    '曲线几乎变成直线了！这就是"局部线性"';
+            } else if (zoom > 20) {
+                document.getElementById('zoomInfo').textContent = 
+                    '曲线的弯曲越来越不明显';
+            } else if (zoom > 5) {
+                document.getElementById('zoomInfo').textContent = 
+                    '继续放大，曲线正在变直';
+            } else {
+                document.getElementById('zoomInfo').textContent = 
+                    '开始放大，注意观察曲线的变化';
+            }
+        }
+
+        // 自动放大动画
+        let zoomAnimationId = null;
+        
+        function autoZoom() {
+            if (zoomAnimationId) return;
+            
+            let zoom = 1;
+            const maxZoom = 100;
+            const step = 1.5;
+            
+            function animate() {
+                zoom *= step;
+                if (zoom > maxZoom) {
+                    zoom = maxZoom;
+                    cancelAnimationFrame(zoomAnimationId);
+                    zoomAnimationId = null;
+                    return;
+                }
+                
+                document.getElementById('zoomSlider').value = zoom;
+                document.getElementById('zoomValue').textContent = Math.round(zoom) + '×';
+                drawZoomVisualization();
+                
+                zoomAnimationId = requestAnimationFrame(animate);
+            }
+            
+            animate();
+        }
+        
+        function resetZoom() {
+            if (zoomAnimationId) {
+                cancelAnimationFrame(zoomAnimationId);
+                zoomAnimationId = null;
+            }
+            document.getElementById('zoomSlider').value = 1;
+            document.getElementById('zoomValue').textContent = '1×';
+            drawZoomVisualization();
+        }
+
+        // ==========================================
+        // 页面切换
+        // ==========================================
+        function switchPanel(panel) {
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(panel).classList.add('active');
+            
+            setTimeout(() => {
+                renderMath();
+                
+                switch (panel) {
+                    case 'secant':
+                        drawSecantVisualization();
+                        break;
+                    case 'slope':
+                        drawSlopeVisualization();
+                        break;
+                    case 'tangent':
+                        updateTangentDemo();
+                        break;
+                    case 'zoom':
+                        drawZoomVisualization();
+                        break;
+                }
+            }, 50);
+        }
+
+        // 更新函数
+        function updateTangentDemo() {
+            drawTangentDemo();
+        }
+
+        // ==========================================
+        // 事件监听器
+        // ==========================================
+        
+        // 割线页面
+        document.getElementById('hSlider')?.addEventListener('input', function() {
+            document.getElementById('hValue').textContent = parseFloat(this.value).toFixed(2);
+            drawSecantVisualization();
+        });
+
+        // 斜率页面
+        document.getElementById('slopeSlider')?.addEventListener('input', function() {
+            document.getElementById('slopeValue').textContent = parseFloat(this.value).toFixed(1);
+            drawSlopeVisualization();
+        });
+
+        document.getElementById('xSlider')?.addEventListener('input', function() {
+            document.getElementById('xValue').textContent = parseFloat(this.value).toFixed(1);
+            drawSlopeVisualization();
+        });
+
+        // 切线页面
+        document.getElementById('tangentSlider')?.addEventListener('input', function() {
+            document.getElementById('tangentValue').textContent = parseFloat(this.value).toFixed(2);
+            drawTangentDemo();
+        });
+
+        // 放大页面
+        document.getElementById('zoomSlider')?.addEventListener('input', function() {
+            document.getElementById('zoomValue').textContent = Math.round(this.value) + '×';
+            drawZoomVisualization();
+        });
+
+        // ==========================================
+        // 技巧7：响应式重绘
+        // ==========================================
+        let resizeTimeout;
+        window.addEventListener('resize', function() {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                const activePanel = document.querySelector('.content.active');
+                if (activePanel) {
+                    const panelId = activePanel.id;
+                    switch (panelId) {
+                        case 'secant':
+                            drawSecantVisualization();
+                            break;
+                        case 'slope':
+                            drawSlopeVisualization();
+                            break;
+                        case 'tangent':
+                            drawTangentDemo();
+                            break;
+                        case 'zoom':
+                            drawZoomVisualization();
+                            break;
+                    }
+                }
+            }, 150);
+        });
+
+        // ==========================================
+        // 初始化
+        // ==========================================
+        window.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                drawSecantVisualization();
+                renderMath();
+            }, 100);
+        });
+
+        function toggleReturnLinks() { const p = document.querySelector('.return-links'); if (!p) return; if (p.style.display === 'flex') { p.style.opacity = '0'; setTimeout(() => p.style.display = 'none', 160); } else { p.style.display = 'flex'; requestAnimationFrame(() => p.style.opacity = '1'); } }
+    </script>
+</body>
+</html>

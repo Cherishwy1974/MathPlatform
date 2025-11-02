@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>基本初等函数实验室 - 函数艺术与运动</title>
+    
+    <!-- MathJax 配置 -->
+    <!-- MathJax配置 -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+            },
+            startup: {
+                pageReady: () => {
+                    return MathJax.startup.defaultPageReady().then(() => {
+                        console.log('MathJax加载完成');
+                    });
+                }
+            }
+        };
+    </script>
+    <script defer src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js"></script>
+    
+    <style>
+        :root {
+            --h1-size: 22px;      
+            --h2-size: 20px;      
+            --h3-size: 18px;      
+            --btn-size: 16px;     
+            --formula-size: 18px;
+            --text-size: 16px;
+            
+            --primary: #4f46e5;
+            --primary-light: #6366f1;
+            --primary-dark: #3730a3;
+            --light: #ffffff;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-600: #4b5563;
+            --gray-800: #1f2937;
+            --border: #e5e7eb;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        *::-webkit-scrollbar {
+            width: 0;
+            background: transparent;
+        }
+        
+        * {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
+            font-size: var(--text-size);
+            line-height: 1.5;
+            background: var(--gray-50);
+            color: var(--gray-800);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            height: 100vh;
+            max-height: 700px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            background: var(--light);
+        }
+
+        .header {
+            background: var(--primary);
+            color: var(--light);
+            padding: 8px 20px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: var(--h2-size);
+            margin: 0;
+        }
+
+        .main {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 120px;
+            background: var(--gray-50);
+            border-right: 1px solid var(--border);
+            padding: 10px 8px;
+        }
+
+        .nav-btn {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 4px;
+            background: transparent;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: var(--text-size);
+            color: var(--gray-600);
+            text-align: left;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover {
+            background: var(--gray-100);
+        }
+
+        .nav-btn.active {
+            background: var(--primary);
+            color: var(--light);
+        }
+
+        .content {
+            flex: 1;
+            display: none;
+            padding: 16px;
+            overflow-y: auto;
+        }
+
+        .content.active {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow-y: auto;
+        }
+
+        .card {
+            background: var(--light);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .card h3 {
+            font-size: var(--h3-size);
+            color: var(--primary);
+            margin-bottom: 12px;
+        }
+
+        .input-group {
+            margin-bottom: 12px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 4px;
+            font-size: var(--text-size);
+            font-weight: 500;
+        }
+
+        .input-group input,
+        .input-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: var(--text-size);
+            background: var(--gray-50);
+        }
+
+        .input-group input:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: var(--light);
+        }
+
+        .btn {
+            padding: 8px 16px;
+            background: var(--primary);
+            color: var(--light);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: var(--btn-size);
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .result {
+            background: var(--gray-50);
+            padding: 12px;
+            border-radius: 4px;
+            border: 1px solid var(--primary);
+            text-align: center;
+            font-size: var(--text-size);
+            margin: 12px 0;
+            min-height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .formula-box {
+            background: #f0f7ff;
+            padding: 12px;
+            border-radius: 4px;
+            border-left: 3px solid var(--primary);
+            margin: 12px 0;
+            text-align: center;
+            font-size: var(--formula-size);
+        }
+
+        .MathJax {
+            font-size: 0.9em !important;
+        }
+        
+        mjx-container {
+            font-size: 100% !important;
+        }
+        
+        .formula-box mjx-container {
+            font-size: 90% !important;
+        }
+        
+        .info-box mjx-container {
+            font-size: 90% !important;
+        }
+        
+        .result mjx-container {
+            font-size: 90% !important;
+        }
+
+        .info-box {
+            background: var(--gray-50);
+            padding: 10px;
+            border-radius: 4px;
+            margin: 8px 0;
+            font-size: var(--text-size);
+            text-align: center;
+        }
+
+        .steps {
+            background: #fff9e6;
+            padding: 12px;
+            border-radius: 4px;
+            border-left: 3px solid #f59e0b;
+            line-height: 1.8;
+            font-size: var(--text-size);
+        }
+
+        /* Desmos容器样式 */
+        .desmos-container {
+            border: 1px solid var(--gray-200);
+            border-radius: 4px;
+            background: #fafafa;
+            padding: 8px;
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .desmos-container:hover {
+            border-color: var(--primary);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.15);
+        }
+
+        .desmos-container iframe {
+            width:600px;
+            height: 1600px;
+            border: none;
+            border-radius: 4px;
+        }
+
+        /* iframe覆盖层样式 */
+        .iframe-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(79, 70, 229, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        .desmos-container:hover .iframe-overlay {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .overlay-content {
+            text-align: center;
+            color: var(--primary);
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .overlay-content p {
+            margin: 0 0 12px 0;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .overlay-btn {
+            background: var(--primary);
+            color: var(--light);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .overlay-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        /* 幻灯片容器 */
+        .slideshow-container {
+            position: relative;
+            border: 1px solid var(--gray-200);
+            border-radius: 4px;
+            background: var(--light);
+            min-height: 400px;
+            max-height: 500px;
+            overflow: hidden;
+        }
+
+        .slide {
+            display: none;
+            padding: 40px;
+            text-align: center;
+            height: 100%;
+            position: relative;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        }
+
+        .slide.active {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .slide h2 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: var(--primary);
+        }
+
+        .slide p {
+            font-size: 1.2rem;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            max-width: 400px;
+        }
+
+        .slide-number {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: var(--primary);
+            color: var(--light);
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+        }
+
+        /* 函数控制翻页按钮 */
+        .function-controls {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            justify-content: center;
+        }
+
+        .function-btn {
+            padding: 6px 12px;
+            background: var(--gray-100);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        .function-btn:hover {
+            background: var(--primary);
+            color: var(--light);
+        }
+
+        .function-btn.active {
+            background: var(--primary);
+            color: var(--light);
+        }
+
+        /* 翻页动画效果 */
+        .slide-transition {
+            animation: slideIn 0.5s ease-in-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* 函数驱动的翻页效果 */
+        .linear-transition {
+            animation: linearSlide 0.8s ease-out;
+        }
+
+        .quadratic-transition {
+            animation: quadraticSlide 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .exponential-transition {
+            animation: exponentialSlide 1.5s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+
+        .sine-transition {
+            animation: sineSlide 1.8s ease-in-out;
+        }
+
+        @keyframes linearSlide {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes quadraticSlide {
+            from { transform: translateY(-100%) scale(0.8); opacity: 0; }
+            to { transform: translateY(0) scale(1); opacity: 1; }
+        }
+
+        @keyframes exponentialSlide {
+            0% { transform: scale(0.1) rotate(-180deg); opacity: 0; }
+            50% { transform: scale(1.1) rotate(-90deg); opacity: 0.7; }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+
+        @keyframes sineSlide {
+            0% { transform: translateX(-100%) rotateY(90deg); opacity: 0; }
+            25% { transform: translateX(-50%) rotateY(45deg); opacity: 0.3; }
+            50% { transform: translateX(0) rotateY(0deg); opacity: 0.7; }
+            75% { transform: translateX(25%) rotateY(-22.5deg); opacity: 0.9; }
+            100% { transform: translateX(0) rotateY(0deg); opacity: 1; }
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .main {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+                padding: 8px 16px;
+                display: flex;
+                flex-direction: row;
+                gap: 8px;
+                overflow-x: auto;
+                flex-shrink: 0;
+                justify-content: center;
+                flex-wrap: nowrap;
+            }
+
+            .nav-btn {
+                min-width: 90px;
+                text-align: center;
+                margin-bottom: 0;
+                white-space: nowrap;
+                flex-shrink: 0;
+                padding: 8px 12px;
+                font-size: 14px;
+            }
+
+            .content.active {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .container {
+                max-height: none;
+                height: 100vh;
+            }
+
+            .header {
+                padding: 6px 16px;
+                height: 36px;
+            }
+
+            .header h1 {
+                font-size: 18px;
+            }
+
+            .card {
+                padding: 12px;
+            }
+
+            .desmos-container,
+            .slideshow-container {
+                min-height: 300px;
+                max-height: 400px;
+            }
+
+            .slide h2 {
+                font-size: 1.5rem;
+            }
+
+            .slide p {
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header {
+                padding: 4px 12px;
+                height: 32px;
+            }
+
+            .header h1 {
+                font-size: 16px;
+            }
+
+            .sidebar {
+                padding: 6px 8px;
+                gap: 6px;
+                justify-content: space-between;
+            }
+
+            .nav-btn {
+                min-width: 75px;
+                padding: 6px 8px;
+                font-size: 13px;
+                flex: 1;
+                max-width: 100px;
+            }
+
+            .content {
+                padding: 12px;
+            }
+
+            .card {
+                padding: 10px;
+            }
+
+            .desmos-container,
+            .slideshow-container {
+                min-height: 250px;
+                max-height: 350px;
+            }
+        }
+    .return-home-panel { position: fixed; bottom: 12px; right: 12px; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; z-index: 40; }
+        .return-toggle { width: 40px; height: 40px; border-radius: 50%; border: none; background: linear-gradient(135deg, rgba(79,70,229,0.96), rgba(99,102,241,0.9)); color: #fff; font-size: 20px; cursor: pointer; box-shadow: 0 10px 18px rgba(79,70,229,0.28); transition: transform 0.2s, box-shadow 0.2s; }
+        .return-toggle:hover { transform: translateY(-1px) scale(1.03); box-shadow: 0 14px 26px rgba(79,70,229,0.35); }
+        .return-links { display: none; flex-direction: column; gap: 6px; padding: 10px; border-radius: 10px; background: rgba(255,255,255,0.96); border: 1px solid rgba(79,70,229,0.18); box-shadow: 0 10px 30px rgba(15,23,42,0.14); opacity: 0; transition: opacity 0.16s; }
+        .return-link { text-decoration: none; font-size: 15px; color: var(--primary-dark); padding: 6px 12px; border-radius: 8px; background: rgba(99,102,241,0.12); transition: background 0.2s; }
+        .return-link:hover { background: rgba(79,70,229,0.18); }
+    </style>
+
+</head>
+<body>
+    <div class="return-home-panel"><button class="return-toggle" onclick="toggleReturnLinks()"><i class="fa-solid fa-house"></i></button><div class="return-links"><a class="return-link" href="index.html"><i class="fa-solid fa-arrow-left"></i> 返回目录</a><a class="return-link" href="../index.html"><i class="fa-solid fa-house"></i> 返回主站</a></div></div>
+    <div class="container">
+        <header class="header">
+            <h1>基本初等函数实验室 - 函数艺术与运动</h1>
+        </header>
+
+        <div class="main">
+            <!-- 侧边栏 -->
+            <nav class="sidebar">
+                <button class="nav-btn active" onclick="switchPanel('art')">函数艺术</button>
+                <button class="nav-btn" onclick="switchPanel('motion')">函数运动</button>
+            </nav>
+
+            <!-- 函数艺术页面 -->
+            <div class="content active" id="art">
+                <div class="column">
+                    <div class="card">
+                        <h3>函数的艺术之美</h3>
+                        <div class="info-box">
+                            函数不仅仅是数学工具，更是创造美的艺术家。通过参数方程、极坐标方程等，函数能够描绘出令人惊叹的艺术作品。
+                        </div>
+                        <div class="steps">
+                            <strong>探索内容：</strong><br>
+                            • 参数方程绘制的精美图形<br>
+                            • 极坐标下的对称之美<br>
+                            • 复杂函数的艺术表现<br>
+                            • 数学与艺术的完美结合
+                        </div>
+                        <div class="formula-box">
+                            <strong>典型艺术函数：</strong><br>
+                            心形线：$r = a(1-\cos\theta)$<br>
+                            玫瑰线：$r = a\cos(n\theta)$<br>
+                            螺旋线：$r = a\theta$
+                        </div>
+                    </div>
+
+                  
+                </div>
+
+                <div class="column">
+                    <div class="card">
+                        <h3>Desmos 艺术画廊</h3>
+                        <div class="desmos-container" onclick="openDesmosGallery()">
+                            <iframe src="https://www.desmos.com/art?lang=zh-CN#13" 
+                                    width="100%" height="100%" frameborder="0">
+                                <p>您的浏览器不支持iframe，请直接访问：
+                                   <a href="https://www.desmos.com/art?lang=zh-CN#13" target="_blank">Desmos艺术画廊</a>
+                                </p>
+                            </iframe>
+                            <div class="iframe-overlay">
+                                <div class="overlay-content">
+                                    <p>点击此处访问 Desmos 艺术画廊</p>
+                                    <button class="overlay-btn">立即访问</button>
+                                </div>
+                            </div>
+                        </div>
+ 
+                    </div>
+                </div>
+            </div>
+
+            <!-- 函数运动页面 -->
+            <div class="content" id="motion">
+                <div class="column">
+                    <div class="card">
+                        <h3>函数驱动的运动效果</h3>
+                        <div class="info-box">
+                            不同的函数有着不同的"性格"，让我们通过翻页动画来感受它们的运动特征。
+                        </div>
+                        
+                        <div class="function-controls">
+                            <button class="function-btn active" onclick="changeSlideWithFunction('linear', 0)">线性函数</button>
+                            <button class="function-btn" onclick="changeSlideWithFunction('quadratic', 1)">二次函数</button>
+                            <button class="function-btn" onclick="changeSlideWithFunction('exponential', 2)">指数函数</button>
+                            <button class="function-btn" onclick="changeSlideWithFunction('sine', 3)">正弦函数</button>
+                        </div>
+
+                        <div class="steps">
+                            <strong>观察要点：</strong><br>
+                            • 线性函数：速度始终保持不变，表现为均匀直线运动<br>
+                            • 二次函数：运动过程中速度不断变化，体现为加速或减速的过程<br>
+                            • 指数函数：初期变化缓慢，随后迅速激增，呈现爆发式增长<br>
+                            • 正弦函数：运动呈现周期性起伏，像波浪一样有规律地变化
+                        </div>
+
+                        <div class="formula-box" id="currentFormula">
+                            $$f(x) = kx + b$$
+                            <div style="font-size: 0.8em; margin-top: 8px;">线性函数 - 匀速运动</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="column">
+                    <div class="card">
+                        <h3>函数运动演示</h3>
+                        <div class="slideshow-container">
+                            <div class="slide active">
+                                <div class="slide-number">1/4</div>
+                                <h2>线性函数</h2>
+                                <p>就像匀速行驶的汽车，线性函数代表着稳定、可预测的变化。无论何时，变化率都是恒定的。</p>
+                                <div class="formula-box">
+                                    $f(x) = kx + b$
+                                </div>
+                            </div>
+                            
+                            <div class="slide">
+                                <div class="slide-number">2/4</div>
+                                <h2>二次函数</h2>
+                                <p>如同加速或减速的运动，二次函数展现了变化率本身在变化的美妙过程。抛物线轨迹遍布自然界。</p>
+                                <div class="formula-box">
+                                    $f(x) = ax^2 + bx + c$
+                                </div>
+                            </div>
+                            
+                            <div class="slide">
+                                <div class="slide-number">3/4</div>
+                                <h2>指数函数</h2>
+                                <p>爆发式增长的力量！从细胞分裂到经济增长，指数函数描述着世界上最强大的变化模式。</p>
+                                <div class="formula-box">
+                                    $f(x) = a^x$
+                                </div>
+                            </div>
+                            
+                            <div class="slide">
+                                <div class="slide-number">4/4</div>
+                                <h2>正弦函数</h2>
+                                <p>如波浪般起伏，如心跳般律动。正弦函数捕捉着宇宙中最基本的周期性现象。</p>
+                                <div class="formula-box">
+                                    $f(x) = A\sin(\omega x + \phi)$
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="info-box" id="motionDescription">
+                            点击上方按钮，感受不同函数的运动"性格"
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentSlideIndex = 0;
+        let mathJaxReady = false;
+
+        // MathJax渲染函数
+        function renderMath() {
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                MathJax.typesetPromise().then(() => {
+                    console.log('MathJax 渲染成功');
+                }).catch(err => {
+                    console.error('MathJax 渲染错误:', err);
+                });
+            } else {
+                console.log('MathJax 未就绪，等待...');
+                setTimeout(renderMath, 300);
+            }
+        }
+
+        // 页面切换
+        function switchPanel(panel) {
+            // 移除所有活动状态
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+            
+            // 设置新的活动状态
+            event.target.classList.add('active');
+            document.getElementById(panel).classList.add('active');
+            
+            // 重新渲染 MathJax
+            setTimeout(renderMath, 100);
+        }
+
+        // 打开Desmos艺术画廊
+        function openDesmosGallery() {
+            window.open('https://www.desmos.com/art?lang=zh-CN#13', '_blank');
+        }
+
+        // 函数驱动的幻灯片切换
+        function changeSlideWithFunction(functionType, slideIndex) {
+            // 更新按钮状态
+            document.querySelectorAll('.function-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // 隐藏当前幻灯片
+            const slides = document.querySelectorAll('.slide');
+            slides.forEach(slide => {
+                slide.classList.remove('active');
+                // 移除之前的动画类
+                slide.classList.remove('linear-transition', 'quadratic-transition', 'exponential-transition', 'sine-transition');
+            });
+
+            // 显示新幻灯片并应用对应的动画效果
+            const newSlide = slides[slideIndex];
+            const animationClass = functionType + '-transition';
+            
+            setTimeout(() => {
+                newSlide.classList.add('active', animationClass);
+                currentSlideIndex = slideIndex;
+                updateFormulaDisplay(functionType);
+                updateMotionDescription(functionType);
+            }, 50);
+        }
+
+        // 更新公式显示
+        function updateFormulaDisplay(functionType) {
+            const formulas = {
+                'linear': {
+                    formula: '$$f(x) = kx + b$$',
+                    description: '线性函数 - 匀速运动'
+                },
+                'quadratic': {
+                    formula: '$$f(x) = ax^2 + bx + c$$',
+                    description: '二次函数 - 加速运动'
+                },
+                'exponential': {
+                    formula: '$$f(x) = a^x$$',
+                    description: '指数函数 - 爆发式增长'
+                },
+                'sine': {
+                    formula: '$$f(x) = A\\sin(\\omega x + \\phi)$$',
+                    description: '正弦函数 - 周期性波动'
+                }
+            };
+
+            const formulaElement = document.getElementById('currentFormula');
+            if (formulaElement && formulas[functionType]) {
+                formulaElement.innerHTML = formulas[functionType].formula + 
+                    '<div style="font-size: 0.8em; margin-top: 8px;">' + 
+                    formulas[functionType].description + '</div>';
+                setTimeout(renderMath, 100);
+            }
+        }
+
+        // 更新运动描述
+        function updateMotionDescription(functionType) {
+            const descriptions = {
+                'linear': '线性函数：像匀速行驶的列车，稳定而可预测',
+                'quadratic': '二次函数：如抛物运动，先快后慢或先慢后快',
+                'exponential': '指数函数：如病毒传播，开始缓慢然后爆炸性增长',
+                'sine': '正弦函数：如海浪起伏，周期性地重复着美丽的韵律'
+            };
+
+            const descElement = document.getElementById('motionDescription');
+            if (descElement && descriptions[functionType]) {
+                descElement.textContent = descriptions[functionType];
+            }
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('页面加载完成，开始初始化...');
+            
+            setTimeout(() => {
+                try {
+                    renderMath();
+                    updateFormulaDisplay('linear');
+                    updateMotionDescription('linear');
+                    console.log('初始化完成');
+                } catch (error) {
+                    console.error('初始化错误:', error);
+                }
+            }, 500);
+        });
+
+        // 当MathJax准备就绪时
+        window.addEventListener('load', function() {
+            mathJaxReady = true;
+            renderMath();
+        });
+        function toggleReturnLinks() { const p = document.querySelector('.return-links'); if (!p) return; if (p.style.display === 'flex') { p.style.opacity = '0'; setTimeout(() => p.style.display = 'none', 160); } else { p.style.display = 'flex'; requestAnimationFrame(() => p.style.opacity = '1'); } }
+    </script>
+</body>
+</html>

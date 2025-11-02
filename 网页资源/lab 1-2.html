@@ -1,0 +1,1135 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>对数运算实验室</title>
+    
+    <!-- ========================================
+         修复1：使用本地MathJax，优化配置减少卡顿
+         修复2：延迟加载，避免阻塞页面
+         ======================================== -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            startup: {
+                pageReady: () => {
+                    return MathJax.startup.defaultPageReady().then(() => {
+                        console.log('MathJax加载完成');
+                    });
+                }
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+            }
+        };
+    </script>
+    <!-- 使用defer异步加载，避免阻塞 -->
+    <script defer src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js"></script>    
+    <style>
+        /* ========================================
+           用户要求1：字号统一
+           ======================================== */
+        :root {
+            --h1-size: 22px;      
+            --h2-size: 20px;      
+            --h3-size: 18px;      
+            --btn-size: 16px;     
+            --formula-size: 20px; 
+            --text-size: 16px;
+            
+            --primary: #4f46e5;
+            --primary-light: #6366f1;
+            --primary-dark: #3730a3;
+            --light: #ffffff;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-600: #4b5563;
+            --gray-800: #1f2937;
+            --border: #e5e7eb;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* ========================================
+           用户要求：滚动条生效但不显示
+           ======================================== */
+        *::-webkit-scrollbar {
+            width: 0;
+            background: transparent;
+        }
+        
+        * {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
+            font-size: var(--text-size);
+            line-height: 1.5;
+            background: var(--gray-50);
+            color: var(--gray-800);
+        }
+
+        /* ========================================
+           用户要求：横向布局（宽是高的2倍），压缩高度
+           ======================================== */
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            height: 100vh;
+            max-height: 700px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            background: var(--light);
+        }
+
+        .header {
+            background: var(--primary);
+            color: var(--light);
+            padding: 8px 20px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: var(--h2-size);
+            margin: 0;
+        }
+
+        .main {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* ========================================
+           用户要求：侧边栏不动
+           ======================================== */
+        .sidebar {
+            width: 120px;
+            background: var(--gray-50);
+            border-right: 1px solid var(--border);
+            padding: 10px 8px;
+        }
+
+        .nav-btn {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 4px;
+            background: transparent;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: var(--text-size);
+            color: var(--gray-600);
+            text-align: left;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover {
+            background: var(--gray-100);
+        }
+
+        .nav-btn.active {
+            background: var(--primary);
+            color: var(--light);
+        }
+
+        /* ========================================
+           用户要求：最多左右两栏，必须有可视化
+           ======================================== */
+        .content {
+            flex: 1;
+            display: none;
+            padding: 16px;
+            overflow-y: auto;
+        }
+
+        .content.active {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow-y: auto;
+        }
+
+        .card {
+            background: var(--light);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .card h3 {
+            font-size: var(--h3-size);
+            color: var(--primary);
+            margin-bottom: 12px;
+        }
+
+        .input-group {
+            margin-bottom: 12px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 4px;
+            font-size: var(--text-size);
+            font-weight: 500;
+        }
+
+        .input-group input,
+        .input-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: var(--text-size);
+            background: var(--gray-50);
+        }
+
+        .input-group input:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: var(--light);
+        }
+
+        .btn {
+            padding: 8px 16px;
+            background: var(--primary);
+            color: var(--light);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: var(--btn-size);
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .result {
+            background: var(--gray-50);
+            padding: 12px;
+            border-radius: 4px;
+            border: 1px solid var(--primary);
+            text-align: center;
+            font-size: var(--text-size);
+            margin: 12px 0;
+            min-height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .formula-box {
+            background: #f0f7ff;
+            padding: 12px;
+            border-radius: 4px;
+            border-left: 3px solid var(--primary);
+            margin: 12px 0;
+            text-align: center;
+            font-size: var(--formula-size);
+        }
+
+        .info-box {
+            background: var(--gray-50);
+            padding: 10px;
+            border-radius: 4px;
+            margin: 8px 0;
+            font-size: var(--text-size);
+            text-align: center;
+        }
+
+        .steps {
+            background: #fff9e6;
+            padding: 12px;
+            border-radius: 4px;
+            border-left: 3px solid #f59e0b;
+            line-height: 1.8;
+            font-size: var(--text-size);
+        }
+
+        .canvas-container {
+            border: 1px solid var(--gray-200);
+            border-radius: 4px;
+            background: #fafafa;
+            padding: 10px;
+            min-height: 200px;
+            max-height: 500px;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .canvas-container canvas {
+            max-width: 100%;
+            max-height: 100%;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .tower-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: var(--gray-50);
+            border-radius: 4px;
+            min-height: 250px;
+            max-height: 400px;
+        }
+
+        .tower-display {
+            display: flex;
+            align-items: flex-end;
+            gap: 10px;
+        }
+
+        .tower {
+            display: flex;
+            flex-direction: column-reverse;
+            align-items: center;
+        }
+
+        .block {
+            width: 40px;
+            height: 25px;
+            background: var(--primary);
+            border: 1px solid var(--primary-dark);
+            margin: 1px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--light);
+            font-size: 12px;
+            font-weight: bold;
+            border-radius: 2px;
+            transition: all 0.3s;
+        }
+
+        .block.removing {
+            opacity: 0.3;
+            transform: translateX(50px);
+        }
+
+        .slider-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: var(--gray-50);
+            border-radius: 4px;
+            margin-top: 12px;
+        }
+
+        .slider-group label {
+            min-width: 60px;
+            font-size: var(--text-size);
+        }
+
+        .slider {
+            flex: 1;
+            height: 4px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: var(--gray-200);
+            outline: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+        }
+
+        .slider-value {
+            min-width: 40px;
+            text-align: center;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .rule-visual {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 20px;
+            background: var(--gray-50);
+            border-radius: 4px;
+            min-height: 150px;
+        }
+
+        .rule-tower {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .rule-height {
+            width: 30px;
+            background: var(--primary);
+            border-radius: 2px;
+            margin-bottom: 5px;
+        }
+
+        .rule-label {
+            font-size: 12px;
+            color: var(--gray-600);
+            text-align: center;
+        }
+
+        .operator {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary);
+            padding: 0 10px;
+        }
+
+        /* ========================================
+           响应式设计：小尺寸下导航按钮移到上方
+           ======================================== */
+        @media (max-width: 768px) {
+            .main {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+                padding: 8px 16px;
+                display: flex;
+                flex-direction: row;
+                gap: 8px;
+                overflow-x: auto;
+                flex-shrink: 0;
+                justify-content: center;
+                flex-wrap: nowrap;
+            }
+
+            .nav-btn {
+                min-width: 90px;
+                text-align: center;
+                margin-bottom: 0;
+                white-space: nowrap;
+                flex-shrink: 0;
+                padding: 8px 12px;
+                font-size: 14px;
+            }
+
+            .content.active {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .container {
+                max-height: none;
+                height: 100vh;
+            }
+
+            .header {
+                padding: 6px 16px;
+                height: 36px;
+            }
+
+            .header h1 {
+                font-size: 18px;
+            }
+
+            .card {
+                padding: 12px;
+            }
+
+            .canvas-container {
+                min-height: 200px;
+                max-height: 300px;
+                padding: 8px;
+            }
+
+            .canvas-container canvas {
+                width: 100%;
+                max-width: 100%;
+                height: auto;
+            }
+
+            .tower-container {
+                min-height: 200px;
+                max-height: 300px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header {
+                padding: 4px 12px;
+                height: 32px;
+            }
+
+            .header h1 {
+                font-size: 16px;
+            }
+
+            .sidebar {
+                padding: 6px 8px;
+                gap: 6px;
+                justify-content: space-between;
+            }
+
+            .nav-btn {
+                min-width: 75px;
+                padding: 6px 8px;
+                font-size: 13px;
+                flex: 1;
+                max-width: 100px;
+            }
+
+            .content {
+                padding: 12px;
+            }
+
+            .card {
+                padding: 10px;
+            }
+
+            .canvas-container {
+                min-height: 180px;
+                max-height: 250px;
+                padding: 6px;
+            }
+
+            .canvas-container canvas {
+                width: 100%;
+                max-width: 100%;
+                height: auto;
+            }
+
+            .tower-container {
+                min-height: 180px;
+                max-height: 250px;
+            }
+        }
+
+        /* 极小屏幕优化 */
+        @media (max-width: 360px) {
+            .sidebar {
+                padding: 4px 6px;
+                gap: 4px;
+                /* ========================================
+                   修复：极小屏幕确保按钮可以横向滚动查看
+                   不强制挤压，保持按钮最小可读宽度
+                   ======================================== */
+                overflow-x: auto;
+                justify-content: flex-start;
+            }
+
+            .nav-btn {
+                /* ========================================
+                   修复：保持最小宽度，确保文字不被截断
+                   用户可通过横向滚动查看所有按钮
+                   ======================================== */
+                min-width: 65px;
+                padding: 5px 6px;
+                font-size: 12px;
+                flex-shrink: 0;
+            }
+
+            .header h1 {
+                font-size: 14px;
+            }
+        }
+
+        /* 统一悬浮返回按钮样式 */
+        .return-home-panel {
+            position: fixed;
+            bottom: 12px;
+            right: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+            z-index: 40;
+        }
+        .return-toggle { width: 40px; height: 40px; border-radius: 50%; border: none; background: linear-gradient(135deg, rgba(79,70,229,0.96), rgba(99,102,241,0.9)); color: #ffffff; font-size: 20px; cursor: pointer; box-shadow: 0 10px 18px rgba(79,70,229,0.28); transition: transform 0.2s ease, box-shadow 0.2s ease; }
+        .return-toggle:hover { transform: translateY(-1px) scale(1.03); box-shadow: 0 14px 26px rgba(79,70,229,0.35); }
+        .return-toggle:focus-visible { outline: 2px solid rgba(129,140,248,0.65); outline-offset: 3px; }
+        .return-links { display: none; flex-direction: column; gap: 6px; padding: 10px; border-radius: 10px; background: rgba(255,255,255,0.96); border: 1px solid rgba(79,70,229,0.18); box-shadow: 0 10px 30px rgba(15,23,42,0.14); opacity: 0; transition: opacity 0.16s ease; }
+        .return-link { text-decoration: none; font-size: 15px; color: var(--primary-dark); padding: 6px 12px; border-radius: 8px; background: rgba(99,102,241,0.12); transition: background 0.2s ease, color 0.2s ease; }
+        .return-link:hover { background: rgba(79,70,229,0.18); color: var(--primary); }
+    </style>
+
+</head>
+<body>
+    <div class="return-home-panel">
+        <button class="return-toggle" onclick="toggleReturnLinks()"><i class="fa-solid fa-house"></i></button>
+        <div class="return-links">
+            <a class="return-link" href="index.html"><i class="fa-solid fa-arrow-left"></i> 返回目录</a>
+            <a class="return-link" href="../index.html"><i class="fa-solid fa-house"></i> 返回主站</a>
+        </div>
+    </div>
+    <div class="container">
+        <header class="header">
+            <h1>对数运算实验室</h1>
+        </header>
+
+        <div class="main">
+            <!-- 侧边栏 -->
+            <nav class="sidebar">
+                <button class="nav-btn active" onclick="switchPanel('basic')">基础计算</button>
+                <button class="nav-btn" onclick="switchPanel('tower')">拆塔游戏</button>
+                <button class="nav-btn" onclick="switchPanel('rules')">运算法则</button>
+            </nav>
+
+            <!-- 基础计算页面 -->
+            <div class="content active" id="basic">
+                <div class="column">
+                    <div class="card">
+                        <h3>对数计算</h3>
+                        <div class="input-group">
+                            <label>底数 a</label>
+                            <input type="number" id="base" value="2" step="1" min="2">
+                        </div>
+                        <div class="input-group">
+                            <label>真数 x</label>
+                            <input type="number" id="value" value="8" step="1" min="1">
+                        </div>
+                        <div class="result" id="result">
+                            $\log_2 8 = 3$
+                        </div>
+                        <div class="btn-row">
+                            <button class="btn" onclick="calculate()">计算</button>
+                            <button class="btn" onclick="randomCalc()">随机</button>
+                        </div>
+                        <div class="formula-box" id="steps">
+                            $\log_a x = n \Leftrightarrow a^n = x$
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>特殊情况</h3>
+                        <div class="info-box">$\log_a 1 = 0$ (任何底数)</div>
+                        <div class="info-box">$\log_a a = 1$ (底数等于真数)</div>
+                        <div class="info-box">$\log_a a^n = n$</div>
+                        <div class="info-box">$a^{\log_a x} = x$</div>
+                    </div>
+                </div>
+
+                <div class="column">
+                    <div class="card">
+                        <h3>函数图像</h3>
+                        <div class="canvas-container">
+                            <canvas id="graph" width="600" height="300"></canvas>
+                        </div>
+                        <div class="slider-group">
+                            <label>底数 a</label>
+                            <input type="range" class="slider" id="baseSlider" 
+                                   min="2" max="10" step="1" value="2">
+                            <span class="slider-value" id="sliderValue">2</span>
+                        </div>
+                        <div class="info-box" id="funcDesc">
+                            $y = \log_2 x$ 单调递增
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 拆塔游戏页面 -->
+            <div class="content" id="tower">
+                <div class="column">
+                    <div class="card">
+                        <h3>拆塔游戏 - 理解对数</h3>
+                        <div class="info-box">
+                            对数就是反过来问：需要拆几次？
+                        </div>
+                        <div class="input-group">
+                            <label>积木塔大小（真数）</label>
+                            <select id="towerSize" onchange="updateTower()">
+                                <option value="8" selected>8块积木</option>
+                                <option value="16">16块积木</option>
+                                <option value="32">32块积木</option>
+                                <option value="64">64块积木</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>拆解标准（底数）</label>
+                            <select id="towerBase" onchange="updateTower()">
+                                <option value="2" selected>每次拆一半（底数2）</option>
+                                <option value="4">每次拆到1/4（底数4）</option>
+                                <option value="8">每次拆到1/8（底数8）</option>
+                            </select>
+                        </div>
+                        <button class="btn" onclick="animateDismantling()" style="width: 100%; margin-top: 12px;">
+                            开始拆塔动画
+                        </button>
+                        <div class="steps" id="towerSteps">
+                            准备拆解8块积木的塔...<br>
+                            使用底数2（每次拆一半）
+                        </div>
+                    </div>
+                </div>
+
+                <div class="column">
+                    <div class="card">
+                        <h3>拆塔可视化</h3>
+                        <div class="tower-container">
+                            <div class="tower-display" id="towerVisual"></div>
+                        </div>
+                        <div class="result" id="towerResult">
+                            $\log_2 8 = 3$ (需要拆3次)
+                        </div>
+                        <div class="formula-box">
+                            🏗️ 积木塔 = 真数<br>
+                            🔨 拆解标准 = 底数<br>
+                            📏 拆解次数 = 对数
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 运算法则页面 -->
+            <div class="content" id="rules">
+                <div class="column">
+                    <div class="card">
+                        <h3>乘法规则：塔高相加</h3>
+                        <div class="formula-box">$\log_a(bc) = \log_a b + \log_a c$</div>
+                        <div class="rule-visual" id="multiplyViz"></div>
+                        <div class="steps">
+                            两个塔的积木相乘 = 塔高相加<br>
+                            例：8块 × 16块 = 128块<br>
+                            $\log_2 8 + \log_2 16 = 3 + 4 = 7$<br>
+                            $\log_2 128 = 7$ ✓
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>幂次规则：重复叠加</h3>
+                        <div class="formula-box">$\log_a(b^c) = c \cdot \log_a b$</div>
+                        <div class="steps">
+                            把c个相同的塔叠在一起<br>
+                            例：$8^3 = 512$<br>
+                            $\log_2(8^3) = 3 \times \log_2 8 = 3 \times 3 = 9$
+                        </div>
+                    </div>
+                </div>
+
+                <div class="column">
+                    <div class="card">
+                        <h3>除法规则：塔高相减</h3>
+                        <div class="formula-box">$\log_a\left(\frac{b}{c}\right) = \log_a b - \log_a c$</div>
+                        <div class="rule-visual" id="divideViz"></div>
+                        <div class="steps">
+                            大塔除以小塔 = 塔高相减<br>
+                            例：32块 ÷ 4块 = 8块<br>
+                            $\log_2 32 - \log_2 4 = 5 - 2 = 3$<br>
+                            $\log_2 8 = 3$ ✓
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>换底公式：单位换算</h3>
+                        <div class="formula-box">$\log_a b = \frac{\log_c b}{\log_c a}$</div>
+                        <div class="steps">
+                            用标准尺子量不同尺子<br>
+                            例：求$\log_4 64$<br>
+                            用2号尺：$\log_2 64 = 6$<br>
+                            $\log_2 4 = 2$<br>
+                            结果：$\frac{6}{2} = 3$
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ========================================
+        // 修复3：简化渲染逻辑，减少重复调用
+        // ========================================
+        function renderMath() {
+            if (window.MathJax && MathJax.typesetPromise) {
+                MathJax.typesetPromise().catch(err => console.log('渲染错误:', err));
+            }
+        }
+
+        // 页面切换
+        function switchPanel(panel) {
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(panel).classList.add('active');
+            
+            // 延迟渲染公式，避免卡顿
+            setTimeout(() => {
+                renderMath();
+                if (panel === 'basic') drawGraph();
+                if (panel === 'tower') updateTower();
+                if (panel === 'rules') drawRuleVisuals();
+            }, 50);
+        }
+
+        // 计算对数
+        function calculate() {
+            const base = parseFloat(document.getElementById('base').value);
+            const value = parseFloat(document.getElementById('value').value);
+            
+            if (isNaN(base) || isNaN(value) || base <= 1 || value <= 0) {
+                document.getElementById('result').innerHTML = '请输入有效数字';
+                return;
+            }
+            
+            const result = Math.log(value) / Math.log(base);
+            document.getElementById('result').innerHTML = `$\\log_{${base}} ${value} = ${result.toFixed(3)}$`;
+            
+            // 更新步骤
+            let steps = `问：${base}要自乘几次得到${value}？<br>`;
+            let power = 1;
+            for (let i = 1; i <= Math.min(5, Math.ceil(result)); i++) {
+                power *= base;
+                steps += `$${base}^${i} = ${power}$`;
+                if (Math.abs(power - value) < 0.01) {
+                    steps += ' ✓';
+                }
+                steps += '<br>';
+            }
+            steps += `答案：${result.toFixed(2)}次！`;
+            
+            document.getElementById('steps').innerHTML = steps;
+            
+            // 同步滑块
+            document.getElementById('baseSlider').value = base;
+            document.getElementById('sliderValue').textContent = base;
+            
+            drawGraph();
+            renderMath();
+        }
+
+        // 随机计算
+        function randomCalc() {
+            const bases = [2, 3, 5, 10];
+            const base = bases[Math.floor(Math.random() * bases.length)];
+            const power = Math.floor(Math.random() * 4) + 1;
+            const value = Math.pow(base, power);
+            
+            document.getElementById('base').value = base;
+            document.getElementById('value').value = value;
+            calculate();
+        }
+
+        // 智能Canvas自适应绘制函数图像
+        function drawGraph() {
+            const canvas = document.getElementById('graph');
+            if (!canvas) return;
+            
+            // 智能计算容器尺寸
+            const container = canvas.parentElement;
+            const containerWidth = Math.max(200, container.clientWidth - 20);
+            const containerHeight = Math.max(150, Math.min(400, container.clientHeight - 20));
+            
+            // 设置Canvas显示尺寸
+            canvas.style.width = containerWidth + 'px';
+            canvas.style.height = containerHeight + 'px';
+            
+            // 设置Canvas实际尺寸（用于绘制）
+            const devicePixelRatio = window.devicePixelRatio || 1;
+            canvas.width = containerWidth * devicePixelRatio;
+            canvas.height = containerHeight * devicePixelRatio;
+            
+            const ctx = canvas.getContext('2d');
+            ctx.scale(devicePixelRatio, devicePixelRatio);
+            
+            const width = containerWidth;
+            const height = containerHeight;
+            const centerX = width * 0.2;
+            const centerY = height / 2;
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            const base = parseFloat(document.getElementById('baseSlider')?.value || 2);
+            
+            // 智能计算网格密度和缩放比例
+            const minGridSize = 20;
+            const maxGridSize = 60;
+            const gridDensity = Math.max(5, Math.min(15, Math.floor(width / 50)));
+            const scale = Math.max(minGridSize, Math.min(maxGridSize, width / gridDensity));
+            
+            // 智能网格绘制
+            ctx.strokeStyle = '#e5e7eb';
+            ctx.lineWidth = width < 300 ? 0.3 : 0.5;
+            
+            // 主网格线
+            for (let x = centerX % scale; x < width; x += scale) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, height);
+                ctx.stroke();
+            }
+            for (let y = centerY % scale; y < height; y += scale) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(width, y);
+                ctx.stroke();
+            }
+            
+            // 坐标轴
+            ctx.strokeStyle = '#374151';
+            ctx.lineWidth = width < 300 ? 1.5 : 2;
+            ctx.beginPath();
+            ctx.moveTo(0, centerY);
+            ctx.lineTo(width, centerY);
+            ctx.moveTo(centerX, 0);
+            ctx.lineTo(centerX, height);
+            ctx.stroke();
+            
+            // 对数曲线
+            ctx.strokeStyle = '#4f46e5';
+            ctx.lineWidth = width < 300 ? 2 : 2.5;
+            ctx.beginPath();
+            
+            let first = true;
+            const stepSize = width < 300 ? 3 : 2;
+            for (let px = centerX + 1; px <= width; px += stepSize) {
+                const x = (px - centerX) / scale;
+                if (x > 0) {
+                    const y = Math.log(x) / Math.log(base);
+                    const py = centerY - y * scale;
+                    
+                    if (py >= -10 && py <= height + 10) {
+                        if (first) {
+                            ctx.moveTo(px, py);
+                            first = false;
+                        } else {
+                            ctx.lineTo(px, py);
+                        }
+                    }
+                }
+            }
+            ctx.stroke();
+            
+            // 标记点(1,0)
+            ctx.fillStyle = '#ef4444';
+            const pointRadius = width < 300 ? 3 : 5;
+            ctx.beginPath();
+            ctx.arc(centerX + scale, centerY, pointRadius, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // 更新描述
+            const desc = document.getElementById('funcDesc');
+            desc.innerHTML = `$y = \\log_{${base}} x$ 单调递增`;
+            renderMath();
+        }
+
+        // 更新拆塔可视化
+        function updateTower() {
+            const size = parseInt(document.getElementById('towerSize').value);
+            const base = parseInt(document.getElementById('towerBase').value);
+            
+            const visual = document.getElementById('towerVisual');
+            visual.innerHTML = '';
+            
+            // 计算需要拆几次
+            const steps = Math.log(size) / Math.log(base);
+            
+            // 创建塔的可视化
+            let currentSize = size;
+            let stepCount = 0;
+            
+            while (currentSize > 1) {
+                const tower = document.createElement('div');
+                tower.className = 'tower';
+                tower.id = `tower-${stepCount}`;
+                
+                // 每层最多显示4个块，超过就显示数字
+                const blocksToShow = Math.min(4, currentSize);
+                for (let i = 0; i < blocksToShow; i++) {
+                    const block = document.createElement('div');
+                    block.className = 'block';
+                    block.textContent = currentSize > 4 ? currentSize : '';
+                    tower.appendChild(block);
+                }
+                
+                visual.appendChild(tower);
+                currentSize = Math.floor(currentSize / base);
+                stepCount++;
+            }
+            
+            // 最后剩余1
+            const finalTower = document.createElement('div');
+            finalTower.className = 'tower';
+            finalTower.innerHTML = '<div class="block">1</div>';
+            visual.appendChild(finalTower);
+            
+            document.getElementById('towerResult').innerHTML = 
+                `$\\log_{${base}} ${size} = ${steps.toFixed(2)}$ (需要拆${Math.ceil(steps)}次)`;
+            
+            document.getElementById('towerSteps').innerHTML = 
+                `准备拆解${size}块积木的塔...<br>使用底数${base}（每次拆到1/${base}）`;
+            
+            renderMath();
+        }
+
+        // 拆塔动画
+        function animateDismantling() {
+            const size = parseInt(document.getElementById('towerSize').value);
+            const base = parseInt(document.getElementById('towerBase').value);
+            
+            let currentSize = size;
+            let stepNum = 0;
+            let stepText = '';
+            
+            const animate = () => {
+                if (currentSize <= 1) {
+                    document.getElementById('towerSteps').innerHTML = stepText + 
+                        `<br><strong>完成！总共拆了${stepNum}次</strong>`;
+                    renderMath();
+                    return;
+                }
+                
+                // 添加移除动画
+                const tower = document.getElementById(`tower-${stepNum}`);
+                if (tower) {
+                    tower.querySelectorAll('.block').forEach(block => {
+                        block.classList.add('removing');
+                    });
+                }
+                
+                currentSize = Math.floor(currentSize / base);
+                stepNum++;
+                stepText += `第${stepNum}次：拆到${currentSize}块<br>`;
+                
+                document.getElementById('towerSteps').innerHTML = stepText;
+                
+                setTimeout(animate, 800);
+            };
+            
+            // 重置动画
+            updateTower();
+            setTimeout(animate, 500);
+        }
+
+        // 绘制运算法则可视化
+        function drawRuleVisuals() {
+            // 乘法规则可视化
+            const multiplyViz = document.getElementById('multiplyViz');
+            multiplyViz.innerHTML = `
+                <div class="rule-tower">
+                    <div class="rule-height" style="height: 60px;"></div>
+                    <div class="rule-label">8块<br>高度3</div>
+                </div>
+                <div class="operator">×</div>
+                <div class="rule-tower">
+                    <div class="rule-height" style="height: 80px;"></div>
+                    <div class="rule-label">16块<br>高度4</div>
+                </div>
+                <div class="operator">=</div>
+                <div class="rule-tower">
+                    <div class="rule-height" style="height: 140px; background: #10b981;"></div>
+                    <div class="rule-label">128块<br>高度7</div>
+                </div>
+            `;
+            
+            // 除法规则可视化
+            const divideViz = document.getElementById('divideViz');
+            divideViz.innerHTML = `
+                <div class="rule-tower">
+                    <div class="rule-height" style="height: 100px;"></div>
+                    <div class="rule-label">32块<br>高度5</div>
+                </div>
+                <div class="operator">÷</div>
+                <div class="rule-tower">
+                    <div class="rule-height" style="height: 40px;"></div>
+                    <div class="rule-label">4块<br>高度2</div>
+                </div>
+                <div class="operator">=</div>
+                <div class="rule-tower">
+                    <div class="rule-height" style="height: 60px; background: #10b981;"></div>
+                    <div class="rule-label">8块<br>高度3</div>
+                </div>
+            `;
+        }
+
+        // 滑块事件
+        document.getElementById('baseSlider')?.addEventListener('input', function() {
+            const value = parseFloat(this.value);
+            document.getElementById('sliderValue').textContent = value;
+            document.getElementById('base').value = value;
+            drawGraph();
+        });
+
+        // 防抖优化：窗口大小变化时只重绘当前活跃面板
+        let resizeTimeout;
+        window.addEventListener('resize', function() {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                const activePanel = document.querySelector('.content.active');
+                if (activePanel) {
+                    const panelId = activePanel.id;
+                    if (panelId === 'basic') {
+                        drawGraph();
+                    } else if (panelId === 'tower') {
+                        updateTower();
+                    } else if (panelId === 'rules') {
+                        drawRuleVisuals();
+                    }
+                }
+            }, 150); // 增加防抖延迟到150ms
+        });
+
+        // 初始化
+        window.addEventListener('DOMContentLoaded', function() {
+            // 延迟初始化，避免阻塞
+            setTimeout(() => {
+                calculate();
+                drawGraph();
+                updateTower();
+                drawRuleVisuals();
+                renderMath();
+            }, 100);
+        });
+
+        // 统一悬浮返回按钮控制函数
+        function toggleReturnLinks() {
+            const panel = document.querySelector('.return-links');
+            if (!panel) return;
+            if (panel.style.display === 'flex') {
+                panel.style.opacity = '0';
+                setTimeout(() => panel.style.display = 'none', 160);
+            } else {
+                panel.style.display = 'flex';
+                requestAnimationFrame(() => panel.style.opacity = '1');
+            }
+        }
+    </script>
+</body>
+</html>

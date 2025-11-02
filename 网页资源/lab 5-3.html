@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>换元积分法实验室</title>
+
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            startup: {
+                pageReady: () => {
+                    return MathJax.startup.defaultPageReady().then(() => {
+                        console.log('MathJax加载完成');
+                    });
+                }
+            }
+        };
+    </script>
+    <script src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js" id="MathJax-script"></script>
+
+    <style>
+        :root {
+            --h1-size: 22px;
+            --h2-size: 20px;
+            --h3-size: 18px;
+            --btn-size: 16px;
+            --formula-size: 20px;
+            --text-size: 16px;
+
+            --primary: #4f46e5;
+            --primary-light: #6366f1;
+            --primary-dark: #3730a3;
+            --light: #ffffff;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-600: #4b5563;
+            --gray-800: #1f2937;
+            --border: #e5e7eb;
+            --success: #10b981;
+            --warning: #f59e0b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        *::-webkit-scrollbar {
+            width: 0;
+            background: transparent;
+        }
+
+        * {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
+            font-size: var(--text-size);
+            line-height: 1.5;
+            background: var(--gray-50);
+            color: var(--gray-800);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            height: 100vh;
+            max-height: 700px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            background: var(--light);
+        }
+
+        .header {
+            background: var(--primary);
+            color: var(--light);
+            padding: 8px 20px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: var(--h2-size);
+            margin: 0;
+        }
+
+        .main {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 120px;
+            background: var(--gray-50);
+            border-right: 1px solid var(--border);
+            padding: 10px 8px;
+        }
+
+        .nav-btn {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 4px;
+            background: transparent;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: var(--text-size);
+            color: var(--gray-600);
+            text-align: left;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover {
+            background: var(--gray-100);
+        }
+
+        .nav-btn.active {
+            background: var(--primary);
+            color: var(--light);
+        }
+
+        .content {
+            flex: 1;
+            display: none;
+            padding: 16px;
+            overflow-y: auto;
+        }
+
+        .content.active {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow-y: auto;
+        }
+
+        .card {
+            background: var(--light);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .card h3 {
+            font-size: var(--h3-size);
+            color: var(--primary);
+            margin-bottom: 12px;
+        }
+
+        .formula-box {
+            background: #f0f7ff;
+            padding: 12px;
+            border-radius: 4px;
+            border-left: 3px solid var(--primary);
+            margin: 12px 0;
+            text-align: center;
+            font-size: var(--formula-size);
+        }
+
+        .canvas-container {
+            border: 1px solid var(--gray-200);
+            border-radius: 4px;
+            background: #fafafa;
+            padding: 10px;
+            min-height: 200px;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .canvas-container canvas {
+            max-width: 100%;
+            height: 320px;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            background: var(--primary);
+            color: var(--light);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: var(--btn-size);
+            transition: all 0.2s;
+            width: 100%;
+        }
+
+        .btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .input-group {
+            margin-bottom: 12px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 4px;
+            font-size: var(--text-size);
+            font-weight: 500;
+        }
+
+        .input-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: var(--text-size);
+            background: var(--gray-50);
+        }
+
+        .step-box {
+            background: #fff9e6;
+            padding: 12px;
+            border-radius: 4px;
+            border-left: 3px solid #f59e0b;
+            margin: 8px 0;
+            font-size: var(--text-size);
+        }
+
+        .result {
+            background: var(--gray-50);
+            padding: 12px;
+            border-radius: 4px;
+            border: 1px solid var(--primary);
+            text-align: center;
+            font-size: var(--text-size);
+            margin: 12px 0;
+            min-height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .return-home-panel { position: fixed; bottom: 12px; right: 12px; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; z-index: 40; }
+        .return-toggle { width: 40px; height: 40px; border-radius: 50%; border: none; background: linear-gradient(135deg, rgba(79,70,229,0.96), rgba(99,102,241,0.9)); color: #fff; font-size: 20px; cursor: pointer; box-shadow: 0 10px 18px rgba(79,70,229,0.28); transition: transform 0.2s, box-shadow 0.2s; }
+        .return-toggle:hover { transform: translateY(-1px) scale(1.03); box-shadow: 0 14px 26px rgba(79,70,229,0.35); }
+        .return-links { display: none; flex-direction: column; gap: 6px; padding: 10px; border-radius: 10px; background: rgba(255,255,255,0.96); border: 1px solid rgba(79,70,229,0.18); box-shadow: 0 10px 30px rgba(15,23,42,0.14); opacity: 0; transition: opacity 0.16s; }
+        .return-link { text-decoration: none; font-size: 15px; color: var(--primary-dark); padding: 6px 12px; border-radius: 8px; background: rgba(99,102,241,0.12); transition: background 0.2s; }
+        .return-link:hover { background: rgba(79,70,229,0.18); }
+
+        @media (max-width: 768px) {
+            .content.active {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header class="header">
+            <h1>换元积分法实验室</h1>
+        </header>
+
+        <div class="main">
+            <nav class="sidebar">
+                <button class="nav-btn active" onclick="switchPanel('substitute')">凑微分</button>
+                <button class="nav-btn" onclick="switchPanel('trig')">三角换元</button>
+            </nav>
+
+            <!-- 凑微分 -->
+            <div class="content active" id="substitute">
+                <div class="column">
+                    <div class="card">
+                        <h3>第一换元法（凑微分）</h3>
+                        <div class="formula-box">
+                            $\int f(u) \, du = F(u) + C$
+                        </div>
+                        <div class="input-group">
+                            <label>选择例题</label>
+                            <select id="subExample" onchange="updateSubstitution()">
+                                <option value="1">$\int 2x \cdot e^{x^2} \, dx$</option>
+                                <option value="2">$\int \frac{\cos x}{\sin x} \, dx$</option>
+                                <option value="3">$\int x \sqrt{1+x^2} \, dx$</option>
+                                <option value="4">$\int \frac{x}{1+x^2} \, dx$</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>换元步骤</h3>
+                        <div id="subSteps">
+                            <div class="step-box">选择例题查看步骤</div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>最终结果</h3>
+                        <div class="result" id="subResult">
+                            $\int f(x) \, dx$
+                        </div>
+                        <button class="btn" onclick="animateSubstitution()">动画演示换元过程</button>
+                    </div>
+                </div>
+
+                <div class="column">
+                    <div class="card">
+                        <h3>换元可视化</h3>
+                        <div class="canvas-container">
+                            <canvas id="subCanvas" width="600" height="320"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 三角换元 -->
+            <div class="content" id="trig">
+                <div class="column">
+                    <div class="card">
+                        <h3>第二换元法（三角换元）</h3>
+                        <div class="formula-box">
+                            $x = g(t), \quad dx = g'(t) \, dt$
+                        </div>
+                        <div class="input-group">
+                            <label>选择类型</label>
+                            <select id="trigType" onchange="updateTrig()">
+                                <option value="sqrt1">$\sqrt{a^2 - x^2}$ 型，令 $x = a\sin t$</option>
+                                <option value="sqrt2">$\sqrt{a^2 + x^2}$ 型，令 $x = a\tan t$</option>
+                                <option value="sqrt3">$\sqrt{x^2 - a^2}$ 型，令 $x = a\sec t$</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>换元原理</h3>
+                        <div id="trigSteps">
+                            <div class="step-box">选择类型查看原理</div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>例题演示</h3>
+                        <div class="result" id="trigResult">
+                            选择类型查看例题
+                        </div>
+                        <button class="btn" onclick="animateTrig()">动画演示</button>
+                    </div>
+                </div>
+
+                <div class="column">
+                    <div class="card">
+                        <h3>三角关系图</h3>
+                        <div class="canvas-container">
+                            <canvas id="trigCanvas" width="600" height="320"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let animId = null;
+
+        function renderMath() {
+            if (window.MathJax && MathJax.typesetPromise) {
+                MathJax.typesetPromise().catch(err => console.log('渲染错误:', err));
+            }
+        }
+
+        function switchPanel(panel) {
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+
+            event.target.classList.add('active');
+            document.getElementById(panel).classList.add('active');
+
+            setTimeout(() => {
+                renderMath();
+                if (panel === 'substitute') {
+                    updateSubstitution();
+                } else if (panel === 'trig') {
+                    updateTrig();
+                }
+            }, 50);
+        }
+
+        function updateSubstitution() {
+            const example = document.getElementById('subExample').value;
+            const stepsDiv = document.getElementById('subSteps');
+            const resultDiv = document.getElementById('subResult');
+
+            let steps = '';
+            let result = '';
+
+            switch(example) {
+                case '1':
+                    steps = `
+                        <div class="step-box"><strong>步骤 1:</strong> 令 $u = x^2$</div>
+                        <div class="step-box"><strong>步骤 2:</strong> 则 $du = 2x \\, dx$</div>
+                        <div class="step-box"><strong>步骤 3:</strong> 原式 = $\\int e^u \\, du$</div>
+                        <div class="step-box"><strong>步骤 4:</strong> $= e^u + C$</div>
+                        <div class="step-box"><strong>步骤 5:</strong> 代回 $u = x^2$</div>
+                    `;
+                    result = '$= e^{x^2} + C$';
+                    break;
+                case '2':
+                    steps = `
+                        <div class="step-box"><strong>步骤 1:</strong> 令 $u = \\sin x$</div>
+                        <div class="step-box"><strong>步骤 2:</strong> 则 $du = \\cos x \\, dx$</div>
+                        <div class="step-box"><strong>步骤 3:</strong> 原式 = $\\int \\frac{1}{u} \\, du$</div>
+                        <div class="step-box"><strong>步骤 4:</strong> $= \\ln|u| + C$</div>
+                        <div class="step-box"><strong>步骤 5:</strong> $= \\ln|\\sin x| + C$</div>
+                    `;
+                    result = '$= \\ln|\\sin x| + C$';
+                    break;
+                case '3':
+                    steps = `
+                        <div class="step-box"><strong>步骤 1:</strong> 令 $u = 1 + x^2$</div>
+                        <div class="step-box"><strong>步骤 2:</strong> 则 $du = 2x \\, dx$</div>
+                        <div class="step-box"><strong>步骤 3:</strong> 原式 = $\\frac{1}{2} \\int \\sqrt{u} \\, du$</div>
+                        <div class="step-box"><strong>步骤 4:</strong> $= \\frac{1}{2} \\cdot \\frac{2}{3} u^{3/2} + C$</div>
+                        <div class="step-box"><strong>步骤 5:</strong> $= \\frac{1}{3}(1+x^2)^{3/2} + C$</div>
+                    `;
+                    result = '$= \\frac{1}{3}(1+x^2)^{3/2} + C$';
+                    break;
+                case '4':
+                    steps = `
+                        <div class="step-box"><strong>步骤 1:</strong> 令 $u = 1 + x^2$</div>
+                        <div class="step-box"><strong>步骤 2:</strong> 则 $du = 2x \\, dx$</div>
+                        <div class="step-box"><strong>步骤 3:</strong> 原式 = $\\frac{1}{2} \\int \\frac{1}{u} \\, du$</div>
+                        <div class="step-box"><strong>步骤 4:</strong> $= \\frac{1}{2} \\ln|u| + C$</div>
+                        <div class="step-box"><strong>步骤 5:</strong> $= \\frac{1}{2} \\ln(1+x^2) + C$</div>
+                    `;
+                    result = '$= \\frac{1}{2} \\ln(1+x^2) + C$';
+                    break;
+            }
+
+            stepsDiv.innerHTML = steps;
+            resultDiv.innerHTML = result;
+            renderMath();
+            drawSubstitution();
+        }
+
+        function drawSubstitution() {
+            const canvas = document.getElementById('subCanvas');
+            if (!canvas) return;
+
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+
+            ctx.clearRect(0, 0, width, height);
+
+            // 绘制换元过程示意图
+            const centerX = width / 2;
+            const centerY = height / 2;
+
+            // 原积分
+            ctx.fillStyle = '#3b82f6';
+            ctx.font = 'bold 18px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('原积分', centerX - 200, centerY - 100);
+
+            ctx.strokeStyle = '#3b82f6';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(centerX - 250, centerY - 80, 100, 60);
+            ctx.fillStyle = '#3b82f6';
+            ctx.font = '14px Arial';
+            ctx.fillText('∫f(g(x))g\'(x)dx', centerX - 200, centerY - 45);
+
+            // 箭头1：换元
+            ctx.strokeStyle = '#10b981';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(centerX - 150, centerY - 50);
+            ctx.lineTo(centerX - 50, centerY - 50);
+            ctx.stroke();
+
+            // 箭头头部
+            ctx.beginPath();
+            ctx.moveTo(centerX - 50, centerY - 50);
+            ctx.lineTo(centerX - 60, centerY - 55);
+            ctx.lineTo(centerX - 60, centerY - 45);
+            ctx.closePath();
+            ctx.fillStyle = '#10b981';
+            ctx.fill();
+
+            ctx.fillStyle = '#10b981';
+            ctx.font = 'bold 14px Arial';
+            ctx.fillText('u = g(x)', centerX - 100, centerY - 60);
+            ctx.fillText('du = g\'(x)dx', centerX - 100, centerY - 40);
+
+            // 新积分
+            ctx.fillStyle = '#8b5cf6';
+            ctx.font = 'bold 18px Arial';
+            ctx.fillText('新积分', centerX, centerY - 100);
+
+            ctx.strokeStyle = '#8b5cf6';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(centerX - 50, centerY - 80, 100, 60);
+            ctx.fillStyle = '#8b5cf6';
+            ctx.font = '14px Arial';
+            ctx.fillText('∫f(u)du', centerX, centerY - 45);
+
+            // 箭头2：积分
+            ctx.strokeStyle = '#f59e0b';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY - 20);
+            ctx.lineTo(centerX, centerY + 40);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY + 40);
+            ctx.lineTo(centerX - 5, centerY + 30);
+            ctx.lineTo(centerX + 5, centerY + 30);
+            ctx.closePath();
+            ctx.fillStyle = '#f59e0b';
+            ctx.fill();
+
+            ctx.fillStyle = '#f59e0b';
+            ctx.font = 'bold 14px Arial';
+            ctx.fillText('计算积分', centerX + 50, centerY + 10);
+
+            // 结果
+            ctx.fillStyle = '#ef4444';
+            ctx.font = 'bold 18px Arial';
+            ctx.fillText('F(u) + C', centerX, centerY + 80);
+
+            ctx.strokeStyle = '#ef4444';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(centerX - 50, centerY + 60, 100, 40);
+
+            // 箭头3：回代
+            ctx.strokeStyle = '#10b981';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(centerX + 50, centerY + 80);
+            ctx.lineTo(centerX + 200, centerY + 80);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(centerX + 200, centerY + 80);
+            ctx.lineTo(centerX + 190, centerY + 75);
+            ctx.lineTo(centerX + 190, centerY + 85);
+            ctx.closePath();
+            ctx.fillStyle = '#10b981';
+            ctx.fill();
+
+            ctx.fillStyle = '#10b981';
+            ctx.font = 'bold 14px Arial';
+            ctx.fillText('代回 x', centerX + 125, centerY + 70);
+
+            // 最终结果
+            ctx.fillStyle = '#10b981';
+            ctx.font = 'bold 18px Arial';
+            ctx.fillText('最终结果', centerX + 250, centerY + 60);
+
+            ctx.strokeStyle = '#10b981';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(centerX + 200, centerY + 70, 100, 40);
+            ctx.fillStyle = '#10b981';
+            ctx.font = '14px Arial';
+            ctx.fillText('F(g(x)) + C', centerX + 250, centerY + 95);
+        }
+
+        function animateSubstitution() {
+            if (animId) {
+                clearInterval(animId);
+                animId = null;
+            }
+
+            const canvas = document.getElementById('subCanvas');
+            if (!canvas) return;
+
+            const ctx = canvas.getContext('2d');
+            let step = 0;
+
+            animId = setInterval(() => {
+                step++;
+                if (step > 4) step = 0;
+
+                drawSubstitution();
+
+                // 高亮当前步骤
+                ctx.strokeStyle = '#ef4444';
+                ctx.lineWidth = 4;
+                ctx.setLineDash([10, 5]);
+
+                switch(step) {
+                    case 1:
+                        ctx.strokeRect(canvas.width/2 - 250, canvas.height/2 - 80, 100, 60);
+                        break;
+                    case 2:
+                        ctx.strokeRect(canvas.width/2 - 50, canvas.height/2 - 80, 100, 60);
+                        break;
+                    case 3:
+                        ctx.strokeRect(canvas.width/2 - 50, canvas.height/2 + 60, 100, 40);
+                        break;
+                    case 4:
+                        ctx.strokeRect(canvas.width/2 + 200, canvas.height/2 + 70, 100, 40);
+                        break;
+                }
+
+                ctx.setLineDash([]);
+            }, 1000);
+        }
+
+        function updateTrig() {
+            const type = document.getElementById('trigType').value;
+            const stepsDiv = document.getElementById('trigSteps');
+            const resultDiv = document.getElementById('trigResult');
+
+            let steps = '';
+            let result = '';
+
+            switch(type) {
+                case 'sqrt1':
+                    steps = `
+                        <div class="step-box"><strong>原理:</strong> 利用 $\\sin^2 t + \\cos^2 t = 1$</div>
+                        <div class="step-box"><strong>换元:</strong> 令 $x = a\\sin t$</div>
+                        <div class="step-box"><strong>微分:</strong> $dx = a\\cos t \\, dt$</div>
+                        <div class="step-box"><strong>化简:</strong> $\\sqrt{a^2-x^2} = a\\cos t$</div>
+                    `;
+                    result = '例: $\\int \\sqrt{1-x^2} \\, dx = \\frac{1}{2}(x\\sqrt{1-x^2} + \\arcsin x) + C$';
+                    break;
+                case 'sqrt2':
+                    steps = `
+                        <div class="step-box"><strong>原理:</strong> 利用 $1 + \\tan^2 t = \\sec^2 t$</div>
+                        <div class="step-box"><strong>换元:</strong> 令 $x = a\\tan t$</div>
+                        <div class="step-box"><strong>微分:</strong> $dx = a\\sec^2 t \\, dt$</div>
+                        <div class="step-box"><strong>化简:</strong> $\\sqrt{a^2+x^2} = a\\sec t$</div>
+                    `;
+                    result = '例: $\\int \\frac{1}{\\sqrt{1+x^2}} \\, dx = \\ln|x + \\sqrt{1+x^2}| + C$';
+                    break;
+                case 'sqrt3':
+                    steps = `
+                        <div class="step-box"><strong>原理:</strong> 利用 $\\sec^2 t - 1 = \\tan^2 t$</div>
+                        <div class="step-box"><strong>换元:</strong> 令 $x = a\\sec t$</div>
+                        <div class="step-box"><strong>微分:</strong> $dx = a\\sec t \\tan t \\, dt$</div>
+                        <div class="step-box"><strong>化简:</strong> $\\sqrt{x^2-a^2} = a\\tan t$</div>
+                    `;
+                    result = '例: $\\int \\frac{1}{\\sqrt{x^2-1}} \\, dx = \\ln|x + \\sqrt{x^2-1}| + C$';
+                    break;
+            }
+
+            stepsDiv.innerHTML = steps;
+            resultDiv.innerHTML = result;
+            renderMath();
+            drawTrig();
+        }
+
+        function drawTrig() {
+            const canvas = document.getElementById('trigCanvas');
+            if (!canvas) return;
+
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+            const type = document.getElementById('trigType').value;
+
+            ctx.clearRect(0, 0, width, height);
+
+            const centerX = width / 2;
+            const centerY = height / 2;
+
+            // 绘制直角三角形
+            ctx.strokeStyle = '#374151';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(centerX - 100, centerY + 80);
+            ctx.lineTo(centerX + 100, centerY + 80);
+            ctx.lineTo(centerX + 100, centerY - 80);
+            ctx.closePath();
+            ctx.stroke();
+
+            // 标记直角
+            ctx.strokeStyle = '#374151';
+            ctx.lineWidth = 1.5;
+            ctx.strokeRect(centerX + 85, centerY + 65, 15, 15);
+
+            // 根据类型标记边和角
+            ctx.fillStyle = '#ef4444';
+            ctx.font = 'bold 18px Arial';
+
+            switch(type) {
+                case 'sqrt1': // sqrt(a^2 - x^2)
+                    // 斜边 a
+                    ctx.fillText('a', centerX - 50, centerY);
+                    // 对边 x
+                    ctx.fillText('x', centerX + 120, centerY);
+                    // 邻边 sqrt(a^2-x^2)
+                    ctx.fillText('√(a²-x²)', centerX - 20, centerY + 100);
+                    // 角度 t
+                    ctx.fillStyle = '#3b82f6';
+                    ctx.fillText('t', centerX - 80, centerY + 70);
+
+                    // 绘制角度弧
+                    ctx.strokeStyle = '#3b82f6';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.arc(centerX - 100, centerY + 80, 30, -Math.PI/2, -Math.PI/6, false);
+                    ctx.stroke();
+                    break;
+
+                case 'sqrt2': // sqrt(a^2 + x^2)
+                    // 斜边 sqrt(a^2+x^2)
+                    ctx.fillText('√(a²+x²)', centerX - 70, centerY);
+                    // 对边 x
+                    ctx.fillText('x', centerX + 120, centerY);
+                    // 邻边 a
+                    ctx.fillText('a', centerX - 20, centerY + 100);
+                    // 角度 t
+                    ctx.fillStyle = '#3b82f6';
+                    ctx.fillText('t', centerX - 80, centerY + 70);
+
+                    ctx.strokeStyle = '#3b82f6';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.arc(centerX - 100, centerY + 80, 30, -Math.PI/2, -Math.PI/6, false);
+                    ctx.stroke();
+                    break;
+
+                case 'sqrt3': // sqrt(x^2 - a^2)
+                    // 斜边 x
+                    ctx.fillText('x', centerX - 50, centerY);
+                    // 对边 sqrt(x^2-a^2)
+                    ctx.fillText('√(x²-a²)', centerX + 120, centerY - 20);
+                    // 邻边 a
+                    ctx.fillText('a', centerX - 20, centerY + 100);
+                    // 角度 t
+                    ctx.fillStyle = '#3b82f6';
+                    ctx.fillText('t', centerX - 80, centerY + 70);
+
+                    ctx.strokeStyle = '#3b82f6';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.arc(centerX - 100, centerY + 80, 30, -Math.PI/2, -Math.PI/6, false);
+                    ctx.stroke();
+                    break;
+            }
+        }
+
+        function animateTrig() {
+            if (animId) {
+                clearInterval(animId);
+                animId = null;
+            }
+
+            const canvas = document.getElementById('trigCanvas');
+            if (!canvas) return;
+
+            let angle = 0;
+
+            animId = setInterval(() => {
+                angle += 0.02;
+                if (angle > Math.PI / 3) angle = 0.1;
+
+                const ctx = canvas.getContext('2d');
+                const width = canvas.width;
+                const height = canvas.height;
+                const centerX = width / 2;
+                const centerY = height / 2;
+
+                ctx.clearRect(0, 0, width, height);
+
+                // 绘制动态三角形
+                const base = 200;
+                const height_tri = base * Math.tan(angle);
+
+                ctx.strokeStyle = '#374151';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(centerX - base/2, centerY + 80);
+                ctx.lineTo(centerX + base/2, centerY + 80);
+                ctx.lineTo(centerX + base/2, centerY + 80 - height_tri);
+                ctx.closePath();
+                ctx.stroke();
+
+                // 标记直角
+                ctx.strokeRect(centerX + base/2 - 15, centerY + 65, 15, 15);
+
+                // 角度弧
+                ctx.strokeStyle = '#3b82f6';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(centerX - base/2, centerY + 80, 40, -Math.PI/2, -Math.PI/2 + angle, false);
+                ctx.stroke();
+
+                // 标签
+                ctx.fillStyle = '#ef4444';
+                ctx.font = 'bold 16px Arial';
+                ctx.fillText('x = a sin t', centerX - 40, centerY - 50);
+            }, 50);
+        }
+
+        // 初始化
+        window.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                updateSubstitution();
+                renderMath();
+            }, 100);
+        });
+
+        function toggleReturnLinks() { const p = document.querySelector('.return-links'); if (!p) return; if (p.style.display === 'flex') { p.style.opacity = '0'; setTimeout(() => p.style.display = 'none', 160); } else { p.style.display = 'flex'; requestAnimationFrame(() => p.style.opacity = '1'); } }
+    </script>
+
+    <div class="return-home-panel"><button class="return-toggle" onclick="toggleReturnLinks()"><i class="fa-solid fa-house"></i></button><div class="return-links"><a class="return-link" href="index.html"><i class="fa-solid fa-arrow-left"></i> 返回目录</a><a class="return-link" href="../index.html"><i class="fa-solid fa-house"></i> 返回主站</a></div></div>
+</body>
+</html>

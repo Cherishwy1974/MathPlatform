@@ -1,0 +1,1403 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>实验室 2-15 | 极限求解方法知识图谱</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+            background: linear-gradient(to bottom, #f8f9fc 0%, #f3f4f8 100%);
+            padding: 0;
+            color: #2d3748;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem 1.5rem;
+        }
+
+         /* 顶部滚动条容器 */
+         .top-scroll-container {
+             position: sticky;
+             top: 0;
+             z-index: 200;
+             background: rgba(255, 255, 255, 0.9);
+             backdrop-filter: blur(12px);
+             border-bottom: 1px solid rgba(123, 104, 238, 0.1);
+             padding: 0.6rem 1.5rem;
+             margin-bottom: 0.5rem;
+             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+         }
+
+         .top-scroll-bar {
+             height: 12px;
+             background: linear-gradient(90deg, #f1f5f9 0%, #e2e8f0 100%);
+             border-radius: 6px;
+             position: relative;
+             cursor: pointer;
+             box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+         }
+
+         .top-scroll-thumb {
+             height: 100%;
+             background: linear-gradient(90deg, #7B68EE 0%, #6366f1 100%);
+             border-radius: 6px;
+             position: absolute;
+             /* 修复：确保滑块始终可见，设置初始宽度和位置 */
+             min-width: 60px;
+             width: 20%;
+             left: 0;
+             box-shadow: 0 1px 3px rgba(123, 104, 238, 0.3);
+             transition: all 0.2s ease;
+         }
+
+         .top-scroll-thumb:hover {
+             background: linear-gradient(90deg, #6366f1 0%, #4f46e5 100%);
+             box-shadow: 0 2px 8px rgba(123, 104, 238, 0.4);
+             transform: scaleY(1.2);
+             cursor: grab;
+         }
+
+         .top-scroll-thumb:active,
+         .top-scroll-thumb.dragging {
+             cursor: grabbing;
+             background: linear-gradient(90deg, #4f46e5 0%, #3730a3 100%);
+             box-shadow: 0 4px 12px rgba(123, 104, 238, 0.6);
+             transform: scaleY(1.3);
+         }
+
+         .scroll-info {
+             display: flex;
+             justify-content: space-between;
+             align-items: center;
+             margin-bottom: 0.4rem;
+             font-size: 0.75rem;
+             color: #64748b;
+         }
+
+         .scroll-progress {
+            font-weight: 600;
+            color: #7B68EE;
+            background: rgba(123, 104, 238, 0.08);
+            padding: 0.1rem 0.5rem;
+            border-radius: 12px;
+        }
+
+        /* 横向流程图 */
+        .flow {
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+            overflow-x: auto;
+            overflow-y: auto;
+            padding: 1rem;
+            /* 隐藏原生滚动条 */
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+            min-height: 500px;
+        }
+
+         .flow::-webkit-scrollbar {
+             display: none;
+        }
+
+        /* 流程节点列 */
+        .flow-column {
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+            position: relative;
+        }
+
+        /* 展开按钮 - 新设计 */
+        .expand-btn {
+            position: absolute;
+            top: 50%;
+            right: -14px;
+            transform: translateY(-50%);
+            z-index: 100;
+        }
+
+         .expand-btn button {
+             background: rgba(123, 104, 238, 0.1);
+             color: #7B68EE;
+             border: 1px solid transparent;
+             border-radius: 10px; 
+             width: 28px;
+             height: 28px;
+             cursor: pointer;
+             box-shadow: none;
+             transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+         }
+
+         .expand-btn button svg {
+             width: 14px;
+             height: 14px;
+             stroke-width: 3;
+             transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+         }
+
+         .expand-btn button:hover,
+         .expand-btn button.expanded {
+            transform: scale(1.1);
+             box-shadow: 0 8px 12px -3px rgb(123 104 238 / 0.2), 0 4px 6px -4px rgb(123 104 238 / 0.1);
+             background: #7B68EE;
+             color: white;
+             border-color: #7B68EE;
+        }
+
+        .expand-btn button:active {
+            transform: scale(0.98);
+        }
+
+        .expand-btn button.expanded .icon-arrow {
+            transform: rotate(180deg);
+        }
+
+        /* 隐藏的列 */
+        .flow-column.hidden {
+            display: none;
+        }
+
+        /* 使包含展开按钮的节点可定位 */
+        .expandable-source {
+            position: relative;
+            overflow: visible;
+        }
+
+        /* 分支容器 */
+        .branch-container {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .branch-container .node {
+            flex: 1;
+        }
+
+        .branch-container .expand-btn {
+            align-self: center;
+        }
+
+         /* 节点卡片 - 自适应宽度设计 */
+         .node {
+             background: white;
+             border-radius: 12px;
+             padding: 1.2rem;
+             padding-right: 2rem;
+             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+             border: 1px solid rgba(0, 0, 0, 0.06);
+             min-width: fit-content;
+             max-width: 280px;
+             width: auto;
+             position: relative;
+             overflow: visible;
+         }
+
+         /* 特殊样式：第4、5个不定式节点更紧凑 */
+         .node.type.compact {
+             max-width: 200px;
+             padding: 1rem;
+         }
+
+         /* 0/0型和∞/∞型方法列 - 避免重叠 */
+         #col-zerozero,
+         #col-infinf {
+             margin-left: -280px;
+         }
+
+         /* ∞/∞型方法列特殊对齐 */
+         #col-infinf {
+             margin-top: 280px;
+         }
+         
+         /* 连续性分支特殊对齐 */
+         #col-continuity-main {
+             margin-top: 200px;
+         }
+         
+         /* 间断点类型列特殊对齐 */
+         #col-discontinuity-types {
+             margin-left: -280px;
+             margin-top: 120px;
+         }
+         
+         /* 连续性步骤对齐 */
+         #col-continuity-steps {
+             margin-top: 0;
+         }
+
+        .node:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(123, 104, 238, 0.12);
+            border-color: rgba(123, 104, 238, 0.2);
+        }
+
+         /* 第1级：起始节点 - 深蓝色渐变 */
+        .node.start {
+            background: linear-gradient(135deg, #7B68EE 0%, #6366f1 100%);
+            color: white;
+            border: none;
+            box-shadow: 0 4px 12px rgba(123, 104, 238, 0.25);
+        }
+
+        .node.start h3 {
+            font-size: 1rem;
+            margin-bottom: 0.4rem;
+            font-weight: 600;
+        }
+
+        .node.start p {
+            font-size: 0.85rem;
+            opacity: 0.95;
+            line-height: 1.4;
+        }
+
+         /* 第2级：分支节点 - 自适应宽度 */
+        .node.branch {
+            border-left: 3px solid;
+            min-width: 160px;
+            max-width: 220px;
+            padding: 1rem;
+        }
+
+        .node.branch.green {
+            border-color: #10b981;
+            background: linear-gradient(to right, rgba(16, 185, 129, 0.05) 0%, rgba(255, 255, 255, 0) 100%);
+        }
+
+        .node.branch.red {
+            border-color: #ef4444;
+            background: linear-gradient(to right, rgba(239, 68, 68, 0.05) 0%, rgba(255, 255, 255, 0) 100%);
+        }
+
+        .node.branch.blue {
+            border-color: #3b82f6;
+            background: linear-gradient(to right, rgba(59, 130, 246, 0.05) 0%, rgba(255, 255, 255, 0) 100%);
+        }
+
+         .node.branch.green h3 { color: #059669; font-size: 0.95rem; }
+         .node.branch.red h3 { color: #dc2626; font-size: 0.95rem; }
+         .node.branch.blue h3 { color: #1d4ed8; font-size: 0.95rem; }
+
+         /* 第3级：类型节点 - 紫蓝色系 */
+         .node.type {
+             border-left: 3px solid #7B68EE;
+             background: linear-gradient(to right, rgba(123, 104, 238, 0.04) 0%, rgba(255, 255, 255, 0) 100%);
+             width: auto;
+         }
+
+         .node.type h4 {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+            color: #5b21b6;
+         }
+
+         /* 第4级：方法节点 - 粉红色系 */
+         .node.method {
+             border-left: 3px solid #ec4899;
+             background: linear-gradient(to right, rgba(236, 72, 153, 0.04) 0%, rgba(255, 255, 255, 0) 100%);
+             min-width: auto;
+         }
+
+         .node.method h4 {
+             font-size: 0.85rem;
+             font-weight: 600;
+             margin-bottom: 0.4rem;
+             color: #be185d;
+         }
+
+         /* 通用文字样式 */
+         .node h3 {
+             font-size: 0.95rem;
+             font-weight: 600;
+             margin-bottom: 0.4rem;
+             color: #1f2937;
+        }
+
+        .node p {
+             font-size: 0.8rem;
+             color: #4b5563;
+             line-height: 1.5;
+         }
+
+         .node strong {
+             color: #111827;
+             font-weight: 600;
+         }
+
+
+
+        /* 可展开节点 */
+        .node.expandable {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .node.expandable::after {
+            content: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="%237B68EE" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>');
+            position: absolute;
+            top: 1.1rem;
+            right: 1rem;
+            transition: transform 0.2s ease;
+            opacity: 0.6;
+        }
+
+        .node.expandable:hover::after {
+            opacity: 1;
+        }
+
+        .node.expandable.collapsed::after {
+            transform: rotate(-90deg);
+        }
+
+        .node-content {
+             max-height: none;
+             overflow: visible;
+            transition: max-height 0.4s ease, opacity 0.3s ease;
+            opacity: 1;
+        }
+
+        .node.collapsed .node-content {
+            max-height: 0;
+             overflow: hidden;
+            opacity: 0;
+        }
+
+        .node-title {
+            user-select: none;
+            padding-right: 1.5rem;
+        }
+
+        /* 页脚 */
+        .footer {
+            text-align: center;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(123, 104, 238, 0.1);
+        }
+
+        .footer-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-subtitle {
+            font-size: 0.75rem;
+            color: #6b7280;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        
+         .footer-subtitle span:first-child {
+             font-weight: 600;
+             color: #7B68EE;
+             background: rgba(123, 104, 238, 0.1);
+             padding: 0.1rem 0.5rem;
+             border-radius: 12px;
+         }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0.5rem;
+            }
+            
+            .node {
+                padding: 0.8rem;
+                max-width: 220px;
+                font-size: 0.9em;
+            }
+            
+            .node h3, .node h4 {
+                font-size: 0.85rem;
+            }
+            
+            .node p {
+                font-size: 0.75rem;
+            }
+            
+            .top-scroll-container {
+                padding: 0.4rem 0.5rem;
+            }
+            
+            .scroll-info {
+                font-size: 0.7rem;
+            }
+            
+            .expand-btn button {
+                width: 24px;
+                height: 24px;
+            }
+            
+            .expand-btn button svg {
+                width: 12px;
+                height: 12px;
+            }
+        }
+    </style>
+
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            startup: {
+                pageReady: () => {
+                    return MathJax.startup.defaultPageReady().then(() => {
+                        console.log('MathJax加载完成');
+                    });
+                }
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+            }
+        };
+    </script>
+    <script defer src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js"></script>
+</head>
+<body>
+     <!-- 顶部滚动条 -->
+     <div class="top-scroll-container">
+         <div class="scroll-info">
+             <span class="scroll-position">位置: <span class="scroll-progress">主菜单</span></span>
+             <span class="scroll-percentage">0%</span>
+         </div>
+         <div class="top-scroll-bar" onclick="handleTopScrollClick(event)">
+             <div class="top-scroll-thumb" id="top-scroll-thumb"></div>
+         </div>
+        </div>
+
+     <div class="container">
+        <div class="flow">
+            <!-- 第一列：起始节点 -->
+            <div class="flow-column" id="col-0">
+                <!-- 两个主要分支 -->
+                <div class="node start expandable-source">
+                    <h3 style="color: white;">极限求解</h3>
+                    <p style="color: rgba(255,255,255,0.9);">代入求值，判断极限类型</p>
+                    <div class="expand-btn">
+                        <button onclick="toggleLimitBranches(event)" title="展开极限求解">
+                            <svg class="icon-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m12 5 7 7-7 7"/></svg>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="node start expandable-source" style="margin-top: 1rem;">
+                    <h3 style="color: white;">连续性分析</h3>
+                    <p style="color: rgba(255,255,255,0.9);">判断函数连续性与间断点</p>
+                    <div class="expand-btn">
+                        <button onclick="toggleContinuityMain(event)" title="展开连续性分析">
+                            <svg class="icon-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m12 5 7 7-7 7"/></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 第二列：极限求解分支 -->
+            <div class="flow-column hidden" id="col-limit-branches">
+                <!-- 分支一：有确定值（终点） -->
+                <div class="node branch green">
+                    <h3>情况一：有确定值</h3>
+                    <div class="node-content">
+                        <p><strong>结果：</strong>极限值 $A \in \mathbb{R}$<br>
+                        <strong>方法：</strong>直接代入法</p>
+                    </div>
+                </div>
+
+                <!-- 分支二：非确定值（可继续展开） -->
+                <div class="node branch red expandable-source">
+                    <h3>情况二：非确定值</h3>
+                    <div class="node-content">
+                        <p>需根据不定式类型选择方法</p>
+                    </div>
+                     <!-- 分支二右侧的展开按钮 -->
+                    <div class="expand-btn" id="btn-methods">
+                        <button onclick="toggleMethods(event)" title="展开求解方法">
+                            <svg class="icon-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m12 5 7 7-7 7"/></svg>
+                        </button>
+                </div>
+            </div>
+            </div>
+
+             <!-- 第三列：不定式类型 -->
+             <div class="flow-column hidden" id="col-methods">
+                 <!-- B/0 型 - 简单类型，直接展示 -->
+                 <div class="node type expandable" onclick="toggleNode(this)">
+                    <h4 class="node-title">类型①：$\dfrac{B}{0}$ 型</h4>
+                    <div class="node-content">
+                          <p><strong>结论：</strong>极限 $\to \infty$（无穷大）<br>
+                          <strong>原理：</strong>分子为非零常数，分母趋于零<br>
+                          <strong>通式：</strong>$\displaystyle\lim_{x \to a} \frac{B}{x-a} = \pm\infty$ (其中 $B \neq 0$)<br>
+                          <strong>符号判断：</strong>取决于分母的正负号<br>
+                          <strong>例子：</strong>$\displaystyle\lim_{x \to 0^+} \frac{1}{x} = +\infty$, $\displaystyle\lim_{x \to 0^-} \frac{1}{x} = -\infty$</p>
+                    </div>
+                  </div>
+
+                 <!-- 0/0 型 - 复杂类型，有展开按钮 -->
+                 <div class="node type expandable-source">
+                     <h4>类型②：$\frac{0}{0}$ 型</h4>
+                     <p>包含多种求解方法</p>
+                     <div class="expand-btn" id="btn-zerozero">
+                         <button onclick="toggleZeroZero(event)" title="展开 0/0 型方法">
+                             <svg class="icon-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m12 5 7 7-7 7"/></svg>
+                         </button>
+                </div>
+            </div>
+
+                 <!-- ∞/∞ 型 - 复杂类型，有展开按钮 -->
+                 <div class="node type expandable-source">
+                     <h4>类型③：$\frac{\infty}{\infty}$ 型</h4>
+                     <p>包含多种求解方法</p>
+                     <div class="expand-btn" id="btn-infinf">
+                         <button onclick="toggleInfinf(event)" title="展开 ∞/∞ 型方法">
+                             <svg class="icon-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m12 5 7 7-7 7"/></svg>
+                         </button>
+                     </div>
+            </div>
+
+                  <!-- 1^∞ 型 - 简单类型，直接展示 -->
+                  <div class="node type compact expandable" onclick="toggleNode(this)">
+                     <h4 class="node-title">类型④：$1^\infty$ 型</h4>
+                        <div class="node-content">
+                         <p><strong>方法：</strong>第二重要极限及其变形<br>
+                         <strong>基本公式：</strong>$\displaystyle\lim_{x\to \infty} \left(1 + \frac{1}{x}\right)^x = e$ 或 $\displaystyle\lim_{x\to 0} (1 + x)^{\frac{1}{x}} = e$<br>
+                         <strong>基本换元公式：</strong>$\displaystyle\lim_{t\to 0} \left(1 + t\right)^{\frac{1}{t}} = e$<br>
+                         <strong>例子：</strong>$\displaystyle\lim_{x \to \infty} \left(1 + \frac{4}{x}\right)^{3x}$<br>
+                         <strong>解法：</strong>令 $t = \frac{4}{x}$, 则 $x = \frac{4}{t}$, 当 $x \to \infty$ 时, $t \to 0$<br>
+                         原式 $= \displaystyle\lim_{t \to 0} (1 + t)^{3 \cdot \frac{4}{t}} = \lim_{t \to 0} [(1 + t)^{\frac{1}{t}}]^{12} = e^{12}$</p>
+                        </div>
+                    </div>
+
+                  <!-- ∞-∞ 型 - 简单类型，直接展示 -->
+                  <div class="node type compact expandable" onclick="toggleNode(this)">
+                     <h4 class="node-title">类型⑤：$\infty - \infty$ 型</h4>
+                        <div class="node-content">
+                         <p><strong>主要方法：</strong>通分法、有理化法、变形法<br>
+                         <strong>通分法：</strong>将两个分式通分为一个分式<br>
+                         <strong>有理化法：</strong>含根式时使用，消去根式<br>
+                         <strong>目标：</strong>转化为 $\frac{0}{0}$ 或 $\frac{\infty}{\infty}$ 型<br>
+                         <strong>例子：</strong>$\displaystyle\lim_{x \to 1} \left(\frac{1}{x-1} - \frac{2}{x^2-1}\right) = \lim_{x \to 1} \frac{x+1-2}{(x-1)(x+1)} = \lim_{x \to 1} \frac{x-1}{(x-1)(x+1)} = \frac{1}{2}$</p>
+                     </div>
+                        </div>
+                    </div>
+
+             <!-- 第四列：0/0 型方法 -->
+             <div class="flow-column hidden" id="col-zerozero">
+                 <div class="node method expandable" onclick="toggleNode(this)">
+                     <h4 class="node-title">因式分解法</h4>
+                        <div class="node-content">
+                         <p><strong>适用：</strong>多项式、有理分式函数<br>
+                         <strong>操作：</strong>将分子分母因式分解，约去公因子<br>
+                         <strong>常用技巧：</strong>立方和差公式 $a^3 \pm b^3 = (a \pm b)(a^2 \mp ab + b^2)$<br>
+                         <strong>例子：</strong>$\displaystyle\lim_{x \to 1} \frac{x^2-1}{x-1} = \lim_{x \to 1} \frac{(x+1)(x-1)}{x-1} = \lim_{x \to 1} (x+1) = 2$</p>
+                </div>
+            </div>
+
+                 <div class="node method expandable" onclick="toggleNode(this)">
+                     <h4 class="node-title">分式有理化</h4>
+                     <div class="node-content">
+                         <p><strong>适用：</strong>分子或分母含根式的分式<br>
+                         <strong>原理：</strong>利用平方差公式 $(a+b)(a-b) = a^2 - b^2$ 消除根式<br>
+                         <strong>分子有理化：</strong>若分子为 $\sqrt{a} - \sqrt{b}$，则分子分母同乘 $\sqrt{a} + \sqrt{b}$<br>
+                         <strong>分母有理化：</strong>若分母为 $\sqrt{a} + \sqrt{b}$，则分子分母同乘 $\sqrt{a} - \sqrt{b}$<br>
+                         <strong>例子1 (分子)：</strong>$\displaystyle\lim_{x \to 0} \frac{\sqrt{1+x}-1}{x} = \lim_{x \to 0} \frac{(\sqrt{1+x}-1)(\sqrt{1+x}+1)}{x(\sqrt{1+x}+1)} = \lim_{x \to 0} \frac{x}{x(\sqrt{1+x}+1)} = \frac{1}{2}$<br>
+                         <strong>例子2 (分母)：</strong>$\displaystyle\lim_{x \to 0} \frac{x}{\sqrt{1+x}-1} = \lim_{x \to 0} \frac{x(\sqrt{1+x}+1)}{(\sqrt{1+x}-1)(\sqrt{1+x}+1)} = \lim_{x \to 0} \frac{x(\sqrt{1+x}+1)}{x} = 2$</p>
+                     </div>
+            </div>
+
+                 <div class="node method expandable" onclick="toggleNode(this)">
+                     <h4 class="node-title">等价无穷小替换</h4>
+                    <div class="node-content">
+                         <p><strong>常用公式：</strong><br>
+                         当 $x \to 0$ 时：$\sin x \sim x$, $\tan x \sim x$, $\arcsin x \sim x$, $\arctan x \sim x$<br>
+                         $e^x-1 \sim x$, $\ln(1+x) \sim x$, $(1+x)^a-1 \sim ax$<br>
+                         <strong>例子：</strong>$\displaystyle\lim_{x \to 0} \frac{\sin 3x}{\tan 2x} = \lim_{x \to 0} \frac{3x}{2x} = \frac{3}{2}$</p>
+                    </div>
+                </div>
+
+                 <div class="node method expandable" onclick="toggleNode(this)">
+                     <h4 class="node-title">洛必达法则</h4>
+                    <div class="node-content">
+                         <p><strong>适用条件：</strong><br>
+                         1. $\displaystyle\lim_{x \to a} f(x) = 0$ 且 $\displaystyle\lim_{x \to a} g(x) = 0$<br>
+                         2. $f'(x)$ 和 $g'(x)$ 在 $a$ 的邻域内存在且 $g'(x) \neq 0$<br>
+                         <strong>公式：</strong>$\displaystyle\lim_{x \to a} \frac{f(x)}{g(x)} = \lim_{x \to a} \frac{f'(x)}{g'(x)}$<br>
+                         <strong>例子：</strong>$\displaystyle\lim_{x \to 0} \frac{\sin x - x}{x^3} = \lim_{x \to 0} \frac{\cos x - 1}{3x^2} = \lim_{x \to 0} \frac{-\sin x}{6x} = -\frac{1}{6}$</p>
+                     </div>
+                    </div>
+                </div>
+
+             <!-- 第五列：∞/∞ 型方法 -->
+             <div class="flow-column hidden" id="col-infinf">
+                 <div class="node method expandable" onclick="toggleNode(this)">
+                     <h4 class="node-title">分子分母同除最高次幂</h4>
+                    <div class="node-content">
+                         <p><strong>适用：</strong>多项式的无穷远极限<br>
+                         <strong>操作：</strong>分子分母同除以最高次幂项<br>
+                         <strong>原理：</strong>$\displaystyle\lim_{x \to \infty} \frac{1}{x^n} = 0$ (n &gt; 0)<br>
+                         <strong>例子：</strong>$\displaystyle\lim_{x \to \infty} \frac{3x^2+2x+1}{2x^2-5x+3} = \lim_{x \to \infty} \frac{3+\frac{2}{x}+\frac{1}{x^2}}{2-\frac{5}{x}+\frac{3}{x^2}} = \frac{3}{2}$<br>
+                         <strong>终极总结：</strong>对于多项式比值的无穷远极限，直接看分子分母的最高次项系数比即可</p>
+                     </div>
+                 </div>
+
+                 <div class="node method expandable" onclick="toggleNode(this)">
+                     <h4 class="node-title">洛必达法则</h4>
+                     <div class="node-content">
+                         <p><strong>适用条件：</strong><br>
+                         1. $\displaystyle\lim_{x \to a} f(x) = \infty$ 且 $\displaystyle\lim_{x \to a} g(x) = \infty$<br>
+                         2. $f'(x)$ 和 $g'(x)$ 在 $a$ 的邻域内存在且 $g'(x) \neq 0$<br>
+                         <strong>公式：</strong>$\displaystyle\lim_{x \to a} \frac{f(x)}{g(x)} = \lim_{x \to a} \frac{f'(x)}{g'(x)}$<br>
+                         <strong>例子：</strong>$\displaystyle\lim_{x \to \infty} \frac{x^2}{e^x} = \lim_{x \to \infty} \frac{2x}{e^x} = \lim_{x \to \infty} \frac{2}{e^x} = 0$</p>
+                    </div>
+                </div>
+            </div>
+
+             <!-- 第二列：连续性分析主分支 -->
+             <div class="flow-column hidden" id="col-continuity-main">
+                 <!-- 连续性判断步骤 -->
+                 <div class="node type expandable-source">
+                     <h4>连续性判断步骤</h4>
+                     <p>系统化的连续性分析流程</p>
+                     <div class="expand-btn" id="btn-continuity-steps">
+                         <button onclick="toggleContinuitySteps(event)" title="展开判断步骤">
+                             <svg class="icon-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m12 5 7 7-7 7"/></svg>
+                         </button>
+                     </div>
+                 </div>
+
+                 <!-- 间断点分类 -->
+                 <div class="node type expandable-source">
+                     <h4>间断点分类</h4>
+                     <p>第一类与第二类间断点</p>
+                     <div class="expand-btn" id="btn-discontinuity">
+                         <button onclick="toggleDiscontinuityTypes(event)" title="展开间断点类型">
+                             <svg class="icon-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m12 5 7 7-7 7"/></svg>
+                         </button>
+                     </div>
+                 </div>
+
+                 <!-- 连续函数性质 -->
+                 <div class="node type compact expandable" onclick="toggleNode(this)">
+                     <h4 class="node-title">连续函数的性质</h4>
+                     <div class="node-content">
+                         <p><strong>1. 有界性定理：</strong><br>
+                         闭区间上的连续函数必有界<br>
+                         <strong>2. 最值定理：</strong><br>
+                         闭区间上的连续函数必有最大值和最小值<br>
+                         <strong>3. 介值定理：</strong><br>
+                         若 $f(x)$ 在 $[a,b]$ 上连续，且 $f(a) \neq f(b)$，<br>
+                         则 $\forall c \in (f(a), f(b))$，$\exists \xi \in (a,b)$，使 $f(\xi) = c$<br>
+                         <strong>4. 零点定理：</strong><br>
+                         若 $f(a) \cdot f(b) &lt; 0$，则 $\exists \xi \in (a,b)$，使 $f(\xi) = 0$</p>
+                     </div>
+                 </div>
+             </div>
+
+             <!-- 第三列：连续性判断步骤 -->
+             <div class="flow-column hidden" id="col-continuity-steps">
+                 <div class="node method expandable" onclick="toggleNode(this)">
+                     <h4 class="node-title">步骤1：求极限值</h4>
+                     <div class="node-content">
+                         <p><strong>目标：</strong>计算 $\displaystyle\lim_{x \to x_0} f(x)$<br>
+                         <strong>方法：</strong><br>
+                         1. 先求左极限：$\displaystyle\lim_{x \to x_0^-} f(x)$<br>
+                         2. 再求右极限：$\displaystyle\lim_{x \to x_0^+} f(x)$<br>
+                         3. 若左右极限相等，则极限存在<br>
+                         <strong>注意：</strong>可能需要用到前面的极限求解方法<br>
+                         <strong>结果分类：</strong><br>
+                         • 极限存在且有限<br>
+                         • 极限为 $\pm\infty$<br>
+                         • 极限不存在（振荡等）</p>
+                     </div>
+                 </div>
+
+                 <div class="node method expandable" onclick="toggleNode(this)">
+                     <h4 class="node-title">步骤2：求函数值</h4>
+                     <div class="node-content">
+                         <p><strong>目标：</strong>计算 $f(x_0)$<br>
+                         <strong>情况分类：</strong><br>
+                         1. $f(x_0)$ 有定义：直接代入计算<br>
+                         2. $f(x_0)$ 无定义：如分母为0、对数真数≤0等<br>
+                         <strong>特殊情况：</strong><br>
+                         • 分段函数：注意使用正确的表达式<br>
+                         • 含参数函数：确定参数值<br>
+                         <strong>重要：</strong>函数值与极限值是两个独立的概念</p>
+                     </div>
+                 </div>
+
+                 <div class="node method expandable" onclick="toggleNode(this)">
+                     <h4 class="node-title">步骤3：比较并判断</h4>
+                     <div class="node-content">
+                         <p><strong>连续的充要条件：</strong><br>
+                         1. $f(x_0)$ 有定义<br>
+                         2. $\displaystyle\lim_{x \to x_0} f(x)$ 存在<br>
+                         3. $\displaystyle\lim_{x \to x_0} f(x) = f(x_0)$<br>
+                         <strong>判断流程：</strong><br>
+                         • 若三条件都满足 → 连续<br>
+                         • 若极限存在但 $f(x_0)$ 无定义 → 可去间断点<br>
+                         • 若极限存在但 $\lim \neq f(x_0)$ → 可去间断点<br>
+                         • 若左右极限都存在但不相等 → 跳跃间断点<br>
+                         • 若左右极限至少一个不存在 → 第二类间断点</p>
+                     </div>
+                 </div>
+             </div>
+
+             <!-- 第四列：间断点类型 -->
+             <div class="flow-column hidden" id="col-discontinuity-types">
+                 <div class="node method expandable" onclick="toggleNode(this)">
+                     <h4 class="node-title">第一类间断点</h4>
+                     <div class="node-content">
+                         <p><strong>定义：</strong>左、右极限都存在的间断点<br>
+                         <strong>1. 可去间断点：</strong><br>
+                         $\displaystyle\lim_{x \to x_0^-} f(x) = \lim_{x \to x_0^+} f(x) \neq f(x_0)$<br>
+                         或 $f(x_0)$ 无定义<br>
+                         <strong>例子：</strong>$f(x) = \frac{\sin x}{x}$ 在 $x=0$ 处<br>
+                         <strong>2. 跳跃间断点：</strong><br>
+                         $\displaystyle\lim_{x \to x_0^-} f(x) \neq \lim_{x \to x_0^+} f(x)$<br>
+                         <strong>例子：</strong>$f(x) = \text{sgn}(x)$ 在 $x=0$ 处</p>
+                     </div>
+                 </div>
+
+                 <div class="node method expandable" onclick="toggleNode(this)">
+                     <h4 class="node-title">第二类间断点</h4>
+                     <div class="node-content">
+                         <p><strong>定义：</strong>左、右极限至少有一个不存在的间断点<br>
+                         <strong>1. 无穷间断点：</strong><br>
+                         至少一个单侧极限为 $\pm\infty$<br>
+                         <strong>例子：</strong>$f(x) = \frac{1}{x}$ 在 $x=0$ 处<br>
+                         <strong>2. 振荡间断点：</strong><br>
+                         极限振荡不存在<br>
+                         <strong>例子：</strong>$f(x) = \sin\frac{1}{x}$ 在 $x=0$ 处<br>
+                         <strong>判断步骤：</strong><br>
+                         1. 求 $\displaystyle\lim_{x \to x_0^-} f(x)$ 和 $\displaystyle\lim_{x \to x_0^+} f(x)$<br>
+                         2. 比较两个极限值与 $f(x_0)$</p>
+                     </div>
+                 </div>
+
+                 <div class="node method expandable" onclick="toggleNode(this)">
+                     <h4 class="node-title">间断点判断方法</h4>
+                     <div class="node-content">
+                         <p><strong>步骤：</strong><br>
+                         1. 找出无定义点（分母为0、对数真数≤0等）<br>
+                         2. 找出分段函数的分界点<br>
+                         3. 对每个可疑点求左右极限<br>
+                         4. 根据极限情况分类<br>
+                         <strong>常见间断点：</strong><br>
+                         • 有理分式的零点<br>
+                         • 对数函数的零点和负值点<br>
+                         • 三角函数的无定义点<br>
+                         • 分段函数的分界点<br>
+                         <strong>例题：</strong>判断 $f(x)=\frac{x^2-1}{x-1}$ 在 $x=1$ 的间断类型<br>
+                         解：$\displaystyle\lim_{x \to 1} \frac{x^2-1}{x-1} = \lim_{x \to 1} (x+1) = 2$<br>
+                         因极限存在但 $f(1)$ 无定义，故为可去间断点</p>
+                     </div>
+                 </div>
+             </div>
+        </div>
+
+        <div class="footer">
+            <div class="footer-title">极限与连续性知识图谱</div>
+            <div class="footer-subtitle">
+                <span>LAB 2-15</span> | 高等数学 · 第2章 极限与连续
+            </div>
+        </div>
+
+
+    </div>
+
+    <script>
+        // 节点展开/收起功能
+        function toggleNode(element) {
+            element.classList.toggle('collapsed');
+
+            // 展开后触发 MathJax 重新渲染
+            if (!element.classList.contains('collapsed') && window.MathJax) {
+                setTimeout(() => {
+                    MathJax.typesetPromise([element]).catch((err) => console.log(err));
+                }, 100);
+            }
+        }
+
+         // 展开/折叠极限求解分支
+         function toggleLimitBranches(event) {
+             event.stopPropagation();
+             const btn = event.currentTarget;
+             const col = document.getElementById('col-limit-branches');
+
+             if (!col) return;
+
+             // 先关闭另一个主分支
+             collapseAllContinuityColumns();
+
+             const wasHidden = col.classList.contains('hidden');
+             col.classList.toggle('hidden');
+             const isCollapsing = !wasHidden;
+             btn.classList.toggle('expanded', wasHidden);
+
+             if (isCollapsing) {
+                 // 折叠时向左滚动
+                 smoothScrollToElement(document.getElementById('col-0'), 'left');
+                 updateScrollIndicator('主菜单');
+                 collapseAllLimitColumns();
+             } else {
+                 // 展开时向右滚动到新列
+                setTimeout(() => {
+                     smoothScrollToElement(col, 'right');
+                     updateScrollIndicator('极限求解分支');
+                     if (window.MathJax) {
+                         MathJax.typesetPromise([col]).catch((err) => console.log(err));
+                     }
+                }, 100);
+             }
+         }
+
+         // 展开/折叠方法类型列
+         function toggleMethods(event) {
+             event.stopPropagation();
+             const btn = event.currentTarget;
+             const col = document.getElementById('col-methods');
+
+             if (!col) return;
+
+             // 先折叠其他子分支
+             collapseMethodDetailColumns();
+
+             const wasHidden = col.classList.contains('hidden');
+             col.classList.toggle('hidden');
+             const isCollapsing = !wasHidden;
+             btn.classList.toggle('expanded', wasHidden);
+             
+             if (isCollapsing) {
+                 // 折叠时向左滚动
+                 smoothScrollToElement(document.getElementById('col-limit-branches'), 'left');
+                 updateScrollIndicator('极限求解分支');
+             } else {
+                 // 展开时向右滚动到新列
+                 setTimeout(() => {
+                     smoothScrollToElement(col, 'right');
+                     updateScrollIndicator('不定式类型');
+                     if (window.MathJax) {
+                         MathJax.typesetPromise([col]).catch((err) => console.log(err));
+                     }
+                 }, 100);
+             }
+         }
+
+         // 展开/折叠 0/0 型方法
+         function toggleZeroZero(event) {
+             event.stopPropagation();
+             const btn = event.currentTarget;
+             const col = document.getElementById('col-zerozero');
+
+             if (!col) return;
+
+             // 先关闭同级的 ∞/∞ 型方法
+             const infCol = document.getElementById('col-infinf');
+             const infBtn = document.querySelector('#btn-infinf button');
+             if (infCol && !infCol.classList.contains('hidden')) {
+                 infCol.classList.add('hidden');
+                 if (infBtn) infBtn.classList.remove('expanded');
+             }
+
+             const wasHidden = col.classList.contains('hidden');
+             col.classList.toggle('hidden');
+             const isCollapsing = !wasHidden;
+             btn.classList.toggle('expanded', wasHidden);
+             
+             if (isCollapsing) {
+                 // 折叠时向左滚动
+                 smoothScrollToElement(document.getElementById('col-methods'), 'left');
+                 updateScrollIndicator('不定式类型');
+             } else {
+                 setTimeout(() => {
+                     smoothScrollToElement(col, 'right');
+                     updateScrollIndicator('0/0 型方法');
+                if (window.MathJax) {
+                         MathJax.typesetPromise([col]).catch((err) => console.log(err));
+                     }
+                 }, 100);
+             }
+         }
+
+         // 展开/折叠 ∞/∞ 型方法
+         function toggleInfinf(event) {
+             event.stopPropagation();
+             const btn = event.currentTarget;
+             const col = document.getElementById('col-infinf');
+
+             if (!col) return;
+
+             // 先关闭同级的 0/0 型方法
+             const zeroCol = document.getElementById('col-zerozero');
+             const zeroBtn = document.querySelector('#btn-zerozero button');
+             if (zeroCol && !zeroCol.classList.contains('hidden')) {
+                 zeroCol.classList.add('hidden');
+                 if (zeroBtn) zeroBtn.classList.remove('expanded');
+             }
+
+             const wasHidden = col.classList.contains('hidden');
+             col.classList.toggle('hidden');
+             const isCollapsing = !wasHidden;
+             btn.classList.toggle('expanded', wasHidden);
+             
+             if (isCollapsing) {
+                 // 折叠时向左滚动
+                 smoothScrollToElement(document.getElementById('col-methods'), 'left');
+                 updateScrollIndicator('不定式类型');
+             } else {
+                    setTimeout(() => {
+                     smoothScrollToElement(col, 'right');
+                     updateScrollIndicator('∞/∞ 型方法');
+                     if (window.MathJax) {
+                        MathJax.typesetPromise([col]).catch((err) => console.log(err));
+                     }
+                 }, 100);
+             }
+         }
+
+         // 平滑滚动到元素
+         function smoothScrollToElement(element, direction = 'right') {
+             if (!element) return;
+             
+             const container = document.querySelector('.flow');
+             
+             // 等待DOM更新后再计算位置
+             setTimeout(() => {
+                 const elementRect = element.getBoundingClientRect();
+                 const containerRect = container.getBoundingClientRect();
+                 
+                 // 计算目标滚动位置，确保元素完全可见
+                 let targetScrollLeft, targetScrollTop = container.scrollTop;
+                 
+                 if (direction === 'right') {
+                     // 展开时：确保新元素在视口中间偏右位置
+                     targetScrollLeft = container.scrollLeft + elementRect.left - containerRect.left - 50;
+                     // 确保不超出容器右边界
+                     const maxScroll = container.scrollWidth - containerRect.width;
+                     targetScrollLeft = Math.min(targetScrollLeft, maxScroll);
+                     
+                     // 垂直滚动调整
+                     if (elementRect.top < containerRect.top) {
+                         targetScrollTop = container.scrollTop + elementRect.top - containerRect.top - 20;
+                     } else if (elementRect.bottom > containerRect.bottom) {
+                         targetScrollTop = container.scrollTop + elementRect.bottom - containerRect.bottom + 20;
+                     }
+                 } else {
+                     // 折叠时：居中显示目标元素
+                     targetScrollLeft = container.scrollLeft + elementRect.left - containerRect.left - (containerRect.width - elementRect.width) / 2;
+                 }
+                 
+                 container.scrollTo({
+                     left: Math.max(0, targetScrollLeft),
+                     top: Math.max(0, targetScrollTop),
+                     behavior: 'smooth'
+                 });
+             }, 150); // 给足够时间让DOM完全渲染
+         }
+
+         // 顶部滚动条拖拽功能
+         let isDragging = false;
+         let dragStartX = 0;
+         let thumbStartLeft = 0;
+
+         function initScrollBarDrag() {
+             const thumb = document.getElementById('top-scroll-thumb');
+             const scrollBar = document.querySelector('.top-scroll-bar');
+             
+             if (!thumb || !scrollBar) return;
+
+             // 鼠标按下开始拖拽
+             thumb.addEventListener('mousedown', function(e) {
+                 e.preventDefault();
+                 isDragging = true;
+                 dragStartX = e.clientX;
+                 
+                 const thumbRect = thumb.getBoundingClientRect();
+                 const barRect = scrollBar.getBoundingClientRect();
+                 thumbStartLeft = (thumbRect.left - barRect.left) / barRect.width * 100;
+                 
+                 thumb.classList.add('dragging');
+                 document.body.style.userSelect = 'none';
+             });
+
+             // 鼠标移动拖拽
+             document.addEventListener('mousemove', function(e) {
+                 if (!isDragging) return;
+                 
+                 e.preventDefault();
+                 const container = document.querySelector('.flow');
+                 const scrollBar = document.querySelector('.top-scroll-bar');
+                 const barRect = scrollBar.getBoundingClientRect();
+                 
+                 const deltaX = e.clientX - dragStartX;
+                 const deltaPercent = (deltaX / barRect.width) * 100;
+                 
+                 const thumbWidth = parseFloat(thumb.style.width);
+                 let newLeft = thumbStartLeft + deltaPercent;
+                 
+                 // 限制拖拽范围
+                 newLeft = Math.max(0, Math.min(100 - thumbWidth, newLeft));
+                 
+                 // 更新滚动位置
+                 const scrollPercent = newLeft / (100 - thumbWidth);
+                 const maxScroll = container.scrollWidth - container.clientWidth;
+                 const targetScroll = maxScroll * scrollPercent;
+                 
+                 container.scrollLeft = targetScroll;
+             });
+
+             // 鼠标松开结束拖拽
+             document.addEventListener('mouseup', function() {
+                 if (isDragging) {
+                     isDragging = false;
+                     thumb.classList.remove('dragging');
+                     document.body.style.userSelect = '';
+                 }
+             });
+         }
+
+         // 更新顶部位置指示器
+         function updateScrollIndicator(text) {
+             const topProgress = document.querySelector('.scroll-progress');
+             if (topProgress) {
+                 topProgress.textContent = text;
+             }
+         }
+
+
+         // 更新顶部滚动条
+         // 修复：改进滑块计算逻辑，确保始终可见且正确定位
+         function updateTopScrollBar() {
+             const container = document.querySelector('.flow');
+             const thumb = document.getElementById('top-scroll-thumb');
+             const percentageEl = document.querySelector('.scroll-percentage');
+
+             if (!container || !thumb) return;
+
+             const scrollLeft = container.scrollLeft;
+             const maxScroll = container.scrollWidth - container.clientWidth;
+             const scrollPercentage = maxScroll > 0 ? (scrollLeft / maxScroll) * 100 : 0;
+
+             // 更新滑块位置 (滑块宽度为滚动条的比例)
+             const containerWidth = container.clientWidth;
+             const totalWidth = container.scrollWidth;
+
+             // 修复：确保滑块宽度计算正确，最小15%，最大95%
+             let thumbWidth = (containerWidth / totalWidth) * 100;
+             thumbWidth = Math.max(15, Math.min(95, thumbWidth));
+
+             // 修复：确保滑块位置计算正确，防止NaN
+             let thumbLeft = 0;
+             if (maxScroll > 0) {
+                 thumbLeft = (scrollLeft / maxScroll) * (100 - thumbWidth);
+                 thumbLeft = Math.max(0, Math.min(100 - thumbWidth, thumbLeft));
+             }
+
+             thumb.style.width = `${thumbWidth}%`;
+             thumb.style.left = `${thumbLeft}%`;
+
+             // 更新百分比显示
+             if (percentageEl) {
+                 percentageEl.textContent = `${Math.round(scrollPercentage)}%`;
+             }
+         }
+
+         // 处理顶部滚动条点击
+         function handleTopScrollClick(event) {
+             const container = document.querySelector('.flow');
+             const scrollBar = event.currentTarget;
+             const rect = scrollBar.getBoundingClientRect();
+             const clickX = event.clientX - rect.left;
+             const barWidth = rect.width;
+             const clickPercentage = clickX / barWidth;
+             
+             const maxScroll = container.scrollWidth - container.clientWidth;
+             const targetScroll = maxScroll * clickPercentage;
+             
+             container.scrollTo({
+                 left: targetScroll,
+                 behavior: 'smooth'
+             });
+         }
+
+         // 获取当前滚动位置对应的内容描述
+         function getCurrentScrollPosition() {
+             const container = document.querySelector('.flow');
+             const columns = document.querySelectorAll('.flow-column:not(.hidden)');
+             
+             let currentSection = '主菜单';
+             
+             columns.forEach((col, index) => {
+                 const colRect = col.getBoundingClientRect();
+                 const containerRect = container.getBoundingClientRect();
+                 
+                 // 如果列在视口中心附近
+                 if (colRect.left <= containerRect.left + containerRect.width / 2 && 
+                     colRect.right >= containerRect.left + containerRect.width / 2) {
+                     
+                     switch(col.id) {
+                         case 'col-0':
+                             currentSection = '主菜单';
+                             break;
+                         case 'col-limit-branches':
+                             currentSection = '极限求解分支';
+                             break;
+                         case 'col-methods':
+                             currentSection = '不定式类型';
+                             break;
+                         case 'col-zerozero':
+                             currentSection = '0/0 型方法';
+                             break;
+                         case 'col-infinf':
+                             currentSection = '∞/∞ 型方法';
+                             break;
+                         case 'col-continuity-main':
+                             currentSection = '连续性与间断点';
+                             break;
+                         case 'col-continuity-steps':
+                             currentSection = '连续性判断步骤';
+                             break;
+                         case 'col-discontinuity-types':
+                             currentSection = '间断点类型';
+                             break;
+                     }
+                 }
+             });
+             
+             return currentSection;
+         }
+
+         // 展开/折叠连续性主分支
+         function toggleContinuityMain(event) {
+             event.stopPropagation();
+             const btn = event.currentTarget;
+             const col = document.getElementById('col-continuity-main');
+
+             if (!col) return;
+
+             // 先关闭另一个主分支
+             collapseAllLimitColumns();
+             const limitBtn = document.querySelector('#col-0 .node:nth-child(1) .expand-btn button');
+             if (limitBtn) limitBtn.classList.remove('expanded');
+
+             const wasHidden = col.classList.contains('hidden');
+             col.classList.toggle('hidden');
+             const isCollapsing = !wasHidden;
+             btn.classList.toggle('expanded', wasHidden);
+             
+             if (isCollapsing) {
+                 // 折叠时向左滚动
+                 smoothScrollToElement(document.getElementById('col-0'), 'left');
+                 updateScrollIndicator('主菜单');
+                 collapseDiscontinuityColumns();
+             } else {
+                 // 展开时向右滚动到新列
+                 setTimeout(() => {
+                     smoothScrollToElement(col, 'right');
+                     updateScrollIndicator('连续性与间断点');
+                     if (window.MathJax) {
+                         MathJax.typesetPromise([col]).catch((err) => console.log(err));
+                     }
+                 }, 100);
+             }
+         }
+
+         // 展开/折叠间断点类型
+         function toggleDiscontinuityTypes(event) {
+             event.stopPropagation();
+             const btn = event.currentTarget;
+             const col = document.getElementById('col-discontinuity-types');
+
+             if (!col) return;
+
+             // 先关闭同级的连续性步骤
+             const stepsCol = document.getElementById('col-continuity-steps');
+             const stepsBtn = document.querySelector('#btn-continuity-steps button');
+             if (stepsCol && !stepsCol.classList.contains('hidden')) {
+                 stepsCol.classList.add('hidden');
+                 if (stepsBtn) stepsBtn.classList.remove('expanded');
+             }
+
+             const wasHidden = col.classList.contains('hidden');
+             col.classList.toggle('hidden');
+             const isCollapsing = !wasHidden;
+             btn.classList.toggle('expanded', wasHidden);
+             
+             if (isCollapsing) {
+                 // 折叠时向左滚动
+                 smoothScrollToElement(document.getElementById('col-continuity-main'), 'left');
+                 updateScrollIndicator('连续性与间断点');
+             } else {
+                 setTimeout(() => {
+                     smoothScrollToElement(col, 'right');
+                     updateScrollIndicator('间断点类型');
+                     if (window.MathJax) {
+                         MathJax.typesetPromise([col]).catch((err) => console.log(err));
+                     }
+                 }, 100);
+             }
+         }
+
+         // 辅助函数：折叠所有极限相关列
+         function collapseAllLimitColumns() {
+             const limitBranchCol = document.getElementById('col-limit-branches');
+             if (limitBranchCol && !limitBranchCol.classList.contains('hidden')) {
+                 limitBranchCol.classList.add('hidden');
+             }
+             
+             const methodsCol = document.getElementById('col-methods');
+             const methodsBtn = document.querySelector('#btn-methods button');
+             if (methodsCol && !methodsCol.classList.contains('hidden')) {
+                 methodsCol.classList.add('hidden');
+                 if (methodsBtn) methodsBtn.classList.remove('expanded');
+             }
+             
+             collapseMethodDetailColumns();
+         }
+         
+         // 辅助函数：折叠所有连续性相关列
+         function collapseAllContinuityColumns() {
+             const continuityMainCol = document.getElementById('col-continuity-main');
+             const continuityMainBtn = document.querySelector('#col-0 .node:nth-child(2) .expand-btn button');
+             if (continuityMainCol && !continuityMainCol.classList.contains('hidden')) {
+                 continuityMainCol.classList.add('hidden');
+                 if (continuityMainBtn) continuityMainBtn.classList.remove('expanded');
+             }
+             
+             collapseDiscontinuityColumns();
+         }
+
+         // 辅助函数：折叠方法细节列
+         function collapseMethodDetailColumns() {
+             ['col-zerozero', 'col-infinf'].forEach(colId => {
+                 const col = document.getElementById(colId);
+                 if (col && !col.classList.contains('hidden')) {
+                     col.classList.add('hidden');
+                 }
+             });
+             
+             ['#btn-zerozero button', '#btn-infinf button'].forEach(selector => {
+                 const btn = document.querySelector(selector);
+                 if (btn) btn.classList.remove('expanded');
+             });
+         }
+
+         // 展开/折叠连续性判断步骤
+         function toggleContinuitySteps(event) {
+             event.stopPropagation();
+             const btn = event.currentTarget;
+             const col = document.getElementById('col-continuity-steps');
+
+             if (!col) return;
+
+             // 先关闭同级的间断点类型
+             const discontinuityCol = document.getElementById('col-discontinuity-types');
+             const discontinuityBtn = document.querySelector('#btn-discontinuity button');
+             if (discontinuityCol && !discontinuityCol.classList.contains('hidden')) {
+                 discontinuityCol.classList.add('hidden');
+                 if (discontinuityBtn) discontinuityBtn.classList.remove('expanded');
+             }
+
+             const wasHidden = col.classList.contains('hidden');
+             col.classList.toggle('hidden');
+             const isCollapsing = !wasHidden;
+             btn.classList.toggle('expanded', wasHidden);
+             
+             if (isCollapsing) {
+                 // 折叠时向左滚动
+                 smoothScrollToElement(document.getElementById('col-continuity-main'), 'left');
+                 updateScrollIndicator('连续性与间断点');
+             } else {
+                 setTimeout(() => {
+                     smoothScrollToElement(col, 'right');
+                     updateScrollIndicator('连续性判断步骤');
+                     if (window.MathJax) {
+                         MathJax.typesetPromise([col]).catch((err) => console.log(err));
+                     }
+                 }, 100);
+             }
+         }
+
+         // 辅助函数：折叠间断点列
+         function collapseDiscontinuityColumns() {
+             const col = document.getElementById('col-discontinuity-types');
+             const btn = document.querySelector('#btn-discontinuity button');
+             if (col && !col.classList.contains('hidden')) {
+                 col.classList.add('hidden');
+                 if (btn) btn.classList.remove('expanded');
+             }
+             
+             const stepsCol = document.getElementById('col-continuity-steps');
+             const stepsBtn = document.querySelector('#btn-continuity-steps button');
+             if (stepsCol && !stepsCol.classList.contains('hidden')) {
+                 stepsCol.classList.add('hidden');
+                 if (stepsBtn) stepsBtn.classList.remove('expanded');
+             }
+         }
+
+
+        // 页面加载后自动折叠所有节点
+        document.addEventListener('DOMContentLoaded', function() {
+            const expandableNodes = document.querySelectorAll('.node.expandable');
+            expandableNodes.forEach(node => {
+                node.classList.add('collapsed');
+            });
+
+             // 初始化顶部滚动条和拖拽功能
+             updateTopScrollBar();
+             initScrollBarDrag();
+             
+             // 监听滚动事件
+             const container = document.querySelector('.flow');
+             container.addEventListener('scroll', function() {
+                 updateTopScrollBar();
+                 
+                 // 实时更新位置指示（节流处理）
+                 clearTimeout(this.scrollTimeout);
+                 this.scrollTimeout = setTimeout(() => {
+                     const currentPos = getCurrentScrollPosition();
+                     const topProgress = document.querySelector('.scroll-progress');
+                     if (topProgress.textContent !== currentPos) {
+                         topProgress.textContent = currentPos;
+                     }
+                 }, 100);
+             });
+
+             // 窗口大小变化时更新滚动条
+             window.addEventListener('resize', function() {
+                 setTimeout(() => {
+                     updateTopScrollBar();
+                 }, 100);
+             });
+             
+            // MathJax 加载后渲染
+            if (window.MathJax) {
+                MathJax.typesetPromise().catch((err) => console.log(err));
+            }
+        });
+    </script>
+</body>
+</html>

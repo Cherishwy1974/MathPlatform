@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab 13.3 条件概率与贝叶斯公式交互推演</title>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\(', '\)']],
+                displayMath: [['$$', '$$'], ['\[', '\]']],
+                processEscapes: true
+            },
+            startup: {
+                pageReady: () => {
+                    return MathJax.startup.defaultPageReady().then(() => {
+                        if (typeof window.scheduleMathRender === 'function') {
+                            window.scheduleMathRender();
+                        }
+                        console.log('MathJax加载完成');
+                    });
+                }
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+            }
+        };
+    </script>
+    <script defer src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js"></script>
+    <script defer src="../common-assets/js/lab-math-enhancer.js"></script>
+    <style>
+
+        :root {
+            --h1-size: 22px;
+            --h2-size: 20px;
+            --h3-size: 18px;
+            --btn-size: 16px;
+            --formula-size: 20px;
+            --text-size: 16px;
+            --primary: #4f46e5;
+            --primary-light: #6366f1;
+            --primary-dark: #3730a3;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --light: #ffffff;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-400: #9ca3af;
+            --gray-600: #4b5563;
+            --gray-800: #1f2937;
+            --border: #e5e7eb;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        *::-webkit-scrollbar {
+            width: 0;
+            background: transparent;
+        }
+
+        * {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
+            font-size: var(--text-size);
+            line-height: 1.5;
+            background: var(--gray-50);
+            color: var(--gray-800);
+        }
+
+        .return-home-panel {
+            position: fixed;
+            top: 12px;
+            right: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+            z-index: 40;
+        }
+
+        .return-toggle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.95), rgba(99, 102, 241, 0.9));
+            color: #ffffff;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 10px 18px rgba(79, 70, 229, 0.28);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .return-toggle:focus-visible {
+            outline: 2px solid rgba(129, 140, 248, 0.6);
+            outline-offset: 3px;
+        }
+
+        .return-toggle:hover {
+            transform: translateY(-1px) scale(1.03);
+            box-shadow: 0 14px 26px rgba(79, 70, 229, 0.35);
+        }
+
+        .return-links {
+            display: none;
+            flex-direction: column;
+            gap: 6px;
+            padding: 10px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(79, 70, 229, 0.15);
+            box-shadow: 0 16px 30px rgba(15, 23, 42, 0.18);
+            backdrop-filter: blur(6px);
+        }
+
+        .return-home-panel.open .return-links {
+            display: flex;
+        }
+
+        .return-link {
+            padding: 6px 12px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 14px;
+            color: var(--primary);
+            background: rgba(79, 70, 229, 0.12);
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+
+        .return-link.return-main {
+            color: var(--success);
+            background: rgba(16, 185, 129, 0.12);
+        }
+
+        .return-link:hover {
+            background: rgba(79, 70, 229, 0.2);
+            color: var(--primary-dark);
+        }
+
+        .return-link.return-main:hover {
+            background: rgba(16, 185, 129, 0.22);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            height: 100vh;
+            max-height: 700px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            background: var(--light);
+            border-radius: 12px;
+            box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(90deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: var(--light);
+            padding: 10px 24px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: var(--h1-size);
+            font-weight: 600;
+        }
+
+        .main {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 120px;
+            background: var(--gray-50);
+            border-right: 1px solid var(--border);
+            padding: 12px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .nav-btn {
+            width: 100%;
+            padding: 8px;
+            border: none;
+            border-radius: 6px;
+            background: transparent;
+            color: var(--gray-600);
+            text-align: left;
+            font-size: var(--text-size);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .nav-btn:hover {
+            background: var(--gray-100);
+        }
+
+        .nav-btn.active {
+            background: var(--primary);
+            color: var(--light);
+        }
+
+        .content {
+            flex: 1;
+            display: none;
+            padding: 18px;
+            overflow-y: auto;
+        }
+
+        .content.active {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow-y: auto;
+        }
+
+        .card {
+            background: var(--light);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+        }
+
+        .card h3 {
+            font-size: var(--h3-size);
+            color: var(--primary);
+            margin-bottom: 12px;
+        }
+
+        .input-group {
+            margin-bottom: 12px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: var(--gray-600);
+        }
+
+        .input-group select,
+        .input-group input,
+        .input-group range,
+        .input-group textarea {
+            width: 100%;
+            padding: 8px 10px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            font-size: var(--text-size);
+            background: var(--gray-50);
+        }
+
+        .input-group input[type="range"] {
+            padding: 0;
+        }
+
+        .input-group input:focus,
+        .input-group select:focus,
+        .input-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: var(--light);
+        }
+
+        .btn,
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 16px;
+            font-size: var(--btn-size);
+            border: none;
+            border-radius: 6px;
+            background: var(--primary);
+            color: var(--light);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            gap: 6px;
+        }
+
+        .btn.secondary {
+            background: var(--gray-200);
+            color: var(--gray-600);
+        }
+
+        .btn:hover,
+        .action-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn.secondary:hover {
+            background: var(--gray-400);
+            color: var(--light);
+        }
+
+        .info-box {
+            background: var(--gray-50);
+            border-left: 3px solid var(--primary);
+            padding: 12px;
+            border-radius: 6px;
+            font-size: var(--text-size);
+            line-height: 1.6;
+        }
+
+        canvas {
+            width: 100%;
+            height: 260px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: #ffffff;
+        }
+
+        .tag-list {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: rgba(79, 70, 229, 0.12);
+            color: var(--primary);
+            font-size: 14px;
+        }
+
+        table.matrix-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: center;
+        }
+
+        table.matrix-table td {
+            border: 1px solid var(--gray-200);
+            padding: 6px;
+            font-size: var(--text-size);
+        }
+    
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 12px;
+        }
+
+        .stat-card {
+            background: var(--gray-50);
+            border-radius: 10px;
+            padding: 12px;
+            border: 1px dashed var(--border);
+        }
+
+        .stat-card h4 {
+            font-size: 15px;
+            color: var(--gray-600);
+            margin-bottom: 6px;
+        }
+
+        .stat-card p {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .equation-box {
+            background: rgba(79, 70, 229, 0.08);
+            border-radius: 8px;
+            padding: 12px;
+            font-weight: 600;
+            color: var(--primary);
+            margin-top: 10px;
+        }
+
+        .info-list {
+            padding-left: 18px;
+        }
+
+        .info-list li {
+            list-style: disc;
+            color: var(--gray-600);
+            margin-bottom: 4px;
+        }
+
+        .highlight {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="return-home-panel">
+        <button class="return-toggle" type="button" aria-label="打开返回导航" onclick="toggleReturnPanel(event)"><i class="fa-solid fa-house"></i></button>
+        <div class="return-links">
+            <a class="return-link return-sub" href="index.html"><i class="fa-solid fa-arrow-left"></i> 返回目录</a>
+            <a class="return-link return-main" href="../index.html"><i class="fa-solid fa-house"></i> 返回主站</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <header class="header">
+            <h1>Lab 13.3 条件概率与贝叶斯公式交互推演</h1>
+        </header>
+
+        <div class="main">
+            <nav class="sidebar">
+                <button class="nav-btn active"  data-panel="module1"onclick="switchPanel('module1')">条件概率</button>
+                <button class="nav-btn"  data-panel="module2"onclick="switchPanel('module2')">贝叶斯推断</button>
+            </nav>
+
+            <div class="content active" id="module1">
+                <div class="column">
+                    <div class="card">
+                        <h3>树形分解条件概率</h3>
+                        <div class="input-group">
+                            <label>先验概率 $P(A)$</label>
+                            <input type="range" id="priorRange" min="0" max="1" step="0.05" value="0.3">
+                            <div>$P(A)=$<span id="priorVal" class="highlight">0.30</span></div>
+                        </div>
+                        <div class="input-group">
+                            <label>条件概率 $P(B|A)$</label>
+                            <input type="range" id="pbaRange" min="0" max="1" step="0.05" value="0.7">
+                            <div>$P(B|A)=$<span id="pbaVal" class="highlight">0.70</span></div>
+                        </div>
+                        <div class="input-group">
+                            <label>条件概率 $P(B|\overline{A})$</label>
+                            <input type="range" id="pbnaRange" min="0" max="1" step="0.05" value="0.2">
+                            <div>$P(B|\overline{A})=$<span id="pbnaVal" class="highlight">0.20</span></div>
+                        </div>
+                        <div class="stat-grid">
+                            <div class="stat-card">
+                                <h4>$P(B)$</h4>
+                                <p id="pbVal">0.41</p>
+                            </div>
+                            <div class="stat-card">
+                                <h4>$P(A\cap B)$</h4>
+                                <p id="jointVal">0.21</p>
+                            </div>
+                        </div>
+                        <div class="equation-box">$P(A\cap B)=P(A)P(B|A)$</div>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="card">
+                        <h3>条件概率树图</h3>
+                        <canvas id="conditionCanvas" width="520" height="320"></canvas>
+                        <ul class="info-list">
+                            <li>显示各分支概率与末端联合概率。</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content" id="module2">
+                <div class="column">
+                    <div class="card">
+                        <h3>贝叶斯公式动态计算</h3>
+                        <div class="input-group">
+                            <label>先验概率 $P(A)$（患病率）</label>
+                            <input type="range" id="priorBayes" min="0.01" max="0.5" step="0.01" value="0.1">
+                            <div>患病率：<span id="priorBayesVal" class="highlight">0.10</span></div>
+                        </div>
+                        <div class="input-group">
+                            <label>灵敏度 $P(	ext{阳性}|A)$</label>
+                            <input type="range" id="sensitivity" min="0.5" max="0.99" step="0.01" value="0.9">
+                            <div>灵敏度：<span id="sensitivityVal" class="highlight">0.90</span></div>
+                        </div>
+                        <div class="input-group">
+                            <label>假阳率 $P(	ext{阳性}|\overline{A})$</label>
+                            <input type="range" id="falsePos" min="0.01" max="0.5" step="0.01" value="0.05">
+                            <div>假阳率：<span id="falsePosVal" class="highlight">0.05</span></div>
+                        </div>
+                        <div class="stat-grid">
+                            <div class="stat-card">
+                                <h4>后验概率 $P(A|	ext{阳性})$</h4>
+                                <p id="posteriorVal">0.66</p>
+                            </div>
+                            <div class="stat-card">
+                                <h4>总体阳性率</h4>
+                                <p id="positiveRate">0.14</p>
+                            </div>
+                        </div>
+                        <div class="equation-box">$P(A|B)=\dfrac{P(B|A)P(A)}{P(B|A)P(A)+P(B|\overline{A})P(\overline{A})}$</div>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="card">
+                        <h3>贝叶斯图示</h3>
+                        <canvas id="bayesCanvas" width="520" height="320"></canvas>
+                        <ul class="info-list">
+                            <li>蓝色方块表示真实患病者，粉色表示假阳性。</li>
+                            <li>阴影显示阳性结果中真实患病比例。</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const panels = document.querySelectorAll('.content');
+        const buttons = document.querySelectorAll('.nav-btn');
+
+        function switchPanel(id, trigger) {
+            const activeButton = trigger instanceof HTMLElement ? trigger :
+
+                (typeof event !== 'undefined' && event?.currentTarget instanceof HTMLElement ? event.currentTarget :
+
+                    document.querySelector(`.nav-btn[data-panel="${id}"]`) ||
+
+                    document.querySelector(`.nav-btn[data-target="${id}"]`) ||
+
+                    null);
+
+            panels.forEach(panel => panel.classList.remove('active'));
+            buttons.forEach(btn => btn.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            const activeBtn = Array.from(buttons).find(btn => btn.getAttribute('onclick').includes(id));
+            if (activeBtn) activeBtn.classList.add('active');
+        }
+
+        let mathObserver = null;
+        let mathRenderQueued = false;
+
+        function startMathObserver() {
+            if (typeof MutationObserver === 'undefined' || !document.body) {
+                return;
+            }
+            if (mathObserver) {
+                mathObserver.disconnect();
+            }
+            mathObserver = new MutationObserver(mutations => {
+                for (const mutation of mutations) {
+                    if (mutation.type === 'childList' || mutation.type === 'characterData') {
+                        scheduleMathRender();
+                        break;
+                    }
+                }
+            });
+            mathObserver.observe(document.body, { childList: true, subtree: true, characterData: true });
+        }
+
+        function scheduleMathRender() {
+            if (mathRenderQueued) {
+                return;
+            }
+            mathRenderQueued = true;
+            requestAnimationFrame(() => {
+                mathRenderQueued = false;
+                if (window.MathJax && MathJax.typesetPromise) {
+                    if (mathObserver) {
+                        mathObserver.disconnect();
+                    }
+                    MathJax.typesetPromise()
+                        .catch(err => console.log('渲染错误:', err))
+                        .finally(() => {
+                            startMathObserver();
+                        });
+                } else {
+                    setTimeout(scheduleMathRender, 160);
+                }
+            });
+        }
+
+        window.scheduleMathRender = scheduleMathRender;
+
+        function renderMath() {
+            scheduleMathRender();
+        }
+
+        function ensureMathReady() {
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', () => {
+                    startMathObserver();
+                    scheduleMathRender();
+                });
+            } else {
+                startMathObserver();
+                scheduleMathRender();
+            }
+        }
+
+        ensureMathReady();
+
+        function toggleReturnPanel(event) {
+            event.stopPropagation();
+            const panel = document.querySelector('.return-home-panel');
+            if (panel) {
+                panel.classList.toggle('open');
+            }
+        }
+
+        document.addEventListener('click', event => {
+            const panel = document.querySelector('.return-home-panel');
+            if (!panel) {
+                return;
+            }
+            if (panel.classList.contains('open') && !panel.contains(event.target)) {
+                panel.classList.remove('open');
+            }
+        });
+
+        window.addEventListener('pageshow', () => {
+            scheduleMathRender();
+        });
+
+        function resizeCanvas(canvas) {
+            const container = canvas.parentElement;
+            const width = container.clientWidth - 20;
+            const height = 300;
+            canvas.style.width = width + 'px';
+            canvas.style.height = height + 'px';
+            const ratio = window.devicePixelRatio || 1;
+            canvas.width = width * ratio;
+            canvas.height = height * ratio;
+            const ctx = canvas.getContext('2d');
+            ctx.setTransform(1,0,0,1,0,0);
+            ctx.scale(ratio, ratio);
+            return ctx;
+        }
+
+        const conditionCtx = resizeCanvas(document.getElementById('conditionCanvas'));
+        const bayesCtx = resizeCanvas(document.getElementById('bayesCanvas'));
+
+        function updateConditionModule() {
+            const prior = Number(document.getElementById('priorRange').value);
+            const pba = Number(document.getElementById('pbaRange').value);
+            const pbna = Number(document.getElementById('pbnaRange').value);
+            document.getElementById('priorVal').textContent = prior.toFixed(2);
+            document.getElementById('pbaVal').textContent = pba.toFixed(2);
+            document.getElementById('pbnaVal').textContent = pbna.toFixed(2);
+            const joint = prior * pba;
+            const pb = prior * pba + (1 - prior) * pbna;
+            document.getElementById('jointVal').textContent = joint.toFixed(3);
+            document.getElementById('pbVal').textContent = pb.toFixed(3);
+            drawConditionTree(prior, pba, pbna);
+        }
+
+        function drawConditionTree(prior, pba, pbna) {
+            const ctx = conditionCtx;
+            const width = ctx.canvas.clientWidth;
+            const height = ctx.canvas.clientHeight;
+            ctx.clearRect(0,0,width,height);
+            ctx.save();
+            ctx.strokeStyle = '#374151';
+            ctx.lineWidth = 2;
+            const startX = 70;
+            const startY = height/2;
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+            ctx.lineTo(startX + 140, startY - 80);
+            ctx.moveTo(startX, startY);
+            ctx.lineTo(startX + 140, startY + 80);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(startX + 140, startY - 80);
+            ctx.lineTo(startX + 260, startY - 120);
+            ctx.moveTo(startX + 140, startY - 80);
+            ctx.lineTo(startX + 260, startY - 40);
+            ctx.moveTo(startX + 140, startY + 80);
+            ctx.lineTo(startX + 260, startY + 40);
+            ctx.moveTo(startX + 140, startY + 80);
+            ctx.lineTo(startX + 260, startY + 120);
+            ctx.stroke();
+            ctx.fillStyle = '#111827';
+            ctx.font = '14px sans-serif';
+            ctx.fillText(`A (${prior.toFixed(2)})`, startX + 50, startY - 90);
+            ctx.fillText(`¯A (${(1-prior).toFixed(2)})`, startX + 50, startY + 100);
+            ctx.fillText(`B|A=${pba.toFixed(2)}`, startX + 170, startY - 130);
+            ctx.fillText(`¯B|A=${(1-pba).toFixed(2)}`, startX + 170, startY - 30);
+            ctx.fillText(`B|¯A=${pbna.toFixed(2)}`, startX + 170, startY + 30);
+            ctx.fillText(`¯B|¯A=${(1-pbna).toFixed(2)}`, startX + 170, startY + 130);
+            ctx.fillText(`P(A\cap B)=${(prior*pba).toFixed(3)}`, startX + 270, startY - 130);
+            ctx.fillText(`P(¯A\cap B)=${((1-prior)*pbna).toFixed(3)}`, startX + 270, startY + 30);
+            ctx.restore();
+        }
+
+        function updateBayesModule() {
+            const prior = Number(document.getElementById('priorBayes').value);
+            const sens = Number(document.getElementById('sensitivity').value);
+            const falsePos = Number(document.getElementById('falsePos').value);
+            document.getElementById('priorBayesVal').textContent = prior.toFixed(2);
+            document.getElementById('sensitivityVal').textContent = sens.toFixed(2);
+            document.getElementById('falsePosVal').textContent = falsePos.toFixed(2);
+            const positiveRate = sens * prior + falsePos * (1 - prior);
+            const posterior = (sens * prior) / positiveRate;
+            document.getElementById('positiveRate').textContent = positiveRate.toFixed(3);
+            document.getElementById('posteriorVal').textContent = posterior.toFixed(3);
+            drawBayesDiagram(prior, sens, falsePos, posterior);
+        }
+
+        function drawBayesDiagram(prior, sens, falsePos, posterior) {
+            const ctx = bayesCtx;
+            const width = ctx.canvas.clientWidth;
+            const height = ctx.canvas.clientHeight;
+            ctx.clearRect(0,0,width,height);
+            ctx.save();
+            const baseWidth = width - 120;
+            const baseHeight = height - 100;
+            const startX = 60;
+            const startY = 40;
+            ctx.strokeStyle = '#111827';
+            ctx.strokeRect(startX, startY, baseWidth, baseHeight);
+            const diseasedHeight = baseHeight * prior;
+            ctx.fillStyle = 'rgba(59,130,246,0.4)';
+            ctx.fillRect(startX, startY, baseWidth/2, diseasedHeight);
+            const healthyHeight = baseHeight - diseasedHeight;
+            ctx.fillStyle = 'rgba(248,113,113,0.4)';
+            ctx.fillRect(startX, startY + diseasedHeight, baseWidth/2, healthyHeight);
+            ctx.fillStyle = 'rgba(59,130,246,0.7)';
+            ctx.fillRect(startX + baseWidth/2, startY, baseWidth/2, diseasedHeight * sens);
+            ctx.fillStyle = 'rgba(248,113,113,0.7)';
+            ctx.fillRect(startX + baseWidth/2, startY + diseasedHeight, baseWidth/2, healthyHeight * falsePos);
+            ctx.fillStyle = '#111827';
+            ctx.font = '14px sans-serif';
+            ctx.fillText('患病人群', startX + 10, startY + diseasedHeight/2);
+            ctx.fillText('健康人群', startX + 10, startY + diseasedHeight + healthyHeight/2);
+            ctx.fillText('阳性中的真实患病比例', startX + baseWidth/2 + 10, startY + 20);
+            ctx.fillText(`≈ ${(posterior*100).toFixed(1)}%`, startX + baseWidth/2 + 10, startY + 40);
+            ctx.restore();
+        }
+
+        document.querySelectorAll('#priorRange, #pbaRange, #pbnaRange').forEach(input => {
+            input.addEventListener('input', () => {
+                updateConditionModule();
+            });
+        });
+
+        document.querySelectorAll('#priorBayes, #sensitivity, #falsePos').forEach(input => {
+            input.addEventListener('input', () => {
+                updateBayesModule();
+            });
+        });
+
+        window.addEventListener('resize', () => {
+            resizeCanvas(conditionCtx.canvas);
+            resizeCanvas(bayesCtx.canvas);
+            updateConditionModule();
+            updateBayesModule();
+        });
+
+        updateConditionModule();
+        updateBayesModule();
+        renderMath();
+    </script>
+</body>
+</html>

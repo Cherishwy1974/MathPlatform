@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>指数运算实验室</title>
+    
+    <!-- ========================================
+         修复1：使用本地MathJax，优化配置减少卡顿
+         修复2：延迟加载，避免阻塞页面
+         ======================================== -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            startup: {
+                pageReady: () => {
+                    return MathJax.startup.defaultPageReady().then(() => {
+                        console.log('MathJax加载完成');
+                    });
+                }
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+            }
+        };
+    </script>
+    <!-- 使用defer异步加载，避免阻塞 -->
+    <script defer src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js"></script>
+    
+    <style>
+        /* ========================================
+           用户要求1：字号统一
+           ======================================== */
+        :root {
+            --h1-size: 22px;      
+            --h2-size: 20px;      
+            --h3-size: 18px;      
+            --btn-size: 16px;     
+            --formula-size: 20px; 
+            --text-size: 16px;
+            
+            --primary: #4f46e5;
+            --primary-light: #6366f1;
+            --primary-dark: #3730a3;
+            --light: #ffffff;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-600: #4b5563;
+            --gray-800: #1f2937;
+            --border: #e5e7eb;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* ========================================
+           用户要求：滚动条生效但不显示
+           ======================================== */
+        *::-webkit-scrollbar {
+            width: 0;
+            background: transparent;
+        }
+        
+        * {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
+            font-size: var(--text-size);
+            line-height: 1.5;
+            background: var(--gray-50);
+            color: var(--gray-800);
+        }
+
+        /* ========================================
+           用户要求：横向布局（宽是高的2倍），压缩高度
+           ======================================== */
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            height: 100vh;
+            max-height: 700px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            background: var(--light);
+        }
+
+        .header {
+            background: var(--primary);
+            color: var(--light);
+            padding: 8px 20px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: var(--h2-size);
+            margin: 0;
+        }
+
+        .main {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* ========================================
+           用户要求：侧边栏不动
+           ======================================== */
+        .sidebar {
+            width: 120px;
+            background: var(--gray-50);
+            border-right: 1px solid var(--border);
+            padding: 10px 8px;
+        }
+
+        .nav-btn {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 4px;
+            background: transparent;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: var(--text-size);
+            color: var(--gray-600);
+            text-align: left;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover {
+            background: var(--gray-100);
+        }
+
+        .nav-btn.active {
+            background: var(--primary);
+            color: var(--light);
+        }
+
+        /* ========================================
+           用户要求：最多左右两栏，必须有可视化
+           ======================================== */
+        .content {
+            flex: 1;
+            display: none;
+            padding: 16px;
+            overflow-y: auto;
+        }
+
+        .content.active {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow-y: auto;
+        }
+
+        .card {
+            background: var(--light);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .card h3 {
+            font-size: var(--h3-size);
+            color: var(--primary);
+            margin-bottom: 12px;
+        }
+
+        .input-group {
+            margin-bottom: 12px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 4px;
+            font-size: var(--text-size);
+            font-weight: 500;
+        }
+
+        .input-group input,
+        .input-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: var(--text-size);
+            background: var(--gray-50);
+        }
+
+        .input-group input:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: var(--light);
+        }
+
+        .btn {
+            padding: 8px 16px;
+            background: var(--primary);
+            color: var(--light);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: var(--btn-size);
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .result {
+            background: var(--gray-50);
+            padding: 12px;
+            border-radius: 4px;
+            border: 1px solid var(--primary);
+            text-align: center;
+            font-size: var(--text-size);
+            margin: 12px 0;
+            min-height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .formula-box {
+            background: #f0f7ff;
+            padding: 12px;
+            border-radius: 4px;
+            border-left: 3px solid var(--primary);
+            margin: 12px 0;
+            text-align: center;
+            font-size: var(--formula-size);
+        }
+
+        .info-box {
+            background: var(--gray-50);
+            padding: 10px;
+            border-radius: 4px;
+            margin: 8px 0;
+            font-size: var(--text-size);
+            text-align: center;
+        }
+
+        .steps {
+            background: #fff9e6;
+            padding: 12px;
+            border-radius: 4px;
+            border-left: 3px solid #f59e0b;
+            line-height: 1.8;
+            font-size: var(--text-size);
+        }
+
+        .canvas-container {
+            border: 1px solid var(--gray-200);
+            border-radius: 4px;
+            background: #fafafa;
+            padding: 10px;
+            min-height: 200px;
+            max-height: 500px;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .canvas-container canvas {
+            max-width: 100%;
+            max-height: 100%;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .dot-grid {
+            display: grid;
+            gap: 6px;
+            padding: 16px;
+            background: var(--gray-50);
+            border-radius: 4px;
+            justify-content: center;
+            align-content: center;
+            min-height: 200px;
+            overflow: auto;
+            max-width: 100%;
+        }
+
+        .dot {
+            width: 24px;
+            height: 24px;
+            background: var(--primary);
+            border-radius: 50%;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .slider-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: var(--gray-50);
+            border-radius: 4px;
+            margin-top: 12px;
+        }
+
+        .slider-group label {
+            min-width: 60px;
+            font-size: var(--text-size);
+        }
+
+        .slider {
+            flex: 1;
+            height: 4px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: var(--gray-200);
+            outline: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+        }
+
+        .slider-value {
+            min-width: 40px;
+            text-align: center;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        /* 立方体容器 - 智能自适应 */
+        .cube-container {
+            background: var(--gray-50);
+            border-radius: 4px;
+            padding: 20px;
+            min-height: 250px;
+            max-height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .cube-container canvas {
+            max-width: 100%;
+            max-height: 100%;
+            display: block;
+        }
+
+        /* ========================================
+           响应式设计：小尺寸下导航按钮移到上方
+           ======================================== */
+        @media (max-width: 768px) {
+            .main {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+                padding: 8px 16px;
+                display: flex;
+                flex-direction: row;
+                gap: 8px;
+                overflow-x: auto;
+                flex-shrink: 0;
+                justify-content: center;
+                flex-wrap: nowrap;
+            }
+
+            .nav-btn {
+                min-width: 90px;
+                text-align: center;
+                margin-bottom: 0;
+                white-space: nowrap;
+                flex-shrink: 0;
+                padding: 8px 12px;
+                font-size: 14px;
+            }
+
+            .content.active {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .container {
+                max-height: none;
+                height: 100vh;
+            }
+
+            .header {
+                padding: 6px 16px;
+                height: 36px;
+            }
+
+            .header h1 {
+                font-size: 18px;
+            }
+
+            .card {
+                padding: 12px;
+            }
+
+            .canvas-container {
+                min-height: 200px;
+                max-height: 300px;
+                padding: 8px;
+            }
+
+            .canvas-container canvas {
+                width: 100%;
+                max-width: 100%;
+                height: auto;
+            }
+
+            .cube-container {
+                min-height: 200px;
+                max-height: 300px;
+                padding: 16px;
+            }
+
+            .cube-container canvas {
+                width: 100%;
+                max-width: 100%;
+                height: auto;
+            }
+
+            .dot-grid {
+                min-height: 150px;
+                padding: 12px;
+                gap: 4px;
+            }
+
+            .dot {
+                width: 20px;
+                height: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header {
+                padding: 4px 12px;
+                height: 32px;
+            }
+
+            .header h1 {
+                font-size: 16px;
+            }
+
+            .sidebar {
+                padding: 6px 8px;
+                gap: 6px;
+                justify-content: space-between;
+            }
+
+            .nav-btn {
+                min-width: 75px;
+                padding: 6px 8px;
+                font-size: 13px;
+                flex: 1;
+                max-width: 100px;
+            }
+
+            .content {
+                padding: 12px;
+            }
+
+            .card {
+                padding: 10px;
+            }
+
+            .canvas-container {
+                min-height: 180px;
+                max-height: 250px;
+                padding: 6px;
+            }
+
+            .canvas-container canvas {
+                width: 100%;
+                max-width: 100%;
+                height: auto;
+            }
+
+            .cube-container {
+                min-height: 180px;
+                max-height: 250px;
+                padding: 12px;
+            }
+
+            .cube-container canvas {
+                width: 100%;
+                max-width: 100%;
+                height: auto;
+            }
+
+            .dot-grid {
+                min-height: 120px;
+                padding: 8px;
+                gap: 3px;
+            }
+
+            .dot {
+                width: 18px;
+                height: 18px;
+            }
+        }
+
+        /* 极小屏幕优化 */
+        @media (max-width: 360px) {
+            .sidebar {
+                padding: 4px 6px;
+                gap: 4px;
+            }
+
+            .nav-btn {
+                min-width: 65px;
+                padding: 5px 6px;
+                font-size: 12px;
+            }
+
+            .header h1 {
+                font-size: 14px;
+            }
+        }
+
+        /* 统一悬浮返回按钮样式 */
+        .return-home-panel {
+            position: fixed;
+            bottom: 12px;
+            right: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+            z-index: 40;
+        }
+        .return-toggle { width: 40px; height: 40px; border-radius: 50%; border: none; background: linear-gradient(135deg, rgba(79,70,229,0.96), rgba(99,102,241,0.9)); color: #ffffff; font-size: 20px; cursor: pointer; box-shadow: 0 10px 18px rgba(79,70,229,0.28); transition: transform 0.2s ease, box-shadow 0.2s ease; }
+        .return-toggle:hover { transform: translateY(-1px) scale(1.03); box-shadow: 0 14px 26px rgba(79,70,229,0.35); }
+        .return-toggle:focus-visible { outline: 2px solid rgba(129,140,248,0.65); outline-offset: 3px; }
+        .return-links { display: none; flex-direction: column; gap: 6px; padding: 10px; border-radius: 10px; background: rgba(255,255,255,0.96); border: 1px solid rgba(79,70,229,0.18); box-shadow: 0 10px 30px rgba(15,23,42,0.14); opacity: 0; transition: opacity 0.16s ease; }
+        .return-link { text-decoration: none; font-size: 15px; color: var(--primary-dark); padding: 6px 12px; border-radius: 8px; background: rgba(99,102,241,0.12); transition: background 0.2s ease, color 0.2s ease; }
+        .return-link:hover { background: rgba(79,70,229,0.18); color: var(--primary); }
+    </style>
+
+</head>
+<body>
+    <div class="return-home-panel">
+        <button class="return-toggle" onclick="toggleReturnLinks()"><i class="fa-solid fa-house"></i></button>
+        <div class="return-links">
+            <a class="return-link" href="index.html"><i class="fa-solid fa-arrow-left"></i> 返回目录</a>
+            <a class="return-link" href="../index.html"><i class="fa-solid fa-house"></i> 返回主站</a>
+        </div>
+    </div>
+    <div class="container">
+        <header class="header">
+            <h1>指数运算实验室</h1>
+        </header>
+
+        <div class="main">
+            <!-- 侧边栏 -->
+            <nav class="sidebar">
+                <button class="nav-btn active" onclick="switchPanel('basic')">基础计算</button>
+                <button class="nav-btn" onclick="switchPanel('fraction')">分数指数</button>
+                <button class="nav-btn" onclick="switchPanel('rules')">运算法则</button>
+            </nav>
+
+            <!-- 基础计算页面 -->
+            <div class="content active" id="basic">
+                <div class="column">
+                    <div class="card">
+                        <h3>指数计算</h3>
+                        <div class="input-group">
+                            <label>底数 a</label>
+                            <input type="number" id="base" value="2" step="0.1" min="0.1">
+                        </div>
+                        <div class="input-group">
+                            <label>指数 x</label>
+                            <input type="number" id="exp" value="3" step="0.1">
+                        </div>
+                        <div class="result" id="result">
+                            $2^3 = 8$
+                        </div>
+                        <div class="btn-row">
+                            <button class="btn" onclick="calculate()">计算</button>
+                            <button class="btn" onclick="randomCalc()">随机</button>
+                        </div>
+                        <div class="formula-box" id="steps">
+                            $a^x = \underbrace{a \times a \times ... \times a}_{x \text{次}}$
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>特殊情况</h3>
+                        <div class="info-box">$a^0 = 1$ (a ≠ 0)</div>
+                        <div class="info-box">$a^{-n} = \frac{1}{a^n}$</div>
+                        <div class="info-box">$a^{\frac{1}{n}} = \sqrt[n]{a}$</div>
+                        <div class="info-box">$a^{\frac{m}{n}} = \sqrt[n]{a^m}$</div>
+                    </div>
+                </div>
+
+                <div class="column">
+                    <div class="card">
+                        <h3>函数图像</h3>
+                        <div class="canvas-container">
+                            <canvas id="graph" width="600" height="300"></canvas>
+                        </div>
+                        <div class="slider-group">
+                            <label>底数 a</label>
+                            <input type="range" class="slider" id="baseSlider" 
+                                   min="0.1" max="5" step="0.1" value="2">
+                            <span class="slider-value" id="sliderValue">2.0</span>
+                        </div>
+                        <div class="info-box" id="funcDesc">
+                            $y = 2^x$ 单调递增
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 分数指数页面 -->
+            <div class="content" id="fraction">
+                <div class="column">
+                    <div class="card">
+                        <h3>平方根可视化</h3>
+                        <div class="input-group">
+                            <label>选择数字</label>
+                            <select id="sqNum" onchange="drawSquare()">
+                                <option value="4">4 → 2×2</option>
+                                <option value="9" selected>9 → 3×3</option>
+                                <option value="16">16 → 4×4</option>
+                                <option value="25">25 → 5×5</option>
+                            </select>
+                        </div>
+                        <div id="squareGrid" class="dot-grid"></div>
+                        <div class="steps" id="sqExp">
+                            9个点排成3×3正方形<br>
+                            边长 = 3<br>
+                            所以 $9^{\frac{1}{2}} = 3$
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>复合分数指数</h3>
+                        <div class="formula-box">
+                            $8^{\frac{2}{3}} = (8^{\frac{1}{3}})^2$
+                        </div>
+                        <div class="steps">
+                            第1步：$8^{\frac{1}{3}} = 2$ (立方根)<br>
+                            第2步：$2^2 = 4$ (平方)<br>
+                            结果：$8^{\frac{2}{3}} = 4$
+                        </div>
+                    </div>
+                </div>
+
+                <div class="column">
+                    <div class="card">
+                        <h3>立方根可视化</h3>
+                        <div class="input-group">
+                            <label>选择数字</label>
+                            <select id="cbNum" onchange="drawCube()">
+                                <option value="8" selected>8 → 2×2×2</option>
+                                <option value="27">27 → 3×3×3</option>
+                                <option value="64">64 → 4×4×4</option>
+                            </select>
+                        </div>
+                        <div class="cube-container">
+                            <canvas id="cubeCanvas" width="400" height="280"></canvas>
+                        </div>
+                        <div class="steps" id="cbExp">
+                            8个方块搭成2×2×2立方体<br>
+                            棱长 = 2<br>
+                            所以 $8^{\frac{1}{3}} = 2$
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 运算法则页面 -->
+            <div class="content" id="rules">
+                <div class="column">
+                    <div class="card">
+                        <h3>基本运算法则</h3>
+                        <div class="formula-box">$a^m \cdot a^n = a^{m+n}$</div>
+                        <div class="formula-box">$\frac{a^m}{a^n} = a^{m-n}$</div>
+                        <div class="formula-box">$(a^m)^n = a^{mn}$</div>
+                        <div class="formula-box">$(ab)^n = a^n b^n$</div>
+                    </div>
+
+                    <div class="card">
+                        <h3>自然指数</h3>
+                        <div class="formula-box">
+                            $e = \lim\limits_{n \to \infty} \left(1 + \frac{1}{n}\right)^n$
+                        </div>
+                        <div class="info-box">$e \approx 2.71828...$</div>
+                        <div class="formula-box">$\frac{d}{dx}e^x = e^x$</div>
+                    </div>
+                </div>
+
+                <div class="column">
+                    <div class="card">
+                        <h3>对数关系</h3>
+                        <div class="formula-box">$y = a^x \Leftrightarrow x = \log_a y$</div>
+                        <div class="formula-box">$a^{\log_a x} = x$</div>
+                        <div class="formula-box">$\log_a a^x = x$</div>
+                    </div>
+
+                    <div class="card">
+                        <h3>应用实例</h3>
+                        <div class="info-box">复利：$A = P(1 + r)^t$</div>
+                        <div class="info-box">半衰期：$N = N_0 \cdot 2^{-\frac{t}{t_{1/2}}}$</div>
+                        <div class="info-box">人口增长：$P = P_0 e^{rt}$</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ========================================
+        function renderMath() {
+            if (window.MathJax && MathJax.typesetPromise) {
+                MathJax.typesetPromise().catch(err => console.log('渲染错误:', err));
+            }
+        }
+
+        // 页面切换
+        function switchPanel(panel) {
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(panel).classList.add('active');
+            
+            // 延迟渲染公式，避免卡顿
+            setTimeout(() => {
+                renderMath();
+                if (panel === 'basic') drawGraph();
+                if (panel === 'fraction') {
+                    drawSquare();
+                    drawCube();
+                }
+            }, 50);
+        }
+
+        // 计算
+        function calculate() {
+            const base = parseFloat(document.getElementById('base').value);
+            const exp = parseFloat(document.getElementById('exp').value);
+            
+            if (isNaN(base) || isNaN(exp)) {
+                document.getElementById('result').innerHTML = '请输入有效数字';
+                return;
+            }
+            
+            const result = Math.pow(base, exp);
+            document.getElementById('result').innerHTML = `$${base}^{${exp}} = ${result.toFixed(3)}$`;
+            
+            // 更新步骤
+            if (exp === 0) {
+                document.getElementById('steps').innerHTML = '$a^0 = 1$ (零次幂)';
+            } else if (exp < 0) {
+                document.getElementById('steps').innerHTML = `$${base}^{${exp}} = \\frac{1}{${base}^{${-exp}}}$`;
+            } else {
+                document.getElementById('steps').innerHTML = `$${base}^{${exp}} = ${result.toFixed(3)}$`;
+            }
+            
+            // 同步滑块
+            document.getElementById('baseSlider').value = base;
+            document.getElementById('sliderValue').textContent = base.toFixed(1);
+            
+            drawGraph();
+            renderMath();
+        }
+
+        // 随机
+        function randomCalc() {
+            document.getElementById('base').value = (Math.random() * 4 + 1).toFixed(1);
+            document.getElementById('exp').value = (Math.random() * 6 - 3).toFixed(1);
+            calculate();
+        }
+
+        // 智能Canvas自适应绘制函数图像
+        function drawGraph() {
+            const canvas = document.getElementById('graph');
+            if (!canvas) return;
+            
+            // 智能计算容器尺寸
+            const container = canvas.parentElement;
+            const containerWidth = Math.max(200, container.clientWidth - 20); // 最小宽度200px
+            const containerHeight = Math.max(150, Math.min(400, container.clientHeight - 20)); // 最小高度150px，最大400px
+            
+            // 设置Canvas显示尺寸
+            canvas.style.width = containerWidth + 'px';
+            canvas.style.height = containerHeight + 'px';
+            
+            // 设置Canvas实际尺寸（用于绘制）
+            const devicePixelRatio = window.devicePixelRatio || 1;
+            canvas.width = containerWidth * devicePixelRatio;
+            canvas.height = containerHeight * devicePixelRatio;
+            
+            const ctx = canvas.getContext('2d');
+            ctx.scale(devicePixelRatio, devicePixelRatio);
+            
+            const width = containerWidth;
+            const height = containerHeight;
+            const centerX = width / 2;
+            const centerY = height / 2;
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            const base = parseFloat(document.getElementById('baseSlider')?.value || 2);
+            
+            // 智能计算网格密度和缩放比例
+            const minGridSize = 20;
+            const maxGridSize = 60;
+            const gridDensity = Math.max(5, Math.min(15, Math.floor(width / 50))); // 根据宽度调整网格密度
+            const scale = Math.max(minGridSize, Math.min(maxGridSize, width / gridDensity));
+            
+            // 智能网格绘制
+            ctx.strokeStyle = '#e5e7eb';
+            ctx.lineWidth = width < 300 ? 0.3 : 0.5; // 小屏幕时使用更细的线
+            
+            // 主网格线
+            for (let x = centerX % scale; x < width; x += scale) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, height);
+                ctx.stroke();
+            }
+            for (let y = centerY % scale; y < height; y += scale) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(width, y);
+                ctx.stroke();
+            }
+            
+            // 次网格线（仅在较大屏幕上显示）
+            if (width > 400) {
+                ctx.strokeStyle = '#f3f4f6';
+                ctx.lineWidth = 0.2;
+                const subScale = scale / 2;
+                for (let x = centerX % subScale; x < width; x += subScale) {
+                    if (Math.abs(x - centerX) % scale !== 0) {
+                        ctx.beginPath();
+                        ctx.moveTo(x, 0);
+                        ctx.lineTo(x, height);
+                        ctx.stroke();
+                    }
+                }
+                for (let y = centerY % subScale; y < height; y += subScale) {
+                    if (Math.abs(y - centerY) % scale !== 0) {
+                        ctx.beginPath();
+                        ctx.moveTo(0, y);
+                        ctx.lineTo(width, y);
+                        ctx.stroke();
+                    }
+                }
+            }
+            
+            // 坐标轴
+            ctx.strokeStyle = '#374151';
+            ctx.lineWidth = width < 300 ? 1.5 : 2;
+            ctx.beginPath();
+            ctx.moveTo(0, centerY);
+            ctx.lineTo(width, centerY);
+            ctx.moveTo(centerX, 0);
+            ctx.lineTo(centerX, height);
+            ctx.stroke();
+            
+            // 函数曲线
+            ctx.strokeStyle = '#4f46e5';
+            ctx.lineWidth = width < 300 ? 2 : 2.5;
+            ctx.beginPath();
+            
+            let first = true;
+            const stepSize = width < 300 ? 3 : 2; // 小屏幕时使用更大的步长提高性能
+            for (let px = 0; px <= width; px += stepSize) {
+                const x = (px - centerX) / scale;
+                const y = Math.pow(base, x);
+                
+                if (y > 0 && y < 1000) {
+                    const py = centerY - y * scale;
+                    if (py >= -10 && py <= height + 10) {
+                        if (first) {
+                            ctx.moveTo(px, py);
+                            first = false;
+                        } else {
+                            ctx.lineTo(px, py);
+                        }
+                    }
+                }
+            }
+            ctx.stroke();
+            
+            // 标记点(0,1)
+            ctx.fillStyle = '#ef4444';
+            const pointRadius = width < 300 ? 3 : 5;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY - scale, pointRadius, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // 更新描述
+            const desc = document.getElementById('funcDesc');
+            if (base > 1) {
+                desc.innerHTML = `$y = ${base.toFixed(1)}^x$ 单调递增`;
+            } else if (base < 1) {
+                desc.innerHTML = `$y = ${base.toFixed(1)}^x$ 单调递减`;
+            } else {
+                desc.innerHTML = `$y = 1$ 常函数`;
+            }
+            renderMath();
+        }
+
+        // 平方根可视化
+        function drawSquare() {
+            const num = parseInt(document.getElementById('sqNum').value);
+            const grid = document.getElementById('squareGrid');
+            const sqrt = Math.sqrt(num);
+            
+            grid.innerHTML = '';
+            grid.style.gridTemplateColumns = `repeat(${sqrt}, 1fr)`;
+            
+            for (let i = 0; i < num; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'dot';
+                grid.appendChild(dot);
+            }
+            
+            document.getElementById('sqExp').innerHTML = 
+                `${num}个点排成${sqrt}×${sqrt}正方形<br>边长 = ${sqrt}<br>所以 $${num}^{\\frac{1}{2}} = ${sqrt}$`;
+            renderMath();
+        }
+
+        // 智能立方体可视化绘制
+        function drawCube() {
+            const num = parseInt(document.getElementById('cbNum').value);
+            const canvas = document.getElementById('cubeCanvas');
+            if (!canvas) return;
+            
+            // 智能计算容器尺寸
+            const container = canvas.parentElement;
+            const containerWidth = Math.max(250, container.clientWidth - 40); // 最小宽度250px
+            const containerHeight = Math.max(200, Math.min(350, container.clientHeight - 40)); // 最小高度200px，最大350px
+            
+            // 设置Canvas显示尺寸
+            canvas.style.width = containerWidth + 'px';
+            canvas.style.height = containerHeight + 'px';
+            
+            // 设置Canvas实际尺寸（用于绘制）
+            const devicePixelRatio = window.devicePixelRatio || 1;
+            canvas.width = containerWidth * devicePixelRatio;
+            canvas.height = containerHeight * devicePixelRatio;
+            
+            const ctx = canvas.getContext('2d');
+            ctx.scale(devicePixelRatio, devicePixelRatio);
+            
+            const cbrt = Math.round(Math.cbrt(num));
+            
+            ctx.clearRect(0, 0, containerWidth, containerHeight);
+            
+            // 智能计算单位长度，确保立方体完整显示
+            const maxCubeWidth = cbrt * 0.866 * 2; // 等轴测投影的最大宽度
+            const maxCubeHeight = cbrt * 1.5; // 等轴测投影的最大高度
+            
+            // 计算可用的绘制区域（留出边距）
+            const margin = 30;
+            const availableWidth = containerWidth - margin * 2;
+            const availableHeight = containerHeight - margin * 2;
+            
+            // 根据立方体复杂度和容器大小智能计算单位长度
+            const unitByWidth = availableWidth / (maxCubeWidth + 2);
+            const unitByHeight = availableHeight / (maxCubeHeight + 2);
+            const unit = Math.min(unitByWidth, unitByHeight, 25); // 最大单位长度25px
+            
+            // 确保最小单位长度
+            const minUnit = containerWidth < 300 ? 8 : 12;
+            const finalUnit = Math.max(minUnit, unit);
+            
+            const offsetX = containerWidth / 2;
+            const offsetY = containerHeight / 2;
+            
+            // 智能调整线宽
+            const lineWidth = containerWidth < 300 ? 1 : 1.5;
+            ctx.strokeStyle = '#4f46e5';
+            ctx.lineWidth = lineWidth;
+            
+            // 绘制立方体框架
+            for (let z = 0; z <= cbrt; z++) {
+                for (let y = 0; y <= cbrt; y++) {
+                    for (let x = 0; x <= cbrt; x++) {
+                        // 计算等轴测投影坐标
+                        const px = offsetX + (x - z) * finalUnit * 0.866;
+                        const py = offsetY + (x + z) * finalUnit * 0.5 - y * finalUnit;
+                        
+                        // 绘制可见的边
+                        ctx.beginPath();
+                        
+                        // X方向的边
+                        if (y === 0 || y === cbrt || z === 0 || z === cbrt) {
+                            if (x < cbrt) {
+                                ctx.moveTo(px, py);
+                                ctx.lineTo(px + finalUnit * 0.866, py - finalUnit * 0.5);
+                            }
+                        }
+                        
+                        // Y方向的边
+                        if (x === 0 || x === cbrt || z === 0 || z === cbrt) {
+                            if (y < cbrt) {
+                                ctx.moveTo(px, py);
+                                ctx.lineTo(px, py + finalUnit);
+                            }
+                        }
+                        
+                        // Z方向的边
+                        if (x === 0 || x === cbrt || y === 0 || y === cbrt) {
+                            if (z < cbrt) {
+                                ctx.moveTo(px, py);
+                                ctx.lineTo(px - finalUnit * 0.866, py - finalUnit * 0.5);
+                            }
+                        }
+                        
+                        ctx.stroke();
+                    }
+                }
+            }
+            
+            // 填充可见面，增加立体感（仅在较大屏幕上显示）
+            if (containerWidth > 300) {
+                ctx.fillStyle = 'rgba(79, 70, 229, 0.1)';
+                
+                // 顶面
+                ctx.beginPath();
+                ctx.moveTo(offsetX, offsetY - cbrt * finalUnit);
+                ctx.lineTo(offsetX + cbrt * finalUnit * 0.866, offsetY - cbrt * finalUnit - cbrt * finalUnit * 0.5);
+                ctx.lineTo(offsetX, offsetY - cbrt * finalUnit - cbrt * finalUnit);
+                ctx.lineTo(offsetX - cbrt * finalUnit * 0.866, offsetY - cbrt * finalUnit - cbrt * finalUnit * 0.5);
+                ctx.closePath();
+                ctx.fill();
+                
+                // 右面
+                ctx.fillStyle = 'rgba(79, 70, 229, 0.05)';
+                ctx.beginPath();
+                ctx.moveTo(offsetX + cbrt * finalUnit * 0.866, offsetY - cbrt * finalUnit - cbrt * finalUnit * 0.5);
+                ctx.lineTo(offsetX + cbrt * finalUnit * 0.866, offsetY - cbrt * finalUnit * 0.5);
+                ctx.lineTo(offsetX, offsetY - cbrt * finalUnit);
+                ctx.lineTo(offsetX, offsetY - cbrt * finalUnit - cbrt * finalUnit);
+                ctx.closePath();
+                ctx.fill();
+            }
+            
+            document.getElementById('cbExp').innerHTML = 
+                `${num}个方块搭成${cbrt}×${cbrt}×${cbrt}立方体<br>棱长 = ${cbrt}<br>所以 $${num}^{\\frac{1}{3}} = ${cbrt}$`;
+            renderMath();
+        }
+
+        // 滑块事件
+        document.getElementById('baseSlider')?.addEventListener('input', function() {
+            const value = parseFloat(this.value);
+            document.getElementById('sliderValue').textContent = value.toFixed(1);
+            document.getElementById('base').value = value;
+            drawGraph();
+        });
+
+        // 防抖优化：窗口大小变化时只重绘当前活跃面板
+        let resizeTimeout;
+        window.addEventListener('resize', function() {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                const activePanel = document.querySelector('.content.active');
+                if (activePanel) {
+                    const panelId = activePanel.id;
+                    if (panelId === 'basic') {
+                        drawGraph();
+                    } else if (panelId === 'fraction') {
+                        drawSquare();
+                        drawCube();
+                    }
+                    // rules面板没有Canvas，无需重绘
+                }
+            }, 150); // 增加防抖延迟到150ms
+        });
+
+        // 初始化
+        window.addEventListener('DOMContentLoaded', function() {
+            // 延迟初始化，避免阻塞
+            setTimeout(() => {
+                calculate();
+                drawGraph();
+                drawSquare();
+                drawCube();
+                renderMath();
+            }, 100);
+        });
+
+        // 统一悬浮返回按钮控制函数
+        function toggleReturnLinks() {
+            const panel = document.querySelector('.return-links');
+            if (!panel) return;
+            if (panel.style.display === 'flex') {
+                panel.style.opacity = '0';
+                setTimeout(() => panel.style.display = 'none', 160);
+            } else {
+                panel.style.display = 'flex';
+                requestAnimationFrame(() => panel.style.opacity = '1');
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab 8.3 偏导数实验室</title>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            startup: {
+                pageReady: () => {
+                    return MathJax.startup.defaultPageReady().then(() => {
+                        console.log('MathJax加载完成');
+                    });
+                }
+            }
+        };
+    </script>
+    <script defer src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js"></script>
+    <style>
+        :root {
+            --primary: #4f46e5; --primary-dark: #3730a3;
+            --success: #10b981; --danger: #ef4444;
+            --gray-50: #f9fafb; --gray-100: #f3f4f6; --gray-200: #e5e7eb; --gray-600: #4b5563; --gray-700: #1f2937; --white: #ffffff;
+            --border: #e5e7eb; --h1-size: 22px; --h3-size: 18px; --text-size: 16px; --formula-size: 20px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        *::-webkit-scrollbar { width: 0; background: transparent; }
+        * { scrollbar-width: none; -ms-overflow-style: none; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", Arial, sans-serif; font-size: var(--text-size); line-height: 1.5; background: var(--gray-50); color: var(--gray-700); }
+        .container { width: 100%; max-width: 1400px; height: min(100vh, 700px); margin: 0 auto; display: flex; flex-direction: column; background: var(--white); border-radius: 12px; box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08); overflow: hidden; }
+        .header { height: 40px; background: var(--primary); color: var(--white); display: flex; align-items: center; padding: 0 20px; }
+        .header h1 { font-size: var(--h1-size); font-weight: 600; }
+        .main { flex: 1; display: flex; overflow: hidden; }
+        .sidebar { width: 120px; background: var(--gray-50); border-right: 1px solid var(--border); padding: 12px 10px; display: flex; flex-direction: column; gap: 8px; }
+        .nav-btn { width: 100%; padding: 8px; background: transparent; border: none; border-radius: 8px; cursor: pointer; font-size: var(--text-size); color: var(--gray-600); text-align: left; transition: background 0.2s ease; }
+        .nav-btn:hover { background: var(--gray-100); }
+        .nav-btn.active { background: var(--primary); color: var(--white); }
+        .content { flex: 1; display: none; padding: 16px; overflow-y: auto; }
+        .content.active { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+        .column { display: flex; flex-direction: column; gap: 14px; overflow-y: auto; }
+        .card { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 16px; box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04); }
+        .card h3 { font-size: var(--h3-size); color: var(--primary); margin-bottom: 10px; }
+        .formula-box { background: #f0f7ff; border-left: 3px solid var(--primary); border-radius: 8px; padding: 12px; text-align: center; font-size: var(--formula-size); }
+        .input-group { margin: 10px 0; }
+        .input-group label { display: block; margin-bottom: 6px; font-weight: 600; color: var(--gray-600); }
+        .input-group input { width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; font-size: var(--text-size); background: var(--gray-50); }
+        .btn { padding: 10px; background: var(--primary); color: var(--white); border: none; border-radius: 8px; cursor: pointer; font-size: var(--text-size); width: 100%; transition: background 0.2s ease; }
+        .btn:hover { background: var(--primary-dark); }
+        .canvas-container { border: 1px solid var(--gray-200); border-radius: 12px; background: #fafafa; padding: 16px; min-height: 400px; display: flex; align-items: center; justify-content: center; }
+        .return-panel { position: fixed; top: 16px; left: 16px; display: flex; gap: 10px; z-index: 9999; }
+        .return-link { padding: 8px 14px; border-radius: 999px; background: rgba(15, 23, 42, 0.8); color: #f8fafc; font-size: 14px; text-decoration: none; transition: transform 0.2s ease; }
+        .return-link:hover { transform: translateY(-2px); }
+        .return-link.return-main { background: rgba(79, 70, 229, 0.85); }
+    </style>
+</head>
+<body>
+    <div class="return-panel">
+        <a class="return-link" href="index.html"><i class="fa-solid fa-arrow-left"></i> 返回目录</a>
+            <a class="return-link return-main" href="../index.html"><i class="fa-solid fa-house"></i> 返回主站</a>
+    </div>
+    <div class="container">
+        <header class="header"><h1>Lab 8.3｜偏导数几何意义实验室</h1></header>
+        <div class="main">
+            <nav class="sidebar">
+                <button class="nav-btn active" onclick="switchPanel('concept')">偏导定义</button>
+                <button class="nav-btn" onclick="switchPanel('geometric')">几何意义</button>
+                <button class="nav-btn" onclick="switchPanel('calculate')">计算练习</button>
+            </nav>
+
+            <!-- 面板1: 偏导定义 -->
+            <div class="content active" id="concept">
+                <div class="column">
+                    <div class="card">
+                        <h3>偏导数定义</h3>
+                        <div class="formula-box">$$ \frac{\partial f}{\partial x} = \lim_{\Delta x \to 0} \frac{f(x+\Delta x, y) - f(x,y)}{\Delta x} $$</div>
+                    </div>
+                    <div class="card">
+                        <h3>物理意义</h3>
+                        <p>$\frac{\partial f}{\partial x}$: 固定$y$,沿$x$方向变化率</p>
+                        <p>$\frac{\partial f}{\partial y}$: 固定$x$,沿$y$方向变化率</p>
+                    </div>
+                    <div class="card">
+                        <h3>例子: $f(x,y) = x^2 + y^2$</h3>
+                        <div class="formula-box">$$ \frac{\partial f}{\partial x} = 2x $$</div>
+                        <div class="formula-box" style="margin-top: 8px;">$$ \frac{\partial f}{\partial y} = 2y $$</div>
+                    </div>
+                    <div class="card">
+                        <h3>在点(1,1)</h3>
+                        <p>$\frac{\partial f}{\partial x}(1,1) = 2$</p>
+                        <p>$\frac{\partial f}{\partial y}(1,1) = 2$</p>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="card" style="flex: 1;">
+                        <h3>曲面可视化</h3>
+                        <div class="canvas-container">
+                    <canvas id="surfaceCanvas"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 面板2: 几何意义 -->
+            <div class="content" id="geometric">
+                <div class="column">
+                    <div class="card">
+                        <h3>切线斜率</h3>
+                        <p>$\frac{\partial f}{\partial x}$表示曲面与平面$y=y_0$交线的切线斜率</p>
+                    </div>
+                    <div class="card">
+                        <h3>固定y值</h3>
+                        <div class="input-group">
+                            <label>y = <span id="fixedYVal">1.0</span></label>
+                            <input type="range" id="fixedY" min="-2" max="2" step="0.1" value="1" oninput="updateY(this.value)">
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3>切点x坐标</h3>
+                        <div class="input-group">
+                            <label>x = <span id="pointXVal">0</span></label>
+                            <input type="range" id="pointX" min="-2" max="2" step="0.1" value="0" oninput="updatePoint()">
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3>切线斜率</h3>
+                        <div id="slopeValue"></div>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="card" style="flex: 1;">
+                        <h3>切线图示</h3>
+                        <div class="canvas-container">
+                            <canvas id="tangentCanvas"></canvas>
+                        </div>
+                        <p style="margin-top: 10px; font-size: 14px;">
+                            <span style="color: #4f46e5;">■</span> 曲线
+                            <span style="color: #ef4444;">■</span> 切线
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 面板3: 计算练习 -->
+            <div class="content" id="calculate">
+                <div class="column">
+                    <div class="card">
+                        <h3>练习题</h3>
+                        <p>计算 $f(x,y) = x^3 + xy^2$ 的偏导数</p>
+                    </div>
+                    <div class="card">
+                        <h3>∂f/∂x = ?</h3>
+                        <div class="input-group">
+                            <input type="text" id="answerX" placeholder="例: 3x^2+y^2">
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3>∂f/∂y = ?</h3>
+                        <div class="input-group">
+                            <input type="text" id="answerY" placeholder="例: 2xy">
+                        </div>
+                    </div>
+                    <div class="card">
+                        <button class="btn" onclick="checkAnswers()">✓ 检查答案</button>
+                    </div>
+                    <div class="card">
+                        <h3>结果</h3>
+                        <div id="result"></div>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="card" style="flex: 1;">
+                        <h3>解题提示</h3>
+                        <div class="canvas-container">
+                            <canvas id="hintCanvas"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function resizeCanvas(canvas) {
+            const container = canvas.parentElement;
+            canvas.width = container.clientWidth - 32;
+            canvas.height = container.clientHeight - 32;
+            return canvas.getContext('2d');
+        }
+
+        function drawSurface() {
+            const canvas = document.getElementById('surfaceCanvas');
+            if (!canvas) return;
+            const ctx = resizeCanvas(canvas);
+            const w = canvas.width, h = canvas.height;
+
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(0, 0, w, h);
+
+            for (let x = -2; x <= 2; x += 0.2) {
+                for (let y = -2; y <= 2; y += 0.2) {
+                    const z = x*x + y*y;
+                    const px = w/2 + x * 60 + z * 8;
+                    const py = h/2 - y * 60 - z * 15;
+                    ctx.fillStyle = `rgba(79, 70, 229, ${0.3 + Math.min(0.5, z/8)})`;
+                    ctx.beginPath();
+                    ctx.arc(px, py, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+        }
+
+        function updateY(val) {
+            document.getElementById('fixedYVal').textContent = val;
+            updatePoint();
+        }
+
+        function updatePoint() {
+            const y0 = parseFloat(document.getElementById('fixedY').value);
+            const x0 = parseFloat(document.getElementById('pointX').value);
+            document.getElementById('pointXVal').textContent = x0;
+
+            const slope = 2 * x0;
+            const slopeBox = document.getElementById('slopeValue');
+            slopeBox.innerHTML = `<div class="formula-box">$k = ${slope.toFixed(2)}$</div>`;
+            if (typeof MathJax !== 'undefined') {
+                MathJax.typesetPromise([slopeBox]).catch(err => console.log(err));
+            }
+
+            drawTangent(x0, y0, slope);
+            if (typeof MathJax !== 'undefined') MathJax.typesetPromise();
+        }
+
+        function drawTangent(x0, y0, slope) {
+            const canvas = document.getElementById('tangentCanvas');
+            if (!canvas) return;
+            const ctx = resizeCanvas(canvas);
+            const w = canvas.width, h = canvas.height;
+
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(0, 0, w, h);
+
+            ctx.strokeStyle = '#374151'; ctx.lineWidth = 2;
+                ctx.beginPath();
+            ctx.moveTo(40, h - 40); ctx.lineTo(w - 20, h - 40);
+            ctx.moveTo(40, h - 40); ctx.lineTo(40, 20);
+            ctx.stroke();
+
+            const scale = 40;
+
+            ctx.strokeStyle = '#4f46e5'; ctx.lineWidth = 2;
+            ctx.beginPath();
+            for (let x = -3; x <= 3; x += 0.05) {
+                const z = x*x + y0*y0;
+                const px = w/2 + x * scale;
+                const py = h - 40 - z * scale;
+                if (x === -3) ctx.moveTo(px, py);
+                else ctx.lineTo(px, py);
+            }
+            ctx.stroke();
+
+            const z0 = x0*x0 + y0*y0;
+            ctx.strokeStyle = '#ef4444'; ctx.lineWidth = 2;
+            ctx.beginPath();
+            for (let dx = -2; dx <= 2; dx += 0.1) {
+                const z = z0 + slope * dx;
+                const px = w/2 + (x0 + dx) * scale;
+                const py = h - 40 - z * scale;
+                if (dx === -2) ctx.moveTo(px, py);
+                else ctx.lineTo(px, py);
+            }
+            ctx.stroke();
+
+            ctx.fillStyle = '#10b981';
+            ctx.beginPath();
+            ctx.arc(w/2 + x0 * scale, h - 40 - z0 * scale, 5, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function checkAnswers() {
+            const ansX = document.getElementById('answerX').value.trim().toLowerCase().replace(/\s/g, '');
+            const ansY = document.getElementById('answerY').value.trim().toLowerCase().replace(/\s/g, '');
+
+            const correctX = ansX === '3x^2+y^2' || ansX === '3x²+y²' || ansX === 'y^2+3x^2' || ansX === 'y²+3x²';
+            const correctY = ansY === '2xy';
+
+            const resultDiv = document.getElementById('result');
+            if (correctX && correctY) {
+                resultDiv.innerHTML = '<div style="color: var(--success); font-weight: 600;">✓ 全部正确!</div>';
+            } else {
+                resultDiv.innerHTML = '<div style="color: var(--danger); font-weight: 600;">✗ 有错误,再想想</div>' +
+                    '<p>提示: 对x求偏导时把y当常数</p>';
+            }
+        }
+
+        function drawHint() {
+            const canvas = document.getElementById('hintCanvas');
+            if (!canvas) return;
+            const ctx = resizeCanvas(canvas);
+            const w = canvas.width, h = canvas.height;
+
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(0, 0, w, h);
+
+            ctx.fillStyle = '#4f46e5';
+            ctx.font = 'bold 16px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('求导提示', w/2, 30);
+
+            ctx.font = '14px sans-serif';
+            ctx.fillStyle = '#374151';
+            const hints = [
+                'f(x,y) = x³ + xy²',
+                '',
+                '对x求偏导:',
+                '把y²看作常数',
+                '∂f/∂x = 3x² + y²',
+                '',
+                '对y求偏导:',
+                '把x看作常数',
+                '∂f/∂y = 2xy'
+            ];
+            hints.forEach((line, i) => {
+                ctx.fillText(line, w/2, 70 + i * 30);
+            });
+        }
+
+        function switchPanel(id) {
+            document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            event.target.classList.add('active');
+
+            setTimeout(() => {
+                if (id === 'concept') drawSurface();
+                else if (id === 'geometric') updatePoint();
+                else if (id === 'calculate') drawHint();
+                if (typeof MathJax !== 'undefined') MathJax.typesetPromise();
+            }, 100);
+        }
+
+        window.addEventListener('load', () => {
+            drawSurface();
+            if (typeof MathJax !== 'undefined') MathJax.typesetPromise();
+        });
+
+        window.addEventListener('resize', () => {
+            drawSurface();
+            drawTangent();
+        });
+
+        // 页面加载时初始化可视化
+        updatePoint();
+        if (typeof MathJax !== 'undefined') {
+            MathJax.typesetPromise().catch(err => console.log(err));
+        }
+    </script>
+</body>
+</html>

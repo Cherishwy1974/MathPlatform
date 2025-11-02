@@ -1,0 +1,3022 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+    <link rel="stylesheet" href="../common-assets/css/fontawesome.min.css">
+    <link rel="stylesheet" href="../common-assets/css/solid.min.css">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>第十章：线性代数基础 (交互式课件)</title>
+<script src="../common-assets/js/d3-7.8.5.min.js"></script>
+<script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true,
+                processEnvironments: true
+            },
+            svg: {
+                fontCache: 'global'
+            },
+            startup: {
+                pageReady: () => {
+                    return window.MathJax.startup.defaultPageReady().then(() => {
+                        console.log('MathJax is ready!');
+                    });
+                }
+            }
+        };
+    </script>
+<script async="" id="MathJax-script" src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js" type="text/javascript">
+</script>
+<style>
+        /* === RESET AND BASE STYLES === */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: 16px;
+            height: 100%;
+        }
+
+        body {
+            font-family: 'Inter', 'Source Han Sans SC', 'Noto Sans SC', 'Microsoft YaHei', system-ui, -apple-system, sans-serif;
+            background: #FAFAFA;
+            overflow: hidden;
+            color: #1a1a1a;
+            height: 100%;
+            line-height: 1.6;
+            font-weight: 400;
+        }
+
+        /* 隐藏旧浮动菜单，统一使用全局样式 */
+        #floating-menu { display: none !important; }
+
+        /* 浮动菜单样式（固定定位，避免挤占页面布局） */
+        #floating-menu { position: fixed; top: 12px; left: 12px; z-index: 1200; }
+        #floating-menu .menu-toggle { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 8px; background: rgba(0,0,0,0.5); color: #fff; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+        #floating-menu .menu-content { position: fixed; top: 12px; left: 60px; display: none; gap: 10px; padding: 6px 10px; background: rgba(255,255,255,0.9); border-radius: 10px; box-shadow: 0 6px 18px rgba(0,0,0,0.15); align-items: center; }
+        #floating-menu .menu-content.active { display: flex; }
+        #floating-menu .menu-item { display: inline-flex; align-items: center; gap: 6px; color: #334155; text-decoration: none; padding: 6px 10px; border-radius: 8px; transition: background 0.2s; }
+        #floating-menu .menu-item:hover { background: rgba(148,163,184,0.2); }
+        #floating-menu .menu-icon { font-size: 14px; }
+        #floating-menu .menu-text { font-size: 14px; }
+
+        /* CSS 变量默认值（用于行列式等可视化的颜色） */
+        :root {
+            --text-color: #2c3e50;
+            --primary-color: #3498db;
+            --axis-color: #475569;
+            --muted-color: #94a3b8;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+            --info-color: #3b82f6;
+            --warning-color: #f59e0b;
+        }
+
+        /* === SLIDE LAYOUT === */
+        .slide-container {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            position: relative;
+            gap: 0;
+            padding: 0;
+        }
+
+        /* Left Content Area - Academic Journal Style */
+        .left-content {
+            width: 50%;
+            height: 100vh;
+            padding: 60px 80px 60px 60px;
+            background: #FBFBFB;
+            overflow-y: auto;
+            font-size: 16px;
+            line-height: 1.6;
+            border: none;
+            box-shadow: none;
+            border-radius: 0;
+        }
+
+        .slide-container.single-column .left-content {
+            width: 100%;
+            max-width: 960px;
+            border-right: none;
+        }
+
+        /* Right Visualization Area - Subtle Contrast */
+        .right-visual {
+            width: 50%;
+            height: 100vh;
+            background: #F8F9FA;
+            display: flex;
+            align-items: stretch;
+            justify-content: center;
+            position: relative;
+            border: none;
+            box-shadow: none;
+            border-radius: 0;
+            overflow: hidden;
+        }
+
+        .slide-container.single-column .right-visual {
+            display: none;
+        }
+
+        .right-visual > div {
+            width: 100%;
+            height: 100%;
+            min-height: 260px;
+            background: transparent;
+            border-radius: 0;
+            box-shadow: none;
+            padding: 16px;
+            overflow: hidden;
+        }
+
+        .right-visual > div > * {
+            width: 100%;
+            height: 100%;
+        }
+
+        .right-visual canvas,
+        .right-visual svg {
+            max-width: 100%;
+            max-height: 100%;
+            display: block;
+            overflow: visible;
+        }
+
+        /* 统一封面样式（与第1–9章一致） */
+        .slide-container.cover { align-items: stretch; }
+        .cover-left { padding: 60px; display: flex; flex-direction: column; justify-content: center; }
+        .cover-badge { display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(90deg, #4a90e2, #9b59b6); color: #fff; padding: 6px 12px; border-radius: 999px; font-size: 14px; width: fit-content; box-shadow: 0 6px 16px rgba(74,144,226,0.35); }
+        .cover-title { font-size: 4rem; line-height: 1.1; margin: 18px 0 8px 0; color: #1a1a2e; background: linear-gradient(90deg, #1a1a2e 0%, #4a90e2 60%, #9b59b6 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+        .cover-subtitle { font-size: 1.6rem; color: #4f5b6a; margin: 10px 0 18px 0; }
+        .cover-meta { display: flex; gap: 14px; flex-wrap: wrap; color: #6b7b8c; font-size: 0.95rem; }
+        .cover-meta span { display: inline-flex; align-items: center; gap: 6px; }
+        .cover-actions { display: flex; gap: 14px; margin-top: 26px; flex-wrap: wrap; }
+        .cover-right { position: relative; overflow: hidden; }
+        .cover-visual { position: relative; width: 100%; height: 100%; background:
+                radial-gradient(1200px 800px at 80% 20%, rgba(155, 89, 182, 0.18), transparent 60%),
+                radial-gradient(900px 700px at 20% 80%, rgba(74, 144, 226, 0.18), transparent 60%),
+                linear-gradient(135deg, #ffffff 0%, #f7faff 50%, #f9f6ff 100%);
+        }
+        .cover-visual::after { content: ""; position: absolute; inset: 0; background: radial-gradient(600px 300px at 50% -10%, rgba(255,255,255,0.7), transparent 70%); pointer-events: none; }
+        .math-badge { position: absolute; padding: 0; background: transparent; border: none; border-radius: 0; box-shadow: none; color: #334155; font-weight: 700; animation: floatY 6s ease-in-out infinite; backdrop-filter: none; pointer-events: none; }
+        .math-badge.b1 { left: 12%; top: 22%; animation-delay: 0s; }
+        .math-badge.b2 { right: 14%; top: 30%; animation-delay: 0.8s; }
+        .math-badge.b3 { left: 20%; bottom: 18%; animation-delay: 1.5s; }
+        .math-badge.b4 { right: 18%; bottom: 22%; animation-delay: 2.2s; }
+        @keyframes floatY { 0% { transform: translateY(0px); } 50% { transform: translateY(-12px); } 100% { transform: translateY(0px); } }
+        .orbit { position: absolute; left: 50%; top: 50%; width: 320px; height: 320px; margin-left: -160px; margin-top: -160px; border-radius: 50%; border: 1px dashed rgba(52, 152, 219, 0.35); animation: spin 18s linear infinite; }
+        .orbit .dot { position: absolute; top: -6px; left: 50%; width: 12px; height: 12px; margin-left: -6px; background: #4a90e2; border-radius: 50%; box-shadow: 0 0 0 6px rgba(74,144,226,0.15); }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Small-screen stacking to avoid clipping */
+        @media (max-width: 1200px) {
+            .slide-container { flex-direction: column; }
+            .left-content { width: 100%; height: 42vh; padding: 32px 24px 24px 24px; }
+            .right-visual { width: 100%; height: 58vh; padding: 12px; }
+            .right-visual > div { height: 100%; }
+        }
+
+        /* === SLIDE TRANSITIONS === */
+        .slide {
+            display: none;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .slide.active {
+            display: flex;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* === 统一的字体系统 === */
+        h1 {
+            color: #003366;
+            font-size: 28px;
+            line-height: 1.3;
+            font-weight: 700;
+            margin: 0 0 24px 0;
+            padding: 0;
+            letter-spacing: -0.02em;
+        }
+
+        h2 {
+            color: #008080;
+            font-size: 22px;
+            line-height: 1.4;
+            font-weight: 600;
+            margin: 32px 0 16px 0;
+            position: relative;
+            padding-left: 0;
+        }
+
+        h2::before {
+            content: '';
+            position: absolute;
+            left: -20px;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: #008080;
+            border-radius: 2px;
+        }
+
+        h3 {
+            color: #1a1a1a;
+            font-size: 20px;
+            line-height: 1.4;
+            font-weight: 600;
+            margin: 24px 0 12px 0;
+        }
+
+        h4 {
+            color: #333333;
+            font-size: 18px;
+            line-height: 1.4;
+            font-weight: 500;
+            margin: 20px 0 8px 0;
+        }
+
+        h5 {
+            color: #555555;
+            font-size: 16px;
+            line-height: 1.4;
+            font-weight: 500;
+            margin: 16px 0 8px 0;
+        }
+
+        p {
+            margin-bottom: 16px;
+            color: #2d2d2d;
+            font-weight: 400;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        ul, ol {
+            margin: 0 0 16px 0;
+            line-height: 1.6;
+            padding-left: 24px;
+            font-size: 16px;
+        }
+
+        li {
+            margin-bottom: 8px;
+            color: #2d2d2d;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        /* === CONTENT MODULES - 去框化设计 === */
+        .definition, .theorem, .example, .note {
+            background: transparent;
+            border: none;
+            border-left: 4px solid;
+            padding: 16px 0 16px 20px;
+            margin: 20px 0;
+        }
+
+        .definition {
+            border-left-color: #1e40af;
+        }
+
+        .theorem {
+            border-left-color: #059669;
+        }
+
+        .example {
+            border-left-color: #dc2626;
+        }
+
+        .note {
+            border-left-color: #6b7280;
+            font-style: italic;
+            color: #4b5563;
+        }
+
+        .math-formula {
+            background: transparent;
+            border: none;
+            border-left: 4px solid #008080;
+            padding: 16px 0 16px 20px;
+            margin: 20px 0;
+            border-radius: 0;
+            font-size: 16px;
+        }
+
+        .highlight {
+            color: #008080;
+            font-weight: 600;
+        }
+
+        .formula-highlight {
+            background: transparent;
+            padding: 24px 0;
+            margin: 24px 0;
+            text-align: center;
+            font-size: 18px;
+            border: none;
+            box-shadow: none;
+        }
+
+        /* 悬浮控制与面板（统一样式） */
+        .floating-control-btn { position: fixed; bottom: 20px; left: 20px; width: 56px; height: 56px; border: none; border-radius: 16px; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 1100; background: rgba(15,23,42,0.7); color: #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.25); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); transition: transform .2s ease, box-shadow .2s ease; }
+        .floating-control-btn:hover { transform: translateY(-2px); box-shadow: 0 16px 36px rgba(0,0,0,0.32); }
+        .floating-control-btn .btn-icon { font-size: 22px; font-weight: 700; }
+        .floating-menu-items { position: fixed; bottom: 20px; left: 86px; display: none; gap: 10px; z-index: 1100; }
+        .floating-menu-items.active { display: flex; }
+        .floating-menu-item { display: inline-flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 14px; cursor: pointer; background: rgba(255,255,255,0.9); color: #0f172a; box-shadow: 0 10px 30px rgba(0,0,0,0.18); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); transition: transform .18s ease, box-shadow .18s ease; }
+        .floating-menu-item:hover { transform: translateY(-1px); box-shadow: 0 14px 36px rgba(0,0,0,0.24); }
+        .floating-menu-item .item-icon { font-size: 16px; width: 18px; text-align: center; }
+        .lab-submenu, .chapter-submenu { position: fixed; left: 20px; bottom: 86px; display: none; z-index: 1100; }
+        .course-submenu { position: fixed; right: 20px; top: 70px; display: none; z-index: 1100; }
+        .submenu-content { position: relative; width: min(920px, calc(100vw - 40px)); max-height: min(70vh, 620px); overflow-y: auto; background: rgba(255,255,255,0.88); border: 1px solid rgba(0,0,0,0.06); border-radius: 16px; padding: 16px; box-shadow: 0 20px 50px rgba(0,0,0,0.25); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+        .submenu-title { font-weight: 700; color: #0f172a; margin-bottom: 10px; }
+        .submenu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; }
+        .submenu-item { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 12px; cursor: pointer; background: rgba(255,255,255,0.95); border: 1px solid rgba(0,0,0,0.05); transition: background .15s ease, transform .15s ease; }
+        .submenu-item:hover { background: rgba(241,245,249,0.95); transform: translateY(-1px); }
+        .submenu-icon { width: 18px; text-align: center; color: #64748b; }
+        .submenu-text { color: #111827; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .submenu-close { position: absolute; right: 10px; top: 6px; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; background: rgba(0,0,0,0.55); color: #fff; font-weight: 700; }
+        .submenu-close:hover { background: rgba(0,0,0,0.72); }
+
+        /* === MATHJAX FORMULA STYLING === */
+        .MathJax {
+            outline: none;
+            display: inline-block;
+        }
+
+        .MathJax_Display {
+            text-align: center !important;
+            margin: 20px 0 !important;
+        }
+
+        /* SVG Container Styling */
+        mjx-container[jax="SVG"] {
+            display: inline-block !important;
+            line-height: 1;
+            vertical-align: baseline;
+        }
+
+        mjx-container[jax="SVG"][display="true"] {
+            display: block !important;
+            text-align: center !important;
+            margin: 20px 0 !important;
+        }
+
+        mjx-container[jax="SVG"] svg {
+            display: inline-block !important;
+            vertical-align: baseline;
+            max-width: 100%;
+            height: auto;
+        }
+
+        mjx-container[jax="SVG"][display="true"] svg {
+            display: block !important;
+            margin: 0 auto !important;
+        }
+
+        /* Enhanced SVG Rendering */
+        mjx-container svg {
+            shape-rendering: geometricPrecision;
+            text-rendering: geometricPrecision;
+            font-family: 'MJXZERO', 'MJXTEX';
+        }
+
+        /* Force Visibility and Proper Display */
+        mjx-container[jax="SVG"] {
+            visibility: visible !important;
+            opacity: 1 !important;
+            overflow: visible !important;
+        }
+
+        mjx-container[jax="SVG"] svg {
+            visibility: visible !important;
+            opacity: 1 !important;
+            width: auto !important;
+            height: auto !important;
+        }
+
+        /* Content Area Formula Display */
+        .left-content mjx-container {
+            display: inline-block !important;
+            margin: 0 3px;
+        }
+
+        .left-content mjx-container[display="true"] {
+            display: block !important;
+            text-align: center !important;
+            margin: 20px 0 !important;
+        }
+
+        /* === SIMPLIFIED INTERACTIVE ELEMENTS === */
+        .step-stack {
+            margin: 32px 0;
+        }
+
+        .step-item {
+            border: none;
+            border-left: 3px solid #008080;
+            border-radius: 0;
+            padding: 0 0 0 20px;
+            background: transparent;
+            display: none;
+            margin: 24px 0;
+        }
+
+        .step-item.active {
+            display: block;
+            background: transparent;
+            border-left-color: #003366;
+        }
+
+        .step-btn {
+            margin-top: 16px;
+            padding: 8px 16px;
+            border-radius: 0;
+            border: 1px solid #E5E7EB;
+            background: transparent;
+            cursor: pointer;
+            font-size: 14px;
+            color: #003366;
+            transition: all 0.2s ease;
+        }
+
+        .step-btn:hover {
+            background: #003366;
+            color: white;
+            border-color: #003366;
+        }
+
+        .prompt-card {
+            background: transparent;
+            border: none;
+            border-left: 3px solid #008080;
+            border-radius: 0;
+            padding: 0 0 0 20px;
+            margin: 32px 0;
+        }
+
+        .teacher-note {
+            background: transparent;
+            border: none;
+            border-left: 3px solid #CC5500;
+            border-radius: 0;
+            padding: 0 0 0 20px;
+            margin: 32px 0;
+            font-style: normal;
+        }
+
+        /* === CANVAS STYLING === */
+        canvas {
+            max-width: 95%;
+            max-height: 95%;
+            border-radius: 0;
+            box-shadow: none;
+        }
+
+        /* === 导航控制 - 第二章极简设计 === */
+        .nav-controls {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .nav-btn {
+            background: rgba(0, 0, 0, 0.15);
+            color: transparent;
+            border: none;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 0;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .nav-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 8px;
+            height: 8px;
+            border-top: 2px solid rgba(0, 0, 0, 0.5);
+            border-right: 2px solid rgba(0, 0, 0, 0.5);
+        }
+
+        .nav-btn:first-child::before {
+            transform: translate(-40%, -50%) rotate(-135deg);
+        }
+
+        .nav-btn:last-child::before {
+            transform: translate(-60%, -50%) rotate(45deg);
+        }
+
+        .nav-btn:hover {
+            background: rgba(0, 0, 0, 0.25);
+        }
+
+        .nav-btn:hover::before {
+            border-color: rgba(0, 0, 0, 0.7);
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .nav-btn:disabled::before {
+            border-color: rgba(0, 0, 0, 0.2);
+        }
+
+        .slide-number {
+            font-size: 11px;
+            color: #9ca3af;
+            font-weight: 400;
+            display: flex;
+            align-items: center;
+            gap: 0;
+            opacity: 0.6;
+        }
+
+        .slide-number input {
+            width: 50px;
+            text-align: right;
+            border: none;
+            background: transparent;
+            font-size: 11px;
+            padding: 0 2px;
+            margin: 0;
+            color: #000000;
+            font-weight: 700;
+        }
+
+        .slide-number input::-webkit-outer-spin-button,
+        .slide-number input::-webkit-inner-spin-button {
+            display: none;
+        }
+
+        .slide-number input[type=number] {
+            -moz-appearance: textfield;
+            appearance: textfield;
+        }
+
+        .slide-number input:focus {
+            outline: none;
+            color: #000000;
+        }
+
+        #slideNumberTotal {
+            color: #9ca3af;
+            font-size: 14px;
+            font-weight: 400;
+            padding: 0 12px;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+        }
+
+        .directory-toggle {
+            border: none;
+            background: transparent;
+            color: #003366;
+            padding: 8px 12px;
+            border-radius: 0;
+            cursor: pointer;
+            border: 1px solid #E5E7EB;
+            transition: all 0.2s ease;
+        }
+
+        .directory-toggle:hover {
+            background: #003366;
+            color: white;
+            border-color: #003366;
+        }
+
+        .directory-menu {
+            position: fixed;
+            bottom: 90px;
+            right: 24px;
+            width: 320px;
+            max-height: 60vh;
+            overflow-y: auto;
+            background: rgba(251, 251, 251, 0.95);
+            border: 1px solid #E5E7EB;
+            border-radius: 0;
+            padding: 20px;
+            box-shadow: none;
+            display: none;
+            z-index: 1200;
+            backdrop-filter: blur(10px);
+        }
+
+        .directory-menu.active {
+            display: block;
+        }
+
+        .directory-menu h3 {
+            margin-bottom: 16px;
+            font-size: 16px;
+            color: #003366;
+        }
+
+        .directory-item {
+            margin-bottom: 12px;
+            color: #2d2d2d;
+            text-decoration: none;
+            display: block;
+            padding: 10px 12px;
+            border-radius: 0;
+            transition: background 0.2s ease;
+            border: 1px solid transparent;
+        }
+
+        .directory-item:hover {
+            background: #003366;
+            color: white;
+            border-color: #003366;
+        }
+
+        .global-animation-controls {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            display: flex;
+            gap: 12px;
+            padding: 8px 16px;
+            background: rgba(251, 251, 251, 0.95);
+            border: 1px solid #E5E7EB;
+            border-radius: 0;
+            box-shadow: none;
+            backdrop-filter: blur(10px);
+            z-index: 1100;
+        }
+
+        .global-control-btn {
+            background: transparent;
+            border: 1px solid #E5E7EB;
+            color: #003366;
+            padding: 6px 12px;
+            border-radius: 0;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .global-control-btn:hover {
+            background: #003366;
+            color: white;
+            border-color: #003366;
+        }
+
+        .global-control-btn.pause {
+            color: #dc2626;
+            border-color: #dc2626;
+        }
+
+        .global-control-btn.pause:hover {
+            background: #dc2626;
+            color: white;
+        }
+
+        .slide-note {
+            font-size: 14px;
+            color: #666666;
+            margin-top: 12px;
+            font-style: italic;
+        }
+
+        /* === UTILITY CLASSES === */
+        .loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 16px;
+            color: #003366;
+            z-index: 9999;
+            font-weight: 500;
+        }
+
+        /* === VISUAL HINTS AND UTILITY === */
+        .visual-hint {
+            font-style: italic;
+            color: #666666;
+            font-size: 15px;
+            margin: 24px 0;
+            padding-left: 20px;
+            border-left: 2px solid #E5E7EB;
+        }
+
+        /* === CLEAN SCROLLBAR === */
+        .left-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .left-content::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .left-content::-webkit-scrollbar-thumb {
+            background: #E5E7EB;
+            border-radius: 3px;
+        }
+
+        .left-content::-webkit-scrollbar-thumb:hover {
+            background: #D1D5DB;
+        }
+
+        .error-message {
+            color: #ef4444;
+            text-align: center;
+            padding: 20px;
+            font-size: 16px;
+            background: #fef2f2;
+        }
+
+        /* === MATRIX VISUALIZATION STYLES === */
+        .matrix-cell {
+            background: rgba(52, 152, 219, 0.1);
+            border: 1px solid rgba(52, 152, 219, 0.3);
+            padding: 12px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: 600;
+            color: #2c3e50;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .matrix-cell:hover {
+            background: rgba(52, 152, 219, 0.2);
+            border-color: rgba(52, 152, 219, 0.5);
+            transform: scale(1.05);
+        }
+
+        .matrix-cell.highlight {
+            background: rgba(46, 204, 113, 0.3);
+            border-color: rgba(46, 204, 113, 0.6);
+            color: #27ae60;
+        }
+
+        .matrix-grid {
+            display: grid;
+            gap: 8px;
+        }
+
+        .matrix-wrapper {
+            display: inline-block;
+        }
+
+        .matrix-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .vis-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .rotate-3d {
+            animation: rotate3d 4s linear infinite;
+            transform-style: preserve-3d;
+        }
+
+        @keyframes rotate3d {
+            0% { transform: rotateX(0deg) rotateY(0deg); }
+            100% { transform: rotateX(360deg) rotateY(360deg); }
+        }
+
+        @media print {
+            body {
+                overflow: visible;
+            }
+            .slide {
+                display: block !important;
+                page-break-after: always;
+            }
+            .nav-container,
+            .global-animation-controls,
+            .directory-menu,
+            .directory-toggle {
+                display: none !important;
+            }
+        }
+    </style>
+    <style>
+        /* 返回按钮样式（统一为第1/2章风格） */
+        .return-home-panel {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            z-index: 9999;
+            display: flex;
+            gap: 10px;
+            opacity: 0.3;
+            transition: opacity 0.3s ease;
+        }
+        .return-home-panel:hover { opacity: 1; }
+        .return-home-panel .return-link {
+            padding: 6px 12px;
+            background: rgba(15, 23, 42, 0.7);
+            color: #f8fafc;
+            text-decoration: none;
+            border-radius: 999px;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+        .return-home-panel .return-link:hover {
+            background: rgba(15, 23, 42, 0.9);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(15, 23, 42, 0.3);
+        }
+        .return-home-panel .return-link.return-main {
+            background: rgba(79, 70, 229, 0.7);
+        }
+        .return-home-panel .return-link.return-main:hover {
+            background: rgba(79, 70, 229, 0.9);
+            box-shadow: 0 8px 16px rgba(79, 70, 229, 0.3);
+        }
+    </style>
+</head>
+<body>
+<div id="slidesContainer">
+<!-- 第1页：标题页 -->
+<div class="slide active"><div class="slide-container cover"><div class="left-content tex2jax_process cover-left">
+<div class="cover-badge"><i class="fa-solid fa-seedling"></i><span> 第十章</span></div>
+<h1 class="cover-title">线性代数基础</h1>
+<p class="cover-subtitle">矩阵与线性方程组</p>
+<div class="cover-meta">
+<span><i class="fa-solid fa-book-open"></i> 基础篇</span>
+<span><i class="fa-solid fa-bolt"></i> 关键概念速览</span>
+</div>
+<div class="cover-actions">
+<a class="home-link-btn" href="../index.html"><span>主页</span></a>
+<a class="home-link-btn" href="../故事书/第10章/看透人心的特征脸.html"><span>故事书</span></a>
+<a class="home-link-btn" href="../习题/index.html"><span>习题</span></a>
+<a class="home-link-btn" href="../产教结合/index.html"><span>产教融合</span></a>
+</div>
+</div><div class="right-visual cover-right"><div class="cover-visual">
+<div class="math-badge b1">A·x=b</div>
+<div class="math-badge b2">det(A)</div>
+<div class="math-badge b3">λ, v</div>
+<div class="math-badge b4">rank</div>
+<div class="orbit"><span class="dot"></span></div>
+<div id="vis-title"></div>
+</div></div></div></div>
+<!-- 第2页：目录 -->
+<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
+<div style="font-size: 3rem; margin-bottom: 1.5rem; height: 8rem; display: flex; align-items: flex-start; justify-content: center">
+                目录
+            </div>
+<div style="display: grid; gap: 1.5rem; margin: 0 auto; max-width: 1400px; text-align: left">
+<div style="padding: 0.8rem">
+<h3 style="font-size: 1.3rem; margin-bottom: 0.5rem; padding-bottom: 0.2rem">第一讲：矩阵基础与运算</h3>
+<div style="display: grid; gap: 0.5rem; font-size: 1rem; line-height: 1.3">
+<div>• 矩阵的概念与表示</div>
+<div>• 矩阵的加法运算</div>
+<div>• 矩阵的乘法运算</div>
+<div>• 特殊矩阵</div>
+</div>
+</div>
+<div style="padding: 0.8rem">
+<h3 style="font-size: 1.3rem; margin-bottom: 0.5rem; padding-bottom: 0.2rem">第二讲：行列式与线性方程组</h3>
+<div style="display: grid; gap: 0.5rem; font-size: 1rem; line-height: 1.3">
+<div>• 行列式的概念与计算</div>
+<div>• 线性方程组的矩阵表示</div>
+<div>• 克拉默法则</div>
+<div>• 方程组的解的判断</div>
+</div>
+</div>
+<div style="padding: 0.8rem">
+<h3 style="font-size: 1.3rem; margin-bottom: 0.5rem; padding-bottom: 0.2rem">第三讲：特征值与特征向量</h3>
+<div style="display: grid; gap: 0.5rem; font-size: 1rem; line-height: 1.3">
+<div>• 特征值与特征向量的定义</div>
+<div>• 特征值的计算方法</div>
+<div>• 特征向量的求解</div>
+<div>• 工程应用实例</div>
+</div>
+</div>
+</div>
+</div><div class="right-visual"><div id="vis-contents"></div></div></div></div>
+<!-- 第3页：第一讲章节页 -->
+<div class="slide"><div class="slide-container single-column"><div class="left-content tex2jax_process">
+<h1 style="text-align: center; font-size: 3.5rem; margin-top: 15vh">第一讲</h1>
+<p style="text-align: center; font-size: 2.5rem; color: var(--text-color); margin-top: 40px">矩阵基础与运算</p>
+<p style="text-align: center; font-size: 1.5rem; margin-top: 60px; color: #666">
+                认识矩阵，掌握基本运算
+            </p>
+</div></div></div>
+<!-- 第4页：什么是矩阵 -->
+<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
+<h2>什么是矩阵？</h2>
+<p>想象一个 <span class="highlight">班级成绩表</span>：</p>
+<ul>
+<li>横向：不同科目</li>
+<li>纵向：不同学生</li>
+<li>交叉点：具体成绩</li>
+</ul>
+<p>这就是矩阵！一个有序的数字表格。</p>
+<h3>生活中的矩阵</h3>
+<p>• <strong>Excel表格</strong>：最常见的矩阵</p>
+<p>• <strong>座位表</strong>：行×列的矩阵</p>
+<p>• <strong>像素图片</strong>：RGB颜色矩阵</p>
+<div class="math-formula">
+                学生成绩矩阵 = $\begin{pmatrix}
+                85 &amp; 92 &amp; 78 \\
+                90 &amp; 88 &amp; 95 \\
+                76 &amp; 84 &amp; 89
+                \end{pmatrix}$
+            </div>
+<p style="text-align: center">3个学生 × 3门课程</p>
+</div><div class="right-visual"><div id="vis-matrix-intro"></div></div></div></div>
+<!-- 第5页：矩阵加法 -->
+<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
+<h2>矩阵加法</h2>
+<p>就像 <span class="highlight">两个班级成绩相加</span>！</p>
+<h3>加法规则</h3>
+<p>• 矩阵大小必须相同</p>
+<p>• 对应位置的数字相加</p>
+<p>• 就像Excel中的单元格相加</p>
+<div class="math-formula">
+                $\begin{pmatrix}
+                1 &amp; 2 \\
+                3 &amp; 4
+                \end{pmatrix} + \begin{pmatrix}
+                5 &amp; 6 \\
+                7 &amp; 8
+                \end{pmatrix} = \begin{pmatrix}
+                6 &amp; 8 \\
+                10 &amp; 12
+                \end{pmatrix}$
+            </div>
+<h3>实际应用</h3>
+<p>两个月的销售额相加：</p>
+<p>1月销售 + 2月销售 = 两月总销售</p>
+</div><div class="right-visual"><div id="vis-matrix-addition"></div></div></div></div>
+<!-- 第6页：矩阵乘法 -->
+<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
+<h2>矩阵乘法</h2>
+<p>像 <span class="highlight">价格×数量=总价</span></p>
+<h3>乘法步骤</h3>
+<p>1. 第一个矩阵的<span class="highlight">行</span></p>
+<p>2. 乘以第二个矩阵的<span class="highlight">列</span></p>
+<p>3. 对应元素相乘后相加</p>
+<h3>记忆口诀</h3>
+<p style="padding: 10px">
+                "横着走，竖着算"<br/>
+                左手指行，右手指列
+            </p>
+<h3>实例：购物计算</h3>
+<p>商品单价 × 购买数量 = 总价</p>
+<div class="math-formula">
+                $\begin{pmatrix} 5 & 3 \end{pmatrix}
+                \begin{pmatrix} 2 \\ 3 \end{pmatrix}
+                = 5\times 2 + 3\times 3 = 19$
+            </div>
+</div><div class="right-visual"><div id="vis-matrix-multiplication"></div></div></div></div>
+<!-- 第7页：向量基础（新增） -->
+<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
+<h2>向量基础</h2>
+<p>向量 = 既有<span class="highlight">大小</span>又有<span class="highlight">方向</span>的量</p>
+<h3>关键概念</h3>
+<ul>
+<li>表示：$\vec v = (v_x, v\_y)$ 或在平面/空间中的箭头</li>
+<li>加法：首尾相接，构成<span class="highlight">平行四边形</span></li>
+<li>数乘：沿同一方向伸缩（负号表示反向）</li>
+<li>几何含义：位置变化、速度、力等</li>
+</ul>
+<h3>与矩阵的关系</h3>
+<p>矩阵可以看作<span class="highlight">线性变换</span>，把向量映射为新的向量（旋转、缩放、投影等）</p>
+</div><div class="right-visual"><div id="vis-vector"></div></div></div></div>
+<!-- 第8页：第二讲章节页 -->
+<div class="slide"><div class="slide-container single-column"><div class="left-content tex2jax_process">
+<h1 style="text-align: center; font-size: 3.5rem; margin-top: 15vh">第二讲</h1>
+<p style="text-align: center; font-size: 2.5rem; color: var(--text-color); margin-top: 40px">行列式与线性方程组</p>
+<p style="text-align: center; font-size: 1.5rem; margin-top: 60px; color: #666">
+                从行列式到方程组求解
+            </p>
+</div></div></div>
+<!-- 第8页：行列式入门 -->
+<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
+<h2>行列式</h2>
+<p>矩阵的"指纹" - <span class="highlight">一个数值</span></p>
+<h3>2×2行列式</h3>
+<div class="math-formula">
+                $\begin{vmatrix}
+                a &amp; b \\
+                c &amp; d
+                \end{vmatrix} = ad - bc$
+            </div>
+<h3>记忆方法</h3>
+<p style="padding: 10px">
+                主对角线（↘）相乘 <span class="highlight">减去</span><br/>
+                副对角线（↙）相乘
+            </p>
+<h3>几何意义</h3>
+<p>• 2×2行列式 = 平行四边形<span class="highlight">面积</span></p>
+<p>• 行列式为0 = 图形被"压扁"了</p>
+<h3>用途</h3>
+<p>判断方程组是否有唯一解：</p>
+<p>行列式 ≠ 0 → 有唯一解 ✓</p>
+<p>行列式 = 0 → 无解或无穷解 ✗</p>
+</div><div class="right-visual"><div id="vis-determinant"></div></div></div></div>
+<!-- 第9页：线性方程组 -->
+<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
+<h2>线性方程组</h2>
+<p>多个未知数的<span class="highlight">联立方程</span></p>
+<h3>实例：购物问题</h3>
+<p>买了苹果和香蕉：</p>
+<div class="math-formula">
+                $\begin{cases}
+                2x + 3y = 16 \text{ (总价)} \\
+                x + y = 6 \text{ (总数量)}
+                \end{cases}$
+            </div>
+<p>x = 苹果数量，y = 香蕉数量</p>
+<h3>求解方法</h3>
+<p>1. <strong>消元法</strong>：逐个消除未知数</p>
+<p>2. <strong>代入法</strong>：用一个表示另一个</p>
+<p>3. <strong>矩阵法</strong>：转化为矩阵运算</p>
+<h3>几何理解</h3>
+<p>• 每个方程是一条直线</p>
+<p>• 解是直线的<span class="highlight">交点</span></p>
+<p>• 无交点 = 无解</p>
+<p>• 重合 = 无穷多解</p>
+</div><div class="right-visual"><div id="vis-linear-system"></div></div></div></div>
+<!-- 第10页：克拉默法则 -->
+<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
+<h2>克拉默法则</h2>
+<p>用<span class="highlight">行列式</span>解方程组</p>
+<h3>公式</h3>
+<div class="math-formula">
+                $x = \frac{D_x}{D}, \quad y = \frac{D_y}{D}$
+            </div>
+<h3>步骤</h3>
+<p>1. 算系数行列式 D</p>
+<p>2. 用常数项替换第1列，算 D_x</p>
+<p>3. 用常数项替换第2列，算 D_y</p>
+<p>4. 相除得答案</p>
+<h3>实例计算</h3>
+<div style="padding: 10px">
+                方程组：2x + y = 5<br/>
+                　　　　x - y = 1<br/>
+<br/>
+                D = 2×(-1) - 1×1 = -3<br/>
+                D_x = 5×(-1) - 1×1 = -6<br/>
+                x = -6/(-3) = 2 ✓
+            </div>
+<p style="margin-top: 15px">
+                <i class="fa-solid fa-lightbulb"></i> 适用条件：D ≠ 0
+            </p>
+</div><div class="right-visual"><div id="vis-cramers"></div></div></div></div>
+<!-- 第11页：第三讲章节页 -->
+<div class="slide"><div class="slide-container single-column"><div class="left-content tex2jax_process">
+<h1 style="text-align: center; font-size: 3.5rem; margin-top: 15vh">第三讲</h1>
+<p style="text-align: center; font-size: 2.5rem; color: var(--text-color); margin-top: 40px">特征值与特征向量</p>
+<p style="text-align: center; font-size: 1.5rem; margin-top: 60px; color: #666">
+                矩阵的"基因密码"
+            </p>
+</div></div></div>
+<!-- 第12页：特征值与特征向量 -->
+<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
+<h2>特征值与特征向量</h2>
+<p>矩阵的<span class="highlight">"个性特征"</span></p>
+<h3>直观理解</h3>
+<p>矩阵变换某些特殊向量时：</p>
+<p>• 只改变<span class="highlight">长度</span></p>
+<p>• 不改变<span class="highlight">方向</span></p>
+<div class="math-formula">
+                $A\vec{v} = \lambda\vec{v}$<br/>
+                矩阵×特征向量 = 数值×特征向量
+            </div>
+<h3>实际意义</h3>
+<p>• <strong>振动分析</strong>：找到共振频率</p>
+<p>• <strong>人脸识别</strong>：提取面部特征</p>
+<p>• <strong>数据压缩</strong>：保留主要信息</p>
+<h3>计算步骤</h3>
+<p>1. 解特征方程：|A - λI| = 0</p>
+<p>2. 得到特征值 λ</p>
+<p>3. 代入求特征向量</p>
+<p style="padding: 10px">
+                类比：DNA是人的特征<br/>
+                特征值是矩阵的"DNA"
+            </p>
+</div><div class="right-visual"><div id="vis-eigenvalue"></div></div></div></div>
+<!-- 第13页：应用实例 -->
+<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
+<h2>实际应用案例</h2>
+<h3>1. 图像处理</h3>
+<p>• 图片 = RGB三个矩阵</p>
+<p>• 滤镜 = 矩阵运算</p>
+<p>• 旋转 = 旋转矩阵</p>
+<h3>2. 经济分析</h3>
+<p>• 投入产出表 = 矩阵</p>
+<p>• 供需平衡 = 线性方程组</p>
+<h3>3. 工程计算</h3>
+<p>• 电路分析：节点电压法</p>
+<p>• 结构分析：受力平衡</p>
+<h3>4. 数据科学</h3>
+<p>• 推荐系统：用户-物品矩阵</p>
+<p>• 机器学习：特征提取</p>
+<div style="padding: 15px; margin-top: 20px">
+<strong>记住：</strong><br/>
+                线性代数 = 处理多维数据的工具<br/>
+                掌握它，就掌握了数据分析的钥匙！
+            </div>
+</div><div class="right-visual"><div id="vis-applications"></div></div></div></div>
+<!-- 第14页：例题 · 矩阵乘法（2×2） -->
+<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
+<h2>例题 · 矩阵乘法（2×2）</h2>
+<p>已知 $A=\begin{pmatrix}2&1\\-1&3\end{pmatrix}$，$B=\begin{pmatrix}1&4\\2&-1\end{pmatrix}$，求 $AB$。</p>
+<h3>思路</h3>
+<p>第 <span class="highlight">A 的行</span> 点乘第 <span class="highlight">B 的列</span>。</p>
+<p>写出每个元素的计算式并逐步相加。</p>
+</div><div class="right-visual"><div id="vis-example-mul-steps"></div></div></div></div>
+
+<!-- 第15页：可视化 · 行列式的面积缩放 -->
+<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
+<h2>可视化 · 行列式的面积缩放</h2>
+<p>二维线性变换 $A=\begin{pmatrix}a&b\\c&d\end{pmatrix}$ 对单位正方形的面积缩放倍数为 $|\det A|=|ad-bc|$。</p>
+<h3>直观解释</h3>
+<p>两列向量构成平行四边形，面积即为行列式的绝对值。</p>
+</div><div class="right-visual"><div id="vis-det-area"></div></div></div></div>
+
+<!-- 第16页：例题 · 高斯消元步骤 -->
+<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
+<h2>例题 · 高斯消元</h2>
+<p>解方程组 $\begin{cases}x+2y=5\\2x- y=1\end{cases}$，并给出每一步行变换。</p>
+<h3>提示</h3>
+<p>写出增广矩阵，按列依次消元，化为阶梯型。</p>
+</div><div class="right-visual"><div id="vis-gauss-steps"></div></div></div></div>
+
+<!-- 第17页：例题 · 克拉默法则步骤 -->
+<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
+<h2>例题 · 克拉默法则</h2>
+<p>用克拉默法则解 $\begin{cases}2x+y=5\\x-y=1\end{cases}$，逐步计算 $D, D_x, D_y$。</p>
+<h3>要点</h3>
+<p>先求 $D=\det A$，再将相应列替换为常数列求 $D_x, D_y$，最后 $x=\dfrac{D_x}{D}, y=\dfrac{D_y}{D}$。</p>
+</div><div class="right-visual"><div id="vis-cramer-steps"></div></div></div></div>
+
+<!-- 第18页：例题 · 特征值与特征向量 -->
+<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
+<h2>例题 · 特征值与特征向量</h2>
+<p>设 $A=\begin{pmatrix}2&1\\1&2\end{pmatrix}$，求特征值与对应特征向量。</p>
+<h3>思路</h3>
+<p>1) 解 $\det(A-\lambda I)=0$ 得到特征值；2) 对每个 $\lambda$ 解 $(A-\lambda I)\,v=0$。</p>
+</div><div class="right-visual"><div id="vis-eig-steps"></div></div></div></div>
+
+<!-- 第19页：总结 -->
+<div class="slide"><div class="slide-container single-column"><div class="left-content tex2jax_process">
+<h2>课程总结</h2>
+<div style="text-align: left; max-width: 600px; margin: 0 auto">
+<h3>✓ 已掌握</h3>
+<ul>
+<li>矩阵：数字表格的运算</li>
+<li>行列式：判断解的存在性</li>
+<li>向量：有方向的量</li>
+<li>线性方程组：多元方程求解</li>
+<li>特征值：矩阵的本质特征</li>
+</ul>
+<h3 style="margin-top: 30px"><i class="fa-solid fa-bullseye"></i> 应用场景</h3>
+<ul>
+<li>Excel数据处理</li>
+<li>图像编辑软件</li>
+<li>经济数据分析</li>
+<li>工程计算</li>
+</ul>
+<h3 style="margin-top: 30px"><i class="fa-solid fa-lightbulb"></i> 学习建议</h3>
+<p>1. 多做实际应用题</p>
+<p>2. 用Excel练习矩阵运算</p>
+<p>3. 结合专业课程使用</p>
+</div>
+            <div style="margin-top: 40px; font-size: 2rem">
+                继续加油！
+            </div>
+</div></div></div>
+<!-- 导航按钮 -->
+<!-- 页面指示器 -->
+<!-- 全局动画控制面板 -->
+<div class="nav-controls" role="navigation" aria-label="幻灯片导航">
+    <button class="nav-btn" onclick="previousSlide()" aria-label="上一页" title="上一页 (<i class="fa-solid fa-arrow-left"></i>)"><i class="fa-solid fa-arrow-left"></i> 上一页</button>
+    <div class="slide-number" role="status" aria-live="polite">
+        <input type="number" id="slideNumberInput" min="1" max="20" value="1"
+               onchange="jumpToSlide(this.value)"
+               aria-label="当前页码">/<span id="slideNumberTotal">20</span>
+    </div>
+    <button class="nav-btn" onclick="nextSlide()" aria-label="下一页" title="下一页 (→)">下一页 →</button>
+</div>
+</div>
+<!-- 浮动菜单按钮 -->
+<div id="floating-menu">
+<div class="menu-toggle" id="menu-toggle">
+<span class="menu-icon">☰</span>
+</div>
+<div class="menu-content" id="menu-content">
+<a class="menu-item" href="#" onclick="showExample('matrix')">
+<span class="menu-icon"><i class="fa-solid fa-chart-bar"></i></span>
+<span class="menu-text">矩阵计算器</span>
+</a>
+<a class="menu-item" href="#" onclick="showExample('determinant')">
+<span class="menu-icon"><i class="fa-solid fa-calculator"></i></span>
+<span class="menu-text">行列式求解器</span>
+</a>
+<a class="menu-item" href="#" onclick="showExample('vector')">
+<span class="menu-icon"><i class="fa-solid fa-arrow-right"></i></span>
+<span class="menu-text">向量可视化</span>
+</a>
+<a class="menu-item" href="#" onclick="showExample('equation')">
+<span class="menu-icon"><i class="fa-solid fa-drafting-compass"></i></span>
+<span class="menu-text">方程组求解</span>
+</a>
+<a class="menu-item" href="#" onclick="downloadNotes()">
+<span class="menu-icon"><i class="fa-solid fa-file-pen"></i></span>
+<span class="menu-text">下载笔记</span>
+</a>
+</div>
+</div>
+<script>
+    let slides, totalSlides, counter, currentSlide = 0;
+    let globalAnimationPlaying = true;
+    let globalAnimationSpeed = 1.0;
+    let currentAnimation = null;
+
+    // 全局计时器跟踪与清理（D3/动画）
+    const __timers = { intervals: new Set(), timeouts: new Set(), d3Timers: new Set() };
+    (function(){
+        const __origSetInterval = window.setInterval;
+        const __origClearInterval = window.clearInterval;
+        const __origSetTimeout = window.setTimeout;
+        const __origClearTimeout = window.clearTimeout;
+        window.setInterval = function(fn, delay, ...args) {
+            const id = __origSetInterval(fn, delay, ...args);
+            __timers.intervals.add(id);
+            return id;
+        };
+        window.clearInterval = function(id) {
+            __timers.intervals.delete(id);
+            return __origClearInterval(id);
+        };
+        window.setTimeout = function(fn, delay, ...args) {
+            const id = __origSetTimeout(fn, delay, ...args);
+            __timers.timeouts.add(id);
+            return id;
+        };
+        window.clearTimeout = function(id) {
+            __timers.timeouts.delete(id);
+            return __origClearTimeout(id);
+        };
+        if (window.d3 && d3.timer) {
+            const __origD3Timer = d3.timer;
+            d3.timer = function(callback, delay, time) {
+                const t = __origD3Timer(callback, delay, time);
+                try { __timers.d3Timers.add(t); } catch(_) {}
+                return t;
+            };
+        }
+        if (window.d3 && d3.interval) {
+            const __origD3Interval = d3.interval;
+            d3.interval = function(callback, delay, time) {
+                const t = __origD3Interval(callback, delay, time);
+                try { __timers.d3Timers.add(t); } catch(_) {}
+                return t;
+            };
+        }
+    })();
+
+    function cleanupBeforeShow() {
+        try {
+            __timers.intervals.forEach(id => { try { clearInterval(id); } catch(_){} });
+            __timers.timeouts.forEach(id => { try { clearTimeout(id); } catch(_){} });
+            __timers.d3Timers.forEach(t => { try { t.stop && t.stop(); } catch(_){} });
+            __timers.intervals.clear();
+            __timers.timeouts.clear();
+            __timers.d3Timers.clear();
+        } catch (e) { console.warn('cleanup timers warning:', e); }
+        try {
+            if (window.d3 && d3.selectAll) { d3.selectAll('.right-visual *').interrupt(); }
+            document.querySelectorAll('.right-visual div[id]').forEach(el => { el.innerHTML = ''; });
+        } catch(e) { console.warn('cleanup visuals warning:', e); }
+    }
+
+    // 动态附加扩展页（超过30页）
+    function appendExtraSlides() {
+        const container = document.getElementById('slidesContainer');
+        if (!container) return;
+        const mkSingle = (title, subtitle, bullets=[]) => {
+            const slide = document.createElement('div');
+            slide.className = 'slide';
+            slide.innerHTML = `
+                <div class="slide-container single-column">
+                  <div class="left-content tex2jax_process">
+                    <h2>${title}</h2>
+                    ${subtitle ? `<p>${subtitle}</p>` : ''}
+                    ${bullets.length ? `<ul>${bullets.map(x=>`<li>${x}</li>`).join('')}</ul>` : ''}
+                  </div>
+                </div>`;
+            return slide;
+        };
+        const mkTwo = (title, leftHtml, rightId) => {
+            const slide = document.createElement('div');
+            slide.className = 'slide';
+            slide.innerHTML = `
+                <div class="slide-container">
+                  <div class="left-content tex2jax_process">
+                    <h2>${title}</h2>
+                    ${leftHtml}
+                  </div>
+                  <div class="right-visual"><div id="${rightId}"></div></div>
+                </div>`;
+            return slide;
+        };
+        // 扩展提纲（非目录，避免重复）
+        const tocSlide = document.createElement('div');
+        tocSlide.className = 'slide';
+        tocSlide.innerHTML = `
+            <div class="slide-container single-column">
+              <div class="left-content tex2jax_process">
+                <h2>学习提纲（扩展）</h2>
+                <p style="color:#64748b;margin:6px 0 14px 0;">下列为本章后续扩展内容的提纲预览，非目录。</p>
+                <ul style="text-align:left; line-height:2; font-size:16px;">
+                  <li>矩阵与向量：从表格到方向</li>
+                  <li>矩阵运算：加法、乘法</li>
+                  <li>行列式与逆：可解性的钥匙</li>
+                  <li>线性方程组：求解与应用</li>
+                  <li>特征值：系统稳定与压缩</li>
+                  <li>线性变换：几何直观</li>
+                  <li>应用案例与练习</li>
+                </ul>
+              </div>
+            </div>`;
+        const extra = [
+            tocSlide,
+            mkSingle('第一节 · 矩阵与向量', '认识矩阵与向量'),
+            // 现有：矩阵加法/乘法/行列式/向量/线性方程组/克拉默/特征值 等在前10页
+            mkSingle('第二节 · 线性方程组', '从直观到算法'),
+            mkTwo('高斯消元（直观）', '<p>按列对齐，<span class="highlight">消去</span>变量，化成阶梯型。</p>', 'vis-gauss'),
+            mkTwo('矩阵的秩与相关性', '<p>行（列）是否<span class="highlight">独立</span>？秩表示独立的最大数。</p>', 'vis-rank'),
+            mkTwo('逆矩阵的直观意义', '<p>有逆表示<span class="highlight">可逆变换</span>，可解且唯一。</p>', 'vis-inverse'),
+            mkSingle('第三节 · 特征值与特征向量', '稳定性与主方向'),
+            mkTwo('特征值入门（复习）', '<p>满足 $Av=\lambda v$ 的非零向量 $v$。</p>', 'vis-eigenvalue-2'),
+            mkTwo('幂法（直观）', '<p>反复相乘，向<span class="highlight">主特征向量</span>靠近。</p>', 'vis-power-iteration'),
+            mkTwo('对角化直观', '<p>找到好坐标系，使变换<span class="highlight">更简单</span>。</p>', 'vis-diagonalization'),
+            mkSingle('第四节 · 线性变换与几何', '从坐标到图形'),
+            mkTwo('线性变换（拉伸/旋转）', '<p>用矩阵描述<span class="highlight">旋转、缩放</span>。</p>', 'vis-linear-transform'),
+            mkTwo('二维变换示例', '<p>网格在变换下的形状变化。</p>', 'vis-transform-2d'),
+            mkTwo('投影的几何意义', '<p>向某个方向的<span class="highlight">影子</span>。</p>', 'vis-projection'),
+            mkSingle('第五节 · 应用场景', '用线性代数解决实际问题'),
+            mkTwo('最小二乘拟合（直线）', '<p>让总误差<span class="highlight">最小</span>的直线。</p>', 'vis-least-squares-linear'),
+            mkTwo('网络与路径（直观）', '<p>用矩阵描述<span class="highlight">连接关系</span>。</p>', 'vis-application-network'),
+            mkTwo('图像处理中的矩阵', '<p>卷积核滤波的<span class="highlight">简化示意</span>。</p>', 'vis-application-image'),
+            mkTwo('机器学习中的矩阵', '<p>特征提取、降维（直观）。</p>', 'vis-application-ml'),
+            mkSingle('第六节 · 综合练习', '上手做做看'),
+            mkTwo('练习一：方程组与消元', '<p>$\begin{cases}x+y=3\\2x-y=1\end{cases}$</p>', 'vis-exercise-1'),
+            mkTwo('练习二：特征值判断', '<p>$A=\begin{pmatrix}2&0\\0&1\end{pmatrix}$</p>', 'vis-exercise-2'),
+            mkSingle('总结', '核心：结构 + 运算 + 直观')
+        ];
+        extra.forEach(el => container.appendChild(el));
+    }
+
+    // 初始化
+    document.addEventListener('DOMContentLoaded', function() {
+        // appendExtraSlides(); // 已移除扩展幻灯片
+        slides = document.querySelectorAll('.slide');
+        totalSlides = slides.length;
+        counter = document.getElementById('page-indicator');
+
+        showSlide(0);
+        // 自适应：窗口/方向变化时重绘当前页
+        let __resizeTimer;
+        function __rerenderCurrent() { showSlide(currentSlide); }
+        window.addEventListener('resize', () => {
+            clearTimeout(__resizeTimer);
+            __resizeTimer = setTimeout(__rerenderCurrent, 250);
+        });
+        window.addEventListener('orientationchange', () => setTimeout(__rerenderCurrent, 300));
+        initFloatingMenu();
+
+        // 键盘导航
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                e.preventDefault();
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                previousSlide();
+            }
+        });
+
+        // 鼠标滚轮导航（左侧内容可滚动，右侧切页）
+        document.addEventListener('wheel', (e) => {
+            if (e.target.closest('.left-content')) {
+                return; // 允许左侧内容自然滚动
+            }
+            e.preventDefault();
+            if (e.deltaY > 0) nextSlide();
+            else previousSlide();
+        }, { passive: false });
+
+        // 目录点击跳转（data-jump 根据选择器定位对应幻灯片）
+        document.addEventListener('click', (e) => {
+            const a = e.target.closest('[data-jump]');
+            if (!a) return;
+            e.preventDefault();
+            const sel = a.getAttribute('data-jump');
+            let targetIndex = -1;
+            slides = document.querySelectorAll('.slide');
+            slides.forEach((slide, idx) => {
+                if (slide.querySelector(sel)) targetIndex = idx;
+            });
+            if (targetIndex >= 0) showSlide(targetIndex);
+        });
+    });
+
+    // 显示幻灯片
+    function showSlide(index) {
+        if (index < 0 || index >= totalSlides) return;
+
+        // 清理上一个页面的动画/图形
+        cleanupBeforeShow();
+        slides.forEach(slide => slide.classList.remove('active'));
+        currentSlide = index;
+        slides[currentSlide].classList.add('active');
+        // 更新页码输入框
+        const slideInput = document.getElementById('slideNumberInput');
+        const slideTotal = document.getElementById('slideNumberTotal');
+        if (slideInput) {
+            slideInput.value = currentSlide + 1;
+            slideInput.max = totalSlides;
+        }
+        if (slideTotal) {
+            slideTotal.textContent = totalSlides;
+        }
+
+        updateNavButtons();
+        // 下一帧执行可视化，确保容器已布局
+        requestAnimationFrame(() => runVisualization(currentSlide));
+        
+        // 渲染数学公式
+        if (window.MathJax && window.MathJax.typesetPromise) {
+            window.MathJax.typesetPromise([slides[currentSlide]]).catch(() => {});
+        }
+    }
+
+    function nextSlide() {
+        if (currentSlide < totalSlides - 1) {
+            showSlide(currentSlide + 1);
+        }
+    }
+
+    function previousSlide() {
+        if (currentSlide > 0) {
+            showSlide(currentSlide - 1);
+        }
+    }
+
+    function jumpToSlide(value) {
+        const slideNumber = parseInt(value);
+        if (slideNumber >= 1 && slideNumber <= totalSlides) {
+            currentSlide = slideNumber - 1;
+            showSlide(currentSlide);
+        }
+    }
+
+    function updateNavButtons() {
+        const navButtons = document.querySelectorAll('.nav-controls .nav-btn');
+        if (navButtons.length >= 2) {
+            const prevBtn = navButtons[0];
+            const nextBtn = navButtons[1];
+            
+            prevBtn.disabled = (currentSlide === 0);
+            nextBtn.disabled = (currentSlide === totalSlides - 1);
+        }
+    }
+
+    // 浮动菜单
+    function initFloatingMenu() {
+        const menuToggle = document.getElementById('menu-toggle');
+        const menuContent = document.getElementById('menu-content');
+        
+        if (menuToggle && menuContent) {
+            menuToggle.addEventListener('click', function(e) {
+                e.stopPropagation();
+                menuToggle.classList.toggle('active');
+                menuContent.classList.toggle('active');
+            });
+            
+            document.addEventListener('click', function(e) {
+                if (!menuToggle.contains(e.target) && !menuContent.contains(e.target)) {
+                    menuToggle.classList.remove('active');
+                    menuContent.classList.remove('active');
+                }
+            });
+        }
+    }
+
+    // D3.js工具函数
+    
+    const rootStyles = getComputedStyle(document.documentElement);
+    const themeColors = {
+        text: rootStyles.getPropertyValue('--text-color').trim() || '#34495e',
+        axis: rootStyles.getPropertyValue('--axis-color').trim() || '#475569',
+        muted: rootStyles.getPropertyValue('--muted-color').trim() || '#94a3b8',
+        surface: rootStyles.getPropertyValue('--card-bg').trim() || '#ffffff'
+    };
+
+function setupD3(containerId, margins = {top: 32, right: 32, bottom: 56, left: 56}) {
+        const container = d3.select(`#${containerId}`);
+        if (container.empty()) return null;
+        
+        container.html('');
+        const parent = container.node().parentElement || container.node();
+        const pb = parent.getBoundingClientRect();
+        let svgWidth = Math.floor(pb.width || parent.clientWidth || 800);
+        let svgHeight = Math.floor(pb.height || parent.clientHeight || 500);
+        if (!svgWidth || svgWidth < 320) svgWidth = 320;
+        if (!svgHeight || svgHeight < 280) svgHeight = 280;
+        const width = Math.max(svgWidth - margins.left - margins.right, 120);
+        const height = Math.max(svgHeight - margins.top - margins.bottom, 120);
+        
+        const svg = container.append('svg')
+            .attr('width', svgWidth)
+            .attr('height', svgHeight)
+            .attr('viewBox', `0 0 ${svgWidth} ${svgHeight}`)
+            .attr('preserveAspectRatio', 'xMidYMid meet')
+            .style('max-width', '100%')
+            .style('max-height', '100%')
+            .style('display', 'block');
+        
+        const g = svg.append('g')
+            .attr('transform', `translate(${margins.left}, ${margins.top})`);
+        
+        return { container, svg, g, width, height };
+    }
+
+    // 辅助：步骤化文本渲染（支持MathJax）
+    function renderSteps(containerId, steps) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        container.innerHTML = '';
+        const wrap = document.createElement('div');
+        wrap.style.cssText = 'width:100%;height:100%;padding:24px;overflow:auto;';
+        steps.forEach((s,i)=>{
+            const d = document.createElement('div');
+            d.className = 'tex2jax_process';
+            d.style.cssText = 'margin:8px 0;line-height:1.9;font-size:16px;opacity:0;transition:opacity .3s';
+            d.innerHTML = s;
+            wrap.appendChild(d);
+            setTimeout(()=>{ d.style.opacity='1'; }, 80*i);
+        });
+        container.appendChild(wrap);
+        if (window.MathJax && window.MathJax.typesetPromise) {
+            setTimeout(()=> window.MathJax.typesetPromise([wrap]).catch(()=>{}), 120);
+        }
+    }
+
+    // 可视化函数
+    function runVisualization(slideIndex) {
+        // 清理之前的动画
+        if (currentAnimation) {
+            if (typeof currentAnimation === 'function') {
+                currentAnimation();
+            } else if (currentAnimation.stop) {
+                currentAnimation.stop();
+            }
+        }
+
+        switch(slideIndex) {
+            case 0: visualizeTitleLinear(); break;              // 第1页：封面
+            case 1: visualizeContents(); break;                  // 第2页：目录
+            case 2: break;                                       // 第3页：第一讲章节页
+            case 3: visualizeMatrixIntro(); break;               // 第4页：矩阵引入
+            case 4: visualizeMatrixAddition(); break;            // 第5页：加法
+            case 5: visualizeMatrixMultiplication(); break;      // 第6页：乘法
+            case 6: visualizeVector(); break;                    // 第7页：向量基础（新增）
+            case 7: break;                                       // 第8页：第二讲章节页
+            case 8: visualizeDeterminant(); break;               // 第9页：行列式
+            case 9: visualizeLinearSystem(); break;              // 第10页：方程组
+            case 10: visualizeCramersRule(); break;              // 第11页：克拉默
+            case 11: break;                                      // 第12页：第三讲章节页
+            case 12: visualizeEigenvalue(); break;               // 第13页：特征值
+            case 13: visualizeApplications(); break;             // 第14页：应用
+            case 14: visualizeExampleMulSteps(); break;          // 第15页：例题·矩阵乘法
+            case 15: visualizeDetArea(); break;                  // 第16页：行列式面积
+            case 16: visualizeGaussSteps(); break;               // 第17页：高斯消元步骤
+            case 17: visualizeCramerSteps(); break;              // 第18页：克拉默步骤
+            case 18: visualizeEigSteps(); break;                 // 第19页：特征值与特征向量例题
+            case 19: break;                                      // 第20页：总结
+        }
+    }
+
+    // 标题页可视化
+    function visualizeTitleLinear() {
+        const container = d3.select('#vis-title');
+        if (container.empty()) return;
+        container.selectAll('*').remove();
+        
+        const bounds = container.node().getBoundingClientRect();
+        const width = bounds.width;
+        const height = bounds.height;
+        
+        const svg = container.append('svg')
+            .attr('width', width)
+            .attr('height', height);
+        
+        const g = svg.append('g')
+            .attr('transform', `translate(${width/2}, ${height/2})`);
+        
+        // 矩阵符号
+        g.append('text')
+            .attr('text-anchor', 'middle')
+            .attr('font-size', '90px')
+            .attr('fill', '#3498db')
+            .attr('font-weight', 'bold')
+            .text('[A]')
+            .style('opacity', 0)
+            .transition()
+            .duration(1000)
+            .style('opacity', 1);
+        
+        // 乘号
+        g.append('text')
+            .attr('text-anchor', 'middle')
+            .attr('x', 90)
+            .attr('font-size', '60px')
+            .attr('fill', '#e74c3c')
+            .text('×')
+            .style('opacity', 0)
+            .transition()
+            .delay(600)
+            .duration(800)
+            .style('opacity', 1);
+        
+        // 向量
+        g.append('text')
+            .attr('text-anchor', 'middle')
+            .attr('x', 150)
+            .attr('font-size', '90px')
+            .attr('fill', '#2ecc71')
+            .attr('font-weight', 'bold')
+            .text('[x]')
+            .style('opacity', 0)
+            .transition()
+            .delay(1200)
+            .duration(1000)
+            .style('opacity', 1);
+        
+        // 装饰
+        g.append('circle')
+            .attr('r', 0)
+            .attr('fill', 'none')
+            .attr('stroke', '#9b59b6')
+            .attr('stroke-width', 2)
+            .attr('stroke-dasharray', '10,5')
+            .transition()
+            .delay(1800)
+            .duration(1500)
+            .attr('r', 180);
+    }
+
+    // 目录页可视化
+    function visualizeContents() {
+        const container = document.getElementById('vis-contents');
+        if (!container) return;
+
+        container.innerHTML = `
+            <div class="vis-container">
+                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 40px;">
+                    <div style="font-size: 2.5rem; color: var(--primary-color); font-weight: bold;">
+                        线性代数
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; max-width: 600px;">
+                        <div style="text-align: center; padding: 20px; background: rgba(52, 152, 219, 0.1); border-radius: 10px;">
+                            <div style="font-size: 3rem; color: var(--primary-color);">▦</div>
+                            <div style="margin-top: 10px; font-weight: bold;">矩阵</div>
+                        </div>
+                        <div style="text-align: center; padding: 20px; background: rgba(46, 204, 113, 0.1); border-radius: 10px;">
+                            <div style="font-size: 3rem; color: var(--success-color);">∑</div>
+                            <div style="margin-top: 10px; font-weight: bold;">行列式</div>
+                        </div>
+                        <div style="text-align: center; padding: 20px; background: rgba(231, 76, 60, 0.1); border-radius: 10px;">
+                            <div style="font-size: 3rem; color: var(--danger-color);">≡</div>
+                            <div style="margin-top: 10px; font-weight: bold;">方程组</div>
+                        </div>
+                        <div style="text-align: center; padding: 20px; background: rgba(155, 89, 182, 0.1); border-radius: 10px;">
+                            <div style="font-size: 3rem;">⊗</div>
+                            <div style="margin-top: 10px; font-weight: bold;">克拉默</div>
+                        </div>
+                        <div style="text-align: center; padding: 20px; background: rgba(241, 196, 15, 0.1); border-radius: 10px;">
+                            <div style="font-size: 3rem; color: var(--warning-color);">⚡</div>
+                            <div style="margin-top: 10px; font-weight: bold;">特征值</div>
+                        </div>
+                        <div style="text-align: center; padding: 20px; background: rgba(52, 73, 94, 0.1); border-radius: 10px;">
+                            <div style="font-size: 3rem;">🚀</div>
+                            <div style="margin-top: 10px; font-weight: bold;">应用</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    // 矩阵介绍可视化
+    function visualizeMatrixIntro() {
+        const container = document.getElementById('vis-matrix-intro');
+        if (!container) return;
+        
+        container.innerHTML = `
+            <div class="vis-container">
+                <h3 style="color: ${themeColors.text}; margin-bottom: 30px;">班级成绩矩阵 - 动态演示</h3>
+                <div class="matrix-container">
+                    <div class="matrix-wrapper">
+                        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px;">
+                            <div style="color: var(--warning-color); font-weight: bold;">学生/科目</div>
+                            <div style="color: var(--warning-color);">语文</div>
+                            <div style="color: var(--warning-color);">数学</div>
+                            <div style="color: var(--warning-color);">英语</div>
+                            <div style="color: var(--info-color);">张三</div>
+                            <div class="matrix-cell" id="m11">85</div>
+                            <div class="matrix-cell" id="m12">92</div>
+                            <div class="matrix-cell" id="m13">78</div>
+                            <div style="color: var(--info-color);">李四</div>
+                            <div class="matrix-cell" id="m21">90</div>
+                            <div class="matrix-cell" id="m22">88</div>
+                            <div class="matrix-cell" id="m23">95</div>
+                            <div style="color: var(--info-color);">王五</div>
+                            <div class="matrix-cell" id="m31">76</div>
+                            <div class="matrix-cell" id="m32">84</div>
+                            <div class="matrix-cell" id="m33">89</div>
+                        </div>
+                    </div>
+                </div>
+                <div style="margin-top: 30px; color: ${themeColors.text};">
+                    <p id="matrix-info" style="font-size: 1.2rem; text-align: center;">
+                        点击任意成绩查看详情
+                    </p>
+                </div>
+            </div>
+        `;
+
+        // 添加交互
+        const cells = document.querySelectorAll('.matrix-cell');
+        cells.forEach(cell => {
+            cell.addEventListener('click', function() {
+                const value = this.textContent;
+                const id = this.id;
+                const row = id[1];
+                const col = id[2];
+                const students = ['张三', '李四', '王五'];
+                const subjects = ['语文', '数学', '英语'];
+                
+                document.getElementById('matrix-info').innerHTML = `
+                    <strong>${students[row-1]}</strong>的<strong>${subjects[col-1]}</strong>成绩是
+                    <span style="color: var(--success-color); font-size: 1.5rem;">${value}分</span>
+                `;
+                
+                // 高亮效果
+                cells.forEach(c => c.classList.remove('highlight'));
+                this.classList.add('highlight');
+            });
+        });
+
+        // 自动演示
+        let index = 0;
+        const autoDemo = setInterval(() => {
+            if (!globalAnimationPlaying) return;
+            
+            cells[index].click();
+            index = (index + 1) % cells.length;
+        }, 2000 / globalAnimationSpeed);
+
+        currentAnimation = () => clearInterval(autoDemo);
+    }
+
+    // 矩阵加法可视化
+    function visualizeMatrixAddition() {
+        const container = document.getElementById('vis-matrix-addition');
+        if (!container) return;
+        
+        container.innerHTML = `
+            <div class="vis-container">
+                <h3 style="color: ${themeColors.text}; margin-bottom: 30px;">矩阵加法动画演示</h3>
+                <div class="matrix-container">
+                    <div class="matrix-wrapper">
+                        <div class="matrix-grid" style="grid-template-columns: repeat(2, 1fr);">
+                            <div class="matrix-cell">2</div>
+                            <div class="matrix-cell">3</div>
+                            <div class="matrix-cell">1</div>
+                            <div class="matrix-cell">4</div>
+                        </div>
+                    </div>
+                    <div style="font-size: 2rem; color: ${themeColors.text};">+</div>
+                    <div class="matrix-wrapper">
+                        <div class="matrix-grid" style="grid-template-columns: repeat(2, 1fr);">
+                            <div class="matrix-cell">5</div>
+                            <div class="matrix-cell">1</div>
+                            <div class="matrix-cell">2</div>
+                            <div class="matrix-cell">3</div>
+                        </div>
+                    </div>
+                    <div style="font-size: 2rem; color: ${themeColors.text};">=</div>
+                    <div class="matrix-wrapper">
+                        <div class="matrix-grid" style="grid-template-columns: repeat(2, 1fr);" id="result-add">
+                            <div class="matrix-cell" style="opacity: 0;">7</div>
+                            <div class="matrix-cell" style="opacity: 0;">4</div>
+                            <div class="matrix-cell" style="opacity: 0;">3</div>
+                            <div class="matrix-cell" style="opacity: 0;">7</div>
+                        </div>
+                    </div>
+                </div>
+                <div style="margin-top: 30px;">
+                    <button onclick="animateAddition()" style="background: var(--primary-color); color: ${themeColors.text}; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;">
+                        重新演示
+                    </button>
+                </div>
+            </div>
+        `;
+
+        // 自动播放加法动画
+        setTimeout(() => animateAddition(), 500);
+    }
+
+    function animateAddition() {
+        const resultCells = document.querySelectorAll('#result-add .matrix-cell');
+        resultCells.forEach((cell, i) => {
+            setTimeout(() => {
+                cell.style.transition = 'all 0.5s ease';
+                cell.style.opacity = '1';
+                cell.style.transform = 'scale(1.2)';
+                setTimeout(() => {
+                    cell.style.transform = 'scale(1)';
+                }, 300);
+            }, i * 200 / globalAnimationSpeed);
+        });
+    }
+
+    // 矩阵乘法可视化
+    function visualizeMatrixMultiplication() {
+        const setup = setupD3('vis-matrix-multiplication');
+        if (!setup) return;
+        const { g, width, height } = setup;
+
+        // 创建示例矩阵
+        const matrixA = [[1, 2], [3, 4]];
+        const matrixB = [[5, 6], [7, 8]];
+        const result = [[19, 22], [43, 50]];
+
+        const cellSize = 60;
+        const gap = 100;
+
+        // 绘制矩阵A
+        const aGroup = g.append('g').attr('transform', `translate(0, ${height/2 - cellSize})`);
+        aGroup.append('text')
+            .attr('x', cellSize)
+            .attr('y', -20)
+            .text('A')
+            .attr('fill', themeColors.text)
+            .attr('font-size', '20px')
+            .attr('text-anchor', 'middle');
+
+        matrixA.forEach((row, i) => {
+            row.forEach((val, j) => {
+                aGroup.append('rect')
+                    .attr('x', j * cellSize)
+                    .attr('y', i * cellSize)
+                    .attr('width', cellSize - 5)
+                    .attr('height', cellSize - 5)
+                    .attr('fill', 'rgba(52, 152, 219, 0.2)')
+                    .attr('stroke', 'var(--primary-color)')
+                    .attr('stroke-width', 2)
+                    .attr('rx', 5);
+                
+                aGroup.append('text')
+                    .attr('x', j * cellSize + cellSize/2 - 2.5)
+                    .attr('y', i * cellSize + cellSize/2 + 5)
+                    .text(val)
+                    .attr('fill', themeColors.text)
+                    .attr('font-size', '18px')
+                    .attr('text-anchor', 'middle');
+            });
+        });
+
+        // 绘制矩阵B
+        const bGroup = g.append('g').attr('transform', `translate(${cellSize * 2 + gap}, ${height/2 - cellSize})`);
+        bGroup.append('text')
+            .attr('x', cellSize)
+            .attr('y', -20)
+            .text('B')
+            .attr('fill', themeColors.text)
+            .attr('font-size', '20px')
+            .attr('text-anchor', 'middle');
+
+        matrixB.forEach((row, i) => {
+            row.forEach((val, j) => {
+                bGroup.append('rect')
+                    .attr('x', j * cellSize)
+                    .attr('y', i * cellSize)
+                    .attr('width', cellSize - 5)
+                    .attr('height', cellSize - 5)
+                    .attr('fill', 'rgba(46, 204, 113, 0.2)')
+                    .attr('stroke', 'var(--success-color)')
+                    .attr('stroke-width', 2)
+                    .attr('rx', 5);
+                
+                bGroup.append('text')
+                    .attr('x', j * cellSize + cellSize/2 - 2.5)
+                    .attr('y', i * cellSize + cellSize/2 + 5)
+                    .text(val)
+                    .attr('fill', themeColors.text)
+                    .attr('font-size', '18px')
+                    .attr('text-anchor', 'middle');
+            });
+        });
+
+        // 绘制结果矩阵
+        const resultGroup = g.append('g').attr('transform', `translate(${cellSize * 4 + gap * 2 + 50}, ${height/2 - cellSize})`);
+        resultGroup.append('text')
+            .attr('x', cellSize)
+            .attr('y', -20)
+            .text('A × B')
+            .attr('fill', themeColors.text)
+            .attr('font-size', '20px')
+            .attr('text-anchor', 'middle');
+
+        result.forEach((row, i) => {
+            row.forEach((val, j) => {
+                const rect = resultGroup.append('rect')
+                    .attr('x', j * cellSize)
+                    .attr('y', i * cellSize)
+                    .attr('width', cellSize - 5)
+                    .attr('height', cellSize - 5)
+                    .attr('fill', 'rgba(231, 76, 60, 0.2)')
+                    .attr('stroke', 'var(--danger-color)')
+                    .attr('stroke-width', 2)
+                    .attr('rx', 5)
+                    .style('opacity', 0);
+                
+                const text = resultGroup.append('text')
+                    .attr('x', j * cellSize + cellSize/2 - 2.5)
+                    .attr('y', i * cellSize + cellSize/2 + 5)
+                    .text(val)
+                    .attr('fill', themeColors.text)
+                    .attr('font-size', '18px')
+                    .attr('text-anchor', 'middle')
+                    .style('opacity', 0);
+
+                // 动画显示结果
+                setTimeout(() => {
+                    rect.transition()
+                        .duration(500)
+                        .style('opacity', 1);
+                    text.transition()
+                        .duration(500)
+                        .style('opacity', 1);
+                }, (i * 2 + j) * 500 / globalAnimationSpeed);
+            });
+        });
+
+        // 添加运算符号
+        g.append('text')
+            .attr('x', cellSize * 2 + gap/2)
+            .attr('y', height/2)
+            .text('×')
+            .attr('fill', themeColors.text)
+            .attr('font-size', '30px')
+            .attr('text-anchor', 'middle');
+
+        g.append('text')
+            .attr('x', cellSize * 4 + gap * 1.5 + 25)
+            .attr('y', height/2)
+            .text('=')
+            .attr('fill', themeColors.text)
+            .attr('font-size', '30px')
+            .attr('text-anchor', 'middle');
+    }
+
+    // 行列式可视化
+    function visualizeDeterminant() {
+        const setup = setupD3('vis-determinant');
+        if (!setup) return;
+        const { g, width, height } = setup;
+
+        // 2x2行列式示例
+        const matrix = [[3, 2], [1, 4]];
+        const det = 3 * 4 - 2 * 1; // = 10
+
+        const cellSize = 80;
+        const cx = width / 2;
+        const cy = height / 2;
+
+        // 绘制矩阵
+        const matrixGroup = g.append('g')
+            .attr('transform', `translate(${cx - cellSize}, ${cy - cellSize})`);
+
+        // 绘制单元格
+        matrix.forEach((row, i) => {
+            row.forEach((val, j) => {
+                matrixGroup.append('rect')
+                    .attr('x', j * cellSize)
+                    .attr('y', i * cellSize)
+                    .attr('width', cellSize - 5)
+                    .attr('height', cellSize - 5)
+                    .attr('fill', 'rgba(52, 152, 219, 0.2)')
+                    .attr('stroke', 'var(--primary-color)')
+                    .attr('stroke-width', 2)
+                    .attr('rx', 5);
+                
+                matrixGroup.append('text')
+                    .attr('x', j * cellSize + cellSize/2 - 2.5)
+                    .attr('y', i * cellSize + cellSize/2 + 8)
+                    .text(val)
+                    .attr('fill', themeColors.text)
+                    .attr('font-size', '24px')
+                    .attr('text-anchor', 'middle')
+                    .attr('id', `det-${i}-${j}`);
+            });
+        });
+
+        // 添加对角线动画
+        setTimeout(() => {
+            // 主对角线
+            const mainDiag = matrixGroup.append('line')
+                .attr('x1', 10)
+                .attr('y1', 10)
+                .attr('x2', 10)
+                .attr('y2', 10)
+                .attr('stroke', 'var(--success-color)')
+                .attr('stroke-width', 3)
+                .attr('opacity', 0.8);
+
+            mainDiag.transition()
+                .duration(1000 / globalAnimationSpeed)
+                .attr('x2', cellSize * 2 - 15)
+                .attr('y2', cellSize * 2 - 15);
+
+            // 高亮主对角线元素
+            d3.select('#det-0-0').transition().duration(500).attr('fill', 'var(--success-color)').attr('font-size', '28px');
+            d3.select('#det-1-1').transition().duration(500).attr('fill', 'var(--success-color)').attr('font-size', '28px');
+        }, 500);
+
+        setTimeout(() => {
+            // 副对角线
+            const antiDiag = matrixGroup.append('line')
+                .attr('x1', cellSize * 2 - 15)
+                .attr('y1', 10)
+                .attr('x2', cellSize * 2 - 15)
+                .attr('y2', 10)
+                .attr('stroke', 'var(--danger-color)')
+                .attr('stroke-width', 3)
+                .attr('opacity', 0.8);
+
+            antiDiag.transition()
+                .duration(1000 / globalAnimationSpeed)
+                .attr('x2', 10)
+                .attr('y2', cellSize * 2 - 15);
+
+            // 高亮副对角线元素
+            d3.select('#det-0-1').transition().duration(500).attr('fill', 'var(--danger-color)').attr('font-size', '28px');
+            d3.select('#det-1-0').transition().duration(500).attr('fill', 'var(--danger-color)').attr('font-size', '28px');
+        }, 2000 / globalAnimationSpeed);
+
+        // 显示结果
+        setTimeout(() => {
+            g.append('text')
+                .attr('x', cx)
+                .attr('y', cy + 120)
+                .text(`det = 3×4 - 2×1 = ${det}`)
+                .attr('fill', themeColors.text)
+                .attr('font-size', '24px')
+                .attr('text-anchor', 'middle')
+                .style('opacity', 0)
+                .transition()
+                .duration(500)
+                .style('opacity', 1);
+        }, 3500 / globalAnimationSpeed);
+    }
+
+    // 向量可视化
+    function visualizeVector() {
+        const setup = setupD3('vis-vector');
+        if (!setup) return;
+        const { svg, g, width, height } = setup;
+
+        const cx = width / 2;
+        const cy = height / 2;
+        const scale = 40;
+
+        // 绘制坐标系
+        g.append('line')
+            .attr('x1', 0).attr('y1', cy)
+            .attr('x2', width).attr('y2', cy)
+            .attr('stroke', 'rgba(255,255,255,0.3)')
+            .attr('stroke-width', 1);
+
+        g.append('line')
+            .attr('x1', cx).attr('y1', 0)
+            .attr('x2', cx).attr('y2', height)
+            .attr('stroke', 'rgba(255,255,255,0.3)')
+            .attr('stroke-width', 1);
+
+        // 添加坐标轴标签
+        g.append('text')
+            .attr('x', width - 20).attr('y', cy - 10)
+            .text('x').attr('fill', themeColors.text).attr('font-size', '16px');
+
+        g.append('text')
+            .attr('x', cx + 10).attr('y', 20)
+            .text('y').attr('fill', themeColors.text).attr('font-size', '16px');
+
+        // 向量数据
+        const vectors = [
+            { x: 3, y: 2, color: 'var(--danger-color)', name: 'a' },
+            { x: -2, y: 3, color: 'var(--success-color)', name: 'b' },
+            { x: 1, y: -2.5, color: 'var(--warning-color)', name: 'c' }
+        ];
+
+        // 添加箭头标记
+        svg.append('defs').selectAll('marker')
+            .data(vectors)
+            .enter().append('marker')
+            .attr('id', (d, i) => `arrow-${i}`)
+            .attr('markerWidth', 10)
+            .attr('markerHeight', 10)
+            .attr('refX', 8)
+            .attr('refY', 3)
+            .attr('orient', 'auto')
+            .attr('markerUnits', 'strokeWidth')
+            .append('path')
+            .attr('d', 'M0,0 L0,6 L9,3 z')
+            .attr('fill', d => d.color);
+
+        // 绘制向量
+        vectors.forEach((v, i) => {
+            const endX = cx + v.x * scale;
+            const endY = cy - v.y * scale;
+
+            // 向量线
+            const line = g.append('line')
+                .attr('x1', cx)
+                .attr('y1', cy)
+                .attr('x2', cx)
+                .attr('y2', cy)
+                .attr('stroke', v.color)
+                .attr('stroke-width', 3)
+                .attr('marker-end', `url(#arrow-${i})`);
+
+            // 动画
+            line.transition()
+                .delay(i * 500 / globalAnimationSpeed)
+                .duration(1000 / globalAnimationSpeed)
+                .attr('x2', endX)
+                .attr('y2', endY);
+
+            // 向量标签
+            setTimeout(() => {
+                g.append('text')
+                    .attr('x', endX + 10)
+                    .attr('y', endY - 10)
+                    .text(`${v.name} = (${v.x}, ${v.y})`)
+                    .attr('fill', v.color)
+                    .attr('font-size', '16px')
+                    .style('opacity', 0)
+                    .transition()
+                    .duration(500)
+                    .style('opacity', 1);
+            }, (i * 500 + 1000) / globalAnimationSpeed);
+        });
+
+        // 添加向量加法演示
+        setTimeout(() => {
+            const sum = { x: vectors[0].x + vectors[1].x, y: vectors[0].y + vectors[1].y };
+            const sumEndX = cx + sum.x * scale;
+            const sumEndY = cy - sum.y * scale;
+
+            // 平移第二个向量到第一个向量末端
+            const v1EndX = cx + vectors[0].x * scale;
+            const v1EndY = cy - vectors[0].y * scale;
+
+            g.append('line')
+                .attr('x1', v1EndX)
+                .attr('y1', v1EndY)
+                .attr('x2', v1EndX)
+                .attr('y2', v1EndY)
+                .attr('stroke', vectors[1].color)
+                .attr('stroke-width', 2)
+                .attr('stroke-dasharray', '5,5')
+                .attr('opacity', 0.6)
+                .transition()
+                .duration(1000 / globalAnimationSpeed)
+                .attr('x2', sumEndX)
+                .attr('y2', sumEndY);
+
+            // 和向量
+            g.append('line')
+                .attr('x1', cx)
+                .attr('y1', cy)
+                .attr('x2', cx)
+                .attr('y2', cy)
+                .attr('stroke', 'var(--info-color)')
+                .attr('stroke-width', 3)
+                .attr('stroke-dasharray', '10,5')
+                .transition()
+                .delay(1000 / globalAnimationSpeed)
+                .duration(1000 / globalAnimationSpeed)
+                .attr('x2', sumEndX)
+                .attr('y2', sumEndY);
+
+            // 标签
+            g.append('text')
+                .attr('x', sumEndX + 10)
+                .attr('y', sumEndY + 10)
+                .text(`a + b = (${sum.x}, ${sum.y})`)
+                .attr('fill', 'var(--info-color)')
+                .attr('font-size', '16px')
+                .style('opacity', 0)
+                .transition()
+                .delay(2000 / globalAnimationSpeed)
+                .duration(500)
+                .style('opacity', 1);
+        }, 2000 / globalAnimationSpeed);
+    }
+
+    // 线性方程组可视化
+    function visualizeLinearSystem() {
+        const setup = setupD3('vis-linear-system');
+        if (!setup) return;
+        const { g, width, height } = setup;
+
+        // 方程组: 2x + y = 6, x - y = 0
+        // 解: x = 2, y = 2
+
+        const scale = 40;
+        const cx = width / 2;
+        const cy = height / 2;
+
+        // 绘制坐标系
+        g.append('line')
+            .attr('x1', 0).attr('y1', cy)
+            .attr('x2', width).attr('y2', cy)
+            .attr('stroke', 'rgba(255,255,255,0.3)')
+            .attr('stroke-width', 1);
+
+        g.append('line')
+            .attr('x1', cx).attr('y1', 0)
+            .attr('x2', cx).attr('y2', height)
+            .attr('stroke', 'rgba(255,255,255,0.3)')
+            .attr('stroke-width', 1);
+
+        // 绘制网格
+        for (let i = -5; i <= 5; i++) {
+            if (i !== 0) {
+                g.append('line')
+                    .attr('x1', cx + i * scale).attr('y1', 0)
+                    .attr('x2', cx + i * scale).attr('y2', height)
+                    .attr('stroke', 'rgba(255,255,255,0.1)')
+                    .attr('stroke-width', 0.5);
+
+                g.append('line')
+                    .attr('x1', 0).attr('y1', cy - i * scale)
+                    .attr('x2', width).attr('y2', cy - i * scale)
+                    .attr('stroke', 'rgba(255,255,255,0.1)')
+                    .attr('stroke-width', 0.5);
+            }
+        }
+
+        // 第一条直线: 2x + y = 6 => y = -2x + 6
+        const line1Data = [];
+        for (let x = -1; x <= 4; x += 0.1) {
+            line1Data.push({ x: x, y: -2 * x + 6 });
+        }
+
+        const line1 = d3.line()
+            .x(d => cx + d.x * scale)
+            .y(d => cy - d.y * scale);
+
+        const path1 = g.append('path')
+            .datum(line1Data)
+            .attr('d', line1)
+            .attr('fill', 'none')
+            .attr('stroke', 'var(--danger-color)')
+            .attr('stroke-width', 3);
+
+        // 第二条直线: x - y = 0 => y = x
+        const line2Data = [];
+        for (let x = -1; x <= 4; x += 0.1) {
+            line2Data.push({ x: x, y: x });
+        }
+
+        const line2 = d3.line()
+            .x(d => cx + d.x * scale)
+            .y(d => cy - d.y * scale);
+
+        const path2 = g.append('path')
+            .datum(line2Data)
+            .attr('d', line2)
+            .attr('fill', 'none')
+            .attr('stroke', 'var(--success-color)')
+            .attr('stroke-width', 3);
+
+        // 动画绘制
+        const totalLength1 = path1.node().getTotalLength();
+        const totalLength2 = path2.node().getTotalLength();
+
+        path1.attr('stroke-dasharray', totalLength1)
+            .attr('stroke-dashoffset', totalLength1)
+            .transition()
+            .duration(2000 / globalAnimationSpeed)
+            .attr('stroke-dashoffset', 0);
+
+        path2.attr('stroke-dasharray', totalLength2)
+            .attr('stroke-dashoffset', totalLength2)
+            .transition()
+            .delay(1000 / globalAnimationSpeed)
+            .duration(2000 / globalAnimationSpeed)
+            .attr('stroke-dashoffset', 0);
+
+        // 标记交点
+        setTimeout(() => {
+            const intersectX = cx + 2 * scale;
+            const intersectY = cy - 2 * scale;
+
+            g.append('circle')
+                .attr('cx', intersectX)
+                .attr('cy', intersectY)
+                .attr('r', 0)
+                .attr('fill', 'var(--warning-color)')
+                .attr('stroke', themeColors.axis)
+                .attr('stroke-width', 2)
+                .transition()
+                .duration(500)
+                .attr('r', 8);
+
+            g.append('text')
+                .attr('x', intersectX + 15)
+                .attr('y', intersectY - 15)
+                .text('解: (2, 2)')
+                .attr('fill', 'var(--warning-color)')
+                .attr('font-size', '18px')
+                .style('opacity', 0)
+                .transition()
+                .duration(500)
+                .style('opacity', 1);
+        }, 3500 / globalAnimationSpeed);
+
+        // 添加方程标签
+        g.append('text')
+            .attr('x', cx + 3 * scale)
+            .attr('y', cy - 0 * scale)
+            .text('2x + y = 6')
+            .attr('fill', 'var(--danger-color)')
+            .attr('font-size', '14px')
+            .style('opacity', 0)
+            .transition()
+            .delay(2000 / globalAnimationSpeed)
+            .duration(500)
+            .style('opacity', 1);
+
+        g.append('text')
+            .attr('x', cx + 3.5 * scale)
+            .attr('y', cy - 3.5 * scale)
+            .text('x - y = 0')
+            .attr('fill', 'var(--success-color)')
+            .attr('font-size', '14px')
+            .style('opacity', 0)
+            .transition()
+            .delay(3000 / globalAnimationSpeed)
+            .duration(500)
+            .style('opacity', 1);
+    }
+
+    // 克拉默法则可视化
+    function visualizeCramersRule() {
+        const container = document.getElementById('vis-cramers');
+        if (!container) return;
+        
+        container.innerHTML = `
+            <div class="vis-container">
+                <h3 style="color: ${themeColors.text}; margin-bottom: 20px;">克拉默法则计算演示</h3>
+                <div style="color: ${themeColors.text}; text-align: center;">
+                    <p style="font-size: 1.2rem;">方程组：2x + y = 5, x - y = 1</p>
+                    
+                    <div style="display: flex; justify-content: center; gap: 30px; margin: 30px 0;">
+                        <div class="matrix-wrapper">
+                            <p>系数行列式 D</p>
+                            <div class="matrix-grid" style="grid-template-columns: repeat(2, 1fr);">
+                                <div class="matrix-cell">2</div>
+                                <div class="matrix-cell">1</div>
+                                <div class="matrix-cell">1</div>
+                                <div class="matrix-cell">-1</div>
+                            </div>
+                            <p id="det-d" style="margin-top: 10px; opacity: 0;">= 2×(-1) - 1×1 = -3</p>
+                        </div>
+                        
+                        <div class="matrix-wrapper">
+                            <p>D_x (第1列替换)</p>
+                            <div class="matrix-grid" style="grid-template-columns: repeat(2, 1fr);">
+                                <div class="matrix-cell" style="background: var(--warning-color);">5</div>
+                                <div class="matrix-cell">1</div>
+                                <div class="matrix-cell" style="background: var(--warning-color);">1</div>
+                                <div class="matrix-cell">-1</div>
+                            </div>
+                            <p id="det-dx" style="margin-top: 10px; opacity: 0;">= 5×(-1) - 1×1 = -6</p>
+                        </div>
+                    </div>
+                    
+                    <div id="solution" style="font-size: 1.5rem; margin-top: 30px; opacity: 0;">
+                        x = D_x/D = -6/(-3) = <span style="color: var(--success-color);">2</span>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // 动画显示计算步骤
+        setTimeout(() => {
+            document.getElementById('det-d').style.transition = 'opacity 0.5s';
+            document.getElementById('det-d').style.opacity = '1';
+        }, 1000 / globalAnimationSpeed);
+
+        setTimeout(() => {
+            document.getElementById('det-dx').style.transition = 'opacity 0.5s';
+            document.getElementById('det-dx').style.opacity = '1';
+        }, 2000 / globalAnimationSpeed);
+
+        setTimeout(() => {
+            document.getElementById('solution').style.transition = 'opacity 0.5s';
+            document.getElementById('solution').style.opacity = '1';
+        }, 3000 / globalAnimationSpeed);
+    }
+
+    // 特征值特征向量可视化
+    function visualizeEigenvalue() {
+        const setup = setupD3('vis-eigenvalue');
+        if (!setup) return;
+        const { g, width, height } = setup;
+
+        const cx = width / 2;
+        const cy = height / 2;
+        const scale = 60;
+
+        // 矩阵 A = [[2, 0], [0, 3]]
+        // 特征值: λ1 = 2, λ2 = 3
+        // 特征向量: v1 = [1, 0], v2 = [0, 1]
+
+        // 绘制坐标系
+        g.append('line')
+            .attr('x1', 0).attr('y1', cy)
+            .attr('x2', width).attr('y2', cy)
+            .attr('stroke', 'rgba(255,255,255,0.3)');
+
+        g.append('line')
+            .attr('x1', cx).attr('y1', 0)
+            .attr('x2', cx).attr('y2', height)
+            .attr('stroke', 'rgba(255,255,255,0.3)');
+
+        // 原始向量
+        const v1 = { x: 1, y: 0, color: 'var(--danger-color)' };
+        const v2 = { x: 0, y: 1, color: 'var(--success-color)' };
+
+        // 绘制原始向量
+        g.append('line')
+            .attr('x1', cx).attr('y1', cy)
+            .attr('x2', cx + v1.x * scale).attr('y2', cy - v1.y * scale)
+            .attr('stroke', v1.color)
+            .attr('stroke-width', 3)
+            .attr('id', 'eigen-v1');
+
+        g.append('line')
+            .attr('x1', cx).attr('y1', cy)
+            .attr('x2', cx + v2.x * scale).attr('y2', cy - v2.y * scale)
+            .attr('stroke', v2.color)
+            .attr('stroke-width', 3)
+            .attr('id', 'eigen-v2');
+
+        // 标签
+        g.append('text')
+            .attr('x', cx + scale + 10).attr('y', cy + 5)
+            .text('v₁')
+            .attr('fill', v1.color)
+            .attr('font-size', '16px');
+
+        g.append('text')
+            .attr('x', cx + 5).attr('y', cy - scale - 10)
+            .text('v₂')
+            .attr('fill', v2.color)
+            .attr('font-size', '16px');
+
+        // 变换后的向量（动画）
+        setTimeout(() => {
+            // v1 变为 2v1
+            d3.select('#eigen-v1')
+                .transition()
+                .duration(1500 / globalAnimationSpeed)
+                .attr('x2', cx + 2 * v1.x * scale);
+
+            // v2 变为 3v2
+            d3.select('#eigen-v2')
+                .transition()
+                .duration(1500 / globalAnimationSpeed)
+                .attr('y2', cy - 3 * v2.y * scale);
+
+            // 添加说明
+            g.append('text')
+                .attr('x', cx + 2 * scale + 10).attr('y', cy + 5)
+                .text('2v₁')
+                .attr('fill', v1.color)
+                .attr('font-size', '16px')
+                .style('opacity', 0)
+                .transition()
+                .duration(500)
+                .style('opacity', 1);
+
+            g.append('text')
+                .attr('x', cx + 5).attr('y', cy - 3 * scale - 10)
+                .text('3v₂')
+                .attr('fill', v2.color)
+                .attr('font-size', '16px')
+                .style('opacity', 0)
+                .transition()
+                .duration(500)
+                .style('opacity', 1);
+        }, 1000 / globalAnimationSpeed);
+
+        // 显示矩阵信息
+        g.append('text')
+            .attr('x', 20).attr('y', 40)
+            .text('矩阵 A = [[2, 0], [0, 3]]')
+            .attr('fill', themeColors.text)
+            .attr('font-size', '16px');
+
+        g.append('text')
+            .attr('x', 20).attr('y', 65)
+            .text('特征值: λ₁ = 2, λ₂ = 3')
+            .attr('fill', 'var(--warning-color)')
+            .attr('font-size', '16px');
+
+        g.append('text')
+            .attr('x', 20).attr('y', 90)
+            .text('特征向量只改变长度，不改变方向')
+            .attr('fill', 'var(--info-color)')
+            .attr('font-size', '14px');
+    }
+
+    // 应用案例可视化
+    function visualizeApplications() {
+        const container = document.getElementById('vis-applications');
+        if (!container) return;
+        
+        const blocks = [1,2,3,4,5,6,7,8,9]
+            .map(i => '<div style="width: 20px; height: 20px; background: rgba(52,152,219,' + (i/10) + ');"></div>')
+            .join('');
+
+        container.innerHTML = `
+            <div class="vis-container">
+                <h3 style="color: ${themeColors.text}; margin-bottom: 30px;">线性代数实际应用</h3>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 30px; max-width: 800px;">
+                    
+                    <div class="matrix-wrapper" style="text-align: center;">
+                        <h4 style="color: var(--primary-color); margin-bottom: 15px;">图像处理</h4>
+                        <div style="display: flex; align-items: center; justify-content: center; gap: 20px;">
+                            <div style="width: 60px; height: 60px; background: linear-gradient(45deg, #333, #666); border-radius: 5px;"></div>
+                            <span style="color: ${themeColors.text};">→</span>
+                            <div style="width: 60px; height: 60px; background: linear-gradient(45deg, #666, #999); border-radius: 5px; filter: blur(2px);"></div>
+                        </div>
+                        <p style="color: rgba(0,0,0,0.7); margin-top: 10px; font-size: 0.9rem;">
+                            滤镜 = 矩阵卷积
+                        </p>
+                    </div>
+                    
+                    <div class="matrix-wrapper" style="text-align: center;">
+                        <h4 style="color: var(--success-color); margin-bottom: 15px;">数据分析</h4>
+                        <div style="display: flex; flex-direction: column; align-items: center;">
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px;">${blocks}</div>
+                        </div>
+                        <p style="color: rgba(0,0,0,0.7); margin-top: 10px; font-size: 0.9rem;">
+                            数据矩阵分析
+                        </p>
+                    </div>
+                    
+                    <div class="matrix-wrapper" style="text-align: center;">
+                        <h4 style="color: var(--warning-color); margin-bottom: 15px;">3D图形</h4>
+                        <div class="rotate-3d" style="width: 60px; height: 60px; margin: 0 auto;">
+                            <div style="width: 60px; height: 60px; border: 2px solid var(--warning-color); transform: rotateX(45deg) rotateY(45deg);"></div>
+                        </div>
+                        <p style="color: rgba(0,0,0,0.7); margin-top: 10px; font-size: 0.9rem;">
+                            3D变换矩阵
+                        </p>
+                    </div>
+                    
+                    <div class="matrix-wrapper" style="text-align: center;">
+                        <h4 style="color: var(--danger-color); margin-bottom: 15px;">机器学习</h4>
+                        <div style="display: flex; justify-content: center; gap: 5px;">
+                            <div style="width: 8px; height: 40px; background: var(--danger-color);"></div>
+                            <div style="width: 8px; height: 60px; background: var(--danger-color);"></div>
+                            <div style="width: 8px; height: 30px; background: var(--danger-color);"></div>
+                            <div style="width: 8px; height: 50px; background: var(--danger-color);"></div>
+                        </div>
+                        <p style="color: rgba(255,255,255,0.8); margin-top: 10px; font-size: 0.9rem;">
+                            神经网络权重矩阵
+                        </p>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    // 扩展可视化函数（新增）
+    function visualizeGauss() {
+        renderSteps('vis-gauss', [
+            '目标：把增广矩阵化为<span class="highlight">阶梯型</span>',
+            '$$\\left(\\begin{array}{ccc|c}1&2&-1&3\\\\2&1&1&4\\\\-1&1&2&0\\end{array}\\right)$$',
+            '步骤：① 选主元 ② 消去下方 ③ 下一列',
+            '最后：回代求解'
+        ]);
+    }
+
+    function visualizeRank() {
+        const setup = setupD3('vis-rank'); if (!setup) return; const {g,width,height}=setup;
+        const m=3,n=3, cell=40, startX=width/2 - (n*cell)/2, startY=height/2 - (m*cell)/2;
+        for(let i=0;i<m;i++) for(let j=0;j<n;j++){
+            g.append('rect').attr('x', startX+j*cell).attr('y', startY+i*cell).attr('width',cell).attr('height',cell)
+             .attr('fill', i===0? 'rgba(16,185,129,0.2)': 'rgba(59,130,246,0.15)')
+             .attr('stroke','#64748b');
+        }
+        g.append('text').attr('x', width/2).attr('y', startY-20).attr('text-anchor','middle').text('高亮行表示独立').style('fill','#334155');
+    }
+
+    function visualizeInverse() {
+        renderSteps('vis-inverse', [
+            '可逆 ⇔ 存在 $A^{-1}$，且 $AA^{-1}=I$',
+            '几何直观：<span class="highlight">可逆变换</span>可还原原图形',
+            '行列式 $\\det(A)\\neq 0$ 才可逆'
+        ]);
+    }
+
+    function visualizeEigenvalue2() {
+        renderSteps('vis-eigenvalue-2', [
+            '$Av=\\lambda v$，方向不变，只是被拉伸',
+            '求解：$\\det(A-\\lambda I)=0$'
+        ]);
+    }
+
+    function visualizePowerIteration() {
+        const setup = setupD3('vis-power-iteration'); if(!setup) return; const {g,width,height}=setup;
+        const x0=[1,0]; const A=[[1.2,0.2],[0.1,0.9]]; let v=x0; const pts=[];
+        for(let k=0;k<10;k++){ const nv=[A[0][0]*v[0]+A[0][1]*v[1], A[1][0]*v[0]+A[1][1]*v[1]]; const len=Math.hypot(nv[0],nv[1]); v=[nv[0]/len,nv[1]/len]; pts.push([...v]); }
+        const cx=width/2, cy=height/2, R=Math.min(width,height)/3;
+        g.append('circle').attr('cx',cx).attr('cy',cy).attr('r',R).attr('fill','none').attr('stroke','#94a3b8');
+        pts.forEach((p,i)=>{
+            g.append('line').attr('x1',cx).attr('y1',cy).attr('x2',cx+p[0]*R).attr('y2',cy-p[1]*R)
+             .attr('stroke', i===pts.length-1?'#ef4444':'#64748b').attr('stroke-width', i===pts.length-1?3:1.5)
+             .attr('opacity', 0.6);
+        });
+    }
+
+    function visualizeDiagonalization() {
+        renderSteps('vis-diagonalization', [
+            '若 $A=PDP^{-1}$，则 $A^k=PD^kP^{-1}$ 计算更容易',
+            '几何：换到<span class="highlight">更合适</span>的坐标系'
+        ]);
+    }
+
+    function visualizeLinearTransform() {
+        const setup=setupD3('vis-linear-transform'); if(!setup) return; const {g,width,height}=setup;
+        const cx=width/2, cy=height/2; const s=80;
+        const square=[[0,0],[1,0],[1,1],[0,1],[0,0]];
+        const A=[[0.8,-0.3],[0.2,1.1]];
+        const toPix=(p)=>[cx+(p[0]-0.5)*2*s, cy-(p[1]-0.5)*2*s];
+        const toPixT=(p)=>{const q=[A[0][0]*p[0]+A[0][1]*p[1],A[1][0]*p[0]+A[1][1]*p[1]]; return toPix(q)};
+        const line=d3.line().x(d=>d[0]).y(d=>d[1]);
+        g.append('path').attr('d', line(square.map(toPix))).attr('stroke','#64748b').attr('fill','none');
+        g.append('path').attr('d', line(square.map(toPixT))).attr('stroke','#ef4444').attr('fill','none');
+        g.append('text').attr('x', cx).attr('y', cy- s - 20).attr('text-anchor','middle').text('原图形 vs 变换后').style('fill','#334155');
+    }
+
+    function visualizeTransform2D() {
+        const setup = setupD3('vis-transform-2d');
+        if (!setup) return;
+        const { g, width, height } = setup;
+        const cx = width / 2, cy = height / 2; const s = Math.min(width, height) / 6;
+
+        // 定义一个网格方形与一个仿射变换矩阵
+        const square = [[-1,-1],[1,-1],[1,1],[-1,1],[-1,-1]];
+        const A = [[0.8, -0.3],[0.2, 1.1]];
+
+        const toPix = (p) => [cx + p[0]*s, cy - p[1]*s];
+        const applyA = (p) => [A[0][0]*p[0] + A[0][1]*p[1], A[1][0]*p[0] + A[1][1]*p[1]];
+        const toPixT = (p) => toPix(applyA(p));
+
+        const line = d3.line().x(d=>d[0]).y(d=>d[1]);
+
+        // 参考坐标轴
+        g.append('line').attr('x1', 20).attr('y1', cy).attr('x2', width-20).attr('y2', cy)
+            .attr('stroke', themeColors.axis).attr('stroke-width', 1).attr('opacity', 0.6);
+        g.append('line').attr('x1', cx).attr('y1', 20).attr('x2', cx).attr('y2', height-20)
+            .attr('stroke', themeColors.axis).attr('stroke-width', 1).attr('opacity', 0.6);
+
+        // 原始与变换后的方形轮廓
+        g.append('path')
+            .attr('d', line(square.map(toPix)))
+            .attr('stroke', '#64748b')
+            .attr('fill', 'none');
+        g.append('path')
+            .attr('d', line(square.map(toPixT)))
+            .attr('stroke', '#ef4444')
+            .attr('fill', 'none');
+
+        g.append('text').attr('x', cx).attr('y', cy - s - 24)
+            .attr('text-anchor','middle')
+            .text('二维变换示例（原图形 vs 变换后）')
+            .style('fill','#334155');
+    }
+
+    function visualizeProjection() {
+        const setup=setupD3('vis-projection'); if(!setup) return; const {g,width,height}=setup;
+        const cx=width/2, cy=height/2; const R=90; const v=[0.8,0.4];
+        g.append('line').attr('x1',cx-R).attr('y1',cy).attr('x2',cx+R).attr('y2',cy).attr('stroke','#94a3b8');
+        g.append('line').attr('x1',cx).attr('y1',cy).attr('x2',cx+v[0]*R).attr('y2',cy-v[1]*R).attr('stroke','#3b82f6').attr('stroke-width',3);
+        g.append('line').attr('x1',cx).attr('y1',cy).attr('x2',cx+(v[0])*R).attr('y2',cy).attr('stroke','#ef4444').attr('stroke-width',3).attr('stroke-dasharray','5,4');
+        g.append('text').attr('x', cx+v[0]*R+8).attr('y', cy-v[1]*R).text('v').style('fill','#3b82f6');
+        g.append('text').attr('x', cx+v[0]*R+8).attr('y', cy+14).text('proj').style('fill','#ef4444');
+    }
+
+    function visualizeLeastSquaresLinear() {
+        const setup=setupD3('vis-least-squares-linear'); if(!setup) return; const {g,width,height}=setup;
+        const x=d3.scaleLinear().domain([0,10]).range([40,width-20]);
+        const y=d3.scaleLinear().domain([0,10]).range([height-30,20]);
+        const pts=[{x:1,y:2.2},{x:2,y:2.8},{x:3,y:3.9},{x:4,y:5.2},{x:5,y:4.8},{x:6,y:6.1},{x:7,y:7.1}];
+        g.append('g').attr('transform',`translate(0,${height-30})`).call(d3.axisBottom(x).ticks(5));
+        g.append('g').attr('transform',`translate(40,0)`).call(d3.axisLeft(y).ticks(5));
+        g.selectAll('circle').data(pts).enter().append('circle').attr('cx',d=>x(d.x)).attr('cy',d=>y(d.y)).attr('r',4).attr('fill','#3b82f6');
+        const line=d3.line().x(d=>x(d.x)).y(d=>y(d.y));
+        g.append('path').datum([{x:0,y:1},{x:10,y:9}]).attr('d',line).attr('stroke','#ef4444').attr('stroke-width',2).attr('fill','none');
+    }
+
+    function visualizeApplicationNetwork() {
+        const setup=setupD3('vis-application-network'); if(!setup) return; const {g,width,height}=setup;
+        const nodes=[{x:80,y:60},{x:200,y:50},{x:140,y:140},{x:260,y:120}];
+        const links=[[0,1],[0,2],[1,2],[2,3]];
+        links.forEach(l=>{const a=nodes[l[0]], b=nodes[l[1]]; g.append('line').attr('x1',a.x).attr('y1',a.y).attr('x2',b.x).attr('y2',b.y).attr('stroke','#94a3b8');});
+        nodes.forEach((n,i)=>{ g.append('circle').attr('cx',n.x).attr('cy',n.y).attr('r',10).attr('fill', i? '#3b82f6':'#10b981'); });
+    }
+
+    function visualizeApplicationImage() {
+        const setup=setupD3('vis-application-image'); if(!setup) return; const {g,width,height}=setup;
+        const cell=24, sx=width/2-5*cell, sy=height/2-5*cell;
+        for(let i=0;i<5;i++) for(let j=0;j<5;j++){
+            g.append('rect').attr('x',sx+j*cell).attr('y',sy+i*cell).attr('width',cell-2).attr('height',cell-2)
+             .attr('fill', (i+j)%2? '#e5e7eb':'#cbd5e1');
+        }
+        g.append('text').attr('x',width/2).attr('y',sy-16).attr('text-anchor','middle').text('5×5 图像块（示意）').style('fill','#334155');
+    }
+
+    function visualizeApplicationML() { renderSteps('vis-application-ml', ['矩阵在 <span class="highlight">特征提取</span>、<span class="highlight">降维</span> 中的作用', '示例：PCA 的核心是特征分解']); }
+    function visualizeExercise1() { renderSteps('vis-exercise-1', ['解：$\\begin{cases}x+y=3\\\\2x-y=1\\end{cases}$，用消元法步骤化演示']); }
+    function visualizeExercise2() { renderSteps('vis-exercise-2', ['判断 $A=\\begin{pmatrix}2&0\\\\0&1\\end{pmatrix}$ 的特征值与特征向量']); }
+
+    // 新增：例题与可视化步骤
+    function visualizeExampleMulSteps() {
+        renderSteps('vis-example-mul-steps', [
+            '给定：$A=\\begin{pmatrix}2&1\\\\-1&3\\end{pmatrix}$，$B=\\begin{pmatrix}1&4\\\\2&-1\\end{pmatrix}$',
+            '计算：$C=AB$，按 <span class="highlight">行×列</span> 逐项点乘',
+            '$c_{11} = 2\\cdot 1 + 1\\cdot 2 = 4$',
+            '$c_{12} = 2\\cdot 4 + 1\\cdot(-1) = 7$',
+            '$c_{21} = (-1)\\cdot 1 + 3\\cdot 2 = 5$',
+            '$c_{22} = (-1)\\cdot 4 + 3\\cdot(-1) = -7$',
+            '结论：$AB=\\begin{pmatrix}4&7\\\\5&-7\\end{pmatrix}$'
+        ]);
+    }
+
+    function visualizeDetArea() {
+        const setup=setupD3('vis-det-area'); if(!setup) return; const {g,width,height}=setup;
+        const cx=width/2, cy=height/2; const s=Math.min(width,height)/6;
+        const A=[[1.1,0.4],[-0.3,0.9]];
+        const e1=[1,0], e2=[0,1];
+        const Ae1=[A[0][0]*e1[0]+A[0][1]*e1[1], A[1][0]*e1[0]+A[1][1]*e1[1]];
+        const Ae2=[A[0][0]*e2[0]+A[0][1]*e2[1], A[1][0]*e2[0]+A[1][1]*e2[1]];
+        const toPix=(p)=>[cx+p[0]*s, cy-p[1]*s];
+        const poly=[ [0,0], Ae1, [Ae1[0]+Ae2[0], Ae1[1]+Ae2[1]], Ae2 ];
+        const det=A[0][0]*A[1][1]-A[0][1]*A[1][0];
+        // 轴
+        g.append('line').attr('x1',20).attr('y1',cy).attr('x2',width-20).attr('y2',cy).attr('stroke',themeColors.axis);
+        g.append('line').attr('x1',cx).attr('y1',20).attr('x2',cx).attr('y2',height-20).attr('stroke',themeColors.axis);
+        // 向量与平行四边形
+        const line=d3.line().x(d=>d[0]).y(d=>d[1]);
+        g.append('line').attr('x1',cx).attr('y1',cy).attr('x2',toPix(Ae1)[0]).attr('y2',toPix(Ae1)[1]).attr('stroke','#3b82f6').attr('stroke-width',3);
+        g.append('line').attr('x1',cx).attr('y1',cy).attr('x2',toPix(Ae2)[0]).attr('y2',toPix(Ae2)[1]).attr('stroke','#10b981').attr('stroke-width',3);
+        g.append('path').attr('d', line(poly.map(toPix))).attr('fill','rgba(239,68,68,0.15)').attr('stroke','#ef4444');
+        g.append('text').attr('x', cx).attr('y', cy - s*2 - 10).attr('text-anchor','middle').text(`|det A| ≈ ${Math.abs(det).toFixed(2)}（面积倍率）`).style('fill','#334155');
+    }
+
+    function visualizeGaussSteps() {
+        renderSteps('vis-gauss-steps', [
+            '方程组：$\\begin{cases}x+2y=5\\\\2x-y=1\\end{cases}$',
+            '增广矩阵：$\\left(\\begin{array}{cc|c}1&2&5\\\\2&-1&1\\end{array}\\right)$',
+            '$R_2 \\leftarrow R_2 - 2R_1$: $\\left(\\begin{array}{cc|c}1&2&5\\\\0&-5&-9\\end{array}\\right)$',
+            '回代：$-5y=-9 \\Rightarrow y=\\dfrac{9}{5}$，$x+2y=5 \\Rightarrow x=\\dfrac{7}{5}$',
+            '解：$\\left( x, y \\right)=\\left( \\dfrac{7}{5}, \\dfrac{9}{5} \\right)$'
+        ]);
+    }
+
+    function visualizeCramerSteps() {
+        renderSteps('vis-cramer-steps', [
+            '方程组：$\\begin{cases}2x+y=5\\\\x-y=1\\end{cases}$，$A=\\begin{pmatrix}2&1\\\\1&-1\\end{pmatrix}$，$b=\\begin{pmatrix}5\\\\1\\end{pmatrix}$',
+            '$D=\\det A = 2\\cdot(-1) - 1\\cdot 1 = -3$',
+            '$D_x=\\det \\begin{pmatrix}5&1\\\\1&-1\\end{pmatrix} = 5\\cdot(-1) - 1\\cdot 1 = -6$',
+            '$D_y=\\det \\begin{pmatrix}2&5\\\\1&1\\end{pmatrix} = 2\\cdot 1 - 5\\cdot 1 = -3$',
+            '解：$x=\\dfrac{D_x}{D}=2, \quad y=\\dfrac{D_y}{D}=1$'
+        ]);
+    }
+
+    function visualizeEigSteps() {
+        renderSteps('vis-eig-steps', [
+            '矩阵：$A=\\begin{pmatrix}2&1\\\\1&2\\end{pmatrix}$',
+            '特征方程：$\\det(A-\\lambda I)=\\left| \\begin{matrix} 2-\\lambda & 1 \\\\ 1 & 2-\\lambda \\end{matrix} \\right| = (2-\\lambda)^2 - 1 = 0$',
+            '解得：$\\lambda_1=3, \\; \\lambda_2=1$',
+            '$\\lambda_1=3$：$(A-3I)v=0 \\Rightarrow \\begin{pmatrix}-1&1\\\\1&-1\\end{pmatrix} v=0$，取 $v_1=\\begin{pmatrix}1\\\\1\\end{pmatrix}$',
+            '$\\lambda_2=1$：$(A-I)v=0 \\Rightarrow \\begin{pmatrix}1&1\\\\1&1\\end{pmatrix} v=0$，取 $v_2=\\begin{pmatrix}1\\\\-1\\end{pmatrix}$',
+            '结论：$\\lambda_1=3$ 的特征向量方向为 $(1,1)$；$\\lambda_2=1$ 的特征向量方向为 $(1,-1)$'
+        ]);
+    }
+    // 示例功能
+    function showExample(type) {
+        alert(`${type} 功能演示 - 开发中...`);
+    }
+
+    function downloadNotes() {
+        alert('笔记下载功能 - 开发中...');
+    }
+</script>
+
+<!-- 顶部返回面板（统一）：返回目录弹面板 -->
+<div class="return-home-panel" style="position: fixed; top: 16px; right: 16px; z-index: 1200; display: flex; gap: 10px; opacity: .3; transition: opacity .3s;"> 
+    <a class="return-link" href="../index.html" style="padding:6px 12px; background: rgba(15,23,42,.7); color:#f8fafc; border-radius:999px; font-size:12px; text-decoration:none; display:flex; align-items:center; gap:6px;"> <i class="fa-solid fa-house"></i> 返回主站 </a>
+    <a class="return-link return-main" href="javascript:void(0)" onclick="event.stopPropagation(); toggleCourseSubmenu()" style="padding:6px 12px; background: rgba(79,70,229,.7); color:#f8fafc; border-radius:999px; font-size:12px; text-decoration:none; display:flex; align-items:center; gap:6px;"> <i class="fa-solid fa-arrow-left"></i> 返回目录 </a>
+</div>
+
+<!-- 悬浮控制按钮与二级菜单（统一样式） -->
+<button class="floating-control-btn" id="floating-control-btn"><span class="btn-icon">+</span></button>
+<div class="floating-menu-items" id="floating-menu-items">
+    <div class="floating-menu-item" onclick="event.stopPropagation(); toggleLabSubmenu()">
+        <span class="item-icon"><i class="fa-solid fa-flask"></i></span>
+        <span class="item-text">实验室</span>
+    </div>
+    <div class="floating-menu-item" onclick="event.stopPropagation(); toggleChapterSubmenu()">
+        <span class="item-icon"><i class="fa-solid fa-clipboard-list"></i></span>
+        <span class="item-text">本章目录</span>
+    </div>
+</div>
+
+<!-- 实验室弹层（第十章） -->
+<div class="lab-submenu" id="lab-submenu" style="display:none;">
+    <div class="submenu-content">
+        <div class="submenu-title">第十章实验室</div>
+        <div class="submenu-grid">
+            <div class="submenu-item" onclick="window.open('../网页资源/index.html','_blank')"><span class="submenu-icon"><i class="fa-solid fa-list"></i></span><span class="submenu-text">资源总览</span></div>
+            <div class="submenu-item" onclick="window.open('../网页资源/lab 10-1.html','_blank')"><span class="submenu-icon"><i class="fa-solid fa-vial"></i></span><span class="submenu-text">矩阵与运算实验室</span></div>
+            <div class="submenu-item" onclick="window.open('../网页资源/lab 10-2.html','_blank')"><span class="submenu-icon"><i class="fa-solid fa-vial"></i></span><span class="submenu-text">行列式实验室</span></div>
+            <div class="submenu-item" onclick="window.open('../网页资源/lab 10-3.html','_blank')"><span class="submenu-icon"><i class="fa-solid fa-vial"></i></span><span class="submenu-text">线性方程组实验室</span></div>
+            <div class="submenu-item" onclick="window.open('../网页资源/lab 10-4.html','_blank')"><span class="submenu-icon"><i class="fa-solid fa-vial"></i></span><span class="submenu-text">克拉默法则实验室</span></div>
+            <div class="submenu-item" onclick="window.open('../网页资源/lab 10-5.html','_blank')"><span class="submenu-icon"><i class="fa-solid fa-vial"></i></span><span class="submenu-text">特征值与特征向量实验室</span></div>
+            <div class="submenu-item" onclick="window.open('../网页资源/lab 10-6.html','_blank')"><span class="submenu-icon"><i class="fa-solid fa-vial"></i></span><span class="submenu-text">线性变换与对角化实验室</span></div>
+            <div class="submenu-item" onclick="window.open('../网页资源/lab 10-7.html','_blank')"><span class="submenu-icon"><i class="fa-solid fa-vial"></i></span><span class="submenu-text">应用与可视化实验室</span></div>
+        </div>
+        <div class="submenu-close" onclick="toggleLabSubmenu()">×</div>
+    </div>
+</div>
+
+<!-- 本章目录弹层（自动生成） -->
+<div class="chapter-submenu" id="chapter-submenu" style="display:none;">
+    <div class="submenu-content">
+        <div class="submenu-title">第十章目录</div>
+        <div class="submenu-grid" id="chapter-submenu-grid"></div>
+        <div class="submenu-close" onclick="toggleChapterSubmenu()">×</div>
+    </div>
+</div>
+
+<!-- 全部课件目录弹层 -->
+<div class="course-submenu" id="course-submenu" style="display:none;">
+    <div class="submenu-content">
+        <div class="submenu-title">全部课件目录</div>
+        <div class="submenu-grid">
+            <div class="submenu-item" onclick="window.location.href='第1章代数.html';"><span class="submenu-icon"><i class="fa-solid fa-1"></i></span><span class="submenu-text">第1章 代数</span></div>
+            <div class="submenu-item" onclick="window.location.href='第2章极限与连续.html';"><span class="submenu-icon"><i class="fa-solid fa-2"></i></span><span class="submenu-text">第2章 极限与连续</span></div>
+            <div class="submenu-item" onclick="window.location.href='第3章导数与微分.html';"><span class="submenu-icon"><i class="fa-solid fa-3"></i></span><span class="submenu-text">第3章 导数与微分</span></div>
+            <div class="submenu-item" onclick="window.location.href='第4章导数应用.html';"><span class="submenu-icon"><i class="fa-solid fa-4"></i></span><span class="submenu-text">第4章 导数应用</span></div>
+            <div class="submenu-item" onclick="window.location.href='第5章不定积分.html';"><span class="submenu-icon"><i class="fa-solid fa-5"></i></span><span class="submenu-text">第5章 不定积分</span></div>
+            <div class="submenu-item" onclick="window.location.href='第6章定积分.html';"><span class="submenu-icon"><i class="fa-solid fa-6"></i></span><span class="submenu-text">第6章 定积分</span></div>
+            <div class="submenu-item" onclick="window.location.href='第7章常微分方程.html';"><span class="submenu-icon"><i class="fa-solid fa-7"></i></span><span class="submenu-text">第7章 常微分方程</span></div>
+            <div class="submenu-item" onclick="window.location.href='第8章多元函数微分学.html';"><span class="submenu-icon"><i class="fa-solid fa-8"></i></span><span class="submenu-text">第8章 多元函数微分学</span></div>
+            <div class="submenu-item" onclick="window.location.href='第9章多元函数积分学初步.html';"><span class="submenu-icon"><i class="fa-solid fa-9"></i></span><span class="submenu-text">第9章 多元函数积分学初步</span></div>
+            <div class="submenu-item" onclick="window.location.href='第10章线性代数.html';"><span class="submenu-icon"><i class="fa-solid fa-folder"></i></span><span class="submenu-text">第10章 线性代数</span></div>
+            <div class="submenu-item" onclick="window.location.href='第11章无穷级数.html';"><span class="submenu-icon"><i class="fa-solid fa-folder"></i></span><span class="submenu-text">第11章 无穷级数</span></div>
+            <div class="submenu-item" onclick="window.location.href='第12章向量代数与空间解析几何.html';"><span class="submenu-icon"><i class="fa-solid fa-folder"></i></span><span class="submenu-text">第12章 向量代数与空间解析几何</span></div>
+            <div class="submenu-item" onclick="window.location.href='第13章概率与统计.html';"><span class="submenu-icon"><i class="fa-solid fa-folder"></i></span><span class="submenu-text">第13章 概率与统计</span></div>
+        </div>
+        <div class="submenu-close" onclick="toggleCourseSubmenu()">×</div>
+    </div>
+</div>
+
+<script>
+// 统一导航API
+window.goToSlide = window.goToSlide || function(index) {
+    try {
+        if (typeof window.showSlide === 'function') { window.showSlide(index); }
+        else if (typeof window.jumpToSlide === 'function') { window.jumpToSlide(index + 1); }
+    } catch(e) {}
+};
+
+// 悬浮菜单互斥控制与切换
+function closeAllSubmenus(exceptId) {
+    ['lab-submenu','chapter-submenu','course-submenu'].forEach(id => {
+        if (id !== exceptId) {
+            const el = document.getElementById(id);
+            if (el) el.style.display = 'none';
+        }
+    });
+}
+function toggleLabSubmenu() { const el = document.getElementById('lab-submenu'); if (!el) return; const willOpen = el.style.display !== 'block'; closeAllSubmenus('lab-submenu'); el.style.display = willOpen ? 'block' : 'none'; }
+function toggleChapterSubmenu() { const el = document.getElementById('chapter-submenu'); if (!el) return; const willOpen = el.style.display !== 'block'; closeAllSubmenus('chapter-submenu'); if (willOpen) buildChapterMenuCh10(); el.style.display = willOpen ? 'block' : 'none'; }
+function toggleCourseSubmenu() { const el = document.getElementById('course-submenu'); if (!el) return; const willOpen = el.style.display !== 'block'; closeAllSubmenus('course-submenu'); el.style.display = willOpen ? 'block' : 'none'; }
+function initFloatingControl() { const floatingBtn = document.getElementById('floating-control-btn'); const floatingMenu = document.getElementById('floating-menu-items'); if (!floatingBtn || !floatingMenu) return; floatingBtn.addEventListener('click', function(e) { e.stopPropagation(); floatingBtn.classList.toggle('active'); floatingMenu.classList.toggle('active'); }); }
+
+// 自动构建“第十章目录”
+function buildChapterMenuCh10() {
+    const grid = document.getElementById('chapter-submenu-grid');
+    if (!grid) return; grid.innerHTML = '';
+    const cover = document.createElement('div'); cover.className = 'submenu-item'; cover.innerHTML = '<span class="submenu-icon"><i class="fa-solid fa-house"></i></span><span class="submenu-text">封面</span>'; cover.onclick = function() { try { goToSlide(0); } catch(_) {} toggleChapterSubmenu(); }; grid.appendChild(cover);
+    const toc = document.createElement('div'); toc.className = 'submenu-item'; toc.innerHTML = '<span class="submenu-icon"><i class="fa-solid fa-list-ul"></i></span><span class="submenu-text">目录页</span>'; toc.onclick = function() { try { goToSlide(1); } catch(_) {} toggleChapterSubmenu(); }; grid.appendChild(toc);
+    const slides = document.querySelectorAll('#slidesContainer > .slide');
+    if (!slides.length) return;
+    slides.forEach((slide, idx) => {
+        const h1 = slide.querySelector('.left-content h1');
+        const h2 = slide.querySelector('.left-content h2');
+        const title = (h1 && h1.textContent.trim()) || (h2 && h2.textContent.trim()) || '';
+        if (!title) return; if (title.includes('目录')) return;
+        const item = document.createElement('div'); item.className = 'submenu-item';
+        item.innerHTML = '<span class="submenu-icon"><i class="fa-solid fa-file-lines"></i></span><span class="submenu-text">' + title.replace(/\s+/g,' ') + '</span>';
+        item.onclick = function() { try { goToSlide(idx); } catch(_) {} toggleChapterSubmenu(); };
+        grid.appendChild(item);
+    });
+}
+
+// 全局关闭与 Esc
+document.addEventListener('DOMContentLoaded', function() {
+    initFloatingControl();
+    ['lab-submenu','chapter-submenu','course-submenu'].forEach(id => {
+        const el = document.getElementById(id); if (!el) return; const content = el.querySelector('.submenu-content'); if (content) content.addEventListener('click', ev => ev.stopPropagation());
+    });
+    document.addEventListener('click', () => {
+        closeAllSubmenus();
+        const floatingBtn = document.getElementById('floating-control-btn');
+        const floatingMenu = document.getElementById('floating-menu-items');
+        if (floatingBtn && floatingMenu) { floatingBtn.classList.remove('active'); floatingMenu.classList.remove('active'); }
+    });
+    document.addEventListener('keydown', (ev) => {
+        if (ev.key === 'Escape') { closeAllSubmenus(); const floatingBtn = document.getElementById('floating-control-btn'); const floatingMenu = document.getElementById('floating-menu-items'); if (floatingBtn && floatingMenu) { floatingBtn.classList.remove('active'); floatingMenu.classList.remove('active'); } }
+    });
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>极限可视化练习册 (教学版)</title>
+    <link rel="stylesheet" href="../common-assets/css/index.min.css">
+    <script>
+    // --- MathJax 3 Configuration for rendering LaTeX ---
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']]
+      },
+      svg: {
+        fontCache: 'global'
+      },
+      startup: {
+        ready: () => {
+          MathJax.startup.defaultReady();
+          document.dispatchEvent(new Event('MathJaxReady'));
+        }
+      }
+    };
+    </script>
+    <script id="MathJax-script" async src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js"></script>
+    <style>
+        /* --- Core Styles for a clean, app-like experience --- */
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden; /* Prevent scrolling */
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f8fafc; /* Tailwind's gray-50 */
+        }
+        #slider-container {
+            display: flex;
+            height: 100%;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .slide {
+            width: 100vw;
+            height: 100vh;
+            flex-shrink: 0;
+            display: flex;
+            padding: 2rem;
+            box-sizing: border-box;
+            align-items: center;
+            justify-content: center;
+        }
+        .problem-title {
+            font-size: 1.5rem; /* Further reduced for better readability */
+            line-height: 2rem; /* Adjusted for smaller font */
+            font-weight: 600;
+            color: #1f2937; /* gray-800 */
+        }
+        canvas {
+            /* background-color: #ffffff;  去掉白色背景 */
+            border-radius: 0.75rem;
+            width: 100%;
+            height: auto;
+            max-width: 900px;
+        }
+        .solution-container {
+            min-height: 220px; /* Increased height for more steps */
+        }
+        .solution-step {
+            opacity: 0;
+            transform: translateY(10px);
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.4s ease-out;
+        }
+        .solution-step.text {
+            font-size: 0.9rem;
+            color: #4b5563;
+        }
+         .solution-step.formula {
+            font-size: 1.125rem;
+        }
+        .solution-step.visible {
+            opacity: 1;
+            transform: translateY(0);
+            max-height: 5rem; /* A value larger than any step will ever be */
+            margin-top: 0.75rem;
+        }
+        .info-panel h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #111827;
+        }
+         .info-panel h2 {
+            font-size: 1.5rem;
+            font-weight: 400;
+            color: #4b5563;
+            margin-top: 0.5rem;
+        }
+        
+        .rule-info {
+            font-size: 0.95rem;
+        }
+        
+        #page-counter {
+            position: absolute;
+            bottom: 1.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #4b5563; /* gray-600 */
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+        }
+    </style>
+</head>
+<body>
+
+    <main id="slider-container"></main>
+
+    <!-- Navigation UI -->
+    <div id="page-counter"></div>
+
+    <!-- Slide Template -->
+    <template id="slide-template">
+        <div class="slide">
+             <!-- Problem Layout -->
+            <div class="problem-layout hidden w-full h-full md:flex-row flex-col items-center justify-center gap-8">
+                <div class="w-full md:w-3/5 xl:w-2/3 flex items-center justify-center">
+                    <canvas width="900" height="450"></canvas>
+                </div>
+                <div class="w-full md:w-2/5 xl:w-1/3 flex flex-col justify-center">
+                    <div class="rule-info mb-4 text-center md:text-left">
+                        <h3 class="rule-name font-semibold text-gray-600"></h3>
+                        <p class="rule-formula text-gray-800"></p>
+                    </div>
+                    <h1 class="problem-title text-center md:text-left mb-4"></h1>
+                    <div class="controls-container" style="display: none;"> <!-- Button is hidden, controlled by keyboard -->
+                        <button class="solution-control-btn"></button>
+                    </div>
+                    <div class="solution-container w-full"></div>
+                    <div class="teaser-text text-lg text-gray-700"></div>
+                </div>
+            </div>
+            <!-- Info Layout -->
+            <div class="info-layout hidden w-full h-full flex-col items-center justify-center text-center">
+            </div>
+        </div>
+    </template>
+
+<script>
+// --- DATA: SLIDES ---
+const slides = [
+    {
+        type: 'problem',
+        func: x => 3 * x * x - 2 * x + 5,
+        latex: "\\lim\\limits_{x \\to 1} (3x^2 - 2x + 5)",
+        relatedRule: {
+            name: '应用：和/差法则',
+            formula: '$ \\lim [f(x) \\pm g(x)] = \\lim f(x) \\pm \\lim g(x) $'
+        },
+        a: 1,
+        limit: 6,
+        solution: [
+            { type: 'text', content: '应用<b>和/差法则</b>，将极限拆分：' },
+            { type: 'formula', content: "= \\lim\\limits_{x \\to 1} (3x^2) - \\lim\\limits_{x \\to 1} (2x) + \\lim\\limits_{x \\to 1} (5)" },
+            { type: 'text', content: '应用<b>乘法法则</b>，提出常数系数：' },
+            { type: 'formula', content: "= 3(\\lim\\limits_{x \\to 1} x)^2 - 2(\\lim\\limits_{x \\to 1} x) + 5" },
+            { type: 'text', content: '将 x=1 代入，完成计算：' },
+            { type: 'formula', content: "= 3(1)^2 - 2(1) + 5 = 6" }
+        ],
+        xRange: [-2, 4], yRange: [0, 15]
+    },
+    {
+        type: 'problem', // COUNTEREXAMPLE for SUM/DIFF
+        latex: "\\lim\\limits_{x \\to \\infty} (\\sqrt{x^2+x} - x)",
+        isCounterExample: true,
+        relatedRule: {
+            name: '法则应用前提：各部分极限必须存在',
+            formula: '此为 <b>∞-∞ 未定式</b>，将在《极限求法》章节详细讲解。只有当拆分后每一项的极限都是<b>有限数</b>时，才能使用运算法则。'
+        },
+        solution: [
+            { type: 'text', content: '<b>错误方法：</b>直接应用差法则，得到 $\\infty - \\infty$ 未定式。' },
+            { type: 'formula', content: "\\lim\\limits_{x \\to \\infty} \\sqrt{x^2+x} - \\lim\\limits_{x \\to \\infty} x = \\infty - \\infty \\; (\\text{无意义！})" },
+            { type: 'text', content: '<b>正确方法：</b>通过乘以<b>共轭表达式</b>进行代数变形。' },
+            { type: 'formula', content: "= \\lim\\limits_{x \\to \\infty} \\frac{(\\sqrt{x^2+x}-x)(\\sqrt{x^2+x}+x)}{\\sqrt{x^2+x}+x}" },
+            { type: 'formula', content: "= \\lim\\limits_{x \\to \\infty} \\frac{x}{\\sqrt{x^2+x}+x} = \\lim\\limits_{x \\to \\infty} \\frac{1}{\\sqrt{1+1/x}+1} = \\frac{1}{2}" }
+        ]
+    },
+    {
+        type: 'problem',
+        func: x => (x + 4) * (2 * x - 1),
+        latex: "\\lim\\limits_{x \\to -2} (x+4)(2x-1)",
+        relatedRule: {
+            name: '应用：乘法法则',
+            formula: '$ \\lim [f(x) \\cdot g(x)] = \\lim f(x) \\cdot \\lim g(x) $'
+        },
+        a: -2,
+        limit: -10,
+        solution: [
+            { type: 'text', content: '应用<b>乘法法则</b>，将极限拆分：' },
+            { type: 'formula', content: "= (\\lim\\limits_{x \\to -2} (x+4))(\\lim\\limits_{x \\to -2} (2x-1))" },
+            { type: 'text', content: '对括号内分别代入 x=-2：' },
+            { type: 'formula', content: "= ((-2)+4)(2(-2)-1)" },
+            { type: 'text', content: '完成计算：' },
+            { type: 'formula', content: "= (2)(-5) = -10" }
+        ],
+        xRange: [-5, 2], yRange: [-12, 5]
+    },
+     {
+        type: 'problem', // COUNTEREXAMPLE for PRODUCT
+        latex: "\\lim\\limits_{x \\to 1} \\left( (x-1) \\cdot \\frac{1}{x^2-1} \\right)",
+        isCounterExample: true,
+        relatedRule: {
+            name: '法则应用前提：各部分极限必须存在',
+            formula: '此为 <b>0·∞ 未定式</b>，将在《极限求法》章节详细讲解。$\\lim \\frac{1}{x^2-1}$ 极限不存在，不能直接拆分。'
+        },
+        solution: [
+            { type: 'text', content: '<b>错误方法：</b>直接应用乘法法则，得到 $0 \\cdot \\infty$ 未定式。' },
+            { type: 'formula', content: "\\lim\\limits_{x \\to 1} (x-1) \\cdot \\lim\\limits_{x \\to 1} \\frac{1}{x^2-1} = 0 \\cdot \\infty \\; (\\text{无意义！})" },
+            { type: 'text', content: '<b>正确方法：</b>先进行<b>因式分解</b>和化简。' },
+            { type: 'formula', content: "= \\lim\\limits_{x \\to 1} \\frac{x-1}{(x-1)(x+1)} = \\lim\\limits_{x \\to 1} \\frac{1}{x+1} = \\frac{1}{2}" }
+        ]
+    },
+    {
+        type: 'problem',
+        func: x => (x * x + 2 * x) / (x - 1),
+        latex: "\\lim\\limits_{x \\to -1} \\frac{x^2 + 2x}{x - 1}",
+        relatedRule: {
+            name: '应用：商法则',
+            formula: '$ \\lim \\frac{f(x)}{g(x)} = \\frac{\\lim f(x)}{\\lim g(x)}, \\quad (\\lim g(x) \\neq 0) $'
+        },
+        a: -1,
+        limit: 0.5,
+        solution: [
+            { type: 'text', content: '检查分母极限：$\\lim\\limits_{x \\to -1} (x - 1) = -2 \\neq 0$'},
+            { type: 'text', content: '应用<b>商的法则</b>，将极限拆分：'},
+            { type: 'formula', content: "= \\frac{\\lim\\limits_{x \\to -1} (x^2 + 2x)}{\\lim\\limits_{x \\to -1} (x - 1)}" },
+            { type: 'text', content: '分别对分子分母代入 x=-1：' },
+            { type: 'formula', content: "= \\frac{(-1)^2 + 2(-1)}{(-1) - 1}" },
+            { type: 'text', content: '完成计算：' },
+            { type: 'formula', content: "= \\frac{1 - 2}{-2} = 0.5" }
+        ],
+        xRange: [-4, 2], yRange: [-2, 4]
+    },
+    {
+        type: 'problem', // COUNTEREXAMPLE for QUOTIENT
+        latex: "\\lim\\limits_{x \\to \\infty} \\frac{2x^2+3}{x^2-1}",
+        isCounterExample: true,
+        relatedRule: {
+            name: '法则应用前提：各部分极限必须存在',
+            formula: '此为 <b>∞/∞ 未定式</b>，将在《极限求法》章节详细讲解。分子分母的极限都不是有限数，不能直接拆分。'
+        },
+        solution: [
+            { type: 'text', content: '<b>错误方法：</b>直接应用商法则，得到 $\\frac{\\infty}{\\infty}$ 未定式。' },
+            { type: 'formula', content: "\\frac{\\lim\\limits_{x \\to \\infty} (2x^2+3)}{\\lim\\limits_{x \\to \\infty} (x^2-1)} = \\frac{\\infty}{\\infty} \\; (\\text{无意义！})" },
+            { type: 'text', content: '<b>正确方法：</b>分子分母<b>同除以x的最高次幂</b>。' },
+            { type: 'formula', content: "= \\lim\\limits_{x \\to \\infty} \\frac{2+3/x^2}{1-1/x^2} = \\frac{2+0}{1-0} = 2" }
+        ]
+    },
+    {
+        type: 'problem',
+        func: x => Math.sqrt(x*x + 7),
+        latex: "\\lim\\limits_{x \\to 3} \\sqrt{x^2 + 7}",
+        relatedRule: {
+            name: '应用：复合函数极限法则',
+            formula: '极限符号 $\\lim$ 可以和连续函数（如 $\\sqrt{x}$）交换次序。'
+        },
+        a: 3,
+        limit: 4,
+        solution: [
+            { type: 'text', content: '极限符号可以和连续函数交换次序：' },
+            { type: 'formula', content: "= \\sqrt{\\lim\\limits_{x \\to 3} (x^2 + 7)}" },
+            { type: 'text', content: '计算根号内的极限：' },
+            { type: 'formula', content: "= \\sqrt{3^2 + 7}" },
+            { type: 'text', content: '完成计算：' },
+            { type: 'formula', content: "= \\sqrt{16} = 4" }
+        ],
+        xRange: [-1, 5], yRange: [0, 8]
+    },
+    {
+        type: 'teaser',
+        title: '思考题 (What If...)',
+        latex: "\\lim\\limits_{x \\to 1} \\frac{x^2 - 1}{x - 1} = ?",
+        text: '如果直接代入，我们会得到 $\\frac{0}{0}$ 的形式。我们的运算法则"失灵"了！<br><br>这种情况我们称之为"<b>0/0 未定式</b>"。此类未定式求法将在《极限求法》章节详细讲解。',
+        func: x => (x === 1) ? NaN : (x*x-1)/(x-1), // Create a hole
+        a: 1,
+        limit: 2,
+        isTeaser: true,
+        xRange: [-2, 4], yRange: [-1, 5]
+    }
+];
+
+// --- APP STATE & ELEMENTS ---
+const slider = document.getElementById('slider-container');
+const pageCounter = document.getElementById('page-counter');
+const template = document.getElementById('slide-template');
+
+let currentSlide = 0;
+const visualizations = [];
+const slideUIs = [];
+
+// --- CORE FUNCTIONS ---
+function createSlides() {
+    slides.forEach((slideData) => {
+        const clone = template.content.cloneNode(true);
+        const problemLayout = clone.querySelector('.problem-layout');
+        const infoLayout = clone.querySelector('.info-layout');
+        
+        if (slideData.type === 'problem' || slideData.type === 'teaser') {
+            infoLayout.remove();
+            problemLayout.classList.remove('hidden');
+            problemLayout.style.display = 'flex';
+
+            const canvas = problemLayout.querySelector('canvas');
+            const titleEl = problemLayout.querySelector('.problem-title');
+            const controlsContainer = problemLayout.querySelector('.controls-container');
+            const solutionContainer = problemLayout.querySelector('.solution-container');
+            const teaserTextEl = problemLayout.querySelector('.teaser-text');
+
+            titleEl.textContent = `$${slideData.latex}$`;
+            
+            if (slideData.func) {
+                visualizations.push(new LimitVisualizer(canvas, slideData));
+            } else { // Handle slides without visualization like counter-examples
+                canvas.parentElement.remove();
+                const contentPanel = problemLayout.querySelector('.w-full.md\\:w-2\\/5');
+                contentPanel.classList.remove('md:w-2/5', 'xl:w-1/3');
+                contentPanel.classList.add('w-full', 'max-w-2xl', 'mx-auto');
+                visualizations.push(null);
+            }
+            
+            const ruleInfo = problemLayout.querySelector('.rule-info');
+            if (slideData.relatedRule) {
+                ruleInfo.querySelector('.rule-name').innerHTML = slideData.relatedRule.name;
+                ruleInfo.querySelector('.rule-formula').innerHTML = slideData.relatedRule.formula;
+                 if (slideData.isCounterExample) {
+                    ruleInfo.querySelector('.rule-name').classList.add('text-red-800');
+                    ruleInfo.querySelector('.rule-formula').classList.add('text-red-900');
+                    ruleInfo.classList.add('bg-red-50', 'border-l-4', 'border-red-400', 'p-3', 'rounded');
+                 }
+            } else {
+                ruleInfo.remove();
+            }
+
+            if(slideData.type === 'teaser') {
+                controlsContainer.remove();
+                solutionContainer.remove();
+                teaserTextEl.innerHTML = slideData.text;
+                slideUIs.push(null);
+            } else {
+                teaserTextEl.remove();
+                slideData.solution.forEach(stepData => {
+                    const stepEl = document.createElement('p');
+                    stepEl.classList.add('solution-step');
+                    if (stepData.type === 'text') {
+                        stepEl.classList.add('text');
+                        stepEl.innerHTML = stepData.content;
+                    } else {
+                        stepEl.classList.add('formula');
+                        stepEl.textContent = `$${stepData.content}$`;
+                    }
+                    solutionContainer.appendChild(stepEl);
+                });
+
+                const solutionBtn = controlsContainer.querySelector('.solution-control-btn');
+                const steps = solutionContainer.querySelectorAll('.solution-step');
+                const uiState = { currentStep: -1, btn: solutionBtn, steps: steps, originalButtonText: '开始解题' };
+                slideUIs.push(uiState);
+
+                solutionBtn.addEventListener('click', () => {
+                    if (uiState.currentStep < steps.length - 1) {
+                        uiState.currentStep++;
+                        steps[uiState.currentStep].classList.add('visible');
+                        uiState.originalButtonText = '下一步';
+                        if (uiState.currentStep === steps.length - 1) uiState.originalButtonText = '重置';
+                    } else {
+                        uiState.currentStep = -1;
+                        steps.forEach(step => step.classList.remove('visible'));
+                        uiState.originalButtonText = '开始解题';
+                    }
+                });
+            }
+        } else {
+            problemLayout.remove();
+            infoLayout.classList.remove('hidden');
+            infoLayout.style.display = 'flex';
+            infoLayout.innerHTML = `<div><h1>${slideData.title}</h1><h2>${slideData.subtitle}</h2></div>`;
+            visualizations.push(null);
+            slideUIs.push(null);
+        }
+        slider.appendChild(clone);
+    });
+    MathJax.typesetPromise();
+}
+
+
+function resetSlideUI(index) {
+    if (!slideUIs[index]) return;
+    const uiState = slideUIs[index];
+    uiState.currentStep = -1;
+    uiState.steps.forEach(step => step.classList.remove('visible'));
+    // No need to change button text here as it's hidden
+}
+
+function goToSlide(index) {
+    if (index < 0 || index >= slides.length) return;
+    
+    if(slideUIs[currentSlide]) resetSlideUI(currentSlide);
+    if(visualizations[currentSlide]) visualizations[currentSlide].stop();
+
+    slider.style.transform = `translateX(-${index * 100}vw)`;
+    currentSlide = index;
+    
+    if(visualizations[currentSlide]) visualizations[currentSlide].start();
+    pageCounter.textContent = `${index + 1} / ${slides.length}`;
+}
+
+// --- VISUALIZATION CLASS ---
+class LimitVisualizer {
+    constructor(canvas, problem) {
+        this.canvas = canvas;
+        this.ctx = canvas.getContext('2d');
+        this.problem = problem;
+        this.animationFrameId = null;
+        this.colors = {
+            process: '#3b82f6',
+            result: '#1f2937',
+            axis: '#9ca3af',
+            guide: '#cbd5e1',
+            labelBg: '#f1f5f9'
+        };
+        this.resetAnimationState();
+    }
+
+    resetAnimationState() {
+        if (!this.problem.xRange) return;
+        const xSpan = this.problem.xRange[1] - this.problem.xRange[0];
+        this.x1 = this.problem.a - xSpan * 0.4;
+        this.x2 = this.problem.a + xSpan * 0.4;
+    }
+
+    start() {
+        this.resetAnimationState();
+        this.animate();
+    }
+
+    stop() {
+        if (this.animationFrameId) {
+            cancelAnimationFrame(this.animationFrameId);
+            this.animationFrameId = null;
+        }
+    }
+
+    animate() {
+        if (!this.problem.a) return;
+        const { a } = this.problem;
+        const approachSpeed = 0.02;
+
+        this.x1 += (a - this.x1) * approachSpeed;
+        this.x2 += (a - this.x2) * approachSpeed;
+
+        this.draw();
+
+        if (Math.abs(a - this.x1) > 0.001) {
+            this.animationFrameId = requestAnimationFrame(() => this.animate());
+        }
+    }
+
+    draw() {
+        const { func, a, limit, xRange, yRange } = this.problem;
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+        const padding = 60;
+        const w = this.canvas.width;
+        const h = this.canvas.height;
+        
+        const toCanvasX = x => padding + (x - xRange[0]) / (xRange[1] - xRange[0]) * (w - 2 * padding);
+        const toCanvasY = y => h - padding - (y - yRange[0]) / (yRange[1] - yRange[0]) * (h - 2 * padding);
+        
+        // 绘制坐标轴（仅当0在范围内时）
+        this.ctx.strokeStyle = this.colors.axis;
+        this.ctx.lineWidth = 1.5;
+        this.ctx.beginPath();
+        
+        // X轴（水平轴）- 仅当y范围包含0时绘制
+        if (yRange[0] <= 0 && yRange[1] >= 0) {
+            this.ctx.moveTo(padding, toCanvasY(0));
+            this.ctx.lineTo(w - padding, toCanvasY(0));
+        }
+        
+        // Y轴（垂直轴）- 仅当x范围包含0时绘制
+        if (xRange[0] <= 0 && xRange[1] >= 0) {
+            this.ctx.moveTo(toCanvasX(0), padding);
+            this.ctx.lineTo(toCanvasX(0), h - padding);
+        }
+        
+        this.ctx.stroke();
+
+        this.ctx.strokeStyle = this.colors.process;
+        this.ctx.lineWidth = 3;
+        this.ctx.beginPath();
+        for (let i = 0; i <= w - 2 * padding; i++) {
+            const x = xRange[0] + i / (w - 2 * padding) * (xRange[1] - xRange[0]);
+            const y = func(x);
+            if (y >= yRange[0] && y <= yRange[1]) {
+                const cx = toCanvasX(x);
+                const cy = toCanvasY(y);
+                 if (i === 0 || !isFinite(toCanvasY(func(xRange[0] + (i-1) / (w - 2 * padding) * (xRange[1] - xRange[0]))))) this.ctx.moveTo(cx, cy); else this.ctx.lineTo(cx, cy);
+            }
+        }
+        this.ctx.stroke();
+
+        const cx1 = toCanvasX(this.x1); const cy1 = toCanvasY(func(this.x1));
+        const cx2 = toCanvasX(this.x2); const cy2 = toCanvasY(func(this.x2));
+        
+        this.drawArrow(toCanvasX(this.x1 - 0.1), toCanvasY(0)+10, cx1, toCanvasY(0)+10, this.colors.process, 2.5);
+        this.drawArrow(toCanvasX(this.x2 + 0.1), toCanvasY(0)+10, cx2, toCanvasY(0)+10, this.colors.process, 2.5);
+
+        const prev_cx1 = toCanvasX(this.x1 - 0.05);
+        const prev_cy1 = toCanvasY(func(this.x1 - 0.05));
+        this.drawArrow(prev_cx1, prev_cy1, cx1, cy1, this.colors.process, 2.5);
+        const prev_cx2 = toCanvasX(this.x2 + 0.05);
+        const prev_cy2 = toCanvasY(func(this.x2 + 0.05));
+        this.drawArrow(prev_cx2, prev_cy2, cx2, cy2, this.colors.process, 2.5);
+
+        const finalX = toCanvasX(a); const finalY = toCanvasY(limit);
+        
+        this.ctx.setLineDash([4, 4]);
+        this.ctx.strokeStyle = this.colors.result;
+        this.ctx.lineWidth = 1;
+        this.ctx.beginPath();
+        this.ctx.moveTo(finalX, padding); this.ctx.lineTo(finalX, finalY);
+        this.ctx.moveTo(w - padding, finalY); this.ctx.lineTo(finalX, finalY);
+        this.ctx.stroke();
+        this.ctx.setLineDash([]);
+        
+        if (this.problem.isTeaser) {
+            this.ctx.strokeStyle = this.colors.result;
+            this.ctx.fillStyle = 'white';
+            this.ctx.lineWidth = 2;
+            this.ctx.beginPath(); this.ctx.arc(finalX, finalY, 7, 0, 2 * Math.PI); this.ctx.fill(); this.ctx.stroke();
+        } else {
+             this.ctx.fillStyle = this.colors.result;
+            this.ctx.beginPath(); this.ctx.arc(finalX, finalY, 8, 0, 2 * Math.PI); this.ctx.fill();
+        }
+        
+        this.ctx.strokeStyle = this.colors.guide;
+        this.ctx.lineWidth = 1;
+        this.ctx.setLineDash([2, 3]);
+        this.ctx.beginPath();
+        this.ctx.moveTo(cx1, toCanvasY(0)); this.ctx.lineTo(cx1, cy1);
+        this.ctx.moveTo(cx2, toCanvasY(0)); this.ctx.lineTo(cx2, cy2);
+        this.ctx.stroke();
+        this.ctx.setLineDash([]);
+        
+        this.drawLabel(`x=${a}`, finalX, toCanvasY(0), 'x');
+        this.drawLabel(`y=${limit}`, toCanvasX(0), finalY, 'y');
+    }
+    
+    drawArrow(fromx, fromy, tox, toy, color, lw) {
+        if (!isFinite(fromx) || !isFinite(fromy) || !isFinite(tox) || !isFinite(toy)) return;
+        const headlen = 10;
+        const dx = tox - fromx;
+        const dy = toy - fromy;
+        const angle = Math.atan2(dy, dx);
+        this.ctx.strokeStyle = color; this.ctx.lineWidth = lw;
+        this.ctx.beginPath();
+        this.ctx.moveTo(fromx, fromy); this.ctx.lineTo(tox, toy);
+        this.ctx.lineTo(tox - headlen * Math.cos(angle - Math.PI / 6), toy - headlen * Math.sin(angle - Math.PI / 6));
+        this.ctx.moveTo(tox, toy);
+        this.ctx.lineTo(tox - headlen * Math.cos(angle + Math.PI / 6), toy - headlen * Math.sin(angle + Math.PI / 6));
+        this.ctx.stroke();
+    }
+
+    drawLabel(text, x, y, axis = 'x') {
+        this.ctx.font = '500 14px sans-serif';
+        const textMetrics = this.ctx.measureText(text);
+        const textWidth = textMetrics.width;
+        const textHeight = 14; 
+        const hPadding = 8;
+        const vPadding = 4;
+        
+        let rectX, rectY;
+        
+        if (axis === 'x') {
+            rectX = x - (textWidth / 2) - hPadding;
+            rectY = y - (textHeight / 2) - vPadding - 5;
+            this.ctx.textAlign = 'center';
+            this.ctx.textBaseline = 'middle';
+        } else {
+            rectX = x - textWidth - hPadding * 2 + 5;
+            rectY = y - (textHeight / 2) - vPadding;
+            this.ctx.textAlign = 'right';
+            this.ctx.textBaseline = 'middle';
+        }
+
+        this.ctx.fillStyle = this.colors.labelBg;
+        this.ctx.beginPath();
+        this.ctx.roundRect(rectX, rectY, textWidth + hPadding * 2, textHeight + vPadding * 2, 8);
+        this.ctx.fill();
+
+        this.ctx.fillStyle = this.colors.result;
+        if(axis === 'x'){
+            this.ctx.fillText(text, x, y - 5);
+        } else {
+            this.ctx.fillText(text, x + 5 - hPadding, y);
+        }
+    }
+}
+
+// --- INITIALIZATION ---
+function init() {
+    createSlides();
+    // Use requestAnimationFrame to ensure the DOM is painted before MathJax runs
+    requestAnimationFrame(() => {
+        MathJax.typesetPromise().then(() => {
+            goToSlide(0);
+            document.addEventListener('keydown', (e) => {
+                if(e.key === 'ArrowRight') goToSlide(currentSlide + 1);
+                if(e.key === 'ArrowLeft') goToSlide(currentSlide - 1);
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault(); // Prevent page scrolling
+                    const uiState = slideUIs[currentSlide];
+                    if (uiState && uiState.btn) {
+                        uiState.btn.click();
+                    }
+                }
+            });
+        });
+    });
+}
+
+document.addEventListener('MathJaxReady', init);
+
+</script>
+</body>
+</html>

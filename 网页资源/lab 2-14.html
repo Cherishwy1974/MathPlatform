@@ -1,0 +1,1524 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>直接代入法求极限 - 互动游戏</title>
+    
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            startup: {
+                pageReady: () => {
+                    return MathJax.startup.defaultPageReady().then(() => {
+                        console.log('MathJax加载完成');
+                    });
+                }
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+            }
+        };
+    </script>
+    <script defer src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
+            background: #ffffff;
+            color: #2c3e50;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100vw;
+            height: 100vh;
+            margin: 0 auto;
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+            padding: 20px;
+        }
+
+        .left-panel {
+            flex: 0 0 45%;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
+        }
+
+        .question-area {
+            text-align: center;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .question {
+            font-size: 28px;
+            color: #1a202c;
+            opacity: 0;
+            animation: fadeInDown 0.6s ease forwards;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .steps-container {
+            flex: 1;
+        }
+
+        .right-panel {
+            flex: 0 0 55%;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            height: calc(100vh - 40px);
+        }
+
+        .graph-container {
+            width: 100%;
+            height: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            animation: fadeIn 0.8s ease 0.3s forwards;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            background: #ffffff;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .graph-container canvas {
+            width: 100%;
+            height: 100%;
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        .step {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            margin: 10px 0;
+            border-radius: 12px;
+            font-size: 18px;
+            text-align: center;
+            opacity: 0;
+            transform: translateX(-30px);
+            transition: all 0.5s ease;
+        }
+
+        .step.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .step.highlight {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+
+        .arrow {
+            position: absolute;
+            transition: all 0.3s ease;
+        }
+
+
+        .keyboard-hint {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(15, 23, 42, 0.8);
+            color: #f8fafc;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: 14px;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .keyboard-hint div {
+            margin: 4px 0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                height: auto;
+            }
+
+            .left-panel {
+                flex: none;
+                max-height: none;
+            }
+
+            .right-panel {
+                flex: none;
+                height: 400px;
+            }
+
+            .question {
+                font-size: 24px;
+            }
+
+            .graph-container {
+                height: 350px;
+            }
+
+            .step {
+                font-size: 16px;
+                padding: 12px 16px;
+            }
+        }
+
+        .return-home-panel { position: fixed; bottom: 12px; right: 12px; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; z-index: 40; }
+        .return-toggle { width: 40px; height: 40px; border-radius: 50%; border: none; background: linear-gradient(135deg, rgba(79,70,229,0.96), rgba(99,102,241,0.9)); color: #fff; font-size: 20px; cursor: pointer; box-shadow: 0 10px 18px rgba(79,70,229,0.28); transition: transform 0.2s, box-shadow 0.2s; }
+        .return-toggle:hover { transform: translateY(-1px) scale(1.03); box-shadow: 0 14px 26px rgba(79,70,229,0.35); }
+        .return-links { display: none; flex-direction: column; gap: 6px; padding: 10px; border-radius: 10px; background: rgba(255,255,255,0.96); border: 1px solid rgba(79,70,229,0.18); box-shadow: 0 10px 30px rgba(15,23,42,0.14); opacity: 0; transition: opacity 0.16s; }
+        .return-link { text-decoration: none; font-size: 15px; color: #3730a3; padding: 6px 12px; border-radius: 8px; background: rgba(99,102,241,0.12); transition: background 0.2s; }
+        .return-link:hover { background: rgba(79,70,229,0.18); }
+    </style>
+</head>
+<body>
+    <div class="return-home-panel"><button class="return-toggle" onclick="toggleReturnLinks()"><i class="fa-solid fa-house"></i></button><div class="return-links"><a class="return-link" href="index.html"><i class="fa-solid fa-arrow-left"></i> 返回目录</a><a class="return-link" href="../index.html"><i class="fa-solid fa-house"></i> 返回主站</a></div></div>
+    <div class="container">
+        <div class="left-panel">
+            <div class="question-area">
+                <div class="question" id="question">
+                    $$\lim\limits_{x \to 2} (3x^2 - 5x + 1)$$
+                </div>
+            </div>
+
+            <div class="steps-container" id="stepsContainer">
+                <div class="step" id="step0">
+                    <strong>步骤1：</strong>检查函数在 $x=2$ 处是否连续
+                </div>
+                <div class="step" id="step1">
+                    <strong>步骤2：</strong>函数 $f(x) = 3x^2 - 5x + 1$ 是多项式，在 $x=2$ 处连续
+                </div>
+                <div class="step" id="step2">
+                    <strong>步骤3：</strong>直接将 $x=2$ 代入函数
+                </div>
+                <div class="step" id="step3">
+                    $f(2) = 3 \times 2^2 - 5 \times 2 + 1$
+                </div>
+                <div class="step" id="step4">
+                    $= 3 \times 4 - 10 + 1$
+                </div>
+                <div class="step" id="step5">
+                    $= 12 - 10 + 1 = 3$
+                </div>
+                <div class="step highlight" id="step6">
+                    <strong>答案：</strong>$\lim\limits_{x \to 2} (3x^2 - 5x + 1) = 3$
+                </div>
+            </div>
+        </div>
+
+        <div class="right-panel">
+            <div class="graph-container">
+                <canvas id="graphCanvas" width="800" height="500"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 用户要求：动画设计要显示x和y的同时趋近
+        // x趋近：在x轴上显示箭头从左右趋近
+        // y趋近：在函数图像上显示点的移动
+        let currentStep = -1;
+        let animationXLeft = 0;   // 左侧x值
+        let animationXRight = 0;  // 右侧x值
+        let targetX = 2;          // 目标x值
+        let animationRunning = false;
+
+        const questions = [
+            {
+                question: '\\lim\\limits_{x \\to 2} (3x^2 - 5x + 1)',
+                func: x => 3*x*x - 5*x + 1,
+                target: 2,
+                steps: [
+                    '步骤1：检查函数在 $x=2$ 处是否连续',
+                    '步骤2：函数 $f(x) = 3x^2 - 5x + 1$ 是多项式，在 $x=2$ 处连续',
+                    '步骤3：直接将 $x=2$ 代入函数',
+                    '$f(2) = 3 \\times 2^2 - 5 \\times 2 + 1$',
+                    '$= 3 \\times 4 - 10 + 1$',
+                    '$= 12 - 10 + 1 = 3$',
+                    '<strong>答案：</strong>$\\lim\\limits_{x \\to 2} (3x^2 - 5x + 1) = 3$'
+                ]
+            },
+            {
+                question: '\\lim\\limits_{x \\to 1} (2x^3 + 3x - 1)',
+                func: x => 2*x*x*x + 3*x - 1,
+                target: 1,
+                steps: [
+                    '步骤1：检查函数在 $x=1$ 处是否连续',
+                    '步骤2：函数 $f(x) = 2x^3 + 3x - 1$ 是多项式，在 $x=1$ 处连续',
+                    '步骤3：直接将 $x=1$ 代入函数',
+                    '$f(1) = 2 \\times 1^3 + 3 \\times 1 - 1$',
+                    '$= 2 + 3 - 1 = 4$',
+                    '<strong>答案：</strong>$\\lim\\limits_{x \\to 1} (2x^3 + 3x - 1) = 4$'
+                ]
+            },
+            {
+                question: '\\lim\\limits_{x \\to 3} \\frac{x^2 + 2x - 3}{x + 1}',
+                func: x => (x*x + 2*x - 3)/(x + 1),
+                target: 3,
+                steps: [
+                    '步骤1：检查分母在 $x=3$ 处是否为零',
+                    '步骤2：$x+1|_{x=3} = 4 \\neq 0$，函数在 $x=3$ 处连续',
+                    '步骤3：直接将 $x=3$ 代入函数',
+                    '$f(3) = \\frac{3^2 + 2 \\times 3 - 3}{3 + 1}$',
+                    '$= \\frac{9 + 6 - 3}{4}$',
+                    '$= \\frac{12}{4} = 3$',
+                    '<strong>答案：</strong>$\\lim\\limits_{x \\to 3} \\frac{x^2 + 2x - 3}{x + 1} = 3$'
+                ]
+            },
+            {
+                question: '\\lim\\limits_{x \\to 0} \\sin(2x + \\frac{\\pi}{4})',
+                func: x => Math.sin(2*x + Math.PI/4),
+                target: 0,
+                steps: [
+                    '步骤1：检查三角函数在 $x=0$ 处是否连续',
+                    '步骤2：$\\sin(x)$ 在全体实数上连续',
+                    '步骤3：直接将 $x=0$ 代入函数',
+                    '$f(0) = \\sin(2 \\times 0 + \\frac{\\pi}{4})$',
+                    '$= \\sin(\\frac{\\pi}{4}) = \\frac{\\sqrt{2}}{2}$',
+                    '<strong>答案：</strong>$\\lim\\limits_{x \\to 0} \\sin(2x + \\frac{\\pi}{4}) = \\frac{\\sqrt{2}}{2}$'
+                ]
+            },
+            {
+                question: '\\lim\\limits_{x \\to -1} (x^4 - 2x^2 + 5)',
+                func: x => x*x*x*x - 2*x*x + 5,
+                target: -1,
+                steps: [
+                    '步骤1：检查函数在 $x=-1$ 处是否连续',
+                    '步骤2：函数 $f(x) = x^4 - 2x^2 + 5$ 是多项式，在 $x=-1$ 处连续',
+                    '步骤3：直接将 $x=-1$ 代入函数',
+                    '$f(-1) = (-1)^4 - 2 \\times (-1)^2 + 5$',
+                    '$= 1 - 2 + 5 = 4$',
+                    '<strong>答案：</strong>$\\lim\\limits_{x \\to -1} (x^4 - 2x^2 + 5) = 4$'
+                ]
+            },
+            // 新增题目6-20：多项式函数
+            {
+                question: '\\lim\\limits_{x \\to 2} (x^2 + 3x - 2)',
+                func: x => x*x + 3*x - 2,
+                target: 2,
+                steps: [
+                    '步骤1：检查函数在 $x=2$ 处是否连续',
+                    '步骤2：函数 $f(x) = x^2 + 3x - 2$ 是多项式，在 $x=2$ 处连续',
+                    '步骤3：直接将 $x=2$ 代入函数',
+                    '$f(2) = 2^2 + 3 \\times 2 - 2 = 4 + 6 - 2 = 8$',
+                    '<strong>答案：</strong>$\\lim\\limits_{x \\to 2} (x^2 + 3x - 2) = 8$'
+                ]
+            },
+            {
+                question: '\\lim\\limits_{x \\to 1} (4x^3 - 2x + 5)',
+                func: x => 4*x*x*x - 2*x + 5,
+                target: 1,
+                steps: [
+                    '步骤1：检查函数在 $x=1$ 处是否连续',
+                    '步骤2：函数 $f(x) = 4x^3 - 2x + 5$ 是多项式，在 $x=1$ 处连续',
+                    '步骤3：直接将 $x=1$ 代入函数',
+                    '$f(1) = 4 \\times 1^3 - 2 \\times 1 + 5 = 4 - 2 + 5 = 7$',
+                    '<strong>答案：</strong>$\\lim\\limits_{x \\to 1} (4x^3 - 2x + 5) = 7$'
+                ]
+            },
+            {
+                question: '\\lim\\limits_{x \\to 0} (5x^2 + 2x + 3)',
+                func: x => 5*x*x + 2*x + 3,
+                target: 0,
+                steps: [
+                    '步骤1：检查函数在 $x=0$ 处是否连续',
+                    '步骤2：函数 $f(x) = 5x^2 + 2x + 3$ 是多项式，在 $x=0$ 处连续',
+                    '步骤3：直接将 $x=0$ 代入函数',
+                    '$f(0) = 5 \\times 0^2 + 2 \\times 0 + 3 = 3$',
+                    '<strong>答案：</strong>$\\lim\\limits_{x \\to 0} (5x^2 + 2x + 3) = 3$'
+                ]
+            },
+            {
+                question: '\\lim\\limits_{x \\to -2} (x^3 + 4x^2 - x + 1)',
+                func: x => x*x*x + 4*x*x - x + 1,
+                target: -2,
+                steps: [
+                    '步骤1：检查函数在 $x=-2$ 处是否连续',
+                    '步骤2：函数 $f(x) = x^3 + 4x^2 - x + 1$ 是多项式，在 $x=-2$ 处连续',
+                    '步骤3：直接将 $x=-2$ 代入函数',
+                    '$f(-2) = (-2)^3 + 4 \\times (-2)^2 - (-2) + 1$',
+                    '$= -8 + 16 + 2 + 1 = 11$',
+                    '<strong>答案：</strong>$\\lim\\limits_{x \\to -2} (x^3 + 4x^2 - x + 1) = 11$'
+                ]
+            },
+            {
+                question: '\\lim\\limits_{x \\to 3} (2x^2 - 7x + 3)',
+                func: x => 2*x*x - 7*x + 3,
+                target: 3,
+                steps: [
+                    '步骤1：检查函数在 $x=3$ 处是否连续',
+                    '步骤2：函数 $f(x) = 2x^2 - 7x + 3$ 是多项式，在 $x=3$ 处连续',
+                    '步骤3：直接将 $x=3$ 代入函数',
+                    '$f(3) = 2 \\times 3^2 - 7 \\times 3 + 3 = 18 - 21 + 3 = 0$',
+                    '<strong>答案：</strong>$\\lim\\limits_{x \\to 3} (2x^2 - 7x + 3) = 0$'
+                ]
+            },
+            {
+                question: '\\lim\\limits_{x \\to 1} (x^4 + x^3 - 3x + 2)',
+                func: x => x*x*x*x + x*x*x - 3*x + 2,
+                target: 1,
+                steps: [
+                    '步骤1：检查函数在 $x=1$ 处是否连续',
+                    '步骤2：函数 $f(x) = x^4 + x^3 - 3x + 2$ 是多项式，在 $x=1$ 处连续',
+                    '步骤3：直接将 $x=1$ 代入函数',
+                    '$f(1) = 1^4 + 1^3 - 3 \\times 1 + 2 = 1 + 1 - 3 + 2 = 1$',
+                    '<strong>答案：</strong>$\\lim\\limits_{x \\to 1} (x^4 + x^3 - 3x + 2) = 1$'
+                ]
+            },
+            {
+                question: '\\lim\\limits_{x \\to -1} (3x^2 + 5x - 1)',
+                func: x => 3*x*x + 5*x - 1,
+                target: -1,
+                steps: [
+                    '步骤1：检查函数在 $x=-1$ 处是否连续',
+                    '步骤2：函数 $f(x) = 3x^2 + 5x - 1$ 是多项式，在 $x=-1$ 处连续',
+                    '步骤3：直接将 $x=-1$ 代入函数',
+                    '$f(-1) = 3 \\times (-1)^2 + 5 \\times (-1) - 1 = 3 - 5 - 1 = -3$',
+                    '<strong>答案：</strong>$\\lim\\limits_{x \\to -1} (3x^2 + 5x - 1) = -3$'
+                ]
+            },
+            {
+                question: '\\lim\\limits_{x \\to 2} (x^3 - 3x^2 + 4)',
+                func: x => x*x*x - 3*x*x + 4,
+                target: 2,
+                steps: [
+                    '步骤1：检查函数在 $x=2$ 处是否连续',
+                    '步骤2：函数 $f(x) = x^3 - 3x^2 + 4$ 是多项式，在 $x=2$ 处连续',
+                    '步骤3：直接将 $x=2$ 代入函数',
+                    '$f(2) = 2^3 - 3 \\times 2^2 + 4 = 8 - 12 + 4 = 0$',
+                    '<strong>答案：</strong>$\\lim\\limits_{x \\to 2} (x^3 - 3x^2 + 4) = 0$'
+                ]
+            },
+            {
+                question: '\\lim\\limits_{x \\to 0} (6x^2 - 4x + 7)',
+                func: x => 6*x*x - 4*x + 7,
+                target: 0,
+                steps: [
+                    '步骤1：检查函数在 $x=0$ 处是否连续',
+                    '步骤2：函数 $f(x) = 6x^2 - 4x + 7$ 是多项式，在 $x=0$ 处连续',
+                    '步骤3：直接将 $x=0$ 代入函数',
+                    '$f(0) = 6 \\times 0^2 - 4 \\times 0 + 7 = 7$',
+                    '<strong>答案：</strong>$\\lim\\limits_{x \\to 0} (6x^2 - 4x + 7) = 7$'
+                ]
+            },
+            {
+                question: '\\lim\\limits_{x \\to 1} (2x^4 - 5x^2 + 3)',
+                func: x => 2*x*x*x*x - 5*x*x + 3,
+                target: 1,
+                steps: [
+                    '步骤1：检查函数在 $x=1$ 处是否连续',
+                    '步骤2：函数 $f(x) = 2x^4 - 5x^2 + 3$ 是多项式，在 $x=1$ 处连续',
+                    '步骤3：直接将 $x=1$ 代入函数',
+                    '$f(1) = 2 \\times 1^4 - 5 \\times 1^2 + 3 = 2 - 5 + 3 = 0$',
+                    '<strong>答案：</strong>$\\lim\\limits_{x \\to 1} (2x^4 - 5x^2 + 3) = 0$'
+                ]
+            },
+            // 新增题目16-30：分式函数
+            {
+                question: '\\lim\\limits_{x \\to 2} \\frac{x^2 + 3x + 2}{x + 3}',
+                func: x => (x*x + 3*x + 2)/(x + 3),
+                target: 2,
+                steps: [
+                    '步骤1：检查分母在 $x=2$ 处是否为零',
+                    '步骤2：$x+3|_{x=2} = 5 \\neq 0$，函数在 $x=2$ 处连续',
+                    '步骤3：直接将 $x=2$ 代入函数',
+                    '$f(2) = \\frac{2^2 + 3 \\times 2 + 2}{2 + 3} = \\frac{4 + 6 + 2}{5} = \\frac{12}{5}$',
+                    '<strong>答案：</strong>$\\lim\\limits_{x \\to 2} \\frac{x^2 + 3x + 2}{x + 3} = \\frac{12}{5} = 2.4$'
+                ]
+            },
+            {
+                question: '\\lim\\limits_{x \\to 1} \\frac{2x^2 - x + 3}{x^2 + 1}',
+                func: x => (2*x*x - x + 3)/(x*x + 1),
+                target: 1,
+                steps: [
+                    '步骤1：检查分母在 $x=1$ 处是否为零',
+                    '步骤2：$x^2+1|_{x=1} = 2 \\neq 0$，函数在 $x=1$ 处连续',
+                    '步骤3：直接将 $x=1$ 代入函数',
+                    '$f(1) = \\frac{2 \\times 1^2 - 1 + 3}{1^2 + 1} = \\frac{2 - 1 + 3}{2} = \\frac{4}{2} = 2$',
+                    '<strong>答案：</strong>$\\lim\\limits_{x \\to 1} \\frac{2x^2 - x + 3}{x^2 + 1} = 2$'
+                ]
+            },
+            {
+                question: '\\lim\\limits_{x \\to 0} \\frac{3x + 5}{2x + 1}',
+                func: x => (3*x + 5)/(2*x + 1),
+                target: 0,
+                steps: [
+                    '步骤1：检查分母在 $x=0$ 处是否为零',
+                    '步骤2：$2x+1|_{x=0} = 1 \\neq 0$，函数在 $x=0$ 处连续',
+                    '步骤3：直接将 $x=0$ 代入函数',
+                    '$f(0) = \\frac{3 \\times 0 + 5}{2 \\times 0 + 1} = \\frac{5}{1} = 5$',
+                    '<strong>答案：</strong>$\\lim\\limits_{x \\to 0} \\frac{3x + 5}{2x + 1} = 5$'
+                ]
+            },
+            {
+                question: '\\lim\\limits_{x \\to -1} \\frac{x^2 - 4}{x - 2}',
+                func: x => (x*x - 4)/(x - 2),
+                target: -1,
+                steps: [
+                    '步骤1：检查分母在 $x=-1$ 处是否为零',
+                    '步骤2：$x-2|_{x=-1} = -3 \\neq 0$，函数在 $x=-1$ 处连续',
+                    '步骤3：直接将 $x=-1$ 代入函数',
+                    '$f(-1) = \\frac{(-1)^2 - 4}{-1 - 2} = \\frac{1 - 4}{-3} = \\frac{-3}{-3} = 1$',
+                    '<strong>答案：</strong>$\\lim\\limits_{x \\to -1} \\frac{x^2 - 4}{x - 2} = 1$'
+                ]
+            },
+            {
+                question: '\\lim\\limits_{x \\to 3} \\frac{x^2 - 1}{2x + 1}',
+                func: x => (x*x - 1)/(2*x + 1),
+                target: 3,
+                steps: [
+                    '步骤1：检查分母在 $x=3$ 处是否为零',
+                    '步骤2：$2x+1|_{x=3} = 7 \\neq 0$，函数在 $x=3$ 处连续',
+                    '步骤3：直接将 $x=3$ 代入函数',
+                    '$f(3) = \\frac{3^2 - 1}{2 \\times 3 + 1} = \\frac{9 - 1}{7} = \\frac{8}{7}$',
+                    '<strong>答案：</strong>$\\lim\\limits_{x \\to 3} \\frac{x^2 - 1}{2x + 1} = \\frac{8}{7} \\approx 1.14$'
+                ]
+            },
+            {
+                question: '\\lim\\limits_{x \\to 1} \\frac{x^3 + 2x}{x + 2}',
+                func: x => (x*x*x + 2*x)/(x + 2),
+                target: 1,
+                steps: [
+                    '步骤1：检查分母在 $x=1$ 处是否为零',
+                    '步骤2：$x+2|_{x=1} = 3 \\neq 0$，函数在 $x=1$ 处连续',
+                    '步骤3：直接将 $x=1$ 代入函数',
+                    '$f(1) = \\frac{1^3 + 2 \\times 1}{1 + 2} = \\frac{1 + 2}{3} = \\frac{3}{3} = 1$',
+                    '<strong>答案：</strong>$\\lim\\limits_{x \\to 1} \\frac{x^3 + 2x}{x + 2} = 1$'
+                ]
+            },
+            {
+                question: '\\lim\\limits_{x \\to 2} \\frac{4x - 3}{x^2 + 1}',
+                func: x => (4*x - 3)/(x*x + 1),
+                target: 2,
+                steps: [
+                    '步骤1：检查分母在 $x=2$ 处是否为零',
+                    '步骤2：$x^2+1|_{x=2} = 5 \\neq 0$，函数在 $x=2$ 处连续',
+                    '步骤3：直接将 $x=2$ 代入函数',
+                    '$f(2) = \\frac{4 \\times 2 - 3}{2^2 + 1} = \\frac{8 - 3}{5} = \\frac{5}{5} = 1$',
+                    '<strong>答案：</strong>$\\lim\\limits_{x \\to 2} \\frac{4x - 3}{x^2 + 1} = 1$'
+                ]
+            },
+            {
+                question: '\\lim\\limits_{x \\to 0} \\frac{x^2 + 2x + 4}{x + 1}',
+                func: x => (x*x + 2*x + 4)/(x + 1),
+                target: 0,
+                steps: [
+                    '步骤1：检查分母在 $x=0$ 处是否为零',
+                    '步骤2：$x+1|_{x=0} = 1 \\neq 0$，函数在 $x=0$ 处连续',
+                    '步骤3：直接将 $x=0$ 代入函数',
+                    '$f(0) = \\frac{0^2 + 2 \\times 0 + 4}{0 + 1} = \\frac{4}{1} = 4$',
+                    '<strong>答案：</strong>$\\lim\\limits_{x \\to 0} \\frac{x^2 + 2x + 4}{x + 1} = 4$'
+                ]
+            },
+            {
+                question: '\\lim\\limits_{x \\to -2} \\frac{3x^2 + x - 1}{x + 3}',
+                func: x => (3*x*x + x - 1)/(x + 3),
+                target: -2,
+                steps: [
+                    '步骤1：检查分母在 $x=-2$ 处是否为零',
+                    '步骤2：$x+3|_{x=-2} = 1 \\neq 0$，函数在 $x=-2$ 处连续',
+                    '步骤3：直接将 $x=-2$ 代入函数',
+                    '$f(-2) = \\frac{3 \\times (-2)^2 + (-2) - 1}{-2 + 3} = \\frac{12 - 2 - 1}{1} = 9$',
+                    '<strong>答案：</strong>$\\lim\\limits_{x \\to -2} \\frac{3x^2 + x - 1}{x + 3} = 9$'
+                ]
+            },
+            {
+                question: '\\lim\\limits_{x \\to 1} \\frac{5x + 2}{3x - 1}',
+                func: x => (5*x + 2)/(3*x - 1),
+                target: 1,
+                steps: [
+                    '步骤1：检查分母在 $x=1$ 处是否为零',
+                    '步骤2：$3x-1|_{x=1} = 2 \\neq 0$，函数在 $x=1$ 处连续',
+                    '步骤3：直接将 $x=1$ 代入函数',
+                    '$f(1) = \\frac{5 \\times 1 + 2}{3 \\times 1 - 1} = \\frac{7}{2} = 3.5$',
+                    '<strong>答案：</strong>$\\lim\\limits_{x \\to 1} \\frac{5x + 2}{3x - 1} = 3.5$'
+                ]
+            },
+            // 新增题目31-45：三角函数
+            {
+                question: '\\lim\\limits_{x \\to 0} \\cos(x)',
+                func: x => Math.cos(x),
+                target: 0,
+                steps: [
+                    '步骤1：检查三角函数在 $x=0$ 处是否连续',
+                    '步骤2：$\\cos(x)$ 在全体实数上连续',
+                    '步骤3：直接将 $x=0$ 代入函数',
+                    '$f(0) = \\cos(0) = 1$',
+                    '<strong>答案：</strong>$\\lim\\limits_{x \\to 0} \\cos(x) = 1$'
+                ]
+            },
+            {
+                question: '\\lim\\limits_{x \\to 0} \\sin(x)',
+                func: x => Math.sin(x),
+                target: 0,
+                steps: [
+                    '步骤1：检查三角函数在 $x=0$ 处是否连续',
+                    '步骤2：$\\sin(x)$ 在全体实数上连续',
+                    '步骤3：直接将 $x=0$ 代入函数',
+                    '$f(0) = \\sin(0) = 0$',
+                    '<strong>答案：</strong>$\\lim\\limits_{x \\to 0} \\sin(x) = 0$'
+                ]
+            },
+            {
+                question: '\\lim\\limits_{x \\to 1} \\sin(\\pi x)',
+                func: x => Math.sin(Math.PI * x),
+                target: 1,
+                steps: [
+                    '步骤1：检查三角函数在 $x=1$ 处是否连续',
+                    '步骤2：$\\sin(\\pi x)$ 在全体实数上连续',
+                    '步骤3：直接将 $x=1$ 代入函数',
+                    '$f(1) = \\sin(\\pi \\times 1) = \\sin(\\pi) = 0$',
+                    '<strong>答案：</strong>$\\lim\\limits_{x \\to 1} \\sin(\\pi x) = 0$'
+                ]
+            },
+            {
+                question: '\\lim\\limits_{x \\to 0} \\cos(2x)',
+                func: x => Math.cos(2*x),
+                target: 0,
+                steps: [
+                    '步骤1：检查三角函数在 $x=0$ 处是否连续',
+                    '步骤2：$\\cos(2x)$ 在全体实数上连续',
+                    '步骤3：直接将 $x=0$ 代入函数',
+                    '$f(0) = \\cos(2 \\times 0) = \\cos(0) = 1$',
+                    '<strong>答案：</strong>$\\lim\\limits_{x \\to 0} \\cos(2x) = 1$'
+                ]
+            },
+            {
+                question: '\\lim\\limits_{x \\to 1} (2\\sin(x) + 3)',
+                func: x => 2*Math.sin(x) + 3,
+                target: 1,
+                steps: [
+                    '步骤1：检查函数在 $x=1$ 处是否连续',
+                    '步骤2：$2\\sin(x) + 3$ 在全体实数上连续',
+                    '步骤3：直接将 $x=1$ 代入函数',
+                    '$f(1) = 2\\sin(1) + 3 \\approx 2 \\times 0.841 + 3 = 4.68$',
+                    '<strong>答案：</strong>$\\lim\\limits_{x \\to 1} (2\\sin(x) + 3) \\approx 4.68$'
+                ]
+            },
+            {
+                question: '\\lim\\limits_{x \\to 0} (3\\cos(x) - 1)',
+                func: x => 3*Math.cos(x) - 1,
+                target: 0,
+                steps: [
+                    '步骤1：检查函数在 $x=0$ 处是否连续',
+                    '步骤2：$3\\cos(x) - 1$ 在全体实数上连续',
+                    '步骤3：直接将 $x=0$ 代入函数',
+                    '$f(0) = 3\\cos(0) - 1 = 3 \\times 1 - 1 = 2$',
+                    '<strong>答案：</strong>$\\lim\\limits_{x \\to 0} (3\\cos(x) - 1) = 2$'
+                ]
+            },
+            {
+                question: '\\lim\\limits_{x \\to 0} \\sin(3x)',
+                func: x => Math.sin(3*x),
+                target: 0,
+                steps: [
+                    '步骤1：检查三角函数在 $x=0$ 处是否连续',
+                    '步骤2：$\\sin(3x)$ 在全体实数上连续',
+                    '步骤3：直接将 $x=0$ 代入函数',
+                    '$f(0) = \\sin(3 \\times 0) = \\sin(0) = 0$',
+                    '<strong>答案：</strong>$\\lim\\limits_{x \\to 0} \\sin(3x) = 0$'
+                ]
+            },
+            {
+                question: '\\lim\\limits_{x \\to 1} \\cos(\\pi x + 1)',
+                func: x => Math.cos(Math.PI * x + 1),
+                target: 1,
+                steps: [
+                    '步骤1：检查三角函数在 $x=1$ 处是否连续',
+                    '步骤2：$\\cos(\\pi x + 1)$ 在全体实数上连续',
+                    '步骤3：直接将 $x=1$ 代入函数',
+                    '$f(1) = \\cos(\\pi + 1) \\approx \\cos(4.14) \\approx -0.54$',
+                    '<strong>答案：</strong>$\\lim\\limits_{x \\to 1} \\cos(\\pi x + 1) \\approx -0.54$'
+                ]
+            },
+            {
+                question: '\\lim\\limits_{x \\to 0} (x + \\sin(x))',
+                func: x => x + Math.sin(x),
+                target: 0,
+                steps: [
+                    '步骤1：检查函数在 $x=0$ 处是否连续',
+                    '步骤2：$x + \\sin(x)$ 在全体实数上连续',
+                    '步骤3：直接将 $x=0$ 代入函数',
+                    '$f(0) = 0 + \\sin(0) = 0 + 0 = 0$',
+                    '<strong>答案：</strong>$\\lim\\limits_{x \\to 0} (x + \\sin(x)) = 0$'
+                ]
+            },
+            {
+                question: '\\lim\\limits_{x \\to 1} (x^2 + \\cos(x))',
+                func: x => x*x + Math.cos(x),
+                target: 1,
+                steps: [
+                    '步骤1：检查函数在 $x=1$ 处是否连续',
+                    '步骤2：$x^2 + \\cos(x)$ 在全体实数上连续',
+                    '步骤3：直接将 $x=1$ 代入函数',
+                    '$f(1) = 1^2 + \\cos(1) \\approx 1 + 0.540 = 1.54$',
+                    '<strong>答案：</strong>$\\lim\\limits_{x \\to 1} (x^2 + \\cos(x)) \\approx 1.54$'
+                ]
+            },
+            // 新增题目46-60：指数、对数、根式函数
+            {
+                question: '\\lim\\limits_{x \\to 0} e^x',
+                func: x => Math.exp(x),
+                target: 0,
+                steps: [
+                    '步骤1：检查指数函数在 $x=0$ 处是否连续',
+                    '步骤2：$e^x$ 在全体实数上连续',
+                    '步骤3：直接将 $x=0$ 代入函数',
+                    '$f(0) = e^0 = 1$',
+                    '<strong>答案：</strong>$\\lim\\limits_{x \\to 0} e^x = 1$'
+                ]
+            },
+            {
+                question: '\\lim\\limits_{x \\to 1} e^{2x}',
+                func: x => Math.exp(2*x),
+                target: 1,
+                steps: [
+                    '步骤1：检查指数函数在 $x=1$ 处是否连续',
+                    '步骤2：$e^{2x}$ 在全体实数上连续',
+                    '步骤3：直接将 $x=1$ 代入函数',
+                    '$f(1) = e^{2 \\times 1} = e^2 \\approx 7.39$',
+                    '<strong>答案：</strong>$\\lim\\limits_{x \\to 1} e^{2x} \\approx 7.39$'
+                ]
+            },
+            {
+                question: '\\lim\\limits_{x \\to 1} \\ln(x + 1)',
+                func: x => Math.log(x + 1),
+                target: 1,
+                steps: [
+                    '步骤1：检查对数函数在 $x=1$ 处是否连续',
+                    '步骤2：$x+1|_{x=1} = 2 > 0$，$\\ln(x+1)$ 在 $x=1$ 处连续',
+                    '步骤3：直接将 $x=1$ 代入函数',
+                    '$f(1) = \\ln(1 + 1) = \\ln(2) \\approx 0.693$',
+                    '<strong>答案：</strong>$\\lim\\limits_{x \\to 1} \\ln(x + 1) \\approx 0.693$'
+                ]
+            },
+            {
+                question: '\\lim\\limits_{x \\to 0} (e^x + x)',
+                func: x => Math.exp(x) + x,
+                target: 0,
+                steps: [
+                    '步骤1：检查函数在 $x=0$ 处是否连续',
+                    '步骤2：$e^x + x$ 在全体实数上连续',
+                    '步骤3：直接将 $x=0$ 代入函数',
+                    '$f(0) = e^0 + 0 = 1 + 0 = 1$',
+                    '<strong>答案：</strong>$\\lim\\limits_{x \\to 0} (e^x + x) = 1$'
+                ]
+            },
+            {
+                question: '\\lim\\limits_{x \\to 2} \\ln(x)',
+                func: x => Math.log(x),
+                target: 2,
+                steps: [
+                    '步骤1：检查对数函数在 $x=2$ 处是否连续',
+                    '步骤2：$x|_{x=2} = 2 > 0$，$\\ln(x)$ 在 $x=2$ 处连续',
+                    '步骤3：直接将 $x=2$ 代入函数',
+                    '$f(2) = \\ln(2) \\approx 0.693$',
+                    '<strong>答案：</strong>$\\lim\\limits_{x \\to 2} \\ln(x) \\approx 0.693$'
+                ]
+            },
+            {
+                question: '\\lim\\limits_{x \\to 1} \\sqrt{x + 3}',
+                func: x => Math.sqrt(x + 3),
+                target: 1,
+                steps: [
+                    '步骤1：检查根式函数在 $x=1$ 处是否连续',
+                    '步骤2：$x+3|_{x=1} = 4 > 0$，$\\sqrt{x+3}$ 在 $x=1$ 处连续',
+                    '步骤3：直接将 $x=1$ 代入函数',
+                    '$f(1) = \\sqrt{1 + 3} = \\sqrt{4} = 2$',
+                    '<strong>答案：</strong>$\\lim\\limits_{x \\to 1} \\sqrt{x + 3} = 2$'
+                ]
+            },
+            {
+                question: '\\lim\\limits_{x \\to 0} \\sqrt{4 - x}',
+                func: x => Math.sqrt(4 - x),
+                target: 0,
+                steps: [
+                    '步骤1：检查根式函数在 $x=0$ 处是否连续',
+                    '步骤2：$4-x|_{x=0} = 4 > 0$，$\\sqrt{4-x}$ 在 $x=0$ 处连续',
+                    '步骤3：直接将 $x=0$ 代入函数',
+                    '$f(0) = \\sqrt{4 - 0} = \\sqrt{4} = 2$',
+                    '<strong>答案：</strong>$\\lim\\limits_{x \\to 0} \\sqrt{4 - x} = 2$'
+                ]
+            },
+            {
+                question: '\\lim\\limits_{x \\to 1} (2e^x - 1)',
+                func: x => 2*Math.exp(x) - 1,
+                target: 1,
+                steps: [
+                    '步骤1：检查函数在 $x=1$ 处是否连续',
+                    '步骤2：$2e^x - 1$ 在全体实数上连续',
+                    '步骤3：直接将 $x=1$ 代入函数',
+                    '$f(1) = 2e^1 - 1 = 2e - 1 \\approx 2 \\times 2.718 - 1 = 4.44$',
+                    '<strong>答案：</strong>$\\lim\\limits_{x \\to 1} (2e^x - 1) \\approx 4.44$'
+                ]
+            },
+            {
+                question: '\\lim\\limits_{x \\to 2} (x + \\sqrt{x})',
+                func: x => x + Math.sqrt(x),
+                target: 2,
+                steps: [
+                    '步骤1：检查函数在 $x=2$ 处是否连续',
+                    '步骤2：$x + \\sqrt{x}$ 在 $x > 0$ 时连续',
+                    '步骤3：直接将 $x=2$ 代入函数',
+                    '$f(2) = 2 + \\sqrt{2} \\approx 2 + 1.414 = 3.41$',
+                    '<strong>答案：</strong>$\\lim\\limits_{x \\to 2} (x + \\sqrt{x}) \\approx 3.41$'
+                ]
+            },
+            {
+                question: '\\lim\\limits_{x \\to 1} (\\ln(x + 1) + x^2)',
+                func: x => Math.log(x + 1) + x*x,
+                target: 1,
+                steps: [
+                    '步骤1：检查函数在 $x=1$ 处是否连续',
+                    '步骤2：$\\ln(x+1) + x^2$ 在 $x > -1$ 时连续',
+                    '步骤3：直接将 $x=1$ 代入函数',
+                    '$f(1) = \\ln(2) + 1^2 \\approx 0.693 + 1 = 1.69$',
+                    '<strong>答案：</strong>$\\lim\\limits_{x \\to 1} (\\ln(x + 1) + x^2) \\approx 1.69$'
+                ]
+            },
+            // 新增题目61-65：分段函数和混合类型
+            {
+                question: '\\lim\\limits_{x \\to 2} f(x), f(x)=\\begin{cases} x^2+1, & x \\leq 2 \\\\ 2x+1, & x>2 \\end{cases}',
+                func: x => x <= 2 ? x*x + 1 : 2*x + 1,
+                target: 2,
+                steps: [
+                    '步骤1：检查分段函数在 $x=2$ 处的连续性',
+                    '步骤2：$x=2$ 时取左段：$f(x) = x^2 + 1$',
+                    '步骤3：直接将 $x=2$ 代入左段函数',
+                    '$f(2) = 2^2 + 1 = 4 + 1 = 5$',
+                    '<strong>答案：</strong>$\\lim\\limits_{x \\to 2} f(x) = 5$'
+                ]
+            },
+            {
+                question: '\\lim\\limits_{x \\to 1} f(x), f(x)=\\begin{cases} 3x-1, & x \\leq 1 \\\\ x^2+1, & x>1 \\end{cases}',
+                func: x => x <= 1 ? 3*x - 1 : x*x + 1,
+                target: 1,
+                steps: [
+                    '步骤1：检查分段函数在 $x=1$ 处的连续性',
+                    '步骤2：$x=1$ 时取左段：$f(x) = 3x - 1$',
+                    '步骤3：直接将 $x=1$ 代入左段函数',
+                    '$f(1) = 3 \\times 1 - 1 = 3 - 1 = 2$',
+                    '<strong>答案：</strong>$\\lim\\limits_{x \\to 1} f(x) = 2$'
+                ]
+            },
+            {
+                question: '\\lim\\limits_{x \\to 0} f(x), f(x)=\\begin{cases} x+2, & x \\leq 0 \\\\ 2-x, & x>0 \\end{cases}',
+                func: x => x <= 0 ? x + 2 : 2 - x,
+                target: 0,
+                steps: [
+                    '步骤1：检查分段函数在 $x=0$ 处的连续性',
+                    '步骤2：$x=0$ 时取左段：$f(x) = x + 2$',
+                    '步骤3：直接将 $x=0$ 代入左段函数',
+                    '$f(0) = 0 + 2 = 2$',
+                    '<strong>答案：</strong>$\\lim\\limits_{x \\to 0} f(x) = 2$'
+                ]
+            },
+            {
+                question: '\\lim\\limits_{x \\to 3} (x^2\\cos(x))',
+                func: x => x*x * Math.cos(x),
+                target: 3,
+                steps: [
+                    '步骤1：检查函数在 $x=3$ 处是否连续',
+                    '步骤2：$x^2\\cos(x)$ 在全体实数上连续',
+                    '步骤3：直接将 $x=3$ 代入函数',
+                    '$f(3) = 3^2 \\times \\cos(3) \\approx 9 \\times (-0.990) = -8.91$',
+                    '<strong>答案：</strong>$\\lim\\limits_{x \\to 3} (x^2\\cos(x)) \\approx -8.91$'
+                ]
+            },
+            {
+                question: '\\lim\\limits_{x \\to 1} \\frac{e^x + 1}{x + 1}',
+                func: x => (Math.exp(x) + 1)/(x + 1),
+                target: 1,
+                steps: [
+                    '步骤1：检查分母在 $x=1$ 处是否为零',
+                    '步骤2：$x+1|_{x=1} = 2 \\neq 0$，函数在 $x=1$ 处连续',
+                    '步骤3：直接将 $x=1$ 代入函数',
+                    '$f(1) = \\frac{e^1 + 1}{1 + 1} = \\frac{e + 1}{2} \\approx \\frac{3.718}{2} = 1.86$',
+                    '<strong>答案：</strong>$\\lim\\limits_{x \\to 1} \\frac{e^x + 1}{x + 1} \\approx 1.86$'
+                ]
+            },
+            // 新增题目66-80：无穷小乘以有界函数
+            {
+                question: '\\lim\\limits_{x \\to 0} x\\sin(\\frac{1}{x})',
+                func: x => x === 0 ? 0 : x * Math.sin(1/x),
+                target: 0,
+                steps: [
+                    '步骤1：识别函数类型',
+                    '步骤2：$x \\to 0$ 时，$x$ 是无穷小，$\\sin(\\frac{1}{x})$ 是有界函数',
+                    '步骤3：无穷小乘以有界函数仍是无穷小',
+                    '$\\lim\\limits_{x \\to 0} x\\sin(\\frac{1}{x}) = 0$',
+                    '<strong>答案：</strong>$\\lim\\limits_{x \\to 0} x\\sin(\\frac{1}{x}) = 0$'
+                ]
+            },
+            {
+                question: '\\lim\\limits_{x \\to 0} x^2\\cos(\\frac{1}{x})',
+                func: x => x === 0 ? 0 : x*x * Math.cos(1/x),
+                target: 0,
+                steps: [
+                    '步骤1：识别函数类型',
+                    '步骤2：$x \\to 0$ 时，$x^2$ 是无穷小，$\\cos(\\frac{1}{x})$ 是有界函数',
+                    '步骤3：无穷小乘以有界函数仍是无穷小',
+                    '$\\lim\\limits_{x \\to 0} x^2\\cos(\\frac{1}{x}) = 0$',
+                    '<strong>答案：</strong>$\\lim\\limits_{x \\to 0} x^2\\cos(\\frac{1}{x}) = 0$'
+                ]
+            },
+            {
+                question: '\\lim\\limits_{x \\to 0} 3x\\sin(\\frac{2}{x})',
+                func: x => x === 0 ? 0 : 3*x * Math.sin(2/x),
+                target: 0,
+                steps: [
+                    '步骤1：识别函数类型',
+                    '步骤2：$x \\to 0$ 时，$3x$ 是无穷小，$\\sin(\\frac{2}{x})$ 是有界函数',
+                    '步骤3：无穷小乘以有界函数仍是无穷小',
+                    '$\\lim\\limits_{x \\to 0} 3x\\sin(\\frac{2}{x}) = 0$',
+                    '<strong>答案：</strong>$\\lim\\limits_{x \\to 0} 3x\\sin(\\frac{2}{x}) = 0$'
+                ]
+            },
+            {
+                question: '\\lim\\limits_{x \\to 0} x\\cos(\\frac{5}{x})',
+                func: x => x === 0 ? 0 : x * Math.cos(5/x),
+                target: 0,
+                steps: [
+                    '步骤1：识别函数类型',
+                    '步骤2：$x \\to 0$ 时，$x$ 是无穷小，$\\cos(\\frac{5}{x})$ 是有界函数',
+                    '步骤3：无穷小乘以有界函数仍是无穷小',
+                    '$\\lim\\limits_{x \\to 0} x\\cos(\\frac{5}{x}) = 0$',
+                    '<strong>答案：</strong>$\\lim\\limits_{x \\to 0} x\\cos(\\frac{5}{x}) = 0$'
+                ]
+            },
+            {
+                question: '\\lim\\limits_{x \\to 0} x^2\\sin(\\frac{3}{x})',
+                func: x => x === 0 ? 0 : x*x * Math.sin(3/x),
+                target: 0,
+                steps: [
+                    '步骤1：识别函数类型',
+                    '步骤2：$x \\to 0$ 时，$x^2$ 是无穷小，$\\sin(\\frac{3}{x})$ 是有界函数',
+                    '步骤3：无穷小乘以有界函数仍是无穷小',
+                    '$\\lim\\limits_{x \\to 0} x^2\\sin(\\frac{3}{x}) = 0$',
+                    '<strong>答案：</strong>$\\lim\\limits_{x \\to 0} x^2\\sin(\\frac{3}{x}) = 0$'
+                ]
+            },
+            {
+                question: '\\lim\\limits_{x \\to 0} 2x\\arctan(\\frac{1}{x})',
+                func: x => x === 0 ? 0 : 2*x * Math.atan(1/x),
+                target: 0,
+                steps: [
+                    '步骤1：识别函数类型',
+                    '步骤2：$x \\to 0$ 时，$2x$ 是无穷小，$\\arctan(\\frac{1}{x})$ 是有界函数',
+                    '步骤3：无穷小乘以有界函数仍是无穷小',
+                    '$\\lim\\limits_{x \\to 0} 2x\\arctan(\\frac{1}{x}) = 0$',
+                    '<strong>答案：</strong>$\\lim\\limits_{x \\to 0} 2x\\arctan(\\frac{1}{x}) = 0$'
+                ]
+            },
+            {
+                question: '\\lim\\limits_{x \\to 0} (x+x^2)\\sin(\\frac{1}{x})',
+                func: x => x === 0 ? 0 : (x + x*x) * Math.sin(1/x),
+                target: 0,
+                steps: [
+                    '步骤1：识别函数类型',
+                    '步骤2：$x \\to 0$ 时，$x+x^2$ 是无穷小，$\\sin(\\frac{1}{x})$ 是有界函数',
+                    '步骤3：无穷小乘以有界函数仍是无穷小',
+                    '$\\lim\\limits_{x \\to 0} (x+x^2)\\sin(\\frac{1}{x}) = 0$',
+                    '<strong>答案：</strong>$\\lim\\limits_{x \\to 0} (x+x^2)\\sin(\\frac{1}{x}) = 0$'
+                ]
+            },
+            {
+                question: '\\lim\\limits_{x \\to 0} 5x^2\\cos(\\frac{2}{x})',
+                func: x => x === 0 ? 0 : 5*x*x * Math.cos(2/x),
+                target: 0,
+                steps: [
+                    '步骤1：识别函数类型',
+                    '步骤2：$x \\to 0$ 时，$5x^2$ 是无穷小，$\\cos(\\frac{2}{x})$ 是有界函数',
+                    '步骤3：无穷小乘以有界函数仍是无穷小',
+                    '$\\lim\\limits_{x \\to 0} 5x^2\\cos(\\frac{2}{x}) = 0$',
+                    '<strong>答案：</strong>$\\lim\\limits_{x \\to 0} 5x^2\\cos(\\frac{2}{x}) = 0$'
+                ]
+            },
+            {
+                question: '\\lim\\limits_{x \\to 0} x\\arctan(\\frac{2}{x})',
+                func: x => x === 0 ? 0 : x * Math.atan(2/x),
+                target: 0,
+                steps: [
+                    '步骤1：识别函数类型',
+                    '步骤2：$x \\to 0$ 时，$x$ 是无穷小，$\\arctan(\\frac{2}{x})$ 是有界函数',
+                    '步骤3：无穷小乘以有界函数仍是无穷小',
+                    '$\\lim\\limits_{x \\to 0} x\\arctan(\\frac{2}{x}) = 0$',
+                    '<strong>答案：</strong>$\\lim\\limits_{x \\to 0} x\\arctan(\\frac{2}{x}) = 0$'
+                ]
+            },
+            {
+                question: '\\lim\\limits_{x \\to 0} (2x-x^2)\\cos(\\frac{3}{x})',
+                func: x => x === 0 ? 0 : (2*x - x*x) * Math.cos(3/x),
+                target: 0,
+                steps: [
+                    '步骤1：识别函数类型',
+                    '步骤2：$x \\to 0$ 时，$2x-x^2$ 是无穷小，$\\cos(\\frac{3}{x})$ 是有界函数',
+                    '步骤3：无穷小乘以有界函数仍是无穷小',
+                    '$\\lim\\limits_{x \\to 0} (2x-x^2)\\cos(\\frac{3}{x}) = 0$',
+                    '<strong>答案：</strong>$\\lim\\limits_{x \\to 0} (2x-x^2)\\cos(\\frac{3}{x}) = 0$'
+                ]
+            },
+            // 新增题目81-90：更多混合类型
+            {
+                question: '\\lim\\limits_{x \\to 1} (x^3 - 2x + 4)',
+                func: x => x*x*x - 2*x + 4,
+                target: 1,
+                steps: [
+                    '步骤1：检查函数在 $x=1$ 处是否连续',
+                    '步骤2：函数 $f(x) = x^3 - 2x + 4$ 是多项式，在 $x=1$ 处连续',
+                    '步骤3：直接将 $x=1$ 代入函数',
+                    '$f(1) = 1^3 - 2 \\times 1 + 4 = 1 - 2 + 4 = 3$',
+                    '<strong>答案：</strong>$\\lim\\limits_{x \\to 1} (x^3 - 2x + 4) = 3$'
+                ]
+            },
+            {
+                question: '\\lim\\limits_{x \\to 0} \\frac{\\sin(x) + x}{x + 1}',
+                func: x => (Math.sin(x) + x)/(x + 1),
+                target: 0,
+                steps: [
+                    '步骤1：检查分母在 $x=0$ 处是否为零',
+                    '步骤2：$x+1|_{x=0} = 1 \\neq 0$，函数在 $x=0$ 处连续',
+                    '步骤3：直接将 $x=0$ 代入函数',
+                    '$f(0) = \\frac{\\sin(0) + 0}{0 + 1} = \\frac{0}{1} = 0$',
+                    '<strong>答案：</strong>$\\lim\\limits_{x \\to 0} \\frac{\\sin(x) + x}{x + 1} = 0$'
+                ]
+            },
+            {
+                question: '\\lim\\limits_{x \\to 2} \\sqrt{x^2 + 5}',
+                func: x => Math.sqrt(x*x + 5),
+                target: 2,
+                steps: [
+                    '步骤1：检查根式函数在 $x=2$ 处是否连续',
+                    '步骤2：$x^2+5|_{x=2} = 9 > 0$，$\\sqrt{x^2+5}$ 在 $x=2$ 处连续',
+                    '步骤3：直接将 $x=2$ 代入函数',
+                    '$f(2) = \\sqrt{2^2 + 5} = \\sqrt{9} = 3$',
+                    '<strong>答案：</strong>$\\lim\\limits_{x \\to 2} \\sqrt{x^2 + 5} = 3$'
+                ]
+            },
+            {
+                question: '\\lim\\limits_{x \\to 1} \\frac{x^2 + x - 2}{2x + 3}',
+                func: x => (x*x + x - 2)/(2*x + 3),
+                target: 1,
+                steps: [
+                    '步骤1：检查分母在 $x=1$ 处是否为零',
+                    '步骤2：$2x+3|_{x=1} = 5 \\neq 0$，函数在 $x=1$ 处连续',
+                    '步骤3：直接将 $x=1$ 代入函数',
+                    '$f(1) = \\frac{1^2 + 1 - 2}{2 \\times 1 + 3} = \\frac{0}{5} = 0$',
+                    '<strong>答案：</strong>$\\lim\\limits_{x \\to 1} \\frac{x^2 + x - 2}{2x + 3} = 0$'
+                ]
+            },
+            {
+                question: '\\lim\\limits_{x \\to 0} (e^{2x} - 1 + x)',
+                func: x => Math.exp(2*x) - 1 + x,
+                target: 0,
+                steps: [
+                    '步骤1：检查函数在 $x=0$ 处是否连续',
+                    '步骤2：$e^{2x} - 1 + x$ 在全体实数上连续',
+                    '步骤3：直接将 $x=0$ 代入函数',
+                    '$f(0) = e^{2 \\times 0} - 1 + 0 = e^0 - 1 = 1 - 1 = 0$',
+                    '<strong>答案：</strong>$\\lim\\limits_{x \\to 0} (e^{2x} - 1 + x) = 0$'
+                ]
+            },
+            {
+                question: '\\lim\\limits_{x \\to 1} (\\sqrt{x+3} + x)',
+                func: x => Math.sqrt(x + 3) + x,
+                target: 1,
+                steps: [
+                    '步骤1：检查函数在 $x=1$ 处是否连续',
+                    '步骤2：$\\sqrt{x+3} + x$ 在 $x > -3$ 时连续',
+                    '步骤3：直接将 $x=1$ 代入函数',
+                    '$f(1) = \\sqrt{1+3} + 1 = \\sqrt{4} + 1 = 2 + 1 = 3$',
+                    '<strong>答案：</strong>$\\lim\\limits_{x \\to 1} (\\sqrt{x+3} + x) = 3$'
+                ]
+            },
+            {
+                question: '\\lim\\limits_{x \\to 0} x^3\\sin(\\frac{1}{x^2})',
+                func: x => x === 0 ? 0 : x*x*x * Math.sin(1/(x*x)),
+                target: 0,
+                steps: [
+                    '步骤1：识别函数类型',
+                    '步骤2：$x \\to 0$ 时，$x^3$ 是无穷小，$\\sin(\\frac{1}{x^2})$ 是有界函数',
+                    '步骤3：无穷小乘以有界函数仍是无穷小',
+                    '$\\lim\\limits_{x \\to 0} x^3\\sin(\\frac{1}{x^2}) = 0$',
+                    '<strong>答案：</strong>$\\lim\\limits_{x \\to 0} x^3\\sin(\\frac{1}{x^2}) = 0$'
+                ]
+            },
+            {
+                question: '\\lim\\limits_{x \\to 2} \\frac{x^3 - 8}{x + 1}',
+                func: x => (x*x*x - 8)/(x + 1),
+                target: 2,
+                steps: [
+                    '步骤1：检查分母在 $x=2$ 处是否为零',
+                    '步骤2：$x+1|_{x=2} = 3 \\neq 0$，函数在 $x=2$ 处连续',
+                    '步骤3：直接将 $x=2$ 代入函数',
+                    '$f(2) = \\frac{2^3 - 8}{2 + 1} = \\frac{8 - 8}{3} = \\frac{0}{3} = 0$',
+                    '<strong>答案：</strong>$\\lim\\limits_{x \\to 2} \\frac{x^3 - 8}{x + 1} = 0$'
+                ]
+            },
+            {
+                question: '\\lim\\limits_{x \\to 1} (2\\cos(x) + x^2)',
+                func: x => 2*Math.cos(x) + x*x,
+                target: 1,
+                steps: [
+                    '步骤1：检查函数在 $x=1$ 处是否连续',
+                    '步骤2：$2\\cos(x) + x^2$ 在全体实数上连续',
+                    '步骤3：直接将 $x=1$ 代入函数',
+                    '$f(1) = 2\\cos(1) + 1^2 \\approx 2 \\times 0.540 + 1 = 2.08$',
+                    '<strong>答案：</strong>$\\lim\\limits_{x \\to 1} (2\\cos(x) + x^2) \\approx 2.08$'
+                ]
+            },
+            {
+                question: '\\lim\\limits_{x \\to 0} (x + \\cos(x))',
+                func: x => x + Math.cos(x),
+                target: 0,
+                steps: [
+                    '步骤1：检查函数在 $x=0$ 处是否连续',
+                    '步骤2：$x + \\cos(x)$ 在全体实数上连续',
+                    '步骤3：直接将 $x=0$ 代入函数',
+                    '$f(0) = 0 + \\cos(0) = 0 + 1 = 1$',
+                    '<strong>答案：</strong>$\\lim\\limits_{x \\to 0} (x + \\cos(x)) = 1$'
+                ]
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+
+        function drawGraph() {
+            const canvas = document.getElementById('graphCanvas');
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            const currentQ = questions[currentQuestionIndex];
+            const func = currentQ.func;
+            targetX = currentQ.target;
+            
+            // 坐标系设置 - 调整为画布中心，确保不被截断
+            const centerX = width / 2;
+            const centerY = height / 2;  // 改回中心位置
+            const scale = 40;  // 减小缩放比例，避免函数值过大导致截断
+            
+            // 绘制网格
+            ctx.strokeStyle = '#f0f0f0';
+            ctx.lineWidth = 1;
+            for (let x = 0; x < width; x += scale) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, height);
+                ctx.stroke();
+            }
+            for (let y = 0; y < height; y += scale) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(width, y);
+                ctx.stroke();
+            }
+            
+            // 绘制坐标轴
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(0, centerY);
+            ctx.lineTo(width, centerY);
+            ctx.moveTo(centerX, 0);
+            ctx.lineTo(centerX, height);
+            ctx.stroke();
+            
+            // 绘制函数曲线 - 改进绘制逻辑，避免截断
+            ctx.strokeStyle = '#4f46e5';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            let firstPoint = true;
+            
+            // 计算合适的x范围
+            const xMin = -width / (2 * scale);
+            const xMax = width / (2 * scale);
+            const step = (xMax - xMin) / width * 2;
+            
+            for (let x = xMin; x <= xMax; x += step) {
+                try {
+                    const y = func(x);
+                    const px = centerX + x * scale;
+                    const py = centerY - y * scale;
+                    
+                    // 只绘制在画布范围内的点，但允许一定的缓冲区
+                    if (py >= -50 && py <= height + 50 && px >= -50 && px <= width + 50) {
+                        // 将超出边界的点裁剪到边界
+                        const clampedPy = Math.max(0, Math.min(height, py));
+                        const clampedPx = Math.max(0, Math.min(width, px));
+                        
+                        if (firstPoint) {
+                            ctx.moveTo(clampedPx, clampedPy);
+                            firstPoint = false;
+                        } else {
+                            ctx.lineTo(clampedPx, clampedPy);
+                        }
+                    } else {
+                        firstPoint = true;
+                    }
+                } catch (e) {
+                    firstPoint = true;
+                }
+            }
+            ctx.stroke();
+            
+            // 绘制目标点
+            const targetPx = centerX + targetX * scale;
+            const targetY = func(targetX);
+            const targetPy = centerY - targetY * scale;
+            
+            // 确保目标点在画布内可见
+            if (targetPy >= 0 && targetPy <= height && targetPx >= 0 && targetPx <= width) {
+                ctx.fillStyle = '#ef4444';
+                ctx.beginPath();
+                ctx.arc(targetPx, targetPy, 10, 0, 2 * Math.PI);
+                ctx.fill();
+                
+                // 绘制目标点的标注
+                ctx.font = 'bold 18px "Microsoft YaHei", Arial';
+                ctx.fillStyle = '#ef4444';
+                ctx.textAlign = 'center';
+                const labelY = Math.min(centerY + 30, height - 10);
+                ctx.fillText(`x = ${targetX}`, targetPx, labelY);
+
+                // 绘制虚线连接到x轴
+                ctx.strokeStyle = '#ef4444';
+                ctx.lineWidth = 1;
+                ctx.setLineDash([5, 5]);
+                ctx.beginPath();
+                ctx.moveTo(targetPx, targetPy);
+                ctx.lineTo(targetPx, centerY);
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+            
+            // 绘制移动点 - 从两边趋近
+            const hasReachedLeft = Math.abs(animationXLeft - targetX) < 0.01;
+            const hasReachedRight = Math.abs(animationXRight - targetX) < 0.01;
+            
+            if (!hasReachedLeft || !hasReachedRight) {
+                // 左侧趋近的点（蓝色）
+                if (!hasReachedLeft) {
+                    const animPxLeft = centerX + animationXLeft * scale;
+                    const animYLeft = func(animationXLeft);
+                    const animPyLeft = centerY - animYLeft * scale;
+                    
+                    if (animPyLeft >= 0 && animPyLeft <= height && animPxLeft >= 0 && animPxLeft <= width) {
+                        ctx.fillStyle = '#3b82f6';
+                        ctx.beginPath();
+                        ctx.arc(animPxLeft, animPyLeft, 8, 0, 2 * Math.PI);
+                        ctx.fill();
+                        
+                        // 左侧点标注
+                        ctx.font = 'bold 16px "Microsoft YaHei", Arial';
+                        ctx.fillStyle = '#3b82f6';
+                        ctx.textAlign = 'center';
+                        const leftLabelY = Math.min(centerY + 50, height - 10);
+                        ctx.fillText(`x = ${animationXLeft.toFixed(2)}`, animPxLeft, leftLabelY);
+
+                        // 虚线连接到x轴
+                        ctx.strokeStyle = '#3b82f6';
+                        ctx.lineWidth = 1;
+                        ctx.setLineDash([5, 5]);
+                        ctx.beginPath();
+                        ctx.moveTo(animPxLeft, animPyLeft);
+                        ctx.lineTo(animPxLeft, centerY);
+                        ctx.stroke();
+                        ctx.setLineDash([]);
+                        
+                        // 箭头
+                        if (targetPy >= 0 && targetPy <= height) {
+                            drawArrow(ctx, animPxLeft, animPyLeft, targetPx, targetPy, '#3b82f6');
+                        }
+                    }
+                }
+                
+                // 右侧趋近的点（绿色）
+                if (!hasReachedRight) {
+                    const animPxRight = centerX + animationXRight * scale;
+                    const animYRight = func(animationXRight);
+                    const animPyRight = centerY - animYRight * scale;
+                    
+                    if (animPyRight >= 0 && animPyRight <= height && animPxRight >= 0 && animPxRight <= width) {
+                        ctx.fillStyle = '#10b981';
+                        ctx.beginPath();
+                        ctx.arc(animPxRight, animPyRight, 8, 0, 2 * Math.PI);
+                        ctx.fill();
+                        
+                        // 右侧点标注
+                        ctx.font = 'bold 16px "Microsoft YaHei", Arial';
+                        ctx.fillStyle = '#10b981';
+                        ctx.textAlign = 'center';
+                        const rightLabelY = Math.min(centerY + 45, height - 10);
+                        ctx.fillText(`x = ${animationXRight.toFixed(2)}`, animPxRight, rightLabelY);
+                        
+                        // 虚线
+                        ctx.strokeStyle = '#10b981';
+                        ctx.lineWidth = 1;
+                        ctx.setLineDash([5, 5]);
+                        ctx.beginPath();
+                        ctx.moveTo(animPxRight, animPyRight);
+                        ctx.lineTo(animPxRight, centerY);
+                        ctx.stroke();
+                        ctx.setLineDash([]);
+                        
+                        // 箭头
+                        if (targetPy >= 0 && targetPy <= height) {
+                            drawArrow(ctx, animPxRight, animPyRight, targetPx, targetPy, '#10b981');
+                        }
+                    }
+                }
+                
+                // 添加趋向说明
+                ctx.font = 'bold 16px "Microsoft YaHei", Arial';
+                ctx.fillStyle = '#4f46e5';
+                ctx.textAlign = 'left';
+                ctx.fillText(`x → ${targetX}⁻ (左极限)`, 20, 30);
+                ctx.fillText(`x → ${targetX}⁺ (右极限)`, 20, 50);
+                ctx.fillText(`f(x) → ${targetY.toFixed(2)}`, 20, 70);
+            } else {
+                // 到达目标点后的说明
+                ctx.font = 'bold 18px "Microsoft YaHei", Arial';
+                ctx.fillStyle = '#ef4444';
+                ctx.textAlign = 'left';
+                ctx.fillText(`极限值 = ${targetY.toFixed(2)}`, 20, 35);
+            }
+        }
+
+        function drawArrow(ctx, fromX, fromY, toX, toY, color = '#10b981') {
+            const headlen = 15;
+            const dx = toX - fromX;
+            const dy = toY - fromY;
+            const angle = Math.atan2(dy, dx);
+            
+            ctx.strokeStyle = color;
+            ctx.fillStyle = color;
+            ctx.lineWidth = 2;
+            
+            // 画线
+            ctx.beginPath();
+            ctx.moveTo(fromX, fromY);
+            ctx.lineTo(toX - Math.cos(angle) * 20, toY - Math.sin(angle) * 20);
+            ctx.stroke();
+            
+            // 画箭头
+            ctx.beginPath();
+            ctx.moveTo(toX - Math.cos(angle) * 20, toY - Math.sin(angle) * 20);
+            ctx.lineTo(toX - Math.cos(angle - Math.PI / 6) * headlen - Math.cos(angle) * 20, 
+                      toY - Math.sin(angle - Math.PI / 6) * headlen - Math.sin(angle) * 20);
+            ctx.lineTo(toX - Math.cos(angle + Math.PI / 6) * headlen - Math.cos(angle) * 20, 
+                      toY - Math.sin(angle + Math.PI / 6) * headlen - Math.sin(angle) * 20);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        function animateToTarget() {
+            if (!animationRunning) return;
+
+            const speed = 0.03;  // 用户要求：动画慢一点，从0.05改为0.03
+            const diffLeft = targetX - animationXLeft;
+            const diffRight = targetX - animationXRight;
+            
+            let stillAnimating = false;
+            
+            // 左侧点移动
+            if (Math.abs(diffLeft) > 0.01) {
+                animationXLeft += diffLeft * speed;
+                stillAnimating = true;
+            } else {
+                animationXLeft = targetX;
+            }
+            
+            // 右侧点移动
+            if (Math.abs(diffRight) > 0.01) {
+                animationXRight += diffRight * speed;
+                stillAnimating = true;
+            } else {
+                animationXRight = targetX;
+            }
+            
+            drawGraph();
+            
+            if (stillAnimating) {
+                requestAnimationFrame(animateToTarget);
+            } else {
+                animationRunning = false;
+            }
+        }
+
+        function startAnimation() {
+            const currentQ = questions[currentQuestionIndex];
+            // 左侧从目标值左边开始
+            animationXLeft = currentQ.target - 3;
+            // 右侧从目标值右边开始
+            animationXRight = currentQ.target + 3;
+            animationRunning = true;
+            animateToTarget();
+        }
+
+        function nextStep() {
+            const currentQ = questions[currentQuestionIndex];
+            const totalSteps = currentQ.steps.length - 1;
+            if (currentStep < totalSteps) {
+                currentStep++;
+                updateSteps();
+                renderMath();
+
+                if (currentStep === 0) {
+                    startAnimation();
+                }
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > -1) {
+                currentStep--;
+                updateSteps();
+                renderMath();
+            }
+        }
+
+        function updateSteps() {
+            const currentQ = questions[currentQuestionIndex];
+            const totalSteps = currentQ.steps.length - 1;
+            for (let i = 0; i <= totalSteps; i++) {
+                const step = document.getElementById(`step${i}`);
+                if (step) {
+                    if (i <= currentStep) {
+                        step.classList.add('show');
+                    } else {
+                        step.classList.remove('show');
+                    }
+                }
+            }
+        }
+
+        function resetGame() {
+            currentStep = -1;
+            const currentQ = questions[currentQuestionIndex];
+            animationXLeft = currentQ.target - 3;
+            animationXRight = currentQ.target + 3;
+            animationRunning = false;
+            updateSteps();
+            drawGraph();
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex = (currentQuestionIndex + 1) % questions.length;
+            loadQuestion();
+            resetGame();
+        }
+
+        function prevQuestion() {
+            currentQuestionIndex = (currentQuestionIndex - 1 + questions.length) % questions.length;
+            loadQuestion();
+            resetGame();
+        }
+
+        function loadQuestion() {
+            const currentQ = questions[currentQuestionIndex];
+            document.getElementById('question').innerHTML = `$$${currentQ.question}$$`;
+            
+            // 更新步骤内容
+            const stepsContainer = document.getElementById('stepsContainer');
+            stepsContainer.innerHTML = '';
+            currentQ.steps.forEach((stepText, index) => {
+                const stepDiv = document.createElement('div');
+                stepDiv.className = 'step' + (index === currentQ.steps.length - 1 ? ' highlight' : '');
+                stepDiv.id = `step${index}`;
+                stepDiv.innerHTML = stepText;
+                stepsContainer.appendChild(stepDiv);
+            });
+            
+            renderMath();
+            drawGraph();
+        }
+
+        function renderMath() {
+            if (window.MathJax && MathJax.typesetPromise) {
+                MathJax.typesetPromise().catch(err => console.log('渲染错误:', err));
+            }
+        }
+
+        // 键盘事件
+        document.addEventListener('keydown', function(e) {
+            // 左右键切换题目
+            if (e.code === 'ArrowLeft') {
+                e.preventDefault();
+                prevQuestion();
+            } else if (e.code === 'ArrowRight') {
+                e.preventDefault();
+                nextQuestion();
+            }
+            // 上下键控制步骤
+            else if (e.code === 'ArrowDown') {
+                e.preventDefault();
+                nextStep();
+            } else if (e.code === 'ArrowUp') {
+                e.preventDefault();
+                prevStep();
+            }
+        });
+
+        // 初始化
+        window.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                loadQuestion();
+                renderMath();
+            }, 100);
+        });
+
+        // 窗口大小变化时重绘
+        window.addEventListener('resize', drawGraph);
+
+        function toggleReturnLinks() { const p = document.querySelector('.return-links'); if (!p) return; if (p.style.display === 'flex') { p.style.opacity = '0'; setTimeout(() => p.style.display = 'none', 160); } else { p.style.display = 'flex'; requestAnimationFrame(() => p.style.opacity = '1'); } }
+    </script>
+</body>
+</html>
+

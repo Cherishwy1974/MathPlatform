@@ -1,0 +1,1317 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>单调性与极值分析实验室</title>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true,
+                processEnvironments: true
+            },
+            startup: {
+                pageReady: () => {
+                    return MathJax.startup.defaultPageReady().then(() => {
+                        console.log('MathJax加载完成');
+                    });
+                }
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+            }
+        };
+    </script>
+    <script defer src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js"></script>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-dark: #3730a3;
+            --primary-light: #6366f1;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #3b82f6;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #1f2937;
+            --white: #ffffff;
+            --border: #e5e7eb;
+            --h1-size: 22px;
+            --h2-size: 20px;
+            --h3-size: 18px;
+            --text-size: 16px;
+            --formula-size: 20px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        *::-webkit-scrollbar {
+            width: 0;
+            background: transparent;
+        }
+
+        * {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+            font-size: var(--text-size);
+            line-height: 1.5;
+            background: var(--gray-50);
+            color: var(--gray-700);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            height: min(100vh, 700px);
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            background: var(--white);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+            overflow: hidden;
+        }
+
+        .header {
+            height: 40px;
+            background: var(--primary);
+            color: var(--white);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+        }
+
+        .header h1 {
+            font-size: var(--h1-size);
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .main {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 120px;
+            background: var(--gray-50);
+            border-right: 1px solid var(--border);
+            padding: 12px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .nav-btn {
+            width: 100%;
+            padding: 8px 10px;
+            background: transparent;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: var(--text-size);
+            color: var(--gray-600);
+            text-align: left;
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+
+        .nav-btn:hover {
+            background: var(--gray-100);
+        }
+
+        .nav-btn.active {
+            background: var(--primary);
+            color: var(--white);
+        }
+
+        .content {
+            flex: 1;
+            display: none;
+            padding: 16px;
+            overflow-y: auto;
+            background: var(--white);
+        }
+
+        .content.active {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            min-height: 0;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        .card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04);
+        }
+
+        .card h3 {
+            font-size: var(--h3-size);
+            color: var(--primary);
+        }
+
+        .card-scroll {
+            overflow-y: auto;
+        }
+
+        .tag-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .tag {
+            font-size: 13px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: var(--gray-100);
+            color: var(--gray-500);
+        }
+
+        .status-box {
+            border-radius: 10px;
+            padding: 12px;
+            font-size: 14px;
+            background: #eef2ff;
+            color: var(--primary-dark);
+            line-height: 1.6;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            background: var(--gray-50);
+            border: 1px solid var(--gray-200);
+            border-radius: 10px;
+            padding: 12px;
+        }
+
+        .control-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .control-row label {
+            font-weight: 600;
+            color: var(--gray-600);
+        }
+
+        select,
+        input[type="text"] {
+            flex: 1;
+            padding: 8px 10px;
+            border-radius: 8px;
+            border: 1px solid var(--gray-300);
+            font-size: 15px;
+            background: var(--white);
+        }
+
+        input[type="range"] {
+            flex: 1;
+        }
+
+        .slider {
+            -webkit-appearance: none;
+            appearance: none;
+            height: 4px;
+            background: var(--gray-200);
+            border-radius: 999px;
+            outline: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+        }
+
+        .slider::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--primary);
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            flex: 1;
+            background: var(--primary);
+            color: var(--white);
+            border: none;
+            border-radius: 8px;
+            padding: 10px 12px;
+            font-size: var(--text-size);
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .action-btn.secondary {
+            background: var(--white);
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(79, 70, 229, 0.18);
+        }
+
+        .canvas-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .canvas-stack canvas {
+            width: 100%;
+            height: 240px;
+            background: var(--white);
+            border-radius: 10px;
+            border: 1px solid var(--gray-200);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 15px;
+        }
+
+        th,
+        td {
+            border: 1px solid var(--gray-200);
+            padding: 8px;
+            text-align: center;
+        }
+
+        thead {
+            background: var(--gray-100);
+        }
+
+        .interval-btn {
+            padding: 4px 10px;
+            border-radius: 6px;
+            border: 1px solid var(--gray-300);
+            background: var(--white);
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .interval-btn.active.increase {
+            background: rgba(16, 185, 129, 0.15);
+            border-color: var(--success);
+            color: var(--success);
+        }
+
+        .interval-btn.active.decrease {
+            background: rgba(239, 68, 68, 0.15);
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        .interval-btn.correct {
+            box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.35);
+        }
+
+        .interval-btn.wrong {
+            box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.35);
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .info-item {
+            background: var(--gray-50);
+            border: 1px solid var(--gray-200);
+            border-radius: 10px;
+            padding: 10px;
+            font-size: 15px;
+            color: var(--gray-600);
+        }
+
+        .info-item strong {
+            display: block;
+            margin-bottom: 6px;
+            color: var(--primary-dark);
+        }
+
+        .highlight-box {
+            position: relative;
+            background: linear-gradient(135deg, #eff6ff, #dbeafe);
+            border: 2px solid rgba(59, 130, 246, 0.4);
+            border-radius: 12px;
+            padding: 16px;
+            color: var(--gray-600);
+        }
+
+        .highlight-box::before {
+            content: '<i class="fa-solid fa-lightbulb"></i>';
+            position: absolute;
+            top: -12px;
+            left: 20px;
+            background: var(--white);
+            padding: 0 8px;
+            font-size: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .main {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                flex-direction: row;
+                align-items: center;
+                justify-content: center;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+                gap: 8px;
+                overflow-x: auto;
+            }
+
+            .nav-btn {
+                min-width: 110px;
+                text-align: center;
+                white-space: nowrap;
+            }
+
+            .content.active {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                height: auto;
+                max-height: none;
+            }
+        }
+
+        .return-home-panel { position: fixed; bottom: 12px; right: 12px; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; z-index: 40; }
+        .return-toggle { width: 40px; height: 40px; border-radius: 50%; border: none; background: linear-gradient(135deg, rgba(79,70,229,0.96), rgba(99,102,241,0.9)); color: #fff; font-size: 20px; cursor: pointer; box-shadow: 0 10px 18px rgba(79,70,229,0.28); transition: transform 0.2s, box-shadow 0.2s; }
+        .return-toggle:hover { transform: translateY(-1px) scale(1.03); box-shadow: 0 14px 26px rgba(79,70,229,0.35); }
+        .return-links { display: none; flex-direction: column; gap: 6px; padding: 10px; border-radius: 10px; background: rgba(255,255,255,0.96); border: 1px solid rgba(79,70,229,0.18); box-shadow: 0 10px 30px rgba(15,23,42,0.14); opacity: 0; transition: opacity 0.16s; }
+        .return-link { text-decoration: none; font-size: 15px; color: var(--primary-dark); padding: 6px 12px; border-radius: 8px; background: rgba(99,102,241,0.12); transition: background 0.2s; }
+        .return-link:hover { background: rgba(79,70,229,0.18); }
+    </style>
+
+</head>
+<body>
+    <div class="return-home-panel"><button class="return-toggle" onclick="toggleReturnLinks()"><i class="fa-solid fa-house"></i></button><div class="return-links"><a class="return-link" href="index.html"><i class="fa-solid fa-arrow-left"></i> 返回目录</a><a class="return-link" href="../index.html"><i class="fa-solid fa-house"></i> 返回主站</a></div></div>
+
+    <div class="container">
+        <header class="header">
+            <h1>单调性与极值分析实验室</h1>
+        </header>
+        <div class="main">
+            <nav class="sidebar">
+                <button class="nav-btn active" data-section="analysis">单调性分析</button>
+                <button class="nav-btn" data-section="extrema">极值点判断</button>
+                <button class="nav-btn" data-section="custom">自定义函数</button>
+            </nav>
+
+            <div class="content active" id="analysis">
+                <div class="column">
+                    <div class="card">
+                        <h3>分析结果</h3>
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <strong>当前函数</strong>
+                                <span id="functionSummary">$f(x) = x^3 - 3x$</span>
+                            </div>
+                            <div class="info-item">
+                                <strong>驻点</strong>
+                                <span id="criticalInfo">$x=-1,1$</span>
+                            </div>
+                            <div class="info-item">
+                                <strong>单调性</strong>
+                                <span id="intervalInfo">增→减→增</span>
+                            </div>
+                            <div class="info-item">
+                                <strong>极值</strong>
+                                <span id="extremaInfo">极大: $x=-1$, 极小: $x=1$</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3>实时提示</h3>
+                        <div class="status-box" id="hintInfo">启动扫描观察切线斜率变化</div>
+                    </div>
+                </div>
+
+                <div class="column">
+                    <div class="card">
+                        <h3>函数与导数图像</h3>
+                        <div class="controls">
+                            <div class="control-row">
+                                <label for="presetSelector">选择函数</label>
+                                <select id="presetSelector"></select>
+                            </div>
+                            <div class="control-row">
+                                <label for="customInput">自定义表达式</label>
+                                <input type="text" id="customInput" placeholder="例如: Math.sin(x) - x/2">
+                                <button class="action-btn secondary" id="applyCustom">应用</button>
+                            </div>
+                            <div class="control-row">
+                                <label for="speedSlider">扫描速度</label>
+                                <input type="range" class="slider" id="speedSlider" min="1" max="5" step="1" value="2">
+                                <span id="speedValue">中速</span>
+                            </div>
+                            <div class="btn-group">
+                                <button class="action-btn" id="toggleScan">启动扫描</button>
+                                <button class="action-btn secondary" id="resetView">重置</button>
+                            </div>
+                        </div>
+                        <div class="canvas-stack">
+                            <canvas id="functionCanvas"></canvas>
+                            <canvas id="derivativeCanvas"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content" id="extrema">
+                <div class="column">
+                    <div class="card">
+                        <h3>极值点判断</h3>
+                        <div class="status-box">观察 $f'(x)$ 的符号变化判断极值点类型</div>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="card">
+                        <h3>极值点可视化</h3>
+                        <div class="controls">
+                            <div class="control-row">
+                                <label for="extremaSelector">选择函数</label>
+                                <select id="extremaSelector"></select>
+                            </div>
+                            <div class="btn-group">
+                                <button class="action-btn" id="analyzeExtrema">分析极值</button>
+                                <button class="action-btn secondary" id="resetExtrema">重置</button>
+                            </div>
+                        </div>
+                        <div class="canvas-stack">
+                            <canvas id="extremaCanvas"></canvas>
+                            <canvas id="derivativeSignCanvas"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content" id="custom">
+                <div class="column">
+                    <div class="card">
+                        <h3>自定义函数</h3>
+                        <div class="status-box">支持 Math 函数与算符，使用 JavaScript 语法</div>
+                    </div>
+                    <div class="card">
+                        <h3>函数输入</h3>
+                        <div class="controls">
+                            <div class="control-row">
+                                <label for="customFunctionInput">函数表达式</label>
+                                <input type="text" id="customFunctionInput" placeholder="例如: Math.sin(x) * x + Math.cos(x)">
+                                <button class="action-btn" id="analyzeCustom">分析函数</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="card">
+                        <h3>自定义函数分析结果</h3>
+                        <div class="canvas-stack">
+                            <canvas id="customCanvas"></canvas>
+                            <canvas id="customDerivativeCanvas"></canvas>
+                        </div>
+                        <div id="customAnalysisResults" class="info-grid"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function renderMath() {
+            if (window.MathJax && MathJax.typesetPromise) {
+                MathJax.typesetPromise().catch(err => console.warn('渲染错误:', err));
+            }
+        }
+
+        function setupCanvas(canvas) {
+            if (!canvas) return null;
+            const ctx = canvas.getContext('2d');
+            const rect = canvas.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            const width = rect.width || canvas.clientWidth || 400;
+            const height = rect.height || canvas.clientHeight || 240;
+            canvas.width = width * dpr;
+            canvas.height = height * dpr;
+            canvas.style.width = `${width}px`;
+            canvas.style.height = `${height}px`;
+            ctx.scale(dpr, dpr);
+            return { ctx, width, height };
+        }
+
+        function drawAxes(ctx, width, height, xRange = [-5, 5], yRange = [-5, 5]) {
+            const padding = 40;
+            ctx.save();
+            ctx.strokeStyle = '#e2e8f0';
+            ctx.lineWidth = 1;
+            const gridCount = 8;
+            for (let i = 0; i <= gridCount; i++) {
+                const gx = padding + i * (width - 2 * padding) / gridCount;
+                ctx.beginPath();
+                ctx.moveTo(gx, padding);
+                ctx.lineTo(gx, height - padding);
+                ctx.stroke();
+
+                const gy = padding + i * (height - 2 * padding) / gridCount;
+                ctx.beginPath();
+                ctx.moveTo(padding, gy);
+                ctx.lineTo(width - padding, gy);
+                ctx.stroke();
+            }
+
+            ctx.strokeStyle = '#1f2937';
+            ctx.lineWidth = 1.5;
+            const zeroX = padding + (0 - xRange[0]) / (xRange[1] - xRange[0]) * (width - 2 * padding);
+            if (zeroX >= padding && zeroX <= width - padding) {
+                ctx.beginPath();
+                ctx.moveTo(zeroX, padding);
+                ctx.lineTo(zeroX, height - padding);
+                ctx.stroke();
+            }
+
+            const zeroY = height - padding - (0 - yRange[0]) / (yRange[1] - yRange[0]) * (height - 2 * padding);
+            if (zeroY >= padding && zeroY <= height - padding) {
+                ctx.beginPath();
+                ctx.moveTo(padding, zeroY);
+                ctx.lineTo(width - padding, zeroY);
+                ctx.stroke();
+            }
+            ctx.restore();
+        }
+
+        function mathToCanvas(x, y, width, height, xRange, yRange, padding = 40) {
+            const plotWidth = width - 2 * padding;
+            const plotHeight = height - 2 * padding;
+            const cx = padding + (x - xRange[0]) / (xRange[1] - xRange[0]) * plotWidth;
+            const cy = height - padding - (y - yRange[0]) / (yRange[1] - yRange[0]) * plotHeight;
+            return { x: cx, y: cy };
+        }
+
+        function parseExpression(expr) {
+            if (!expr) return null;
+            try {
+                const sanitized = expr.replace(/\^/g, '**');
+                return new Function('x', `return ${sanitized};`);
+            } catch (err) {
+                return null;
+            }
+        }
+
+        function evaluateSafe(fn, x) {
+            try {
+                const value = fn(x);
+                return Number.isFinite(value) ? value : NaN;
+            } catch (err) {
+                return NaN;
+            }
+        }
+
+        function numericDerivative(fn, x, h = 1e-4) {
+            const f1 = evaluateSafe(fn, x + h);
+            const f2 = evaluateSafe(fn, x - h);
+            if (!Number.isFinite(f1) || !Number.isFinite(f2)) return NaN;
+            return (f1 - f2) / (2 * h);
+        }
+
+        function formatNumber(value) {
+            if (!Number.isFinite(value)) return '∞';
+            if (Math.abs(value) >= 1000) return value.toExponential(2);
+            if (Math.abs(value) < 0.001 && value !== 0) return value.toExponential(2);
+            return value.toFixed(2);
+        }
+
+        const presets = {
+            cubic: { label: '$x^3 - 3x$', expression: 'x**3 - 3*x', domain: [-4, 4] },
+            trig: { label: '$\\sin x - \frac{x}{2}$', expression: 'Math.sin(x) - x/2', domain: [-6, 6] },
+            rational: { label: '$\\dfrac{x^2}{x^2+1}$', expression: '(x*x)/(x*x+1)', domain: [-6, 6] }
+        };
+
+        const presetSelector = document.getElementById('presetSelector');
+        const customInput = document.getElementById('customInput');
+        const extremaSelector = document.getElementById('extremaSelector');
+        const applyCustomBtn = document.getElementById('applyCustom');
+        const speedSlider = document.getElementById('speedSlider');
+        const speedValue = document.getElementById('speedValue');
+        const toggleScanBtn = document.getElementById('toggleScan');
+        const resetViewBtn = document.getElementById('resetView');
+        const navButtons = document.querySelectorAll('.nav-btn');
+        const pages = document.querySelectorAll('.content');
+
+        const functionCanvas = document.getElementById('functionCanvas');
+        const derivativeCanvas = document.getElementById('derivativeCanvas');
+        const extremaCanvas = document.getElementById('extremaCanvas');
+        const derivativeSignCanvas = document.getElementById('derivativeSignCanvas');
+        const customCanvas = document.getElementById('customCanvas');
+        const customDerivativeCanvas = document.getElementById('customDerivativeCanvas');
+
+        const intervalTable = document.getElementById('intervalTable');
+        const functionSummary = document.getElementById('functionSummary');
+        const criticalInfo = document.getElementById('criticalInfo');
+        const intervalInfo = document.getElementById('intervalInfo');
+        const extremaInfo = document.getElementById('extremaInfo');
+        const hintInfo = document.getElementById('hintInfo');
+        const customAnalysisResults = document.getElementById('customAnalysisResults');
+
+        let currentFn = parseExpression(presets.cubic.expression);
+        let currentExpression = presets.cubic.expression;
+        let domain = presets.cubic.domain.slice();
+        let intervalData = [];
+        let currentCriticalPoints = [];
+        let currentSection = 'analysis';
+        let scanActive = false;
+        let scanX = domain[0];
+        let scanDirection = 1;
+        let animationFrame = null;
+        let customAnalysis = null;
+
+        function populatePresetSelector() {
+            Object.entries(presets).forEach(([key, item]) => {
+                const option = document.createElement('option');
+                option.value = key;
+                option.textContent = item.label;
+                option.innerHTML = item.label;
+                extremaSelector.appendChild(option.cloneNode(true));
+                presetSelector.appendChild(option);
+            });
+            presetSelector.value = 'cubic';
+            extremaSelector.value = 'cubic';
+        }
+
+        function findCriticalPoints(fn, range, samples = 320) {
+            const [minX, maxX] = range;
+            const points = [];
+            let prevX = minX;
+            let prevDeriv = numericDerivative(fn, prevX);
+            for (let i = 1; i <= samples; i++) {
+                const x = minX + (i / samples) * (maxX - minX);
+                const deriv = numericDerivative(fn, x);
+                if (!Number.isFinite(deriv) || !Number.isFinite(prevDeriv)) {
+                    prevX = x;
+                    prevDeriv = deriv;
+                    continue;
+                }
+                if (Math.abs(deriv) < 1e-4) {
+                    points.push(x);
+                } else if (prevDeriv * deriv < 0) {
+                    let left = prevX;
+                    let right = x;
+                    for (let k = 0; k < 20; k++) {
+                        const mid = (left + right) / 2;
+                        const midDeriv = numericDerivative(fn, mid);
+                        if (!Number.isFinite(midDeriv)) break;
+                        if (prevDeriv * midDeriv <= 0) {
+                            right = mid;
+                        } else {
+                            left = mid;
+                            prevDeriv = midDeriv;
+                        }
+                    }
+                    points.push((left + right) / 2);
+                }
+                prevX = x;
+                prevDeriv = deriv;
+            }
+            const unique = Array.from(new Set(points.map(p => parseFloat(p.toFixed(3)))));
+            unique.sort((a, b) => a - b);
+            return unique;
+        }
+
+        function buildIntervals(fn, points, range) {
+            const [minX, maxX] = range;
+            const nodes = [minX, ...points, maxX];
+            const intervals = [];
+            for (let i = 0; i < nodes.length - 1; i++) {
+                const left = nodes[i];
+                const right = nodes[i + 1];
+                if (!Number.isFinite(left) || !Number.isFinite(right) || right <= left) continue;
+                const mid = (left + right) / 2;
+                const derivativeValue = numericDerivative(fn, mid);
+                let behavior = 'flat';
+                if (Number.isFinite(derivativeValue)) {
+                    if (derivativeValue > 1e-4) behavior = 'increase';
+                    else if (derivativeValue < -1e-4) behavior = 'decrease';
+                }
+                intervals.push({ left, right, mid, behavior, userChoice: null, result: null });
+            }
+            return intervals;
+        }
+
+        function updateIntervalTable() {
+            intervalTable.innerHTML = '';
+            intervalData.forEach((item, index) => {
+                const row = document.createElement('tr');
+
+                const intervalCell = document.createElement('td');
+                intervalCell.innerHTML = `$(${formatNumber(item.left)}, ${formatNumber(item.right)})$`;
+
+                const chooseCell = document.createElement('td');
+                const plusBtn = document.createElement('button');
+                plusBtn.className = 'interval-btn';
+                plusBtn.textContent = '递增';
+                plusBtn.addEventListener('click', () => setUserChoice(index, 'increase', plusBtn));
+
+                const minusBtn = document.createElement('button');
+                minusBtn.className = 'interval-btn';
+                minusBtn.textContent = '递减';
+                minusBtn.addEventListener('click', () => setUserChoice(index, 'decrease', minusBtn));
+
+                chooseCell.appendChild(plusBtn);
+                chooseCell.appendChild(minusBtn);
+
+                row.appendChild(intervalCell);
+                row.appendChild(chooseCell);
+                intervalTable.appendChild(row);
+            });
+            renderMath();
+        }
+
+        function setUserChoice(index, choice, button) {
+            const row = intervalData[index];
+            row.userChoice = choice;
+            const buttons = button.parentElement.querySelectorAll('.interval-btn');
+            buttons.forEach(btn => btn.className = 'interval-btn');
+            button.classList.add('active', choice === 'increase' ? 'increase' : 'decrease');
+            const correct = row.behavior === choice;
+            row.result = correct;
+            button.classList.add(correct ? 'correct' : 'wrong');
+            hintInfo.textContent = correct ? '选择正确：导数符号与预期一致。' : '选择错误：再观察导数图像的符号变化。';
+        }
+
+        function analyzeFunction() {
+            currentCriticalPoints = findCriticalPoints(currentFn, domain);
+            intervalData = buildIntervals(currentFn, currentCriticalPoints, domain);
+            updateIntervalTable();
+            updateSummary();
+            if (currentSection === 'analysis') {
+                updateAnalysisVisuals();
+            }
+            if (currentSection === 'extrema') {
+                updateExtremaVisuals();
+            }
+        }
+
+        function updateSummary() {
+            const expressionDisplay = currentExpression
+                .replace(/\*\*/g, '^')
+                .replace(/\*/g, '\\cdot ');
+            functionSummary.innerHTML = `当前函数：$f(x) = ${expressionDisplay}$，检测到驻点 ${currentCriticalPoints.length ? currentCriticalPoints.map(c => c.toFixed(2)).join(', ') : '无'}。`;
+            criticalInfo.innerHTML = currentCriticalPoints.length
+                ? `驻点：${currentCriticalPoints.map(c => '$x=' + c.toFixed(2) + '$').join('，')}`
+                : '驻点：暂无';
+
+            const intervalDesc = intervalData.map(item => {
+                const label = item.behavior === 'increase' ? '增' : item.behavior === 'decrease' ? '减' : '待定';
+                return `$(${formatNumber(item.left)}, ${formatNumber(item.right)}) ${label}$`;
+            }).join('，');
+            intervalInfo.innerHTML = intervalDesc || '待分析';
+
+            const extrema = [];
+            for (let i = 1; i < intervalData.length; i++) {
+                const prev = intervalData[i - 1];
+                const current = intervalData[i];
+                const boundary = intervalData[i - 1].right;
+                if (!Number.isFinite(boundary)) continue;
+                if (prev.behavior === 'increase' && current.behavior === 'decrease') {
+                    extrema.push(`$x=${boundary.toFixed(2)}$ 为极大值`);
+                }
+                if (prev.behavior === 'decrease' && current.behavior === 'increase') {
+                    extrema.push(`$x=${boundary.toFixed(2)}$ 为极小值`);
+                }
+            }
+            extremaInfo.innerHTML = extrema.length ? extrema.join('，') : '当前函数暂无明显极值变化。';
+            renderMath();
+        }
+
+        function computeFunctionRange(fn, range, samples = 500) {
+            const [minX, maxX] = range;
+            let minY = Infinity;
+            let maxY = -Infinity;
+            const points = [];
+            for (let i = 0; i <= samples; i++) {
+                const x = minX + (i / samples) * (maxX - minX);
+                const y = evaluateSafe(fn, x);
+                if (!Number.isFinite(y)) continue;
+                minY = Math.min(minY, y);
+                maxY = Math.max(maxY, y);
+                points.push({ x, y });
+            }
+            if (!Number.isFinite(minY) || !Number.isFinite(maxY) || points.length === 0) {
+                minY = -5;
+                maxY = 5;
+            }
+            if (Math.abs(maxY - minY) < 1e-6) {
+                minY -= 1;
+                maxY += 1;
+            }
+            const pad = (maxY - minY) * 0.2 || 1;
+            return { points, yRange: [minY - pad, maxY + pad] };
+        }
+
+        function updateAnalysisVisuals() {
+            drawFunctionCanvas();
+            drawDerivativeCanvas();
+        }
+
+        function drawFunctionCanvas() {
+            const canvasInfo = setupCanvas(functionCanvas);
+            if (!canvasInfo) return;
+            const { ctx, width, height } = canvasInfo;
+            ctx.clearRect(0, 0, width, height);
+            const data = computeFunctionRange(currentFn, domain);
+            drawAxes(ctx, width, height, domain, data.yRange);
+            ctx.save();
+            ctx.strokeStyle = '#2563eb';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            let started = false;
+            data.points.forEach(({ x, y }) => {
+                const { x: cx, y: cy } = mathToCanvas(x, y, width, height, domain, data.yRange);
+                if (!started) {
+                    ctx.moveTo(cx, cy);
+                    started = true;
+                } else {
+                    ctx.lineTo(cx, cy);
+                }
+            });
+            ctx.stroke();
+            ctx.restore();
+            drawScanLine(ctx, width, height, domain, data.yRange, '#2563eb');
+        }
+
+        function drawDerivativeCanvas() {
+            const canvasInfo = setupCanvas(derivativeCanvas);
+            if (!canvasInfo) return;
+            const { ctx, width, height } = canvasInfo;
+            ctx.clearRect(0, 0, width, height);
+            const derivativeData = computeFunctionRange(x => numericDerivative(currentFn, x), domain);
+            drawAxes(ctx, width, height, domain, derivativeData.yRange);
+            ctx.save();
+            ctx.strokeStyle = '#f97316';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            let started = false;
+            derivativeData.points.forEach(({ x, y }) => {
+                const { x: cx, y: cy } = mathToCanvas(x, y, width, height, domain, derivativeData.yRange);
+                if (!started) {
+                    ctx.moveTo(cx, cy);
+                    started = true;
+                } else {
+                    ctx.lineTo(cx, cy);
+                }
+            });
+            ctx.stroke();
+            ctx.restore();
+            drawScanLine(ctx, width, height, domain, derivativeData.yRange, '#f97316');
+        }
+
+        function drawScanLine(ctx, width, height, xRange, yRange, color) {
+            if (!scanActive) return;
+            const position = mathToCanvas(scanX, 0, width, height, xRange, yRange);
+            ctx.save();
+            ctx.strokeStyle = color;
+            ctx.setLineDash([6, 6]);
+            ctx.beginPath();
+            ctx.moveTo(position.x, 20);
+            ctx.lineTo(position.x, height - 20);
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        function animateScan() {
+            const speed = parseInt(speedSlider.value, 10);
+            const distance = (domain[1] - domain[0]);
+            const divider = speed === 1 ? 600 : speed === 2 ? 420 : speed === 3 ? 300 : speed === 4 ? 200 : 140;
+            const delta = distance / divider;
+            scanX += scanDirection * delta;
+            if (scanX >= domain[1] || scanX <= domain[0]) {
+                scanDirection *= -1;
+                scanX = Math.max(domain[0], Math.min(domain[1], scanX));
+            }
+            const derivativeValue = numericDerivative(currentFn, scanX);
+            hintInfo.innerHTML = `扫描到 $x=${scanX.toFixed(2)}$，导数 ${Number.isFinite(derivativeValue) ? derivativeValue.toFixed(3) : '未定义'}`;
+            updateAnalysisVisuals();
+            renderMath();
+            animationFrame = requestAnimationFrame(animateScan);
+        }
+
+        function stopScan() {
+            scanActive = false;
+            toggleScanBtn.textContent = '启动扫描';
+            if (animationFrame) cancelAnimationFrame(animationFrame);
+            animationFrame = null;
+            updateAnalysisVisuals();
+        }
+
+        function startScan() {
+            if (scanActive) return;
+            scanActive = true;
+            toggleScanBtn.textContent = '暂停扫描';
+            animationFrame = requestAnimationFrame(animateScan);
+        }
+
+        function updateExtremaVisuals() {
+            const canvasInfo = setupCanvas(extremaCanvas);
+            if (canvasInfo) {
+                const { ctx, width, height } = canvasInfo;
+                ctx.clearRect(0, 0, width, height);
+                const data = computeFunctionRange(currentFn, domain);
+                drawAxes(ctx, width, height, domain, data.yRange);
+                ctx.save();
+                ctx.strokeStyle = '#2563eb';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                let started = false;
+                data.points.forEach(({ x, y }) => {
+                    const { x: cx, y: cy } = mathToCanvas(x, y, width, height, domain, data.yRange);
+                    if (!started) { ctx.moveTo(cx, cy); started = true; }
+                    else ctx.lineTo(cx, cy);
+                });
+                ctx.stroke();
+                ctx.restore();
+
+                currentCriticalPoints.forEach(point => {
+                    const value = evaluateSafe(currentFn, point);
+                    if (!Number.isFinite(value)) return;
+                    const { x: cx, y: cy } = mathToCanvas(point, value, width, height, domain, data.yRange);
+                    const type = determineExtremaType(point);
+                    ctx.save();
+                    ctx.fillStyle = type === 'max' ? '#ef4444' : type === 'min' ? '#10b981' : '#94a3b8';
+                    ctx.beginPath();
+                    ctx.arc(cx, cy, 5, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = '#1f2937';
+                    ctx.font = '14px sans-serif';
+                    const label = type === 'max' ? '极大值' : type === 'min' ? '极小值' : '驻点';
+                    ctx.fillText(label, cx + 8, cy - 8);
+                    ctx.restore();
+                });
+            }
+
+            const signInfo = setupCanvas(derivativeSignCanvas);
+            if (signInfo) {
+                const { ctx, width, height } = signInfo;
+                ctx.clearRect(0, 0, width, height);
+                const padding = 50;
+                const axisY = height / 2;
+                ctx.save();
+                ctx.strokeStyle = '#1f2937';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(padding, axisY);
+                ctx.lineTo(width - padding, axisY);
+                ctx.stroke();
+
+                const totalWidth = width - 2 * padding;
+                intervalData.forEach(interval => {
+                    const ratioLeft = (interval.left - domain[0]) / (domain[1] - domain[0]);
+                    const ratioRight = (interval.right - domain[0]) / (domain[1] - domain[0]);
+                    const x1 = padding + ratioLeft * totalWidth;
+                    const x2 = padding + ratioRight * totalWidth;
+                    const color = interval.behavior === 'increase'
+                        ? 'rgba(16,185,129,0.35)'
+                        : interval.behavior === 'decrease'
+                            ? 'rgba(239,68,68,0.35)'
+                            : 'rgba(148,163,184,0.35)';
+                    ctx.fillStyle = color;
+                    ctx.fillRect(x1, axisY - 22, x2 - x1, 44);
+                    ctx.fillStyle = '#1f2937';
+                    ctx.font = '13px sans-serif';
+                    const label = interval.behavior === 'increase' ? '递增' : interval.behavior === 'decrease' ? '递减' : '待定';
+                    ctx.fillText(label, x1 + 6, axisY - 26);
+                    ctx.fillText(`${formatNumber(interval.left)} ~ ${formatNumber(interval.right)}`, x1 + 6, axisY + 32);
+                });
+                ctx.restore();
+            }
+            renderMath();
+        }
+
+        function determineExtremaType(point) {
+            const index = currentCriticalPoints.indexOf(point);
+            if (index === -1) return 'stationary';
+            const leftInterval = intervalData.find(interval => interval.right === point);
+            const rightInterval = intervalData.find(interval => interval.left === point);
+            if (!leftInterval || !rightInterval) return 'stationary';
+            if (leftInterval.behavior === 'increase' && rightInterval.behavior === 'decrease') return 'max';
+            if (leftInterval.behavior === 'decrease' && rightInterval.behavior === 'increase') return 'min';
+            return 'stationary';
+        }
+
+        function analyzeCustomExpression(expr) {
+            const fn = parseExpression(expr);
+            if (!fn) return null;
+            const customDomain = [-5, 5];
+            const criticalPoints = findCriticalPoints(fn, customDomain);
+            const intervals = buildIntervals(fn, criticalPoints, customDomain);
+            return { fn, expression: expr, domain: customDomain, criticalPoints, intervals };
+        }
+
+        function renderCustomAnalysis(analysis) {
+            if (!analysis) {
+                customAnalysisResults.innerHTML = '<div class="status-box">请输入合法的函数表达式再开始分析。</div>';
+                renderMath();
+                return;
+            }
+            const { criticalPoints, intervals, expression } = analysis;
+            const expressionDisplay = expression
+                .replace(/\*\*/g, '^')
+                .replace(/\*/g, '\\cdot ');
+            const intervalDesc = intervals.map(item => {
+                const label = item.behavior === 'increase' ? '增' : item.behavior === 'decrease' ? '减' : '待定';
+                return `$(${formatNumber(item.left)}, ${formatNumber(item.right)}) ${label}$`;
+            }).join('，');
+            const extrema = [];
+            for (let i = 1; i < intervals.length; i++) {
+                const prev = intervals[i - 1];
+                const current = intervals[i];
+                const boundary = intervals[i - 1].right;
+                if (prev.behavior === 'increase' && current.behavior === 'decrease') extrema.push(`$x=${boundary.toFixed(2)}$ 极大值`);
+                if (prev.behavior === 'decrease' && current.behavior === 'increase') extrema.push(`$x=${boundary.toFixed(2)}$ 极小值`);
+            }
+            customAnalysisResults.innerHTML = `
+                <div class="info-item"><strong>函数</strong>$f(x) = ${expressionDisplay}$</div>
+                <div class="info-item"><strong>驻点</strong>${criticalPoints.length ? criticalPoints.map(c => '$x=' + c.toFixed(2) + '$').join('，') : '暂无'}</div>
+                <div class="info-item"><strong>区间</strong>${intervalDesc || '待分析'}</div>
+                <div class="info-item"><strong>极值</strong>${extrema.length ? extrema.join('，') : '暂无明显极值'}</div>
+            `;
+            renderMath();
+        }
+
+        function updateCustomVisuals() {
+            if (!customAnalysis) return;
+            const { fn, domain: customDomain } = customAnalysis;
+            const canvasInfo = setupCanvas(customCanvas);
+            if (canvasInfo) {
+                const { ctx, width, height } = canvasInfo;
+                ctx.clearRect(0, 0, width, height);
+                const data = computeFunctionRange(fn, customDomain);
+                drawAxes(ctx, width, height, customDomain, data.yRange);
+                ctx.save();
+                ctx.strokeStyle = '#10b981';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                let started = false;
+                data.points.forEach(({ x, y }) => {
+                    const { x: cx, y: cy } = mathToCanvas(x, y, width, height, customDomain, data.yRange);
+                    if (!started) { ctx.moveTo(cx, cy); started = true; }
+                    else ctx.lineTo(cx, cy);
+                });
+                ctx.stroke();
+                ctx.restore();
+            }
+
+            const derivativeInfo = setupCanvas(customDerivativeCanvas);
+            if (derivativeInfo) {
+                const { ctx, width, height } = derivativeInfo;
+                ctx.clearRect(0, 0, width, height);
+                const data = computeFunctionRange(x => numericDerivative(fn, x), customDomain);
+                drawAxes(ctx, width, height, customDomain, data.yRange);
+                ctx.save();
+                ctx.strokeStyle = '#6366f1';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                let started = false;
+                data.points.forEach(({ x, y }) => {
+                    const { x: cx, y: cy } = mathToCanvas(x, y, width, height, customDomain, data.yRange);
+                    if (!started) { ctx.moveTo(cx, cy); started = true; }
+                    else ctx.lineTo(cx, cy);
+                });
+                ctx.stroke();
+                ctx.restore();
+            }
+        }
+
+        function switchSection(section) {
+            currentSection = section;
+            pages.forEach(page => {
+                page.classList.toggle('active', page.id === section);
+            });
+            navButtons.forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.section === section);
+            });
+            if (section !== 'analysis') {
+                stopScan();
+            }
+            if (section === 'analysis') {
+                updateAnalysisVisuals();
+            } else if (section === 'extrema') {
+                updateExtremaVisuals();
+            } else if (section === 'custom') {
+                updateCustomVisuals();
+            }
+            renderMath();
+        }
+
+        presetSelector.addEventListener('change', () => {
+            const key = presetSelector.value;
+            const item = presets[key];
+            if (!item) return;
+            const fn = parseExpression(item.expression);
+            if (!fn) return;
+            currentFn = fn;
+            currentExpression = item.expression;
+            domain = item.domain.slice();
+            scanX = domain[0];
+            scanDirection = 1;
+            stopScan();
+            analyzeFunction();
+        });
+
+        extremaSelector.addEventListener('change', () => {
+            const key = extremaSelector.value;
+            const item = presets[key];
+            if (!item) return;
+            const fn = parseExpression(item.expression);
+            if (!fn) return;
+            currentFn = fn;
+            currentExpression = item.expression;
+            domain = item.domain.slice();
+            analyzeFunction();
+            updateExtremaVisuals();
+        });
+
+        applyCustomBtn.addEventListener('click', () => {
+            const expr = customInput.value.trim();
+            if (!expr) return;
+            const fn = parseExpression(expr);
+            if (!fn) {
+                hintInfo.textContent = '表达式无法解析，请使用 Math 函数并检查语法。';
+                return;
+            }
+            currentFn = fn;
+            currentExpression = expr;
+            domain = [-5, 5];
+            scanX = domain[0];
+            scanDirection = 1;
+            stopScan();
+            analyzeFunction();
+        });
+
+        speedSlider.addEventListener('input', () => {
+            const value = parseInt(speedSlider.value, 10);
+            speedValue.textContent = value === 1 ? '慢速' : value === 2 ? '中速' : value === 3 ? '偏快' : value === 4 ? '快速' : '极速';
+        });
+
+        toggleScanBtn.addEventListener('click', () => {
+            if (scanActive) {
+                stopScan();
+            } else {
+                startScan();
+            }
+        });
+
+        resetViewBtn.addEventListener('click', () => {
+            presetSelector.value = 'cubic';
+            const item = presets.cubic;
+            currentFn = parseExpression(item.expression);
+            currentExpression = item.expression;
+            domain = item.domain.slice();
+            scanX = domain[0];
+            scanDirection = 1;
+            customInput.value = '';
+            stopScan();
+            analyzeFunction();
+        });
+
+        navButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const section = btn.dataset.section;
+                if (section && section !== currentSection) {
+                    switchSection(section);
+                }
+            });
+        });
+
+        document.getElementById('analyzeCustom').addEventListener('click', () => {
+            const expr = document.getElementById('customFunctionInput').value.trim();
+            const analysis = analyzeCustomExpression(expr);
+            if (!analysis) {
+                customAnalysis = null;
+                renderCustomAnalysis(null);
+                return;
+            }
+            customAnalysis = analysis;
+            renderCustomAnalysis(customAnalysis);
+            updateCustomVisuals();
+        });
+
+        window.addEventListener('resize', () => {
+            if (currentSection === 'analysis') {
+                updateAnalysisVisuals();
+            } else if (currentSection === 'extrema') {
+                updateExtremaVisuals();
+            } else if (currentSection === 'custom') {
+                updateCustomVisuals();
+            }
+        });
+
+        populatePresetSelector();
+        analyzeFunction();
+        renderCustomAnalysis(null);
+        switchSection('analysis');
+        renderMath();
+
+        function toggleReturnLinks() { const p = document.querySelector('.return-links'); if (!p) return; if (p.style.display === 'flex') { p.style.opacity = '0'; setTimeout(() => p.style.display = 'none', 160); } else { p.style.display = 'flex'; requestAnimationFrame(() => p.style.opacity = '1'); } }
+    </script>
+</body>
+</html>

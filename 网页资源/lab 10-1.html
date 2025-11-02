@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab 10.1 矩阵结构认知与特殊矩阵构建实验室</title>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\(', '\)']],
+                displayMath: [['$$', '$$'], ['\[', '\]']],
+                processEscapes: true
+            },
+            startup: {
+                pageReady: () => {
+                    return MathJax.startup.defaultPageReady().then(() => {
+                        if (typeof window.scheduleMathRender === 'function') {
+                            window.scheduleMathRender();
+                        }
+                        console.log('MathJax加载完成');
+                    });
+                }
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+            }
+        };
+    </script>
+    <script defer src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js"></script>
+    <script defer src="../common-assets/js/lab-math-enhancer.js"></script>
+    <style>
+        :root {
+            --h1-size: 22px;
+            --h2-size: 20px;
+            --h3-size: 18px;
+            --btn-size: 16px;
+            --formula-size: 20px;
+            --text-size: 16px;
+            --primary: #4f46e5;
+            --primary-light: #6366f1;
+            --primary-dark: #3730a3;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --light: #ffffff;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-400: #9ca3af;
+            --gray-600: #4b5563;
+            --gray-800: #1f2937;
+            --border: #e5e7eb;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        *::-webkit-scrollbar {
+            width: 0;
+            background: transparent;
+        }
+
+        * {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
+            font-size: var(--text-size);
+            line-height: 1.5;
+            background: var(--gray-50);
+            color: var(--gray-800);
+        }
+
+        .return-home-panel {
+            position: fixed;
+            top: 12px;
+            right: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+            z-index: 40;
+        }
+
+        .return-toggle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.95), rgba(99, 102, 241, 0.9));
+            color: #ffffff;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 10px 18px rgba(79, 70, 229, 0.28);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .return-toggle:focus-visible {
+            outline: 2px solid rgba(129, 140, 248, 0.6);
+            outline-offset: 3px;
+        }
+
+        .return-toggle:hover {
+            transform: translateY(-1px) scale(1.03);
+            box-shadow: 0 14px 26px rgba(79, 70, 229, 0.35);
+        }
+
+        .return-links {
+            display: none;
+            flex-direction: column;
+            gap: 6px;
+            padding: 10px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(79, 70, 229, 0.15);
+            box-shadow: 0 16px 30px rgba(15, 23, 42, 0.18);
+            backdrop-filter: blur(6px);
+        }
+
+        .return-home-panel.open .return-links {
+            display: flex;
+        }
+
+        .return-link {
+            padding: 6px 12px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 14px;
+            color: var(--primary);
+            background: rgba(79, 70, 229, 0.12);
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+
+        .return-link.return-main {
+            color: var(--success);
+            background: rgba(16, 185, 129, 0.12);
+        }
+
+        .return-link:hover {
+            background: rgba(79, 70, 229, 0.2);
+            color: var(--primary-dark);
+        }
+
+        .return-link.return-main:hover {
+            background: rgba(16, 185, 129, 0.22);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            height: 100vh;
+            max-height: 700px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            background: var(--light);
+            border-radius: 12px;
+            box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(90deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: var(--light);
+            padding: 10px 24px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: var(--h1-size);
+            font-weight: 600;
+        }
+
+        .main {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 120px;
+            background: var(--gray-50);
+            border-right: 1px solid var(--border);
+            padding: 12px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .nav-btn {
+            width: 100%;
+            padding: 8px;
+            border: none;
+            border-radius: 6px;
+            background: transparent;
+            color: var(--gray-600);
+            text-align: left;
+            font-size: var(--text-size);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .nav-btn:hover {
+            background: var(--gray-100);
+        }
+
+        .nav-btn.active {
+            background: var(--primary);
+            color: var(--light);
+        }
+
+        .content {
+            flex: 1;
+            display: none;
+            padding: 18px;
+            overflow-y: auto;
+        }
+
+        .content.active {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow-y: auto;
+        }
+
+        .card {
+            background: var(--light);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+        }
+
+        .card h3 {
+            font-size: var(--h3-size);
+            color: var(--primary);
+            margin-bottom: 12px;
+        }
+
+        .input-group {
+            margin-bottom: 12px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: var(--gray-600);
+        }
+
+        .input-group select,
+        .input-group input,
+        .input-group range,
+        .input-group textarea {
+            width: 100%;
+            padding: 8px 10px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            font-size: var(--text-size);
+            background: var(--gray-50);
+        }
+
+        .input-group input[type="range"] {
+            padding: 0;
+        }
+
+        .input-group input:focus,
+        .input-group select:focus,
+        .input-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: var(--light);
+        }
+
+        .btn,
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 16px;
+            font-size: var(--btn-size);
+            border: none;
+            border-radius: 6px;
+            background: var(--primary);
+            color: var(--light);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            gap: 6px;
+        }
+
+        .btn.secondary {
+            background: var(--gray-200);
+            color: var(--gray-600);
+        }
+
+        .btn:hover,
+        .action-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn.secondary:hover {
+            background: var(--gray-400);
+            color: var(--light);
+        }
+
+        .info-box {
+            background: var(--gray-50);
+            border-left: 3px solid var(--primary);
+            padding: 12px;
+            border-radius: 6px;
+            font-size: var(--text-size);
+            line-height: 1.6;
+        }
+
+        canvas {
+            width: 100%;
+            height: 260px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: #ffffff;
+        }
+
+        .tag-list {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: rgba(79, 70, 229, 0.12);
+            color: var(--primary);
+            font-size: 14px;
+        }
+
+        table.matrix-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: center;
+        }
+
+        table.matrix-table td {
+            border: 1px solid var(--gray-200);
+            padding: 6px;
+            font-size: var(--text-size);
+        }
+    
+        /* 内联公式排版 */
+        .formula-box {
+            display: inline-flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+            gap: 8px;
+            margin: 4px 12px 4px 0;
+            width: auto;
+            max-width: 100%;
+            text-align: left;
+        }
+
+        .formula-box::before {
+            content: attr(data-prefix);
+            font-weight: 600;
+            color: var(--primary, #4f46e5);
+            margin-right: 6px;
+        }
+
+        .formula-box[data-prefix=""]::before,
+        .formula-box:not([data-prefix])::before {
+            content: none;
+        }
+
+        .formula-box mjx-container {
+            margin: 0;
+        }
+
+        /* 自定义下拉框样式 */
+        .custom-select-container { position: relative; width: 100%; }
+        .custom-select-trigger { padding: 8px 32px 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; background: #f9fafb; cursor: pointer; display: flex; align-items: center; justify-content: space-between; transition: all 0.2s; }
+        .custom-select-trigger:hover { border-color: #9ca3af; background: #ffffff; }
+        .custom-select-container.open .custom-select-trigger { border-color: #4f46e5; background: #ffffff; }
+        .custom-select-trigger .arrow { font-size: 10px; color: #6b7280; transition: transform 0.2s; }
+        .custom-select-trigger .selected-formula { flex: 1; }
+        .custom-select-container.open .arrow { transform: rotate(180deg); }
+        .custom-select-options { display: none; position: absolute; top: 100%; left: 0; right: 0; background: #ffffff; border: 1px solid #d1d5db; border-radius: 6px; margin-top: 4px; max-height: 200px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        .custom-select-container.open .custom-select-options { display: block; }
+        .custom-option { padding: 8px 12px; cursor: pointer; transition: background 0.15s; }
+        .custom-option:hover { background: #f3f4f6; }
+        .custom-option.selected { background: #eef2ff; color: #4f46e5; font-weight: 500; }
+
+    </style>
+</head>
+<body>
+    <div class="return-home-panel">
+        <button class="return-toggle" type="button" aria-label="打开返回导航" onclick="toggleReturnPanel(event)"><i class="fa-solid fa-house"></i></button>
+        <div class="return-links">
+            <a class="return-link return-sub" href="index.html"><i class="fa-solid fa-arrow-left"></i> 返回目录</a>
+            <a class="return-link return-main" href="../index.html"><i class="fa-solid fa-house"></i> 返回主站</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <header class="header">
+            <h1>Lab 10.1 矩阵结构认知与特殊矩阵构建实验室</h1>
+        </header>
+
+        <div class="main">
+            <nav class="sidebar">
+                <button class="nav-btn active"  data-panel="module1"onclick="switchPanel('module1', this)">结构识别</button>
+                <button class="nav-btn"  data-panel="module2"onclick="switchPanel('module2', this)">特殊矩阵</button>
+            </nav>
+
+            <div class="content active" id="module1">
+                <div class="column">
+                    <div class="card">
+                        <h3>矩阵尺寸与元素设置</h3>
+                        <div class="input-group">
+                            <label>行数：<span id="rowsDisplay">3</span></label>
+                            <input type="range" id="rowRange" min="2" max="5" value="3">
+                        </div>
+                        <div class="input-group">
+                            <label>列数：<span id="colsDisplay">3</span></label>
+                            <input type="range" id="colRange" min="2" max="5" value="3">
+                        </div>
+                        <div class="input-group">
+                            <label>元素生成方式</label>
+                            <div class="custom-select-container">
+                                <div class="custom-select-trigger" onclick="toggleCustomSelect(this)">
+                                    <span class="selected-formula">按行递增</span>
+                                    <span class="arrow">▼</span>
+                                </div>
+                                <div class="custom-select-options">
+                                    <div class="custom-option selected" data-value="sequential" onclick="selectCustomOption(this, 'entryMode')">
+                                        按行递增
+                                    </div>
+                                    <div class="custom-option" data-value="random" onclick="selectCustomOption(this, 'entryMode')">
+                                        随机整数
+                                    </div>
+                                    <div class="custom-option" data-value="zero" onclick="selectCustomOption(this, 'entryMode')">
+                                        全部为0
+                                    </div>
+                                </div>
+                                <input type="hidden" id="entryMode" value="sequential">
+                            </div>
+                        </div>
+                        <button class="btn" onclick="generateMatrix()">生成矩阵</button>
+                    </div>
+                    <div class="card">
+                        <h3>结构特征提炼</h3>
+                        <div class="info-box" id="structureSummary">
+                            请选择矩阵尺寸并生成矩阵，系统会自动分析行列型、方阵性以及稀疏度等结构特征。
+                        </div>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="card">
+                        <h3>矩阵符号表示</h3>
+                        <p class="formula-box" data-prefix="公式：">$A = [a_{ij}]_{m\times n}$</p>
+                        <div class="tag-list" id="structureTags"></div>
+                    </div>
+                    <div class="card">
+                        <h3>矩阵布局可视化</h3>
+                        <canvas id="matrixCanvas"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content" id="module2">
+                <div class="column">
+                    <div class="card">
+                        <h3>特殊矩阵选择</h3>
+                        <div class="input-group">
+                            <label>目标类型</label>
+                            <div class="custom-select-container">
+                                <div class="custom-select-trigger" onclick="toggleCustomSelect(this)">
+                                    <span class="selected-formula">单位矩阵</span>
+                                    <span class="arrow">▼</span>
+                                </div>
+                                <div class="custom-select-options">
+                                    <div class="custom-option selected" data-value="identity" onclick="selectCustomOption(this, 'specialType')">
+                                        单位矩阵
+                                    </div>
+                                    <div class="custom-option" data-value="diagonal" onclick="selectCustomOption(this, 'specialType')">
+                                        对角矩阵
+                                    </div>
+                                    <div class="custom-option" data-value="upper" onclick="selectCustomOption(this, 'specialType')">
+                                        上三角矩阵
+                                    </div>
+                                    <div class="custom-option" data-value="lower" onclick="selectCustomOption(this, 'specialType')">
+                                        下三角矩阵
+                                    </div>
+                                    <div class="custom-option" data-value="symmetric" onclick="selectCustomOption(this, 'specialType')">
+                                        对称矩阵
+                                    </div>
+                                </div>
+                                <input type="hidden" id="specialType" value="identity">
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>矩阵阶数</label>
+                            <input type="number" id="specialSize" min="2" max="5" value="3">
+                        </div>
+                        <button class="btn" onclick="buildSpecialMatrix()">生成结构</button>
+                    </div>
+                    <div class="card">
+                        <h3>结构说明</h3>
+                        <div class="info-box" id="specialExplanation">
+                            选择一种特殊矩阵类型，观察其非零元素的分布规律以及需要满足的代数条件。
+                        </div>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="card">
+                        <h3>特殊矩阵数据表</h3>
+                        <div id="specialMatrixTable"></div>
+                    </div>
+                    <div class="card">
+                        <h3>元素分布示意</h3>
+                        <canvas id="specialCanvas"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 自定义下拉框控制函数
+        function toggleCustomSelect(trigger) {
+            const container = trigger.parentElement;
+            const allContainers = document.querySelectorAll('.custom-select-container');
+            allContainers.forEach(c => {
+                if (c !== container) c.classList.remove('open');
+            });
+            container.classList.toggle('open');
+        }
+
+        function selectCustomOption(option, selectId) {
+            const container = option.closest('.custom-select-container');
+            const trigger = container.querySelector('.custom-select-trigger span');
+            const hiddenInput = document.getElementById(selectId);
+            const allOptions = container.querySelectorAll('.custom-option');
+            
+            allOptions.forEach(opt => opt.classList.remove('selected'));
+            option.classList.add('selected');
+            
+            trigger.innerHTML = option.innerHTML;
+            hiddenInput.value = option.dataset.value;
+            
+            container.classList.remove('open');
+            
+            if (typeof MathJax !== 'undefined') {
+                MathJax.typesetPromise([trigger]).catch(err => console.log(err));
+            }
+            
+            // 触发对应的更新函数
+            if (selectId === 'entryMode') generateMatrix();
+            if (selectId === 'specialType') buildSpecialMatrix();
+        }
+
+        // 点击外部关闭下拉框
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.custom-select-container')) {
+                document.querySelectorAll('.custom-select-container').forEach(c => {
+                    c.classList.remove('open');
+                });
+            }
+        });
+
+        const baseState = {
+            rows: 3,
+            cols: 3,
+            matrix: []
+        };
+
+        function switchPanel(id, btn) {
+            document.querySelectorAll('.content').forEach(content => content.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            document.querySelectorAll('.nav-btn').forEach(button => button.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+            renderMath();
+        }
+
+        let mathObserver = null;
+        let mathRenderQueued = false;
+
+        function startMathObserver() {
+            if (typeof MutationObserver === 'undefined' || !document.body) {
+                return;
+            }
+            if (mathObserver) {
+                mathObserver.disconnect();
+            }
+            mathObserver = new MutationObserver(mutations => {
+                for (const mutation of mutations) {
+                    if (mutation.type === 'childList' || mutation.type === 'characterData') {
+                        scheduleMathRender();
+                        break;
+                    }
+                }
+            });
+            mathObserver.observe(document.body, { childList: true, subtree: true, characterData: true });
+        }
+
+        function scheduleMathRender() {
+            if (mathRenderQueued) {
+                return;
+            }
+            mathRenderQueued = true;
+            requestAnimationFrame(() => {
+                mathRenderQueued = false;
+                if (window.MathJax && MathJax.typesetPromise) {
+                    if (mathObserver) {
+                        mathObserver.disconnect();
+                    }
+                    MathJax.typesetPromise()
+                        .catch(err => console.log('渲染错误:', err))
+                        .finally(() => {
+                            startMathObserver();
+                        });
+                } else {
+                    setTimeout(scheduleMathRender, 160);
+                }
+            });
+        }
+
+        window.scheduleMathRender = scheduleMathRender;
+
+        function renderMath() {
+            scheduleMathRender();
+        }
+
+        function ensureMathReady() {
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', () => {
+                    startMathObserver();
+                    scheduleMathRender();
+                });
+            } else {
+                startMathObserver();
+                scheduleMathRender();
+            }
+        }
+
+        ensureMathReady();
+
+        function toggleReturnPanel(event) {
+            event.stopPropagation();
+            const panel = document.querySelector('.return-home-panel');
+            if (panel) {
+                panel.classList.toggle('open');
+            }
+        }
+
+        document.addEventListener('click', event => {
+            const panel = document.querySelector('.return-home-panel');
+            if (!panel) {
+                return;
+            }
+            if (panel.classList.contains('open') && !panel.contains(event.target)) {
+                panel.classList.remove('open');
+            }
+        });
+
+        window.addEventListener('pageshow', () => {
+            scheduleMathRender();
+        });
+
+        function resizeCanvas(canvas) {
+            const container = canvas.parentElement;
+            const width = container.clientWidth - 20;
+            const height = container.clientHeight - 20;
+            canvas.style.width = width + 'px';
+            canvas.style.height = height + 'px';
+            const ratio = window.devicePixelRatio || 1;
+            canvas.width = width * ratio;
+            canvas.height = height * ratio;
+            const ctx = canvas.getContext('2d');
+            ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            return ctx;
+        }
+
+        function drawAxis(ctx, width, height) {
+            ctx.clearRect(0, 0, width, height);
+            ctx.save();
+            ctx.strokeStyle = '#374151';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(50, height - 40);
+            ctx.lineTo(width - 30, height - 40);
+            ctx.moveTo(50, 30);
+            ctx.lineTo(50, height - 40);
+            ctx.stroke();
+            ctx.font = '14px sans-serif';
+            ctx.fillStyle = '#374151';
+            ctx.fillText('列 j', width - 70, height - 48);
+            ctx.fillText('行 i', 10, 50);
+            ctx.restore();
+        }
+
+        function generateMatrix() {
+            const rows = parseInt(document.getElementById('rowRange').value, 10);
+            const cols = parseInt(document.getElementById('colRange').value, 10);
+            const mode = document.getElementById('entryMode').value;
+            document.getElementById('rowsDisplay').textContent = rows;
+            document.getElementById('colsDisplay').textContent = cols;
+            baseState.rows = rows;
+            baseState.cols = cols;
+            baseState.matrix = [];
+            let counter = 1;
+            for (let i = 0; i < rows; i++) {
+                const row = [];
+                for (let j = 0; j < cols; j++) {
+                    if (mode === 'sequential') {
+                        row.push(counter++);
+                    } else if (mode === 'random') {
+                        row.push(Math.floor(Math.random() * 9) - 4);
+                    } else {
+                        row.push(0);
+                    }
+                }
+                baseState.matrix.push(row);
+            }
+            updateStructureSummary();
+            drawMatrixCanvas();
+        }
+
+        function updateStructureSummary() {
+            const { rows, cols, matrix } = baseState;
+            if (!matrix.length) return;
+            const tags = [];
+            tags.push(rows === cols ? '方阵' : '矩阵');
+            if (rows === cols) {
+                tags.push(rows % 2 === 0 ? '偶阶' : '奇阶');
+            }
+            const zeroCount = matrix.flat().filter(v => v === 0).length;
+            if (zeroCount === rows * cols) {
+                tags.push('零矩阵');
+            } else if (zeroCount > rows * cols * 0.6) {
+                tags.push('稀疏矩阵');
+            }
+            const tagContainer = document.getElementById('structureTags');
+            tagContainer.innerHTML = tags.map(tag => `<span class="tag">${tag}</span>`).join('');
+            const summary = [`尺寸：$${rows} \\times ${cols}$`];
+            summary.push(rows === cols ? '该矩阵是方阵，可讨论行列式与特征值。' : '该矩阵是非方阵，适用于描述线性变换。');
+            summary.push(`零元素比例约为 ${(zeroCount / (rows * cols) * 100).toFixed(1)}%`);
+            const summaryEl = document.getElementById('structureSummary');
+            summaryEl.innerHTML = summary.join('<br>');
+            if (typeof MathJax !== 'undefined') {
+                MathJax.typesetPromise([summaryEl]).catch(err => console.log(err));
+            }
+            renderMath();
+        }
+
+        function drawMatrixCanvas() {
+            const canvas = document.getElementById('matrixCanvas');
+            const ctx = resizeCanvas(canvas);
+            const width = canvas.width / (window.devicePixelRatio || 1);
+            const height = canvas.height / (window.devicePixelRatio || 1);
+            drawAxis(ctx, width, height);
+            const { rows, cols, matrix } = baseState;
+            if (!matrix.length) return;
+            const gridWidth = width - 100;
+            const gridHeight = height - 80;
+            const cellW = gridWidth / cols;
+            const cellH = gridHeight / rows;
+            ctx.strokeStyle = '#6366f1';
+            ctx.fillStyle = '#1f2937';
+            ctx.font = '14px sans-serif';
+            for (let i = 0; i < rows; i++) {
+                for (let j = 0; j < cols; j++) {
+                    const x = 50 + j * cellW;
+                    const y = 30 + i * cellH;
+                    ctx.strokeRect(x, y, cellW, cellH);
+                    ctx.fillText(matrix[i][j], x + cellW / 2 - 6, y + cellH / 2 + 4);
+                }
+            }
+        }
+
+        function buildSpecialMatrix() {
+            const size = parseInt(document.getElementById('specialSize').value, 10);
+            const type = document.getElementById('specialType').value;
+            const matrix = Array.from({ length: size }, () => Array(size).fill(0));
+            let explanation = '';
+            for (let i = 0; i < size; i++) {
+                for (let j = 0; j < size; j++) {
+                    if (type === 'identity') {
+                        matrix[i][j] = i === j ? 1 : 0;
+                        explanation = '单位矩阵的主对角线为1，其余为0，是线性变换中保持向量不变的矩阵。';
+                    } else if (type === 'diagonal') {
+                        matrix[i][j] = i === j ? (i + 1) : 0;
+                        explanation = '对角矩阵只在主对角线上有可能非零，是最易求幂的矩阵类型。';
+                    } else if (type === 'upper') {
+                        matrix[i][j] = j >= i ? (i + j + 1) % 5 : 0;
+                        explanation = '上三角矩阵主对角线以下元素为0，常用于高斯消元的中间状态。';
+                    } else if (type === 'lower') {
+                        matrix[i][j] = i >= j ? (i + j + 2) % 6 : 0;
+                        explanation = '下三角矩阵主对角线上方元素为0，可通过逐步回代求解线性方程组。';
+                    } else if (type === 'symmetric') {
+                        const value = (i + j + 2);
+                        matrix[i][j] = matrix[j][i] = value;
+                        explanation = '对称矩阵满足 $a_{ij}=a_{ji}$，具有实特征值与正交特征向量的优良性质。';
+                    }
+                }
+            }
+            if (type === 'symmetric') {
+                for (let i = 0; i < size; i++) {
+                    for (let j = i; j < size; j++) {
+                        matrix[j][i] = matrix[i][j];
+                    }
+                }
+            }
+            document.getElementById('specialExplanation').innerHTML = explanation;
+            renderSpecialTable(matrix);
+            drawSpecialCanvas(matrix, type);
+            renderMath();
+        }
+
+        function renderSpecialTable(matrix) {
+            const table = document.createElement('table');
+            table.className = 'matrix-table';
+            matrix.forEach(row => {
+                const tr = document.createElement('tr');
+                row.forEach(value => {
+                    const td = document.createElement('td');
+                    td.textContent = value;
+                    tr.appendChild(td);
+                });
+                table.appendChild(tr);
+            });
+            const container = document.getElementById('specialMatrixTable');
+            container.innerHTML = '';
+            container.appendChild(table);
+        }
+
+        function drawSpecialCanvas(matrix, type) {
+            const canvas = document.getElementById('specialCanvas');
+            const ctx = resizeCanvas(canvas);
+            const width = canvas.width / (window.devicePixelRatio || 1);
+            const height = canvas.height / (window.devicePixelRatio || 1);
+            drawAxis(ctx, width, height);
+            const size = matrix.length;
+            const gridWidth = width - 100;
+            const gridHeight = height - 80;
+            const cellW = gridWidth / size;
+            const cellH = gridHeight / size;
+            for (let i = 0; i < size; i++) {
+                for (let j = 0; j < size; j++) {
+                    const x = 50 + j * cellW;
+                    const y = 30 + i * cellH;
+                    if (matrix[i][j] !== 0) {
+                        ctx.fillStyle = type === 'identity' && i === j ? '#10b981' : '#6366f1';
+                        ctx.fillRect(x, y, cellW, cellH);
+                    }
+                    ctx.strokeStyle = '#e5e7eb';
+                    ctx.strokeRect(x, y, cellW, cellH);
+                }
+            }
+        }
+
+        document.getElementById('rowRange').addEventListener('input', generateMatrix);
+        document.getElementById('colRange').addEventListener('input', generateMatrix);
+        window.addEventListener('resize', () => {
+            drawMatrixCanvas();
+            const table = document.getElementById('specialMatrixTable');
+            if (table.children.length) {
+                const values = Array.from(table.querySelectorAll('tr')).map(tr => Array.from(tr.children).map(td => parseInt(td.textContent, 10)));
+                drawSpecialCanvas(values, document.getElementById('specialType').value);
+            }
+        });
+
+        // 页面加载完成后初始化可视化
+        window.addEventListener('load', () => {
+            generateMatrix();
+            buildSpecialMatrix();
+            
+            // 初始化自定义下拉框的LaTeX渲染
+            if (typeof MathJax !== 'undefined') {
+                MathJax.typesetPromise().catch(err => console.log(err));
+            }
+            renderMath();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab 9.1 二重积分概念与几何意义实验室</title>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            startup: {
+                pageReady: () => {
+                    return MathJax.startup.defaultPageReady().then(() => {
+                        if (typeof window.scheduleMathRender === 'function') {
+                            window.scheduleMathRender();
+                        }
+                        console.log('MathJax加载完成');
+                    });
+                }
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+            }
+        };
+    </script>
+    <script defer src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js"></script>
+    <script defer src="../common-assets/js/lab-math-enhancer.js"></script>
+    <style>
+        :root {
+            --h1-size: 22px;
+            --h2-size: 20px;
+            --h3-size: 18px;
+            --btn-size: 16px;
+            --formula-size: 20px;
+            --text-size: 16px;
+            --primary: #4f46e5;
+            --primary-dark: #3730a3;
+            --primary-light: #6366f1;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --light: #ffffff;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-600: #4b5563;
+            --gray-800: #1f2937;
+            --border: #e5e7eb;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        *::-webkit-scrollbar { width: 0; background: transparent; }
+        * { scrollbar-width: none; -ms-overflow-style: none; }
+
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif; font-size: var(--text-size); line-height: 1.5; background: var(--gray-50); color: var(--gray-800); }
+        .return-home-panel {
+            position: fixed;
+            top: 12px;
+            right: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+            z-index: 40;
+        }
+
+        .return-toggle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.95), rgba(99, 102, 241, 0.9));
+            color: #ffffff;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 10px 18px rgba(79, 70, 229, 0.28);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .return-toggle:focus-visible {
+            outline: 2px solid rgba(129, 140, 248, 0.6);
+            outline-offset: 3px;
+        }
+
+        .return-toggle:hover {
+            transform: translateY(-1px) scale(1.03);
+            box-shadow: 0 14px 26px rgba(79, 70, 229, 0.35);
+        }
+
+        .return-links {
+            display: none;
+            flex-direction: column;
+            gap: 6px;
+            padding: 10px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(79, 70, 229, 0.15);
+            box-shadow: 0 16px 30px rgba(15, 23, 42, 0.18);
+            backdrop-filter: blur(6px);
+        }
+
+        .return-home-panel.open .return-links {
+            display: flex;
+        }
+
+        .return-link {
+            padding: 6px 12px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 14px;
+            color: var(--primary);
+            background: rgba(79, 70, 229, 0.12);
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+
+        .return-link.return-main {
+            color: var(--success);
+            background: rgba(16, 185, 129, 0.12);
+        }
+
+        .return-link:hover {
+            background: rgba(79, 70, 229, 0.2);
+            color: var(--primary-dark);
+        }
+
+        .return-link.return-main:hover {
+            background: rgba(16, 185, 129, 0.22);
+        }
+
+        .container { width: 100%; max-width: 1400px; min-height: 700px; margin: 0 auto; display: flex; flex-direction: column; background: var(--light); border-radius: 12px; box-shadow: 0 12px 24px rgba(15,23,42,0.08); overflow: hidden; }
+        .header { background: linear-gradient(90deg, var(--primary), var(--primary-dark)); color: var(--light); padding: 10px 24px; height: 48px; display: flex; align-items: center; }
+        .header h1 { font-size: var(--h1-size); font-weight: 600; }
+        .main { flex: 1; display: flex; overflow: hidden; }
+        .sidebar { width: 120px; background: var(--gray-50); border-right: 1px solid var(--border); padding: 12px 10px; display: flex; flex-direction: column; gap: 8px; }
+        .nav-btn { width: 100%; padding: 8px; border: none; border-radius: 6px; background: transparent; color: var(--gray-600); text-align: left; font-size: var(--text-size); cursor: pointer; transition: all 0.2s ease; }
+        .nav-btn:hover { background: var(--gray-100); color: var(--primary); }
+        .nav-btn.active { background: rgba(79,70,229,0.12); color: var(--primary); font-weight: 600; }
+
+        .content { flex: 1; display: none; padding: 16px; overflow-y: auto; }
+        .content.active { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .column { display: flex; flex-direction: column; gap: 16px; overflow-y: auto; }
+        
+        .card { background: var(--light); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+        .card h3 { font-size: var(--h3-size); color: var(--primary); margin-bottom: 12px; }
+        
+        .control-group { display: flex; flex-direction: column; gap: 8px; background: var(--light); padding: 12px; border-radius: 8px; border: 1px solid var(--gray-200); }
+        label { font-weight: 500; color: var(--gray-600); }
+        input[type="range"] { padding: 8px 10px; border-radius: 6px; border: 1px solid var(--gray-300); outline: none; transition: border 0.2s ease; }
+        input[type="range"]:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79,70,229,0.2); }
+        .info-card { background: var(--gray-50); border-radius: 4px; padding: 10px; margin: 8px 0; font-size: var(--text-size); }
+        .status-tag { display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 999px; background: rgba(79,70,229,0.12); color: var(--primary); font-size: 14px; }
+        .status-tag.success { background: rgba(16,185,129,0.16); color: var(--success); }
+        
+        .canvas-container { border: 1px solid var(--gray-200); border-radius: 4px; background: #fafafa; padding: 10px; }
+        .canvas-container canvas { width: 100%; height: 300px; display: block; }
+        @media (max-width: 1100px) { .content.active { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <div class="return-home-panel">
+        <button class="return-toggle" type="button" aria-label="打开返回导航" onclick="toggleReturnPanel(event)"><i class="fa-solid fa-house"></i></button>
+        <div class="return-links">
+            <a class="return-link return-sub" href="index.html"><i class="fa-solid fa-arrow-left"></i> 返回目录</a>
+            <a class="return-link return-main" href="../index.html"><i class="fa-solid fa-house"></i> 返回主站</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <header class="header">
+            <h1>Lab 9.1｜二重积分的概念与几何意义</h1>
+        </header>
+
+        <div class="main">
+            <nav class="sidebar">
+                <button class="nav-btn active"  data-panel="module1"onclick="switchPanel('module1', this)">概念引入</button>
+                <button class="nav-btn"  data-panel="module2"onclick="switchPanel('module2', this)">黎曼和演示</button>
+            </nav>
+
+            <div class="content active" id="module1">
+                <div class="column">
+                    <div class="card">
+                        <h3>曲边柱体的体积</h3>
+                        <div class="info-card" id="conceptInfo">二重积分 $\iint_D f(x,y)\,dA$ 表示在底面区域 $D$ 上方，由高度 $f(x,y)$ 构成的曲边柱体体积。</div>
+                        <div class="control-group">
+                            <label for="heightSlider">平均高度系数：<span id="heightValue" class="status-tag">1.00</span></label>
+                            <input type="range" id="heightSlider" min="0.5" max="2" step="0.05" value="1" oninput="updateConcept()" />
+                        </div>
+                        <div class="info-card" id="volumeInfo">调整高度以观察曲面体积的变化。</div>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="card" style="flex: 1;">
+                        <h3>区域与曲面</h3>
+                        <div class="canvas-container">
+                            <canvas id="conceptCanvas"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content" id="module2">
+                <div class="column">
+                    <div class="card">
+                        <h3>划分与求和</h3>
+                        <div class="control-group">
+                            <label for="partitionSlider">分割数量 $n$：<span id="partitionValue" class="status-tag">6×6</span></label>
+                            <input type="range" id="partitionSlider" min="2" max="14" value="6" oninput="updateRiemann()" />
+                        </div>
+                        <div class="info-card" id="riemannInfo">分割越细，近似体积越接近真实体积。</div>
+                        <div class="info-card" id="sumInfo">黎曼和数值将在此显示。</div>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="card" style="flex: 1;">
+                        <h3>近似柱体</h3>
+                        <div class="canvas-container">
+                            <canvas id="riemannCanvas"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const conceptCanvas = document.getElementById('conceptCanvas');
+        const riemannCanvas = document.getElementById('riemannCanvas');
+
+        function resizeCanvas(canvas) {
+            const container = canvas.parentElement;
+            const width = container.clientWidth - 20;
+            const height = container.clientHeight - 20;
+            canvas.style.width = width + 'px';
+            canvas.style.height = height + 'px';
+            const ratio = window.devicePixelRatio || 1;
+            canvas.width = width * ratio;
+            canvas.height = height * ratio;
+            const ctx = canvas.getContext('2d');
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.scale(ratio, ratio);
+            return ctx;
+        }
+
+        function drawAxis(ctx, width, height) {
+            ctx.clearRect(0, 0, width, height);
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, width, height);
+            ctx.strokeStyle = '#374151';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(40, height - 40);
+            ctx.lineTo(width - 40, height - 40);
+            ctx.moveTo(40, height - 40);
+            ctx.lineTo(40, 40);
+            ctx.stroke();
+            ctx.fillStyle = '#4b5563';
+            ctx.font = '14px sans-serif';
+            ctx.fillText('x', width - 48, height - 52);
+            ctx.fillText('y', 48, 36);
+        }
+
+        let mathObserver = null;
+        let mathRenderQueued = false;
+
+        function startMathObserver() {
+            if (typeof MutationObserver === 'undefined' || !document.body) {
+                return;
+            }
+            if (mathObserver) {
+                mathObserver.disconnect();
+            }
+            mathObserver = new MutationObserver(mutations => {
+                for (const mutation of mutations) {
+                    if (mutation.type === 'childList' || mutation.type === 'characterData') {
+                        scheduleMathRender();
+                        break;
+                    }
+                }
+            });
+            mathObserver.observe(document.body, { childList: true, subtree: true, characterData: true });
+        }
+
+        function scheduleMathRender() {
+            if (mathRenderQueued) {
+                return;
+            }
+            mathRenderQueued = true;
+            requestAnimationFrame(() => {
+                mathRenderQueued = false;
+                if (window.MathJax && MathJax.typesetPromise) {
+                    if (mathObserver) {
+                        mathObserver.disconnect();
+                    }
+                    MathJax.typesetPromise()
+                        .catch(err => console.log('渲染错误:', err))
+                        .finally(() => {
+                            startMathObserver();
+                        });
+                } else {
+                    setTimeout(scheduleMathRender, 160);
+                }
+            });
+        }
+
+        window.scheduleMathRender = scheduleMathRender;
+
+        function renderMath() {
+            scheduleMathRender();
+        }
+
+        function ensureMathReady() {
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', () => {
+                    startMathObserver();
+                    scheduleMathRender();
+                });
+            } else {
+                startMathObserver();
+                scheduleMathRender();
+            }
+        }
+
+        ensureMathReady();
+
+        function toggleReturnPanel(event) {
+            event.stopPropagation();
+            const panel = document.querySelector('.return-home-panel');
+            if (panel) {
+                panel.classList.toggle('open');
+            }
+        }
+
+        document.addEventListener('click', event => {
+            const panel = document.querySelector('.return-home-panel');
+            if (!panel) {
+                return;
+            }
+            if (panel.classList.contains('open') && !panel.contains(event.target)) {
+                panel.classList.remove('open');
+            }
+        });
+
+        window.addEventListener('pageshow', () => {
+            scheduleMathRender();
+        });
+
+        function switchPanel(id, btn) {
+            document.querySelectorAll('.content').forEach(panel => panel.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+            btn.classList.add('active');
+            setTimeout(() => {
+                drawConcept();
+                drawRiemann();
+            }, 80);
+        }
+
+        function updateConcept() {
+            const value = parseFloat(document.getElementById('heightSlider').value);
+            document.getElementById('heightValue').textContent = value.toFixed(2);
+            document.getElementById('volumeInfo').innerHTML = `<span class="status-tag">体积</span> 体积近似为 ${ (value * 6.4).toFixed(2) } 单位^3。`;
+            drawConcept();
+        }
+
+        function drawConcept() {
+            const ctx = resizeCanvas(conceptCanvas);
+            const width = conceptCanvas.clientWidth - 20;
+            const height = conceptCanvas.clientHeight - 20;
+            drawAxis(ctx, width, height);
+            const scale = 60;
+            const value = parseFloat(document.getElementById('heightSlider').value);
+            ctx.save();
+            ctx.translate(40, height - 40);
+            ctx.scale(1, -1);
+            ctx.fillStyle = 'rgba(79,70,229,0.15)';
+            ctx.fillRect(0, 0, 6 * scale, 4 * scale);
+            for (let x = 0; x <= 6; x++) {
+                ctx.strokeStyle = 'rgba(99,102,241,0.2)';
+                ctx.beginPath();
+                ctx.moveTo(x * scale, 0);
+                ctx.lineTo(x * scale, 4 * scale);
+                ctx.stroke();
+            }
+            for (let y = 0; y <= 4; y++) {
+                ctx.strokeStyle = 'rgba(99,102,241,0.2)';
+                ctx.beginPath();
+                ctx.moveTo(0, y * scale);
+                ctx.lineTo(6 * scale, y * scale);
+                ctx.stroke();
+            }
+            ctx.fillStyle = 'rgba(79,70,229,0.4)';
+            for (let x = 0; x < 6; x++) {
+                for (let y = 0; y < 4; y++) {
+                    const h = value * (Math.sin((x + 0.5) / 2) + Math.cos((y + 0.5) / 3) + 2);
+                    ctx.fillRect(x * scale, y * scale, scale, h * 10);
+                }
+            }
+            ctx.restore();
+        }
+
+        function updateRiemann() {
+            const n = parseInt(document.getElementById('partitionSlider').value, 10);
+            document.getElementById('partitionValue').textContent = `${n}×${n}`;
+            drawRiemann();
+        }
+
+        function drawRiemann() {
+            const ctx = resizeCanvas(riemannCanvas);
+            const width = riemannCanvas.clientWidth - 20;
+            const height = riemannCanvas.clientHeight - 20;
+            drawAxis(ctx, width, height);
+            const n = parseInt(document.getElementById('partitionSlider').value, 10);
+            const dx = 6 / n;
+            const dy = 4 / n;
+            let sum = 0;
+            const scale = 60;
+            ctx.save();
+            ctx.translate(40, height - 40);
+            ctx.scale(1, -1);
+            for (let i = 0; i < n; i++) {
+                for (let j = 0; j < n; j++) {
+                    const x = i * dx + dx / 2;
+                    const y = j * dy + dy / 2;
+                    const h = Math.sin(x / 2) + Math.cos(y / 3) + 2;
+                    sum += h * dx * dy;
+                    ctx.fillStyle = `rgba(79,70,229,${0.2 + 0.6 * (h / 4)})`;
+                    ctx.fillRect(i * dx * scale, j * dy * scale, dx * scale, h * 20);
+                }
+            }
+            ctx.restore();
+            document.getElementById('sumInfo').innerHTML = `<span class="status-tag success">黎曼和</span> ${sum.toFixed(3)}，逼近真实体积 ${ (6.4).toFixed(2) }。`;
+        }
+
+        window.addEventListener('resize', () => {
+            drawConcept();
+            drawRiemann();
+        });
+
+        updateConcept();
+        updateRiemann();
+        renderMath();
+    </script>
+</body>
+</html>

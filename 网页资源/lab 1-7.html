@@ -1,0 +1,1619 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>复合函数实验室</title>
+
+    <!-- MathJax v3 配置和加载 -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+            },
+            startup: {
+                pageReady: () => {
+                    return MathJax.startup.defaultPageReady().then(() => {
+                        console.log('MathJax 初始化完成');
+                    });
+                }
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js"></script>
+
+    <!-- 引入 Font Awesome 图标 -->
+    <link href="../common-assets/css/all.min.css" rel="stylesheet">
+    <!-- 引入 Google Fonts -->
+    <link href="../common-assets/fonts/source-han-serif.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --h1-size: 24px;
+            --h2-size: 20px;
+            --h3-size: 18px;
+            --btn-size: 16px;
+            --formula-size: 1.2em;
+            --text-size: 16px;
+            --primary: #4f46e5;
+            --primary-light: #6366f1;
+            --primary-dark: #3730a3;
+            --light: #ffffff;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-600: #4b5563;
+            --gray-800: #1f2937;
+            --border: #e5e7eb;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        *::-webkit-scrollbar {
+            width: 0;
+            background: transparent;
+        }
+
+        body {
+            font-family: 'jf open 粉圆', 'Noto Serif CJK SC', '思源宋体', serif;
+            font-size: var(--text-size);
+            background: var(--gray-50);
+            color: var(--gray-800);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            height: auto;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            background: var(--light);
+        }
+
+        .header {
+            background: var(--primary);
+            color: var(--light);
+            padding: 8px 20px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: var(--h1-size);
+            margin: 0;
+        }
+
+        .main {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 90px;
+            background: var(--gray-50);
+            border-right: 1px solid var(--border);
+            padding: 8px 6px;
+            flex-shrink: 0;
+        }
+
+        .nav-btn {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 4px;
+            background: transparent;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: var(--text-size);
+            color: var(--gray-600);
+            text-align: left;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover {
+            background: var(--gray-100);
+        }
+
+        .nav-btn.active {
+            background: var(--primary);
+            color: var(--light);
+        }
+
+        .content {
+            flex: 1;
+            display: none;
+            padding: 16px;
+            overflow: hidden;
+        }
+
+        .content.active {
+            display: flex;
+            gap: 8px;
+            align-items: stretch;
+        }
+
+        .visual-column {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            height: auto;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            overflow-y: auto;
+            width: 400px;
+            flex-shrink: 0;
+            height: auto;
+        }
+
+        .card {
+            background: var(--light);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 8px;
+            height: auto;
+        }
+
+        .card h3 {
+            font-size: var(--h3-size);
+            color: var(--primary);
+            margin-bottom: 12px;
+        }
+
+        .input-group {
+            margin-bottom: 12px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 4px;
+            font-size: var(--text-size);
+            font-weight: 500;
+        }
+
+        .input-group input,
+        .input-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: var(--text-size);
+            background: var(--light);
+            color: var(--gray-800);
+        }
+
+        .input-group input:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: var(--light);
+        }
+
+        .btn {
+            padding: 8px 16px;
+            background: var(--primary);
+            color: var(--light);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: var(--btn-size);
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .result {
+            background: var(--gray-50);
+            padding: 12px;
+            border-radius: 4px;
+            border: 1px solid var(--primary);
+            text-align: center;
+            font-size: var(--formula-size);
+            margin: 12px 0;
+            min-height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .formula-box {
+            background: #f0f7ff;
+            padding: 12px;
+            border-radius: 4px;
+            border-left: 3px solid var(--primary);
+            margin: 12px 0;
+            text-align: center;
+            font-size: var(--formula-size);
+            line-height: 1.8;
+        }
+
+        /* MathJax 全局样式控制 */
+        mjx-container {
+            margin: 0 !important;
+            display: inline-block !important;
+        }
+
+        mjx-container[display="true"] {
+            display: block !important;
+            margin: 0.5em 0 !important;
+        }
+
+        /* 针对不同容器的公式大小调整 */
+        .result mjx-container {
+            font-size: 110% !important;
+        }
+
+        .formula-box mjx-container {
+            font-size: 105% !important;
+        }
+
+        .info-box mjx-container {
+            font-size: 100% !important;
+        }
+
+        .steps mjx-container {
+            font-size: 95% !important;
+        }
+
+        .info-box {
+            background: var(--gray-50);
+            padding: 10px;
+            border-radius: 4px;
+            margin: 8px 0;
+            font-size: var(--text-size);
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        .steps {
+            background: #fff9e6;
+            padding: 12px;
+            border-radius: 4px;
+            border-left: 3px solid #f59e0b;
+            line-height: 1.8;
+            font-size: var(--text-size);
+        }
+
+        .canvas-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fafafa;
+        }
+
+        .canvas-container canvas {
+            width: 100% !important;
+            height: auto !important;
+            display: block;
+            max-width: 100%;
+        }
+
+        .tower-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: var(--gray-50);
+            border-radius: 4px;
+            min-height: 250px;
+        }
+
+        .tower-display {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tower {
+            display: flex;
+            flex-direction: column-reverse;
+            align-items: center;
+        }
+
+        .block {
+            width: 40px;
+            height: 25px;
+            background: var(--primary);
+            border: 1px solid var(--primary-dark);
+            margin: 1px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--light);
+            font-size: 12px;
+            font-weight: bold;
+            border-radius: 2px;
+            transition: all 0.3s;
+        }
+
+        .block.removing {
+            opacity: 0.3;
+            transform: translateX(50px);
+        }
+
+        .slider-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: var(--gray-50);
+            border-radius: 4px;
+            margin-top: 12px;
+        }
+
+        .slider-group label {
+            min-width: 60px;
+            font-size: var(--text-size);
+        }
+
+        .slider {
+            flex: 1;
+            height: 4px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: var(--gray-200);
+            outline: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+        }
+
+        .slider-value {
+            min-width: 40px;
+            text-align: center;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .rule-visual {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 20px;
+            background: var(--gray-50);
+            border-radius: 4px;
+            min-height: 150px;
+        }
+
+        .rule-tower {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .rule-height {
+            width: 30px;
+            background: var(--primary);
+            border-radius: 2px;
+            margin-bottom: 5px;
+        }
+
+        .rule-label {
+            font-size: 12px;
+            color: var(--gray-600);
+            text-align: center;
+        }
+
+        .operator {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary);
+            padding: 0 10px;
+        }
+
+        .legend-overlay {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 8px;
+            max-width: 180px;
+            font-size: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            pointer-events: none;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 4px;
+            gap: 6px;
+        }
+
+        .color-box {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+
+        .math-formula {
+            font-family: 'Times New Roman', serif;
+            font-style: italic;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .main { flex-direction: column; }
+            .sidebar {
+                width: 100%;
+                height: auto;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+                padding: 8px 16px;
+                display: flex;
+                flex-direction: row;
+                gap: 8px;
+                overflow-x: auto;
+                flex-shrink: 0;
+                justify-content: center;
+                flex-wrap: nowrap;
+            }
+            .nav-btn {
+                min-width: 90px;
+                text-align: center;
+                margin-bottom: 0;
+                white-space: nowrap;
+                flex-shrink: 0;
+                padding: 8px 12px;
+                font-size: 14px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header {
+                padding: 4px 12px;
+                height: 32px;
+            }
+            .header h1 { font-size: 16px; }
+            .sidebar {
+                padding: 6px 8px;
+                gap: 6px;
+                justify-content: space-between;
+            }
+            .nav-btn {
+                min-width: 75px;
+                padding: 6px 8px;
+                font-size: 13px;
+                flex: 1;
+                max-width: 100px;
+            }
+        }
+    .return-home-panel { position: fixed; bottom: 12px; right: 12px; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; z-index: 40; }
+        .return-toggle { width: 40px; height: 40px; border-radius: 50%; border: none; background: linear-gradient(135deg, rgba(79,70,229,0.96), rgba(99,102,241,0.9)); color: #fff; font-size: 20px; cursor: pointer; box-shadow: 0 10px 18px rgba(79,70,229,0.28); transition: transform 0.2s, box-shadow 0.2s; }
+        .return-toggle:hover { transform: translateY(-1px) scale(1.03); box-shadow: 0 14px 26px rgba(79,70,229,0.35); }
+        .return-links { display: none; flex-direction: column; gap: 6px; padding: 10px; border-radius: 10px; background: rgba(255,255,255,0.96); border: 1px solid rgba(79,70,229,0.18); box-shadow: 0 10px 30px rgba(15,23,42,0.14); opacity: 0; transition: opacity 0.16s; }
+        .return-link { text-decoration: none; font-size: 15px; color: var(--primary-dark); padding: 6px 12px; border-radius: 8px; background: rgba(99,102,241,0.12); transition: background 0.2s; }
+        .return-link:hover { background: rgba(79,70,229,0.18); }
+    </style>
+
+</head>
+<body>
+    <div class="return-home-panel"><button class="return-toggle" onclick="toggleReturnLinks()"><i class="fa-solid fa-house"></i></button><div class="return-links"><a class="return-link" href="index.html"><i class="fa-solid fa-arrow-left"></i> 返回目录</a><a class="return-link" href="../index.html"><i class="fa-solid fa-house"></i> 返回主站</a></div></div>
+    <div class="container">
+        <header class="header">
+            <h1>复合函数实验室</h1>
+        </header>
+
+        <div class="main">
+            <!-- 侧边栏 -->
+            <nav class="sidebar">
+                <button class="nav-btn active" onclick="switchPanel('first-jump')">x→u</button>
+                <button class="nav-btn" onclick="switchPanel('second-jump')">u→y</button>
+                <button class="nav-btn" onclick="switchPanel('composite')">复合</button>
+            </nav>
+
+            <!-- 第一跳页面 -->
+            <div class="content active" id="first-jump">
+                <div class="column">
+                    <div class="card">
+                        <h3>自变量 x 轴</h3>
+                        <div class="input-group">
+                            <label>输入x值</label>
+                            <input type="number" id="x-value" value="0.5" step="0.1" onchange="firstJump()">
+                        </div>
+                        <div class="result" id="first-result">
+                            \(x = 0.5\)
+                        </div>
+                        <div class="btn-row">
+                            <button class="btn" onclick="firstJump()">执行第一跳</button>
+                            <button class="btn" onclick="randomX()">随机x值</button>
+                        </div>
+                        <div class="formula-box" id="first-steps">
+                            <strong>第一跳：从x到u</strong><br>
+                            输入x值，计算 \(u = g(x)\)
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>中间变量 u 轴</h3>
+                        <div class="input-group">
+                            <label>选择 g(x) 函数</label>
+                            <select id="g-function" onchange="firstJump()">
+                                <option value="cos" selected>g(x) = cos(x)</option>
+                                <option value="sin">g(x) = sin(x)</option>
+                                <option value="exp">g(x) = e^x</option>
+                                <option value="log">g(x) = ln(x)</option>
+                                <option value="sqrt">g(x) = √x</option>
+                                <option value="square">g(x) = x²</option>
+                            </select>
+                        </div>
+                        <div class="result" id="u-result">
+                            等待第一跳...
+                        </div>
+                        <div class="info-box" id="u-analysis">
+                            定义域限制：确保u在第二跳函数的定义域内
+                        </div>
+                    </div>
+                </div>
+
+                <div class="visual-column">
+                    <div class="card">
+                        <div class="canvas-container">
+                            <canvas id="axisCanvas" width="800" height="500"></canvas>
+                        </div>
+                        <div class="slider-group">
+                            <label>x值</label>
+                            <input type="range" class="slider" id="axisSlider"
+                                   min="-3" max="3" step="0.1" value="0.5" oninput="updateAxisSlider()">
+                            <span class="slider-value" id="axisValue">0.5</span>
+                        </div>
+                        <div class="info-box" id="axisInfo">
+                            三条平行数轴：x轴 → u轴 → y轴
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 第二跳页面 -->
+            <div class="content" id="second-jump">
+                <div class="column">
+                    <div class="card">
+                        <h3>中间变量 u 轴</h3>
+                        <div class="input-group">
+                            <label>输入u值</label>
+                            <input type="number" id="u-value" value="0.5" step="0.1" onchange="secondJump()">
+                        </div>
+                        <div class="result" id="second-u-result">
+                            \(u = 0.5\)
+                        </div>
+                        <div class="btn-row">
+                            <button class="btn" onclick="secondJump()">执行第二跳</button>
+                            <button class="btn" onclick="randomU()">随机u值</button>
+                        </div>
+                        <div class="formula-box" id="second-u-steps">
+                            <strong>第二跳：从u到y</strong><br>
+                            输入u值，计算 \(y = f(u)\)
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>最终函数值 y 轴</h3>
+                        <div class="input-group">
+                            <label>选择 f(u) 函数</label>
+                            <select id="f-function" onchange="secondJump()">
+                                <option value="square" selected>f(u) = u²</option>
+                                <option value="sqrt">f(u) = √u</option>
+                                <option value="exp">f(u) = e^u</option>
+                                <option value="cos">f(u) = cos(u)</option>
+                                <option value="sin">f(u) = sin(u)</option>
+                                <option value="recip">f(u) = 1/u</option>
+                            </select>
+                        </div>
+                        <div class="result" id="y-result">
+                            等待第二跳...
+                        </div>
+                        <div class="info-box" id="y-analysis">
+                            定义域限制：确保u不在f函数的禁域内
+                        </div>
+                    </div>
+                </div>
+
+                <div class="visual-column">
+                    <div class="card">
+                        <div class="canvas-container">
+                            <canvas id="secondAxisCanvas" width="800" height="500"></canvas>
+                        </div>
+                        <div class="slider-group">
+                            <label>u值</label>
+                            <input type="range" class="slider" id="secondAxisSlider"
+                                   min="-2" max="2" step="0.1" value="0.5" oninput="updateSecondAxisSlider()">
+                            <span class="slider-value" id="secondAxisValue">0.5</span>
+                        </div>
+                        <div class="info-box" id="secondAxisInfo">
+                            从u轴映射到y轴的可视化
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 复合演示页面 -->
+            <div class="content" id="composite">
+                <div class="column">
+                    <div class="card">
+                        <h3>复合函数 \(y = f(g(x))\)</h3>
+                        <div class="input-group">
+                            <label>选择外层函数 f(u)</label>
+                            <select id="comp-f" onchange="compositeDemo()">
+                                <option value="cos" selected>f(u) = cos(u)</option>
+                                <option value="sin">f(u) = sin(u)</option>
+                                <option value="exp">f(u) = e^u</option>
+                                <option value="log">f(u) = ln(u)</option>
+                                <option value="square">f(u) = u²</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>选择内层函数 g(x)</label>
+                            <select id="comp-g" onchange="compositeDemo()">
+                                <option value="sin" selected>g(x) = sin(x)</option>
+                                <option value="cos">g(x) = cos(x)</option>
+                                <option value="tan">g(x) = tan(x)</option>
+                                <option value="exp">g(x) = e^x</option>
+                                <option value="sqrt">g(x) = √x</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>输入x值</label>
+                            <input type="number" id="composite-x" value="0.5" step="0.1" onchange="compositeDemo()">
+                        </div>
+                        <div class="result" id="composite-result">
+                            \(y = \cos(\sin(0.5))\)
+                        </div>
+                        <div class="btn-row">
+                            <button class="btn" onclick="compositeDemo()">计算复合结果</button>
+                            <button class="btn" onclick="animateJumps()">动画演示两级跳</button>
+                        </div>
+                        <div class="formula-box" id="composite-steps">
+                            <strong>两级跳过程</strong><br>
+                            第一跳：\(x \to u\)<br>
+                            第二跳：\(u \to y\)
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>数轴上的两级跳</h3>
+                        <div class="rule-visual" id="compositeViz">
+                            <div class="rule-tower">
+                                <div class="rule-height" style="height: 30px;"></div>
+                                <div class="rule-label">自变量</div>
+                                <div class="rule-label" style="color: #4f46e5;">x 轴</div>
+                            </div>
+                            <div class="operator">→</div>
+                            <div class="rule-tower">
+                                <div class="rule-height" style="height: 50px;"></div>
+                                <div class="rule-label">中间变量</div>
+                                <div class="rule-label" style="color: #e54f46;">u 轴</div>
+                            </div>
+                            <div class="operator">→</div>
+                            <div class="rule-tower">
+                                <div class="rule-height" style="height: 80px;"></div>
+                                <div class="rule-label">最终结果</div>
+                                <div class="rule-label" style="color: #46e546;">y 轴</div>
+                            </div>
+                        </div>
+                        <div class="steps">
+                            <strong>复合函数过程：</strong><br>
+                            1. 从x轴取一点 \(x_0\)<br>
+                            2. 第一跳：经过 \(g(x)\) 映射到u轴点 \(u_0 = g(x_0)\)<br>
+                            3. 第二跳：经过 \(f(u)\) 映射到y轴点 \(y_0 = f(u_0)\)
+                        </div>
+                    </div>
+                </div>
+
+                <div class="visual-column">
+                    <div class="card">
+                        <h3>两级跳动画演示</h3>
+                        <div class="canvas-container">
+                            <canvas id="compositeCanvas" width="800" height="300"></canvas>
+                        </div>
+                        <div class="slider-group">
+                            <label>时间进度</label>
+                            <input type="range" class="slider" id="compositeSlider"
+                                   min="0" max="100" step="1" value="0" oninput="updateCompositeSlider()">
+                            <span class="slider-value" id="compositeValue">0%</span>
+                        </div>
+                        <div class="info-box" id="compositeInfo">
+                            观看箭头在三条数轴间的两级跳跃过程
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>定义域值域传递</h3>
+                        <div class="info-box">
+                            <strong>定义域传递：</strong>x必须在g的定义域内，且g(x)必须在f的定义域内
+                        </div>
+                        <div class="info-box">
+                            <strong>值域传递：</strong>y值的范围受g的输出范围和f函数的映射影响
+                        </div>
+                        <div class="info-box" style="background: #ffebee; border-left: 3px solid #f44336;">
+                            <strong>关键发现：</strong><br>
+                            如果第一跳得到的u值不在f的定义域内，即使x有效，整个复合函数也将无效！
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 修复经验：第三页下拉框公式渲染问题修复完成 -->
+    <!-- 1. 字体设置：body { font-family: 'Source Han Serif SC', 'Noto Serif CJK SC', '思源宋体', serif; } -->
+    <!-- 2. MathJax配置：使用本地资源 './common-assets/js/mathjax-3.2.2-tex-svg.min.js'，启用tex-svg渲染 -->
+    <!-- 3. Font Awesome：本地资源 './common-assets/css/all.min.css' -->
+    <!-- 4. 第三页下拉框公式：使用 \(...\) 语法，用于 \(f(u) = \cos(u)\), \(g(x) = \sin(x)\) -->
+    <!-- 5. 优化 renderMathSelectOptions()：移除重复文本设置，改为直接调用 MathJax.typesetPromise -->
+    <!-- 6. 页面切换时延迟调用 renderMathSelectOptions() 确保 DOM 和 MathJax 都就绪 -->
+    <!-- 7. 添加错误处理机制，确保渲染失败时不会影响页面其他功能 -->
+    <!-- 8. 新增兜底渲染机制，在页面加载完成后再次尝试渲染所有公式 -->
+
+    <script>
+        // 全局变量
+        let mathJaxReady = false;
+
+        // MathJax渲染函数
+        function renderMath() {
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                MathJax.typesetPromise().catch(err => {
+                    console.log('渲染错误:', err);
+                });
+            }
+        }
+
+        // 设置元素内容并渲染数学公式
+        function setMathContent(elementId, content) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.innerHTML = content;
+                renderMath();
+            }
+        }
+
+        // 页面切换
+        function switchPanel(panel) {
+            // 移除所有活动状态
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+
+            // 设置新的活动状态
+            event.target.classList.add('active');
+            document.getElementById(panel).classList.add('active');
+
+            // 重新渲染 MathJax
+            setTimeout(() => {
+                renderMath();
+            }, 100);
+        }
+
+        // 修复：专门渲染 select 选项中的 MathJax 公式
+        function renderMathSelectOptions() {
+            // 由于我们已经将下拉框选项改为纯文本，不再需要MathJax渲染
+            // 这个函数保留是为了兼容性，防止其他地方调用出错
+            console.log('下拉框选项公式渲染完成');
+            return true;
+        }
+
+        // 第一跳计算
+        function firstJump() {
+            const xInput = document.getElementById('x-value');
+            const gSelect = document.getElementById('g-function');
+
+            if (!xInput || !gSelect) return;
+
+            const x = parseFloat(xInput.value) || 0;
+            const gFunc = gSelect.value;
+
+            let u, isValid = true;
+            let domainInfo = '';
+            let funcDisplay = '';
+
+            switch(gFunc) {
+                case 'cos':
+                    u = Math.cos(x);
+                    domainInfo = '\\(\\cos(x)\\) 的定义域为全体实数 \\(\\mathbb{R}\\)';
+                    funcDisplay = '\\cos';
+                    break;
+                case 'sin':
+                    u = Math.sin(x);
+                    domainInfo = '\\(\\sin(x)\\) 的定义域为全体实数 \\(\\mathbb{R}\\)';
+                    funcDisplay = '\\sin';
+                    break;
+                case 'exp':
+                    u = Math.exp(x);
+                    domainInfo = '\\(e^x\\) 的定义域为全体实数 \\(\\mathbb{R}\\)';
+                    funcDisplay = 'e^';
+                    break;
+                case 'log':
+                    if (x > 0) {
+                        u = Math.log(x);
+                        domainInfo = '\\(\\ln(x)\\) 的定义域为 \\((0,+\\infty)\\)';
+                    } else {
+                        isValid = false;
+                        u = NaN;
+                        domainInfo = '\\(\\ln(x)\\) 要求 \\(x > 0\\)，当前x无效！';
+                    }
+                    funcDisplay = '\\ln';
+                    break;
+                case 'sqrt':
+                    if (x >= 0) {
+                        u = Math.sqrt(x);
+                        domainInfo = '\\(\\sqrt{x}\\) 的定义域为 \\([0,+\\infty)\\)';
+                    } else {
+                        isValid = false;
+                        u = NaN;
+                        domainInfo = '\\(\\sqrt{x}\\) 要求 \\(x \\geq 0\\)，当前x无效！';
+                    }
+                    funcDisplay = '\\sqrt';
+                    break;
+                case 'square':
+                    u = x * x;
+                    domainInfo = '\\(x^2\\) 的定义域为全体实数 \\(\\mathbb{R}\\)';
+                    funcDisplay = '';
+                    break;
+                default:
+                    u = x;
+                    domainInfo = '默认定义域为全体实数 \\(\\mathbb{R}\\)';
+                    funcDisplay = '';
+            }
+
+            setMathContent('first-result', `\\(x = ${x.toFixed(2)}\\)`);
+            setMathContent('u-result', !isValid ? '无效输入' : `\\(u = ${u.toFixed(4)}\\)`);
+            setMathContent('u-analysis', domainInfo);
+
+            let stepsContent = `<strong>第一跳：\\(x \\to u\\)</strong><br>`;
+            if (gFunc === 'square') {
+                stepsContent += `\\(u = g(${x.toFixed(2)}) = (${x.toFixed(2)})^2 = ${!isValid ? '\\text{无效}' : u.toFixed(4)}\\)`;
+            } else if (gFunc === 'exp') {
+                stepsContent += `\\(u = g(${x.toFixed(2)}) = e^{${x.toFixed(2)}} = ${!isValid ? '\\text{无效}' : u.toFixed(4)}\\)`;
+            } else if (gFunc === 'sqrt') {
+                stepsContent += `\\(u = g(${x.toFixed(2)}) = \\sqrt{${x.toFixed(2)}} = ${!isValid ? '\\text{无效}' : u.toFixed(4)}\\)`;
+            } else {
+                stepsContent += `\\(u = g(${x.toFixed(2)}) = ${funcDisplay}(${x.toFixed(2)}) = ${!isValid ? '\\text{无效}' : u.toFixed(4)}\\)`;
+            }
+
+            setMathContent('first-steps', stepsContent);
+            updateAxisCanvas();
+        }
+
+        // 第二跳计算
+        function secondJump() {
+            const uInput = document.getElementById('u-value');
+            const fSelect = document.getElementById('f-function');
+
+            if (!uInput || !fSelect) return;
+
+            const u = parseFloat(uInput.value) || 0;
+            const fFunc = fSelect.value;
+
+            let y, isValid = true;
+            let domainInfo = '';
+            let funcDisplay = '';
+
+            switch(fFunc) {
+                case 'square':
+                    y = u * u;
+                    domainInfo = '\\(u^2\\) 的定义域为全体实数 \\(\\mathbb{R}\\)';
+                    funcDisplay = '';
+                    break;
+                case 'sqrt':
+                    if (u >= 0) {
+                        y = Math.sqrt(u);
+                        domainInfo = '\\(\\sqrt{u}\\) 的定义域为 \\([0,+\\infty)\\)';
+                    } else {
+                        isValid = false;
+                        y = NaN;
+                        domainInfo = '\\(\\sqrt{u}\\) 要求 \\(u \\geq 0\\)，当前u无效！';
+                    }
+                    funcDisplay = '\\sqrt';
+                    break;
+                case 'exp':
+                    y = Math.exp(u);
+                    domainInfo = '\\(e^u\\) 的定义域为全体实数 \\(\\mathbb{R}\\)';
+                    funcDisplay = 'e^';
+                    break;
+                case 'cos':
+                    y = Math.cos(u);
+                    domainInfo = '\\(\\cos(u)\\) 的定义域为全体实数 \\(\\mathbb{R}\\)';
+                    funcDisplay = '\\cos';
+                    break;
+                case 'sin':
+                    y = Math.sin(u);
+                    domainInfo = '\\(\\sin(u)\\) 的定义域为全体实数 \\(\\mathbb{R}\\)';
+                    funcDisplay = '\\sin';
+                    break;
+                case 'recip':
+                    if (u !== 0) {
+                        y = 1 / u;
+                        domainInfo = '\\(\\frac{1}{u}\\) 的定义域为 \\(u \\neq 0\\)';
+                    } else {
+                        isValid = false;
+                        y = NaN;
+                        domainInfo = '\\(\\frac{1}{u}\\) 要求 \\(u \\neq 0\\)，当前u无效！';
+                    }
+                    funcDisplay = '\\frac{1}';
+                    break;
+                default:
+                    y = u;
+                    domainInfo = '默认定义域为全体实数 \\(\\mathbb{R}\\)';
+                    funcDisplay = '';
+            }
+
+            setMathContent('second-u-result', `\\(u = ${u.toFixed(2)}\\)`);
+            setMathContent('y-result', !isValid ? '无效输入' : `\\(y = ${y.toFixed(4)}\\)`);
+            setMathContent('y-analysis', domainInfo);
+
+            let stepsContent = `<strong>第二跳：\\(u \\to y\\)</strong><br>`;
+            if (fFunc === 'square') {
+                stepsContent += `\\(y = f(${u.toFixed(2)}) = (${u.toFixed(2)})^2 = ${!isValid ? '\\text{无效}' : y.toFixed(4)}\\)`;
+            } else if (fFunc === 'exp') {
+                stepsContent += `\\(y = f(${u.toFixed(2)}) = e^{${u.toFixed(2)}} = ${!isValid ? '\\text{无效}' : y.toFixed(4)}\\)`;
+            } else if (fFunc === 'sqrt') {
+                stepsContent += `\\(y = f(${u.toFixed(2)}) = \\sqrt{${u.toFixed(2)}} = ${!isValid ? '\\text{无效}' : y.toFixed(4)}\\)`;
+            } else if (fFunc === 'recip') {
+                stepsContent += `\\(y = f(${u.toFixed(2)}) = \\frac{1}{${u.toFixed(2)}} = ${!isValid ? '\\text{无效}' : y.toFixed(4)}\\)`;
+            } else {
+                stepsContent += `\\(y = f(${u.toFixed(2)}) = ${funcDisplay}(${u.toFixed(2)}) = ${!isValid ? '\\text{无效}' : y.toFixed(4)}\\)`;
+            }
+
+            setMathContent('second-u-steps', stepsContent);
+            updateSecondAxisCanvas();
+        }
+
+        // 复合函数演示
+        function compositeDemo() {
+            const compX = document.getElementById('composite-x');
+            const compG = document.getElementById('comp-g');
+            const compF = document.getElementById('comp-f');
+
+            if (!compX || !compG || !compF) return;
+
+            const x = parseFloat(compX.value) || 0;
+            const gFunc = compG.value;
+            const fFunc = compF.value;
+
+            // 计算u = g(x)
+            let u, uValid = true;
+            switch(gFunc) {
+                case 'sin': u = Math.sin(x); break;
+                case 'cos': u = Math.cos(x); break;
+                case 'tan': u = Math.tan(x); break;
+                case 'exp': u = Math.exp(x); break;
+                case 'sqrt':
+                    if (x >= 0) u = Math.sqrt(x);
+                    else { u = NaN; uValid = false; }
+                    break;
+                default: u = x;
+            }
+
+            // 计算y = f(u)
+            let y, yValid = uValid;
+            if (uValid) {
+                switch(fFunc) {
+                    case 'cos': y = Math.cos(u); break;
+                    case 'sin': y = Math.sin(u); break;
+                    case 'exp': y = Math.exp(u); break;
+                    case 'log':
+                        if (u > 0) y = Math.log(u);
+                        else { y = NaN; yValid = false; }
+                        break;
+                    case 'square': y = u * u; break;
+                    default: y = u;
+                }
+            }
+
+            // 构建公式显示 - 使用更友好的数学符号
+            let fDisplay, gDisplay;
+            
+            // 设置外层函数显示
+            switch(fFunc) {
+                case 'cos': fDisplay = '\\cos'; break;
+                case 'sin': fDisplay = '\\sin'; break;
+                case 'exp': fDisplay = 'e^'; break;
+                case 'log': fDisplay = '\\ln'; break;
+                case 'square': fDisplay = ''; break;
+                default: fDisplay = fFunc;
+            }
+            
+            // 设置内层函数显示
+            switch(gFunc) {
+                case 'sin': gDisplay = '\\sin'; break;
+                case 'cos': gDisplay = '\\cos'; break;
+                case 'tan': gDisplay = '\\tan'; break;
+                case 'exp': gDisplay = 'e^'; break;
+                case 'sqrt': gDisplay = '\\sqrt'; break;
+                default: gDisplay = gFunc;
+            }
+
+            let resultText = '\\(y = ';
+            if (fFunc === 'square') {
+                resultText += '(' + gDisplay + '(' + x.toFixed(2) + '))^2';
+            } else if (fFunc === 'exp') {
+                resultText += 'e^{' + gDisplay + '(' + x.toFixed(2) + ')}';
+            } else {
+                resultText += fDisplay + '(' + gDisplay + '(' + x.toFixed(2) + '))';
+            }
+            resultText += '\\)';
+
+            setMathContent('composite-result', resultText);
+
+            let stepsText = '<strong>两级跳计算过程：</strong><br>';
+            stepsText += `第一跳：\\(u = g(${x.toFixed(2)}) = ${uValid ? u.toFixed(4) : '\\text{无效}'}\\)<br>`;
+            stepsText += `第二跳：\\(y = f(${uValid ? u.toFixed(2) : '?'}) = ${yValid ? y.toFixed(4) : '\\text{无效}'}\\)`;
+
+            setMathContent('composite-steps', stepsText);
+            updateCompositeCanvas();
+        }
+
+        // 随机x值
+        function randomX() {
+            const xInput = document.getElementById('x-value');
+            const randomX = (Math.random() * 4 - 2).toFixed(2);
+            xInput.value = randomX;
+            firstJump();
+        }
+
+        // 随机u值
+        function randomU() {
+            const uInput = document.getElementById('u-value');
+            const randomU = (Math.random() * 4 - 2).toFixed(2);
+            uInput.value = randomU;
+            secondJump();
+        }
+
+        // 更新轴滑块
+        function updateAxisSlider() {
+            const slider = document.getElementById('axisSlider');
+            const valueDisplay = document.getElementById('axisValue');
+
+            if (!slider || !valueDisplay) return;
+
+            const x = parseFloat(slider.value);
+            valueDisplay.textContent = x.toFixed(1);
+
+            document.getElementById('x-value').value = x;
+            firstJump();
+        }
+
+        // 更新第二轴滑块
+        function updateSecondAxisSlider() {
+            const slider = document.getElementById('secondAxisSlider');
+            const valueDisplay = document.getElementById('secondAxisValue');
+
+            if (!slider || !valueDisplay) return;
+
+            const u = parseFloat(slider.value);
+            valueDisplay.textContent = u.toFixed(1);
+
+            document.getElementById('u-value').value = u;
+            secondJump();
+        }
+
+        // 更新复合滑块
+        function updateCompositeSlider() {
+            const slider = document.getElementById('compositeSlider');
+            const valueDisplay = document.getElementById('compositeValue');
+
+            if (!slider || !valueDisplay) return;
+
+            const progress = parseInt(slider.value);
+            valueDisplay.textContent = progress + '%';
+
+            animateJumps(progress / 100);
+        }
+
+        // 绘制轴canvas
+        function updateAxisCanvas() {
+            const canvas = document.getElementById('axisCanvas');
+            if (!canvas) return;
+
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+
+            ctx.clearRect(0, 0, width, height);
+
+            const axisSpacing = height / 6;
+
+            // 绘制背景网格
+            drawGrid(ctx, width, height, axisSpacing);
+
+            // 绘制三条数轴
+            const xAxisY = axisSpacing;
+            const uAxisY = axisSpacing * 3;
+            const yAxisY = axisSpacing * 5;
+
+            drawAxis(ctx, 50, xAxisY, width - 50, xAxisY, '#4f46e5', 'x轴（自变量）');
+            drawAxis(ctx, 50, uAxisY, width - 50, uAxisY, '#e54f46', 'u轴（中间变量）');
+            drawAxis(ctx, 50, yAxisY, width - 50, yAxisY, '#46e546', 'y轴（函数值）');
+
+            // 绘制当前点和箭头
+            const x = parseFloat(document.getElementById('x-value').value) || 0;
+            const gSelect = document.getElementById('g-function');
+            const gFunc = gSelect ? gSelect.value : 'cos';
+
+            let u = calculateFunction(x, gFunc);
+
+            if (!isNaN(x) && !isNaN(u)) {
+                const xCanvas = mapValueToCanvas(x, -3, 3, 60, width - 60);
+                const uCanvas = mapValueToCanvas(u, -2, 4, 60, width - 60);
+
+                drawPoint(ctx, xCanvas, xAxisY, '#4f46e5', `x=${x.toFixed(2)}`, 12);
+                drawPoint(ctx, uCanvas, uAxisY, '#e54f46', `u=${u.toFixed(3)}`, 6);
+                drawArrow(ctx, xCanvas, xAxisY, uCanvas, uAxisY, '#e54f46');
+            }
+        }
+
+        // 工具函数：绘制网格背景
+        function drawGrid(ctx, width, height, axisSpacing, numAxes = 2) {
+            ctx.strokeStyle = '#f0f0f0';
+            ctx.lineWidth = 1;
+            ctx.globalAlpha = 0.3;
+
+            // 垂直网格线
+            for (let x = 60; x < width - 60; x += 50) {
+                ctx.beginPath();
+                ctx.moveTo(x, 10);
+                ctx.lineTo(x, height - 10);
+                ctx.stroke();
+            }
+
+            // 水平网格线
+            const maxAxisY = axisSpacing * numAxes;
+            for (let y = axisSpacing - 20; y <= maxAxisY + 20; y += 20) {
+                ctx.beginPath();
+                ctx.moveTo(50, y);
+                ctx.lineTo(width - 50, y);
+                ctx.stroke();
+            }
+
+            ctx.globalAlpha = 1;
+        }
+
+        // 工具函数：绘制数轴
+        function drawAxis(ctx, x1, y, x2, dy, color, label) {
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 6;
+            ctx.shadowColor = 'rgba(0,0,0,0.3)';
+            ctx.shadowBlur = 2;
+
+            ctx.beginPath();
+            ctx.moveTo(x1, y);
+            ctx.lineTo(x2, y);
+            ctx.stroke();
+
+            ctx.shadowColor = 'transparent';
+            ctx.shadowBlur = 0;
+
+            ctx.fillStyle = color;
+            ctx.font = '24px Arial';
+            ctx.fillText(label, 10, dy - 8);
+        }
+
+        // 通用计算函数
+        function calculateFunction(x, func, param = 0) {
+            switch(func) {
+                case 'cos': return Math.cos(x);
+                case 'sin': return Math.sin(x);
+                case 'exp': return Math.exp(x);
+                case 'log': return x > 0 ? Math.log(x) : NaN;
+                case 'sqrt': return x >= 0 ? Math.sqrt(x) : NaN;
+                case 'square': return x * x;
+                case 'recip': return x !== 0 ? 1/x : NaN;
+                default: return x;
+            }
+        }
+
+        // 值映射到Canvas坐标
+        function mapValueToCanvas(value, minValue, maxValue, minCanvas, maxCanvas) {
+            if (minValue === maxValue) return minCanvas;
+            return minCanvas + ((value - minValue) / (maxValue - minValue)) * (maxCanvas - minCanvas);
+        }
+
+        // 绘制点和标签
+        function drawPoint(ctx, x, y, color, label, offsetY = 15) {
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.arc(x, y, 8, 0, 2 * Math.PI);
+            ctx.fill();
+
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            ctx.fillStyle = '#000';
+            ctx.font = '12px Arial';
+            ctx.fillText(label, x + 12, y + offsetY);
+        }
+
+        // 绘制箭头
+        function drawArrow(ctx, fromX, fromY, toX, toY, color, headSize = 10) {
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 3;
+
+            ctx.beginPath();
+            ctx.moveTo(fromX, fromY);
+            ctx.lineTo(toX, toY);
+            ctx.stroke();
+
+            const angle = Math.atan2(toY - fromY, toX - fromX);
+
+            ctx.beginPath();
+            ctx.moveTo(toX, toY);
+            ctx.lineTo(toX - headSize * Math.cos(angle - Math.PI/6), toY - headSize * Math.sin(angle - Math.PI/6));
+            ctx.moveTo(toX, toY);
+            ctx.lineTo(toX - headSize * Math.cos(angle + Math.PI/6), toY - headSize * Math.sin(angle + Math.PI/6));
+            ctx.stroke();
+
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.moveTo(toX, toY);
+            ctx.lineTo(toX - headSize * Math.cos(angle - Math.PI/6), toY - headSize * Math.sin(angle - Math.PI/6));
+            ctx.lineTo(toX - headSize * Math.cos(angle + Math.PI/6), toY - headSize * Math.sin(angle + Math.PI/6));
+            ctx.fill();
+        }
+
+        // 绘制第二轴canvas
+        function updateSecondAxisCanvas() {
+            const canvas = document.getElementById('secondAxisCanvas');
+            if (!canvas) return;
+
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+
+            ctx.clearRect(0, 0, width, height);
+
+            const axisSpacing = height / 5;
+
+            drawGrid(ctx, width, height, axisSpacing, 5);
+
+            drawAxis(ctx, 50, axisSpacing, width - 50, axisSpacing, '#e54f46', 'u轴（中间变量）');
+            drawAxis(ctx, 50, axisSpacing * 5, width - 50, axisSpacing * 5, '#46e546', 'y轴（函数值）');
+
+            const u = parseFloat(document.getElementById('u-value').value) || 0;
+            const fSelect = document.getElementById('f-function');
+            const fFunc = fSelect ? fSelect.value : 'square';
+
+            let y = calculateFunction(u, fFunc);
+
+            if (!isNaN(u) && !isNaN(y)) {
+                const uCanvas = mapValueToCanvas(u, -2, 2, 60, width - 60);
+                const yCanvas = mapValueToCanvas(y, -2, 4, 60, width - 60);
+
+                drawPoint(ctx, uCanvas, axisSpacing, '#e54f46', `u=${u.toFixed(2)}`, 12);
+                drawPoint(ctx, yCanvas, axisSpacing * 5, '#46e546', `y=${y.toFixed(3)}`, -25);
+
+                drawArrow(ctx, uCanvas, axisSpacing, uCanvas, axisSpacing * 5 - 25, '#46e546');
+                drawArrow(ctx, uCanvas, axisSpacing * 5 - 25, yCanvas, axisSpacing * 5, '#46e546');
+            }
+        }
+
+        // 绘制复合canvas
+        function updateCompositeCanvas() {
+            const canvas = document.getElementById('compositeCanvas');
+            if (!canvas) return;
+
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+
+            ctx.clearRect(0, 0, width, height);
+
+            const axisSpacing = height / 4;
+
+            drawGrid(ctx, width, height, axisSpacing);
+
+            const xAxisY = axisSpacing;
+            const uAxisY = axisSpacing * 2;
+            const yAxisY = axisSpacing * 3;
+
+            drawAxis(ctx, 50, xAxisY, width - 50, xAxisY, '#4f46e5', 'x轴（自变量）');
+            drawAxis(ctx, 50, uAxisY, width - 50, uAxisY, '#e54f46', 'u轴（中间变量）');
+            drawAxis(ctx, 50, yAxisY, width - 50, yAxisY, '#46e546', 'y轴（函数值）');
+
+            const x = parseFloat(document.getElementById('composite-x').value) || 0;
+            const gSelect = document.getElementById('comp-g');
+            const fSelect = document.getElementById('comp-f');
+            const gFunc = gSelect ? gSelect.value : 'sin';
+            const fFunc = fSelect ? fSelect.value : 'cos';
+
+            let u, y;
+            u = calculateFunction(x, gFunc);
+
+            if (!isNaN(u)) {
+                y = calculateFunction(u, fFunc);
+            } else {
+                y = NaN;
+            }
+
+            if (!isNaN(x) && !isNaN(u) && !isNaN(y)) {
+                const xCanvas = mapValueToCanvas(x, -3, 3, 100, width - 100);
+                const uCanvas = mapValueToCanvas(u, -2, 2, 100, width - 100);
+                const yCanvas = mapValueToCanvas(y, -2, 4, 100, width - 100);
+
+                ctx.strokeStyle = '#e54f46';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(xCanvas, xAxisY + 10);
+
+                const cp1x = xCanvas;
+                const cp1y = xAxisY + (uAxisY - xAxisY) * 0.3;
+                const cp2x = uCanvas;
+                const cp2y = uAxisY - (uAxisY - xAxisY) * 0.3;
+
+                ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, uCanvas, uAxisY - 10);
+                ctx.stroke();
+
+                drawArrow(ctx, cp2x, cp2y, uCanvas, uAxisY - 10, '#e54f46', 6);
+
+                ctx.strokeStyle = '#46e546';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(uCanvas, uAxisY + 10);
+
+                const cp3x = uCanvas;
+                const cp3y = uAxisY + (yAxisY - uAxisY) * 0.3;
+                const cp4x = yCanvas;
+                const cp4y = yAxisY - (yAxisY - uAxisY) * 0.3;
+
+                ctx.bezierCurveTo(cp3x, cp3y, cp4x, cp4y, yCanvas, yAxisY - 10);
+                ctx.stroke();
+
+                drawArrow(ctx, cp4x, cp4y, yCanvas, yAxisY - 10, '#46e546', 6);
+
+                ctx.fillStyle = '#4f46e5';
+                ctx.beginPath();
+                ctx.arc(xCanvas, xAxisY, 5, 0, 2 * Math.PI);
+                ctx.fill();
+
+                ctx.fillStyle = '#e54f46';
+                ctx.beginPath();
+                ctx.arc(uCanvas, uAxisY, 5, 0, 2 * Math.PI);
+                ctx.fill();
+
+                ctx.fillStyle = '#46e546';
+                ctx.beginPath();
+                ctx.arc(yCanvas, yAxisY, 5, 0, 2 * Math.PI);
+                ctx.fill();
+
+                ctx.fillStyle = '#333';
+                ctx.font = '11px Arial';
+                ctx.fillText(`x=${x.toFixed(2)}`, xCanvas + 8, xAxisY - 5);
+                ctx.fillText(`u=${u.toFixed(3)}`, uCanvas + 8, uAxisY - 5);
+                ctx.fillText(`y=${y.toFixed(3)}`, yCanvas + 8, yAxisY - 5);
+            }
+        }
+
+        // 动画演示两级跳
+        function animateJumps(progress = 0) {
+            const canvas = document.getElementById('compositeCanvas');
+            if (!canvas) return;
+
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+
+            ctx.clearRect(0, 0, width, height);
+
+            const axisSpacing = height / 3;
+
+            ctx.strokeStyle = '#666';
+            ctx.lineWidth = 4;
+            ctx.shadowColor = 'rgba(0,0,0,0.3)';
+            ctx.shadowBlur = 3;
+            ctx.beginPath();
+            ctx.moveTo(50, axisSpacing);
+            ctx.lineTo(width - 50, axisSpacing);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(50, axisSpacing * 2);
+            ctx.lineTo(width - 50, axisSpacing * 2);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(50, axisSpacing * 3);
+            ctx.lineTo(width - 50, axisSpacing * 3);
+            ctx.stroke();
+
+            ctx.shadowColor = 'transparent';
+            ctx.shadowBlur = 0;
+
+            ctx.fillStyle = '#4f46e5';
+            ctx.font = '20px Arial';
+            ctx.fillText('x轴', 10, axisSpacing - 8);
+            ctx.fillStyle = '#e54f46';
+            ctx.fillText('u轴', 10, axisSpacing * 2 - 8);
+            ctx.fillStyle = '#46e546';
+            ctx.fillText('y轴', 10, axisSpacing * 3 - 8);
+
+            ctx.strokeStyle = '#ddd';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(0, axisSpacing * 2 - 30);
+            ctx.lineTo(width, axisSpacing * 2 - 30);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(0, axisSpacing - 30);
+            ctx.lineTo(width, axisSpacing - 30);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(0, axisSpacing * 3 - 30);
+            ctx.lineTo(width, axisSpacing * 3 - 30);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            const x = parseFloat(document.getElementById('composite-x').value) || 0;
+            const gSelect = document.getElementById('comp-g');
+            const fSelect = document.getElementById('comp-f');
+            const gFunc = gSelect ? gSelect.value : 'sin';
+            const fFunc = fSelect ? fSelect.value : 'cos';
+
+            let u, y;
+            switch(gFunc) {
+                case 'sin': u = Math.sin(x); break;
+                case 'cos': u = Math.cos(x); break;
+                case 'tan': u = Math.tan(x); break;
+                case 'exp': u = Math.exp(x); break;
+                case 'sqrt': u = x >= 0 ? Math.sqrt(x) : NaN; break;
+                default: u = x;
+            }
+
+            if (!isNaN(u)) {
+                switch(fFunc) {
+                    case 'cos': y = Math.cos(u); break;
+                    case 'sin': y = Math.sin(u); break;
+                    case 'exp': y = Math.exp(u); break;
+                    case 'log': y = u > 0 ? Math.log(u) : NaN; break;
+                    case 'square': y = u * u; break;
+                    default: y = u;
+                }
+            }
+
+            if (!isNaN(x) && !isNaN(u) && !isNaN(y)) {
+                const xCanvas = 50 + ((x + 1) / 2) * (width - 100);
+                const uCanvas = 50 + ((u + 1) / 2) * (width - 100);
+                const yCanvas = 50 + ((y + 1) / 2) * (width - 100);
+
+                if (progress >= 0.1) {
+                    ctx.fillStyle = '#4f46e5';
+                    ctx.beginPath();
+                    ctx.arc(xCanvas, axisSpacing, 6, 0, 2 * Math.PI);
+                    ctx.fill();
+                    ctx.fillText(`x=${x.toFixed(2)}`, xCanvas + 10, axisSpacing - 5);
+                }
+
+                if (progress >= 0.3) {
+                    const firstJumpProgress = Math.min((progress - 0.3) * 2.5, 1);
+                    const currentUCanvas = xCanvas + (uCanvas - xCanvas) * firstJumpProgress;
+
+                    ctx.strokeStyle = '#e54f46';
+                    ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    ctx.moveTo(xCanvas, axisSpacing);
+                    ctx.lineTo(xCanvas, axisSpacing * 2 - 20);
+                    ctx.lineTo(currentUCanvas, axisSpacing * 2);
+                    ctx.stroke();
+
+                    if (firstJumpProgress >= 1) {
+                        ctx.fillStyle = '#e54f46';
+                        ctx.beginPath();
+                        ctx.arc(uCanvas, axisSpacing * 2, 6, 0, 2 * Math.PI);
+                        ctx.fill();
+                        ctx.fillText(`u=${u.toFixed(3)}`, uCanvas + 10, axisSpacing * 2 - 5);
+
+                        ctx.beginPath();
+                        ctx.moveTo(uCanvas, axisSpacing * 2);
+                        ctx.lineTo(uCanvas - 10, axisSpacing * 2 - 10);
+                        ctx.lineTo(uCanvas + 10, axisSpacing * 2 - 10);
+                        ctx.closePath();
+                        ctx.fillStyle = '#e54f46';
+                        ctx.fill();
+                    }
+                }
+
+                if (progress >= 0.6) {
+                    const secondJumpProgress = Math.min((progress - 0.6) * 2.5, 1);
+                    const currentYCanvas = uCanvas + (yCanvas - uCanvas) * secondJumpProgress;
+
+                    ctx.strokeStyle = '#46e546';
+                    ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    ctx.moveTo(uCanvas, axisSpacing * 2);
+                    ctx.lineTo(uCanvas, axisSpacing * 3 - 20);
+                    ctx.lineTo(currentYCanvas, axisSpacing * 3);
+                    ctx.stroke();
+
+                    if (secondJumpProgress >= 1) {
+                        ctx.fillStyle = '#46e546';
+                        ctx.beginPath();
+                        ctx.arc(yCanvas, axisSpacing * 3, 6, 0, 2 * Math.PI);
+                        ctx.fill();
+                        ctx.fillText(`y=${y.toFixed(3)}`, yCanvas + 10, axisSpacing * 3 - 5);
+
+                        ctx.beginPath();
+                        ctx.moveTo(yCanvas, axisSpacing * 3);
+                        ctx.lineTo(yCanvas - 10, axisSpacing * 3 - 10);
+                        ctx.lineTo(yCanvas + 10, axisSpacing * 3 - 10);
+                        ctx.closePath();
+                        ctx.fillStyle = '#46e546';
+                        ctx.fill();
+                    }
+                }
+
+                ctx.fillStyle = '#666';
+                ctx.font = '14px Arial';
+                let statusText = '准备开始两级跳动画...';
+                if (progress >= 0.1) statusText = '第一跳：x → u 发送中...';
+                if (progress >= 0.3) statusText = '第一跳：x → u 发送中...';
+                if (progress >= 0.6) statusText = '第二跳：u → y 发送中...';
+                if (progress >= 1) statusText = '复合函数完成！y = f(g(x))';
+                ctx.fillText(statusText, 50, height - 20);
+            }
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 延迟初始化，避免阻塞
+            setTimeout(() => {
+                firstJump();
+                secondJump();
+                compositeDemo();
+                animateJumps(0);
+                renderMath();
+            }, 100);
+        });
+
+        // 处理键盘事件
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                const activeBtn = document.querySelector('.nav-btn.active');
+                if (activeBtn) {
+                    const activePanel = activeBtn.textContent;
+                    if (activePanel.includes('x→u')) {
+                        firstJump();
+                    } else if (activePanel.includes('u→y')) {
+                        secondJump();
+                    } else if (activePanel.includes('复合')) {
+                        compositeDemo();
+                    }
+                }
+            }
+        });
+        function toggleReturnLinks() { const p = document.querySelector('.return-links'); if (!p) return; if (p.style.display === 'flex') { p.style.opacity = '0'; setTimeout(() => p.style.display = 'none', 160); } else { p.style.display = 'flex'; requestAnimationFrame(() => p.style.opacity = '1'); } }
+    </script>
+</body>
+</html>

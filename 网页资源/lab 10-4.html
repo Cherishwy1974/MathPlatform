@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab 10.4 初等变换操作台实验室</title>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\(', '\)']],
+                displayMath: [['$$', '$$'], ['\[', '\]']],
+                processEscapes: true
+            },
+            startup: {
+                pageReady: () => {
+                    return MathJax.startup.defaultPageReady().then(() => {
+                        if (typeof window.scheduleMathRender === 'function') {
+                            window.scheduleMathRender();
+                        }
+                        console.log('MathJax加载完成');
+                    });
+                }
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+            }
+        };
+    </script>
+    <script defer src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js"></script>
+    <script defer src="../common-assets/js/lab-math-enhancer.js"></script>
+    <style>
+        :root {
+            --h1-size: 22px;
+            --h2-size: 20px;
+            --h3-size: 18px;
+            --btn-size: 16px;
+            --formula-size: 20px;
+            --text-size: 16px;
+            --primary: #4f46e5;
+            --primary-light: #6366f1;
+            --primary-dark: #3730a3;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --light: #ffffff;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-400: #9ca3af;
+            --gray-600: #4b5563;
+            --gray-800: #1f2937;
+            --border: #e5e7eb;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        *::-webkit-scrollbar {
+            width: 0;
+            background: transparent;
+        }
+
+        * {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
+            font-size: var(--text-size);
+            line-height: 1.5;
+            background: var(--gray-50);
+            color: var(--gray-800);
+        }
+
+        .return-home-panel {
+            position: fixed;
+            top: 12px;
+            right: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+            z-index: 40;
+        }
+
+        .return-toggle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.95), rgba(99, 102, 241, 0.9));
+            color: #ffffff;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 10px 18px rgba(79, 70, 229, 0.28);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .return-toggle:focus-visible {
+            outline: 2px solid rgba(129, 140, 248, 0.6);
+            outline-offset: 3px;
+        }
+
+        .return-toggle:hover {
+            transform: translateY(-1px) scale(1.03);
+            box-shadow: 0 14px 26px rgba(79, 70, 229, 0.35);
+        }
+
+        .return-links {
+            display: none;
+            flex-direction: column;
+            gap: 6px;
+            padding: 10px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(79, 70, 229, 0.15);
+            box-shadow: 0 16px 30px rgba(15, 23, 42, 0.18);
+            backdrop-filter: blur(6px);
+        }
+
+        .return-home-panel.open .return-links {
+            display: flex;
+        }
+
+        .return-link {
+            padding: 6px 12px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 14px;
+            color: var(--primary);
+            background: rgba(79, 70, 229, 0.12);
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+
+        .return-link.return-main {
+            color: var(--success);
+            background: rgba(16, 185, 129, 0.12);
+        }
+
+        .return-link:hover {
+            background: rgba(79, 70, 229, 0.2);
+            color: var(--primary-dark);
+        }
+
+        .return-link.return-main:hover {
+            background: rgba(16, 185, 129, 0.22);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            height: 100vh;
+            max-height: 700px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            background: var(--light);
+            border-radius: 12px;
+            box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(90deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: var(--light);
+            padding: 10px 24px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: var(--h1-size);
+            font-weight: 600;
+        }
+
+        .main {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 120px;
+            background: var(--gray-50);
+            border-right: 1px solid var(--border);
+            padding: 12px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .nav-btn {
+            width: 100%;
+            padding: 8px;
+            border: none;
+            border-radius: 6px;
+            background: transparent;
+            color: var(--gray-600);
+            text-align: left;
+            font-size: var(--text-size);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .nav-btn:hover {
+            background: var(--gray-100);
+        }
+
+        .nav-btn.active {
+            background: var(--primary);
+            color: var(--light);
+        }
+
+        .content {
+            flex: 1;
+            display: none;
+            padding: 18px;
+            overflow-y: auto;
+        }
+
+        .content.active {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow-y: auto;
+        }
+
+        .card {
+            background: var(--light);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+        }
+
+        .card h3 {
+            font-size: var(--h3-size);
+            color: var(--primary);
+            margin-bottom: 12px;
+        }
+
+        .input-group {
+            margin-bottom: 12px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: var(--gray-600);
+        }
+
+        .input-group select,
+        .input-group input {
+            width: 100%;
+            padding: 8px 10px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            font-size: var(--text-size);
+            background: var(--gray-50);
+        }
+
+        .input-group input:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: var(--light);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 16px;
+            font-size: var(--btn-size);
+            border: none;
+            border-radius: 6px;
+            background: var(--primary);
+            color: var(--light);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            gap: 6px;
+        }
+
+        .btn.secondary {
+            background: var(--gray-200);
+            color: var(--gray-600);
+        }
+
+        .btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn.secondary:hover {
+            background: var(--gray-400);
+            color: var(--light);
+        }
+
+        .info-box {
+            background: var(--gray-50);
+            border-left: 3px solid var(--primary);
+            padding: 12px;
+            border-radius: 6px;
+            font-size: var(--text-size);
+            line-height: 1.6;
+        }
+
+        canvas {
+            width: 100%;
+            height: 260px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: #ffffff;
+        }
+
+        table.matrix-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: center;
+        }
+
+        table.matrix-table td {
+            border: 1px solid var(--gray-200);
+            padding: 6px;
+            font-size: var(--text-size);
+        }
+
+        .log-list {
+            max-height: 160px;
+            overflow-y: auto;
+            padding-left: 16px;
+        }
+
+        .log-list li {
+            margin-bottom: 6px;
+        }
+        
+        /* 自定义下拉框支持LaTeX渲染 */
+        .custom-select-container { position: relative; width: 100%; }
+        .custom-select-trigger { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border: 1px solid #e5e7eb; border-radius: 6px; background: #f9fafb; cursor: pointer; transition: all 0.2s; min-height: 40px; }
+        .custom-select-trigger:hover { border-color: #4f46e5; background: #ffffff; }
+        .custom-select-container.open .custom-select-trigger { border-color: #4f46e5; background: #ffffff; }
+        .selected-formula { flex: 1; }
+        .arrow { font-size: 12px; transition: transform 0.2s; margin-left: 8px; color: #6b7280; }
+        .custom-select-container.open .arrow { transform: rotate(180deg); }
+        .custom-select-options { position: absolute; top: 100%; left: 0; right: 0; margin-top: 4px; background: #ffffff; border: 1px solid #e5e7eb; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); max-height: 200px; overflow-y: auto; display: none; z-index: 1000; }
+        .custom-select-container.open .custom-select-options { display: block; }
+        .custom-option { padding: 10px 12px; cursor: pointer; transition: background 0.2s; border-bottom: 1px solid #f3f4f6; background: #ffffff; }
+        .custom-option:last-child { border-bottom: none; }
+        .custom-option:hover { background: #f3f4f6; }
+        .custom-option.selected { background: #eef2ff; color: #4f46e5; font-weight: 500; }
+    </style>
+</head>
+<body>
+    <div class="return-home-panel">
+        <button class="return-toggle" type="button" aria-label="打开返回导航" onclick="toggleReturnPanel(event)"><i class="fa-solid fa-house"></i></button>
+        <div class="return-links">
+            <a class="return-link return-sub" href="index.html"><i class="fa-solid fa-arrow-left"></i> 返回目录</a>
+            <a class="return-link return-main" href="../index.html"><i class="fa-solid fa-house"></i> 返回主站</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <header class="header">
+            <h1>Lab 10.4 初等变换操作台实验室</h1>
+        </header>
+
+        <div class="main">
+            <nav class="sidebar">
+                <button class="nav-btn active"  data-panel="module1"onclick="switchPanel('module1', this)">行变换</button>
+                <button class="nav-btn"  data-panel="module2"onclick="switchPanel('module2', this)">列变换</button>
+            </nav>
+
+            <div class="content active" id="module1">
+                <div class="column">
+                    <div class="card">
+                        <h3>选择行初等变换</h3>
+                        <div class="input-group">
+                            <label>操作类型</label>
+                            <div class="custom-select-container">
+                                <div class="custom-select-trigger" onclick="toggleCustomSelect(this)">
+                                    <span class="selected-formula">交换两行 $R_i \leftrightarrow R_j$</span>
+                                    <span class="arrow">▼</span>
+                                </div>
+                                <div class="custom-select-options">
+                                    <div class="custom-option selected" data-value="swap" onclick="selectCustomOption(this, 'rowAction')">
+                                        交换两行 $R_i \leftrightarrow R_j$
+                                    </div>
+                                    <div class="custom-option" data-value="scale" onclick="selectCustomOption(this, 'rowAction')">
+                                        倍乘一行 $kR_i$
+                                    </div>
+                                    <div class="custom-option" data-value="add" onclick="selectCustomOption(this, 'rowAction')">
+                                        倍加操作 $R_j + kR_i$
+                                    </div>
+                                </div>
+                                <input type="hidden" id="rowAction" value="swap">
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>目标行</label>
+                            <select id="rowTarget">
+                                <option value="0">第1行</option>
+                                <option value="1">第2行</option>
+                                <option value="2">第3行</option>
+                            </select>
+                        </div>
+                        <div class="input-group" id="rowExtraGroup">
+                            <label>第二行 / 倍数</label>
+                            <input type="number" id="rowExtra" value="1" step="0.5">
+                        </div>
+                        <button class="btn" onclick="applyRowOperation()">执行操作</button>
+                        <button class="btn secondary" onclick="resetRowMatrix()">恢复初始矩阵</button>
+                    </div>
+                    <div class="card">
+                        <h3>操作记录</h3>
+                        <ul class="log-list" id="rowLog"></ul>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="card">
+                        <h3>行变换矩阵</h3>
+                        <div id="rowMatrixView"></div>
+                        <div class="info-box">三类行初等变换不改变线性方程组的解集，是求行最简形与矩阵秩的基础工具。</div>
+                    </div>
+                    <div class="card">
+                        <h3>行变换几何示意</h3>
+                        <canvas id="rowCanvas"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content" id="module2">
+                <div class="column">
+                    <div class="card">
+                        <h3>列变换演练</h3>
+                        <div class="input-group">
+                            <label>操作类型</label>
+                            <div class="custom-select-container">
+                                <div class="custom-select-trigger" onclick="toggleCustomSelect(this)">
+                                    <span class="selected-formula">交换两列 $C_i \leftrightarrow C_j$</span>
+                                    <span class="arrow">▼</span>
+                                </div>
+                                <div class="custom-select-options">
+                                    <div class="custom-option selected" data-value="swap" onclick="selectCustomOption(this, 'colAction')">
+                                        交换两列 $C_i \leftrightarrow C_j$
+                                    </div>
+                                    <div class="custom-option" data-value="scale" onclick="selectCustomOption(this, 'colAction')">
+                                        倍乘一列 $kC_i$
+                                    </div>
+                                    <div class="custom-option" data-value="add" onclick="selectCustomOption(this, 'colAction')">
+                                        倍加操作 $C_j + kC_i$
+                                    </div>
+                                </div>
+                                <input type="hidden" id="colAction" value="swap">
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>目标列</label>
+                            <select id="colTarget">
+                                <option value="0">第1列</option>
+                                <option value="1">第2列</option>
+                                <option value="2">第3列</option>
+                            </select>
+                        </div>
+                        <div class="input-group" id="colExtraGroup">
+                            <label>第二列 / 倍数</label>
+                            <input type="number" id="colExtra" value="1" step="0.5">
+                        </div>
+                        <button class="btn" onclick="applyColOperation()">执行操作</button>
+                        <button class="btn secondary" onclick="resetColMatrix()">恢复初始矩阵</button>
+                    </div>
+                    <div class="card">
+                        <h3>列变换提示</h3>
+                        <div class="info-box" id="colInfo">列初等变换对应于右乘初等矩阵，常用于求解伴随矩阵与特征向量的正交化。</div>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="card">
+                        <h3>列变换矩阵</h3>
+                        <div id="colMatrixView"></div>
+                    </div>
+                    <div class="card">
+                        <h3>列操作追踪</h3>
+                        <canvas id="colCanvas"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const initialRowMatrix = [
+            [1, -2, 3],
+            [2, 1, -1],
+            [0, 4, 2]
+        ];
+        const initialColMatrix = [
+            [1, 2, 0],
+            [-1, 3, 2],
+            [2, -2, 1]
+        ];
+        let rowMatrix = JSON.parse(JSON.stringify(initialRowMatrix));
+        let colMatrix = JSON.parse(JSON.stringify(initialColMatrix));
+
+        function switchPanel(id, btn) {
+            document.querySelectorAll('.content').forEach(content => content.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            document.querySelectorAll('.nav-btn').forEach(button => button.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+            renderMath();
+        }
+
+        let mathObserver = null;
+        let mathRenderQueued = false;
+
+        function startMathObserver() {
+            if (typeof MutationObserver === 'undefined' || !document.body) {
+                return;
+            }
+            if (mathObserver) {
+                mathObserver.disconnect();
+            }
+            mathObserver = new MutationObserver(mutations => {
+                for (const mutation of mutations) {
+                    if (mutation.type === 'childList' || mutation.type === 'characterData') {
+                        scheduleMathRender();
+                        break;
+                    }
+                }
+            });
+            mathObserver.observe(document.body, { childList: true, subtree: true, characterData: true });
+        }
+
+        function scheduleMathRender() {
+            if (mathRenderQueued) {
+                return;
+            }
+            mathRenderQueued = true;
+            requestAnimationFrame(() => {
+                mathRenderQueued = false;
+                if (window.MathJax && MathJax.typesetPromise) {
+                    if (mathObserver) {
+                        mathObserver.disconnect();
+                    }
+                    MathJax.typesetPromise()
+                        .catch(err => console.log('渲染错误:', err))
+                        .finally(() => {
+                            startMathObserver();
+                        });
+                } else {
+                    setTimeout(scheduleMathRender, 160);
+                }
+            });
+        }
+
+        window.scheduleMathRender = scheduleMathRender;
+
+        function renderMath() {
+            scheduleMathRender();
+        }
+
+        function ensureMathReady() {
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', () => {
+                    startMathObserver();
+                    scheduleMathRender();
+                });
+            } else {
+                startMathObserver();
+                scheduleMathRender();
+            }
+        }
+
+        ensureMathReady();
+
+        function toggleReturnPanel(event) {
+            event.stopPropagation();
+            const panel = document.querySelector('.return-home-panel');
+            if (panel) {
+                panel.classList.toggle('open');
+            }
+        }
+
+        document.addEventListener('click', event => {
+            const panel = document.querySelector('.return-home-panel');
+            if (!panel) {
+                return;
+            }
+            if (panel.classList.contains('open') && !panel.contains(event.target)) {
+                panel.classList.remove('open');
+            }
+        });
+
+        window.addEventListener('pageshow', () => {
+            scheduleMathRender();
+        });
+
+        function resizeCanvas(canvas) {
+            const container = canvas.parentElement;
+            const width = container.clientWidth - 20;
+            const height = container.clientHeight - 20;
+            canvas.style.width = width + 'px';
+            canvas.style.height = height + 'px';
+            const ratio = window.devicePixelRatio || 1;
+            canvas.width = width * ratio;
+            canvas.height = height * ratio;
+            const ctx = canvas.getContext('2d');
+            ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            return ctx;
+        }
+
+        function drawAxis(ctx, width, height, labelX, labelY) {
+            ctx.clearRect(0, 0, width, height);
+            ctx.save();
+            ctx.strokeStyle = '#374151';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(50, height - 40);
+            ctx.lineTo(width - 30, height - 40);
+            ctx.moveTo(50, 30);
+            ctx.lineTo(50, height - 40);
+            ctx.stroke();
+            ctx.font = '14px sans-serif';
+            ctx.fillStyle = '#374151';
+            ctx.fillText(labelX, width - 70, height - 48);
+            ctx.fillText(labelY, 15, 50);
+            ctx.restore();
+        }
+
+        function matrixToTable(matrix) {
+            const table = document.createElement('table');
+            table.className = 'matrix-table';
+            matrix.forEach(row => {
+                const tr = document.createElement('tr');
+                row.forEach(value => {
+                    const td = document.createElement('td');
+                    td.textContent = parseFloat(value.toFixed(2));
+                    tr.appendChild(td);
+                });
+                table.appendChild(tr);
+            });
+            return table;
+        }
+
+        function updateRowMatrixView() {
+            const container = document.getElementById('rowMatrixView');
+            container.innerHTML = '';
+            container.appendChild(matrixToTable(rowMatrix));
+            drawRowCanvas();
+        }
+
+        function updateColMatrixView() {
+            const container = document.getElementById('colMatrixView');
+            container.innerHTML = '';
+            container.appendChild(matrixToTable(colMatrix));
+            drawColCanvas();
+        }
+
+        function applyRowOperation() {
+            const action = document.getElementById('rowAction').value;
+            const target = parseInt(document.getElementById('rowTarget').value, 10);
+            const extraValue = document.getElementById('rowExtra').value;
+            let description = '';
+            if (action === 'swap') {
+                const other = parseInt(extraValue, 10) || 0;
+                if (other === target || other < 0 || other > 2) {
+                    alert('请输入要交换的另一行编号（0-2）。');
+                    return;
+                }
+                [rowMatrix[target], rowMatrix[other]] = [rowMatrix[other], rowMatrix[target]];
+                description = `交换 R${target + 1} 与 R${other + 1}`;
+            } else if (action === 'scale') {
+                const k = parseFloat(extraValue);
+                rowMatrix[target] = rowMatrix[target].map(v => v * k);
+                description = `${k.toFixed(2)} \\times R${target + 1}`;
+            } else if (action === 'add') {
+                const info = extraValue.split(',');
+                if (info.length < 2) {
+                    alert('请输入“来源行,倍数”格式，如 0,0.5');
+                    return;
+                }
+                const source = parseInt(info[0], 10);
+                const k = parseFloat(info[1]);
+                if (source < 0 || source > 2) {
+                    alert('来源行编号需在0-2之间');
+                    return;
+                }
+                rowMatrix[target] = rowMatrix[target].map((v, idx) => v + k * rowMatrix[source][idx]);
+                description = `R${target + 1} + (${k})R${source + 1}`;
+            }
+            logRowOperation(description);
+            updateRowMatrixView();
+        }
+
+        function applyColOperation() {
+            const action = document.getElementById('colAction').value;
+            const target = parseInt(document.getElementById('colTarget').value, 10);
+            const extraValue = document.getElementById('colExtra').value;
+            let infoText = '';
+            if (action === 'swap') {
+                const other = parseInt(extraValue, 10) || 0;
+                if (other === target || other < 0 || other > 2) {
+                    alert('请输入要交换的另一列编号（0-2）。');
+                    return;
+                }
+                for (let i = 0; i < colMatrix.length; i++) {
+                    [colMatrix[i][target], colMatrix[i][other]] = [colMatrix[i][other], colMatrix[i][target]];
+                }
+                infoText = `交换 C${target + 1} 与 C${other + 1}`;
+            } else if (action === 'scale') {
+                const k = parseFloat(extraValue);
+                for (let i = 0; i < colMatrix.length; i++) {
+                    colMatrix[i][target] *= k;
+                }
+                infoText = `${k.toFixed(2)} \\times C${target + 1}`;
+            } else if (action === 'add') {
+                const info = extraValue.split(',');
+                if (info.length < 2) {
+                    alert('请输入“来源列,倍数”格式，如 0,0.5');
+                    return;
+                }
+                const source = parseInt(info[0], 10);
+                const k = parseFloat(info[1]);
+                if (source < 0 || source > 2) {
+                    alert('来源列编号需在0-2之间');
+                    return;
+                }
+                for (let i = 0; i < colMatrix.length; i++) {
+                    colMatrix[i][target] += k * colMatrix[i][source];
+                }
+                infoText = `C${target + 1} + (${k})C${source + 1}`;
+            }
+            document.getElementById('colInfo').textContent = `最新操作：${infoText}`;
+            updateColMatrixView();
+        }
+
+        function logRowOperation(text) {
+            const log = document.getElementById('rowLog');
+            const li = document.createElement('li');
+            li.innerHTML = text.includes('\\times') || text.includes('R') ? `$${text}$` : text;
+            log.appendChild(li);
+            log.scrollTop = log.scrollHeight;
+            if (typeof MathJax !== 'undefined') {
+                MathJax.typesetPromise([li]).catch(err => console.log(err));
+            }
+        }
+
+        function resetRowMatrix() {
+            rowMatrix = JSON.parse(JSON.stringify(initialRowMatrix));
+            document.getElementById('rowLog').innerHTML = '';
+            updateRowMatrixView();
+        }
+
+        function resetColMatrix() {
+            colMatrix = JSON.parse(JSON.stringify(initialColMatrix));
+            document.getElementById('colInfo').textContent = '列初等变换对应于右乘初等矩阵，常用于求解伴随矩阵与特征向量的正交化。';
+            updateColMatrixView();
+        }
+
+        function drawRowCanvas() {
+            const canvas = document.getElementById('rowCanvas');
+            const ctx = resizeCanvas(canvas);
+            const width = canvas.width / (window.devicePixelRatio || 1);
+            const height = canvas.height / (window.devicePixelRatio || 1);
+            drawAxis(ctx, width, height, '列 j', '行 i');
+            const gridW = width - 100;
+            const gridH = height - 80;
+            const cellH = gridH / rowMatrix.length;
+            rowMatrix.forEach((row, i) => {
+                const y = 30 + i * cellH;
+                const rowSum = row.reduce((sum, v) => sum + Math.abs(v), 0);
+                ctx.fillStyle = '#6366f1';
+                ctx.fillRect(60, y + cellH / 2 - 6, rowSum * 12, 12);
+                ctx.fillStyle = '#1f2937';
+                ctx.fillText(`R${i + 1}: ${row.map(v => v.toFixed(1)).join(', ')}`, 60, y + 15);
+            });
+        }
+
+        function drawColCanvas() {
+            const canvas = document.getElementById('colCanvas');
+            const ctx = resizeCanvas(canvas);
+            const width = canvas.width / (window.devicePixelRatio || 1);
+            const height = canvas.height / (window.devicePixelRatio || 1);
+            drawAxis(ctx, width, height, '列编号', '数值');
+            const gridW = width - 100;
+            const cellW = gridW / colMatrix[0].length;
+            for (let j = 0; j < colMatrix[0].length; j++) {
+                const column = colMatrix.map(row => row[j]);
+                column.forEach((value, idx) => {
+                    const x = 50 + j * cellW + idx * 12;
+                    const y = height - 40 - value * 15;
+                    ctx.fillStyle = ['#6366f1', '#10b981', '#f59e0b'][idx];
+                    ctx.fillRect(x, y, 10, value * 15);
+                    ctx.fillStyle = '#1f2937';
+                    ctx.fillText(value.toFixed(1), x - 4, y - 4);
+                });
+            }
+        }
+
+        document.getElementById('rowAction').addEventListener('change', () => {
+            const action = document.getElementById('rowAction').value;
+            const label = document.querySelector('#rowExtraGroup label');
+            label.textContent = action === 'swap' ? '另一行编号 (0-2)' : action === 'scale' ? '倍数 k' : '来源行,倍数';
+            document.getElementById('rowExtra').value = action === 'scale' ? 1 : 0;
+        });
+
+        document.getElementById('colAction').addEventListener('change', () => {
+            const action = document.getElementById('colAction').value;
+            const label = document.querySelector('#colExtraGroup label');
+            label.textContent = action === 'swap' ? '另一列编号 (0-2)' : action === 'scale' ? '倍数 k' : '来源列,倍数';
+            document.getElementById('colExtra').value = action === 'scale' ? 1 : 0;
+        });
+
+        window.addEventListener('resize', () => {
+            updateRowMatrixView();
+            updateColMatrixView();
+        });
+
+        // 自定义下拉框控制函数
+        function toggleCustomSelect(trigger) {
+            const container = trigger.parentElement;
+            const isOpen = container.classList.contains('open');
+            document.querySelectorAll('.custom-select-container.open').forEach(el => el.classList.remove('open'));
+            if (!isOpen) container.classList.add('open');
+        }
+
+        function selectCustomOption(option, selectId) {
+            const container = option.closest('.custom-select-container');
+            const trigger = container.querySelector('.selected-formula');
+            const hiddenInput = document.getElementById(selectId);
+            container.querySelectorAll('.custom-option').forEach(opt => opt.classList.remove('selected'));
+            option.classList.add('selected');
+            trigger.innerHTML = option.innerHTML;
+            hiddenInput.value = option.dataset.value;
+            container.classList.remove('open');
+            if (typeof MathJax !== 'undefined') {
+                MathJax.typesetPromise([container]).catch(err => console.log(err));
+            }
+            // 触发change事件
+            hiddenInput.dispatchEvent(new Event('change'));
+        }
+
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.custom-select-container')) {
+                document.querySelectorAll('.custom-select-container.open').forEach(el => el.classList.remove('open'));
+            }
+        });
+
+        resetRowMatrix();
+        resetColMatrix();
+        renderMath();
+    </script>
+</body>
+</html>

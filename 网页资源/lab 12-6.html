@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab 12.6 二次曲面的形态认知实验室</title>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\(', '\)']],
+                displayMath: [['$$', '$$'], ['\[', '\]']],
+                processEscapes: true
+            },
+            startup: {
+                pageReady: () => {
+                    return MathJax.startup.defaultPageReady().then(() => {
+                        if (typeof window.scheduleMathRender === 'function') {
+                            window.scheduleMathRender();
+                        }
+                        console.log('MathJax加载完成');
+                    });
+                }
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+            }
+        };
+    </script>
+    <script defer src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js"></script>
+    <script defer src="../common-assets/js/lab-math-enhancer.js"></script>
+    <style>
+
+        :root {
+            --h1-size: 22px;
+            --h2-size: 20px;
+            --h3-size: 18px;
+            --btn-size: 16px;
+            --formula-size: 20px;
+            --text-size: 16px;
+            --primary: #4f46e5;
+            --primary-light: #6366f1;
+            --primary-dark: #3730a3;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --light: #ffffff;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-400: #9ca3af;
+            --gray-600: #4b5563;
+            --gray-800: #1f2937;
+            --border: #e5e7eb;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        *::-webkit-scrollbar {
+            width: 0;
+            background: transparent;
+        }
+
+        * {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
+            font-size: var(--text-size);
+            line-height: 1.5;
+            background: var(--gray-50);
+            color: var(--gray-800);
+        }
+
+        .return-home-panel {
+            position: fixed;
+            top: 12px;
+            right: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+            z-index: 40;
+        }
+
+        .return-toggle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.95), rgba(99, 102, 241, 0.9));
+            color: #ffffff;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 10px 18px rgba(79, 70, 229, 0.28);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .return-toggle:focus-visible {
+            outline: 2px solid rgba(129, 140, 248, 0.6);
+            outline-offset: 3px;
+        }
+
+        .return-toggle:hover {
+            transform: translateY(-1px) scale(1.03);
+            box-shadow: 0 14px 26px rgba(79, 70, 229, 0.35);
+        }
+
+        .return-links {
+            display: none;
+            flex-direction: column;
+            gap: 6px;
+            padding: 10px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(79, 70, 229, 0.15);
+            box-shadow: 0 16px 30px rgba(15, 23, 42, 0.18);
+            backdrop-filter: blur(6px);
+        }
+
+        .return-home-panel.open .return-links {
+            display: flex;
+        }
+
+        .return-link {
+            padding: 6px 12px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 14px;
+            color: var(--primary);
+            background: rgba(79, 70, 229, 0.12);
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+
+        .return-link.return-main {
+            color: var(--success);
+            background: rgba(16, 185, 129, 0.12);
+        }
+
+        .return-link:hover {
+            background: rgba(79, 70, 229, 0.2);
+            color: var(--primary-dark);
+        }
+
+        .return-link.return-main:hover {
+            background: rgba(16, 185, 129, 0.22);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            height: 100vh;
+            max-height: 700px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            background: var(--light);
+            border-radius: 12px;
+            box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(90deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: var(--light);
+            padding: 10px 24px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: var(--h1-size);
+            font-weight: 600;
+        }
+
+        .main {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 120px;
+            background: var(--gray-50);
+            border-right: 1px solid var(--border);
+            padding: 12px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .nav-btn {
+            width: 100%;
+            padding: 8px;
+            border: none;
+            border-radius: 6px;
+            background: transparent;
+            color: var(--gray-600);
+            text-align: left;
+            font-size: var(--text-size);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .nav-btn:hover {
+            background: var(--gray-100);
+        }
+
+        .nav-btn.active {
+            background: var(--primary);
+            color: var(--light);
+        }
+
+        .content {
+            flex: 1;
+            display: none;
+            padding: 18px;
+            overflow-y: auto;
+        }
+
+        .content.active {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow-y: auto;
+        }
+
+        .card {
+            background: var(--light);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+        }
+
+        .card h3 {
+            font-size: var(--h3-size);
+            color: var(--primary);
+            margin-bottom: 12px;
+        }
+
+        .input-group {
+            margin-bottom: 12px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: var(--gray-600);
+        }
+
+        .input-group select,
+        .input-group input,
+        .input-group range,
+        .input-group textarea {
+            width: 100%;
+            padding: 8px 10px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            font-size: var(--text-size);
+            background: var(--gray-50);
+        }
+
+        .input-group input[type="range"] {
+            padding: 0;
+        }
+
+        .input-group input:focus,
+        .input-group select:focus,
+        .input-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: var(--light);
+        }
+
+        .btn,
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 16px;
+            font-size: var(--btn-size);
+            border: none;
+            border-radius: 6px;
+            background: var(--primary);
+            color: var(--light);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            gap: 6px;
+        }
+
+        .btn.secondary {
+            background: var(--gray-200);
+            color: var(--gray-600);
+        }
+
+        .btn:hover,
+        .action-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn.secondary:hover {
+            background: var(--gray-400);
+            color: var(--light);
+        }
+
+        .info-box {
+            background: var(--gray-50);
+            border-left: 3px solid var(--primary);
+            padding: 12px;
+            border-radius: 6px;
+            font-size: var(--text-size);
+            line-height: 1.6;
+        }
+
+        canvas {
+            width: 100%;
+            height: 260px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: #ffffff;
+        }
+
+        .tag-list {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: rgba(79, 70, 229, 0.12);
+            color: var(--primary);
+            font-size: 14px;
+        }
+
+        table.matrix-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: center;
+        }
+
+        table.matrix-table td {
+            border: 1px solid var(--gray-200);
+            padding: 6px;
+            font-size: var(--text-size);
+        }
+    
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 12px;
+        }
+
+        .stat-card {
+            background: var(--gray-50);
+            border-radius: 10px;
+            padding: 12px;
+            border: 1px dashed var(--border);
+        }
+
+        .stat-card h4 {
+            font-size: 15px;
+            color: var(--gray-600);
+            margin-bottom: 6px;
+        }
+
+        .stat-card p {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .info-list {
+            padding-left: 18px;
+        }
+
+        .info-list li {
+            list-style: disc;
+            color: var(--gray-600);
+            margin-bottom: 4px;
+        }
+
+        .equation-box {
+            background: rgba(79, 70, 229, 0.08);
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 10px;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .highlight {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="return-home-panel">
+        <button class="return-toggle" type="button" aria-label="打开返回导航" onclick="toggleReturnPanel(event)"><i class="fa-solid fa-house"></i></button>
+        <div class="return-links">
+            <a class="return-link return-sub" href="index.html"><i class="fa-solid fa-arrow-left"></i> 返回目录</a>
+            <a class="return-link return-main" href="../index.html"><i class="fa-solid fa-house"></i> 返回主站</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <header class="header">
+            <h1>Lab 12.6 二次曲面的形态认知与截面分析</h1>
+        </header>
+
+        <div class="main">
+            <nav class="sidebar">
+                <button class="nav-btn active"  data-panel="module1"onclick="switchPanel('module1')">曲面识别</button>
+                <button class="nav-btn"  data-panel="module2"onclick="switchPanel('module2')">截面分析</button>
+            </nav>
+
+            <div class="content active" id="module1">
+                <div class="column">
+                    <div class="card">
+                        <h3>选择曲面类型</h3>
+                        <div class="input-group">
+                            <label>标准模型</label>
+                            <select id="surfaceSelect">
+                                <option value="ellipsoid">椭球面</option>
+                                <option value="cone">椭圆锥面</option>
+                                <option value="hyperboloid1">单叶双曲面</option>
+                                <option value="hyperboloid2">双叶双曲面</option>
+                                <option value="paraboloid">椭圆抛物面</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>参数 $a,b,c$</label>
+                            <input type="range" id="aRange" min="1" max="5" value="3">
+                            <div>$a=$ <span id="aVal" class="highlight">3</span></div>
+                            <input type="range" id="bRange" min="1" max="5" value="2">
+                            <div>$b=$ <span id="bVal" class="highlight">2</span></div>
+                            <input type="range" id="cRange" min="1" max="5" value="2">
+                            <div>$c=$ <span id="cVal" class="highlight">2</span></div>
+                        </div>
+                        <div class="equation-box" id="surfaceEquation">\frac{x^2}{9}+\frac{y^2}{4}+\frac{z^2}{4}=1</div>
+                        <div class="info-box">
+                            <p>通过调节 $a,b,c$ 观察曲面轴向伸缩，识别是否封闭、是否含双重曲率等特性。</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="card">
+                        <h3>二次曲面示意</h3>
+                        <canvas id="surfaceCanvas" width="520" height="320"></canvas>
+                        <ul class="info-list">
+                            <li>使用轮廓线显示等高截面。</li>
+                            <li>不同曲面采用不同颜色提示正负号。</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content" id="module2">
+                <div class="column">
+                    <div class="card">
+                        <h3>平面截面设置</h3>
+                        <div class="input-group">
+                            <label>选择截面类型</label>
+                            <select id="sectionSelect">
+                                <option value="x">x = k</option>
+                                <option value="y">y = k</option>
+                                <option value="z" selected>z = k</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>截面位置 k</label>
+                            <input type="range" id="kRange" min="-4" max="4" step="0.5" value="0">
+                            <div>当前 $k=$ <span id="kVal" class="highlight">0</span></div>
+                        </div>
+                        <div class="stat-grid">
+                            <div class="stat-card">
+                                <h4>截面方程</h4>
+                                <p id="sectionEquation">\frac{x^2}{9}+\frac{y^2}{4}=1</p>
+                            </div>
+                            <div class="stat-card">
+                                <h4>曲线类型</h4>
+                                <p id="sectionType">椭圆</p>
+                            </div>
+                        </div>
+                        <div class="info-box">
+                            <p>基于所选曲面与截面平面，自动判断截线形状（椭圆、双曲线、抛物线或不存在）。</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="card">
+                        <h3>截面图像</h3>
+                        <canvas id="sectionCanvas" width="520" height="320"></canvas>
+                        <ul class="info-list">
+                            <li>灰色虚线表示坐标轴，蓝色曲线为截面形状。</li>
+                            <li>若无截线则显示提示文字。</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const panels = document.querySelectorAll('.content');
+        const buttons = document.querySelectorAll('.nav-btn');
+
+        function switchPanel(id, trigger) {
+            const activeButton = trigger instanceof HTMLElement ? trigger :
+
+                (typeof event !== 'undefined' && event?.currentTarget instanceof HTMLElement ? event.currentTarget :
+
+                    document.querySelector(`.nav-btn[data-panel="${id}"]`) ||
+
+                    document.querySelector(`.nav-btn[data-target="${id}"]`) ||
+
+                    null);
+
+            panels.forEach(panel => panel.classList.remove('active'));
+            buttons.forEach(btn => btn.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            const activeBtn = Array.from(buttons).find(btn => btn.getAttribute('onclick').includes(id));
+            if (activeBtn) {
+                activeBtn.classList.add('active');
+            }
+        }
+
+        let mathObserver = null;
+        let mathRenderQueued = false;
+
+        function startMathObserver() {
+            if (typeof MutationObserver === 'undefined' || !document.body) {
+                return;
+            }
+            if (mathObserver) {
+                mathObserver.disconnect();
+            }
+            mathObserver = new MutationObserver(mutations => {
+                for (const mutation of mutations) {
+                    if (mutation.type === 'childList' || mutation.type === 'characterData') {
+                        scheduleMathRender();
+                        break;
+                    }
+                }
+            });
+            mathObserver.observe(document.body, { childList: true, subtree: true, characterData: true });
+        }
+
+        function scheduleMathRender() {
+            if (mathRenderQueued) {
+                return;
+            }
+            mathRenderQueued = true;
+            requestAnimationFrame(() => {
+                mathRenderQueued = false;
+                if (window.MathJax && MathJax.typesetPromise) {
+                    if (mathObserver) {
+                        mathObserver.disconnect();
+                    }
+                    MathJax.typesetPromise()
+                        .catch(err => console.log('渲染错误:', err))
+                        .finally(() => {
+                            startMathObserver();
+                        });
+                } else {
+                    setTimeout(scheduleMathRender, 160);
+                }
+            });
+        }
+
+        window.scheduleMathRender = scheduleMathRender;
+
+        function renderMath() {
+            scheduleMathRender();
+        }
+
+        function ensureMathReady() {
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', () => {
+                    startMathObserver();
+                    scheduleMathRender();
+                });
+            } else {
+                startMathObserver();
+                scheduleMathRender();
+            }
+        }
+
+        ensureMathReady();
+
+        function toggleReturnPanel(event) {
+            event.stopPropagation();
+            const panel = document.querySelector('.return-home-panel');
+            if (panel) {
+                panel.classList.toggle('open');
+            }
+        }
+
+        document.addEventListener('click', event => {
+            const panel = document.querySelector('.return-home-panel');
+            if (!panel) {
+                return;
+            }
+            if (panel.classList.contains('open') && !panel.contains(event.target)) {
+                panel.classList.remove('open');
+            }
+        });
+
+        window.addEventListener('pageshow', () => {
+            scheduleMathRender();
+        });
+
+        function resizeCanvas(canvas) {
+            const container = canvas.parentElement;
+            const width = container.clientWidth - 20;
+            const height = 300;
+            canvas.style.width = width + 'px';
+            canvas.style.height = height + 'px';
+            const ratio = window.devicePixelRatio || 1;
+            canvas.width = width * ratio;
+            canvas.height = height * ratio;
+            const ctx = canvas.getContext('2d');
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.scale(ratio, ratio);
+            return ctx;
+        }
+
+        function drawAxis(ctx, width, height) {
+            ctx.clearRect(0, 0, width, height);
+            ctx.save();
+            ctx.strokeStyle = '#9ca3af';
+            ctx.setLineDash([6, 6]);
+            ctx.beginPath();
+            // x轴（水平）
+            ctx.moveTo(50, height / 2);
+            ctx.lineTo(width - 30, height / 2);
+            // y轴（垂直）
+            ctx.moveTo((width) / 2, height - 40);
+            ctx.lineTo((width) / 2, 30);
+            // z轴（向左上延伸，表示深度）
+            ctx.moveTo((width) / 2, height / 2);
+            ctx.lineTo((width) / 2 - 80, height / 2 - 60);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.fillStyle = '#6b7280';
+            ctx.font = '12px sans-serif';
+            ctx.fillText('x', width - 40, height / 2 - 10);
+            ctx.fillText('y', (width) / 2 + 10, 35);
+            ctx.fillText('z', (width) / 2 - 90, height / 2 - 65);
+            ctx.restore();
+        }
+
+        function projectSurfacePoint(x, y, z) {
+            return {
+                x: 80 + x * 18 + z * 12,
+                y: 250 - (y * 18 + z * 8)
+            };
+        }
+
+        const surfaceCtx = resizeCanvas(document.getElementById('surfaceCanvas'));
+        const sectionCtx = resizeCanvas(document.getElementById('sectionCanvas'));
+
+        const surfaceConfigs = {
+            ellipsoid: {
+                name: '椭球面',
+                equation: (a, b, c) => `\frac{x^2}{${a*a}}+\frac{y^2}{${b*b}}+\frac{z^2}{${c*c}}=1`,
+                section: (plane, k, a, b, c) => {
+                    if (plane === 'z') {
+                        const value = 1 - (k*k)/(c*c);
+                        if (value < 0) return { type: '无截线', equation: '无实数解' };
+                        return { type: '椭圆', equation: `\frac{x^2}{${a*a/value}}+\frac{y^2}{${b*b/value}}=1` };
+                    }
+                    if (plane === 'x') {
+                        const value = 1 - (k*k)/(a*a);
+                        if (value < 0) return { type: '无截线', equation: '无实数解' };
+                        return { type: '椭圆', equation: `\frac{y^2}{${b*b/value}}+\frac{z^2}{${c*c/value}}=1` };
+                    }
+                    const value = 1 - (k*k)/(b*b);
+                    if (value < 0) return { type: '无截线', equation: '无实数解' };
+                    return { type: '椭圆', equation: `\frac{x^2}{${a*a/value}}+\frac{z^2}{${c*c/value}}=1` };
+                }
+            },
+            cone: {
+                name: '椭圆锥面',
+                equation: (a, b, c) => `\frac{x^2}{${a*a}}+\frac{y^2}{${b*b}}=\frac{z^2}{${c*c}}`,
+                section: (plane, k, a, b, c) => {
+                    if (plane === 'z') {
+                        return { type: '椭圆', equation: `\frac{x^2}{${(a*a*k*k)/(c*c)}}+\frac{y^2}{${(b*b*k*k)/(c*c)}}=1` };
+                    }
+                    if (plane === 'x') {
+                        return { type: '双曲线', equation: `\frac{y^2}{${b*b}}-\frac{z^2}{${c*c}}=-\frac{k^2}{${a*a}}` };
+                    }
+                    return { type: '双曲线', equation: `\frac{x^2}{${a*a}}-\frac{z^2}{${c*c}}=-\frac{k^2}{${b*b}}` };
+                }
+            },
+            hyperboloid1: {
+                name: '单叶双曲面',
+                equation: (a, b, c) => `\frac{x^2}{${a*a}}+\frac{y^2}{${b*b}}-\frac{z^2}{${c*c}}=1`,
+                section: (plane, k, a, b, c) => {
+                    if (plane === 'z') {
+                        const value = 1 + (k*k)/(c*c);
+                        return { type: '椭圆', equation: `\frac{x^2}{${a*a/value}}+\frac{y^2}{${b*b/value}}=1` };
+                    }
+                    if (plane === 'x') {
+                        return { type: '双曲线', equation: `\frac{y^2}{${b*b}}-\frac{z^2}{${c*c}}=1-\frac{k^2}{${a*a}}` };
+                    }
+                    return { type: '双曲线', equation: `\frac{x^2}{${a*a}}-\frac{z^2}{${c*c}}=1-\frac{k^2}{${b*b}}` };
+                }
+            },
+            hyperboloid2: {
+                name: '双叶双曲面',
+                equation: (a, b, c) => `-\frac{x^2}{${a*a}}-\frac{y^2}{${b*b}}+\frac{z^2}{${c*c}}=1`,
+                section: (plane, k, a, b, c) => {
+                    if (plane === 'z') {
+                        const value = 1 + (k*k)/(c*c);
+                        return { type: '双曲线', equation: `-\frac{x^2}{${a*a/value}}-\frac{y^2}{${b*b/value}}=1` };
+                    }
+                    if (plane === 'x') {
+                        const val = (k*k)/(a*a) - 1;
+                        if (val < 0) return { type: '无截线', equation: '无实数解' };
+                        return { type: '椭圆', equation: `\frac{y^2}{${b*b/val}}-\frac{z^2}{${c*c}}=1` };
+                    }
+                    const val = (k*k)/(b*b) - 1;
+                    if (val < 0) return { type: '无截线', equation: '无实数解' };
+                    return { type: '椭圆', equation: `\frac{x^2}{${a*a/val}}-\frac{z^2}{${c*c}}=1` };
+                }
+            },
+            paraboloid: {
+                name: '椭圆抛物面',
+                equation: (a, b, c) => `\frac{x^2}{${a*a}}+\frac{y^2}{${b*b}}=\frac{z}{${c}}`,
+                section: (plane, k, a, b, c) => {
+                    if (plane === 'z') {
+                        return { type: '椭圆', equation: `\frac{x^2}{${a*a*k/c}}+\frac{y^2}{${b*b*k/c}}=1` };
+                    }
+                    if (plane === 'x') {
+                        return { type: '抛物线', equation: `\frac{y^2}{${b*b}}=\frac{z}{${c}}-\frac{k^2}{${a*a}}` };
+                    }
+                    return { type: '抛物线', equation: `\frac{x^2}{${a*a}}=\frac{z}{${c}}-\frac{k^2}{${b*b}}` };
+                }
+            }
+        };
+
+        function updateSurface() {
+            const type = document.getElementById('surfaceSelect').value;
+            const a = Number(document.getElementById('aRange').value);
+            const b = Number(document.getElementById('bRange').value);
+            const c = Number(document.getElementById('cRange').value);
+            document.getElementById('aVal').textContent = a;
+            document.getElementById('bVal').textContent = b;
+            document.getElementById('cVal').textContent = c;
+            const config = surfaceConfigs[type];
+            document.getElementById('surfaceEquation').innerHTML = config.equation(a, b, c);
+
+            const width = surfaceCtx.canvas.clientWidth;
+            const height = surfaceCtx.canvas.clientHeight;
+            surfaceCtx.clearRect(0,0,width,height);
+            drawAxis(surfaceCtx, width, height);
+            surfaceCtx.save();
+            surfaceCtx.strokeStyle = '#6366f1';
+            for (let angle = 0; angle < Math.PI*2; angle += Math.PI/6) {
+                surfaceCtx.beginPath();
+                for (let r = 0; r <= 1; r += 0.05) {
+                    let x = a * r * Math.cos(angle);
+                    let y = b * r * Math.sin(angle);
+                    let z;
+                    switch (type) {
+                        case 'ellipsoid':
+                            z = c * Math.sqrt(Math.max(0, 1 - (x*x)/(a*a) - (y*y)/(b*b)));
+                            break;
+                        case 'cone':
+                            z = (c / Math.sqrt((x*x)/(a*a) + (y*y)/(b*b) + 1)) * r;
+                            break;
+                        case 'hyperboloid1':
+                            z = c * Math.sqrt(Math.max(0, (x*x)/(a*a) + (y*y)/(b*b) - 1));
+                            break;
+                        case 'hyperboloid2':
+                            z = c * Math.sqrt(Math.max(0, 1 + (x*x)/(a*a) + (y*y)/(b*b)));
+                            break;
+                        case 'paraboloid':
+                            z = (x*x)/(a*a) * c + (y*y)/(b*b) * c;
+                            break;
+                    }
+                    const pos = projectSurfacePoint(x, y, z || 0);
+                    if (r === 0) {
+                        surfaceCtx.moveTo(pos.x, pos.y);
+                    } else {
+                        surfaceCtx.lineTo(pos.x, pos.y);
+                    }
+                }
+                surfaceCtx.stroke();
+            }
+            surfaceCtx.restore();
+        }
+
+        function updateSection() {
+            const type = document.getElementById('surfaceSelect').value;
+            const a = Number(document.getElementById('aRange').value);
+            const b = Number(document.getElementById('bRange').value);
+            const c = Number(document.getElementById('cRange').value);
+            const plane = document.getElementById('sectionSelect').value;
+            const k = Number(document.getElementById('kRange').value);
+            document.getElementById('kVal').textContent = k;
+            const config = surfaceConfigs[type];
+            const section = config.section(plane, k, a, b, c);
+            document.getElementById('sectionEquation').innerHTML = section.equation;
+            document.getElementById('sectionType').textContent = section.type;
+
+            const width = sectionCtx.canvas.clientWidth;
+            const height = sectionCtx.canvas.clientHeight;
+            drawAxis(sectionCtx, width, height);
+            if (section.type === '无截线') {
+                sectionCtx.save();
+                sectionCtx.fillStyle = '#ef4444';
+                sectionCtx.font = '16px sans-serif';
+                sectionCtx.fillText('当前位置无实截线', width/2 - 80, height/2);
+                sectionCtx.restore();
+                return;
+            }
+            sectionCtx.save();
+            sectionCtx.strokeStyle = '#2563eb';
+            sectionCtx.lineWidth = 2;
+            const centerX = width/2;
+            const centerY = height/2;
+            if (section.type === '椭圆') {
+                const rx = Math.max(20, 120 / a);
+                const ry = Math.max(20, 120 / b);
+                sectionCtx.beginPath();
+                sectionCtx.ellipse(centerX, centerY, rx, ry, 0, 0, Math.PI*2);
+                sectionCtx.stroke();
+            } else if (section.type === '双曲线') {
+                sectionCtx.beginPath();
+                for (let x = -100; x <= 100; x++) {
+                    const y = Math.sqrt(Math.abs((x*x)/100 - 1)) * 40;
+                    sectionCtx.lineTo(centerX + x, centerY - y);
+                }
+                sectionCtx.stroke();
+                sectionCtx.beginPath();
+                for (let x = -100; x <= 100; x++) {
+                    const y = Math.sqrt(Math.abs((x*x)/100 - 1)) * 40;
+                    sectionCtx.lineTo(centerX + x, centerY + y);
+                }
+                sectionCtx.stroke();
+            } else if (section.type === '抛物线') {
+                sectionCtx.beginPath();
+                for (let x = -100; x <= 100; x++) {
+                    const y = 0.01 * x * x;
+                    sectionCtx.lineTo(centerX + x, centerY - y);
+                }
+                sectionCtx.stroke();
+            }
+            sectionCtx.restore();
+        }
+
+        document.getElementById('surfaceSelect').addEventListener('change', () => {
+            updateSurface();
+            updateSection();
+            renderMath();
+        });
+
+        document.querySelectorAll('input[type="range"]').forEach(input => {
+            input.addEventListener('input', () => {
+                updateSurface();
+                updateSection();
+                renderMath();
+            });
+        });
+
+        document.getElementById('sectionSelect').addEventListener('change', () => {
+            updateSection();
+            renderMath();
+        });
+
+        window.addEventListener('resize', () => {
+            resizeCanvas(surfaceCtx.canvas);
+            resizeCanvas(sectionCtx.canvas);
+            updateSurface();
+            updateSection();
+        });
+
+        updateSurface();
+        updateSection();
+        renderMath();
+    </script>
+</body>
+</html>

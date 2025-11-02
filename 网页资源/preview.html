@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>仿真实验室 - 快速预览</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            height: 100%;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            display: flex;
+        }
+
+        .sidebar {
+            width: 280px;
+            padding: 15px 10px;
+            overflow-y: auto;
+            background: linear-gradient(180deg, #2d3748 0%, #1a202c 100%);
+        }
+
+        .sidebar::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .quick-nav {
+            margin-bottom: 15px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+        }
+
+        .quick-nav-title {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 8px;
+        }
+
+        .chapter-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .chapter-badge {
+            padding: 4px 10px;
+            background: rgba(102, 126, 234, 0.2);
+            border: 1px solid rgba(102, 126, 234, 0.4);
+            border-radius: 12px;
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.8);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .chapter-badge:hover {
+            background: rgba(102, 126, 234, 0.4);
+            color: #fff;
+            transform: translateY(-1px);
+        }
+
+        .chapter-group {
+            margin-bottom: 8px;
+        }
+
+        .chapter-title {
+            font-size: 13px;
+            font-weight: bold;
+            color: #fff;
+            padding: 8px 10px;
+            background: rgba(102, 126, 234, 0.25);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+        }
+
+        .chapter-title:hover {
+            background: rgba(102, 126, 234, 0.4);
+            transform: translateX(2px);
+        }
+
+        .chapter-title.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 2px 10px rgba(102, 126, 234, 0.5);
+        }
+
+        .chapter-arrow {
+            transition: transform 0.3s ease;
+            font-size: 12px;
+        }
+
+        .chapter-title.active .chapter-arrow {
+            transform: rotate(90deg);
+        }
+
+        .lesson-list {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            padding-left: 8px;
+        }
+
+        .lesson-list.show {
+            max-height: 2000px;
+            margin-top: 6px;
+        }
+
+        .lesson-item {
+            padding: 6px 10px;
+            margin-bottom: 3px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-left: 3px solid transparent;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.85);
+        }
+
+        .lesson-item:hover {
+            background: rgba(102, 126, 234, 0.3);
+            border-left-color: #667eea;
+            transform: translateX(3px);
+            color: #fff;
+        }
+
+        .lesson-item.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-left-color: #f093fb;
+            transform: translateX(3px);
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+            color: #fff;
+        }
+
+        .main-content {
+            flex: 1;
+            background: #f7fafc;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .preview-header {
+            padding: 15px 20px;
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .preview-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .preview-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .action-btn:hover {
+            background: #5568d3;
+            transform: translateY(-1px);
+        }
+
+        .preview-area {
+            flex: 1;
+            padding: 0;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .preview-area::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        .preview-area::-webkit-scrollbar-track {
+            background: #e2e8f0;
+            border-radius: 5px;
+        }
+
+        .preview-area::-webkit-scrollbar-thumb {
+            background: #cbd5e0;
+            border-radius: 5px;
+        }
+
+        .preview-area::-webkit-scrollbar-thumb:hover {
+            background: #a0aec0;
+        }
+
+        .preview-frame {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: white;
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #a0aec0;
+        }
+
+        .empty-state svg {
+            width: 120px;
+            height: 120px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+
+        .empty-state p {
+            font-size: 14px;
+        }
+
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 280px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                height: auto;
+            }
+
+            .sidebar {
+                width: 100%;
+                max-height: 300px;
+            }
+
+            .main-content {
+                min-height: 500px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="quick-nav">
+                <div class="quick-nav-title">📚 快速跳转</div>
+                <div class="chapter-badges" id="quickNav"></div>
+            </div>
+            <div id="lessonList"></div>
+        </div>
+        <div class="main-content">
+            <div class="preview-header">
+                <div class="preview-title" id="previewTitle">仿真实验室预览</div>
+                <div class="preview-actions">
+                    <button class="action-btn" onclick="openInNew()">新窗口打开</button>
+                    <button class="action-btn" onclick="goToIndex()">返回目录</button>
+                </div>
+            </div>
+            <div class="preview-area">
+                <div class="empty-state" id="emptyState">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                    </svg>
+                    <h3>开始预览</h3>
+                    <p>从左侧菜单选择一个实验开始预览</p>
+                </div>
+                <iframe id="previewFrame" class="preview-frame" style="display: none;"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 实验室课程数据
+        const labData = {
+            '第1章 函数基础': [
+                { name: '指数运算实验室', file: 'lab 1-1.html' },
+                { name: '对数运算实验室', file: 'lab 1-2.html' },
+                { name: '区间分类实验室', file: 'lab 1-3.html' },
+                { name: '函数概念实验室', file: 'lab 1-4.html' },
+                { name: '函数性质实验室', file: 'lab 1-5.html' },
+                { name: '基本初等函数实验室', file: 'lab 1-6.html' },
+                { name: '复合函数实验室', file: 'lab 1-7.html' },
+                { name: '函数艺术与运动', file: 'lab 1-8.html' },
+                { name: '第一章游戏实验室', file: 'lab 1-9.html' }
+            ],
+            '第2章 函数与极限': [
+                { name: '图像压缩与数列极限实验室', file: 'lab 2-1.html' },
+                { name: '数列极限案例探索实验室', file: 'lab 2-2.html' },
+                { name: '函数极限与自变量变化实验室', file: 'lab 2-3.html' },
+                { name: '左右极限与存在性判定实验室', file: 'lab 2-4.html' },
+                { name: '无穷大与无穷小倒数关系实验室', file: 'lab 2-5.html' },
+                { name: '重要极限实验室', file: 'lab 2-6.html' },
+                { name: '无穷小比较实验室', file: 'lab 2-7.html' },
+                { name: '函数增量实验室', file: 'lab 2-8.html' },
+                { name: '等价无穷小倒水游戏', file: 'lab 2-9.html' },
+                { name: '连续与间断游戏', file: 'lab 2-10.html' },
+                { name: '函数连续性实验室', file: 'lab 2-11.html' },
+                { name: '函数间断点实验室', file: 'lab 2-12.html' },
+                { name: '极限与连续游戏', file: 'lab 2-13.html' }
+            ],
+            '第3章 导数与微分': [
+                { name: '导数概念实验室', file: 'lab 3-1.html' },
+                { name: '导数几何意义实验室', file: 'lab 3-2.html' },
+                { name: '导数运算法则实验室', file: 'lab 3-3.html' },
+                { name: '复合函数求导实验室', file: 'lab 3-4.html' },
+                { name: '微分实验室', file: 'lab 3-5.html' },
+                { name: '求导练习游戏', file: 'lab 3-6.html' }
+            ],
+            '第4章 导数应用': [
+                { name: '中值定理实验室', file: 'lab 4-1.html' },
+                { name: '洛必达法则实验室', file: 'lab 4-2.html' },
+                { name: '单调性与极值分析实验室', file: 'lab 4-3.html' }
+            ],
+            '第5章 不定积分': [
+                { name: '原函数概念实验室', file: 'lab 5-1.html' },
+                { name: '换元法技巧实验室', file: 'lab 5-2.html' },
+                { name: '三角换元实验室', file: 'lab 5-3.html' },
+                { name: '部分分式分解实验室', file: 'lab 5-4.html' },
+                { name: '分部积分法实验室', file: 'lab 5-5.html' }
+            ],
+            '第6章 定积分': [
+                { name: '定积分概念实验室', file: 'lab 6-1.html' },
+                { name: '牛顿-莱布尼茨实验室', file: 'lab 6-2.html' },
+                { name: '定积分换元与分部积分实验室', file: 'lab 6-3.html' },
+                { name: '微元面积实验室', file: 'lab 6-4.html' },
+                { name: '旋转体体积实验室', file: 'lab 6-5.html' }
+            ],
+            '第7章 常微分方程': [
+                { name: '微分方程概念实验室', file: 'lab 7-1.html' },
+                { name: '可分离变量方程实验室', file: 'lab 7-2.html' },
+                { name: '齐次方程实验室', file: 'lab 7-3.html' },
+                { name: '一阶线性方程实验室', file: 'lab 7-4.html' },
+                { name: '二阶常系数方程实验室', file: 'lab 7-5.html' }
+            ],
+            '第8章 多元函数微分学': [
+                { name: '二元函数概念实验室', file: 'lab 8-1.html' },
+                { name: '二元函数极限实验室', file: 'lab 8-2.html' },
+                { name: '偏导数实验室', file: 'lab 8-3.html' },
+                { name: '全微分实验室', file: 'lab 8-4.html' },
+                { name: '复合函数求导实验室', file: 'lab 8-5.html' },
+                { name: '隐函数求导实验室', file: 'lab 8-6.html' }
+            ],
+            '第9章 多元函数积分学': [
+                { name: '二重积分概念实验室', file: 'lab 9-1.html' },
+                { name: '二重积分计算实验室', file: 'lab 9-2.html' },
+                { name: '三重积分实验室', file: 'lab 9-3.html' }
+            ],
+            '第10章 线性代数': [
+                { name: '行列式实验室', file: 'lab 10-1.html' },
+                { name: '矩阵运算实验室', file: 'lab 10-2.html' },
+                { name: '矩阵逆实验室', file: 'lab 10-3.html' },
+                { name: '线性方程组实验室', file: 'lab 10-4.html' },
+                { name: '向量空间实验室', file: 'lab 10-5.html' },
+                { name: '特征值实验室', file: 'lab 10-6.html' },
+                { name: '二次型实验室', file: 'lab 10-7.html' }
+            ],
+            '第11章 无穷级数': [
+                { name: '数项级数实验室', file: 'lab 11-1.html' },
+                { name: '正项级数实验室', file: 'lab 11-2.html' },
+                { name: '幂级数实验室', file: 'lab 11-3.html' },
+                { name: '泰勒级数实验室', file: 'lab 11-4.html' },
+                { name: '傅里叶级数实验室', file: 'lab 11-5.html' }
+            ],
+            '第12章 向量代数与空间解析几何': [
+                { name: '向量概念实验室', file: 'lab 12-1.html' },
+                { name: '向量运算实验室', file: 'lab 12-2.html' },
+                { name: '空间直线实验室', file: 'lab 12-3.html' },
+                { name: '空间平面实验室', file: 'lab 12-4.html' },
+                { name: '二次曲面实验室', file: 'lab 12-5.html' },
+                { name: '空间曲线实验室', file: 'lab 12-6.html' }
+            ],
+            '第13章 概率与统计': [
+                { name: '随机事件实验室', file: 'lab 13-1.html' },
+                { name: '概率计算实验室', file: 'lab 13-2.html' },
+                { name: '随机变量实验室', file: 'lab 13-3.html' },
+                { name: '分布函数实验室', file: 'lab 13-4.html' },
+                { name: '数字特征实验室', file: 'lab 13-5.html' },
+                { name: '抽样分布实验室', file: 'lab 13-6.html' }
+            ]
+        };
+
+        let currentFile = '';
+
+        // 生成快速导航
+        function generateQuickNav() {
+            const quickNav = document.getElementById('quickNav');
+            Object.keys(labData).forEach((chapter, index) => {
+                const badge = document.createElement('div');
+                badge.className = 'chapter-badge';
+                const chapterNum = chapter.match(/\d+/)[0];
+                badge.textContent = `Ch${chapterNum}`;
+                badge.title = chapter;
+                badge.dataset.chapter = chapter;
+                badge.addEventListener('click', function() {
+                    scrollToChapter(this.dataset.chapter);
+                });
+                quickNav.appendChild(badge);
+            });
+        }
+
+        // 滚动到指定章节
+        function scrollToChapter(chapterName) {
+            document.querySelectorAll('.chapter-title').forEach(title => {
+                const titleText = title.querySelector('span').textContent;
+                if (titleText === chapterName) {
+                    title.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    // 自动展开该章节
+                    const lessonList = title.nextElementSibling;
+                    title.classList.add('active');
+                    lessonList.classList.add('show');
+                }
+            });
+        }
+
+        // 生成课程列表
+        function generateLessonList() {
+            const listContainer = document.getElementById('lessonList');
+            
+            Object.keys(labData).forEach((chapter, chapterIndex) => {
+                const chapterGroup = document.createElement('div');
+                chapterGroup.className = 'chapter-group';
+                
+                const chapterTitle = document.createElement('div');
+                chapterTitle.className = 'chapter-title';
+                chapterTitle.innerHTML = `
+                    <span>${chapter}</span>
+                    <span class="chapter-arrow">▶</span>
+                `;
+                
+                const lessonList = document.createElement('div');
+                lessonList.className = 'lesson-list';
+                
+                labData[chapter].forEach((lab, index) => {
+                    const lessonItem = document.createElement('div');
+                    lessonItem.className = 'lesson-item';
+                    lessonItem.textContent = `${index + 1}. ${lab.name}`;
+                    lessonItem.dataset.file = lab.file;
+                    lessonItem.dataset.name = lab.name;
+                    lessonItem.dataset.chapter = chapter;
+                    
+                    lessonItem.addEventListener('click', function() {
+                        loadLesson(this);
+                    });
+                    
+                    lessonList.appendChild(lessonItem);
+                });
+                
+                // 章节标题点击事件
+                chapterTitle.addEventListener('click', function() {
+                    toggleChapter(this, lessonList);
+                });
+                
+                chapterGroup.appendChild(chapterTitle);
+                chapterGroup.appendChild(lessonList);
+                listContainer.appendChild(chapterGroup);
+            });
+        }
+
+        // 切换章节展开/折叠
+        function toggleChapter(titleElement, lessonList) {
+            const isActive = titleElement.classList.contains('active');
+            
+            if (isActive) {
+                titleElement.classList.remove('active');
+                lessonList.classList.remove('show');
+            } else {
+                titleElement.classList.add('active');
+                lessonList.classList.add('show');
+            }
+        }
+
+        // 加载课程预览
+        function loadLesson(element) {
+            // 移除所有active状态
+            document.querySelectorAll('.lesson-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // 添加active状态到当前项
+            element.classList.add('active');
+            
+            // 展开当前章节
+            const currentChapter = element.dataset.chapter;
+            document.querySelectorAll('.chapter-title').forEach(title => {
+                const chapterName = title.querySelector('span').textContent;
+                const lessonList = title.nextElementSibling;
+                
+                if (chapterName === currentChapter) {
+                    title.classList.add('active');
+                    lessonList.classList.add('show');
+                }
+            });
+            
+            // 获取文件信息
+            const file = element.dataset.file;
+            const name = element.dataset.name;
+            currentFile = file;
+            
+            // 更新标题
+            document.getElementById('previewTitle').textContent = name;
+            
+            // 隐藏空状态，显示iframe
+            document.getElementById('emptyState').style.display = 'none';
+            const iframe = document.getElementById('previewFrame');
+            iframe.style.display = 'block';
+            iframe.src = file;
+        }
+
+        // 在新窗口打开
+        function openInNew() {
+            if (currentFile) {
+                window.open(currentFile, '_blank');
+            } else {
+                alert('请先选择一个实验');
+            }
+        }
+
+        // 返回目录
+        function goToIndex() {
+            window.location.href = 'index.html';
+        }
+
+        // 初始化
+        generateQuickNav();
+        generateLessonList();
+
+        // 自动展开第一章
+        setTimeout(() => {
+            const firstChapter = document.querySelector('.chapter-title');
+            if (firstChapter) {
+                firstChapter.click();
+            }
+        }, 100);
+    </script>
+</body>
+</html>
+

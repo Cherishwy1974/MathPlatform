@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>原函数概念实验室</title>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            startup: {
+                pageReady: () => {
+                    return MathJax.startup.defaultPageReady().then(() => {
+                        if (typeof window.scheduleMathRender === 'function') {
+                            window.scheduleMathRender();
+                        }
+                        console.log('MathJax加载完成');
+                    });
+                }
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+            }
+        };
+    </script>
+    <script defer src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js"></script>
+    <script defer src="../common-assets/js/lab-math-enhancer.js"></script>
+    <style>
+        :root {
+            --primary: #4f46e5; --primary-dark: #3730a3; --primary-light: #6366f1;
+            --success: #10b981; --warning: #f59e0b; --danger: #ef4444; --info: #3b82f6;
+            --gray-50: #f9fafb; --gray-100: #f3f4f6; --gray-200: #e5e7eb; --gray-300: #d1d5db;
+            --gray-500: #6b7280; --gray-600: #4b5563; --gray-700: #1f2937; --white: #ffffff;
+            --border: #e5e7eb; --h1-size: 22px; --h3-size: 18px; --text-size: 16px; --formula-size: 20px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        *::-webkit-scrollbar { width: 0; background: transparent; }
+        * { scrollbar-width: none; -ms-overflow-style: none; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", Arial, sans-serif; font-size: var(--text-size); line-height: 1.5; background: var(--gray-50); color: var(--gray-700); }
+        .container { width: 100%; max-width: 1400px; height: min(100vh, 700px); margin: 0 auto; display: flex; flex-direction: column; background: var(--white); border-radius: 12px; box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08); overflow: hidden; }
+        .header { height: 40px; background: var(--primary); color: var(--white); display: flex; align-items: center; padding: 0 20px; }
+        .header h1 { font-size: var(--h1-size); font-weight: 600; }
+        .main { flex: 1; display: flex; overflow: hidden; }
+        .sidebar { width: 120px; background: var(--gray-50); border-right: 1px solid var(--border); padding: 12px 10px; display: flex; flex-direction: column; gap: 8px; }
+        .nav-btn { width: 100%; padding: 8px; background: transparent; border: none; border-radius: 8px; cursor: pointer; font-size: var(--text-size); color: var(--gray-600); text-align: left; transition: background 0.2s ease, color 0.2s ease; }
+        .nav-btn:hover { background: var(--gray-100); }
+        .nav-btn.active { background: var(--primary); color: var(--white); }
+        .content { flex: 1; display: none; padding: 16px; overflow-y: auto; background: var(--white); }
+        .content.active { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+        .column { display: flex; flex-direction: column; gap: 16px; min-height: 0; overflow-y: auto; padding-right: 4px; }
+        .card { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04); }
+        .card h3 { font-size: var(--h3-size); color: var(--primary); }
+        .input-group { display: flex; flex-direction: column; gap: 6px; }
+        .input-group label { font-weight: 600; color: var(--gray-600); }
+        .input-group select { width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; font-size: var(--text-size); background: var(--gray-50); }
+        .formula-box { background: #f0f7ff; border-left: 3px solid var(--primary); border-radius: 8px; padding: 12px; text-align: center; font-size: var(--formula-size); }
+        .slider-group { display: flex; align-items: center; gap: 12px; background: var(--gray-50); padding: 12px; border-radius: 8px; }
+        .slider-group label { min-width: 60px; font-weight: 600; color: var(--gray-600); }
+        .slider { flex: 1; -webkit-appearance: none; appearance: none; height: 4px; background: var(--gray-200); border-radius: 999px; outline: none; }
+        .slider::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--primary); cursor: pointer; }
+        .slider::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--primary); border: none; cursor: pointer; }
+        .slider-value { min-width: 40px; text-align: center; font-weight: 600; color: var(--primary); }
+        .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .btn { padding: 8px 16px; background: var(--primary); color: var(--white); border: none; border-radius: 8px; cursor: pointer; font-size: var(--text-size); transition: background 0.2s ease, transform 0.2s ease; }
+        .btn:hover { background: var(--primary-dark); transform: translateY(-1px); }
+        .canvas-container { border: 1px solid var(--gray-200); border-radius: 12px; background: #fafafa; padding: 16px; min-height: 300px; display: flex; align-items: center; justify-content: center; }
+        .canvas-container canvas { max-width: 100%; height: auto; }
+        
+        .return-home-panel { position: fixed; bottom: 12px; right: 12px; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; z-index: 40; }
+        .return-toggle { width: 40px; height: 40px; border-radius: 50%; border: none; background: linear-gradient(135deg, rgba(79,70,229,0.96), rgba(99,102,241,0.9)); color: #fff; font-size: 20px; cursor: pointer; box-shadow: 0 10px 18px rgba(79,70,229,0.28); transition: transform 0.2s, box-shadow 0.2s; }
+        .return-toggle:hover { transform: translateY(-1px) scale(1.03); box-shadow: 0 14px 26px rgba(79,70,229,0.35); }
+        .return-links { display: none; flex-direction: column; gap: 6px; padding: 10px; border-radius: 10px; background: rgba(255,255,255,0.96); border: 1px solid rgba(79,70,229,0.18); box-shadow: 0 10px 30px rgba(15,23,42,0.14); opacity: 0; transition: opacity 0.16s; }
+        .return-link { text-decoration: none; font-size: 15px; color: var(--primary-dark); padding: 6px 12px; border-radius: 8px; background: rgba(99,102,241,0.12); transition: background 0.2s; }
+        .return-link:hover { background: rgba(79,70,229,0.18); }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header class="header"><h1>原函数概念实验室</h1></header>
+        <div class="main">
+            <nav class="sidebar">
+                <button class="nav-btn active" onclick="switchPanel('family')">原函数族</button>
+                <button class="nav-btn" onclick="switchPanel('verify')">验证关系</button>
+            </nav>
+            <div class="content active" id="family">
+                <div class="column">
+                    <div class="card">
+                        <h3>原函数族定义</h3>
+                        <div class="formula-box">$F'(x) = f(x) \Rightarrow F(x) + C$</div>
+                        <div class="input-group">
+                            <label>选择函数 $f(x)$</label>
+                            <select id="funcSelect" onchange="updateFamily()">
+                                <option value="2x">$f(x) = 2x$</option>
+                                <option value="x2">$f(x) = x^2$</option>
+                                <option value="sin">$f(x) = \sin x$</option>
+                                <option value="cos">$f(x) = \cos x$</option>
+                                <option value="exp">$f(x) = e^x$</option>
+                            </select>
+                        </div>
+                        <div class="formula-box" id="antiderivative">$F(x) = x^2 + C$</div>
+                    </div>
+                    <div class="card">
+                        <h3>常数C的作用</h3>
+                        <div class="slider-group">
+                            <label>常数 C</label>
+                            <input type="range" class="slider" id="cSlider" min="-5" max="5" step="0.1" value="0">
+                            <span class="slider-value" id="cValue">0</span>
+                        </div>
+                        <div class="btn-row">
+                            <button class="btn" onclick="animateC()">动画演示</button>
+                            <button class="btn" onclick="stopAnimation()">停止</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="card">
+                        <h3>原函数族可视化</h3>
+                        <div class="canvas-container">
+                            <canvas id="familyCanvas" width="600" height="320"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="content" id="verify">
+                <div class="column">
+                    <div class="card">
+                        <h3>导数验证</h3>
+                        <div class="formula-box">$\\frac{d}{dx}[F(x)] = f(x)$</div>
+                        <div class="input-group">
+                            <label>选择原函数 $F(x)$</label>
+                            <select id="primeSelect" onchange="updateVerify()">
+                                <option value="x2">$F(x) = x^2$</option>
+                                <option value="x3">$F(x) = x^3$</option>
+                                <option value="sin">$F(x) = \sin x$</option>
+                                <option value="cos">$F(x) = \cos x$</option>
+                                <option value="exp">$F(x) = e^x$</option>
+                            </select>
+                        </div>
+                        <div class="formula-box" id="derivative">$f(x) = 2x$</div>
+                        <div class="slider-group">
+                            <label>点 x</label>
+                            <input type="range" class="slider" id="xSlider" min="-3" max="3" step="0.1" value="1">
+                            <span class="slider-value" id="xValue">1.0</span>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3>切线斜率</h3>
+                        <div class="formula-box" id="slopeResult">斜率 = $2.0$</div>
+                        <button class="btn" onclick="animateTangent()" style="width: 100%">动画演示切线</button>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="card">
+                        <h3>函数与导数关系</h3>
+                        <div class="canvas-container">
+                            <canvas id="verifyCanvas" width="600" height="320"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        let animationId = null;
+        let tangentAnimId = null;
+
+        function renderMath() {
+            if (window.MathJax && MathJax.typesetPromise) {
+                MathJax.typesetPromise().catch(err => console.log('渲染错误:', err));
+            }
+        }
+
+        function switchPanel(panel) {
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+            
+            // A more robust way to find the button
+            const btn = Array.from(document.querySelectorAll('.nav-btn')).find(b => b.textContent.includes(event.target.textContent));
+            if(btn) btn.classList.add('active');
+            document.getElementById(panel).classList.add('active');
+
+            setTimeout(() => {
+                renderMath();
+                if (panel === 'family') updateFamily();
+                else if (panel === 'verify') updateVerify();
+            }, 50);
+        }
+
+        function updateFamily() {
+            const func = document.getElementById('funcSelect').value;
+            const resultDiv = document.getElementById('antiderivative');
+            let antider = '';
+            switch(func) {
+                case '2x': antider = '$F(x) = x^2 + C$'; break;
+                case 'x2': antider = '$F(x) = \\frac{x^3}{3} + C$'; break;
+                case 'sin': antider = '$F(x) = -\\cos x + C$'; break;
+                case 'cos': antider = '$F(x) = \\sin x + C$'; break;
+                case 'exp': antider = '$F(x) = e^x + C$'; break;
+            }
+            resultDiv.innerHTML = antider;
+            renderMath();
+            drawFamily();
+        }
+
+        function drawFamily() {
+            const canvas = document.getElementById('familyCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const { width, height } = canvas;
+            const func = document.getElementById('funcSelect').value;
+            const C = parseFloat(document.getElementById('cSlider').value);
+            ctx.clearRect(0, 0, width, height);
+            ctx.strokeStyle = '#374151';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(50, height/2); ctx.lineTo(width - 20, height/2);
+            ctx.moveTo(width/2, 20); ctx.lineTo(width/2, height - 20);
+            ctx.stroke();
+            const colors = ['#cbd5e1', '#94a3b8', '#64748b'];
+            [-2, -1, 1, 2].forEach((cVal, idx) => {
+                ctx.strokeStyle = colors[idx % colors.length];
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                for(let x = -3; x <= 3; x += 0.05) {
+                    const px = width/2 + x * 60;
+                    let y = 0;
+                    switch(func) {
+                        case '2x': y = x * x + cVal; break;
+                        case 'x2': y = x * x * x / 3 + cVal; break;
+                        case 'sin': y = -Math.cos(x) + cVal; break;
+                        case 'cos': y = Math.sin(x) + cVal; break;
+                        case 'exp': y = Math.exp(x) + cVal; break;
+                    }
+                    const py = height/2 - y * 40;
+                    if (x === -3) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+                }
+                ctx.stroke();
+            });
+            ctx.strokeStyle = '#4f46e5';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            for(let x = -3; x <= 3; x += 0.05) {
+                const px = width/2 + x * 60;
+                let y = 0;
+                switch(func) {
+                    case '2x': y = x * x + C; break;
+                    case 'x2': y = x * x * x / 3 + C; break;
+                    case 'sin': y = -Math.cos(x) + C; break;
+                    case 'cos': y = Math.sin(x) + C; break;
+                    case 'exp': y = Math.exp(x) + C; break;
+                }
+                const py = height/2 - y * 40;
+                if (x === -3) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+            }
+            ctx.stroke();
+            ctx.fillStyle = '#4f46e5';
+            ctx.font = '14px Arial';
+            ctx.fillText('F(x) + C = ' + C.toFixed(1), 20, 30);
+        }
+
+        function animateC() {
+            stopAnimation();
+            let c = -5;
+            let direction = 1;
+            animationId = setInterval(() => {
+                c += 0.1 * direction;
+                if (c >= 5 || c <= -5) direction *= -1;
+                document.getElementById('cSlider').value = c;
+                document.getElementById('cValue').textContent = c.toFixed(1);
+                drawFamily();
+            }, 50);
+        }
+
+        function stopAnimation() {
+            if (animationId) clearInterval(animationId);
+            animationId = null;
+        }
+
+        function updateVerify() {
+            const prime = document.getElementById('primeSelect').value;
+            const resultDiv = document.getElementById('derivative');
+            let deriv = '';
+            switch(prime) {
+                case 'x2': deriv = '$f(x) = 2x$'; break;
+                case 'x3': deriv = '$f(x) = 3x^2$'; break;
+                case 'sin': deriv = '$f(x) = \\cos x$'; break;
+                case 'cos': deriv = '$f(x) = -\\sin x$'; break;
+                case 'exp': deriv = '$f(x) = e^x$'; break;
+            }
+            resultDiv.innerHTML = deriv;
+            renderMath();
+            drawVerify();
+        }
+
+        function drawVerify() {
+            const canvas = document.getElementById('verifyCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const { width, height } = canvas;
+            const prime = document.getElementById('primeSelect').value;
+            const x0 = parseFloat(document.getElementById('xSlider').value);
+            ctx.clearRect(0, 0, width, height);
+            ctx.strokeStyle = '#374151';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(50, height/2); ctx.lineTo(width - 20, height/2);
+            ctx.moveTo(width/2, 20); ctx.lineTo(width/2, height - 20);
+            ctx.stroke();
+            ctx.strokeStyle = '#4f46e5';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            for(let x = -3; x <= 3; x += 0.05) {
+                const px = width/2 + x * 60;
+                let y = 0;
+                switch(prime) {
+                    case 'x2': y = x * x; break;
+                    case 'x3': y = x * x * x; break;
+                    case 'sin': y = Math.sin(x); break;
+                    case 'cos': y = Math.cos(x); break;
+                    case 'exp': y = Math.exp(x) - 1; break;
+                }
+                const py = height/2 - y * 40;
+                if (x === -3) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+            }
+            ctx.stroke();
+            ctx.strokeStyle = '#10b981';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            for(let x = -3; x <= 3; x += 0.05) {
+                const px = width/2 + x * 60;
+                let y = 0;
+                switch(prime) {
+                    case 'x2': y = 2 * x; break;
+                    case 'x3': y = 3 * x * x; break;
+                    case 'sin': y = Math.cos(x); break;
+                    case 'cos': y = -Math.sin(x); break;
+                    case 'exp': y = Math.exp(x); break;
+                }
+                const py = height/2 - y * 40;
+                if (x === -3) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+            }
+            ctx.stroke();
+            ctx.setLineDash([]);
+            let y0 = 0, slope = 0;
+            switch(prime) {
+                case 'x2': y0 = x0 * x0; slope = 2 * x0; break;
+                case 'x3': y0 = x0 * x0 * x0; slope = 3 * x0 * x0; break;
+                case 'sin': y0 = Math.sin(x0); slope = Math.cos(x0); break;
+                case 'cos': y0 = Math.cos(x0); slope = -Math.sin(x0); break;
+                case 'exp': y0 = Math.exp(x0) - 1; slope = Math.exp(x0); break;
+            }
+            const px0 = width/2 + x0 * 60;
+            const py0 = height/2 - y0 * 40;
+            ctx.fillStyle = '#ef4444';
+            ctx.beginPath(); ctx.arc(px0, py0, 5, 0, Math.PI * 2); ctx.fill();
+            ctx.strokeStyle = '#ef4444';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            const dx = 1;
+            const x1 = x0 - dx, x2 = x0 + dx;
+            const y1 = y0 + slope * (-dx), y2 = y0 + slope * dx;
+            const px1 = width/2 + x1 * 60, py1 = height/2 - y1 * 40;
+            const px2 = width/2 + x2 * 60, py2 = height/2 - y2 * 40;
+            ctx.moveTo(px1, py1); ctx.lineTo(px2, py2); ctx.stroke();
+            document.getElementById('slopeResult').innerHTML = '斜率 = $' + slope.toFixed(2) + '$';
+            renderMath();
+            ctx.fillStyle = '#4f46e5'; ctx.font = '14px Arial'; ctx.fillText('F(x)', 20, 30);
+            ctx.fillStyle = '#10b981'; ctx.fillText("f(x) = F'(x)", 20, 50);
+            ctx.fillStyle = '#ef4444'; ctx.fillText('切线', 20, 70);
+        }
+
+        function animateTangent() {
+            if (tangentAnimId) clearInterval(tangentAnimId);
+            let x = -3;
+            tangentAnimId = setInterval(() => {
+                x += 0.1;
+                if (x > 3) x = -3;
+                document.getElementById('xSlider').value = x;
+                document.getElementById('xValue').textContent = x.toFixed(1);
+                drawVerify();
+            }, 50);
+        }
+
+        document.getElementById('cSlider').addEventListener('input', function() {
+            document.getElementById('cValue').textContent = this.value;
+            drawFamily();
+        });
+        document.getElementById('xSlider').addEventListener('input', function() {
+            document.getElementById('xValue').textContent = parseFloat(this.value).toFixed(1);
+            drawVerify();
+        });
+
+        window.addEventListener('DOMContentLoaded', function() {
+            // Use a more robust way to find the button
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => switchPanel(e.target.textContent.includes('族') ? 'family' : 'verify'));
+            });
+            setTimeout(() => {
+                updateFamily();
+                renderMath();
+            }, 100);
+        });
+
+        // 返回按钮交互
+        function toggleBackOptions() {
+            const options = document.getElementById('backOptions');
+            options.classList.toggle('show');
+        }
+
+        // 点击页面其他地方关闭菜单
+        document.addEventListener('click', function(event) {
+            const btn = document.getElementById('floatingHomeBtn');
+            const options = document.getElementById('backOptions');
+            if (btn && options && !btn.contains(event.target) && !options.contains(event.target)) {
+                options.classList.remove('show');
+            }
+        });
+    </script>
+
+    <div class="return-home-panel"><button class="return-toggle" onclick="toggleReturnLinks()"><i class="fa-solid fa-house"></i></button><div class="return-links"><a class="return-link" href="index.html"><i class="fa-solid fa-arrow-left"></i> 返回目录</a><a class="return-link" href="../index.html"><i class="fa-solid fa-house"></i> 返回主站</a></div></div>
+
+    <script>
+        function toggleReturnLinks() { const p = document.querySelector('.return-links'); if (!p) return; if (p.style.display === 'flex') { p.style.opacity = '0'; setTimeout(() => p.style.display = 'none', 160); } else { p.style.display = 'flex'; requestAnimationFrame(() => p.style.opacity = '1'); } }
+    </script>
+</body>
+</html>

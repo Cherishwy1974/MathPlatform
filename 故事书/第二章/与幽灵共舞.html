@@ -1,0 +1,1037 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>与幽灵共舞</title>
+    <script src="../../common-assets/js/tailwind.min.js"></script>    <style>
+        @font-face {
+            font-family: 'Iansui-Regular';
+            src: url('../../common-assets/fonts/Iansui-Regular.ttf') format('truetype');
+            font-weight: 400;
+            font-style: normal;
+        }
+        
+        /* 美化滚动条 - 竖向 */
+        *::-webkit-scrollbar {
+            width: 12px;
+        }
+        *::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+        }
+        *::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #93c5fd, #3b82f6);
+            border-radius: 6px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+        *::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #bfdbfe, #93c5fd);
+        }
+        *::-webkit-scrollbar-thumb:active {
+            background: linear-gradient(180deg, #3b82f6, #1d4ed8);
+        }
+        
+        /* 隐藏横向滚动条 */
+        *::-webkit-scrollbar:horizontal {
+            display: none;
+        }
+        
+        :root {
+            /* 深蓝色系主题 - 理性与神秘 */
+            --bg-start: #0a0e27;
+            --bg-scene1: linear-gradient(135deg, #0f172a, #1e293b, #334155);
+            --bg-scene2: linear-gradient(180deg, #1e1b4b, #312e81, #4c1d95);
+            --bg-scene3: linear-gradient(45deg, #0c0a3e, #1e1b4b, #2e1065);
+            --bg-scene4: radial-gradient(circle, #1e293b, #0f172a, #020617);
+            --bg-scene5: linear-gradient(315deg, #1e3a8a, #1e40af);
+            --bg-scene6: linear-gradient(135deg, #0f172a, #164e63, #0e7490);
+            --bg-scene7: linear-gradient(180deg, #000428, #004e92);
+            --bg-scene8: linear-gradient(45deg, #1a202c, #2d3748, #4a5568);
+            --bg-scene9: linear-gradient(135deg, #0c0f2f, #1e3a8a, #0f172a);
+        }
+
+        body {
+            font-family: 'Iansui-Regular', serif;
+            color: #e2e8f0;
+            overflow-x: hidden;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            background-color: var(--bg-start);
+            transition: background-color 1.5s ease-in-out;
+        }
+
+        #scroll-container {
+            height: 1200vh;
+            position: relative;
+        }
+
+        .sticky-element {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* 数学公式粒子背景 */
+        #mathFormulaCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 2s ease;
+            z-index: 1;
+        }
+
+        #mathFormulaCanvas.active {
+            opacity: 1;
+        }
+
+        /* 几何过渡效果 */
+        .geometric-transition {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 0;
+            height: 0;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .circle-wipe {
+            width: 100vmax;
+            height: 100vmax;
+            border-radius: 50%;
+            background: radial-gradient(circle, transparent 0%, var(--transition-color, #1e3a8a) 100%);
+            transform: translate(-50%, -50%) scale(0);
+            transition: transform 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .circle-wipe.active {
+            transform: translate(-50%, -50%) scale(2);
+        }
+
+        /* 数学网格过渡 */
+        .grid-transition {
+            width: 100vw;
+            height: 100vh;
+            position: absolute;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(4, 1fr);
+            opacity: 0;
+            transition: opacity 0.8s ease;
+        }
+
+        .grid-piece {
+            background: linear-gradient(45deg, transparent, var(--transition-color, #3b82f6), transparent);
+            transform: rotate(0deg) scale(0);
+            transition: transform 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .grid-transition.active {
+            opacity: 1;
+        }
+
+        .grid-transition.active .grid-piece {
+            transform: rotate(45deg) scale(1);
+        }
+
+        /* 0/0 公式场景特效 */
+        #scene5 {
+            position: relative;
+            background: radial-gradient(ellipse at center, rgba(30, 58, 138, 0.05), transparent);
+        }
+
+        #ghost-formula {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            opacity: 0;
+            transition: opacity 1.5s cubic-bezier(0.23, 1, 0.32, 1);
+            filter: drop-shadow(0 20px 40px rgba(59, 130, 246, 0.2));
+            z-index: 20;
+        }
+
+        .formula-ghost {
+            position: absolute;
+            font-family: 'Iansui-Regular', serif;
+            font-size: 120px;
+            color: rgba(147, 197, 253, 0.2);
+            animation: ghost-float 4s ease-in-out infinite;
+        }
+
+        @keyframes ghost-float {
+            0%, 100% { 
+                transform: translate(-50%, -50%) translateY(0); 
+                opacity: 0.1;
+            }
+            50% { 
+                transform: translate(-50%, -50%) translateY(-20px); 
+                opacity: 0.3;
+            }
+        }
+
+        /* 漂浮的无穷小量 */
+        .infinitesimal {
+            position: absolute;
+            font-size: 20px;
+            color: rgba(147, 197, 253, 0.3);
+            font-family: 'Iansui-Regular', serif;
+            animation: float-infinitesimal 10s infinite linear;
+            pointer-events: none;
+        }
+
+        @keyframes float-infinitesimal {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.3;
+            }
+            90% {
+                opacity: 0.3;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* 数学背景网格 */
+        .math-grid {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 1.5s ease;
+            pointer-events: none;
+        }
+
+        .grid-line {
+            stroke: rgba(59, 130, 246, 0.1);
+            stroke-width: 1;
+        }
+
+        .function-curve {
+            stroke: rgba(59, 130, 246, 0.3);
+            stroke-width: 2;
+            fill: none;
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            animation: draw-curve 3s ease forwards;
+        }
+
+        @keyframes draw-curve {
+            to { stroke-dashoffset: 0; }
+        }
+
+        /* 场景样式 */
+        .scene {
+            opacity: 0;
+            transition: opacity 0.8s ease-in-out;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .scene-background {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            transition: opacity 1.5s ease-in-out;
+            z-index: -2;
+        }
+
+        /* 场景背景 */
+        .bg-scene1 { background: var(--bg-scene1); }
+        .bg-scene2 { background: var(--bg-scene2); }
+        .bg-scene3 { background: var(--bg-scene3); }
+        .bg-scene4 { background: var(--bg-scene4); }
+        .bg-scene5 { background: var(--bg-scene5); }
+        .bg-scene6 { background: var(--bg-scene6); }
+        .bg-scene7 { background: var(--bg-scene7); }
+        .bg-scene8 { background: var(--bg-scene8); }
+        .bg-scene9 { background: var(--bg-scene9); }
+
+        /* 优雅的图片样式 */
+        .illustration-wrapper {
+            position: absolute;
+            z-index: 5;
+            transition: all 1.5s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .illustration {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: all 1.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            opacity: 0;
+            transform: scale(0.85) translateY(30px);
+            filter: brightness(0.9) contrast(1.1) saturate(1.1);
+        }
+
+        /* 柔和的图片边缘 */
+        .frame-elegant {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            border-radius: 20px;
+            box-shadow: 
+                0 15px 35px rgba(0, 0, 0, 0.3),
+                0 5px 15px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(147, 197, 253, 0.2);
+        }
+
+        .frame-elegant::before {
+            content: '';
+            position: absolute;
+            inset: -1px;
+            background: linear-gradient(135deg, 
+                rgba(147, 197, 253, 0.2) 0%, 
+                rgba(147, 197, 253, 0) 50%,
+                rgba(147, 197, 253, 0.1) 100%
+            );
+            border-radius: inherit;
+            opacity: 0.6;
+            z-index: -1;
+        }
+
+        /* 图片出现动画 */
+        .illustration-appear {
+            opacity: 0.95;
+            transform: scale(1) translateY(0);
+        }
+
+        .illustration-left {
+            left: 10vw;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 35vw;
+            height: 55vh;
+        }
+
+        .illustration-right {
+            right: 10vw;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 35vw;
+            height: 55vh;
+        }
+
+        /* 精致的文字样式和动画 */
+        .story-text {
+            position: absolute;
+            font-size: 1.5rem;
+            text-shadow: 3px 3px 10px rgba(0,0,0,0.7);
+            transition: all 1s cubic-bezier(0.23, 1, 0.32, 1);
+            text-align: left;
+            padding: 2rem;
+            max-width: 280px;
+            line-height: 2.2;
+            font-weight: 500;
+            z-index: 8;
+            writing-mode: vertical-rl;
+            text-orientation: upright;
+            letter-spacing: 0.12em;
+            opacity: 0;
+            transform: translateY(20px);
+            color: #e2e8f0;
+        }
+
+        .story-text-appear {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .text-left {
+            left: 30vw;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .text-right {
+            right: 30vw;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        /* 逐字浮现动画 */
+        .char-float {
+            display: inline-block;
+            opacity: 0;
+            transform: translateY(15px);
+            animation: float-up 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+        }
+
+        @keyframes float-up {
+            0% {
+                opacity: 0;
+                transform: translateY(15px) scale(0.9);
+            }
+            50% {
+                opacity: 0.5;
+                transform: translateY(5px) scale(0.95);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* 封面和封底样式优化 */
+        #scene-cover, #scene-end {
+            z-index: 10;
+        }
+
+        #scene-cover h1, #scene-cover p, #scene-end p {
+            position: relative;
+            z-index: 11;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.5);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1366px) {
+            .story-text {
+                font-size: 1.3rem;
+                max-width: 260px;
+            }
+            .illustration-left,
+            .illustration-right {
+                width: 33vw;
+                height: 50vh;
+            }
+            .text-left {
+               left: 30vw;            }
+            .text-right {
+                right: 30vw;            }
+        }
+        
+        @media (max-width: 768px) {
+            .scene { 
+                flex-direction: column; 
+                justify-content: center; 
+                align-items: center;
+                padding: 3vh 3vw;
+                gap: 1.5rem;
+            }
+            .illustration-wrapper { 
+                position: relative !important; 
+                left: auto !important;
+                right: auto !important;
+                width: 80vw !important;
+                height: 40vh !important;
+                margin: 0 auto;
+            }
+            .story-text { 
+                position: relative !important; 
+                left: auto !important;
+                right: auto !important;
+                max-width: 85vw; 
+                font-size: 1.1rem;
+                writing-mode: horizontal-tb;
+                text-orientation: initial;
+                letter-spacing: normal;
+                margin: 0 auto;
+                text-align: center;
+                padding: 1rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .story-text {
+                font-size: 1rem;
+                max-width: 90vw;
+                padding: 0.8rem;
+            }
+            .illustration-wrapper {
+                width: 90vw !important;
+                height: 35vh !important;
+            }
+        }
+    </style>
+
+    <style>
+        .return-home-panel {
+            position: fixed;
+            top: 12px;
+            left: 12px;
+            display: flex;
+            gap: 6px;
+            z-index: 9999;
+            flex-wrap: wrap;
+        }
+        .return-home-panel .return-link {
+            padding: 6px 10px;
+            border-radius: 10px;
+            background: rgba(15, 23, 42, 0.35);
+            color: #f8fafc;
+            font-size: 13px;
+            text-decoration: none;
+            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.18);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            border: 1px solid rgba(248, 250, 252, 0.12);
+            transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .return-home-panel .return-link:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.25);
+            background: rgba(15, 23, 42, 0.42);
+        }
+        .return-home-panel .return-link.return-main {
+            background: rgba(79, 70, 229, 0.18);
+            border-color: rgba(79, 70, 229, 0.25);
+        }
+        @media (max-width: 640px) {
+            .return-home-panel {
+                top: 12px;
+                left: 12px;
+                right: 12px;
+                justify-content: center;
+            }
+            .return-home-panel .return-link {
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="return-home-panel">
+         <a class="return-link return-sub" href="../index.html"><i class="fa-solid fa-arrow-left"></i> 返回目录</a>
+        <a class="return-link return-main" href="../../index.html"><i class="fa-solid fa-house"></i> 返回主站</a>
+    </div>
+    <!-- 几何过渡效果层 -->
+    <div class="geometric-transition">
+        <div id="circle-wipe" class="circle-wipe"></div>
+    </div>
+
+    <div class="geometric-transition">
+        <div id="grid-transition" class="grid-transition">
+            <div class="grid-piece"></div>
+            <div class="grid-piece" style="transition-delay: 0.1s"></div>
+            <div class="grid-piece" style="transition-delay: 0.2s"></div>
+            <div class="grid-piece" style="transition-delay: 0.3s"></div>
+            <div class="grid-piece" style="transition-delay: 0.4s"></div>
+            <div class="grid-piece" style="transition-delay: 0.5s"></div>
+            <div class="grid-piece" style="transition-delay: 0.6s"></div>
+            <div class="grid-piece" style="transition-delay: 0.7s"></div>
+            <div class="grid-piece" style="transition-delay: 0.8s"></div>
+            <div class="grid-piece" style="transition-delay: 0.9s"></div>
+            <div class="grid-piece" style="transition-delay: 1.0s"></div>
+            <div class="grid-piece" style="transition-delay: 1.1s"></div>
+            <div class="grid-piece" style="transition-delay: 1.2s"></div>
+            <div class="grid-piece" style="transition-delay: 1.3s"></div>
+            <div class="grid-piece" style="transition-delay: 1.4s"></div>
+            <div class="grid-piece" style="transition-delay: 1.5s"></div>
+        </div>
+    </div>
+
+    <!-- 函数飞舞动画背景 -->
+    <canvas id="functionCanvas"></canvas>
+
+    <!-- 数学网格背景 -->
+    <svg class="math-grid" id="math-grid">
+        <defs>
+            <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                <path d="M 40 0 L 0 0 0 40" fill="none" class="grid-line"/>
+            </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#grid)" />
+        <path class="function-curve" d="M0,250 Q150,100 300,250 T600,250" />
+        <path class="function-curve" style="animation-delay: 0.5s" d="M0,350 C100,200 200,500 300,350 S500,200 600,350" />
+    </svg>
+
+    <div id="scroll-container">
+        <div id="scene-container" class="sticky-element">
+
+            <!-- 场景背景 -->
+            <div id="bg-scene1" class="scene-background bg-scene1"></div>
+            <div id="bg-scene2" class="scene-background bg-scene2"></div>
+            <div id="bg-scene3" class="scene-background bg-scene3"></div>
+            <div id="bg-scene4" class="scene-background bg-scene4"></div>
+            <div id="bg-scene5" class="scene-background bg-scene5"></div>
+            <div id="bg-scene6" class="scene-background bg-scene6"></div>
+            <div id="bg-scene7" class="scene-background bg-scene7"></div>
+            <div id="bg-scene8" class="scene-background bg-scene8"></div>
+            <div id="bg-scene9" class="scene-background bg-scene9"></div>
+
+            <!-- 场景0: 封面 -->
+            <div id="scene-cover" class="scene flex-col">
+                <h1 class="text-5xl md:text-6xl font-bold text-center" style="color: #93c5fd;">与幽灵共舞</h1>
+                <p class="text-xl md:text-2xl mt-4 text-center" style="color: #cbd5e1;">牛顿微积分的逻辑挑战</p>
+                <p class="absolute bottom-20 opacity-80 text-lg">向下滚动，开启故事</p>
+            </div>
+
+            <!-- 场景1: 剑桥大学 -->
+            <div id="scene1" class="scene">
+                <div class="illustration-wrapper illustration-left depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="1.png" alt="剑桥大学" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-right depth-layer-3">故事要从古老的剑桥大学说起，那时的艾萨克·牛顿，还是一位风华正茂的青年。他的思绪并未停驻于凡尘俗世，而是早已飞向了皓月星辰。</p>
+            </div>
+
+            <!-- 场景2: 苹果与运动 -->
+            <div id="scene2" class="scene">
+                <div class="illustration-wrapper illustration-right depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="2.png" alt="苹果下落" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-left depth-layer-3">当他凝视着苹果从枝头坠落，一个深邃的问题在他脑海中萦绕：世间万物的运动规律究竟为何？要精确描述一个变化的瞬间，他需要一种前所未有的数学工具。</p>
+            </div>
+
+            <!-- 场景3: 流数法 -->
+            <div id="scene3" class="scene">
+                <div class="illustration-wrapper illustration-left depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="3.png" alt="流数法" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-right depth-layer-3">牛顿构想，一条曲线的轨迹，无非是一个点的连续运动。他将这个点在任意瞬间的速度称为"流数"。为了捕捉这个瞬时速度，他必须观察极其微小的时间与距离。</p>
+            </div>
+
+            <!-- 场景4: 无穷分割 -->
+            <div id="scene4" class="scene">
+                <div class="illustration-wrapper illustration-right depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="4.png" alt="无穷分割" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-left depth-layer-3">他将这套方法命名为"流数法"——这便是我们今天所熟知的微积分的雏形。其核心思想，是用无穷分割的方式逼近真实运动。</p>
+            </div>
+
+            <!-- 场景5: 0/0 贝克莱的质疑 -->
+            <div id="scene5" class="scene flex-col">
+                <!-- 幽灵般的0/0公式 -->
+                <div id="ghost-formula">
+                    <div class="formula-ghost" style="top: 50%; left: 50%;">0/0</div>
+                </div>
+                
+                <!-- 淡化的背景图片 -->
+                <div class="illustration-wrapper" style="position: absolute; opacity: 0.15; width: 100%; height: 100%;">
+                    <img src="5.png" alt="贝克莱的质疑" style="object-fit: cover; width: 100%; height: 100%; filter: blur(2px);">
+                </div>
+                
+                <!-- 文字 -->
+                <div class="story-text" style="position: absolute; bottom: 10vh; text-align: center; max-width: 600px; writing-mode: horizontal-tb;">
+                    <p>乔治·贝克莱主教洞悉了这个逻辑漏洞，嘲讽这些无穷小量是"早已消失无踪，却又阴魂不散的幽灵"。</p>
+                </div>
+            </div>
+
+            <!-- 场景6: 逻辑挑战 -->
+            <div id="scene6" class="scene">
+                <div class="illustration-wrapper illustration-left depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="6.png" alt="逻辑挑战" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-right depth-layer-3">贝克莱认为，牛顿的计算过程不过是一种逻辑戏法。这个批评深深刺痛了牛顿，因为他内心清楚，贝克莱的质疑切中了要害。</p>
+            </div>
+
+            <!-- 场景7: 最终比 -->
+            <div id="scene7" class="scene">
+                <div class="illustration-wrapper illustration-right depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="7.png" alt="最终比" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-left depth-layer-3">面对挑战，牛顿提出了"最终比"的概念。他其实已在竭力描绘"极限"的轮廓，但在那个时代，数学的语言尚不足以清晰地定义它。</p>
+            </div>
+
+            <!-- 场景8: 微积分的力量 -->
+            <div id="scene8" class="scene">
+                <div class="illustration-wrapper illustration-left depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="8.png" alt="微积分的力量" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-right depth-layer-3">尽管在逻辑上备受争议，但牛顿"流数法"所展现出的磅礴伟力，却是任何人都无法忽视的。它能精确描绘月亮的轨迹，计算石子抛出的弧线。</p>
+            </div>
+
+            <!-- 场景9: 理性的胜利 -->
+            <div id="scene9" class="scene">
+                <div class="illustration-wrapper illustration-right depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="9.png" alt="理性的胜利" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-left depth-layer-3">牛顿勇敢地与那些"阴魂不散的幽灵"共事，并最终赠予了世界一种全新的、理解宇宙万物运动规律的强大视角。这不仅是数学的胜利，更是人类理性精神的伟大胜利。</p>
+            </div>
+
+            <!-- 结局 -->
+            <div id="scene-end" class="scene flex-col">
+                <p class="text-5xl md:text-6xl font-bold" style="color: #93c5fd;">完</p>
+                <p class="text-xl mt-4" style="color: #cbd5e1;">与幽灵共舞，开启了数学新纪元</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const scenes = Array.from(document.querySelectorAll('.scene'));
+        const sceneBackgrounds = Array.from(document.querySelectorAll('.scene-background'));
+        const sceneCount = scenes.length;
+        const scrollContainer = document.getElementById('scroll-container');
+        const circleWipe = document.getElementById('circle-wipe');
+        const gridTransition = document.getElementById('grid-transition');
+        const mathGrid = document.getElementById('math-grid');
+        const ghostFormula = document.getElementById('ghost-formula');
+         
+        let lastSceneIndex = -1;
+        let isTransitioning = false;
+        let animatedTexts = new Set();
+        let ghostAnimationStarted = false;
+
+        // ========= 函数飞舞动画 =========
+        const config = {
+            maxCurves: 15, // 减少数量使动画更优雅
+            spawnInterval: 800, // 增加间隔使其更舒缓
+            lineWidth: 0.8,
+            colorPalette: [
+                { h: 210, s: 60, l: 65 }, // 深蓝
+                { h: 220, s: 70, l: 60 }, // 海洋蓝
+                { h: 240, s: 60, l: 70 }, // 天蓝
+                { h: 200, s: 50, l: 75 }, // 浅蓝
+            ],
+            glow: {
+                blur: 10,
+            },
+        };
+
+        // 经典函数图像库
+        const functionPresets = [
+            {
+                name: 'Lissajous',
+                x: (t, p) => Math.sin(p.a * t + p.delta),
+                y: (t, p) => Math.sin(p.b * t),
+                tRange: [0, Math.PI * 2],
+                getParams: () => ({
+                    a: Math.floor(Math.random() * 5) + 1,
+                    b: Math.floor(Math.random() * 5) + 1,
+                    delta: Math.PI / 2,
+                })
+            },
+            {
+                name: 'Epitrochoid',
+                x: (t, p) => (p.R + p.r) * Math.cos(t) - p.d * Math.cos(((p.R + p.r) / p.r) * t),
+                y: (t, p) => (p.R + p.r) * Math.sin(t) - p.d * Math.sin(((p.R + p.r) / p.r) * t),
+                tRange: (p) => [0, Math.PI * 2 * p.r / gcd(p.R, p.r)], 
+                getParams: () => {
+                    const R = Math.floor(Math.random() * 5) + 3;
+                    const r = Math.floor(Math.random() * 3) + 1;
+                    return { R, r, d: Math.random() * (R/2) + (r/2) };
+                }
+            },
+            {
+                name: 'Cardioid',
+                x: (t, p) => p.a * (2 * Math.cos(t) - Math.cos(2 * t)),
+                y: (t, p) => p.a * (2 * Math.sin(t) - Math.sin(2 * t)),
+                tRange: [0, Math.PI * 2],
+                getParams: () => ({ a: 1 })
+            }
+        ];
+        
+        function gcd(a, b) { return b === 0 ? a : gcd(b, a % b); }
+
+        const functionCanvas = document.getElementById('functionCanvas');
+        const fCtx = functionCanvas.getContext('2d');
+        let width = functionCanvas.width = window.innerWidth;
+        let height = functionCanvas.height = window.innerHeight;
+        let activeCurves = [];
+        let lastSpawn = 0;
+
+        class FlyingCurve {
+            constructor(x, y) {
+                this.startTime = Date.now();
+                this.lifespan = 10000 + Math.random() * 5000; // 更长的生命周期
+
+                this.centerX = x;
+                this.centerY = y;
+
+                this.startRadius = 20 + Math.random() * 30;
+                this.maxRadius = Math.min(width, height) * (0.3 + Math.random() * 0.2);
+                this.startAngle = Math.random() * Math.PI * 2;
+                this.rotationAmount = (Math.PI * 2) * (1 + Math.random() * 2) * (Math.random() > 0.5 ? 1 : -1);
+
+                const presetIndex = Math.floor(Math.random() * functionPresets.length);
+                this.preset = functionPresets[presetIndex];
+                this.params = this.preset.getParams();
+                
+                this.baseSize = 25 + Math.random() * 35; // 稍小的尺寸
+                this.intrinsicRotationSpeed = (Math.random() - 0.5) * 0.0003;
+                this.colorOffset = Math.random();
+            }
+
+            updateAndDraw(timestamp) {
+                const elapsed = Date.now() - this.startTime;
+                if (elapsed > this.lifespan) { this.isDead = true; return; }
+
+                const progress = elapsed / this.lifespan;
+                const easeProgress = 1 - Math.pow(1 - progress, 3);
+
+                const currentRadius = this.startRadius + easeProgress * (this.maxRadius - this.startRadius);
+                const currentAngle = this.startAngle + easeProgress * this.rotationAmount;
+                const currentX = this.centerX + Math.cos(currentAngle) * currentRadius;
+                const currentY = this.centerY + Math.sin(currentAngle) * currentRadius;
+
+                const scale = Math.sin(progress * Math.PI) * 0.8; // 稍微缩小
+                const intrinsicRotation = elapsed * this.intrinsicRotationSpeed;
+                
+                const colors = getInterpolatedColor(timestamp, this.colorOffset);
+                fCtx.strokeStyle = colors.line;
+                fCtx.shadowColor = colors.glow;
+                fCtx.shadowBlur = config.glow.blur;
+                fCtx.lineWidth = config.lineWidth;
+                fCtx.globalAlpha = scale * 0.6; // 更透明
+
+                fCtx.save();
+                fCtx.translate(currentX, currentY);
+                fCtx.rotate(intrinsicRotation);
+                fCtx.scale(scale, scale);
+
+                fCtx.beginPath();
+                
+                let tRangeValue = this.preset.tRange;
+                if (typeof tRangeValue === 'function') {
+                    tRangeValue = tRangeValue(this.params);
+                }
+                const [tStart, tEnd] = tRangeValue;
+
+                const step = (tEnd - tStart) / 200;
+
+                for (let ti = tStart; ti <= tEnd + 0.001; ti += step) {
+                    const plotX = this.preset.x(ti, this.params) * this.baseSize;
+                    const plotY = this.preset.y(ti, this.params) * this.baseSize;
+
+                    if (ti === tStart) {
+                        fCtx.moveTo(plotX, plotY);
+                    } else {
+                        fCtx.lineTo(plotX, plotY);
+                    }
+                }
+                fCtx.stroke();
+                fCtx.restore();
+            }
+        }
+        
+        function getInterpolatedColor(timestamp, offset) {
+            const palette = config.colorPalette;
+            const timeFactor = (timestamp / 15000 + offset) % palette.length;
+            const index1 = Math.floor(timeFactor);
+            const index2 = (index1 + 1) % palette.length;
+            const blend = timeFactor - index1;
+            const c1 = palette[index1]; const c2 = palette[index2];
+            const h = c1.h + (c2.h - c1.h) * blend;
+            const s = c1.s + (c2.s - c1.s) * blend;
+            const l = c1.l + (c2.l - c1.l) * blend;
+            return { line: `hsla(${h}, ${s}%, ${l}%, 0.7)`, glow: `hsla(${h}, ${s}%, ${l - 5}%, 0.5)` };
+        }
+
+        function animateFunctions(timestamp) {
+            fCtx.clearRect(0, 0, width, height); // 清空画布，保持透明
+
+            if (!lastSpawn) lastSpawn = timestamp;
+
+            // 自动生成
+            if (timestamp - lastSpawn > config.spawnInterval && activeCurves.length < config.maxCurves) {
+                // 随机从不同位置生成
+                const spawnX = Math.random() > 0.5 ? width / 2 : (Math.random() * width);
+                const spawnY = Math.random() > 0.5 ? height / 2 : (Math.random() * height);
+                activeCurves.push(new FlyingCurve(spawnX, spawnY));
+                lastSpawn = timestamp;
+            }
+
+            activeCurves.forEach(curve => curve.updateAndDraw(timestamp));
+            activeCurves = activeCurves.filter(curve => !curve.isDead);
+            
+            fCtx.globalAlpha = 1;
+            fCtx.shadowBlur = 0;
+            requestAnimationFrame(animateFunctions);
+        }
+
+        window.addEventListener('resize', () => {
+            width = functionCanvas.width = window.innerWidth;
+            height = functionCanvas.height = window.innerHeight;
+        });
+
+        // 开始函数动画
+        animateFunctions(0);
+
+        // 创建漂浮的无穷小量
+        function createInfinitesimals() {
+            for (let i = 0; i < 10; i++) {
+                const infinitesimal = document.createElement('div');
+                infinitesimal.className = 'infinitesimal';
+                infinitesimal.textContent = ['dx', 'dt', 'Δx', 'Δt', '→0'][Math.floor(Math.random() * 5)];
+                infinitesimal.style.left = `${Math.random() * 100}%`;
+                infinitesimal.style.animationDelay = `${Math.random() * 10}s`;
+                infinitesimal.style.animationDuration = `${10 + Math.random() * 5}s`;
+                document.body.appendChild(infinitesimal);
+            }
+        }
+        createInfinitesimals();
+
+        // 几何过渡效果
+        function triggerGeometricTransition(type, fromScene, toScene) {
+            if (isTransitioning) return;
+            isTransitioning = true;
+             
+            if (Math.abs(toScene - fromScene) > 2) {
+                // 大跨度使用网格效果
+                gridTransition.style.setProperty('--transition-color', '#3b82f6');
+                gridTransition.classList.add('active');
+                 
+                setTimeout(() => {
+                    gridTransition.classList.remove('active');
+                    isTransitioning = false;
+                }, 800);
+            } else {
+                // 小跨度使用圆形效果
+                circleWipe.style.setProperty('--transition-color', '#1e3a8a');
+                circleWipe.classList.add('active');
+                 
+                setTimeout(() => {
+                    circleWipe.classList.remove('active');
+                    isTransitioning = false;
+                }, 1500);
+            }
+        }
+         
+        // 文字浮现动画
+        function animateTextFloat(element) {
+            if (animatedTexts.has(element)) return;
+            animatedTexts.add(element);
+            
+            const text = element.textContent;
+            element.textContent = '';
+            
+            [...text].forEach((char, index) => {
+                const span = document.createElement('span');
+                span.textContent = char;
+                span.className = 'char-float';
+                span.style.animationDelay = `${index * 0.02}s`;
+                element.appendChild(span);
+            });
+        }
+         
+        // 主滚动处理
+        window.addEventListener('scroll', () => {
+            const scrollHeight = scrollContainer.scrollHeight - window.innerHeight;
+            const scrollTop = window.scrollY;
+            const scrollPercent = Math.min(scrollTop / scrollHeight, 1);
+             
+            updateScenes(scrollPercent);
+        });
+         
+        function updateScenes(percent) {
+            const currentSceneIndex = Math.floor(percent * (sceneCount - 0.001));
+            const sceneProgress = getSceneProgress(percent, currentSceneIndex);
+             
+            // 触发场景转换效果
+            if (currentSceneIndex !== lastSceneIndex && lastSceneIndex !== -1) {
+                triggerGeometricTransition('circle', lastSceneIndex, currentSceneIndex);
+            }
+            lastSceneIndex = currentSceneIndex;
+             
+            // 更新场景显示
+            scenes.forEach((scene, index) => {
+                const isActive = index === currentSceneIndex;
+                scene.style.opacity = isActive ? 1 : 0;
+                
+                if (isActive) {
+                    // 图片动画
+                    const img = scene.querySelector('.illustration');
+                    if (img && sceneProgress > 0.1) {
+                        setTimeout(() => {
+                            img.classList.add('illustration-appear');
+                        }, 100);
+                    }
+                    
+                    // 文字动画
+                    const text = scene.querySelector('.story-text');
+                    if (text && sceneProgress > 0.3) {
+                        text.classList.add('story-text-appear');
+                        if (!animatedTexts.has(text)) {
+                            animateTextFloat(text);
+                        }
+                    }
+                } else {
+                    // 重置非活动场景
+                    const img = scene.querySelector('.illustration');
+                    if (img) {
+                        img.classList.remove('illustration-appear');
+                    }
+                    const text = scene.querySelector('.story-text');
+                    if (text) {
+                        text.classList.remove('story-text-appear');
+                    }
+                }
+            });
+             
+            // 更新场景背景
+            sceneBackgrounds.forEach((bg, index) => {
+                const sceneNumber = index + 1;
+                const progress = getSceneProgress(percent, sceneNumber);
+                bg.style.opacity = progress > 0 ? Math.min(progress * 1.5, 1) : 0;
+            });
+             
+            // 场景5的0/0幽灵动画
+            const p5 = getSceneProgress(percent, 5);
+            if (p5 > 0.2 && !ghostAnimationStarted) {
+                ghostAnimationStarted = true;
+                ghostFormula.style.opacity = 1;
+                // 在特殊场景生成更多函数曲线
+                for(let i = 0; i < 3; i++) {
+                    setTimeout(() => {
+                        if (activeCurves.length < config.maxCurves) {
+                            activeCurves.push(new FlyingCurve(width/2, height/2));
+                        }
+                    }, i * 200);
+                }
+            } else if (p5 === 0) {
+                ghostFormula.style.opacity = 0;
+                ghostAnimationStarted = false;
+            }
+             
+            // 数学网格背景（场景6-8）
+            const mathProgress = Math.max(
+                getSceneProgress(percent, 6),
+                getSceneProgress(percent, 7),
+                getSceneProgress(percent, 8)
+            );
+            mathGrid.style.opacity = mathProgress * 0.3;
+        }
+         
+        function getSceneProgress(percent, sceneIndex) {
+            const sceneStart = sceneIndex / sceneCount;
+            const sceneEnd = (sceneIndex + 1) / sceneCount;
+            if (percent < sceneStart || percent > sceneEnd) return 0;
+            return (percent - sceneStart) / (sceneEnd - sceneStart);
+        }
+         
+        // 初始化
+        window.scrollTo(0, 0);
+        updateScenes(0);
+    </script>
+</body>
+</html>

@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab 8.2 二重极限实验室</title>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            startup: {
+                pageReady: () => {
+                    return MathJax.startup.defaultPageReady().then(() => {
+                        console.log('MathJax加载完成');
+                    });
+                }
+            }
+        };
+    </script>
+    <script defer src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js"></script>
+    <style>
+        :root {
+            --primary: #4f46e5; --primary-dark: #3730a3;
+            --success: #10b981; --danger: #ef4444;
+            --gray-50: #f9fafb; --gray-100: #f3f4f6; --gray-200: #e5e7eb; --gray-600: #4b5563; --gray-700: #1f2937; --white: #ffffff;
+            --border: #e5e7eb; --h1-size: 22px; --h3-size: 18px; --text-size: 16px; --formula-size: 20px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        *::-webkit-scrollbar { width: 0; background: transparent; }
+        * { scrollbar-width: none; -ms-overflow-style: none; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", Arial, sans-serif; font-size: var(--text-size); line-height: 1.5; background: var(--gray-50); color: var(--gray-700); }
+        .container { width: 100%; max-width: 1400px; height: min(100vh, 700px); margin: 0 auto; display: flex; flex-direction: column; background: var(--white); border-radius: 12px; box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08); overflow: hidden; }
+        .header { height: 40px; background: var(--primary); color: var(--white); display: flex; align-items: center; padding: 0 20px; }
+        .header h1 { font-size: var(--h1-size); font-weight: 600; }
+        .main { flex: 1; display: flex; overflow: hidden; }
+        .sidebar { width: 120px; background: var(--gray-50); border-right: 1px solid var(--border); padding: 12px 10px; display: flex; flex-direction: column; gap: 8px; }
+        .nav-btn { width: 100%; padding: 8px; background: transparent; border: none; border-radius: 8px; cursor: pointer; font-size: var(--text-size); color: var(--gray-600); text-align: left; transition: background 0.2s ease; }
+        .nav-btn:hover { background: var(--gray-100); }
+        .nav-btn.active { background: var(--primary); color: var(--white); }
+        .content { flex: 1; display: none; padding: 16px; overflow-y: auto; }
+        .content.active { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+        .column { display: flex; flex-direction: column; gap: 14px; overflow-y: auto; }
+        .card { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 16px; box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04); }
+        .card h3 { font-size: var(--h3-size); color: var(--primary); margin-bottom: 10px; }
+        .formula-box { background: #f0f7ff; border-left: 3px solid var(--primary); border-radius: 8px; padding: 12px; text-align: center; font-size: var(--formula-size); }
+        .input-group { margin: 10px 0; }
+        .input-group label { display: block; margin-bottom: 6px; font-weight: 600; color: var(--gray-600); }
+        .input-group select, .input-group input { width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; font-size: var(--text-size); background: var(--gray-50); }
+        .btn { padding: 10px; background: var(--primary); color: var(--white); border: none; border-radius: 8px; cursor: pointer; font-size: var(--text-size); width: 100%; transition: background 0.2s ease; }
+        .btn:hover { background: var(--primary-dark); }
+        .canvas-container { border: 1px solid var(--gray-200); border-radius: 12px; background: #fafafa; padding: 16px; min-height: 400px; display: flex; align-items: center; justify-content: center; }
+        .return-panel { position: fixed; top: 16px; left: 16px; display: flex; gap: 10px; z-index: 9999; }
+        .return-link { padding: 8px 14px; border-radius: 999px; background: rgba(15, 23, 42, 0.8); color: #f8fafc; font-size: 14px; text-decoration: none; transition: transform 0.2s ease; }
+        .return-link:hover { transform: translateY(-2px); }
+        .return-link.return-main { background: rgba(79, 70, 229, 0.85); }
+        
+        /* 自定义下拉框支持LaTeX渲染 */
+        .custom-select-container { position: relative; width: 100%; }
+        .custom-select-trigger { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border: 1px solid #e5e7eb; border-radius: 6px; background: #f9fafb; cursor: pointer; transition: all 0.2s; min-height: 40px; }
+        .custom-select-trigger:hover { border-color: #4f46e5; background: #ffffff; }
+        .custom-select-container.open .custom-select-trigger { border-color: #4f46e5; background: #ffffff; }
+        .selected-formula { flex: 1; }
+        .arrow { font-size: 12px; transition: transform 0.2s; margin-left: 8px; color: #6b7280; }
+        .custom-select-container.open .arrow { transform: rotate(180deg); }
+        .custom-select-options { position: absolute; top: 100%; left: 0; right: 0; margin-top: 4px; background: #ffffff; border: 1px solid #e5e7eb; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); max-height: 200px; overflow-y: auto; display: none; z-index: 1000; }
+        .custom-select-container.open .custom-select-options { display: block; }
+        .custom-option { padding: 10px 12px; cursor: pointer; transition: background 0.2s; border-bottom: 1px solid #f3f4f6; background: #ffffff; }
+        .custom-option:last-child { border-bottom: none; }
+        .custom-option:hover { background: #f3f4f6; }
+        .custom-option.selected { background: #eef2ff; color: #4f46e5; font-weight: 500; }
+    </style>
+</head>
+<body>
+    <div class="return-panel">
+        <a class="return-link" href="index.html"><i class="fa-solid fa-arrow-left"></i> 返回目录</a>
+        <a class="return-link return-main" href="../index.html"><i class="fa-solid fa-house"></i> 返回主站</a>
+    </div>
+    <div class="container">
+        <header class="header"><h1>Lab 8.2｜二重极限路径依赖实验室</h1></header>
+        <div class="main">
+            <nav class="sidebar">
+                <button class="nav-btn active" onclick="switchPanel('path')">路径探索</button>
+                <button class="nav-btn" onclick="switchPanel('compare')">路径对比</button>
+                <button class="nav-btn" onclick="switchPanel('polar')">极坐标法</button>
+            </nav>
+
+            <!-- 面板1: 路径探索 -->
+            <div class="content active" id="path">
+                <div class="column">
+                    <div class="card">
+                        <h3>选择函数</h3>
+                        <div class="input-group">
+                            <div class="custom-select-container" id="funcSelectContainer">
+                                <div class="custom-select-trigger" onclick="toggleCustomSelect(this)">
+                                    <span class="selected-formula">$f(x,y) = \dfrac{xy}{x^2+y^2}$</span>
+                                    <span class="arrow">▼</span>
+                                </div>
+                                <div class="custom-select-options">
+                                    <div class="custom-option selected" data-value="f1" onclick="selectCustomOption(this, 'funcSelect')">
+                                        $f(x,y) = \dfrac{xy}{x^2+y^2}$
+                                    </div>
+                                    <div class="custom-option" data-value="f2" onclick="selectCustomOption(this, 'funcSelect')">
+                                        $f(x,y) = \dfrac{x^2-y^2}{x^2+y^2}$
+                                    </div>
+                                    <div class="custom-option" data-value="f3" onclick="selectCustomOption(this, 'funcSelect')">
+                                        $f(x,y) = \dfrac{xy^2}{x^2+y^4}$
+                                    </div>
+                                </div>
+                                <input type="hidden" id="funcSelect" value="f1">
+                            </div>
+                        </div>
+                        <div class="formula-box" id="funcFormula"></div>
+                    </div>
+                    <div class="card">
+                        <h3>选择路径</h3>
+                        <div class="input-group">
+                            <div class="custom-select-container" id="pathSelectContainer">
+                                <div class="custom-select-trigger" onclick="toggleCustomSelect(this)">
+                                    <span class="selected-formula">$y = kx$ (直线)</span>
+                                    <span class="arrow">▼</span>
+                                </div>
+                                <div class="custom-select-options">
+                                    <div class="custom-option selected" data-value="line" onclick="selectCustomOption(this, 'pathSelect')">
+                                        $y = kx$ (直线)
+                                    </div>
+                                    <div class="custom-option" data-value="parabola" onclick="selectCustomOption(this, 'pathSelect')">
+                                        $y = kx^2$ (抛物线)
+                                    </div>
+                                    <div class="custom-option" data-value="cubic" onclick="selectCustomOption(this, 'pathSelect')">
+                                        $x = kt^3, y = t$ (参数曲线)
+                                    </div>
+                                </div>
+                                <input type="hidden" id="pathSelect" value="line">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3>参数k</h3>
+                        <div class="input-group">
+                            <label>k = <span id="kVal">1.0</span></label>
+                            <input type="range" id="kSlider" min="-2" max="2" step="0.1" value="1" oninput="updateK(this.value)">
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3>沿路径极限</h3>
+                        <div class="formula-box" id="limitValue"></div>
+                    </div>
+                    <div class="card">
+                        <h3>结论</h3>
+                        <p id="conclusion"></p>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="card" style="flex: 1;">
+                        <h3>路径可视化</h3>
+                        <div class="canvas-container">
+                            <canvas id="pathCanvas"></canvas>
+                        </div>
+                        <p style="margin-top: 10px; font-size: 14px;">
+                            <span style="color: #4f46e5;">■</span> 选定路径
+                            <span style="color: #10b981;">●</span> 原点(0,0)
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 面板2: 路径对比 -->
+            <div class="content" id="compare">
+                <div class="column">
+                    <div class="card">
+                        <h3>路径1: y=x</h3>
+                        <p id="path1Result"></p>
+                    </div>
+                    <div class="card">
+                        <h3>路径2: y=x²</h3>
+                        <p id="path2Result"></p>
+                    </div>
+                    <div class="card">
+                        <h3>路径3: x=t², y=t</h3>
+                        <p id="path3Result"></p>
+                    </div>
+                    <div class="card">
+                        <h3>极限存在性</h3>
+                        <div id="existence"></div>
+                    </div>
+                    <div class="card">
+                        <button class="btn" onclick="comparePaths()">▶ 对比分析</button>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="card" style="flex: 1;">
+                        <h3>多路径图示</h3>
+                        <div class="canvas-container">
+                            <canvas id="compareCanvas"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 面板3: 极坐标法 -->
+            <div class="content" id="polar">
+                <div class="column">
+                    <div class="card">
+                        <h3>极坐标变换</h3>
+                        <div class="formula-box">$$ x = r\\cos\\theta, \\quad y = r\\sin\\theta $$</div>
+                    </div>
+                    <div class="card">
+                        <h3>函数变换</h3>
+                        <div id="polarForm"></div>
+                    </div>
+                    <div class="card">
+                        <h3>$r \\to 0$时</h3>
+                        <p id="polarLimit"></p>
+                    </div>
+                    <div class="card">
+                        <h3>角度θ</h3>
+                        <div class="input-group">
+                            <label>θ = <span id="thetaVal">45</span>°</label>
+                            <input type="range" id="thetaSlider" min="0" max="360" value="45" oninput="updateTheta(this.value)">
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3>该方向极限</h3>
+                        <div id="dirLimit"></div>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="card" style="flex: 1;">
+                        <h3>极坐标视图</h3>
+                        <div class="canvas-container">
+                            <canvas id="polarCanvas"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function resizeCanvas(canvas) {
+            const container = canvas.parentElement;
+            canvas.width = container.clientWidth - 32;
+            canvas.height = container.clientHeight - 32;
+            return canvas.getContext('2d');
+        }
+
+        function drawAxes(ctx, w, h) {
+            ctx.strokeStyle = '#374151'; ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(40, h/2); ctx.lineTo(w - 20, h/2);
+            ctx.moveTo(w/2, h - 20); ctx.lineTo(w/2, 20);
+            ctx.stroke();
+            ctx.fillStyle = '#374151'; ctx.font = '14px sans-serif';
+            ctx.fillText('x', w - 30, h/2 - 10); ctx.fillText('y', w/2 + 10, 30);
+        }
+
+        const functions = {
+            f1: {
+                formula: (x, y) => x*y / (x*x + y*y),
+                display: '$f(x,y) = \\dfrac{xy}{x^2+y^2}$',
+                polar: '$\\dfrac{r^2\\cos\\theta\\sin\\theta}{r^2} = \\cos\\theta\\sin\\theta$',
+                polarDepends: true
+            },
+            f2: {
+                formula: (x, y) => (x*x - y*y) / (x*x + y*y),
+                display: '$f(x,y) = \\dfrac{x^2-y^2}{x^2+y^2}$',
+                polar: '$\\dfrac{r^2\\cos^2\\theta - r^2\\sin^2\\theta}{r^2} = \\cos^2\\theta - \\sin^2\\theta$',
+                polarDepends: true
+            },
+            f3: {
+                formula: (x, y) => x*y*y / (x*x + y*y*y*y),
+                display: '$f(x,y) = \\dfrac{xy^2}{x^2+y^4}$',
+                polar: '依赖于逼近路径',
+                polarDepends: true
+            }
+        };
+
+        let currentFunc = 'f1';
+        let currentPath = 'line';
+        let k = 1;
+
+        function updateFunction() {
+            currentFunc = document.getElementById('funcSelect').value;
+            const f = functions[currentFunc];
+            const formulaBox = document.getElementById('funcFormula');
+            formulaBox.innerHTML = f.display;
+            if (typeof MathJax !== 'undefined') {
+                MathJax.typesetPromise([formulaBox]).catch(err => console.log(err));
+            }
+            updatePath();
+        }
+
+        function updatePath() {
+            currentPath = document.getElementById('pathSelect').value;
+            updateK(document.getElementById('kSlider').value);
+        }
+
+        function updateK(val) {
+            k = parseFloat(val);
+            document.getElementById('kVal').textContent = val;
+            calculateLimit();
+            drawPath();
+        }
+
+        function calculateLimit() {
+            const f = functions[currentFunc].formula;
+            let limitVal;
+
+            if (currentPath === 'line') {
+                // y = kx, 代入得 f(x,kx)
+                if (currentFunc === 'f1') limitVal = k / (1 + k*k);
+                else if (currentFunc === 'f2') limitVal = (1 - k*k) / (1 + k*k);
+                else limitVal = 0; // f3沿y=kx极限为0
+            } else if (currentPath === 'parabola') {
+                // y = kx²
+                if (currentFunc === 'f1') limitVal = 0;
+                else if (currentFunc === 'f2') limitVal = 1;
+                else limitVal = 0;
+            } else {
+                // x = kt³, y = t
+                if (currentFunc === 'f3') limitVal = k / (1 + k*k);
+                else limitVal = 0;
+            }
+
+            const limitBox = document.getElementById('limitValue');
+            limitBox.innerHTML = `$$ \\lim = ${limitVal.toFixed(3)} $$`;
+            if (typeof MathJax !== 'undefined') {
+                MathJax.typesetPromise([limitBox]).catch(err => console.log(err));
+            }
+
+            const depends = Math.abs(limitVal) > 0.01 || (currentPath === 'line' && currentFunc !== 'f3');
+            document.getElementById('conclusion').innerHTML = depends ?
+                '<span style="color: var(--danger); font-weight: 600;">⚠ 极限值依赖于路径,二重极限不存在</span>' :
+                '<span style="color: var(--success); font-weight: 600;">✓ 该路径极限为0</span>';
+
+            if (typeof MathJax !== 'undefined') MathJax.typesetPromise();
+        }
+
+        function drawPath() {
+            const canvas = document.getElementById('pathCanvas');
+            if (!canvas) return;
+            const ctx = resizeCanvas(canvas);
+            const w = canvas.width, h = canvas.height;
+
+            drawAxes(ctx, w, h);
+
+            // 绘制路径
+            ctx.strokeStyle = '#4f46e5'; ctx.lineWidth = 3;
+            ctx.beginPath();
+
+            if (currentPath === 'line') {
+                ctx.moveTo(w/2 - 200, h/2 - 200*k);
+                ctx.lineTo(w/2 + 200, h/2 + 200*k);
+            } else if (currentPath === 'parabola') {
+                for (let x = -2; x <= 2; x += 0.05) {
+                    const y = k * x * x;
+                    const px = w/2 + x * 100;
+                    const py = h/2 - y * 100;
+                    if (x === -2) ctx.moveTo(px, py);
+                    else ctx.lineTo(px, py);
+                }
+            } else {
+                for (let t = -1; t <= 1; t += 0.02) {
+                    const x = k * t * t * t;
+                    const y = t;
+                    const px = w/2 + x * 200;
+                    const py = h/2 - y * 200;
+                    if (t === -1) ctx.moveTo(px, py);
+                    else ctx.lineTo(px, py);
+                }
+            }
+            ctx.stroke();
+
+            // 绘制原点
+            ctx.fillStyle = '#10b981';
+            ctx.beginPath();
+            ctx.arc(w/2, h/2, 8, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function comparePaths() {
+            const f = functions[currentFunc].formula;
+
+            // 路径1: y=x
+            const limit1 = f(1, 1) || 0;
+            document.getElementById('path1Result').innerHTML = `极限值: ${limit1.toFixed(3)}`;
+
+            // 路径2: y=x²
+            const limit2 = currentFunc === 'f2' ? 1 : 0;
+            document.getElementById('path2Result').innerHTML = `极限值: ${limit2.toFixed(3)}`;
+
+            // 路径3: x=t², y=t
+            const limit3 = currentFunc === 'f3' ? 0.5 : 0;
+            document.getElementById('path3Result').innerHTML = `极限值: ${limit3.toFixed(3)}`;
+
+            const allSame = Math.abs(limit1 - limit2) < 0.01 && Math.abs(limit2 - limit3) < 0.01;
+            document.getElementById('existence').innerHTML = allSame ?
+                '<span style="color: var(--success); font-weight: 600;">✓ 三条路径极限相同,可能存在</span>' :
+                '<span style="color: var(--danger); font-weight: 600;">✗ 不同路径得到不同极限值,二重极限不存在</span>';
+
+            drawCompare();
+        }
+
+        function drawCompare() {
+            const canvas = document.getElementById('compareCanvas');
+            if (!canvas) return;
+            const ctx = resizeCanvas(canvas);
+            const w = canvas.width, h = canvas.height;
+
+            drawAxes(ctx, w, h);
+
+            // 路径1: y=x (红色)
+            ctx.strokeStyle = '#ef4444'; ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(w/2 - 200, h/2 - 200);
+            ctx.lineTo(w/2 + 200, h/2 + 200);
+            ctx.stroke();
+
+            // 路径2: y=x² (蓝色)
+            ctx.strokeStyle = '#3b82f6';
+            ctx.beginPath();
+            for (let x = -2; x <= 2; x += 0.05) {
+                const px = w/2 + x * 100;
+                const py = h/2 - x*x * 100;
+                if (x === -2) ctx.moveTo(px, py);
+                else ctx.lineTo(px, py);
+            }
+            ctx.stroke();
+
+            // 路径3: x=t², y=t (绿色)
+            ctx.strokeStyle = '#10b981';
+            ctx.beginPath();
+            for (let t = -1.5; t <= 1.5; t += 0.02) {
+                const px = w/2 + t*t * 150;
+                const py = h/2 - t * 150;
+                if (t === -1.5) ctx.moveTo(px, py);
+                else ctx.lineTo(px, py);
+            }
+            ctx.stroke();
+
+            // 原点
+            ctx.fillStyle = '#10b981';
+            ctx.beginPath();
+            ctx.arc(w/2, h/2, 8, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function updateTheta(val) {
+            document.getElementById('thetaVal').textContent = val;
+            const theta = parseFloat(val) * Math.PI / 180;
+            const cos = Math.cos(theta), sin = Math.sin(theta);
+
+            let dirLimitVal;
+            if (currentFunc === 'f1') dirLimitVal = cos * sin;
+            else if (currentFunc === 'f2') dirLimitVal = cos*cos - sin*sin;
+            else dirLimitVal = '依赖于r的方式';
+
+            const dirLimitBox = document.getElementById('dirLimit');
+            dirLimitBox.innerHTML =
+                `<div class="formula-box">该方向: ${typeof dirLimitVal === 'number' ? dirLimitVal.toFixed(3) : dirLimitVal}</div>`;
+            if (typeof MathJax !== 'undefined') {
+                MathJax.typesetPromise([dirLimitBox]).catch(err => console.log(err));
+            }
+
+            drawPolar(theta);
+            if (typeof MathJax !== 'undefined') MathJax.typesetPromise();
+        }
+
+        function drawPolar(theta) {
+            const canvas = document.getElementById('polarCanvas');
+            if (!canvas) return;
+            const ctx = resizeCanvas(canvas);
+            const w = canvas.width, h = canvas.height;
+
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, w, h);
+
+            // 绘制极坐标圆
+            ctx.strokeStyle = '#e5e7eb'; ctx.lineWidth = 1;
+            for (let r = 50; r <= 200; r += 50) {
+                ctx.beginPath();
+                ctx.arc(w/2, h/2, r, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+
+            // 绘制极轴
+            ctx.strokeStyle = '#374151'; ctx.lineWidth = 2;
+            for (let a = 0; a < 360; a += 45) {
+                const rad = a * Math.PI / 180;
+                ctx.beginPath();
+                ctx.moveTo(w/2, h/2);
+                ctx.lineTo(w/2 + 200 * Math.cos(rad), h/2 - 200 * Math.sin(rad));
+                ctx.stroke();
+            }
+
+            // 绘制选定方向
+            ctx.strokeStyle = '#4f46e5'; ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(w/2, h/2);
+            ctx.lineTo(w/2 + 200 * Math.cos(theta), h/2 - 200 * Math.sin(theta));
+            ctx.stroke();
+        }
+
+        function switchPanel(id) {
+            document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            event.target.classList.add('active');
+
+            setTimeout(() => {
+                if (id === 'path') {
+                    updateFunction();
+                } else if (id === 'compare') {
+                    comparePaths();
+                } else if (id === 'polar') {
+                    const f = functions[currentFunc];
+                    const polarForm = document.getElementById('polarForm');
+                    const polarLimit = document.getElementById('polarLimit');
+                    polarForm.innerHTML = `<div class="formula-box">${f.polar}</div>`;
+                    polarLimit.innerHTML = f.polarDepends ? '极限值依赖于$\\theta$,不存在' : '极限值为0';
+                    if (typeof MathJax !== 'undefined') {
+                        MathJax.typesetPromise([polarForm, polarLimit]).catch(err => console.log(err));
+                    }
+                    updateTheta(45);
+                }
+                if (typeof MathJax !== 'undefined') MathJax.typesetPromise();
+            }, 100);
+        }
+
+        window.addEventListener('load', () => {
+            updateFunction();
+            if (typeof MathJax !== 'undefined') MathJax.typesetPromise();
+        });
+
+        window.addEventListener('resize', () => {
+            drawPath();
+            drawCompare();
+        });
+
+        // 自定义下拉框控制函数
+        function toggleCustomSelect(trigger) {
+            const container = trigger.parentElement;
+            const isOpen = container.classList.contains('open');
+            
+            // 关闭所有打开的下拉框
+            document.querySelectorAll('.custom-select-container.open').forEach(el => {
+                el.classList.remove('open');
+            });
+            
+            // 切换当前下拉框
+            if (!isOpen) {
+                container.classList.add('open');
+            }
+        }
+
+        function selectCustomOption(option, selectId) {
+            const container = option.closest('.custom-select-container');
+            const trigger = container.querySelector('.selected-formula');
+            const hiddenInput = document.getElementById(selectId);
+            const allOptions = container.querySelectorAll('.custom-option');
+            
+            // 移除所有选中状态
+            allOptions.forEach(opt => opt.classList.remove('selected'));
+            
+            // 添加当前选中状态
+            option.classList.add('selected');
+            
+            // 更新显示和值
+            trigger.innerHTML = option.innerHTML;
+            hiddenInput.value = option.dataset.value;
+            
+            // 关闭下拉框
+            container.classList.remove('open');
+            
+            // 重新渲染MathJax
+            if (typeof MathJax !== 'undefined') {
+                MathJax.typesetPromise([container]).catch(err => console.log(err));
+            }
+            
+            // 触发原有的onchange事件
+            if (selectId === 'funcSelect') {
+                updateFunction();
+            } else if (selectId === 'pathSelect') {
+                updatePath();
+            }
+        }
+
+        // 点击外部关闭下拉框
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.custom-select-container')) {
+                document.querySelectorAll('.custom-select-container.open').forEach(el => {
+                    el.classList.remove('open');
+                });
+            }
+        });
+
+        // 初始化时渲染下拉框中的公式
+        window.addEventListener('load', () => {
+            if (typeof MathJax !== 'undefined') {
+                MathJax.typesetPromise().catch(err => console.log(err));
+            }
+        });
+    </script>
+</body>
+</html>

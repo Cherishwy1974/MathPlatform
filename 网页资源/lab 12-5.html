@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab 12.5 平面与空间直线的方程构建实验室</title>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\(', '\)']],
+                displayMath: [['$$', '$$'], ['\[', '\]']],
+                processEscapes: true
+            },
+            startup: {
+                pageReady: () => {
+                    return MathJax.startup.defaultPageReady().then(() => {
+                        if (typeof window.scheduleMathRender === 'function') {
+                            window.scheduleMathRender();
+                        }
+                        console.log('MathJax加载完成');
+                    });
+                }
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+            }
+        };
+    </script>
+    <script defer src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js"></script>
+    <script defer src="../common-assets/js/lab-math-enhancer.js"></script>
+    <style>
+
+        :root {
+            --h1-size: 22px;
+            --h2-size: 20px;
+            --h3-size: 18px;
+            --btn-size: 16px;
+            --formula-size: 20px;
+            --text-size: 16px;
+            --primary: #4f46e5;
+            --primary-light: #6366f1;
+            --primary-dark: #3730a3;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --light: #ffffff;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-400: #9ca3af;
+            --gray-600: #4b5563;
+            --gray-800: #1f2937;
+            --border: #e5e7eb;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        *::-webkit-scrollbar {
+            width: 0;
+            background: transparent;
+        }
+
+        * {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
+            font-size: var(--text-size);
+            line-height: 1.5;
+            background: var(--gray-50);
+            color: var(--gray-800);
+        }
+
+        .return-home-panel {
+            position: fixed;
+            top: 12px;
+            right: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+            z-index: 40;
+        }
+
+        .return-toggle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.95), rgba(99, 102, 241, 0.9));
+            color: #ffffff;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 10px 18px rgba(79, 70, 229, 0.28);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .return-toggle:focus-visible {
+            outline: 2px solid rgba(129, 140, 248, 0.6);
+            outline-offset: 3px;
+        }
+
+        .return-toggle:hover {
+            transform: translateY(-1px) scale(1.03);
+            box-shadow: 0 14px 26px rgba(79, 70, 229, 0.35);
+        }
+
+        .return-links {
+            display: none;
+            flex-direction: column;
+            gap: 6px;
+            padding: 10px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(79, 70, 229, 0.15);
+            box-shadow: 0 16px 30px rgba(15, 23, 42, 0.18);
+            backdrop-filter: blur(6px);
+        }
+
+        .return-home-panel.open .return-links {
+            display: flex;
+        }
+
+        .return-link {
+            padding: 6px 12px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 14px;
+            color: var(--primary);
+            background: rgba(79, 70, 229, 0.12);
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+
+        .return-link.return-main {
+            color: var(--success);
+            background: rgba(16, 185, 129, 0.12);
+        }
+
+        .return-link:hover {
+            background: rgba(79, 70, 229, 0.2);
+            color: var(--primary-dark);
+        }
+
+        .return-link.return-main:hover {
+            background: rgba(16, 185, 129, 0.22);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            height: 100vh;
+            max-height: 700px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            background: var(--light);
+            border-radius: 12px;
+            box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(90deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: var(--light);
+            padding: 10px 24px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: var(--h1-size);
+            font-weight: 600;
+        }
+
+        .main {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 120px;
+            background: var(--gray-50);
+            border-right: 1px solid var(--border);
+            padding: 12px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .nav-btn {
+            width: 100%;
+            padding: 8px;
+            border: none;
+            border-radius: 6px;
+            background: transparent;
+            color: var(--gray-600);
+            text-align: left;
+            font-size: var(--text-size);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .nav-btn:hover {
+            background: var(--gray-100);
+        }
+
+        .nav-btn.active {
+            background: var(--primary);
+            color: var(--light);
+        }
+
+        .content {
+            flex: 1;
+            display: none;
+            padding: 18px;
+            overflow-y: auto;
+        }
+
+        .content.active {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow-y: auto;
+        }
+
+        .card {
+            background: var(--light);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+        }
+
+        .card h3 {
+            font-size: var(--h3-size);
+            color: var(--primary);
+            margin-bottom: 12px;
+        }
+
+        .input-group {
+            margin-bottom: 12px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: var(--gray-600);
+        }
+
+        .input-group select,
+        .input-group input,
+        .input-group range,
+        .input-group textarea {
+            width: 100%;
+            padding: 8px 10px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            font-size: var(--text-size);
+            background: var(--gray-50);
+        }
+
+        .input-group input[type="range"] {
+            padding: 0;
+        }
+
+        .input-group input:focus,
+        .input-group select:focus,
+        .input-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: var(--light);
+        }
+
+        .btn,
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 16px;
+            font-size: var(--btn-size);
+            border: none;
+            border-radius: 6px;
+            background: var(--primary);
+            color: var(--light);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            gap: 6px;
+        }
+
+        .btn.secondary {
+            background: var(--gray-200);
+            color: var(--gray-600);
+        }
+
+        .btn:hover,
+        .action-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn.secondary:hover {
+            background: var(--gray-400);
+            color: var(--light);
+        }
+
+        .info-box {
+            background: var(--gray-50);
+            border-left: 3px solid var(--primary);
+            padding: 12px;
+            border-radius: 6px;
+            font-size: var(--text-size);
+            line-height: 1.6;
+        }
+
+        canvas {
+            width: 100%;
+            height: 260px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: #ffffff;
+        }
+
+        .tag-list {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: rgba(79, 70, 229, 0.12);
+            color: var(--primary);
+            font-size: 14px;
+        }
+
+        table.matrix-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: center;
+        }
+
+        table.matrix-table td {
+            border: 1px solid var(--gray-200);
+            padding: 6px;
+            font-size: var(--text-size);
+        }
+    
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+        }
+
+        .stat-card {
+            background: var(--gray-50);
+            border-radius: 10px;
+            padding: 12px;
+            border: 1px dashed var(--border);
+        }
+
+        .equation-box {
+            background: rgba(79, 70, 229, 0.08);
+            border-radius: 8px;
+            padding: 12px;
+            font-weight: 600;
+            color: var(--primary);
+            margin-top: 10px;
+        }
+
+        .relation-tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 14px;
+            border-radius: 999px;
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--success);
+            font-weight: 600;
+        }
+
+        .relation-tag.danger {
+            background: rgba(239, 68, 68, 0.12);
+            color: var(--danger);
+        }
+
+        .info-list {
+            padding-left: 18px;
+        }
+
+        .info-list li {
+            list-style: disc;
+            color: var(--gray-600);
+            margin-bottom: 4px;
+        }
+
+        .highlight {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="return-home-panel">
+        <button class="return-toggle" type="button" aria-label="打开返回导航" onclick="toggleReturnPanel(event)"><i class="fa-solid fa-house"></i></button>
+        <div class="return-links">
+            <a class="return-link return-sub" href="index.html"><i class="fa-solid fa-arrow-left"></i> 返回目录</a>
+            <a class="return-link return-main" href="../index.html"><i class="fa-solid fa-house"></i> 返回主站</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <header class="header">
+            <h1>Lab 12.5 平面与空间直线的方程构建与关系解析</h1>
+        </header>
+
+        <div class="main">
+            <nav class="sidebar">
+                <button class="nav-btn active"  data-panel="module1"onclick="switchPanel('module1')">平面方程</button>
+                <button class="nav-btn"  data-panel="module2"onclick="switchPanel('module2')">直线方程</button>
+                <button class="nav-btn"  data-panel="module3"onclick="switchPanel('module3')">位置关系</button>
+            </nav>
+
+            <div class="content active" id="module1">
+                <div class="column">
+                    <div class="card">
+                        <h3>设定平面参数</h3>
+                        <div class="input-group">
+                            <label>已知点 $P_0(x_0,y_0,z_0)$</label>
+                            <div class="input-group">
+                                <span>$x_0$ = <span id="pxVal" class="highlight">1</span></span>
+                                <input type="range" id="pxRange" min="-5" max="5" value="1">
+                            </div>
+                            <div class="input-group">
+                                <span>$y_0$ = <span id="pyVal" class="highlight">-1</span></span>
+                                <input type="range" id="pyRange" min="-5" max="5" value="-1">
+                            </div>
+                            <div class="input-group">
+                                <span>$z_0$ = <span id="pzVal" class="highlight">2</span></span>
+                                <input type="range" id="pzRange" min="-5" max="5" value="2">
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>法向量 $\vec{n}=(A,B,C)$</label>
+                            <div class="input-group">
+                                <span>$A$ = <span id="aVal" class="highlight">2</span></span>
+                                <input type="range" id="aRange" min="-5" max="5" value="2">
+                            </div>
+                            <div class="input-group">
+                                <span>$B$ = <span id="bVal" class="highlight">1</span></span>
+                                <input type="range" id="bRange" min="-5" max="5" value="1">
+                            </div>
+                            <div class="input-group">
+                                <span>$C$ = <span id="cVal" class="highlight">-1</span></span>
+                                <input type="range" id="cRange" min="-5" max="5" value="-1">
+                            </div>
+                        </div>
+                        <div class="equation-box" id="planeEquation">2(x-1)+1(y+1)-1(z-2)=0</div>
+                        <div class="info-box">
+                            <p>一般式：$Ax+By+Cz+D=0$，其中 $D=-(Ax_0+By_0+Cz_0)$。</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="card">
+                        <h3>平面三维示意</h3>
+                        <canvas id="planeCanvas" width="520" height="320"></canvas>
+                        <ul class="info-list">
+                            <li>使用网格模拟截面，紫色箭头表示法向量方向。</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content" id="module2">
+                <div class="column">
+                    <div class="card">
+                        <h3>设定空间直线</h3>
+                        <div class="input-group">
+                            <label>过点 $P_1(x_1,y_1,z_1)$</label>
+                            <div class="input-group">
+                                <span>$x_1$ = <span id="lxVal" class="highlight">0</span></span>
+                                <input type="range" id="lxRange" min="-5" max="5" value="0">
+                            </div>
+                            <div class="input-group">
+                                <span>$y_1$ = <span id="lyVal" class="highlight">1</span></span>
+                                <input type="range" id="lyRange" min="-5" max="5" value="1">
+                            </div>
+                            <div class="input-group">
+                                <span>$z_1$ = <span id="lzVal" class="highlight">-1</span></span>
+                                <input type="range" id="lzRange" min="-5" max="5" value="-1">
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>方向向量 $\vec{d}=(m,n,p)$</label>
+                            <div class="input-group">
+                                <span>$m$ = <span id="mVal" class="highlight">1</span></span>
+                                <input type="range" id="mRange" min="-5" max="5" value="1">
+                            </div>
+                            <div class="input-group">
+                                <span>$n$ = <span id="nVal" class="highlight">2</span></span>
+                                <input type="range" id="nRange" min="-5" max="5" value="2">
+                            </div>
+                            <div class="input-group">
+                                <span>$p$ = <span id="pVal" class="highlight">1</span></span>
+                                <input type="range" id="pRange" min="-5" max="5" value="1">
+                            </div>
+                        </div>
+<<<<<<< ours
+                        <div class="equation-box" id="lineEquation">\left\{\begin{aligned}x&=0+t\\ y&=1+2t\\ z&=-1+t\end{aligned}\right.</div>
+=======
+                        <div class="equation-box" id="lineEquation">\left\{\begin{aligned}x&=0+t\\ y&=1+2t\\ z&=-1+t\end{aligned}\right.</div>
+>>>>>>> theirs
+                        <div class="info-box">
+                            <p>同时显示对称式：$\dfrac{x-x_1}{m}=\dfrac{y-y_1}{n}=\dfrac{z-z_1}{p}$。</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="card">
+                        <h3>直线三维示意</h3>
+                        <canvas id="lineCanvas" width="520" height="320"></canvas>
+                        <ul class="info-list">
+                            <li>深蓝线段显示正向，浅蓝延长线显示反向。</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content" id="module3">
+                <div class="column">
+                    <div class="card">
+                        <h3>平面与直线的位置关系</h3>
+                        <div class="stat-grid">
+                            <div class="stat-card">
+                                <h4>点积 $\vec{n}\cdot\vec{d}$</h4>
+                                <p id="ndotd">1</p>
+                            </div>
+                            <div class="stat-card">
+                                <h4>关系判定</h4>
+                                <p id="relation"><span class="relation-tag">相交</span></p>
+                            </div>
+                        </div>
+                        <div class="equation-box" id="intersection">交点：(-0.50, 0.00, -0.50)</div>
+                        <div class="info-box">
+                            <p>若 $\vec{n}\cdot\vec{d}=0$，则直线与平面平行或包含于平面。</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="card">
+                        <h3>交互可视化</h3>
+                        <canvas id="relationCanvas" width="520" height="320"></canvas>
+                        <ul class="info-list">
+                            <li>绿色点表示交点位置。</li>
+                            <li>若平行则显示为两条不相交的几何元素。</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const panels = document.querySelectorAll('.content');
+        const buttons = document.querySelectorAll('.nav-btn');
+
+        function switchPanel(id, trigger) {
+            const activeButton = trigger instanceof HTMLElement ? trigger :
+
+                (typeof event !== 'undefined' && event?.currentTarget instanceof HTMLElement ? event.currentTarget :
+
+                    document.querySelector(`.nav-btn[data-panel="${id}"]`) ||
+
+                    document.querySelector(`.nav-btn[data-target="${id}"]`) ||
+
+                    null);
+
+            panels.forEach(panel => panel.classList.remove('active'));
+            buttons.forEach(btn => btn.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            const activeBtn = Array.from(buttons).find(btn => btn.getAttribute('onclick').includes(id));
+            if (activeBtn) {
+                activeBtn.classList.add('active');
+            }
+        }
+
+        let mathObserver = null;
+        let mathRenderQueued = false;
+
+        function startMathObserver() {
+            if (typeof MutationObserver === 'undefined' || !document.body) {
+                return;
+            }
+            if (mathObserver) {
+                mathObserver.disconnect();
+            }
+            mathObserver = new MutationObserver(mutations => {
+                for (const mutation of mutations) {
+                    if (mutation.type === 'childList' || mutation.type === 'characterData') {
+                        scheduleMathRender();
+                        break;
+                    }
+                }
+            });
+            mathObserver.observe(document.body, { childList: true, subtree: true, characterData: true });
+        }
+
+        function scheduleMathRender() {
+            if (mathRenderQueued) {
+                return;
+            }
+            mathRenderQueued = true;
+            requestAnimationFrame(() => {
+                mathRenderQueued = false;
+                if (window.MathJax && MathJax.typesetPromise) {
+                    if (mathObserver) {
+                        mathObserver.disconnect();
+                    }
+                    MathJax.typesetPromise()
+                        .catch(err => console.log('渲染错误:', err))
+                        .finally(() => {
+                            startMathObserver();
+                        });
+                } else {
+                    setTimeout(scheduleMathRender, 160);
+                }
+            });
+        }
+
+        window.scheduleMathRender = scheduleMathRender;
+
+        function renderMath() {
+            scheduleMathRender();
+        }
+
+        function ensureMathReady() {
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', () => {
+                    startMathObserver();
+                    scheduleMathRender();
+                });
+            } else {
+                startMathObserver();
+                scheduleMathRender();
+            }
+        }
+
+        ensureMathReady();
+
+        function toggleReturnPanel(event) {
+            event.stopPropagation();
+            const panel = document.querySelector('.return-home-panel');
+            if (panel) {
+                panel.classList.toggle('open');
+            }
+        }
+
+        document.addEventListener('click', event => {
+            const panel = document.querySelector('.return-home-panel');
+            if (!panel) {
+                return;
+            }
+            if (panel.classList.contains('open') && !panel.contains(event.target)) {
+                panel.classList.remove('open');
+            }
+        });
+
+        window.addEventListener('pageshow', () => {
+            scheduleMathRender();
+        });
+
+        function resizeCanvas(canvas) {
+            const container = canvas.parentElement;
+            const width = container.clientWidth - 20;
+            const height = 300;
+            canvas.style.width = width + 'px';
+            canvas.style.height = height + 'px';
+            const ratio = window.devicePixelRatio || 1;
+            canvas.width = width * ratio;
+            canvas.height = height * ratio;
+            const ctx = canvas.getContext('2d');
+            ctx.setTransform(1,0,0,1,0,0);
+            ctx.scale(ratio, ratio);
+            return ctx;
+        }
+
+        function drawAxis(ctx, width, height) {
+            ctx.clearRect(0,0,width,height);
+            ctx.save();
+            ctx.lineWidth = 1.1;
+            ctx.strokeStyle = '#374151';
+            ctx.beginPath();
+            // x轴
+            ctx.moveTo(60, height-40);
+            ctx.lineTo(width-40, height-40);
+            // y轴
+            ctx.moveTo(60, height-40);
+            ctx.lineTo(60, 40);
+            // z轴（向左上延伸，表示深度）
+            ctx.moveTo(60, height-40);
+            ctx.lineTo(60 - 80, height-40 - 60);
+            ctx.stroke();
+            ctx.fillStyle = '#111827';
+            ctx.font = '12px sans-serif';
+            ctx.fillText('x', width-45, height-45);
+            ctx.fillText('y', 50, 40);
+            ctx.fillText('z', 60 - 85, height-40 - 65);
+            ctx.restore();
+        }
+
+        function project3D(x, y, z, scale=25) {
+            return {
+                x: 80 + x * scale + z * 12,
+                y: 260 - (y * scale + z * 8)
+            };
+        }
+
+        function drawPlane(ctx, normal, point) {
+            const width = ctx.canvas.clientWidth;
+            const height = ctx.canvas.clientHeight;
+            drawAxis(ctx, width, height);
+            ctx.save();
+            ctx.fillStyle = 'rgba(129, 140, 248, 0.2)';
+            const vertices = [
+                project3D(point[0] - 2, point[1], point[2] - 2),
+                project3D(point[0] + 2, point[1], point[2] - 2),
+                project3D(point[0] + 2, point[1], point[2] + 2),
+                project3D(point[0] - 2, point[1], point[2] + 2)
+            ];
+            ctx.beginPath();
+            ctx.moveTo(vertices[0].x, vertices[0].y);
+            vertices.slice(1).forEach(v => ctx.lineTo(v.x, v.y));
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
+            const origin = project3D(point[0], point[1], point[2]);
+            const tip = project3D(point[0] + normal[0], point[1] + normal[1], point[2] + normal[2]);
+            drawVector(ctx, origin, tip, '#7c3aed');
+        }
+
+        function drawVector(ctx, origin, tip, color) {
+            ctx.save();
+            ctx.strokeStyle = color;
+            ctx.fillStyle = color;
+            ctx.lineWidth = 2.2;
+            ctx.beginPath();
+            ctx.moveTo(origin.x, origin.y);
+            ctx.lineTo(tip.x, tip.y);
+            ctx.stroke();
+            const angle = Math.atan2(tip.y - origin.y, tip.x - origin.x);
+            const size = 8;
+            ctx.beginPath();
+            ctx.moveTo(tip.x, tip.y);
+            ctx.lineTo(tip.x - size * Math.cos(angle - Math.PI / 6), tip.y - size * Math.sin(angle - Math.PI / 6));
+            ctx.lineTo(tip.x - size * Math.cos(angle + Math.PI / 6), tip.y - size * Math.sin(angle + Math.PI / 6));
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
+        }
+
+        const planeCtx = resizeCanvas(document.getElementById('planeCanvas'));
+        const lineCtx = resizeCanvas(document.getElementById('lineCanvas'));
+        const relationCtx = resizeCanvas(document.getElementById('relationCanvas'));
+
+        function getPlaneParams() {
+            const px = Number(document.getElementById('pxRange').value);
+            const py = Number(document.getElementById('pyRange').value);
+            const pz = Number(document.getElementById('pzRange').value);
+            const A = Number(document.getElementById('aRange').value);
+            const B = Number(document.getElementById('bRange').value);
+            const C = Number(document.getElementById('cRange').value);
+            return { point: [px, py, pz], normal: [A, B, C] };
+        }
+
+        function getLineParams() {
+            const lx = Number(document.getElementById('lxRange').value);
+            const ly = Number(document.getElementById('lyRange').value);
+            const lz = Number(document.getElementById('lzRange').value);
+            const m = Number(document.getElementById('mRange').value);
+            const n = Number(document.getElementById('nRange').value);
+            const p = Number(document.getElementById('pRange').value);
+            return { point: [lx, ly, lz], direction: [m, n, p] };
+        }
+
+        function updatePlane() {
+            const { point, normal } = getPlaneParams();
+            document.getElementById('pxVal').textContent = point[0];
+            document.getElementById('pyVal').textContent = point[1];
+            document.getElementById('pzVal').textContent = point[2];
+            document.getElementById('aVal').textContent = normal[0];
+            document.getElementById('bVal').textContent = normal[1];
+            document.getElementById('cVal').textContent = normal[2];
+            const equation = `${normal[0]}(x-${point[0]})+${normal[1]}(y-${point[1]})+${normal[2]}(z-${point[2]})=0`;
+            document.getElementById('planeEquation').textContent = equation;
+            drawPlane(planeCtx, normal, point);
+        }
+
+        function updateLine() {
+            const { point, direction } = getLineParams();
+            document.getElementById('lxVal').textContent = point[0];
+            document.getElementById('lyVal').textContent = point[1];
+            document.getElementById('lzVal').textContent = point[2];
+            document.getElementById('mVal').textContent = direction[0];
+            document.getElementById('nVal').textContent = direction[1];
+            document.getElementById('pVal').textContent = direction[2];
+            document.getElementById('lineEquation').innerHTML = `\\left\\{\\begin{aligned}x&=${point[0]}+${direction[0]}t\\\\ y&=${point[1]}+${direction[1]}t\\\\ z&=${point[2]}+${direction[2]}t\\end{aligned}\\right.`;
+
+            const width = lineCtx.canvas.clientWidth;
+            const height = lineCtx.canvas.clientHeight;
+            drawAxis(lineCtx, width, height);
+            const origin = project3D(point[0], point[1], point[2]);
+            const tip = project3D(point[0] + direction[0], point[1] + direction[1], point[2] + direction[2]);
+            drawVector(lineCtx, origin, tip, '#2563eb');
+            drawVector(lineCtx, origin, project3D(point[0] - direction[0], point[1] - direction[1], point[2] - direction[2]), '#93c5fd');
+        }
+
+        function updateRelation() {
+            const { point, normal } = getPlaneParams();
+            const { point: p1, direction } = getLineParams();
+            const ndotd = normal[0]*direction[0] + normal[1]*direction[1] + normal[2]*direction[2];
+            document.getElementById('ndotd').textContent = ndotd.toFixed(2);
+            let relationHtml;
+            let intersectionText;
+            const D = -(normal[0]*point[0] + normal[1]*point[1] + normal[2]*point[2]);
+            if (Math.abs(ndotd) < 1e-6) {
+                const val = normal[0]*p1[0] + normal[1]*p1[1] + normal[2]*p1[2] + D;
+                if (Math.abs(val) < 1e-6) {
+                    relationHtml = '<span class="relation-tag">直线位于平面内</span>';
+                    intersectionText = '重合：直线上任意点均满足平面方程';
+                } else {
+                    relationHtml = '<span class="relation-tag danger">平行且无交点</span>';
+                    intersectionText = '无交点';
+                }
+            } else {
+                const t = -(normal[0]*p1[0] + normal[1]*p1[1] + normal[2]*p1[2] + D) / ndotd;
+                const xi = p1[0] + direction[0]*t;
+                const yi = p1[1] + direction[1]*t;
+                const zi = p1[2] + direction[2]*t;
+                relationHtml = '<span class="relation-tag">相交</span>';
+                intersectionText = `交点：(${xi.toFixed(2)}, ${yi.toFixed(2)}, ${zi.toFixed(2)})`;
+            }
+            document.getElementById('relation').innerHTML = relationHtml;
+            document.getElementById('intersection').textContent = intersectionText;
+
+            const width = relationCtx.canvas.clientWidth;
+            const height = relationCtx.canvas.clientHeight;
+            drawAxis(relationCtx, width, height);
+            const planePoint = project3D(point[0], point[1], point[2]);
+            const normalTip = project3D(point[0] + normal[0], point[1] + normal[1], point[2] + normal[2]);
+            drawVector(relationCtx, planePoint, normalTip, '#a855f7');
+            const lineOrigin = project3D(p1[0], p1[1], p1[2]);
+            const lineTip = project3D(p1[0] + direction[0], p1[1] + direction[1], p1[2] + direction[2]);
+            drawVector(relationCtx, lineOrigin, lineTip, '#2563eb');
+
+            if (!intersectionText.startsWith('无交点') && !intersectionText.startsWith('重合')) {
+                const coords = intersectionText.match(/-?\d+\.\d+/g);
+                if (coords) {
+                    const xi = parseFloat(coords[0]);
+                    const yi = parseFloat(coords[1]);
+                    const zi = parseFloat(coords[2]);
+                    const pointProj = project3D(xi, yi, zi);
+                    relationCtx.save();
+                    relationCtx.fillStyle = '#16a34a';
+                    relationCtx.beginPath();
+                    relationCtx.arc(pointProj.x, pointProj.y, 5, 0, Math.PI*2);
+                    relationCtx.fill();
+                    relationCtx.restore();
+                }
+            }
+        }
+
+        document.querySelectorAll('input[type="range"]').forEach(input => {
+            input.addEventListener('input', () => {
+                updatePlane();
+                updateLine();
+                updateRelation();
+                renderMath();
+            });
+        });
+
+        window.addEventListener('resize', () => {
+            resizeCanvas(planeCtx.canvas);
+            resizeCanvas(lineCtx.canvas);
+            resizeCanvas(relationCtx.canvas);
+            updatePlane();
+            updateLine();
+            updateRelation();
+        });
+
+        updatePlane();
+        updateLine();
+        updateRelation();
+        renderMath();
+    </script>
+</body>
+</html>

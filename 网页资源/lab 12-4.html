@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab 12.4 向量积的几何与应用实验室</title>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\(', '\)']],
+                displayMath: [['$$', '$$'], ['\[', '\]']],
+                processEscapes: true
+            },
+            startup: {
+                pageReady: () => {
+                    return MathJax.startup.defaultPageReady().then(() => {
+                        if (typeof window.scheduleMathRender === 'function') {
+                            window.scheduleMathRender();
+                        }
+                        console.log('MathJax加载完成');
+                    });
+                }
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+            }
+        };
+    </script>
+    <script defer src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js"></script>
+    <script defer src="../common-assets/js/lab-math-enhancer.js"></script>
+    <style>
+
+        :root {
+            --h1-size: 22px;
+            --h2-size: 20px;
+            --h3-size: 18px;
+            --btn-size: 16px;
+            --formula-size: 20px;
+            --text-size: 16px;
+            --primary: #4f46e5;
+            --primary-light: #6366f1;
+            --primary-dark: #3730a3;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --light: #ffffff;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-400: #9ca3af;
+            --gray-600: #4b5563;
+            --gray-800: #1f2937;
+            --border: #e5e7eb;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        *::-webkit-scrollbar {
+            width: 0;
+            background: transparent;
+        }
+
+        * {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
+            font-size: var(--text-size);
+            line-height: 1.5;
+            background: var(--gray-50);
+            color: var(--gray-800);
+        }
+
+        .return-home-panel {
+            position: fixed;
+            top: 12px;
+            right: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+            z-index: 40;
+        }
+
+        .return-toggle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.95), rgba(99, 102, 241, 0.9));
+            color: #ffffff;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 10px 18px rgba(79, 70, 229, 0.28);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .return-toggle:focus-visible {
+            outline: 2px solid rgba(129, 140, 248, 0.6);
+            outline-offset: 3px;
+        }
+
+        .return-toggle:hover {
+            transform: translateY(-1px) scale(1.03);
+            box-shadow: 0 14px 26px rgba(79, 70, 229, 0.35);
+        }
+
+        .return-links {
+            display: none;
+            flex-direction: column;
+            gap: 6px;
+            padding: 10px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(79, 70, 229, 0.15);
+            box-shadow: 0 16px 30px rgba(15, 23, 42, 0.18);
+            backdrop-filter: blur(6px);
+        }
+
+        .return-home-panel.open .return-links {
+            display: flex;
+        }
+
+        .return-link {
+            padding: 6px 12px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 14px;
+            color: var(--primary);
+            background: rgba(79, 70, 229, 0.12);
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+
+        .return-link.return-main {
+            color: var(--success);
+            background: rgba(16, 185, 129, 0.12);
+        }
+
+        .return-link:hover {
+            background: rgba(79, 70, 229, 0.2);
+            color: var(--primary-dark);
+        }
+
+        .return-link.return-main:hover {
+            background: rgba(16, 185, 129, 0.22);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            height: 100vh;
+            max-height: 700px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            background: var(--light);
+            border-radius: 12px;
+            box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(90deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: var(--light);
+            padding: 10px 24px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: var(--h1-size);
+            font-weight: 600;
+        }
+
+        .main {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 120px;
+            background: var(--gray-50);
+            border-right: 1px solid var(--border);
+            padding: 12px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .nav-btn {
+            width: 100%;
+            padding: 8px;
+            border: none;
+            border-radius: 6px;
+            background: transparent;
+            color: var(--gray-600);
+            text-align: left;
+            font-size: var(--text-size);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .nav-btn:hover {
+            background: var(--gray-100);
+        }
+
+        .nav-btn.active {
+            background: var(--primary);
+            color: var(--light);
+        }
+
+        .content {
+            flex: 1;
+            display: none;
+            padding: 18px;
+            overflow-y: auto;
+        }
+
+        .content.active {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow-y: auto;
+        }
+
+        .card {
+            background: var(--light);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+        }
+
+        .card h3 {
+            font-size: var(--h3-size);
+            color: var(--primary);
+            margin-bottom: 12px;
+        }
+
+        .input-group {
+            margin-bottom: 12px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: var(--gray-600);
+        }
+
+        .input-group select,
+        .input-group input,
+        .input-group range,
+        .input-group textarea {
+            width: 100%;
+            padding: 8px 10px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            font-size: var(--text-size);
+            background: var(--gray-50);
+        }
+
+        .input-group input[type="range"] {
+            padding: 0;
+        }
+
+        .input-group input:focus,
+        .input-group select:focus,
+        .input-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: var(--light);
+        }
+
+        .btn,
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 16px;
+            font-size: var(--btn-size);
+            border: none;
+            border-radius: 6px;
+            background: var(--primary);
+            color: var(--light);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            gap: 6px;
+        }
+
+        .btn.secondary {
+            background: var(--gray-200);
+            color: var(--gray-600);
+        }
+
+        .btn:hover,
+        .action-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn.secondary:hover {
+            background: var(--gray-400);
+            color: var(--light);
+        }
+
+        .info-box {
+            background: var(--gray-50);
+            border-left: 3px solid var(--primary);
+            padding: 12px;
+            border-radius: 6px;
+            font-size: var(--text-size);
+            line-height: 1.6;
+        }
+
+        canvas {
+            width: 100%;
+            height: 260px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: #ffffff;
+        }
+
+        .tag-list {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: rgba(79, 70, 229, 0.12);
+            color: var(--primary);
+            font-size: 14px;
+        }
+
+        table.matrix-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: center;
+        }
+
+        table.matrix-table td {
+            border: 1px solid var(--gray-200);
+            padding: 6px;
+            font-size: var(--text-size);
+        }
+    
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+        }
+
+        .stat-card {
+            background: var(--gray-50);
+            border-radius: 10px;
+            padding: 12px;
+            border: 1px dashed var(--border);
+        }
+
+        .stat-card h4 {
+            font-size: 15px;
+            color: var(--gray-600);
+            margin-bottom: 6px;
+        }
+
+        .stat-card p {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .info-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            padding-left: 16px;
+        }
+
+        .info-list li {
+            list-style: disc;
+            color: var(--gray-600);
+        }
+
+        .highlight {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="return-home-panel">
+        <button class="return-toggle" type="button" aria-label="打开返回导航" onclick="toggleReturnPanel(event)"><i class="fa-solid fa-house"></i></button>
+        <div class="return-links">
+            <a class="return-link return-sub" href="index.html"><i class="fa-solid fa-arrow-left"></i> 返回目录</a>
+            <a class="return-link return-main" href="../index.html"><i class="fa-solid fa-house"></i> 返回主站</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <header class="header">
+            <h1>Lab 12.4 向量积的应用：法向量、面积与力矩</h1>
+        </header>
+
+        <div class="main">
+            <nav class="sidebar">
+                <button class="nav-btn active"  data-panel="module1"onclick="switchPanel('module1')">法向量</button>
+                <button class="nav-btn"  data-panel="module2"onclick="switchPanel('module2')">面积与力矩</button>
+            </nav>
+
+            <div class="content active" id="module1">
+                <div class="column">
+                    <div class="card">
+                        <h3>两个向量的叉积</h3>
+                        <div class="input-group">
+                            <label>$\vec{u}=(u_x,u_y,u_z)$</label>
+                            <div class="input-group">
+                                <span>$u_x$ = <span id="uxVal" class="highlight">1</span></span>
+                                <input type="range" id="uxRange" min="-5" max="5" value="1">
+                            </div>
+                            <div class="input-group">
+                                <span>$u_y$ = <span id="uyVal" class="highlight">2</span></span>
+                                <input type="range" id="uyRange" min="-5" max="5" value="2">
+                            </div>
+                            <div class="input-group">
+                                <span>$u_z$ = <span id="uzVal" class="highlight">1</span></span>
+                                <input type="range" id="uzRange" min="-5" max="5" value="1">
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>$\vec{v}=(v_x,v_y,v_z)$</label>
+                            <div class="input-group">
+                                <span>$v_x$ = <span id="vxVal" class="highlight">-2</span></span>
+                                <input type="range" id="vxRange" min="-5" max="5" value="-2">
+                            </div>
+                            <div class="input-group">
+                                <span>$v_y$ = <span id="vyVal" class="highlight">1</span></span>
+                                <input type="range" id="vyRange" min="-5" max="5" value="1">
+                            </div>
+                            <div class="input-group">
+                                <span>$v_z$ = <span id="vzVal" class="highlight">3</span></span>
+                                <input type="range" id="vzRange" min="-5" max="5" value="3">
+                            </div>
+                        </div>
+                        <div class="stat-grid">
+                            <div class="stat-card">
+                                <h4>叉积 $\vec{u}\times\vec{v}$</h4>
+                                <p id="crossVal">(5,-5,5)</p>
+                            </div>
+                            <div class="stat-card">
+                                <h4>模长</h4>
+                                <p id="crossMag">8.66</p>
+                            </div>
+                            <div class="stat-card">
+                                <h4>单位法向量</h4>
+                                <p id="unitNormal">(0.58,-0.58,0.58)</p>
+                            </div>
+                        </div>
+                        <div class="info-box">
+                            <p>叉积公式：$\vec{u}\times\vec{v}=(u_y v_z-u_z v_y, u_z v_x-u_x v_z, u_x v_y-u_y v_x)$。</p>
+                            <p>结果向量垂直于 $\vec{u}$ 与 $\vec{v}$ 所张成的平面。</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="card">
+                        <h3>法向量的空间展示</h3>
+                        <canvas id="normalCanvas" width="520" height="320"></canvas>
+                        <ul class="info-list">
+                            <li>蓝色与紫色箭头为原向量。</li>
+                            <li>橙色箭头表示法向量方向，采用三维斜投影绘制。</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content" id="module2">
+                <div class="column">
+                    <div class="card">
+                        <h3>平行四边形面积与力矩</h3>
+                        <div class="input-group">
+                            <label>第二组向量</label>
+                            <div class="input-group">
+                                <span>$\vec{r}=(r_x,r_y,r_z)$</span>
+                                <input type="range" id="rxRange" min="-4" max="4" value="2">
+                                <div>当前 $r_x$：<span id="rxVal" class="highlight">2</span></div>
+                            </div>
+                            <div class="input-group">
+                                <input type="range" id="ryRange" min="-4" max="4" value="1">
+                                <div>当前 $r_y$：<span id="ryVal" class="highlight">1</span></div>
+                            </div>
+                            <div class="input-group">
+                                <input type="range" id="rzRange" min="-4" max="4" value="0">
+                                <div>当前 $r_z$：<span id="rzVal" class="highlight">0</span></div>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>作用力 $\vec{F}=(F_x,F_y,F_z)$</label>
+                            <div class="input-group">
+                                <input type="range" id="fxRange" min="-4" max="4" value="1">
+                                <div>$F_x$：<span id="fxVal" class="highlight">1</span></div>
+                            </div>
+                            <div class="input-group">
+                                <input type="range" id="fyRange" min="-4" max="4" value="3">
+                                <div>$F_y$：<span id="fyVal" class="highlight">3</span></div>
+                            </div>
+                            <div class="input-group">
+                                <input type="range" id="fzRange" min="-4" max="4" value="2">
+                                <div>$F_z$：<span id="fzVal" class="highlight">2</span></div>
+                            </div>
+                        </div>
+                        <div class="stat-grid">
+                            <div class="stat-card">
+                                <h4>面积 $S=|\vec{u}\times\vec{v}|$</h4>
+                                <p id="areaVal">8.66</p>
+                            </div>
+                            <div class="stat-card">
+                                <h4>力矩 $\vec{M}=\vec{r}\times\vec{F}$</h4>
+                                <p id="torqueVal">(-2, -4, 5)</p>
+                            </div>
+                            <div class="stat-card">
+                                <h4>力矩大小</h4>
+                                <p id="torqueMag">6.71</p>
+                            </div>
+                        </div>
+                        <div class="info-box">
+                            <p>平行四边形面积等于叉积的模长；力矩向量垂直于力和位置向量平面。</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="card">
+                        <h3>面积与力矩空间图</h3>
+                        <canvas id="torqueCanvas" width="520" height="320"></canvas>
+                        <ul class="info-list">
+                            <li>阴影平面展示由 $\vec{r}$ 和 $\vec{F}$ 张成的区域。</li>
+                            <li>红色箭头表示力矩方向。</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const panels = document.querySelectorAll('.content');
+        const buttons = document.querySelectorAll('.nav-btn');
+
+        function switchPanel(id, trigger) {
+            const activeButton = trigger instanceof HTMLElement ? trigger :
+
+                (typeof event !== 'undefined' && event?.currentTarget instanceof HTMLElement ? event.currentTarget :
+
+                    document.querySelector(`.nav-btn[data-panel="${id}"]`) ||
+
+                    document.querySelector(`.nav-btn[data-target="${id}"]`) ||
+
+                    null);
+
+            panels.forEach(panel => panel.classList.remove('active'));
+            buttons.forEach(btn => btn.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            const activeBtn = Array.from(buttons).find(btn => btn.getAttribute('onclick').includes(id));
+            if (activeBtn) {
+                activeBtn.classList.add('active');
+            }
+        }
+
+        let mathObserver = null;
+        let mathRenderQueued = false;
+
+        function startMathObserver() {
+            if (typeof MutationObserver === 'undefined' || !document.body) {
+                return;
+            }
+            if (mathObserver) {
+                mathObserver.disconnect();
+            }
+            mathObserver = new MutationObserver(mutations => {
+                for (const mutation of mutations) {
+                    if (mutation.type === 'childList' || mutation.type === 'characterData') {
+                        scheduleMathRender();
+                        break;
+                    }
+                }
+            });
+            mathObserver.observe(document.body, { childList: true, subtree: true, characterData: true });
+        }
+
+        function scheduleMathRender() {
+            if (mathRenderQueued) {
+                return;
+            }
+            mathRenderQueued = true;
+            requestAnimationFrame(() => {
+                mathRenderQueued = false;
+                if (window.MathJax && MathJax.typesetPromise) {
+                    if (mathObserver) {
+                        mathObserver.disconnect();
+                    }
+                    MathJax.typesetPromise()
+                        .catch(err => console.log('渲染错误:', err))
+                        .finally(() => {
+                            startMathObserver();
+                        });
+                } else {
+                    setTimeout(scheduleMathRender, 160);
+                }
+            });
+        }
+
+        window.scheduleMathRender = scheduleMathRender;
+
+        function renderMath() {
+            scheduleMathRender();
+        }
+
+        function ensureMathReady() {
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', () => {
+                    startMathObserver();
+                    scheduleMathRender();
+                });
+            } else {
+                startMathObserver();
+                scheduleMathRender();
+            }
+        }
+
+        ensureMathReady();
+
+        function toggleReturnPanel(event) {
+            event.stopPropagation();
+            const panel = document.querySelector('.return-home-panel');
+            if (panel) {
+                panel.classList.toggle('open');
+            }
+        }
+
+        document.addEventListener('click', event => {
+            const panel = document.querySelector('.return-home-panel');
+            if (!panel) {
+                return;
+            }
+            if (panel.classList.contains('open') && !panel.contains(event.target)) {
+                panel.classList.remove('open');
+            }
+        });
+
+        window.addEventListener('pageshow', () => {
+            scheduleMathRender();
+        });
+
+        function resizeCanvas(canvas) {
+            const container = canvas.parentElement;
+            const width = container.clientWidth - 20;
+            const height = 300;
+            canvas.style.width = width + 'px';
+            canvas.style.height = height + 'px';
+            const ratio = window.devicePixelRatio || 1;
+            canvas.width = width * ratio;
+            canvas.height = height * ratio;
+            const ctx = canvas.getContext('2d');
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.scale(ratio, ratio);
+            return ctx;
+        }
+
+        function drawAxis(ctx, width, height) {
+            ctx.clearRect(0, 0, width, height);
+            ctx.save();
+            ctx.lineWidth = 1.2;
+            ctx.strokeStyle = '#374151';
+            ctx.beginPath();
+            // x轴
+            ctx.moveTo(60, height - 50);
+            ctx.lineTo(width - 40, height - 50);
+            // y轴
+            ctx.moveTo(60, height - 50);
+            ctx.lineTo(60, 40);
+            // z轴（向左上延伸，表示深度）
+            ctx.moveTo(60, height - 50);
+            ctx.lineTo(60 - 80, height - 50 - 60);
+            ctx.stroke();
+            ctx.fillStyle = '#111827';
+            ctx.font = '12px sans-serif';
+            ctx.fillText('x', width - 45, height - 55);
+            ctx.fillText('y', 50, 40);
+            ctx.fillText('z', 60 - 85, height - 50 - 65);
+            ctx.restore();
+        }
+
+        function project3D(x, y, z, scale=25) {
+            return {
+                x: 80 + x * scale + z * 12,
+                y: 260 - (y * scale + z * 8)
+            };
+        }
+
+        function draw3DVector(ctx, origin, tip, color) {
+            ctx.save();
+            ctx.strokeStyle = color;
+            ctx.fillStyle = color;
+            ctx.lineWidth = 2.2;
+            ctx.beginPath();
+            ctx.moveTo(origin.x, origin.y);
+            ctx.lineTo(tip.x, tip.y);
+            ctx.stroke();
+            const angle = Math.atan2(tip.y - origin.y, tip.x - origin.x);
+            const size = 8;
+            ctx.beginPath();
+            ctx.moveTo(tip.x, tip.y);
+            ctx.lineTo(tip.x - size * Math.cos(angle - Math.PI / 6), tip.y - size * Math.sin(angle - Math.PI / 6));
+            ctx.lineTo(tip.x - size * Math.cos(angle + Math.PI / 6), tip.y - size * Math.sin(angle + Math.PI / 6));
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
+        }
+
+        const normalCtx = resizeCanvas(document.getElementById('normalCanvas'));
+        const torqueCtx = resizeCanvas(document.getElementById('torqueCanvas'));
+
+        function updateCrossProduct() {
+            const ux = Number(document.getElementById('uxRange').value);
+            const uy = Number(document.getElementById('uyRange').value);
+            const uz = Number(document.getElementById('uzRange').value);
+            const vx = Number(document.getElementById('vxRange').value);
+            const vy = Number(document.getElementById('vyRange').value);
+            const vz = Number(document.getElementById('vzRange').value);
+            document.getElementById('uxVal').textContent = ux;
+            document.getElementById('uyVal').textContent = uy;
+            document.getElementById('uzVal').textContent = uz;
+            document.getElementById('vxVal').textContent = vx;
+            document.getElementById('vyVal').textContent = vy;
+            document.getElementById('vzVal').textContent = vz;
+
+            const cx = uy * vz - uz * vy;
+            const cy = uz * vx - ux * vz;
+            const cz = ux * vy - uy * vx;
+            const cross = [cx, cy, cz];
+            const crossMag = Math.sqrt(cx*cx + cy*cy + cz*cz);
+            const unit = crossMag ? cross.map(v => v / crossMag) : [0,0,0];
+            document.getElementById('crossVal').textContent = `(${cross.map(v => v.toFixed(2)).join(', ')})`;
+            document.getElementById('crossMag').textContent = crossMag.toFixed(2);
+            document.getElementById('unitNormal').textContent = `(${unit.map(v => v.toFixed(2)).join(', ')})`;
+
+            const width = normalCtx.canvas.clientWidth;
+            const height = normalCtx.canvas.clientHeight;
+            drawAxis(normalCtx, width, height);
+            const origin = project3D(0,0,0);
+            draw3DVector(normalCtx, origin, project3D(ux, uy, uz), '#2563eb');
+            draw3DVector(normalCtx, origin, project3D(vx, vy, vz), '#7c3aed');
+            draw3DVector(normalCtx, origin, project3D(cx, cy, cz), '#f97316');
+
+            const area = crossMag;
+            document.getElementById('areaVal').textContent = area.toFixed(2);
+        }
+
+        function updateTorque() {
+            const rx = Number(document.getElementById('rxRange').value);
+            const ry = Number(document.getElementById('ryRange').value);
+            const rz = Number(document.getElementById('rzRange').value);
+            const fx = Number(document.getElementById('fxRange').value);
+            const fy = Number(document.getElementById('fyRange').value);
+            const fz = Number(document.getElementById('fzRange').value);
+            document.getElementById('rxVal').textContent = rx;
+            document.getElementById('ryVal').textContent = ry;
+            document.getElementById('rzVal').textContent = rz;
+            document.getElementById('fxVal').textContent = fx;
+            document.getElementById('fyVal').textContent = fy;
+            document.getElementById('fzVal').textContent = fz;
+
+            const mx = ry * fz - rz * fy;
+            const my = rz * fx - rx * fz;
+            const mz = rx * fy - ry * fx;
+            const torque = [mx, my, mz];
+            const torqueMag = Math.sqrt(mx*mx + my*my + mz*mz);
+            document.getElementById('torqueVal').textContent = `(${torque.map(v => v.toFixed(2)).join(', ')})`;
+            document.getElementById('torqueMag').textContent = torqueMag.toFixed(2);
+
+            const width = torqueCtx.canvas.clientWidth;
+            const height = torqueCtx.canvas.clientHeight;
+            drawAxis(torqueCtx, width, height);
+            const origin = project3D(0,0,0);
+            torqueCtx.save();
+            torqueCtx.fillStyle = 'rgba(129, 140, 248, 0.2)';
+            torqueCtx.beginPath();
+            const rTip = project3D(rx, ry, rz, 25);
+            const fTip = project3D(fx, fy, fz, 25);
+            torqueCtx.moveTo(origin.x, origin.y);
+            torqueCtx.lineTo(rTip.x, rTip.y);
+            torqueCtx.lineTo(fTip.x, fTip.y);
+            torqueCtx.closePath();
+            torqueCtx.fill();
+            torqueCtx.restore();
+            draw3DVector(torqueCtx, origin, rTip, '#14b8a6');
+            draw3DVector(torqueCtx, origin, fTip, '#6366f1');
+            draw3DVector(torqueCtx, origin, project3D(mx, my, mz, 25), '#ef4444');
+        }
+
+        document.querySelectorAll('input[type="range"]').forEach(input => {
+            input.addEventListener('input', () => {
+                updateCrossProduct();
+                updateTorque();
+            });
+        });
+
+        window.addEventListener('resize', () => {
+            resizeCanvas(normalCtx.canvas);
+            resizeCanvas(torqueCtx.canvas);
+            updateCrossProduct();
+            updateTorque();
+        });
+
+        updateCrossProduct();
+        updateTorque();
+        renderMath();
+    </script>
+</body>
+</html>

@@ -1,0 +1,1593 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>导数定义实验室</title>
+    
+    <!-- MathJax配置 -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            startup: {
+                pageReady: () => {
+                    return MathJax.startup.defaultPageReady().then(() => {
+                        console.log('MathJax加载完成');
+                    });
+                }
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+            }
+        };
+    </script>
+    <script src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js" defer></script>
+    
+    <style>
+        /* 用户要求：字号统一 */
+        :root {
+            --h1-size: 22px;      
+            --h2-size: 20px;      
+            --h3-size: 18px;      
+            --btn-size: 16px;     
+            --formula-size: 20px; 
+            --text-size: 16px;
+            
+            --primary: #4f46e5;
+            --primary-light: #6366f1;
+            --primary-dark: #3730a3;
+            --light: #ffffff;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-600: #4b5563;
+            --gray-800: #1f2937;
+            --border: #e5e7eb;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* 滚动条生效但不显示 */
+        *::-webkit-scrollbar {
+            width: 0;
+            background: transparent;
+        }
+        
+        * {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
+            font-size: var(--text-size);
+            line-height: 1.5;
+            background: var(--gray-50);
+            color: var(--gray-800);
+        }
+
+        /* 横向布局（宽是高的2倍），压缩高度 */
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            height: 100vh;
+            max-height: 700px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            background: var(--light);
+        }
+
+        .header {
+            background: var(--primary);
+            color: var(--light);
+            padding: 8px 20px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: var(--h2-size);
+            margin: 0;
+        }
+
+        .main {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* 侧边栏不动 */
+        .sidebar {
+            width: 120px;
+            background: var(--gray-50);
+            border-right: 1px solid var(--border);
+            padding: 10px 8px;
+        }
+
+        .nav-btn {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 4px;
+            background: transparent;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: var(--text-size);
+            color: var(--gray-600);
+            text-align: left;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover {
+            background: var(--gray-100);
+        }
+
+        .nav-btn.active {
+            background: var(--primary);
+            color: var(--light);
+        }
+
+        /* 最多左右两栏，必须有可视化 */
+        .content {
+            flex: 1;
+            display: none;
+            padding: 16px;
+            overflow-y: auto;
+        }
+
+        .content.active {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow-y: auto;
+        }
+
+        .card {
+            background: var(--light);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .card h3 {
+            font-size: var(--h3-size);
+            color: var(--primary);
+            margin-bottom: 12px;
+        }
+
+        .input-group {
+            margin-bottom: 12px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 4px;
+            font-size: var(--text-size);
+            font-weight: 500;
+        }
+
+        .input-group input,
+        .input-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: var(--text-size);
+            background: var(--gray-50);
+        }
+
+        .input-group input:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: var(--light);
+        }
+
+        .btn {
+            padding: 8px 16px;
+            background: var(--primary);
+            color: var(--light);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: var(--btn-size);
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .result {
+            background: var(--gray-50);
+            padding: 12px;
+            border-radius: 4px;
+            border: 1px solid var(--primary);
+            text-align: center;
+            font-size: var(--text-size);
+            margin: 12px 0;
+            min-height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .formula-box {
+            background: #f0f7ff;
+            padding: 12px;
+            border-radius: 4px;
+            border-left: 3px solid var(--primary);
+            margin: 12px 0;
+            text-align: center;
+            font-size: var(--formula-size);
+        }
+
+        .info-box {
+            background: var(--gray-50);
+            padding: 10px;
+            border-radius: 4px;
+            margin: 8px 0;
+            font-size: var(--text-size);
+            text-align: center;
+        }
+
+        .steps {
+            background: #fff9e6;
+            padding: 12px;
+            border-radius: 4px;
+            border-left: 3px solid #f59e0b;
+            line-height: 1.8;
+            font-size: var(--text-size);
+        }
+
+        .canvas-container {
+            border: 1px solid var(--gray-200);
+            border-radius: 4px;
+            background: #fafafa;
+            padding: 10px;
+            min-height: 200px;
+            max-height: 500px;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .canvas-container canvas {
+            max-width: 100%;
+            max-height: 100%;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .slider-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: var(--gray-50);
+            border-radius: 4px;
+            margin-top: 12px;
+        }
+
+        .slider-group label {
+            min-width: 80px;
+            font-size: var(--text-size);
+        }
+
+        .slider {
+            flex: 1;
+            height: 4px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: var(--gray-200);
+            outline: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+        }
+
+        .slider-value {
+            min-width: 60px;
+            text-align: center;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .animation-controls {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .animation-controls button {
+            flex: 1;
+        }
+
+        .legend {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 3px;
+            border-radius: 2px;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .main {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+                padding: 8px 16px;
+                display: flex;
+                flex-direction: row;
+                gap: 8px;
+                overflow-x: auto;
+                flex-shrink: 0;
+                justify-content: center;
+                flex-wrap: nowrap;
+            }
+
+            .nav-btn {
+                min-width: 90px;
+                text-align: center;
+                margin-bottom: 0;
+                white-space: nowrap;
+                flex-shrink: 0;
+                padding: 8px 12px;
+                font-size: 14px;
+            }
+
+            .content.active {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .container {
+                max-height: none;
+                height: 100vh;
+            }
+        }
+
+        .return-home-panel { position: fixed; bottom: 12px; right: 12px; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; z-index: 40; }
+        .return-toggle { width: 40px; height: 40px; border-radius: 50%; border: none; background: linear-gradient(135deg, rgba(79,70,229,0.96), rgba(99,102,241,0.9)); color: #fff; font-size: 20px; cursor: pointer; box-shadow: 0 10px 18px rgba(79,70,229,0.28); transition: transform 0.2s, box-shadow 0.2s; }
+        .return-toggle:hover { transform: translateY(-1px) scale(1.03); box-shadow: 0 14px 26px rgba(79,70,229,0.35); }
+        .return-links { display: none; flex-direction: column; gap: 6px; padding: 10px; border-radius: 10px; background: rgba(255,255,255,0.96); border: 1px solid rgba(79,70,229,0.18); box-shadow: 0 10px 30px rgba(15,23,42,0.14); opacity: 0; transition: opacity 0.16s; }
+        .return-link { text-decoration: none; font-size: 15px; color: var(--primary-dark); padding: 6px 12px; border-radius: 8px; background: rgba(99,102,241,0.12); transition: background 0.2s; }
+        .return-link:hover { background: rgba(79,70,229,0.18); }
+    </style>
+
+</head>
+<body>
+    <div class="return-home-panel"><button class="return-toggle" onclick="toggleReturnLinks()"><i class="fa-solid fa-house"></i></button><div class="return-links"><a class="return-link" href="index.html"><i class="fa-solid fa-arrow-left"></i> 返回目录</a><a class="return-link" href="../index.html"><i class="fa-solid fa-house"></i> 返回主站</a></div></div>
+    <div class="container">
+        <header class="header">
+            <h1>导数定义实验室</h1>
+        </header>
+
+        <div class="main">
+            <!-- 侧边栏 -->
+            <nav class="sidebar">
+                <button class="nav-btn active" onclick="switchPanel('concept')">基本概念</button>
+                <button class="nav-btn" onclick="switchPanel('limit')">极限理解</button>
+                <button class="nav-btn" onclick="switchPanel('tangent')">切线意义</button>
+                <button class="nav-btn" onclick="switchPanel('practice')">实践应用</button>
+            </nav>
+
+            <!-- 基本概念页面 -->
+            <div class="content active" id="concept">
+                <div class="column">
+                    <div class="card">
+                        <h3>什么是导数？</h3>
+                        <div class="info-box">
+                            <strong>简单理解：</strong>导数描述了函数的变化快慢
+                        </div>
+                        <div class="steps">
+                            <strong>生活例子：</strong><br>
+                            🚗 汽车速度表 = 位置的导数<br>
+                            <i class="fa-solid fa-chart-line"></i> 股票涨跌速度 = 股价的导数<br>
+                            🌡️ 温度变化率 = 温度的导数<br>
+                            🏃 加速度 = 速度的导数
+                        </div>
+                        <div class="formula-box">
+                            导数 = $\lim\limits_{\Delta x \to 0} \frac{f(x + \Delta x) - f(x)}{\Delta x}$
+                        </div>
+                        <div class="info-box">
+                            当 $\Delta x$ 越来越小，平均变化率就越接近瞬时变化率
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>平均变化率 vs 瞬时变化率</h3>
+                        <div class="steps">
+                            <strong>平均变化率：</strong>一段时间内的整体变化<br>
+                            例：开车1小时走了60公里，平均速度60km/h<br><br>
+                            <strong>瞬时变化率：</strong>某一时刻的变化速度<br>
+                            例：看速度表显示的当前速度80km/h
+                        </div>
+                        <div class="info-box">
+                            导数就是瞬时变化率！
+                        </div>
+                    </div>
+                </div>
+
+                <div class="column">
+                    <div class="card">
+                        <h3>导数的直观理解</h3>
+                        <div class="canvas-container">
+                            <canvas id="conceptCanvas" width="600" height="400"></canvas>
+                        </div>
+                        <div class="legend">
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: #4f46e5;"></div>
+                                <span>函数曲线</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: #ef4444;"></div>
+                                <span>切线（导数）</span>
+                            </div>
+                        </div>
+                        <div class="slider-group">
+                            <label>选择点 x =</label>
+                            <input type="range" class="slider" id="xSlider" 
+                                   min="-2" max="2" step="0.1" value="0">
+                            <span class="slider-value" id="xValue">0.0</span>
+                        </div>
+                        <div class="result" id="derivativeValue">
+                            导数值 f'(0) = 0
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 极限理解页面 -->
+            <div class="content" id="limit">
+                <div class="column">
+                    <div class="card">
+                        <h3>从平均到瞬时</h3>
+                        <div class="input-group">
+                            <label>选择函数</label>
+                            <select id="funcSelect" onchange="updateLimit()">
+                                <option value="quadratic">二次函数 f(x) = x²</option>
+                                <option value="cubic">三次函数 f(x) = x³/3</option>
+                                <option value="sqrt">平方根 f(x) = √(x+2)</option>
+                            </select>
+                        </div>
+                        <div class="info-box">
+                            在点 x = <span id="pointX">1</span> 处求导数
+                        </div>
+                        <div class="slider-group">
+                            <label>Δx 大小</label>
+                            <input type="range" class="slider" id="deltaSlider" 
+                                   min="0.01" max="2" step="0.01" value="1">
+                            <span class="slider-value" id="deltaValue">1.00</span>
+                        </div>
+                        <div class="formula-box" id="limitFormula">
+                            平均变化率 = $\frac{f(1 + 1) - f(1)}{1}$ = 3
+                        </div>
+                        <div class="steps">
+                            <strong>观察规律：</strong><br>
+                            当 Δx = 1.0 时，平均变化率 = <span id="rate1">3.0</span><br>
+                            当 Δx = 0.5 时，平均变化率 = <span id="rate2">2.5</span><br>
+                            当 Δx = 0.1 时，平均变化率 = <span id="rate3">2.1</span><br>
+                            当 Δx → 0 时，瞬时变化率 = <span id="instantRate">2.0</span>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>动画演示</h3>
+                        <div class="animation-controls">
+                            <button class="btn" onclick="startAnimation()">开始动画</button>
+                            <button class="btn" onclick="resetAnimation()">重置</button>
+                        </div>
+                        <div class="info-box" id="animationInfo">
+                            点击"开始动画"观看 Δx 逐渐变小的过程
+                        </div>
+                    </div>
+                </div>
+
+                <div class="column">
+                    <div class="card">
+                        <h3>极限过程可视化</h3>
+                        <div class="canvas-container">
+                            <canvas id="limitCanvas" width="600" height="400"></canvas>
+                        </div>
+                        <div class="legend">
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: #4f46e5;"></div>
+                                <span>函数曲线</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: #10b981;"></div>
+                                <span>割线（平均）</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: #ef4444;"></div>
+                                <span>切线（瞬时）</span>
+                            </div>
+                        </div>
+                        <div class="result" id="convergenceResult">
+                            当前割线斜率：3.0 → 极限值：2.0
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 切线意义页面 -->
+            <div class="content" id="tangent">
+                <div class="column">
+                    <div class="card">
+                        <h3>导数的几何意义</h3>
+                        <div class="formula-box">
+                            导数 = 切线斜率
+                        </div>
+                        <div class="steps">
+                            <strong>斜率的含义：</strong><br>
+                            • 斜率 > 0：函数上升（增函数）<br>
+                            • 斜率 < 0：函数下降（减函数）<br>
+                            • 斜率 = 0：函数平坦（可能是极值点）<br>
+                            • 斜率越大：变化越快
+                        </div>
+                        <div class="input-group">
+                            <label>选择函数类型</label>
+                            <select id="tangentFunc" onchange="updateTangent()">
+                                <option value="parabola">抛物线（有极值）</option>
+                                <option value="cubic">三次函数（有拐点）</option>
+                                <option value="sine">正弦函数（周期性）</option>
+                                <option value="exponential">指数函数（单调增）</option>
+                            </select>
+                        </div>
+                        <div class="info-box" id="tangentInfo">
+                            在 x = 0 处：f'(0) = 0（水平切线）
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>切线方程</h3>
+                        <div class="formula-box" id="tangentEquation">
+                            y - y₀ = f'(x₀)(x - x₀)
+                        </div>
+                        <div class="info-box">
+                            <strong>点斜式方程：</strong>已知一点和斜率求直线
+                        </div>
+                        <div class="result" id="tangentResult">
+                            当前切线：y = 2x + 1
+                        </div>
+                    </div>
+                </div>
+
+                <div class="column">
+                    <div class="card">
+                        <h3>切线动态演示</h3>
+                        <div class="canvas-container">
+                            <canvas id="tangentCanvas" width="600" height="400"></canvas>
+                        </div>
+                        <div class="slider-group">
+                            <label>移动切点 x =</label>
+                            <input type="range" class="slider" id="tangentSlider" 
+                                   min="-3" max="3" step="0.1" value="0">
+                            <span class="slider-value" id="tangentXValue">0.0</span>
+                        </div>
+                        <div class="legend">
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: #4f46e5;"></div>
+                                <span>函数图像</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: #ef4444;"></div>
+                                <span>切线</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: #10b981;"></div>
+                                <span>切点</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 实践应用页面 -->
+            <div class="content" id="practice">
+                <div class="column">
+                    <div class="card">
+                        <h3>汽车运动分析</h3>
+                        <div class="info-box">
+                            位置函数：s(t) = 5t² - 20t + 15
+                        </div>
+                        <div class="steps">
+                            <strong>求解步骤：</strong><br>
+                            1. 速度 = 位置的导数<br>
+                            v(t) = s'(t) = 10t - 20<br><br>
+                            2. 加速度 = 速度的导数<br>
+                            a(t) = v'(t) = 10 m/s²
+                        </div>
+                        <div class="slider-group">
+                            <label>时间 t (秒)</label>
+                            <input type="range" class="slider" id="timeSlider" 
+                                   min="0" max="5" step="0.1" value="2">
+                            <span class="slider-value" id="timeValue">2.0</span>
+                        </div>
+                        <div class="result" id="motionResult">
+                            t = 2秒时：位置 = 5m，速度 = 0 m/s
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>成本优化问题</h3>
+                        <div class="info-box">
+                            成本函数：C(x) = x³ - 6x² + 15x + 100
+                        </div>
+                        <div class="steps">
+                            <strong>边际成本（导数的应用）：</strong><br>
+                            C'(x) = 3x² - 12x + 15<br><br>
+                            当 C'(x) = 0 时，可能是成本最优点
+                        </div>
+                        <button class="btn" onclick="findOptimal()">求最优产量</button>
+                        <div class="result" id="optimalResult" style="margin-top: 12px;">
+                            点击按钮求解最优产量
+                        </div>
+                    </div>
+                </div>
+
+                <div class="column">
+                    <div class="card">
+                        <h3>实际应用可视化</h3>
+                        <div class="canvas-container">
+                            <canvas id="applicationCanvas" width="600" height="400"></canvas>
+                        </div>
+                        <div class="input-group">
+                            <label>选择应用场景</label>
+                            <select id="appSelect" onchange="updateApplication()">
+                                <option value="motion">物体运动</option>
+                                <option value="growth">人口增长</option>
+                                <option value="cost">成本分析</option>
+                                <option value="temperature">温度变化</option>
+                            </select>
+                        </div>
+                        <div class="info-box" id="appInfo">
+                            展示位置、速度、加速度的关系
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // 技巧1：延迟加载MathJax，避免阻塞页面
+        // ==========================================
+        function renderMath() {
+            if (window.MathJax && MathJax.typesetPromise) {
+                MathJax.typesetPromise().catch(err => console.log('渲染错误:', err));
+            }
+        }
+
+        // ==========================================
+        // 技巧2：统一的Canvas绘图工具函数
+        // ==========================================
+        function setupCanvas(canvas) {
+            const ctx = canvas.getContext('2d');
+            const rect = canvas.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            
+            // 设置实际尺寸和显示尺寸
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            canvas.style.width = rect.width + 'px';
+            canvas.style.height = rect.height + 'px';
+            
+            // 缩放上下文以适应设备像素比
+            ctx.scale(dpr, dpr);
+            
+            return { ctx, width: rect.width, height: rect.height };
+        }
+
+        // ==========================================
+        // 技巧3：绘制坐标轴的通用函数
+        // ==========================================
+        function drawAxes(ctx, width, height, padding = 40) {
+            ctx.strokeStyle = '#374151';
+            ctx.lineWidth = 2;
+            
+            // X轴
+            ctx.beginPath();
+            ctx.moveTo(padding, height - padding);
+            ctx.lineTo(width - padding, height - padding);
+            ctx.stroke();
+            
+            // Y轴
+            ctx.beginPath();
+            ctx.moveTo(padding, padding);
+            ctx.lineTo(padding, height - padding);
+            ctx.stroke();
+            
+            // 箭头
+            ctx.fillStyle = '#374151';
+            // X轴箭头
+            ctx.beginPath();
+            ctx.moveTo(width - padding, height - padding);
+            ctx.lineTo(width - padding - 8, height - padding - 4);
+            ctx.lineTo(width - padding - 8, height - padding + 4);
+            ctx.fill();
+            
+            // Y轴箭头
+            ctx.beginPath();
+            ctx.moveTo(padding, padding);
+            ctx.lineTo(padding - 4, padding + 8);
+            ctx.lineTo(padding + 4, padding + 8);
+            ctx.fill();
+            
+            // 轴标签
+            ctx.font = '14px Arial';
+            ctx.fillText('x', width - padding + 10, height - padding + 5);
+            ctx.fillText('y', padding - 5, padding - 10);
+        }
+
+        // ==========================================
+        // 技巧4：绘制网格线
+        // ==========================================
+        function drawGrid(ctx, width, height, padding = 40, gridSize = 40) {
+            ctx.strokeStyle = '#e5e7eb';
+            ctx.lineWidth = 0.5;
+            
+            // 垂直网格线
+            for (let x = padding + gridSize; x < width - padding; x += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(x, padding);
+                ctx.lineTo(x, height - padding);
+                ctx.stroke();
+            }
+            
+            // 水平网格线
+            for (let y = padding + gridSize; y < height - padding; y += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(padding, y);
+                ctx.lineTo(width - padding, y);
+                ctx.stroke();
+            }
+        }
+
+        // ==========================================
+        // 技巧5：坐标转换函数（数学坐标到画布坐标）
+        // ==========================================
+        function mathToCanvas(x, y, width, height, xRange, yRange, padding = 40) {
+            const plotWidth = width - 2 * padding;
+            const plotHeight = height - 2 * padding;
+            
+            const canvasX = padding + (x - xRange[0]) / (xRange[1] - xRange[0]) * plotWidth;
+            const canvasY = height - padding - (y - yRange[0]) / (yRange[1] - yRange[0]) * plotHeight;
+            
+            return { x: canvasX, y: canvasY };
+        }
+
+        // ==========================================
+        // 基本概念页面的可视化
+        // ==========================================
+        function drawConceptVisualization() {
+            const canvas = document.getElementById('conceptCanvas');
+            if (!canvas) return;
+            
+            const { ctx, width, height } = setupCanvas(canvas);
+            
+            // 清空画布
+            ctx.clearRect(0, 0, width, height);
+            
+            // 绘制网格和坐标轴
+            drawGrid(ctx, width, height);
+            drawAxes(ctx, width, height);
+            
+            // 获取滑块值
+            const xValue = parseFloat(document.getElementById('xSlider').value);
+            
+            // 定义函数 f(x) = x^2
+            const f = (x) => x * x;
+            const df = (x) => 2 * x; // 导数
+            
+            // 数学坐标范围
+            const xRange = [-3, 3];
+            const yRange = [-1, 9];
+            
+            // 绘制函数曲线
+            ctx.strokeStyle = '#4f46e5';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            
+            for (let i = 0; i <= 100; i++) {
+                const x = xRange[0] + (xRange[1] - xRange[0]) * i / 100;
+                const y = f(x);
+                const point = mathToCanvas(x, y, width, height, xRange, yRange);
+                
+                if (i === 0) ctx.moveTo(point.x, point.y);
+                else ctx.lineTo(point.x, point.y);
+            }
+            ctx.stroke();
+            
+            // 计算切点
+            const y0 = f(xValue);
+            const slope = df(xValue);
+            
+            // 绘制切线
+            ctx.strokeStyle = '#ef4444';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            
+            const tangentX1 = xValue - 1.5;
+            const tangentX2 = xValue + 1.5;
+            const tangentY1 = y0 + slope * (tangentX1 - xValue);
+            const tangentY2 = y0 + slope * (tangentX2 - xValue);
+            
+            const p1 = mathToCanvas(tangentX1, tangentY1, width, height, xRange, yRange);
+            const p2 = mathToCanvas(tangentX2, tangentY2, width, height, xRange, yRange);
+            
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.stroke();
+            
+            // 绘制切点
+            const point = mathToCanvas(xValue, y0, width, height, xRange, yRange);
+            ctx.fillStyle = '#10b981';
+            ctx.beginPath();
+            ctx.arc(point.x, point.y, 5, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 更新导数值显示
+            document.getElementById('derivativeValue').innerHTML = 
+                `导数值 f'(${xValue.toFixed(1)}) = ${slope.toFixed(1)}`;
+        }
+
+        // ==========================================
+        // 极限理解页面的可视化
+        // ==========================================
+        function drawLimitVisualization() {
+            const canvas = document.getElementById('limitCanvas');
+            if (!canvas) return;
+            
+            const { ctx, width, height } = setupCanvas(canvas);
+            
+            // 清空画布
+            ctx.clearRect(0, 0, width, height);
+            
+            // 绘制网格和坐标轴
+            drawGrid(ctx, width, height);
+            drawAxes(ctx, width, height);
+            
+            // 获取函数类型和Δx
+            const funcSelect = document.getElementById('funcSelect');
+            const deltaX = parseFloat(document.getElementById('deltaSlider').value);
+            
+            // 定义函数
+            let f, df;
+            switch (funcSelect.value) {
+                case 'quadratic':
+                    f = (x) => x * x;
+                    df = (x) => 2 * x;
+                    break;
+                case 'cubic':
+                    f = (x) => x * x * x / 3;
+                    df = (x) => x * x;
+                    break;
+                case 'sqrt':
+                    f = (x) => Math.sqrt(x + 2);
+                    df = (x) => 1 / (2 * Math.sqrt(x + 2));
+                    break;
+            }
+            
+            const x0 = 1; // 固定点
+            const xRange = [-1, 4];
+            const yRange = [-1, 5];
+            
+            // 绘制函数曲线
+            ctx.strokeStyle = '#4f46e5';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            
+            for (let i = 0; i <= 100; i++) {
+                const x = xRange[0] + (xRange[1] - xRange[0]) * i / 100;
+                const y = f(x);
+                const point = mathToCanvas(x, y, width, height, xRange, yRange);
+                
+                if (i === 0) ctx.moveTo(point.x, point.y);
+                else ctx.lineTo(point.x, point.y);
+            }
+            ctx.stroke();
+            
+            // 绘制割线（平均变化率）
+            const x1 = x0 + deltaX;
+            const y0 = f(x0);
+            const y1 = f(x1);
+            const avgSlope = (y1 - y0) / deltaX;
+            
+            ctx.strokeStyle = '#10b981';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            
+            const secantX1 = x0 - 0.5;
+            const secantX2 = x1 + 0.5;
+            const secantY1 = y0 + avgSlope * (secantX1 - x0);
+            const secantY2 = y0 + avgSlope * (secantX2 - x0);
+            
+            const sp1 = mathToCanvas(secantX1, secantY1, width, height, xRange, yRange);
+            const sp2 = mathToCanvas(secantX2, secantY2, width, height, xRange, yRange);
+            
+            ctx.moveTo(sp1.x, sp1.y);
+            ctx.lineTo(sp2.x, sp2.y);
+            ctx.stroke();
+            
+            // 绘制切线（瞬时变化率）
+            const instantSlope = df(x0);
+            
+            ctx.strokeStyle = '#ef4444';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            
+            const tangentX1 = x0 - 1;
+            const tangentX2 = x0 + 2;
+            const tangentY1 = y0 + instantSlope * (tangentX1 - x0);
+            const tangentY2 = y0 + instantSlope * (tangentX2 - x0);
+            
+            const tp1 = mathToCanvas(tangentX1, tangentY1, width, height, xRange, yRange);
+            const tp2 = mathToCanvas(tangentX2, tangentY2, width, height, xRange, yRange);
+            
+            ctx.moveTo(tp1.x, tp1.y);
+            ctx.lineTo(tp2.x, tp2.y);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            // 绘制两个点
+            const point0 = mathToCanvas(x0, y0, width, height, xRange, yRange);
+            const point1 = mathToCanvas(x1, y1, width, height, xRange, yRange);
+            
+            ctx.fillStyle = '#ef4444';
+            ctx.beginPath();
+            ctx.arc(point0.x, point0.y, 5, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.fillStyle = '#10b981';
+            ctx.beginPath();
+            ctx.arc(point1.x, point1.y, 5, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 更新显示
+            document.getElementById('convergenceResult').textContent = 
+                `当前割线斜率：${avgSlope.toFixed(2)} → 极限值：${instantSlope.toFixed(2)}`;
+        }
+
+        // ==========================================
+        // 切线意义页面的可视化
+        // ==========================================
+        function drawTangentVisualization() {
+            const canvas = document.getElementById('tangentCanvas');
+            if (!canvas) return;
+            
+            const { ctx, width, height } = setupCanvas(canvas);
+            
+            // 清空画布
+            ctx.clearRect(0, 0, width, height);
+            
+            // 绘制网格和坐标轴
+            drawGrid(ctx, width, height);
+            drawAxes(ctx, width, height);
+            
+            // 获取函数类型和x值
+            const funcType = document.getElementById('tangentFunc').value;
+            const xValue = parseFloat(document.getElementById('tangentSlider').value);
+            
+            // 定义不同类型的函数
+            let f, df, xRange, yRange;
+            switch (funcType) {
+                case 'parabola':
+                    f = (x) => -0.5 * x * x + 2;
+                    df = (x) => -x;
+                    xRange = [-4, 4];
+                    yRange = [-6, 4];
+                    break;
+                case 'cubic':
+                    f = (x) => 0.2 * x * x * x;
+                    df = (x) => 0.6 * x * x;
+                    xRange = [-4, 4];
+                    yRange = [-5, 5];
+                    break;
+                case 'sine':
+                    f = (x) => 2 * Math.sin(x);
+                    df = (x) => 2 * Math.cos(x);
+                    xRange = [-4, 4];
+                    yRange = [-3, 3];
+                    break;
+                case 'exponential':
+                    f = (x) => Math.exp(x * 0.5);
+                    df = (x) => 0.5 * Math.exp(x * 0.5);
+                    xRange = [-4, 4];
+                    yRange = [-1, 8];
+                    break;
+            }
+            
+            // 绘制函数曲线
+            ctx.strokeStyle = '#4f46e5';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            
+            for (let i = 0; i <= 200; i++) {
+                const x = xRange[0] + (xRange[1] - xRange[0]) * i / 200;
+                const y = f(x);
+                const point = mathToCanvas(x, y, width, height, xRange, yRange);
+                
+                if (i === 0) ctx.moveTo(point.x, point.y);
+                else ctx.lineTo(point.x, point.y);
+            }
+            ctx.stroke();
+            
+            // 计算切点和切线
+            const y0 = f(xValue);
+            const slope = df(xValue);
+            
+            // 绘制切线
+            ctx.strokeStyle = '#ef4444';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            
+            const tangentLength = 2;
+            const tangentX1 = xValue - tangentLength;
+            const tangentX2 = xValue + tangentLength;
+            const tangentY1 = y0 + slope * (tangentX1 - xValue);
+            const tangentY2 = y0 + slope * (tangentX2 - xValue);
+            
+            const p1 = mathToCanvas(tangentX1, tangentY1, width, height, xRange, yRange);
+            const p2 = mathToCanvas(tangentX2, tangentY2, width, height, xRange, yRange);
+            
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.stroke();
+            
+            // 绘制切点
+            const point = mathToCanvas(xValue, y0, width, height, xRange, yRange);
+            ctx.fillStyle = '#10b981';
+            ctx.beginPath();
+            ctx.arc(point.x, point.y, 6, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 更新信息
+            let slopeInfo;
+            if (Math.abs(slope) < 0.01) {
+                slopeInfo = '斜率 ≈ 0（水平切线）';
+            } else if (slope > 0) {
+                slopeInfo = `斜率 = ${slope.toFixed(2)}（函数递增）`;
+            } else {
+                slopeInfo = `斜率 = ${slope.toFixed(2)}（函数递减）`;
+            }
+            
+            document.getElementById('tangentInfo').innerHTML = 
+                `在 x = ${xValue.toFixed(1)} 处：f'(${xValue.toFixed(1)}) = ${slope.toFixed(2)}<br>${slopeInfo}`;
+            
+            document.getElementById('tangentResult').textContent = 
+                `当前切线：y = ${slope.toFixed(2)}x + ${(y0 - slope * xValue).toFixed(2)}`;
+        }
+
+        // ==========================================
+        // 实践应用页面的可视化
+        // ==========================================
+        function drawApplicationVisualization() {
+            const canvas = document.getElementById('applicationCanvas');
+            if (!canvas) return;
+            
+            const { ctx, width, height } = setupCanvas(canvas);
+            
+            // 清空画布
+            ctx.clearRect(0, 0, width, height);
+            
+            // 绘制网格和坐标轴
+            drawGrid(ctx, width, height);
+            drawAxes(ctx, width, height);
+            
+            const appType = document.getElementById('appSelect').value;
+            
+            switch (appType) {
+                case 'motion':
+                    drawMotionApplication(ctx, width, height);
+                    break;
+                case 'growth':
+                    drawGrowthApplication(ctx, width, height);
+                    break;
+                case 'cost':
+                    drawCostApplication(ctx, width, height);
+                    break;
+                case 'temperature':
+                    drawTemperatureApplication(ctx, width, height);
+                    break;
+            }
+        }
+
+        // 绘制物体运动应用
+        function drawMotionApplication(ctx, width, height) {
+            const xRange = [0, 5];
+            const yRange = [-30, 30];
+            
+            // 位置函数 s(t) = 5t² - 20t + 15
+            const s = (t) => 5 * t * t - 20 * t + 15;
+            const v = (t) => 10 * t - 20;  // 速度（一阶导数）
+            const a = (t) => 10;  // 加速度（二阶导数）
+            
+            // 绘制位置曲线
+            ctx.strokeStyle = '#4f46e5';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            
+            for (let i = 0; i <= 100; i++) {
+                const t = xRange[0] + (xRange[1] - xRange[0]) * i / 100;
+                const pos = s(t);
+                const point = mathToCanvas(t, pos, width, height, xRange, yRange);
+                
+                if (i === 0) ctx.moveTo(point.x, point.y);
+                else ctx.lineTo(point.x, point.y);
+            }
+            ctx.stroke();
+            
+            // 绘制速度曲线
+            ctx.strokeStyle = '#10b981';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            
+            for (let i = 0; i <= 100; i++) {
+                const t = xRange[0] + (xRange[1] - xRange[0]) * i / 100;
+                const vel = v(t);
+                const point = mathToCanvas(t, vel, width, height, xRange, yRange);
+                
+                if (i === 0) ctx.moveTo(point.x, point.y);
+                else ctx.lineTo(point.x, point.y);
+            }
+            ctx.stroke();
+            
+            // 添加图例标注
+            ctx.font = '12px Arial';
+            ctx.fillStyle = '#4f46e5';
+            ctx.fillText('位置 s(t)', width - 100, 30);
+            ctx.fillStyle = '#10b981';
+            ctx.fillText('速度 v(t)', width - 100, 45);
+            
+            document.getElementById('appInfo').textContent = 
+                '蓝线：位置函数，绿线：速度函数（位置的导数）';
+        }
+
+        // 绘制人口增长应用
+        function drawGrowthApplication(ctx, width, height) {
+            const xRange = [0, 10];
+            const yRange = [0, 150];
+            
+            // 指数增长模型 P(t) = P₀ * e^(rt)
+            const P0 = 10;
+            const r = 0.3;
+            const P = (t) => P0 * Math.exp(r * t);
+            const dP = (t) => P0 * r * Math.exp(r * t);  // 增长率
+            
+            // 绘制人口曲线
+            ctx.strokeStyle = '#4f46e5';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            
+            for (let i = 0; i <= 100; i++) {
+                const t = xRange[0] + (xRange[1] - xRange[0]) * i / 100;
+                const pop = P(t);
+                const point = mathToCanvas(t, pop, width, height, xRange, yRange);
+                
+                if (i === 0) ctx.moveTo(point.x, point.y);
+                else ctx.lineTo(point.x, point.y);
+            }
+            ctx.stroke();
+            
+            // 绘制增长率曲线
+            ctx.strokeStyle = '#ef4444';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            
+            for (let i = 0; i <= 100; i++) {
+                const t = xRange[0] + (xRange[1] - xRange[0]) * i / 100;
+                const rate = dP(t);
+                const point = mathToCanvas(t, rate, width, height, xRange, yRange);
+                
+                if (i === 0) ctx.moveTo(point.x, point.y);
+                else ctx.lineTo(point.x, point.y);
+            }
+            ctx.stroke();
+            
+            document.getElementById('appInfo').textContent = 
+                '蓝线：人口数量，红线：增长速度（越来越快）';
+        }
+
+        // 绘制成本分析应用
+        function drawCostApplication(ctx, width, height) {
+            const xRange = [0, 6];
+            const yRange = [0, 200];
+            
+            // 成本函数 C(x) = x³ - 6x² + 15x + 100
+            const C = (x) => x * x * x - 6 * x * x + 15 * x + 100;
+            const MC = (x) => 3 * x * x - 12 * x + 15;  // 边际成本
+            
+            // 绘制总成本曲线
+            ctx.strokeStyle = '#4f46e5';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            
+            for (let i = 0; i <= 100; i++) {
+                const x = xRange[0] + (xRange[1] - xRange[0]) * i / 100;
+                const cost = C(x);
+                const point = mathToCanvas(x, cost, width, height, xRange, yRange);
+                
+                if (i === 0) ctx.moveTo(point.x, point.y);
+                else ctx.lineTo(point.x, point.y);
+            }
+            ctx.stroke();
+            
+            // 绘制边际成本曲线
+            ctx.strokeStyle = '#f59e0b';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            
+            for (let i = 0; i <= 100; i++) {
+                const x = xRange[0] + (xRange[1] - xRange[0]) * i / 100;
+                const marginal = MC(x) * 2;  // 放大以便观察
+                const point = mathToCanvas(x, marginal, width, height, xRange, yRange);
+                
+                if (i === 0) ctx.moveTo(point.x, point.y);
+                else ctx.lineTo(point.x, point.y);
+            }
+            ctx.stroke();
+            
+            // 标记最优点
+            const x_optimal = 2;  // MC = 0 的解
+            const y_optimal = C(x_optimal);
+            const point = mathToCanvas(x_optimal, y_optimal, width, height, xRange, yRange);
+            
+            ctx.fillStyle = '#ef4444';
+            ctx.beginPath();
+            ctx.arc(point.x, point.y, 5, 0, Math.PI * 2);
+            ctx.fill();
+            
+            document.getElementById('appInfo').textContent = 
+                '蓝线：总成本，橙线：边际成本×2，红点：成本最优点';
+        }
+
+        // 绘制温度变化应用
+        function drawTemperatureApplication(ctx, width, height) {
+            const xRange = [0, 24];
+            const yRange = [10, 30];
+            
+            // 温度函数（正弦模拟日变化）
+            const T = (t) => 20 + 5 * Math.sin((t - 6) * Math.PI / 12);
+            const dT = (t) => 5 * Math.PI / 12 * Math.cos((t - 6) * Math.PI / 12);
+            
+            // 绘制温度曲线
+            ctx.strokeStyle = '#4f46e5';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            
+            for (let i = 0; i <= 100; i++) {
+                const t = xRange[0] + (xRange[1] - xRange[0]) * i / 100;
+                const temp = T(t);
+                const point = mathToCanvas(t, temp, width, height, xRange, yRange);
+                
+                if (i === 0) ctx.moveTo(point.x, point.y);
+                else ctx.lineTo(point.x, point.y);
+            }
+            ctx.stroke();
+            
+            // 标记关键时刻
+            const times = [6, 12, 18];
+            const labels = ['早上6点', '中午12点', '晚上6点'];
+            
+            times.forEach((t, i) => {
+                const temp = T(t);
+                const point = mathToCanvas(t, temp, width, height, xRange, yRange);
+                
+                ctx.fillStyle = '#ef4444';
+                ctx.beginPath();
+                ctx.arc(point.x, point.y, 4, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.fillStyle = '#374151';
+                ctx.font = '10px Arial';
+                ctx.fillText(labels[i], point.x - 20, point.y - 10);
+            });
+            
+            document.getElementById('appInfo').textContent = 
+                '一天24小时的温度变化，导数表示升温/降温速度';
+        }
+
+        // ==========================================
+        // 页面切换功能
+        // ==========================================
+        function switchPanel(panel) {
+            // 移除所有active类
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+            
+            // 添加active类
+            event.target.classList.add('active');
+            document.getElementById(panel).classList.add('active');
+            
+            // 延迟渲染，避免卡顿
+            setTimeout(() => {
+                renderMath();
+                
+                // 根据不同页面初始化
+                switch (panel) {
+                    case 'concept':
+                        drawConceptVisualization();
+                        break;
+                    case 'limit':
+                        updateLimit();
+                        drawLimitVisualization();
+                        break;
+                    case 'tangent':
+                        updateTangent();
+                        drawTangentVisualization();
+                        break;
+                    case 'practice':
+                        updateApplication();
+                        drawApplicationVisualization();
+                        updateMotion();
+                        break;
+                }
+            }, 50);
+        }
+
+        // ==========================================
+        // 更新极限页面
+        // ==========================================
+        function updateLimit() {
+            const funcSelect = document.getElementById('funcSelect').value;
+            const deltaX = parseFloat(document.getElementById('deltaSlider').value);
+            
+            // 更新Δx显示
+            document.getElementById('deltaValue').textContent = deltaX.toFixed(2);
+            
+            // 定义函数
+            let f, df, funcName;
+            switch (funcSelect) {
+                case 'quadratic':
+                    f = (x) => x * x;
+                    df = (x) => 2 * x;
+                    funcName = 'x²';
+                    break;
+                case 'cubic':
+                    f = (x) => x * x * x / 3;
+                    df = (x) => x * x;
+                    funcName = 'x³/3';
+                    break;
+                case 'sqrt':
+                    f = (x) => Math.sqrt(x + 2);
+                    df = (x) => 1 / (2 * Math.sqrt(x + 2));
+                    funcName = '√(x+2)';
+                    break;
+            }
+            
+            const x0 = 1;
+            const x1 = x0 + deltaX;
+            const y0 = f(x0);
+            const y1 = f(x1);
+            const avgRate = (y1 - y0) / deltaX;
+            const instantRate = df(x0);
+            
+            // 更新公式显示
+            document.getElementById('limitFormula').innerHTML = 
+                `平均变化率 = $\\frac{f(${x0} + ${deltaX.toFixed(2)}) - f(${x0})}{${deltaX.toFixed(2)}}$ = ${avgRate.toFixed(2)}`;
+            
+            // 更新变化率列表
+            document.getElementById('rate1').textContent = ((f(x0 + 1) - f(x0)) / 1).toFixed(2);
+            document.getElementById('rate2').textContent = ((f(x0 + 0.5) - f(x0)) / 0.5).toFixed(2);
+            document.getElementById('rate3').textContent = ((f(x0 + 0.1) - f(x0)) / 0.1).toFixed(2);
+            document.getElementById('instantRate').textContent = instantRate.toFixed(2);
+            
+            renderMath();
+            drawLimitVisualization();
+        }
+
+        // ==========================================
+        // 动画功能
+        // ==========================================
+        let animationId = null;
+        
+        function startAnimation() {
+            if (animationId) return;
+            
+            let delta = 2.0;
+            const step = 0.02;
+            
+            function animate() {
+                delta -= step;
+                if (delta < 0.01) {
+                    delta = 0.01;
+                    cancelAnimationFrame(animationId);
+                    animationId = null;
+                    document.getElementById('animationInfo').textContent = 
+                        '动画完成！Δx已经接近0';
+                    return;
+                }
+                
+                document.getElementById('deltaSlider').value = delta;
+                document.getElementById('deltaValue').textContent = delta.toFixed(2);
+                updateLimit();
+                
+                document.getElementById('animationInfo').textContent = 
+                    `Δx = ${delta.toFixed(2)}，观察割线逐渐接近切线`;
+                
+                animationId = requestAnimationFrame(animate);
+            }
+            
+            animate();
+        }
+        
+        function resetAnimation() {
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+                animationId = null;
+            }
+            document.getElementById('deltaSlider').value = 1;
+            document.getElementById('deltaValue').textContent = '1.00';
+            updateLimit();
+            document.getElementById('animationInfo').textContent = 
+                '点击"开始动画"观看 Δx 逐渐变小的过程';
+        }
+
+        // ==========================================
+        // 更新切线页面
+        // ==========================================
+        function updateTangent() {
+            drawTangentVisualization();
+        }
+
+        // ==========================================
+        // 更新应用页面
+        // ==========================================
+        function updateApplication() {
+            drawApplicationVisualization();
+        }
+        
+        // 更新运动分析
+        function updateMotion() {
+            const t = parseFloat(document.getElementById('timeSlider').value);
+            document.getElementById('timeValue').textContent = t.toFixed(1);
+            
+            // 位置函数 s(t) = 5t² - 20t + 15
+            const s = 5 * t * t - 20 * t + 15;
+            const v = 10 * t - 20;
+            
+            document.getElementById('motionResult').innerHTML = 
+                `t = ${t.toFixed(1)}秒时：位置 = ${s.toFixed(1)}m，速度 = ${v.toFixed(1)} m/s`;
+        }
+        
+        // 求最优产量
+        function findOptimal() {
+            // 边际成本 C'(x) = 3x² - 12x + 15
+            // 令 C'(x) = 0，求解二次方程
+            // 使用二次公式：x = (12 ± √(144-180))/6
+            // 由于判别式为负，没有实数解，找最小值点
+            
+            // 二阶导数 C''(x) = 6x - 12
+            // 令 C''(x) = 0，得 x = 2
+            
+            const x_optimal = 2;
+            const C = (x) => x * x * x - 6 * x * x + 15 * x + 100;
+            const cost_optimal = C(x_optimal);
+            
+            document.getElementById('optimalResult').innerHTML = 
+                `最优产量：x = ${x_optimal} 单位<br>` +
+                `此时成本：C = ${cost_optimal.toFixed(2)} 元<br>` +
+                `<span style="color: #10b981;">这是成本的局部最小值点</span>`;
+        }
+
+        // ==========================================
+        // 滑块事件监听
+        // ==========================================
+        document.getElementById('xSlider')?.addEventListener('input', function() {
+            document.getElementById('xValue').textContent = parseFloat(this.value).toFixed(1);
+            drawConceptVisualization();
+        });
+        
+        document.getElementById('deltaSlider')?.addEventListener('input', function() {
+            updateLimit();
+        });
+        
+        document.getElementById('tangentSlider')?.addEventListener('input', function() {
+            document.getElementById('tangentXValue').textContent = parseFloat(this.value).toFixed(1);
+            drawTangentVisualization();
+        });
+        
+        document.getElementById('timeSlider')?.addEventListener('input', function() {
+            updateMotion();
+        });
+
+        // ==========================================
+        // 技巧6：响应式重绘，避免频繁重绘
+        // ==========================================
+        let resizeTimeout;
+        window.addEventListener('resize', function() {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                const activePanel = document.querySelector('.content.active');
+                if (activePanel) {
+                    const panelId = activePanel.id;
+                    switch (panelId) {
+                        case 'concept':
+                            drawConceptVisualization();
+                            break;
+                        case 'limit':
+                            drawLimitVisualization();
+                            break;
+                        case 'tangent':
+                            drawTangentVisualization();
+                            break;
+                        case 'practice':
+                            drawApplicationVisualization();
+                            break;
+                    }
+                }
+            }, 150);
+        });
+
+        // ==========================================
+        // 初始化
+        // ==========================================
+        window.addEventListener('DOMContentLoaded', function() {
+            // 延迟初始化，避免阻塞
+            setTimeout(() => {
+                drawConceptVisualization();
+                renderMath();
+            }, 100);
+        });
+
+        function toggleReturnLinks() { const p = document.querySelector('.return-links'); if (!p) return; if (p.style.display === 'flex') { p.style.opacity = '0'; setTimeout(() => p.style.display = 'none', 160); } else { p.style.display = 'flex'; requestAnimationFrame(() => p.style.opacity = '1'); } }
+    </script>
+</body>
+</html>

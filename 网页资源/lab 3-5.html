@@ -1,0 +1,1068 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>微分实验室 - 以直代曲</title>
+    
+    <!-- MathJax配置 -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            }
+        };
+    </script>
+    <script src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js" defer></script>
+    
+    <style>
+        /* 用户要求：字号统一 */
+        :root {
+            --h1-size: 22px;      
+            --h2-size: 20px;      
+            --h3-size: 18px;      
+            --btn-size: 16px;     
+            --formula-size: 20px; 
+            --text-size: 16px;
+            
+            --primary: #4f46e5;
+            --primary-light: #6366f1;
+            --primary-dark: #3730a3;
+            --light: #ffffff;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-600: #4b5563;
+            --gray-800: #1f2937;
+            --border: #e5e7eb;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #06b6d4;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* 滚动条生效但不显示 */
+        *::-webkit-scrollbar {
+            width: 0;
+            background: transparent;
+        }
+        
+        * {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
+            font-size: var(--text-size);
+            line-height: 1.5;
+            background: var(--gray-50);
+            color: var(--gray-800);
+        }
+
+        /* 横向布局（宽是高的2倍），压缩高度 */
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            height: 100vh;
+            max-height: 700px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            background: var(--light);
+        }
+
+        .header {
+            background: var(--primary);
+            color: var(--light);
+            padding: 8px 20px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: var(--h2-size);
+            margin: 0;
+        }
+
+        .main {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* 侧边栏不动 */
+        .sidebar {
+            width: 120px;
+            background: var(--gray-50);
+            border-right: 1px solid var(--border);
+            padding: 10px 8px;
+        }
+
+        .nav-btn {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 4px;
+            background: transparent;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: var(--text-size);
+            color: var(--gray-600);
+            text-align: left;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover {
+            background: var(--gray-100);
+        }
+
+        .nav-btn.active {
+            background: var(--primary);
+            color: var(--light);
+        }
+
+        /* 最多左右两栏，必须有可视化 */
+        .content {
+            flex: 1;
+            display: none;
+            padding: 16px;
+            overflow-y: auto;
+        }
+
+        .content.active {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow-y: auto;
+        }
+
+        .card {
+            background: var(--light);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .card h3 {
+            font-size: var(--h3-size);
+            color: var(--primary);
+            margin-bottom: 12px;
+        }
+
+        /* 核心概念框 - 黄色 */
+        .key-concept {
+            background: #fef3c7;
+            border: 2px solid var(--warning);
+            padding: 12px;
+            border-radius: 6px;
+            margin: 12px 0;
+            text-align: center;
+            font-size: var(--formula-size);
+            font-weight: bold;
+        }
+
+        /* 生活例子框 - 绿色 */
+        .life-example {
+            background: #d1fae5;
+            border: 2px solid var(--success);
+            padding: 15px;
+            border-radius: 6px;
+            margin: 12px 0;
+        }
+
+        /* 公式框 - 蓝色 */
+        .formula-box {
+            background: #dbeafe;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid var(--primary);
+            margin: 12px 0;
+            text-align: center;
+            font-size: var(--formula-size);
+        }
+
+        /* 步骤说明 */
+        .steps {
+            background: #fff9e6;
+            padding: 12px;
+            border-radius: 4px;
+            border-left: 3px solid #f59e0b;
+            line-height: 1.8;
+            font-size: var(--text-size);
+            margin: 12px 0;
+        }
+
+        /* 画布容器 */
+        .canvas-container {
+            border: 1px solid var(--gray-200);
+            border-radius: 4px;
+            background: #fafafa;
+            padding: 10px;
+            min-height: 200px;
+            max-height: 400px;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .canvas-container canvas {
+            max-width: 100%;
+            max-height: 100%;
+            display: block;
+            margin: 0 auto;
+        }
+
+        /* 滑块控制 */
+        .slider-group {
+            margin: 12px 0;
+        }
+
+        .slider-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+
+        .slider-group input[type="range"] {
+            width: 100%;
+            margin: 8px 0;
+        }
+
+        .value-display {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-left: 8px;
+            font-size: 14px;
+        }
+
+        /* 对比显示 */
+        .comparison-box {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin: 12px 0;
+        }
+
+        .comparison-item {
+            padding: 12px;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .comparison-item.real {
+            background: #fee2e2;
+            border: 2px solid var(--danger);
+        }
+
+        .comparison-item.approx {
+            background: #dbeafe;
+            border: 2px solid var(--info);
+        }
+
+        .comparison-item .label {
+            font-size: 14px;
+            color: var(--gray-600);
+            margin-bottom: 4px;
+        }
+
+        .comparison-item .value {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        /* 信息提示框 */
+        .info-box {
+            background: var(--gray-50);
+            padding: 12px;
+            border-radius: 4px;
+            margin: 12px 0;
+            border-left: 3px solid var(--info);
+        }
+
+        /* 强调文字 */
+        .highlight {
+            color: var(--danger);
+            font-weight: bold;
+        }
+
+        .highlight-blue {
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        /* 按钮 */
+        .btn {
+            padding: 8px 16px;
+            background: var(--primary);
+            color: var(--light);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: var(--btn-size);
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            background: var(--primary-dark);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .main {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+                padding: 8px 16px;
+                display: flex;
+                flex-direction: row;
+                gap: 8px;
+                overflow-x: auto;
+            }
+
+            .nav-btn {
+                min-width: 90px;
+                text-align: center;
+                white-space: nowrap;
+            }
+
+            .content.active {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                max-height: none;
+                height: 100vh;
+            }
+        }
+
+        .return-home-panel { position: fixed; bottom: 12px; right: 12px; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; z-index: 40; }
+        .return-toggle { width: 40px; height: 40px; border-radius: 50%; border: none; background: linear-gradient(135deg, rgba(79,70,229,0.96), rgba(99,102,241,0.9)); color: #fff; font-size: 20px; cursor: pointer; box-shadow: 0 10px 18px rgba(79,70,229,0.28); transition: transform 0.2s, box-shadow 0.2s; }
+        .return-toggle:hover { transform: translateY(-1px) scale(1.03); box-shadow: 0 14px 26px rgba(79,70,229,0.35); }
+        .return-links { display: none; flex-direction: column; gap: 6px; padding: 10px; border-radius: 10px; background: rgba(255,255,255,0.96); border: 1px solid rgba(79,70,229,0.18); box-shadow: 0 10px 30px rgba(15,23,42,0.14); opacity: 0; transition: opacity 0.16s; }
+        .return-link { text-decoration: none; font-size: 15px; color: var(--primary-dark); padding: 6px 12px; border-radius: 8px; background: rgba(99,102,241,0.12); transition: background 0.2s; }
+        .return-link:hover { background: rgba(79,70,229,0.18); }
+    </style>
+
+
+</head>
+<body>
+    <div class="return-home-panel"><button class="return-toggle" onclick="toggleReturnLinks()"><i class="fa-solid fa-house"></i></button><div class="return-links"><a class="return-link" href="index.html"><i class="fa-solid fa-arrow-left"></i> 返回目录</a><a class="return-link" href="../index.html"><i class="fa-solid fa-house"></i> 返回主站</a></div></div>
+
+    <div class="container">
+        <header class="header">
+            <h1>微分：以直代曲的奥秘</h1>
+        </header>
+
+        <div class="main">
+            <!-- 侧边栏 -->
+            <nav class="sidebar">
+                <button class="nav-btn active" onclick="switchPanel('concept')">核心概念</button>
+                <button class="nav-btn" onclick="switchPanel('zoom')">放大观察</button>
+                <button class="nav-btn" onclick="switchPanel('practice')">动手实验</button>
+                <button class="nav-btn" onclick="switchPanel('apply')">实际应用</button>
+            </nav>
+
+            <!-- 核心概念页面 -->
+            <div class="content active" id="concept">
+                <div class="column">
+                    <div class="card">
+                        <h3>🔍 微分的本质：以直代曲</h3>
+                        
+                        <div class="key-concept">
+                            在足够小的范围内<br>
+                            任何曲线都可以用直线来近似
+                        </div>
+
+                        <div class="life-example">
+                            <strong>🗺️ 地图比喻：</strong><br>
+                            看世界地图时，国家边界是弯曲的；<br>
+                            但看你家附近的街道地图时，道路就是直的。<br><br>
+                            <strong>原理：</strong>放大看局部，曲线变直线！
+                        </div>
+
+                        <div class="steps">
+                            <strong>微分的意义：</strong><br>
+                            • 用<span class="highlight">简单的直线</span>计算<br>
+                            • 代替<span class="highlight">复杂的曲线</span>计算<br>
+                            • 当范围足够小时，误差可以忽略
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3><i class="fa-solid fa-drafting-compass"></i> 两个重要的量</h3>
+                        
+                        <div class="comparison-box">
+                            <div class="comparison-item real">
+                                <div class="label">真实改变量</div>
+                                <div class="value">Δy</div>
+                                <div class="label">沿曲线</div>
+                            </div>
+                            <div class="comparison-item approx">
+                                <div class="label">微分(近似)</div>
+                                <div class="value">dy</div>
+                                <div class="label">沿切线</div>
+                            </div>
+                        </div>
+
+                        <div class="formula-box">
+                            当 dx 很小时：Δy ≈ dy
+                        </div>
+                    </div>
+                </div>
+
+                <div class="column">
+                    <div class="card">
+                        <h3><i class="fa-solid fa-chart-bar"></i> 图解：曲与直</h3>
+                        
+                        <div class="canvas-container">
+                            <canvas id="conceptCanvas" width="500" height="350"></canvas>
+                        </div>
+
+                        <div class="info-box">
+                            <strong>观察要点：</strong><br>
+                            • <span class="highlight">红色</span>：真实的曲线路径（Δy）<br>
+                            • <span class="highlight-blue">蓝色</span>：切线的直线路径（dy）<br>
+                            • 当 dx 变小，两者越来越接近
+                        </div>
+
+                        <div class="formula-box">
+                            微分公式：dy = f'(x) · dx
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 放大观察页面 -->
+            <div class="content" id="zoom">
+                <div class="column">
+                    <div class="card">
+                        <h3>🔍 放大实验</h3>
+                        
+                        <div class="key-concept">
+                            拖动滑块，观察曲线如何变直
+                        </div>
+
+                        <div class="slider-group">
+                            <label>
+                                放大倍数
+                                <span class="value-display" id="zoomValue">1x</span>
+                            </label>
+                            <input type="range" id="zoomSlider" min="1" max="100" value="1" step="1">
+                        </div>
+
+                        <div class="steps">
+                            <strong>观察要点：</strong><br>
+                            <i class="fa-solid fa-circle-1"></i> 放大倍数 = 1x：明显看到曲线<br>
+                            <i class="fa-solid fa-circle-2"></i> 放大倍数 = 50x：曲线开始变直<br>
+                            <i class="fa-solid fa-circle-3"></i> 放大倍数 = 100x：几乎是直线了！
+                        </div>
+
+                        <div class="life-example">
+                            <strong>现实例子：</strong><br>
+                            地球是圆的，但你站在地面上，<br>
+                            看到的地平线是直的。<br>
+                            因为相对地球，你太"微小"了！
+                        </div>
+                    </div>
+                </div>
+
+                <div class="column">
+                    <div class="card">
+                        <h3>👁️ 放大可视化</h3>
+                        
+                        <div class="canvas-container" style="min-height: 350px;">
+                            <canvas id="zoomCanvas" width="500" height="350"></canvas>
+                        </div>
+
+                        <div class="info-box">
+                            <strong>颜色说明：</strong><br>
+                            • <span class="highlight-blue">蓝色</span>：函数曲线<br>
+                            • <span class="highlight">红色</span>：切线（始终是直的）<br>
+                            • 黑点：观察点
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 动手实验页面 -->
+            <div class="content" id="practice">
+                <div class="column">
+                    <div class="card">
+                        <h3>🎮 交互实验</h3>
+                        
+                        <div class="info-box">
+                            调节参数，观察 Δy 和 dy 的关系
+                        </div>
+
+                        <div class="slider-group">
+                            <label>
+                                选择函数
+                            </label>
+                            <select id="funcSelect" style="width: 100%; padding: 6px; font-size: 16px;">
+                                <option value="x2">y = x²</option>
+                                <option value="sin">y = sin(x)</option>
+                                <option value="sqrt">y = √x</option>
+                            </select>
+                        </div>
+
+                        <div class="slider-group">
+                            <label>
+                                切点位置 x₀
+                                <span class="value-display" id="x0Value">1.0</span>
+                            </label>
+                            <input type="range" id="x0Slider" min="0.5" max="3" value="1" step="0.01">
+                        </div>
+
+                        <div class="slider-group">
+                            <label>
+                                增量 dx
+                                <span class="value-display" id="dxValue">0.5</span>
+                            </label>
+                            <input type="range" id="dxSlider" min="0.01" max="1.5" value="0.5" step="0.01">
+                        </div>
+
+                        <div class="comparison-box">
+                            <div class="comparison-item real">
+                                <div class="label">真实改变</div>
+                                <div class="value" id="deltaY">1.25</div>
+                                <div class="label">Δy</div>
+                            </div>
+                            <div class="comparison-item approx">
+                                <div class="label">微分近似</div>
+                                <div class="value" id="dy">1.00</div>
+                                <div class="label">dy</div>
+                            </div>
+                        </div>
+
+                        <div class="info-box">
+                            误差：<span id="error">0.25</span><br>
+                            <strong>试试让 dx 变小，误差会减小！</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="column">
+                    <div class="card">
+                        <h3><i class="fa-solid fa-chart-line"></i> 实验可视化</h3>
+                        
+                        <div class="canvas-container">
+                            <canvas id="practiceCanvas" width="500" height="350"></canvas>
+                        </div>
+
+                        <div class="steps">
+                            <strong>图解说明：</strong><br>
+                            • 黑色虚线：dx（水平增量）<br>
+                            • <span class="highlight">红色线</span>：Δy（真实改变量）<br>
+                            • <span class="highlight-blue">蓝色线</span>：dy（微分近似）<br>
+                            • 灰色虚线：切线
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 实际应用页面 -->
+            <div class="content" id="apply">
+                <div class="column">
+                    <div class="card">
+                        <h3>🧮 应用1：近似计算</h3>
+                        
+                        <div class="key-concept">
+                            不用计算器，快速估算 √9.1
+                        </div>
+
+                        <div class="steps">
+                            <strong>解题步骤：</strong><br>
+                            <i class="fa-solid fa-circle-1"></i> 函数：f(x) = √x<br>
+                            <i class="fa-solid fa-circle-2"></i> 基准点：x₀ = 9，f(9) = 3<br>
+                            <i class="fa-solid fa-circle-3"></i> 增量：dx = 0.1<br>
+                            4️⃣ 导数：f'(x) = 1/(2√x)<br>
+                            　　在x=9处：f'(9) = 1/6<br>
+                            5️⃣ 微分：dy = f'(9)·dx = 1/6 × 0.1 ≈ 0.0167<br>
+                            6️⃣ 近似值：√9.1 ≈ 3 + 0.0167 = 3.0167
+                        </div>
+
+                        <div class="life-example">
+                            <strong>✅ 验证：</strong><br>
+                            真实值：√9.1 = 3.01662...<br>
+                            我们的估算：3.0167<br>
+                            误差仅 0.00008！
+                        </div>
+                    </div>
+                </div>
+
+                <div class="column">
+                    <div class="card">
+                        <h3>📏 应用2：误差分析</h3>
+                        
+                        <div class="key-concept">
+                            测量误差如何传递？
+                        </div>
+
+                        <div class="life-example">
+                            <strong>问题：</strong><br>
+                            正方形边长 10cm，测量误差 ±0.1cm<br>
+                            面积误差是多少？
+                        </div>
+
+                        <div class="steps">
+                            <strong>分析过程：</strong><br>
+                            <i class="fa-solid fa-circle-1"></i> 面积函数：A = x²<br>
+                            <i class="fa-solid fa-circle-2"></i> 导数：A' = 2x<br>
+                            <i class="fa-solid fa-circle-3"></i> 在x=10处：A'(10) = 20<br>
+                            4️⃣ 误差传递：<br>
+                            　　dA = A'(10)·dx<br>
+                            　　dA = 20 × (±0.1) = ±2 cm²
+                        </div>
+
+                        <div class="formula-box">
+                            结论：0.1cm的小误差<br>
+                            导致2cm²的面积误差
+                        </div>
+
+                        <div class="info-box">
+                            <strong>启示：</strong><br>
+                            误差会被"放大"，放大倍数就是导数！
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // 页面切换
+        // ==========================================
+        function switchPanel(panel) {
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(panel).classList.add('active');
+            
+            // 延迟初始化对应页面
+            setTimeout(() => {
+                if (window.MathJax) {
+                    MathJax.typesetPromise();
+                }
+                
+                switch (panel) {
+                    case 'concept':
+                        drawConceptGraph();
+                        break;
+                    case 'zoom':
+                        initZoom();
+                        break;
+                    case 'practice':
+                        initPractice();
+                        break;
+                }
+            }, 100);
+        }
+
+        // ==========================================
+        // 概念页面
+        // ==========================================
+        function drawConceptGraph() {
+            const canvas = document.getElementById('conceptCanvas');
+            if (!canvas) return;
+            
+            const ctx = canvas.getContext('2d');
+            const width = 500;
+            const height = 350;
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            // 绘制坐标轴
+            ctx.strokeStyle = '#9ca3af';
+            ctx.lineWidth = 1;
+            
+            // X轴
+            ctx.beginPath();
+            ctx.moveTo(50, height - 50);
+            ctx.lineTo(width - 50, height - 50);
+            ctx.stroke();
+            
+            // Y轴
+            ctx.beginPath();
+            ctx.moveTo(50, 50);
+            ctx.lineTo(50, height - 50);
+            ctx.stroke();
+            
+            // 绘制函数曲线 y = x²
+            ctx.strokeStyle = '#4f46e5';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            
+            for (let px = 50; px < width - 50; px++) {
+                const x = (px - 50) / 80 - 1;
+                const y = x * x;
+                const py = height - 50 - y * 100;
+                
+                if (px === 50) {
+                    ctx.moveTo(px, py);
+                } else {
+                    ctx.lineTo(px, py);
+                }
+            }
+            ctx.stroke();
+            
+            // 选定点
+            const x0 = 1;
+            const y0 = 1;
+            const dx = 0.5;
+            const dy = 2 * x0 * dx; // 导数是2x
+            const deltaY = (x0 + dx) * (x0 + dx) - y0;
+            
+            const px0 = 50 + (x0 + 1) * 80;
+            const py0 = height - 50 - y0 * 100;
+            const px1 = 50 + (x0 + dx + 1) * 80;
+            const py1 = height - 50 - (y0 + deltaY) * 100;
+            
+            // 绘制切线
+            ctx.strokeStyle = '#6b7280';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(px0 - 50, py0 + 50);
+            ctx.lineTo(px0 + 100, py0 - 100);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            // 绘制 dx
+            ctx.strokeStyle = '#374151';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(px0, height - 40);
+            ctx.lineTo(px1, height - 40);
+            ctx.stroke();
+            ctx.fillStyle = '#374151';
+            ctx.font = '14px Arial';
+            ctx.fillText('dx', (px0 + px1) / 2 - 10, height - 25);
+            
+            // 绘制 Δy（红色）
+            ctx.strokeStyle = '#ef4444';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(px1, py0);
+            ctx.lineTo(px1, py1);
+            ctx.stroke();
+            ctx.fillStyle = '#ef4444';
+            ctx.fillText('Δy', px1 + 10, (py0 + py1) / 2);
+            
+            // 绘制 dy（蓝色）
+            const py_tangent = py0 - dy * 100;
+            ctx.strokeStyle = '#3b82f6';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(px1 - 20, py0);
+            ctx.lineTo(px1 - 20, py_tangent);
+            ctx.stroke();
+            ctx.fillStyle = '#3b82f6';
+            ctx.fillText('dy', px1 - 35, (py0 + py_tangent) / 2);
+            
+            // 标记切点
+            ctx.fillStyle = '#374151';
+            ctx.beginPath();
+            ctx.arc(px0, py0, 5, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // ==========================================
+        // 放大观察页面
+        // ==========================================
+        let zoomLevel = 1;
+
+        function initZoom() {
+            const slider = document.getElementById('zoomSlider');
+            slider.addEventListener('input', function() {
+                zoomLevel = parseFloat(this.value);
+                document.getElementById('zoomValue').textContent = zoomLevel + 'x';
+                drawZoomGraph();
+            });
+            drawZoomGraph();
+        }
+
+        function drawZoomGraph() {
+            const canvas = document.getElementById('zoomCanvas');
+            if (!canvas) return;
+            
+            const ctx = canvas.getContext('2d');
+            const width = 500;
+            const height = 350;
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            // 设置观察点
+            const focusX = 1;
+            const focusY = 0.5 * focusX * focusX; // y = 0.5x²
+            
+            ctx.save();
+            
+            // 平移到中心，然后缩放
+            ctx.translate(width / 2, height / 2);
+            ctx.scale(zoomLevel, zoomLevel);
+            ctx.translate(-focusX * 50, -focusY * 50);
+            
+            // 绘制函数曲线
+            ctx.strokeStyle = '#4f46e5';
+            ctx.lineWidth = 2 / zoomLevel;
+            ctx.beginPath();
+            
+            for (let x = -5; x <= 5; x += 0.05) {
+                const y = 0.5 * x * x;
+                const px = x * 50;
+                const py = -y * 50;
+                
+                if (x === -5) {
+                    ctx.moveTo(px, py);
+                } else {
+                    ctx.lineTo(px, py);
+                }
+            }
+            ctx.stroke();
+            
+            // 绘制切线
+            ctx.strokeStyle = '#ef4444';
+            ctx.lineWidth = 1.5 / zoomLevel;
+            ctx.beginPath();
+            const slope = focusX; // 导数是x
+            ctx.moveTo(-200, -(focusY * 50 + slope * (-200 - focusX * 50)));
+            ctx.lineTo(200, -(focusY * 50 + slope * (200 - focusX * 50)));
+            ctx.stroke();
+            
+            // 标记观察点
+            ctx.fillStyle = '#1f2937';
+            ctx.beginPath();
+            ctx.arc(focusX * 50, -focusY * 50, 5 / Math.sqrt(zoomLevel), 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.restore();
+        }
+
+        // ==========================================
+        // 动手实验页面
+        // ==========================================
+        const functions = {
+            'x2': {
+                func: x => x * x,
+                deriv: x => 2 * x,
+                name: 'x²'
+            },
+            'sin': {
+                func: x => Math.sin(x),
+                deriv: x => Math.cos(x),
+                name: 'sin(x)'
+            },
+            'sqrt': {
+                func: x => Math.sqrt(x),
+                deriv: x => 1 / (2 * Math.sqrt(x)),
+                name: '√x'
+            }
+        };
+
+        function initPractice() {
+            // 添加事件监听
+            document.getElementById('funcSelect').addEventListener('change', updatePractice);
+            document.getElementById('x0Slider').addEventListener('input', updatePractice);
+            document.getElementById('dxSlider').addEventListener('input', updatePractice);
+            
+            updatePractice();
+        }
+
+        function updatePractice() {
+            const funcKey = document.getElementById('funcSelect').value;
+            const x0 = parseFloat(document.getElementById('x0Slider').value);
+            const dx = parseFloat(document.getElementById('dxSlider').value);
+            
+            const func = functions[funcKey];
+            
+            // 更新显示值
+            document.getElementById('x0Value').textContent = x0.toFixed(2);
+            document.getElementById('dxValue').textContent = dx.toFixed(2);
+            
+            // 计算
+            const y0 = func.func(x0);
+            const y1 = func.func(x0 + dx);
+            const deltaY = y1 - y0;
+            const dy = func.deriv(x0) * dx;
+            const error = Math.abs(deltaY - dy);
+            
+            // 更新结果
+            document.getElementById('deltaY').textContent = deltaY.toFixed(4);
+            document.getElementById('dy').textContent = dy.toFixed(4);
+            document.getElementById('error').textContent = error.toFixed(4);
+            
+            // 绘制图形
+            drawPracticeGraph(func, x0, dx, deltaY, dy);
+        }
+
+        function drawPracticeGraph(func, x0, dx, deltaY, dy) {
+            const canvas = document.getElementById('practiceCanvas');
+            if (!canvas) return;
+            
+            const ctx = canvas.getContext('2d');
+            const width = 500;
+            const height = 350;
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            // 绘制坐标轴
+            ctx.strokeStyle = '#e5e7eb';
+            ctx.lineWidth = 1;
+            
+            // 网格
+            for (let i = 0; i <= 10; i++) {
+                const x = 50 + i * 40;
+                ctx.beginPath();
+                ctx.moveTo(x, 50);
+                ctx.lineTo(x, height - 50);
+                ctx.stroke();
+            }
+            
+            for (let i = 0; i <= 6; i++) {
+                const y = 50 + i * 50;
+                ctx.beginPath();
+                ctx.moveTo(50, y);
+                ctx.lineTo(width - 50, y);
+                ctx.stroke();
+            }
+            
+            // 坐标轴
+            ctx.strokeStyle = '#374151';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(50, height - 50);
+            ctx.lineTo(width - 50, height - 50);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(50, 50);
+            ctx.lineTo(50, height - 50);
+            ctx.stroke();
+            
+            // 绘制函数曲线
+            ctx.strokeStyle = '#4f46e5';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            
+            for (let px = 50; px < width - 50; px++) {
+                const x = (px - 50) / 100;
+                const y = func.func(x);
+                const py = height - 50 - y * 80;
+                
+                if (!isNaN(y) && isFinite(y)) {
+                    if (px === 50) {
+                        ctx.moveTo(px, py);
+                    } else {
+                        ctx.lineTo(px, py);
+                    }
+                }
+            }
+            ctx.stroke();
+            
+            // 计算位置
+            const y0 = func.func(x0);
+            const px0 = 50 + x0 * 100;
+            const py0 = height - 50 - y0 * 80;
+            const px1 = 50 + (x0 + dx) * 100;
+            const py1 = height - 50 - (y0 + deltaY) * 80;
+            const py_tangent = height - 50 - (y0 + dy) * 80;
+            
+            // 绘制切线
+            ctx.strokeStyle = '#6b7280';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([5, 5]);
+            const slope = func.deriv(x0);
+            ctx.beginPath();
+            ctx.moveTo(px0 - 100, py0 + 100 * slope * 0.8);
+            ctx.lineTo(px0 + 100, py0 - 100 * slope * 0.8);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            // 绘制 dx
+            ctx.strokeStyle = '#374151';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([3, 3]);
+            ctx.beginPath();
+            ctx.moveTo(px0, height - 40);
+            ctx.lineTo(px1, height - 40);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            // 绘制 Δy
+            ctx.strokeStyle = '#ef4444';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(px1, py0);
+            ctx.lineTo(px1, py1);
+            ctx.stroke();
+            
+            // 绘制 dy
+            ctx.strokeStyle = '#3b82f6';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(px1 - 10, py0);
+            ctx.lineTo(px1 - 10, py_tangent);
+            ctx.stroke();
+            
+            // 标记点
+            ctx.fillStyle = '#1f2937';
+            ctx.beginPath();
+            ctx.arc(px0, py0, 5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(px1, py1, 5, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 标签
+            ctx.font = '14px Arial';
+            ctx.fillStyle = '#ef4444';
+            ctx.fillText('Δy', px1 + 5, (py0 + py1) / 2);
+            ctx.fillStyle = '#3b82f6';
+            ctx.fillText('dy', px1 - 25, (py0 + py_tangent) / 2);
+            ctx.fillStyle = '#374151';
+            ctx.fillText('dx', (px0 + px1) / 2, height - 25);
+        }
+
+        // ==========================================
+        // 初始化
+        // ==========================================
+        window.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                drawConceptGraph();
+                if (window.MathJax) {
+                    MathJax.typesetPromise();
+                }
+            }, 100);
+        });
+
+        function toggleReturnLinks() { const p = document.querySelector('.return-links'); if (!p) return; if (p.style.display === 'flex') { p.style.opacity = '0'; setTimeout(() => p.style.display = 'none', 160); } else { p.style.display = 'flex'; requestAnimationFrame(() => p.style.opacity = '1'); } }
+    </script>
+</body>
+</html>

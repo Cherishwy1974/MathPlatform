@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab 5.5 分部积分法实验室</title>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            startup: {
+                pageReady: () => {
+                    return MathJax.startup.defaultPageReady().then(() => {
+                        console.log('MathJax加载完成');
+                    });
+                }
+            }
+        };
+    </script>
+    <script defer src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js"></script>
+    <style>
+        :root {
+            --primary: #4f46e5; --primary-dark: #3730a3;
+            --success: #10b981; --danger: #ef4444;
+            --gray-50: #f9fafb; --gray-100: #f3f4f6; --gray-200: #e5e7eb; --gray-600: #4b5563; --gray-700: #1f2937; --white: #ffffff;
+            --border: #e5e7eb; --h1-size: 22px; --h3-size: 18px; --text-size: 16px; --formula-size: 20px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        *::-webkit-scrollbar { width: 0; background: transparent; }
+        * { scrollbar-width: none; -ms-overflow-style: none; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", Arial, sans-serif; font-size: var(--text-size); line-height: 1.5; background: var(--gray-50); color: var(--gray-700); }
+        .container { width: 100%; max-width: 1400px; height: min(100vh, 700px); margin: 0 auto; display: flex; flex-direction: column; background: var(--white); border-radius: 12px; box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08); overflow: hidden; }
+        .header { height: 40px; background: var(--primary); color: var(--white); display: flex; align-items: center; padding: 0 20px; }
+        .header h1 { font-size: var(--h1-size); font-weight: 600; }
+        .main { flex: 1; display: flex; overflow: hidden; }
+        .sidebar { width: 120px; background: var(--gray-50); border-right: 1px solid var(--border); padding: 12px 10px; display: flex; flex-direction: column; gap: 8px; }
+        .nav-btn { width: 100%; padding: 8px; background: transparent; border: none; border-radius: 8px; cursor: pointer; font-size: var(--text-size); color: var(--gray-600); text-align: left; transition: background 0.2s ease; }
+        .nav-btn:hover { background: var(--gray-100); }
+        .nav-btn.active { background: var(--primary); color: var(--white); }
+        .content { flex: 1; display: none; padding: 16px; overflow-y: auto; }
+        .content.active { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+        .column { display: flex; flex-direction: column; gap: 14px; overflow-y: auto; }
+        .card { background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 16px; box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04); }
+        .card h3 { font-size: var(--h3-size); color: var(--primary); margin-bottom: 10px; }
+        .formula-box { background: #f0f7ff; border-left: 3px solid var(--primary); border-radius: 8px; padding: 12px; text-align: center; font-size: var(--formula-size); }
+        .btn { padding: 10px; background: var(--primary); color: var(--white); border: none; border-radius: 8px; cursor: pointer; font-size: var(--text-size); width: 100%; transition: background 0.2s ease; }
+        .btn:hover { background: var(--primary-dark); }
+        .choice-box { background: #fff9e6; padding: 10px; border-radius: 6px; border: 1px solid #f59e0b; margin: 6px 0; cursor: pointer; transition: all 0.2s; }
+        .choice-box:hover { background: #fef3c7; }
+        .choice-box.selected { background: #dbeafe; border-color: var(--primary); }
+        .feedback { margin-top: 10px; padding: 12px; border-radius: 8px; display: none; }
+        .feedback.success { background: rgba(16, 185, 129, 0.1); border: 1px solid var(--success); color: var(--success); }
+        .feedback.error { background: rgba(239, 68, 68, 0.1); border: 1px solid var(--danger); color: var(--danger); }
+        .canvas-container { border: 1px solid var(--gray-200); border-radius: 12px; background: #fafafa; padding: 16px; min-height: 400px; display: flex; align-items: center; justify-content: center; }
+        
+        .return-home-panel { position: fixed; bottom: 12px; right: 12px; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; z-index: 40; }
+        .return-toggle { width: 40px; height: 40px; border-radius: 50%; border: none; background: linear-gradient(135deg, rgba(79,70,229,0.96), rgba(99,102,241,0.9)); color: #fff; font-size: 20px; cursor: pointer; box-shadow: 0 10px 18px rgba(79,70,229,0.28); transition: transform 0.2s, box-shadow 0.2s; }
+        .return-toggle:hover { transform: translateY(-1px) scale(1.03); box-shadow: 0 14px 26px rgba(79,70,229,0.35); }
+        .return-links { display: none; flex-direction: column; gap: 6px; padding: 10px; border-radius: 10px; background: rgba(255,255,255,0.96); border: 1px solid rgba(79,70,229,0.18); box-shadow: 0 10px 30px rgba(15,23,42,0.14); opacity: 0; transition: opacity 0.16s; }
+        .return-link { text-decoration: none; font-size: 15px; color: var(--primary-dark); padding: 6px 12px; border-radius: 8px; background: rgba(99,102,241,0.12); transition: background 0.2s; }
+        .return-link:hover { background: rgba(79,70,229,0.18); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header"><h1>Lab 5.5｜分部积分法实验室</h1></header>
+        <div class="main">
+            <nav class="sidebar">
+                <button class="nav-btn active" onclick="switchPanel('concept')">积分公式</button>
+                <button class="nav-btn" onclick="switchPanel('practice')">LIATE法则</button>
+            </nav>
+
+            <!-- 公式面板 -->
+            <div class="content active" id="concept">
+                <div class="column">
+                    <div class="card">
+                        <h3>分部积分公式</h3>
+                        <div class="formula-box">$$ \int u \, dv = uv - \int v \, du $$</div>
+                    </div>
+                    <div class="card">
+                        <h3>例1: $\int x e^x dx$</h3>
+                        <p>令 $u=x$, $dv=e^x dx$</p>
+                        <p>则 $du=dx$, $v=e^x$</p>
+                    </div>
+                    <div class="card">
+                        <h3>计算过程</h3>
+                        <div class="formula-box">$$ \int x e^x dx = xe^x - \int e^x dx $$</div>
+                    </div>
+                    <div class="card">
+                        <h3>结果</h3>
+                        <div class="formula-box">$$ = e^x(x-1) + C $$</div>
+                    </div>
+                    <div class="card">
+                        <h3>例2: $\int \ln x dx$</h3>
+                        <p>令 $u=\ln x$, $dv=dx$</p>
+                        <div class="formula-box">$$ = x\ln x - x + C $$</div>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="card" style="flex: 1;">
+                        <h3>公式推导流程</h3>
+                        <div class="canvas-container">
+                            <canvas id="conceptCanvas"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LIATE练习面板 -->
+            <div class="content" id="practice">
+                <div class="column">
+                    <div class="card">
+                        <h3>LIATE 选择顺序</h3>
+                        <p><strong>L</strong> - 对数 Logarithmic</p>
+                        <p><strong>I</strong> - 反三角 Inverse trig</p>
+                        <p><strong>A</strong> - 代数 Algebraic</p>
+                        <p><strong>T</strong> - 三角 Trigonometric</p>
+                        <p><strong>E</strong> - 指数 Exponential</p>
+                    </div>
+                    <div class="card">
+                        <h3>练习题</h3>
+                        <p id="practiceQuestion">$\int x \ln x \, dx$，选择 $u=?$</p>
+                    </div>
+                    <div class="card">
+                        <h3>选项</h3>
+                        <div id="practiceChoices"></div>
+                    </div>
+                    <div class="card">
+                        <div id="practiceFeedback" class="feedback"></div>
+                        <button class="btn" onclick="nextPractice()">下一题</button>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="card" style="flex: 1;">
+                        <h3>LIATE 决策树</h3>
+                        <div class="canvas-container">
+                            <canvas id="practiceCanvas"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function resizeCanvas(canvas) {
+            const container = canvas.parentElement;
+            canvas.width = container.clientWidth - 32;
+            canvas.height = container.clientHeight - 32;
+            return canvas.getContext('2d');
+        }
+
+        function drawConceptCanvas() {
+            const canvas = document.getElementById('conceptCanvas');
+            if (!canvas) return;
+            const ctx = resizeCanvas(canvas);
+            const w = canvas.width, h = canvas.height;
+            ctx.clearRect(0, 0, w, h);
+            const centerX = w / 2;
+
+            ctx.fillStyle = '#4f46e5'; ctx.font = 'bold 20px Arial'; ctx.textAlign = 'center';
+            ctx.fillText('∫ u dv', centerX, 50);
+
+            ctx.strokeStyle = '#4f46e5'; ctx.lineWidth = 3;
+            ctx.beginPath(); ctx.moveTo(centerX, 60); ctx.lineTo(centerX, 100); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(centerX, 100); ctx.lineTo(centerX - 5, 90); ctx.lineTo(centerX + 5, 90); ctx.closePath();
+            ctx.fillStyle = '#4f46e5'; ctx.fill();
+
+            ctx.strokeStyle = '#8b5cf6'; ctx.lineWidth = 2; ctx.strokeRect(centerX - 100, 110, 200, 50);
+            ctx.fillStyle = '#8b5cf6'; ctx.font = 'bold 18px Arial'; ctx.fillText('= uv - ∫ v du', centerX, 140);
+
+            ctx.strokeStyle = '#10b981'; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.moveTo(centerX - 50, 160); ctx.lineTo(centerX - 150, 220); ctx.stroke();
+            ctx.strokeRect(centerX - 200, 210, 100, 40);
+            ctx.fillStyle = '#10b981'; ctx.font = 'bold 16px Arial'; ctx.fillText('uv', centerX - 150, 235);
+
+            ctx.strokeStyle = '#ef4444'; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.moveTo(centerX + 50, 160); ctx.lineTo(centerX + 150, 220); ctx.stroke();
+            ctx.strokeRect(centerX + 100, 210, 100, 40);
+            ctx.fillStyle = '#ef4444'; ctx.font = 'bold 16px Arial'; ctx.fillText('-∫v du', centerX + 150, 235);
+        }
+
+        function drawPracticeCanvas() {
+            const canvas = document.getElementById('practiceCanvas');
+            if (!canvas) return;
+            const ctx = resizeCanvas(canvas);
+            const w = canvas.width, h = canvas.height;
+            ctx.clearRect(0, 0, w, h);
+
+            ctx.fillStyle = '#4f46e5'; ctx.font = 'bold 18px Arial'; ctx.textAlign = 'center';
+            ctx.fillText('选择 u 的优先级', w/2, 30);
+
+            const levels = [
+                {name: 'L - 对数', color: '#ef4444', y: 60},
+                {name: 'I - 反三角', color: '#f59e0b', y: 110},
+                {name: 'A - 代数', color: '#10b981', y: 160},
+                {name: 'T - 三角', color: '#3b82f6', y: 210},
+                {name: 'E - 指数', color: '#8b5cf6', y: 260}
+            ];
+
+            levels.forEach((level, i) => {
+                ctx.fillStyle = level.color; ctx.fillRect(w/2 - 100, level.y, 200, 35);
+                ctx.fillStyle = '#ffffff'; ctx.font = 'bold 16px Arial'; ctx.fillText(level.name, w/2, level.y + 23);
+                if (i < levels.length - 1) {
+                    ctx.strokeStyle = '#374151'; ctx.lineWidth = 2;
+                    ctx.beginPath(); ctx.moveTo(w/2, level.y + 35); ctx.lineTo(w/2, level.y + 50); ctx.stroke();
+                }
+            });
+        }
+
+        const practiceProblems = [
+            {question: '$\\int x \\ln x \\, dx$，选择 $u=?$', choices: [{text: '$u = \\ln x$ (对数)', value: 'ln', correct: true}, {text: '$u = x$ (代数)', value: 'x', correct: false}], explanation: '对数 L 优先于代数 A'},
+            {question: '$\\int x e^x \\, dx$，选择 $u=?$', choices: [{text: '$u = x$ (代数)', value: 'x', correct: true}, {text: '$u = e^x$ (指数)', value: 'exp', correct: false}], explanation: '代数 A 优先于指数 E'},
+            {question: '$\\int x \\sin x \\, dx$，选择 $u=?$', choices: [{text: '$u = x$ (代数)', value: 'x', correct: true}, {text: '$u = \\sin x$ (三角)', value: 'sin', correct: false}], explanation: '代数 A 优先于三角 T'}
+        ];
+
+        let currentPracticeIndex = 0;
+
+        function loadPractice() {
+            const current = practiceProblems[currentPracticeIndex];
+            document.getElementById('practiceQuestion').innerHTML = current.question;
+            const choicesDiv = document.getElementById('practiceChoices');
+            choicesDiv.innerHTML = '';
+            current.choices.forEach(choice => {
+                const div = document.createElement('div');
+                div.className = 'choice-box';
+                div.innerHTML = choice.text;
+                div.onclick = () => {
+                    document.querySelectorAll('.choice-box').forEach(b => b.classList.remove('selected'));
+                    div.classList.add('selected');
+                    const feedback = document.getElementById('practiceFeedback');
+                    if (choice.correct) {
+                        feedback.className = 'feedback success';
+                        feedback.innerHTML = '<strong>✓ 正确！</strong> ' + current.explanation;
+                    } else {
+                        feedback.className = 'feedback error';
+                        feedback.innerHTML = '<strong>✗ 错误</strong> ' + current.explanation;
+                    }
+                    feedback.style.display = 'block';
+                    if (typeof MathJax !== 'undefined') MathJax.typesetPromise([feedback]);
+                };
+                choicesDiv.appendChild(div);
+            });
+            document.getElementById('practiceFeedback').style.display = 'none';
+            if (typeof MathJax !== 'undefined') MathJax.typesetPromise();
+        }
+
+        function nextPractice() {
+            currentPracticeIndex = (currentPracticeIndex + 1) % practiceProblems.length;
+            loadPractice();
+        }
+
+        function switchPanel(id) {
+            document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            event.target.classList.add('active');
+            setTimeout(() => {
+                if (id === 'concept') drawConceptCanvas();
+                else if (id === 'practice') drawPracticeCanvas();
+                if (typeof MathJax !== 'undefined') MathJax.typesetPromise();
+            }, 100);
+        }
+
+        window.addEventListener('load', () => {
+            drawConceptCanvas();
+            loadPractice();
+            if (typeof MathJax !== 'undefined') MathJax.typesetPromise();
+        });
+
+        function toggleReturnLinks() { const p = document.querySelector('.return-links'); if (!p) return; if (p.style.display === 'flex') { p.style.opacity = '0'; setTimeout(() => p.style.display = 'none', 160); } else { p.style.display = 'flex'; requestAnimationFrame(() => p.style.opacity = '1'); } }
+    </script>
+
+    <div class="return-home-panel"><button class="return-toggle" onclick="toggleReturnLinks()"><i class="fa-solid fa-house"></i></button><div class="return-links"><a class="return-link" href="index.html"><i class="fa-solid fa-arrow-left"></i> 返回目录</a><a class="return-link" href="../index.html"><i class="fa-solid fa-house"></i> 返回主站</a></div></div>
+</body>
+</html>

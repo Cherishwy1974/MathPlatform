@@ -1,0 +1,868 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>上帝的语言</title>
+    <script src="../../common-assets/js/tailwind.min.js"></script>    <style>
+        @font-face {
+            font-family: 'Iansui-Regular';
+            src: url('../../common-assets/fonts/Iansui-Regular.ttf') format('truetype');
+            font-weight: 400;
+            font-style: normal;
+        }
+        
+        /* 美化滚动条 - 竖向 */
+        *::-webkit-scrollbar {
+            width: 12px;
+        }
+        *::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+        }
+        *::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #8a2be2, #4b0082);
+            border-radius: 6px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+        *::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #9370db, #8a2be2);
+        }
+        *::-webkit-scrollbar-thumb:active {
+            background: linear-gradient(180deg, #4b0082, #2e0054);
+        }
+        
+        /* 隐藏横向滚动条 */
+        *::-webkit-scrollbar:horizontal {
+            display: none;
+        }
+        
+        :root {
+            /* 电磁波主题 - 紫蓝渐变 */
+            --bg-start: #0a0118;
+            --bg-scene1: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            --bg-scene2: linear-gradient(180deg, #1a1a3e, #3d3d8e, #5b5bc0);
+            --bg-scene3: linear-gradient(45deg, #0a0118, #1a1a3e, #2e2e5f);
+            --bg-scene4: radial-gradient(circle, #302b63, #0f0c29, #000000);
+            --bg-scene5: linear-gradient(315deg, #4b0082, #8a2be2);
+            --bg-scene6: linear-gradient(135deg, #1a1a3e, #483d8b, #6a5acd);
+            --bg-scene7: linear-gradient(180deg, #000428, #004e92);
+            --bg-scene8: linear-gradient(45deg, #0f0c29, #302b63, #24243e);
+            --bg-scene9: linear-gradient(135deg, #4b0082, #8b008b, #9400d3);
+        }
+
+        body {
+            font-family: 'Iansui-Regular', serif;
+            color: #e6e6fa;
+            overflow-x: hidden;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            background-color: var(--bg-start);
+            transition: background-color 1.5s ease-in-out;
+        }
+
+        #scroll-container {
+            height: 1400vh;
+            position: relative;
+        }
+
+        .sticky-element {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* 电磁波动画背景 */
+        #waveCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        /* 场力线效果 */
+        .field-line {
+            position: absolute;
+            width: 2px;
+            height: 100vh;
+            background: linear-gradient(to bottom, 
+                transparent,
+                rgba(138, 43, 226, 0.3),
+                transparent
+            );
+            animation: field-flow 8s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes field-flow {
+            0% { transform: translateY(-100vh); }
+            100% { transform: translateY(100vh); }
+        }
+
+        /* 电磁粒子 */
+        .em-particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: radial-gradient(circle, #8a2be2, transparent);
+            border-radius: 50%;
+            animation: particle-float 15s infinite linear;
+            pointer-events: none;
+        }
+
+        @keyframes particle-float {
+            0% {
+                transform: translate(0, 100vh) scale(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+                transform: translate(50px, 80vh) scale(1);
+            }
+            50% {
+                transform: translate(-50px, 0) scale(1.5);
+            }
+            90% {
+                opacity: 1;
+                transform: translate(30px, -80vh) scale(1);
+            }
+            100% {
+                transform: translate(0, -100vh) scale(0);
+                opacity: 0;
+            }
+        }
+
+        /* 几何过渡效果 */
+        .geometric-transition {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 0;
+            height: 0;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .wave-wipe {
+            width: 100vmax;
+            height: 100vmax;
+            border-radius: 50%;
+            background: radial-gradient(circle, transparent 0%, var(--transition-color, #4b0082) 100%);
+            transform: translate(-50%, -50%) scale(0);
+            transition: transform 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .wave-wipe.active {
+            transform: translate(-50%, -50%) scale(2);
+        }
+
+        /* 场景样式 */
+        .scene {
+            opacity: 0;
+            transition: opacity 0.8s ease-in-out;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .scene-background {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            transition: opacity 1.5s ease-in-out;
+            z-index: -2;
+        }
+
+        /* 场景背景 */
+        .bg-scene1 { background: var(--bg-scene1); }
+        .bg-scene2 { background: var(--bg-scene2); }
+        .bg-scene3 { background: var(--bg-scene3); }
+        .bg-scene4 { background: var(--bg-scene4); }
+        .bg-scene5 { background: var(--bg-scene5); }
+        .bg-scene6 { background: var(--bg-scene6); }
+        .bg-scene7 { background: var(--bg-scene7); }
+        .bg-scene8 { background: var(--bg-scene8); }
+        .bg-scene9 { background: var(--bg-scene9); }
+
+        /* 图片样式 */
+        .illustration-wrapper {
+            position: absolute;
+            z-index: 5;
+            transition: all 1.5s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .illustration {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: all 1.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            opacity: 0;
+            transform: scale(0.85) translateY(30px);
+            filter: brightness(0.9) contrast(1.1) saturate(1.2);
+        }
+
+        .frame-elegant {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            border-radius: 20px;
+            box-shadow: 
+                0 15px 35px rgba(75, 0, 130, 0.4),
+                0 5px 15px rgba(138, 43, 226, 0.3);
+            border: 1px solid rgba(138, 43, 226, 0.3);
+        }
+
+        .frame-elegant::before {
+            content: '';
+            position: absolute;
+            inset: -1px;
+            background: linear-gradient(135deg, 
+                rgba(138, 43, 226, 0.2) 0%, 
+                rgba(138, 43, 226, 0) 50%,
+                rgba(138, 43, 226, 0.1) 100%
+            );
+            border-radius: inherit;
+            opacity: 0.6;
+            z-index: -1;
+        }
+
+        .illustration-appear {
+            opacity: 0.95;
+            transform: scale(1) translateY(0);
+        }
+
+        .illustration-left {
+            left: 10vw;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 35vw;
+            height: 55vh;
+        }
+
+        .illustration-right {
+            right: 10vw;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 35vw;
+            height: 55vh;
+        }
+
+        /* 文字样式 */
+        .story-text {
+            position: absolute;
+            font-size: 1.5rem;
+            text-shadow: 3px 3px 10px rgba(0,0,0,0.8);
+            transition: all 1s cubic-bezier(0.23, 1, 0.32, 1);
+            text-align: left;
+            padding: 2rem;
+            max-width: 280px;
+            line-height: 2.2;
+            font-weight: 500;
+            z-index: 8;
+            writing-mode: vertical-rl;
+            text-orientation: upright;
+            letter-spacing: 0.12em;
+            opacity: 0;
+            transform: translateY(20px);
+            color: #e6e6fa;
+        }
+
+        .story-text-appear {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .text-left {
+            left: 30vw;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .text-right {
+            right: 30vw;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        /* 逐字浮现动画 */
+        .char-float {
+            display: inline-block;
+            opacity: 0;
+            transform: translateY(15px);
+            animation: float-up 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+        }
+
+        @keyframes float-up {
+            0% {
+                opacity: 0;
+                transform: translateY(15px) scale(0.9);
+            }
+            50% {
+                opacity: 0.5;
+                transform: translateY(5px) scale(0.95);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* 特殊场景：麦克斯韦方程组 */
+        #scene7 {
+            position: relative;
+        }
+
+        #maxwell-equations {
+            position: absolute;
+            width: 600px;
+            height: 400px;
+            opacity: 0;
+            transition: opacity 1.5s cubic-bezier(0.23, 1, 0.32, 1);
+            z-index: 20;
+        }
+
+        .equation {
+            position: absolute;
+            font-family: 'Iansui-Regular', serif;
+            font-size: 28px;
+            color: rgba(138, 43, 226, 0.6);
+            font-style: italic;
+            animation: equation-pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes equation-pulse {
+            0%, 100% { 
+                opacity: 0.4;
+                transform: scale(1);
+            }
+            50% { 
+                opacity: 0.8;
+                transform: scale(1.05);
+            }
+        }
+
+        /* 封面和封底样式 */
+        #scene-cover, #scene-end {
+            z-index: 10;
+        }
+
+        #scene-cover h1, #scene-cover p, #scene-end p {
+            position: relative;
+            z-index: 11;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.5);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1366px) {
+            .story-text {
+                font-size: 1.3rem;
+                max-width: 260px;
+            }
+            .illustration-left,
+            .illustration-right {
+                width: 33vw;
+                height: 50vh;
+            }
+            .text-left {
+               left: 30vw;            }
+            .text-right {
+                right: 30vw;            }
+        }
+        
+        @media (max-width: 768px) {
+            .scene { 
+                flex-direction: column; 
+                justify-content: center; 
+                align-items: center;
+                padding: 3vh 3vw;
+                gap: 1.5rem;
+            }
+            .illustration-wrapper { 
+                position: relative !important; 
+                left: auto !important;
+                right: auto !important;
+                width: 80vw !important;
+                height: 40vh !important;
+                margin: 0 auto;
+            }
+            .story-text { 
+                position: relative !important; 
+                left: auto !important;
+                right: auto !important;
+                max-width: 85vw; 
+                font-size: 1.1rem;
+                writing-mode: horizontal-tb;
+                text-orientation: initial;
+                letter-spacing: normal;
+                margin: 0 auto;
+                text-align: center;
+                padding: 1rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .story-text {
+                font-size: 1rem;
+                max-width: 90vw;
+                padding: 0.8rem;
+            }
+            .illustration-wrapper {
+                width: 90vw !important;
+                height: 35vh !important;
+            }
+        }
+    </style>
+
+    <style>
+        .return-home-panel {
+            position: fixed;
+            top: 12px;
+            left: 12px;
+            display: flex;
+            gap: 6px;
+            z-index: 9999;
+            flex-wrap: wrap;
+        }
+        .return-home-panel .return-link {
+            padding: 6px 10px;
+            border-radius: 10px;
+            background: rgba(15, 23, 42, 0.35);
+            color: #f8fafc;
+            font-size: 13px;
+            text-decoration: none;
+            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.18);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            border: 1px solid rgba(248, 250, 252, 0.12);
+            transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .return-home-panel .return-link:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.25);
+            background: rgba(15, 23, 42, 0.42);
+        }
+        .return-home-panel .return-link.return-main {
+            background: rgba(79, 70, 229, 0.18);
+            border-color: rgba(79, 70, 229, 0.25);
+        }
+        @media (max-width: 640px) {
+            .return-home-panel {
+                top: 12px;
+                left: 12px;
+                right: 12px;
+                justify-content: center;
+            }
+            .return-home-panel .return-link {
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="return-home-panel">
+         <a class="return-link return-sub" href="../index.html"><i class="fa-solid fa-arrow-left"></i> 返回目录</a>
+        <a class="return-link return-main" href="../../index.html"><i class="fa-solid fa-house"></i> 返回主站</a>
+    </div>
+    <!-- 几何过渡效果层 -->
+    <div class="geometric-transition">
+        <div id="wave-wipe" class="wave-wipe"></div>
+    </div>
+
+    <!-- 电磁波动画背景 -->
+    <canvas id="waveCanvas"></canvas>
+
+    <!-- 场力线 -->
+    <div class="field-line" style="left: 10%; animation-delay: 0s;"></div>
+    <div class="field-line" style="left: 30%; animation-delay: 2s;"></div>
+    <div class="field-line" style="left: 50%; animation-delay: 4s;"></div>
+    <div class="field-line" style="left: 70%; animation-delay: 6s;"></div>
+    <div class="field-line" style="left: 90%; animation-delay: 8s;"></div>
+
+    <div id="scroll-container">
+        <div id="scene-container" class="sticky-element">
+
+            <!-- 场景背景 -->
+            <div id="bg-scene1" class="scene-background bg-scene1"></div>
+            <div id="bg-scene2" class="scene-background bg-scene2"></div>
+            <div id="bg-scene3" class="scene-background bg-scene3"></div>
+            <div id="bg-scene4" class="scene-background bg-scene4"></div>
+            <div id="bg-scene5" class="scene-background bg-scene5"></div>
+            <div id="bg-scene6" class="scene-background bg-scene6"></div>
+            <div id="bg-scene7" class="scene-background bg-scene7"></div>
+            <div id="bg-scene8" class="scene-background bg-scene8"></div>
+            <div id="bg-scene9" class="scene-background bg-scene9"></div>
+
+            <!-- 场景0: 封面 -->
+            <div id="scene-cover" class="scene flex-col">
+                <h1 class="text-5xl md:text-6xl font-bold text-center" style="color: #8a2be2;">上帝的语言</h1>
+                <p class="text-xl md:text-2xl mt-4 text-center" style="color: #e6e6fa;">多元函数微积分的诞生</p>
+                <p class="absolute bottom-20 opacity-80 text-lg">向下滚动，开启故事</p>
+            </div>
+
+            <!-- 场景1: 神秘的力 -->
+            <div id="scene1" class="scene">
+                <div class="illustration-wrapper illustration-left depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="9- (1).png" alt="神秘的力" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-right depth-layer-3">在19世纪中叶，物理学的世界里充满了各种神秘的"力"。科学家们对重力已经有了清晰的数学描述，但对于电力和磁力却感到非常困惑。</p>
+            </div>
+
+            <!-- 场景2: 法拉第 -->
+            <div id="scene2" class="scene">
+                <div class="illustration-wrapper illustration-right depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="9- (2).png" alt="法拉第" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-left depth-layer-3">迈克尔·法拉第，一位伟大的实验物理学家。他提出了革命性的想法：空间充满了看不见的"力线"。磁铁周围有磁力线，电荷周围有电力线。</p>
+            </div>
+
+            <!-- 场景3: 力线图 -->
+            <div id="scene3" class="scene">
+                <div class="illustration-wrapper illustration-left depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="9- (3).png" alt="力线图" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-right depth-layer-3">法拉第能"看见"这些场的形态，但他无法用数学来描述它们。他的笔记本里画满了美丽的力线图，却没有一个方程式。</p>
+            </div>
+
+            <!-- 场景4: 麦克斯韦登场 -->
+            <div id="scene4" class="scene">
+                <div class="illustration-wrapper illustration-right depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="9- (4).png" alt="麦克斯韦" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-left depth-layer-3">詹姆斯·克拉克·麦克斯韦，一位来自苏格兰的年轻物理学家。他深深着迷于法拉第的"力线"思想，并立下宏愿：要为法拉第的诗歌，谱写出数学的乐章。</p>
+            </div>
+
+            <!-- 场景5: 三维的挑战 -->
+            <div id="scene5" class="scene">
+                <div class="illustration-wrapper illustration-left depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="9- (5).png" alt="三维场" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-right depth-layer-3">传统的一元微积分根本不够用。法拉第的"场"是三维的！在空间中的任意一点，电场不仅有强度，还有方向。</p>
+            </div>
+
+            <!-- 场景6: 新的语言 -->
+            <div id="scene6" class="scene">
+                <div class="illustration-wrapper illustration-right depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="9- (6).png" alt="新的语言" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-left depth-layer-3">麦克斯韦需要一种全新的语言——多元函数微积分学。他利用偏导数、旋度、散度这些核心"词汇"，开始翻译法拉第的直觉。</p>
+            </div>
+
+            <!-- 场景7: 麦克斯韦方程组 -->
+            <div id="scene7" class="scene flex-col">
+                <!-- 方程组动画 -->
+                <div id="maxwell-equations">
+                    <div class="equation" style="top: 20%; left: 20%;">∇·E = ρ/ε₀</div>
+                    <div class="equation" style="top: 20%; right: 20%; animation-delay: 0.5s;">∇·B = 0</div>
+                    <div class="equation" style="bottom: 20%; left: 20%; animation-delay: 1s;">∇×E = -∂B/∂t</div>
+                    <div class="equation" style="bottom: 20%; right: 20%; animation-delay: 1.5s;">∇×B = μ₀J + μ₀ε₀∂E/∂t</div>
+                </div>
+                
+                <!-- 背景图片 -->
+                <div class="illustration-wrapper" style="position: absolute; opacity: 0.15; width: 100%; height: 100%;">
+                    <img src="9- (7).png" alt="方程组" style="object-fit: cover; width: 100%; height: 100%; filter: blur(2px);">
+                </div>
+                
+                <!-- 文字 -->
+                <div class="story-text" style="position: absolute; bottom: 10vh; text-align: center; max-width: 600px; writing-mode: horizontal-tb;">
+                    <p>最终，他得到了四个优美、对称、堪称完美的方程式——麦克斯韦方程组。</p>
+                </div>
+            </div>
+
+            <!-- 场景8: 意外的发现 -->
+            <div id="scene8" class="scene">
+                <div class="illustration-wrapper illustration-left depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="9- (8).png" alt="电磁波" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-right depth-layer-3">为了让方程组自洽，麦克斯韦加入了一个新项。这个小小的改动预言了一件惊人的事：电磁波的存在！</p>
+            </div>
+
+            <!-- 场景9: 光的本质 -->
+            <div id="scene9" class="scene">
+                <div class="illustration-wrapper illustration-right depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="9- (9).png" alt="光的本质" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-left depth-layer-3">当他计算出电磁波的速度时，他几乎不敢相信——这个数字与光速完全一致！光，就是一种电磁波。</p>
+            </div>
+
+            <!-- 场景10: 伟大统一 -->
+            <div id="scene10" class="scene">
+                <div class="illustration-wrapper illustration-left depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="9- (10).png" alt="统一" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-right depth-layer-3">法拉第的诗意直觉，经由麦克斯韦的数学翻译，最终揭示了一个横跨电、磁、光三大领域的伟大统一。</p>
+            </div>
+
+            <!-- 场景11: 宇宙的语言 -->
+            <div id="scene11" class="scene">
+                <div class="illustration-wrapper illustration-right depth-layer-2">
+                    <div class="frame-elegant">
+                        <img src="9- (11).png" alt="宇宙语言" class="illustration">
+                    </div>
+                </div>
+                <p class="story-text text-left depth-layer-3">多元函数微积分学成了物理学家们探索宇宙的通用语言，爱因斯坦赞誉这是"自牛顿以来最深刻的变革"。</p>
+            </div>
+
+            <!-- 结局 -->
+            <div id="scene-end" class="scene flex-col">
+                <p class="text-5xl md:text-6xl font-bold" style="color: #8a2be2;">完</p>
+                <p class="text-xl mt-4" style="color: #e6e6fa;">数学与物理的完美和谐</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const scenes = Array.from(document.querySelectorAll('.scene'));
+        const sceneBackgrounds = Array.from(document.querySelectorAll('.scene-background'));
+        const sceneCount = scenes.length;
+        const scrollContainer = document.getElementById('scroll-container');
+        const waveWipe = document.getElementById('wave-wipe');
+        const maxwellEquations = document.getElementById('maxwell-equations');
+        
+        let lastSceneIndex = -1;
+        let isTransitioning = false;
+        let animatedTexts = new Set();
+        let equationsAnimationStarted = false;
+
+        // ========= 电磁波动画 =========
+        const waveCanvas = document.getElementById('waveCanvas');
+        const wCtx = waveCanvas.getContext('2d');
+        let waveWidth = waveCanvas.width = window.innerWidth;
+        let waveHeight = waveCanvas.height = window.innerHeight;
+
+        window.addEventListener('resize', () => {
+            waveWidth = waveCanvas.width = window.innerWidth;
+            waveHeight = waveCanvas.height = window.innerHeight;
+        });
+
+        // 电磁波类
+        class ElectromagneticWave {
+            constructor() {
+                this.amplitude = Math.random() * 50 + 20;
+                this.frequency = Math.random() * 0.02 + 0.01;
+                this.phase = Math.random() * Math.PI * 2;
+                this.speed = Math.random() * 2 + 1;
+                this.y = Math.random() * waveHeight;
+                this.opacity = Math.random() * 0.3 + 0.1;
+            }
+
+            update() {
+                this.phase += this.speed * 0.05;
+            }
+
+            draw() {
+                wCtx.strokeStyle = `rgba(138, 43, 226, ${this.opacity})`;
+                wCtx.lineWidth = 2;
+                wCtx.beginPath();
+                
+                for (let x = 0; x < waveWidth; x += 5) {
+                    const y = this.y + Math.sin(x * this.frequency + this.phase) * this.amplitude;
+                    if (x === 0) {
+                        wCtx.moveTo(x, y);
+                    } else {
+                        wCtx.lineTo(x, y);
+                    }
+                }
+                
+                wCtx.stroke();
+                
+                // 磁场分量（垂直方向）
+                wCtx.strokeStyle = `rgba(75, 0, 130, ${this.opacity * 0.8})`;
+                wCtx.beginPath();
+                
+                for (let x = 0; x < waveWidth; x += 5) {
+                    const y = this.y + Math.cos(x * this.frequency + this.phase) * this.amplitude * 0.7;
+                    if (x === 0) {
+                        wCtx.moveTo(x, y);
+                    } else {
+                        wCtx.lineTo(x, y);
+                    }
+                }
+                
+                wCtx.stroke();
+            }
+        }
+
+        const waves = [];
+        for (let i = 0; i < 5; i++) {
+            waves.push(new ElectromagneticWave());
+        }
+
+        function animateWaves() {
+            wCtx.clearRect(0, 0, waveWidth, waveHeight);
+            
+            waves.forEach(wave => {
+                wave.update();
+                wave.draw();
+            });
+            
+            requestAnimationFrame(animateWaves);
+        }
+        animateWaves();
+
+        // 创建电磁粒子
+        function createEMParticles() {
+            for (let i = 0; i < 10; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'em-particle';
+                particle.style.left = `${Math.random() * 100}%`;
+                particle.style.animationDelay = `${Math.random() * 15}s`;
+                particle.style.animationDuration = `${15 + Math.random() * 10}s`;
+                document.body.appendChild(particle);
+            }
+        }
+        createEMParticles();
+
+        // 几何过渡效果
+        function triggerGeometricTransition(type, fromScene, toScene) {
+            if (isTransitioning) return;
+            isTransitioning = true;
+            
+            waveWipe.style.setProperty('--transition-color', '#4b0082');
+            waveWipe.classList.add('active');
+            
+            setTimeout(() => {
+                waveWipe.classList.remove('active');
+                isTransitioning = false;
+            }, 1500);
+        }
+
+        // 文字浮现动画
+        function animateTextFloat(element) {
+            if (animatedTexts.has(element)) return;
+            animatedTexts.add(element);
+            
+            const text = element.textContent;
+            element.textContent = '';
+            
+            [...text].forEach((char, index) => {
+                const span = document.createElement('span');
+                span.textContent = char;
+                span.className = 'char-float';
+                span.style.animationDelay = `${index * 0.02}s`;
+                element.appendChild(span);
+            });
+        }
+
+        // 主滚动处理
+        window.addEventListener('scroll', () => {
+            const scrollHeight = scrollContainer.scrollHeight - window.innerHeight;
+            const scrollTop = window.scrollY;
+            const scrollPercent = Math.min(scrollTop / scrollHeight, 1);
+            
+            updateScenes(scrollPercent);
+        });
+
+        function updateScenes(percent) {
+            const currentSceneIndex = Math.floor(percent * (sceneCount - 0.001));
+            const sceneProgress = getSceneProgress(percent, currentSceneIndex);
+            
+            // 触发场景转换效果
+            if (currentSceneIndex !== lastSceneIndex && lastSceneIndex !== -1) {
+                triggerGeometricTransition('wave', lastSceneIndex, currentSceneIndex);
+            }
+            lastSceneIndex = currentSceneIndex;
+            
+            // 更新场景显示
+            scenes.forEach((scene, index) => {
+                const isActive = index === currentSceneIndex;
+                scene.style.opacity = isActive ? 1 : 0;
+                
+                if (isActive) {
+                    // 图片动画
+                    const img = scene.querySelector('.illustration');
+                    if (img && sceneProgress > 0.1) {
+                        setTimeout(() => {
+                            img.classList.add('illustration-appear');
+                        }, 100);
+                    }
+                    
+                    // 文字动画
+                    const text = scene.querySelector('.story-text');
+                    if (text && sceneProgress > 0.3) {
+                        text.classList.add('story-text-appear');
+                        if (!animatedTexts.has(text)) {
+                            animateTextFloat(text);
+                        }
+                    }
+                } else {
+                    // 重置非活动场景
+                    const img = scene.querySelector('.illustration');
+                    if (img) {
+                        img.classList.remove('illustration-appear');
+                    }
+                    const text = scene.querySelector('.story-text');
+                    if (text) {
+                        text.classList.remove('story-text-appear');
+                    }
+                }
+            });
+            
+            // 更新场景背景
+            sceneBackgrounds.forEach((bg, index) => {
+                const sceneNumber = index + 1;
+                const progress = getSceneProgress(percent, sceneNumber);
+                bg.style.opacity = progress > 0 ? Math.min(progress * 1.5, 1) : 0;
+            });
+            
+            // 场景7的麦克斯韦方程组动画
+            const p7 = getSceneProgress(percent, 7);
+            if (p7 > 0.2 && !equationsAnimationStarted) {
+                equationsAnimationStarted = true;
+                maxwellEquations.style.opacity = 1;
+            } else if (p7 === 0) {
+                maxwellEquations.style.opacity = 0;
+                equationsAnimationStarted = false;
+            }
+        }
+
+        function getSceneProgress(percent, sceneIndex) {
+            const sceneStart = sceneIndex / sceneCount;
+            const sceneEnd = (sceneIndex + 1) / sceneCount;
+            if (percent < sceneStart || percent > sceneEnd) return 0;
+            return (percent - sceneStart) / (sceneEnd - sceneStart);
+        }
+
+        // 初始化
+        window.scrollTo(0, 0);
+        updateScenes(0);
+    </script>
+</body>
+</html>

@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab 10.5 秩计算与标准形实验室</title>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\(', '\)']],
+                displayMath: [['$$', '$$'], ['\[', '\]']],
+                processEscapes: true
+            },
+            startup: {
+                pageReady: () => {
+                    return MathJax.startup.defaultPageReady().then(() => {
+                        if (typeof window.scheduleMathRender === 'function') {
+                            window.scheduleMathRender();
+                        }
+                        console.log('MathJax加载完成');
+                    });
+                }
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+            }
+        };
+    </script>
+    <script defer src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js"></script>
+    <script defer src="../common-assets/js/lab-math-enhancer.js"></script>
+    <style>
+        :root {
+            --h1-size: 22px;
+            --h2-size: 20px;
+            --h3-size: 18px;
+            --btn-size: 16px;
+            --formula-size: 20px;
+            --text-size: 16px;
+            --primary: #4f46e5;
+            --primary-light: #6366f1;
+            --primary-dark: #3730a3;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --light: #ffffff;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-400: #9ca3af;
+            --gray-600: #4b5563;
+            --gray-800: #1f2937;
+            --border: #e5e7eb;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        *::-webkit-scrollbar {
+            width: 0;
+            background: transparent;
+        }
+
+        * {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
+            font-size: var(--text-size);
+            line-height: 1.5;
+            background: var(--gray-50);
+            color: var(--gray-800);
+        }
+
+        .return-home-panel {
+            position: fixed;
+            top: 12px;
+            right: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+            z-index: 40;
+        }
+
+        .return-toggle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.95), rgba(99, 102, 241, 0.9));
+            color: #ffffff;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 10px 18px rgba(79, 70, 229, 0.28);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .return-toggle:focus-visible {
+            outline: 2px solid rgba(129, 140, 248, 0.6);
+            outline-offset: 3px;
+        }
+
+        .return-toggle:hover {
+            transform: translateY(-1px) scale(1.03);
+            box-shadow: 0 14px 26px rgba(79, 70, 229, 0.35);
+        }
+
+        .return-links {
+            display: none;
+            flex-direction: column;
+            gap: 6px;
+            padding: 10px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(79, 70, 229, 0.15);
+            box-shadow: 0 16px 30px rgba(15, 23, 42, 0.18);
+            backdrop-filter: blur(6px);
+        }
+
+        .return-home-panel.open .return-links {
+            display: flex;
+        }
+
+        .return-link {
+            padding: 6px 12px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 14px;
+            color: var(--primary);
+            background: rgba(79, 70, 229, 0.12);
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+
+        .return-link.return-main {
+            color: var(--success);
+            background: rgba(16, 185, 129, 0.12);
+        }
+
+        .return-link:hover {
+            background: rgba(79, 70, 229, 0.2);
+            color: var(--primary-dark);
+        }
+
+        .return-link.return-main:hover {
+            background: rgba(16, 185, 129, 0.22);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            height: 100vh;
+            max-height: 700px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            background: var(--light);
+            border-radius: 12px;
+            box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(90deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: var(--light);
+            padding: 10px 24px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: var(--h1-size);
+            font-weight: 600;
+        }
+
+        .main {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 120px;
+            background: var(--gray-50);
+            border-right: 1px solid var(--border);
+            padding: 12px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .nav-btn {
+            width: 100%;
+            padding: 8px;
+            border: none;
+            border-radius: 6px;
+            background: transparent;
+            color: var(--gray-600);
+            text-align: left;
+            font-size: var(--text-size);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .nav-btn:hover {
+            background: var(--gray-100);
+        }
+
+        .nav-btn.active {
+            background: var(--primary);
+            color: var(--light);
+        }
+
+        .content {
+            flex: 1;
+            display: none;
+            padding: 18px;
+            overflow-y: auto;
+        }
+
+        .content.active {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow-y: auto;
+        }
+
+        .card {
+            background: var(--light);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+        }
+
+        .card h3 {
+            font-size: var(--h3-size);
+            color: var(--primary);
+            margin-bottom: 12px;
+        }
+
+        .input-group {
+            margin-bottom: 12px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: var(--gray-600);
+        }
+
+        .input-group select,
+        .input-group input,
+        .input-group input[type="range"] {
+            width: 100%;
+            padding: 8px 10px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            font-size: var(--text-size);
+            background: var(--gray-50);
+        }
+
+        .input-group input:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: var(--light);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 16px;
+            font-size: var(--btn-size);
+            border: none;
+            border-radius: 6px;
+            background: var(--primary);
+            color: var(--light);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            gap: 6px;
+        }
+
+        .btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .info-box {
+            background: var(--gray-50);
+            border-left: 3px solid var(--primary);
+            padding: 12px;
+            border-radius: 6px;
+            font-size: var(--text-size);
+            line-height: 1.6;
+        }
+
+        canvas {
+            width: 100%;
+            height: 260px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: #ffffff;
+        }
+
+        table.matrix-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: center;
+        }
+
+        table.matrix-table td {
+            border: 1px solid var(--gray-200);
+            padding: 6px;
+            font-size: var(--text-size);
+        }
+    
+        /* 内联公式排版 */
+        .formula-box {
+            display: inline-flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+            gap: 8px;
+            margin: 4px 12px 4px 0;
+            width: auto;
+            max-width: 100%;
+            text-align: left;
+        }
+
+        .formula-box::before {
+            content: attr(data-prefix);
+            font-weight: 600;
+            color: var(--primary, #4f46e5);
+            margin-right: 6px;
+        }
+
+        .formula-box[data-prefix=""]::before,
+        .formula-box:not([data-prefix])::before {
+            content: none;
+        }
+
+        .formula-box mjx-container {
+            margin: 0;
+        }
+
+        /* 自定义下拉框样式 */
+        .custom-select-container { position: relative; width: 100%; }
+        .custom-select-trigger { padding: 8px 32px 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; background: #f9fafb; cursor: pointer; display: flex; align-items: center; justify-content: space-between; transition: all 0.2s; }
+        .custom-select-trigger:hover { border-color: #9ca3af; background: #ffffff; }
+        .custom-select-container.open .custom-select-trigger { border-color: #4f46e5; background: #ffffff; }
+        .custom-select-trigger .arrow { font-size: 10px; color: #6b7280; transition: transform 0.2s; }
+        .custom-select-trigger .selected-formula { flex: 1; }
+        .custom-select-container.open .arrow { transform: rotate(180deg); }
+        .custom-select-options { display: none; position: absolute; top: 100%; left: 0; right: 0; background: #ffffff; border: 1px solid #d1d5db; border-radius: 6px; margin-top: 4px; max-height: 200px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        .custom-select-container.open .custom-select-options { display: block; }
+        .custom-option { padding: 8px 12px; cursor: pointer; transition: background 0.15s; }
+        .custom-option:hover { background: #f3f4f6; }
+        .custom-option.selected { background: #eef2ff; color: #4f46e5; font-weight: 500; }
+
+    </style>
+</head>
+<body>
+    <div class="return-home-panel">
+        <button class="return-toggle" type="button" aria-label="打开返回导航" onclick="toggleReturnPanel(event)"><i class="fa-solid fa-house"></i></button>
+        <div class="return-links">
+            <a class="return-link return-sub" href="index.html"><i class="fa-solid fa-arrow-left"></i> 返回目录</a>
+            <a class="return-link return-main" href="../index.html"><i class="fa-solid fa-house"></i> 返回主站</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <header class="header">
+            <h1>Lab 10.5 秩计算与标准形实验室</h1>
+        </header>
+
+        <div class="main">
+            <nav class="sidebar">
+                <button class="nav-btn active"  data-panel="module1"onclick="switchPanel('module1', this)">秩计算</button>
+                <button class="nav-btn"  data-panel="module2"onclick="switchPanel('module2', this)">标准形对照</button>
+            </nav>
+
+            <div class="content active" id="module1">
+                <div class="column">
+                    <div class="card">
+                        <h3>选择待求矩阵</h3>
+                        <div class="input-group">
+                            <label>示例矩阵</label>
+                            <div class="custom-select-container">
+                                <div class="custom-select-trigger" onclick="toggleCustomSelect(this)">
+                                    <span class="selected-formula">例1：三行两列</span>
+                                    <span class="arrow">▼</span>
+                                </div>
+                                <div class="custom-select-options">
+                                    <div class="custom-option selected" data-value="0" onclick="selectCustomOption(this, 'rankSelector')">
+                                        例1：三行两列
+                                    </div>
+                                    <div class="custom-option" data-value="1" onclick="selectCustomOption(this, 'rankSelector')">
+                                        例2：含参数 $t$
+                                    </div>
+                                    <div class="custom-option" data-value="2" onclick="selectCustomOption(this, 'rankSelector')">
+                                        例3：秩不足矩阵
+                                    </div>
+                                </div>
+                                <input type="hidden" id="rankSelector" value="0">
+                            </div>
+                        </div>
+                        <div class="input-group" id="paramGroup" style="display:none;">
+                            <label>参数 $t$：<span id="paramValue">1</span></label>
+                            <input type="range" id="paramRange" min="-3" max="3" step="1" value="1">
+                        </div>
+                        <button class="btn" onclick="updateRankAnalysis()">执行高斯消元</button>
+                    </div>
+                    <div class="card">
+                        <h3>步骤控制</h3>
+                        <div class="input-group">
+                            <label>查看第 <span id="stepIndex">1</span> 步</label>
+                            <input type="range" id="stepRange" min="1" max="1" value="1" oninput="showRankStep(this.value)">
+                        </div>
+                        <div class="info-box" id="stepDescription">选择矩阵后进行高斯消元，逐步观察主元位置与零行出现。</div>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="card">
+                        <h3>消元过程展示</h3>
+                        <div id="rankTable"></div>
+                        <div class="info-box" id="rankSummary">请选择矩阵并执行操作。</div>
+                    </div>
+                    <div class="card">
+                        <h3>主元位置可视化</h3>
+                        <canvas id="rankCanvas"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content" id="module2">
+                <div class="column">
+                    <div class="card">
+                        <h3>标准形概览</h3>
+                        <div class="info-box">
+                            将矩阵化为阶梯形（Row Echelon Form, REF）或最简形（Reduced Row Echelon Form, RREF）有助于快速读取秩：非零行的数量即为矩阵秩。
+                        </div>
+                        <p class="formula-box" data-prefix="公式：">$\operatorname{rank}(A) = r \iff A \sim \begin{bmatrix} I_r & 0 \\ 0 & 0 \end{bmatrix}$</p>
+                    </div>
+                    <div class="card">
+                        <h3>选择标准形类型</h3>
+                        <div class="input-group">
+                            <label>目标形式</label>
+                            <div class="custom-select-container">
+                                <div class="custom-select-trigger" onclick="toggleCustomSelect(this)">
+                                    <span class="selected-formula">阶梯形 (REF)</span>
+                                    <span class="arrow">▼</span>
+                                </div>
+                                <div class="custom-select-options">
+                                    <div class="custom-option selected" data-value="ref" onclick="selectCustomOption(this, 'formSelector')">
+                                        阶梯形 (REF)
+                                    </div>
+                                    <div class="custom-option" data-value="rref" onclick="selectCustomOption(this, 'formSelector')">
+                                        最简形 (RREF)
+                                    </div>
+                                    <div class="custom-option" data-value="normal" onclick="selectCustomOption(this, 'formSelector')">
+                                        标准分块
+                                    </div>
+                                </div>
+                                <input type="hidden" id="formSelector" value="ref">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="card">
+                        <h3>标准形示意</h3>
+                        <div id="formDisplay"></div>
+                    </div>
+                    <div class="card">
+                        <h3>秩与线性相关性</h3>
+                        <div class="info-box" id="formInfo">选择标准形类型，系统将给出秩对线性方程组、列向量组合的影响分析。</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 自定义下拉框控制函数
+        function toggleCustomSelect(trigger) {
+            const container = trigger.parentElement;
+            const allContainers = document.querySelectorAll('.custom-select-container');
+            allContainers.forEach(c => {
+                if (c !== container) c.classList.remove('open');
+            });
+            container.classList.toggle('open');
+        }
+
+        function selectCustomOption(option, selectId) {
+            const container = option.closest('.custom-select-container');
+            const trigger = container.querySelector('.custom-select-trigger span');
+            const hiddenInput = document.getElementById(selectId);
+            const allOptions = container.querySelectorAll('.custom-option');
+            
+            allOptions.forEach(opt => opt.classList.remove('selected'));
+            option.classList.add('selected');
+            
+            trigger.innerHTML = option.innerHTML;
+            hiddenInput.value = option.dataset.value;
+            
+            container.classList.remove('open');
+            
+            if (typeof MathJax !== 'undefined') {
+                MathJax.typesetPromise([trigger]).catch(err => console.log(err));
+            }
+            
+            // 触发对应的更新函数
+            if (selectId === 'rankSelector') updateRankAnalysis();
+            if (selectId === 'formSelector') updateNormalForm();
+        }
+
+        // 点击外部关闭下拉框
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.custom-select-container')) {
+                document.querySelectorAll('.custom-select-container').forEach(c => {
+                    c.classList.remove('open');
+                });
+            }
+        });
+
+        const rankExamples = [
+            {
+                matrix: [[1, 2], [2, 4], [3, 5]],
+                description: '第二行与第一行成比例吗？请观察消元结果。'
+            },
+            {
+                matrix: t => [[1, t, 1], [0, 1, -1], [1, 1, t]],
+                description: '参数 $t$ 改变主元情况，某些取值可能导致秩下降。'
+            },
+            {
+                matrix: [[1, -1, 0], [2, -2, 0], [0, 0, 0]],
+                description: '存在零行，秩明显小于矩阵行数。'
+            }
+        ];
+
+        let eliminationSteps = [];
+
+        function switchPanel(id, btn) {
+            document.querySelectorAll('.content').forEach(content => content.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            document.querySelectorAll('.nav-btn').forEach(button => button.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+            renderMath();
+        }
+
+        let mathObserver = null;
+        let mathRenderQueued = false;
+
+        function startMathObserver() {
+            if (typeof MutationObserver === 'undefined' || !document.body) {
+                return;
+            }
+            if (mathObserver) {
+                mathObserver.disconnect();
+            }
+            mathObserver = new MutationObserver(mutations => {
+                for (const mutation of mutations) {
+                    if (mutation.type === 'childList' || mutation.type === 'characterData') {
+                        scheduleMathRender();
+                        break;
+                    }
+                }
+            });
+            mathObserver.observe(document.body, { childList: true, subtree: true, characterData: true });
+        }
+
+        function scheduleMathRender() {
+            if (mathRenderQueued) {
+                return;
+            }
+            mathRenderQueued = true;
+            requestAnimationFrame(() => {
+                mathRenderQueued = false;
+                if (window.MathJax && MathJax.typesetPromise) {
+                    if (mathObserver) {
+                        mathObserver.disconnect();
+                    }
+                    MathJax.typesetPromise()
+                        .catch(err => console.log('渲染错误:', err))
+                        .finally(() => {
+                            startMathObserver();
+                        });
+                } else {
+                    setTimeout(scheduleMathRender, 160);
+                }
+            });
+        }
+
+        window.scheduleMathRender = scheduleMathRender;
+
+        function renderMath() {
+            scheduleMathRender();
+        }
+
+        function ensureMathReady() {
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', () => {
+                    startMathObserver();
+                    scheduleMathRender();
+                });
+            } else {
+                startMathObserver();
+                scheduleMathRender();
+            }
+        }
+
+        ensureMathReady();
+
+        function toggleReturnPanel(event) {
+            event.stopPropagation();
+            const panel = document.querySelector('.return-home-panel');
+            if (panel) {
+                panel.classList.toggle('open');
+            }
+        }
+
+        document.addEventListener('click', event => {
+            const panel = document.querySelector('.return-home-panel');
+            if (!panel) {
+                return;
+            }
+            if (panel.classList.contains('open') && !panel.contains(event.target)) {
+                panel.classList.remove('open');
+            }
+        });
+
+        window.addEventListener('pageshow', () => {
+            scheduleMathRender();
+        });
+
+        function resizeCanvas(canvas) {
+            const container = canvas.parentElement;
+            const width = container.clientWidth - 20;
+            const height = container.clientHeight - 20;
+            canvas.style.width = width + 'px';
+            canvas.style.height = height + 'px';
+            const ratio = window.devicePixelRatio || 1;
+            canvas.width = width * ratio;
+            canvas.height = height * ratio;
+            const ctx = canvas.getContext('2d');
+            ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            return ctx;
+        }
+
+        function drawAxis(ctx, width, height) {
+            ctx.clearRect(0, 0, width, height);
+            ctx.save();
+            ctx.strokeStyle = '#374151';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(50, height - 40);
+            ctx.lineTo(width - 30, height - 40);
+            ctx.moveTo(50, 30);
+            ctx.lineTo(50, height - 40);
+            ctx.stroke();
+            ctx.font = '14px sans-serif';
+            ctx.fillStyle = '#374151';
+            ctx.fillText('列 j', width - 70, height - 48);
+            ctx.fillText('行 i', 15, 50);
+            ctx.restore();
+        }
+
+        function cloneMatrix(matrix) {
+            return matrix.map(row => row.slice());
+        }
+
+        function gaussianElimination(matrix) {
+            const m = cloneMatrix(matrix);
+            const steps = [{ matrix: cloneMatrix(m), description: '初始矩阵' }];
+            const rows = m.length;
+            const cols = m[0].length;
+            let rank = 0;
+            let lead = 0;
+            for (let r = 0; r < rows; r++) {
+                if (lead >= cols) break;
+                let i = r;
+                while (i < rows && Math.abs(m[i][lead]) < 1e-8) {
+                    i++;
+                }
+                if (i === rows) {
+                    lead++;
+                    r--;
+                    continue;
+                }
+                if (i !== r) {
+                    [m[i], m[r]] = [m[r], m[i]];
+                    steps.push({ matrix: cloneMatrix(m), description: `交换第 ${i + 1} 行与第 ${r + 1} 行` });
+                }
+                const pivot = m[r][lead];
+                if (Math.abs(pivot - 1) > 1e-8) {
+                    for (let j = 0; j < cols; j++) {
+                        m[r][j] /= pivot;
+                    }
+                    steps.push({ matrix: cloneMatrix(m), description: `将第 ${r + 1} 行除以 ${pivot.toFixed(2)}` });
+                }
+                for (let i2 = 0; i2 < rows; i2++) {
+                    if (i2 !== r && Math.abs(m[i2][lead]) > 1e-8) {
+                        const factor = m[i2][lead];
+                        for (let j = 0; j < cols; j++) {
+                            m[i2][j] -= factor * m[r][j];
+                        }
+                        steps.push({ matrix: cloneMatrix(m), description: `第 ${i2 + 1} 行减去 ${factor.toFixed(2)} \\times 第 ${r + 1} 行` });
+                    }
+                }
+                rank++;
+                lead++;
+            }
+            steps.push({ matrix: cloneMatrix(m), description: `得到行最简形，非零行数为 ${rank}` });
+            return { steps, rank, rref: m };
+        }
+
+        function matrixToTable(matrix) {
+            const table = document.createElement('table');
+            table.className = 'matrix-table';
+            matrix.forEach(row => {
+                const tr = document.createElement('tr');
+                row.forEach(value => {
+                    const td = document.createElement('td');
+                    td.textContent = Math.abs(value) < 1e-6 ? '0' : value.toFixed(2);
+                    tr.appendChild(td);
+                });
+                table.appendChild(tr);
+            });
+            return table;
+        }
+
+        function updateRankAnalysis() {
+            const idx = parseInt(document.getElementById('rankSelector').value, 10);
+            const example = rankExamples[idx];
+            document.getElementById('paramGroup').style.display = idx === 1 ? 'block' : 'none';
+            let matrix = [];
+            if (idx === 1) {
+                const t = parseInt(document.getElementById('paramRange').value, 10);
+                document.getElementById('paramValue').textContent = t;
+                matrix = example.matrix(t);
+            } else {
+                matrix = example.matrix;
+            }
+            const { steps, rank, rref } = gaussianElimination(matrix);
+            eliminationSteps = steps;
+            document.getElementById('stepRange').max = steps.length;
+            document.getElementById('stepRange').value = 1;
+            document.getElementById('stepIndex').textContent = 1;
+            document.getElementById('stepDescription').innerHTML = example.description;
+            showRankStep(1);
+            document.getElementById('rankSummary').innerHTML = `矩阵秩为 ${rank}。${rank === matrix[0].length ? '列向量线性无关，可生成满维空间。' : '列向量存在依赖关系，可找到自由变量。'}`;
+            drawRankCanvas(rref);
+            renderMath();
+        }
+
+        function showRankStep(stepIndex) {
+            if (!eliminationSteps.length) return;
+            const idx = stepIndex - 1;
+            const step = eliminationSteps[idx];
+            document.getElementById('stepIndex').textContent = stepIndex;
+            const descEl = document.getElementById('stepDescription');
+            descEl.innerHTML = step.description.includes('\\times') ? `$${step.description}$` : step.description;
+            if (typeof MathJax !== 'undefined') {
+                MathJax.typesetPromise([descEl]).catch(err => console.log(err));
+            }
+            const container = document.getElementById('rankTable');
+            container.innerHTML = '';
+            container.appendChild(matrixToTable(step.matrix));
+        }
+
+        function drawRankCanvas(rref) {
+            const canvas = document.getElementById('rankCanvas');
+            const ctx = resizeCanvas(canvas);
+            const width = canvas.width / (window.devicePixelRatio || 1);
+            const height = canvas.height / (window.devicePixelRatio || 1);
+            drawAxis(ctx, width, height);
+            const rows = rref.length;
+            const cols = rref[0].length;
+            const gridW = width - 100;
+            const gridH = height - 80;
+            const cellW = gridW / cols;
+            const cellH = gridH / rows;
+            for (let i = 0; i < rows; i++) {
+                for (let j = 0; j < cols; j++) {
+                    const x = 50 + j * cellW;
+                    const y = 30 + i * cellH;
+                    ctx.strokeStyle = '#e5e7eb';
+                    ctx.strokeRect(x, y, cellW, cellH);
+                    if (Math.abs(rref[i][j] - 1) < 1e-6) {
+                        ctx.fillStyle = '#10b981';
+                        ctx.fillRect(x, y, cellW, cellH);
+                        ctx.fillStyle = '#ffffff';
+                        ctx.fillText('主元', x + 10, y + 18);
+                    } else if (Math.abs(rref[i][j]) > 1e-6) {
+                        ctx.fillStyle = '#6366f1';
+                        ctx.fillText(rref[i][j].toFixed(1), x + 6, y + 18);
+                    }
+                }
+            }
+        }
+
+        function updateNormalForm() {
+            const type = document.getElementById('formSelector').value;
+            let html = '';
+            let info = '';
+            if (type === 'ref') {
+                html = '<div class="info-box">REF：主元所在列左下方全为0，主元为1，主元行右侧允许非零。</div>';
+                info = '行阶梯形可以快速读出主元位置。秩 = 主元个数。';
+            } else if (type === 'rref') {
+                html = '<div class="info-box">RREF：在 REF 的基础上，每个主元所在列的其他元素也为0。</div>';
+                info = '最简形直接给出线性方程组解的结构（主变量/自由变量）。';
+            } else {
+                html = '<div class="info-box">标准分块：$\\begin{bmatrix} I_r & 0 \\ 0 & 0 \\end{bmatrix}$，突出秩为 $r$ 的单位矩阵块。</div>';
+                info = '通过行列初等变换可化到标准分块形式，便于理解秩在空间维度上的含义。';
+            }
+            document.getElementById('formDisplay').innerHTML = html;
+            document.getElementById('formInfo').textContent = info;
+            renderMath();
+        }
+
+        document.getElementById('rankSelector').addEventListener('change', updateRankAnalysis);
+        document.getElementById('paramRange').addEventListener('input', updateRankAnalysis);
+        document.getElementById('stepRange').addEventListener('input', (e) => showRankStep(parseInt(e.target.value, 10)));
+        window.addEventListener('resize', () => {
+            if (eliminationSteps.length) {
+                const last = eliminationSteps[eliminationSteps.length - 1].matrix;
+                drawRankCanvas(last);
+            }
+        });
+
+        // 页面加载完成后初始化可视化
+        window.addEventListener('load', () => {
+            updateRankAnalysis();
+            updateNormalForm();
+            
+            // 初始化自定义下拉框的LaTeX渲染
+            if (typeof MathJax !== 'undefined') {
+                MathJax.typesetPromise().catch(err => console.log(err));
+            }
+            renderMath();
+        });
+    </script>
+</body>
+</html>

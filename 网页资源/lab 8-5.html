@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab 8.5 多元复合函数链式求导实验室</title>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            startup: {
+                pageReady: () => {
+                    return MathJax.startup.defaultPageReady().then(() => {
+                        if (typeof window.scheduleMathRender === 'function') {
+                            window.scheduleMathRender();
+                        }
+                        console.log('MathJax加载完成');
+                    });
+                }
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+            }
+        };
+    </script>
+    <script defer src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js"></script>
+    <script defer src="../common-assets/js/lab-math-enhancer.js"></script>
+    <style>
+        :root {
+            --h1-size: 22px;
+            --h2-size: 20px;
+            --h3-size: 18px;
+            --btn-size: 16px;
+            --formula-size: 20px;
+            --text-size: 16px;
+            --primary: #4f46e5;
+            --primary-dark: #3730a3;
+            --primary-light: #6366f1;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --light: #ffffff;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-600: #4b5563;
+            --gray-800: #1f2937;
+            --border: #e5e7eb;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        *::-webkit-scrollbar { width: 0; background: transparent; }
+        * { scrollbar-width: none; -ms-overflow-style: none; }
+
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif; font-size: var(--text-size); line-height: 1.5; background: var(--gray-50); color: var(--gray-800); }
+        .return-home-panel {
+            position: fixed;
+            top: 12px;
+            right: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+            z-index: 40;
+        }
+
+        .return-toggle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.95), rgba(99, 102, 241, 0.9));
+            color: #ffffff;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 10px 18px rgba(79, 70, 229, 0.28);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .return-toggle:focus-visible {
+            outline: 2px solid rgba(129, 140, 248, 0.6);
+            outline-offset: 3px;
+        }
+
+        .return-toggle:hover {
+            transform: translateY(-1px) scale(1.03);
+            box-shadow: 0 14px 26px rgba(79, 70, 229, 0.35);
+        }
+
+        .return-links {
+            display: none;
+            flex-direction: column;
+            gap: 6px;
+            padding: 10px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(79, 70, 229, 0.15);
+            box-shadow: 0 16px 30px rgba(15, 23, 42, 0.18);
+            backdrop-filter: blur(6px);
+        }
+
+        .return-home-panel.open .return-links {
+            display: flex;
+        }
+
+        .return-link {
+            padding: 6px 12px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 14px;
+            color: var(--primary);
+            background: rgba(79, 70, 229, 0.12);
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+
+        .return-link.return-main {
+            color: var(--success);
+            background: rgba(16, 185, 129, 0.12);
+        }
+
+        .return-link:hover {
+            background: rgba(79, 70, 229, 0.2);
+            color: var(--primary-dark);
+        }
+
+        .return-link.return-main:hover {
+            background: rgba(16, 185, 129, 0.22);
+        }
+
+        .container { width: 100%; max-width: 1400px; height: 100vh; max-height: 700px; margin: 0 auto; display: flex; flex-direction: column; background: var(--light); border-radius: 12px; box-shadow: 0 12px 24px rgba(15,23,42,0.08); overflow: hidden; }
+        .header { background: linear-gradient(90deg, var(--primary), var(--primary-dark)); color: var(--light); padding: 10px 24px; height: 48px; display: flex; align-items: center; }
+        .header h1 { font-size: var(--h1-size); font-weight: 600; }
+        .main { flex: 1; display: flex; overflow: hidden; }
+        .sidebar { width: 120px; background: var(--gray-50); border-right: 1px solid var(--border); padding: 12px 10px; display: flex; flex-direction: column; gap: 8px; }
+        .nav-btn { width: 100%; padding: 8px; border: none; border-radius: 6px; background: transparent; color: var(--gray-600); text-align: left; font-size: var(--text-size); cursor: pointer; transition: all 0.2s ease; }
+        .nav-btn:hover { background: var(--gray-100); color: var(--primary); }
+        .nav-btn.active { background: rgba(79,70,229,0.12); color: var(--primary); font-weight: 600; }
+
+        .content { flex: 1; display: none; padding: 16px; overflow-y: auto; }
+        .content.active { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .column { display: flex; flex-direction: column; gap: 16px; overflow-y: auto; }
+        
+        .card { background: var(--light); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+        .card h3 { font-size: var(--h3-size); color: var(--primary); margin-bottom: 12px; }
+        
+        .control-group { display: flex; flex-direction: column; gap: 8px; background: var(--light); padding: 12px; border-radius: 8px; border: 1px solid var(--gray-200); }
+        label { font-weight: 500; color: var(--gray-600); }
+        select, input[type="range"] { padding: 8px 10px; border-radius: 6px; border: 1px solid var(--gray-300); font-size: var(--text-size); outline: none; transition: border 0.2s ease; }
+        select:focus, input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79,70,229,0.2); }
+        .info-card { background: var(--gray-50); border-radius: 4px; padding: 10px; margin: 8px 0; font-size: var(--text-size); }
+        .status-tag { display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 999px; background: rgba(79,70,229,0.12); color: var(--primary); font-size: 14px; }
+        .status-tag.success { background: rgba(16,185,129,0.16); color: var(--success); }
+        
+        .canvas-container { border: 1px solid var(--gray-200); border-radius: 4px; background: #fafafa; padding: 10px; }
+        .canvas-container canvas { width: 100%; height: 300px; display: block; }
+        .step { border-left: 4px solid rgba(79,70,229,0.2); padding: 10px 12px; border-radius: 6px; background: var(--light); margin-bottom: 10px; }
+        .step.active { border-left-color: var(--primary); background: rgba(79,70,229,0.08); }
+        @media (max-width: 1100px) { .content.active { grid-template-columns: 1fr; } }
+        
+        /* 自定义下拉框支持LaTeX渲染 */
+        .custom-select-container { position: relative; width: 100%; }
+        .custom-select-trigger { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border: 1px solid #e5e7eb; border-radius: 6px; background: #f9fafb; cursor: pointer; transition: all 0.2s; min-height: 40px; }
+        .custom-select-trigger:hover { border-color: #4f46e5; background: #ffffff; }
+        .custom-select-container.open .custom-select-trigger { border-color: #4f46e5; background: #ffffff; }
+        .selected-formula { flex: 1; }
+        .arrow { font-size: 12px; transition: transform 0.2s; margin-left: 8px; color: #6b7280; }
+        .custom-select-container.open .arrow { transform: rotate(180deg); }
+        .custom-select-options { position: absolute; top: 100%; left: 0; right: 0; margin-top: 4px; background: #ffffff; border: 1px solid #e5e7eb; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); max-height: 200px; overflow-y: auto; display: none; z-index: 1000; }
+        .custom-select-container.open .custom-select-options { display: block; }
+        .custom-option { padding: 10px 12px; cursor: pointer; transition: background 0.2s; border-bottom: 1px solid #f3f4f6; background: #ffffff; }
+        .custom-option:last-child { border-bottom: none; }
+        .custom-option:hover { background: #f3f4f6; }
+        .custom-option.selected { background: #eef2ff; color: #4f46e5; font-weight: 500; }
+    </style>
+</head>
+<body>
+    <div class="return-home-panel">
+        <button class="return-toggle" type="button" aria-label="打开返回导航" onclick="toggleReturnPanel(event)"><i class="fa-solid fa-house"></i></button>
+        <div class="return-links">
+            <a class="return-link return-sub" href="index.html"><i class="fa-solid fa-arrow-left"></i> 返回目录</a>
+            <a class="return-link return-main" href="../index.html"><i class="fa-solid fa-house"></i> 返回主站</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <header class="header">
+            <h1>Lab 8.5｜多元复合函数求导的“链条”可视化</h1>
+        </header>
+
+        <div class="main">
+            <nav class="sidebar">
+                <button class="nav-btn active"  data-panel="module1"onclick="switchPanel('module1', this)">链条结构</button>
+                <button class="nav-btn"  data-panel="module2"onclick="switchPanel('module2', this)">实例演练</button>
+            </nav>
+
+            <div class="content active" id="module1">
+                <div class="column">
+                    <div class="card">
+                        <h3>复合关系设置</h3>
+                        <div class="control-group">
+                            <label for="caseSelect">选择链式结构：</label>
+                            <div class="custom-select-container">
+                                <div class="custom-select-trigger" onclick="toggleCustomSelect(this)">
+                                    <span class="selected-formula">$z=f(u,v),\ u=x^2+y^2,\ v=xy$</span>
+                                    <span class="arrow">▼</span>
+                                </div>
+                                <div class="custom-select-options">
+                                    <div class="custom-option selected" data-value="case1" onclick="selectCustomOption(this, 'caseSelect')">
+                                        $z=f(u,v),\ u=x^2+y^2,\ v=xy$
+                                    </div>
+                                    <div class="custom-option" data-value="case2" onclick="selectCustomOption(this, 'caseSelect')">
+                                        $z=e^{u},\ u=\sin x + y^2$
+                                    </div>
+                                    <div class="custom-option" data-value="case3" onclick="selectCustomOption(this, 'caseSelect')">
+                                        $z=\ln u,\ u=\sqrt{x^2+v^2},\ v=x-y$
+                                    </div>
+                                </div>
+                                <input type="hidden" id="caseSelect" value="case1">
+                            </div>
+                        </div>
+                        <div class="info-card" id="chainInfo">链式关系的偏导传播路径将在此展示。</div>
+                        <div class="info-card" id="formulaInfo">请在右侧观察链条可视化。</div>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="card">
+                        <h3>链条节点可视化</h3>
+                        <div class="canvas-container">
+                            <canvas id="chainCanvas"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content" id="module2">
+                <div class="column">
+                    <div class="card">
+                        <h3>数值演练</h3>
+                        <div class="control-group">
+                            <label>自变量取值：</label>
+                            <label for="xSlider">$x$：<span id="xValue" class="status-tag">0.50</span></label>
+                            <input type="range" id="xSlider" min="-1" max="1" step="0.05" value="0.5" oninput="updateExample()" />
+                            <label for="ySlider">$y$：<span id="yValue" class="status-tag">0.50</span></label>
+                            <input type="range" id="ySlider" min="-1" max="1" step="0.05" value="0.5" oninput="updateExample()" />
+                        </div>
+                        <div class="info-card" id="exampleInfo">链式求导的结果将在此给出。</div>
+                        <div class="info-card" id="gradientInfo">梯度向量的几何意义将在此说明。</div>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="card">
+                        <h3>链式流图</h3>
+                        <div class="canvas-container">
+                            <canvas id="exampleCanvas"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const chainCanvas = document.getElementById('chainCanvas');
+        const exampleCanvas = document.getElementById('exampleCanvas');
+
+        const cases = {
+            case1: {
+                description: '$z=f(u,v)$，其中 $f_u=2u, f_v=3v$，$u=x^2+y^2, v=xy$。链式求导得到 $\\frac{\\partial z}{\\partial x}=f_u\\cdot 2x + f_v\\cdot y$。',
+                fx: (x, y) => 2 * (x * x + y * y) * 2 * x + 3 * (x * y) * y,
+                fy: (x, y) => 2 * (x * x + y * y) * 2 * y + 3 * (x * y) * x,
+                nodes: ['x', 'y', 'u', 'v', 'z']
+            },
+            case2: {
+                description: '$z=e^{u}$，$u=\\sin x + y^2$。$\\frac{\\partial z}{\\partial x}=e^{u}\\cos x$，$\\frac{\\partial z}{\\partial y}=e^{u}\\cdot 2y$。',
+                fx: (x, y) => Math.exp(Math.sin(x) + y * y) * Math.cos(x),
+                fy: (x, y) => Math.exp(Math.sin(x) + y * y) * 2 * y,
+                nodes: ['x', 'y', 'u', 'z']
+            },
+            case3: {
+                description: '$z=\\ln u$，$u=\\sqrt{x^2+v^2}$，$v=x-y$。需要两次链式传播：$\\frac{\\partial z}{\\partial x}=\\frac{1}{u}\\cdot\\frac{x + v\\cdot 1}{\\sqrt{x^2+v^2}}$。',
+                fx: (x, y) => {
+                    const v = x - y;
+                    const u = Math.sqrt(x * x + v * v);
+                    return (1 / u) * ((x + v * 1) / u);
+                },
+                fy: (x, y) => {
+                    const v = x - y;
+                    const u = Math.sqrt(x * x + v * v);
+                    return (1 / u) * ((v * (-1)) / u);
+                },
+                nodes: ['x', 'y', 'v', 'u', 'z']
+            }
+        };
+
+        function resizeCanvas(canvas) {
+            const container = canvas.parentElement;
+            const width = container.clientWidth - 20;
+            const height = container.clientHeight - 20;
+            canvas.style.width = width + 'px';
+            canvas.style.height = height + 'px';
+            const ratio = window.devicePixelRatio || 1;
+            canvas.width = width * ratio;
+            canvas.height = height * ratio;
+            const ctx = canvas.getContext('2d');
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.scale(ratio, ratio);
+            return ctx;
+        }
+
+        function drawAxis(ctx, width, height) {
+            ctx.clearRect(0, 0, width, height);
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, width, height);
+            ctx.strokeStyle = '#374151';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(40, height - 40);
+            ctx.lineTo(width - 40, height - 40);
+            ctx.moveTo(40, 40);
+            ctx.lineTo(40, height - 40);
+            ctx.stroke();
+        }
+
+        let mathObserver = null;
+        let mathRenderQueued = false;
+
+        function startMathObserver() {
+            if (typeof MutationObserver === 'undefined' || !document.body) {
+                return;
+            }
+            if (mathObserver) {
+                mathObserver.disconnect();
+            }
+            mathObserver = new MutationObserver(mutations => {
+                for (const mutation of mutations) {
+                    if (mutation.type === 'childList' || mutation.type === 'characterData') {
+                        scheduleMathRender();
+                        break;
+                    }
+                }
+            });
+            mathObserver.observe(document.body, { childList: true, subtree: true, characterData: true });
+        }
+
+        function scheduleMathRender() {
+            if (mathRenderQueued) {
+                return;
+            }
+            mathRenderQueued = true;
+            requestAnimationFrame(() => {
+                mathRenderQueued = false;
+                if (window.MathJax && MathJax.typesetPromise) {
+                    if (mathObserver) {
+                        mathObserver.disconnect();
+                    }
+                    MathJax.typesetPromise()
+                        .catch(err => console.log('渲染错误:', err))
+                        .finally(() => {
+                            startMathObserver();
+                        });
+                } else {
+                    setTimeout(scheduleMathRender, 160);
+                }
+            });
+        }
+
+        window.scheduleMathRender = scheduleMathRender;
+
+        function renderMath() {
+            scheduleMathRender();
+        }
+
+        function ensureMathReady() {
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', () => {
+                    startMathObserver();
+                    scheduleMathRender();
+                });
+            } else {
+                startMathObserver();
+                scheduleMathRender();
+            }
+        }
+
+        ensureMathReady();
+
+        function toggleReturnPanel(event) {
+            event.stopPropagation();
+            const panel = document.querySelector('.return-home-panel');
+            if (panel) {
+                panel.classList.toggle('open');
+            }
+        }
+
+        document.addEventListener('click', event => {
+            const panel = document.querySelector('.return-home-panel');
+            if (!panel) {
+                return;
+            }
+            if (panel.classList.contains('open') && !panel.contains(event.target)) {
+                panel.classList.remove('open');
+            }
+        });
+
+        window.addEventListener('pageshow', () => {
+            scheduleMathRender();
+        });
+
+        function switchPanel(id, btn) {
+            document.querySelectorAll('.content').forEach(panel => panel.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+            btn.classList.add('active');
+            setTimeout(() => {
+                drawChain();
+                drawExample();
+            }, 80);
+        }
+
+        function updateChain() {
+            const key = document.getElementById('caseSelect').value;
+            const info = cases[key].description;
+            document.getElementById('chainInfo').innerHTML = `<span class="status-tag">链条解析</span> ${info}`;
+            document.getElementById('formulaInfo').innerHTML = '<span class="status-tag success">观察</span> 箭头表示偏导数乘积的传播方向。';
+            drawChain();
+            renderMath();
+        }
+
+        function drawChain() {
+            const ctx = resizeCanvas(chainCanvas);
+            const width = chainCanvas.clientWidth - 20;
+            const height = chainCanvas.clientHeight - 20;
+            ctx.clearRect(0, 0, width, height);
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, width, height);
+            const key = document.getElementById('caseSelect').value;
+            const nodes = cases[key].nodes;
+            const spacing = (width - 120) / (nodes.length - 1);
+            ctx.font = '16px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            nodes.forEach((node, index) => {
+                const x = 60 + spacing * index;
+                const y = height / 2;
+                ctx.fillStyle = '#ede9fe';
+                ctx.beginPath();
+                ctx.arc(x, y, 40, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = '#4f46e5';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                ctx.fillStyle = '#312e81';
+                ctx.fillText(node, x, y);
+                if (index < nodes.length - 1) {
+                    const nx = 60 + spacing * (index + 1);
+                    ctx.strokeStyle = '#6366f1';
+                    ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    ctx.moveTo(x + 40, y);
+                    ctx.lineTo(nx - 40, y);
+                    ctx.stroke();
+                    ctx.fillStyle = '#6366f1';
+                    ctx.beginPath();
+                    ctx.moveTo(nx - 45, y - 6);
+                    ctx.lineTo(nx - 35, y);
+                    ctx.lineTo(nx - 45, y + 6);
+                    ctx.closePath();
+                    ctx.fill();
+                }
+            });
+        }
+
+        function updateExample() {
+            const key = document.getElementById('caseSelect').value;
+            const x = parseFloat(document.getElementById('xSlider').value);
+            const y = parseFloat(document.getElementById('ySlider').value);
+            document.getElementById('xValue').textContent = x.toFixed(2);
+            document.getElementById('yValue').textContent = y.toFixed(2);
+            const fx = cases[key].fx(x, y);
+            const fy = cases[key].fy(x, y);
+            document.getElementById('exampleInfo').innerHTML = `<span class="status-tag">链式求导</span> $f_x=${fx.toFixed(4)},\ f_y=${fy.toFixed(4)}$。`;
+            const gradNorm = Math.sqrt(fx * fx + fy * fy);
+            document.getElementById('gradientInfo').innerHTML = `<span class="status-tag success">梯度</span> $\\lVert\\nabla f\\rVert=${gradNorm.toFixed(4)}$，方向沿最陡上升。`;
+            drawExample();
+            renderMath();
+        }
+
+        function drawExample() {
+            const ctx = resizeCanvas(exampleCanvas);
+            const width = exampleCanvas.clientWidth - 20;
+            const height = exampleCanvas.clientHeight - 20;
+            ctx.clearRect(0, 0, width, height);
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, width, height);
+            
+            const key = document.getElementById('caseSelect').value;
+            const x = parseFloat(document.getElementById('xSlider').value);
+            const y = parseFloat(document.getElementById('ySlider').value);
+            const fx = cases[key].fx(x, y);
+            const fy = cases[key].fy(x, y);
+            
+            // 绘制链式求导流程图
+            const nodes = cases[key].nodes;
+            const nodeY = height / 2;
+            const spacing = Math.min(120, (width - 100) / (nodes.length - 1));
+            const startX = (width - spacing * (nodes.length - 1)) / 2;
+            
+            ctx.font = '16px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            // 绘制节点和连接
+            nodes.forEach((node, i) => {
+                const nx = startX + i * spacing;
+                
+                // 节点圆圈
+                ctx.fillStyle = i < 2 ? '#10b981' : (i === nodes.length - 1 ? '#ef4444' : '#6366f1');
+                ctx.beginPath();
+                ctx.arc(nx, nodeY, 30, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                
+                // 节点文字
+                ctx.fillStyle = '#ffffff';
+                ctx.fillText(node, nx, nodeY);
+                
+                // 绘制箭头到下一个节点
+                if (i < nodes.length - 1) {
+                    const nnx = startX + (i + 1) * spacing;
+                    ctx.strokeStyle = '#4f46e5';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.moveTo(nx + 32, nodeY);
+                    ctx.lineTo(nnx - 32, nodeY);
+                    ctx.stroke();
+                    
+                    // 箭头头部
+                    ctx.fillStyle = '#4f46e5';
+                    ctx.beginPath();
+                    ctx.moveTo(nnx - 32, nodeY - 6);
+                    ctx.lineTo(nnx - 22, nodeY);
+                    ctx.lineTo(nnx - 32, nodeY + 6);
+                    ctx.closePath();
+                    ctx.fill();
+                }
+            });
+            
+            // 显示当前值
+            ctx.font = '14px sans-serif';
+            ctx.fillStyle = '#4b5563';
+            ctx.textAlign = 'center';
+            ctx.fillText(`x=${x.toFixed(2)}, y=${y.toFixed(2)}`, width / 2, 40);
+            ctx.fillText(`∂z/∂x=${fx.toFixed(3)}, ∂z/∂y=${fy.toFixed(3)}`, width / 2, height - 30);
+        }
+
+        window.addEventListener('resize', () => {
+            drawChain();
+            drawExample();
+        });
+
+        // 自定义下拉框控制函数
+        function toggleCustomSelect(trigger) {
+            const container = trigger.parentElement;
+            const isOpen = container.classList.contains('open');
+            document.querySelectorAll('.custom-select-container.open').forEach(el => el.classList.remove('open'));
+            if (!isOpen) container.classList.add('open');
+        }
+
+        function selectCustomOption(option, selectId) {
+            const container = option.closest('.custom-select-container');
+            const trigger = container.querySelector('.selected-formula');
+            const hiddenInput = document.getElementById(selectId);
+            container.querySelectorAll('.custom-option').forEach(opt => opt.classList.remove('selected'));
+            option.classList.add('selected');
+            trigger.innerHTML = option.innerHTML;
+            hiddenInput.value = option.dataset.value;
+            container.classList.remove('open');
+            if (typeof MathJax !== 'undefined') MathJax.typesetPromise([container]).catch(err => console.log(err));
+            if (selectId === 'caseSelect') updateChain();
+        }
+
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.custom-select-container')) {
+                document.querySelectorAll('.custom-select-container.open').forEach(el => el.classList.remove('open'));
+            }
+        });
+
+        updateChain();
+        updateExample();
+    </script>
+</body>
+</html>

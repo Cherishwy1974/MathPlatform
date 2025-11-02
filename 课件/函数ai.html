@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>函数极限可视化AI工具</title>
+    <script src="../common-assets/js/tailwind.min.js"></script>
+    <script src="../common-assets/js/d3-7.8.5.min.js"></script>
+    <script>
+        MathJax = {
+            tex: {  
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true,
+                tags: 'ams'
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script async src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js" type="text/javascript"></script>
+    <style>
+        body {
+            font-family: 'Inter', 'Helvetica Neue', 'Arial', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background-color: #f0f2f5;
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .btn-spinner {
+            border-top-color: white;
+            width: 20px;
+            height: 20px;
+        }
+        #animation-description {
+            transition: background-color 0.3s ease;
+        }
+
+        /* Navigation Button Styles */
+        .nav-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 12px 20px;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+        }
+
+        .nav-button:active {
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+    <!-- Navigation Button 已移除 - 此页面作为iframe嵌入主课件 -->
+
+    <div class="w-full max-w-5xl mx-auto">
+        <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8">
+            <div class="text-center mb-6">
+                <h1 class="text-3xl md:text-4xl font-bold text-gray-800">函数极限可视化AI工具</h1>
+                <p class="text-gray-500 mt-2">输入函数，AI将绘制图像、动态演示极限过程并计算极限值。</p>
+            </div>
+
+            <!-- Input Section -->
+            <div class="flex flex-col md:flex-row gap-4 mb-4">
+                <div class="relative flex-grow">
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-gray-500">f(x) =</span>
+                    <input type="text" id="formula-input" placeholder="例如: sin(x)/x 或 (x^2-1)/(x-1)"
+                           class="w-full pl-16 pr-4 py-3 text-lg border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300">
+                </div>
+                <button id="visualize-btn"
+                        class="w-full md:w-auto bg-blue-600 text-white font-bold text-lg px-6 py-3 rounded-lg hover:bg-blue-700 active:scale-95 transition-all duration-300 flex items-center justify-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L8.6 3.3a2 2 0 0 0-1.7-.9H3a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"></path><path d="M2 10h20"></path><path d="m9 14 2 2 4-4"></path></svg>
+                    <span>生成图像</span>
+                </button>
+            </div>
+
+            <!-- Status & Formula Display -->
+            <div id="status-container" class="h-12 flex items-center justify-center text-center mb-4">
+                <div id="loader" class="loader hidden"></div>
+                <p id="status-text" class="text-gray-600"></p>
+                <div id="parsed-formula-container" class="hidden bg-blue-50 border border-blue-200 text-blue-800 px-4 py-2 rounded-lg text-lg">
+                    <span class="font-semibold">解析公式: </span>
+                    <span id="parsed-formula"></span>
+                </div>
+            </div>
+
+            <!-- Visualization Area -->
+            <div id="chart-container" class="w-full h-[450px] bg-gray-50 rounded-lg border-2 border-gray-200 relative overflow-hidden">
+                <svg id="chart-svg" width="100%" height="100%"></svg>
+            </div>
+            
+            <!-- Animation Controls -->
+            <div id="animation-controls" class="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200 hidden">
+                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+                    <div id="animation-description" class="md:col-span-2 text-lg font-medium text-center p-3 rounded-lg border bg-blue-50 border-blue-200 text-blue-800">
+                        请选择一个极限过程进行演示
+                    </div>
+                    <!-- Tendency Controls -->
+                    <div class="flex flex-wrap gap-2 justify-center">
+                        <button data-type="to_infinity" class="anim-btn bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg transition-transform active:scale-95 disabled:bg-gray-400">$x \to +\infty$</button>
+                        <button data-type="to_neg_infinity" class="anim-btn bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg transition-transform active:scale-95 disabled:bg-gray-400">$x \to -\infty$</button>
+                    </div>
+                     <!-- Approach Controls -->
+                    <div class="flex flex-wrap gap-2 items-center justify-center">
+                        <span class="font-semibold text-gray-700">当 $x \to$</span>
+                        <input type="number" id="limit-point-input" value="0" class="w-20 text-center border-2 border-gray-300 rounded-md p-1 focus:ring-2 focus:ring-blue-500">
+                        <span class="font-semibold text-gray-700">:</span>
+                        <button data-type="from_right" class="anim-btn bg-teal-500 hover:bg-teal-600 text-white font-bold py-2 px-4 rounded-lg transition-transform active:scale-95 disabled:bg-gray-400">$x \to a^+$</button>
+                        <button data-type="from_left" class="anim-btn bg-teal-500 hover:bg-teal-600 text-white font-bold py-2 px-4 rounded-lg transition-transform active:scale-95 disabled:bg-gray-400">$x \to a^-$</button>
+                         <button data-type="from_both" class="anim-btn bg-teal-500 hover:bg-teal-600 text-white font-bold py-2 px-4 rounded-lg transition-transform active:scale-95 disabled:bg-gray-400">$x \to a$</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <footer class="text-center mt-6 text-sm text-gray-500">
+            <p>由 AI, D3.js 和 MathJax 驱动</p>
+        </footer>
+    </div>
+
+    <script>
+        // --- DOM Elements ---
+        const formulaInput = document.getElementById('formula-input');
+        const visualizeBtn = document.getElementById('visualize-btn');
+        const loader = document.getElementById('loader');
+        const statusText = document.getElementById('status-text');
+        const parsedFormulaContainer = document.getElementById('parsed-formula-container');
+        const parsedFormulaSpan = document.getElementById('parsed-formula');
+        const chartContainer = document.getElementById('chart-container');
+        const svg = d3.select("#chart-svg");
+        const animationControls = document.getElementById('animation-controls');
+        const limitPointInput = document.getElementById('limit-point-input');
+        const animationDescription = document.getElementById('animation-description');
+        const animButtons = document.querySelectorAll('.anim-btn');
+
+        // --- State ---
+        let currentFunction = { latexString: null, evaluate: null };
+        let d3State = { xScale: null, yScale: null, g: null };
+        let isAnimating = false;
+        let animationQueue = [];
+        let currentAnimationId = null;
+
+        // --- API Configuration ---
+        const DEEPSEEK_API_KEY = 'sk-de3f3fed16ae4f3a9b0ba53538d238f7'; // 请替换为您的API Key
+        const API_URL = 'https://api.deepseek.com/chat/completions';
+
+        // --- Event Listeners ---
+        visualizeBtn.addEventListener('click', handleVisualizeClick);
+        formulaInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleVisualizeClick();
+        });
+        
+        animButtons.forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                if (isAnimating) {
+                    // If already animating, add to queue instead of ignoring
+                    const type = e.target.dataset.type;
+                    const a = parseFloat(limitPointInput.value);
+                    if (isNaN(a) && type.includes('from')) {
+                        alert('请输入一个有效的趋近数值 a');
+                        return;
+                    }
+                    queueAnimation(type, a);
+                    return;
+                }
+                const type = e.target.dataset.type;
+                const a = parseFloat(limitPointInput.value);
+                if (isNaN(a) && type.includes('from')) {
+                    alert('请输入一个有效的趋近数值 a');
+                    return;
+                }
+                await handleLimitAnimation(type, a);
+            });
+        });
+
+        async function handleVisualizeClick() {
+            const userInput = formulaInput.value.trim();
+            if (!userInput) {
+                updateStatus('请输入一个函数公式！', 'error');
+                return;
+            }
+            setLoadingState(true, 'visualize');
+            try {
+                const { latexString, jsFunctionBody } = await getAPIData(userInput, 'parse');
+                if (!jsFunctionBody) throw new Error("AI 未能返回有效的函数体。");
+
+                currentFunction.latexString = latexString;
+                currentFunction.evaluate = new Function('x', `
+                    try {
+                        const { sin, cos, tan, sqrt, abs, pow, log, exp, PI, E } = Math;
+                        ${jsFunctionBody}
+                    } catch(e) {
+                        console.warn('Function evaluation error:', e);
+                        return null;
+                    }
+                `);
+                updateStatus('', 'success');
+                parsedFormulaSpan.innerHTML = `\\(f(x) = ${latexString}\\)`;
+                parsedFormulaContainer.classList.remove('hidden');
+                drawFunction();
+                animationControls.classList.remove('hidden');
+                if (window.MathJax) {
+                   await MathJax.typesetPromise([parsedFormulaContainer, animationControls]);
+                }
+            } catch (error) {
+                console.error('Error during visualization:', error);
+                updateStatus(`处理失败: ${error.message}`, 'error');
+                clearChart();
+                animationControls.classList.add('hidden');
+                currentFunction = {};
+            } finally {
+                setLoadingState(false, 'visualize');
+            }
+        }
+        
+        // Animation queue management
+        function queueAnimation(type, a) {
+            animationQueue.push({ type, a });
+            updateAnimationDescription(`动画已加入队列 (队列中: ${animationQueue.length})`, 'calculating');
+        }
+
+        async function processAnimationQueue() {
+            while (animationQueue.length > 0 && !isAnimating) {
+                const { type, a } = animationQueue.shift();
+                await handleLimitAnimation(type, a);
+                // Small delay between queued animations
+                if (animationQueue.length > 0) {
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                }
+            }
+        }
+
+        async function handleLimitAnimation(type, a) {
+            currentAnimationId = Date.now(); // Unique ID for this animation
+            setAnimationState(true);
+            clearLimitLine();
+            
+            let limitCondition, descriptionStart;
+            switch(type) {
+                case 'to_infinity': limitCondition = "x -> +infinity"; descriptionStart = `演示 $x \\to +\\infty$`; break;
+                case 'to_neg_infinity': limitCondition = "x -> -infinity"; descriptionStart = `演示 $x \\to -\\infty$`; break;
+                case 'from_right': limitCondition = `x -> ${a}+`; descriptionStart = `演示 $x \\to ${a}^{+}$`; break;
+                case 'from_left': limitCondition = `x -> ${a}-`; descriptionStart = `演示 $x \\to ${a}^{-}$`; break;
+                case 'from_both':
+                    await handleLimitAnimation('from_left', a);
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    await handleLimitAnimation('from_right', a);
+                    return;
+            }
+
+            updateAnimationDescription(`${descriptionStart} ... 正在计算极限`, 'calculating');
+
+            try {
+                const limitResult = await getAPIData({ latex: currentFunction.latexString, condition: limitCondition }, 'limit');
+                let resultText = '';
+                if (limitResult.exists) {
+                    const value = (typeof limitResult.value === 'number') ? limitResult.value.toFixed(4) : limitResult.value;
+                    resultText = `， AI计算极限为: $L = ${value}$`;
+                    if (typeof limitResult.value === 'number') {
+                        drawLimitLine(limitResult.value);
+                    }
+                } else {
+                    resultText = `， AI判断极限不存在。原因: ${limitResult.reason}`;
+                }
+                updateAnimationDescription(descriptionStart + resultText, 'result');
+            } catch (error) {
+                console.error("Limit calculation error:", error);
+                updateAnimationDescription(`${descriptionStart}，极限计算失败。`, 'error');
+            }
+
+            startD3Animation(type, a);
+            // Wait for animation to finish
+            await new Promise(resolve => setTimeout(resolve, 2500));
+            setAnimationState(false);
+
+            // Process next animation in queue
+            setTimeout(() => processAnimationQueue(), 500);
+        }
+
+        function setLoadingState(isLoading, type) {
+            const btn = type === 'visualize' ? visualizeBtn : null;
+            if (isLoading) {
+                if(btn) {
+                    btn.disabled = true;
+                    btn.innerHTML = `<div class="loader btn-spinner"></div><span>解析中...</span>`;
+                }
+                loader.classList.remove('hidden');
+                statusText.classList.add('hidden');
+                parsedFormulaContainer.classList.add('hidden');
+                animationControls.classList.add('hidden');
+                clearChart();
+            } else {
+                if(btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L8.6 3.3a2 2 0 0 0-1.7-.9H3a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"></path><path d="M2 10h20"></path><path d="m9 14 2 2 4-4"></path></svg><span>生成图像</span>`;
+                }
+                loader.classList.add('hidden');
+            }
+        }
+        
+        function setAnimationState(isBusy) {
+            isAnimating = isBusy;
+            animButtons.forEach(b => {
+                if (isBusy) {
+                    b.disabled = false; // Allow queueing
+                    b.style.opacity = '0.7';
+                    if (animationQueue.length > 0) {
+                        b.innerHTML = b.innerHTML.replace(/\$.*?\$/g, match => match) + ` (${animationQueue.length})`;
+                    }
+                } else {
+                    b.disabled = false;
+                    b.style.opacity = '1';
+                    // Reset button text by removing queue count
+                    b.innerHTML = b.innerHTML.replace(/\s*\(\d+\)$/, '');
+                }
+            });
+        }
+
+        function updateStatus(message, type = 'info') {
+            statusText.textContent = message;
+            statusText.classList.remove('hidden', 'text-red-500', 'text-green-500', 'text-gray-600');
+            if(type !== 'success') parsedFormulaContainer.classList.add('hidden');
+            
+            switch(type) {
+                case 'error': statusText.classList.add('text-red-500'); break;
+                case 'success': statusText.classList.add('hidden'); break;
+                default: statusText.classList.add('text-gray-600');
+            }
+        }
+        
+        function updateAnimationDescription(text, state) {
+            animationDescription.innerHTML = text;
+            animationDescription.classList.remove('bg-blue-50', 'border-blue-200', 'text-blue-800', 'bg-green-50', 'border-green-200', 'text-green-800', 'bg-red-50', 'border-red-200', 'text-red-800');
+            switch(state){
+                case 'calculating': animationDescription.classList.add('bg-blue-50', 'border-blue-200', 'text-blue-800'); break;
+                case 'result': animationDescription.classList.add('bg-green-50', 'border-green-200', 'text-green-800'); break;
+                case 'error': animationDescription.classList.add('bg-red-50', 'border-red-200', 'text-red-800'); break;
+                default: animationDescription.classList.add('bg-blue-50', 'border-blue-200', 'text-blue-800');
+            }
+            if (window.MathJax) MathJax.typesetPromise([animationDescription]);
+        }
+
+        async function getAPIData(data, type) {
+            let systemPrompt, userContent;
+            if (type === 'parse') {
+                systemPrompt = `You are an expert mathematician and JavaScript programmer. Your task is to parse a user's natural language description of a mathematical function, f(x). You MUST respond with ONLY a valid JSON object. The JSON object must have two keys: "latexString" and "jsFunctionBody". "latexString": A LaTeX representation (e.g., "\\\\frac{\\\\sin(x)}{x}"). "jsFunctionBody": A string containing ONLY the body of a JavaScript function. Example user input "sin x 除以 x", your response: {"latexString": "\\\\frac{\\\\sin(x)}{x}", "jsFunctionBody": "return Math.sin(x) / x;"}.`;
+                userContent = data;
+                updateStatus('正在请求 AI 解析公式...', 'info');
+            } else { // limit calculation
+                systemPrompt = `You are a calculus expert. Analyze the provided function formula and determine its limit based on the condition. Respond with ONLY a valid JSON object with three keys: "exists" (boolean), "value" (number, or a string for "infinity" or "-infinity" if exists, else null), and "reason" (a brief explanation in Chinese). Example input: { "latex": "\\\\frac{1}{x}", "condition": "x -> infinity" }, your response: {"exists": true, "value": 0, "reason": "分母趋于无穷大，分式极限为0。"}. Another example: {"latex":"x^2", "condition":"x -> -infinity"}, your response: {"exists":true, "value":"infinity", "reason":"当x取负值且绝对值增大时，x的平方趋于正无穷。"}`;
+                userContent = JSON.stringify(data);
+            }
+            
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${DEEPSEEK_API_KEY}` },
+                body: JSON.stringify({
+                    model: "deepseek-chat", messages: [{ "role": "system", "content": systemPrompt }, { "role": "user", "content": userContent }],
+                    stream: false, response_format: { "type": "json_object" }
+                })
+            });
+            if (!response.ok) {
+                let errorMessage = `HTTP ${response.status}`;
+                try {
+                    const errorBody = await response.json();
+                    errorMessage = errorBody.error?.message || errorMessage;
+                } catch (e) {
+                    // If we can't parse the error response, use the status
+                }
+                throw new Error(`API 请求失败: ${errorMessage}`);
+            }
+
+            const result = await response.json();
+            let content = result.choices?.[0]?.message?.content;
+            if (!content) {
+                throw new Error("API 返回了无效的响应格式。");
+            }
+
+            // Fix for unquoted infinity values from the API, which causes JSON parsing errors.
+            if (type === 'limit') {
+                content = content.replace(/:\s*(-?infinity)\b/g, ':"$1"');
+            }
+
+            try {
+                return JSON.parse(content);
+            } catch (parseError) {
+                console.error('JSON parsing error:', parseError, 'Content:', content);
+                throw new Error("API 返回的数据格式无效。");
+            }
+        }
+
+        function clearChart() {
+            svg.selectAll('*').remove();
+            d3State.g = null;
+        }
+        
+        function clearLimitLine(){
+             if (d3State.g) {
+                d3State.g.selectAll('.limit-line').remove();
+            }
+        }
+
+        function drawFunction() {
+            clearChart();
+            if (!currentFunction.evaluate) return;
+
+            const margin = { top: 30, right: 50, bottom: 40, left: 50 };
+            const width = chartContainer.clientWidth - margin.left - margin.right;
+            const height = chartContainer.clientHeight - margin.top - margin.bottom;
+
+            d3State.g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+            const g = d3State.g;
+            const domain = [-10, 10];
+            const samples = 500;
+            const data = [];
+            
+            for (let i = 0; i <= samples; i++) {
+                const x = domain[0] + (i / samples) * (domain[1] - domain[0]);
+                const y = currentFunction.evaluate(x);
+                if (Number.isFinite(y)) data.push({x, y});
+                else if(data.length > 0 && data[data.length-1].y !== null) data.push({x, y: null});
+            }
+
+            d3State.xScale = d3.scaleLinear().domain(domain).range([0, width]);
+            const yExtent = d3.extent(data.filter(d=>d.y !== null), d => d.y);
+            let yDomain = [-5, 5];
+            if(yExtent[0] !== undefined) {
+                const yPadding = (yExtent[1] - yExtent[0]) * 0.15 || 1;
+                yDomain = [yExtent[0] - yPadding, yExtent[1] + yPadding];
+            }
+            d3State.yScale = d3.scaleLinear().domain(yDomain).range([height, 0]);
+
+            g.append("g").attr("transform", `translate(0, ${height})`).call(d3.axisBottom(d3State.xScale)).append("text").attr("x", width).attr("y", -6).attr("fill", "currentColor").attr("text-anchor", "end").text("x");
+            g.append("g").call(d3.axisLeft(d3State.yScale)).append("text").attr("x", 6).attr("y", 6).attr("dy", "0.71em").attr("fill", "currentColor").attr("text-anchor", "start").text("y");
+            g.append("g").attr("class", "grid").call(d3.axisBottom(d3State.xScale).tickSize(height).tickFormat("")).attr("stroke-opacity", 0.1).select(".domain").remove();
+            g.append("g").attr("class", "grid").call(d3.axisLeft(d3State.yScale).tickSize(-width).tickFormat("")).attr("stroke-opacity", 0.1).select(".domain").remove();
+            
+            // 仅当y=0在范围内时绘制x轴（检查已存在的yDomain变量）
+            if (yDomain[0] <= 0 && yDomain[1] >= 0) {
+                g.append("line").attr("x1", 0).attr("x2", width).attr("y1", d3State.yScale(0)).attr("y2", d3State.yScale(0)).attr("stroke", "black").attr("stroke-opacity", 0.5);
+            }
+            
+            // 仅当x=0在范围内时绘制y轴
+            const xDomain = d3State.xScale.domain();
+            if (xDomain[0] <= 0 && xDomain[1] >= 0) {
+                g.append("line").attr("x1", d3State.xScale(0)).attr("x2", d3State.xScale(0)).attr("y1", 0).attr("y2", height).attr("stroke", "black").attr("stroke-opacity", 0.5);
+            }
+
+            const line = d3.line().defined(d => d.y !== null).x(d => d3State.xScale(d.x)).y(d => d3State.yScale(d.y));
+            const segments = [];
+            let currentSegment = [];
+            for (const d of data) {
+                if (d.y !== null) currentSegment.push(d);
+                else if (currentSegment.length > 0) { segments.push(currentSegment); currentSegment = []; }
+            }
+            if (currentSegment.length > 0) segments.push(currentSegment);
+            segments.forEach(segment => g.append("path").datum(segment).attr("fill", "none").attr("stroke", "#3b82f6").attr("stroke-width", 2.5).attr("d", line));
+        }
+        
+        function drawLimitLine(limitValue) {
+            if (!d3State.g || !Number.isFinite(limitValue)) return;
+            const { g, xScale, yScale } = d3State;
+            const yPos = yScale(limitValue);
+            
+            // Check if limit is within the visible y-domain
+            const yDomain = yScale.domain();
+            if(limitValue < yDomain[0] || limitValue > yDomain[1]) return;
+
+            g.append('line').attr('class', 'limit-line')
+                .attr('x1', 0).attr('x2', xScale.range()[1])
+                .attr('y1', yPos).attr('y2', yPos)
+                .attr('stroke', '#ef4444').attr('stroke-width', 2).attr('stroke-dasharray', '6 4');
+            g.append('text').attr('class', 'limit-line')
+                .attr('x', xScale.range()[1] + 5).attr('y', yPos).attr('dy', '0.32em')
+                .text(`L=${limitValue.toFixed(3)}`).attr('fill', '#ef4444').attr('font-size', '14px').attr('font-weight', 'bold');
+        }
+
+        function startD3Animation(type, a) {
+            if (!currentFunction.evaluate || !d3State.xScale) return;
+            const { xScale, yScale, g } = d3State;
+            svg.selectAll(".limit-point").remove();
+            
+            const duration = 2500;
+            const domain = xScale.domain();
+            let startX, endX;
+
+            switch(type) {
+                case 'to_infinity': startX = Math.max(0, domain[0]); endX = domain[1]; break;
+                case 'to_neg_infinity': startX = Math.min(0, domain[1]); endX = domain[0]; break;
+                case 'from_right': startX = a + (domain[1] - domain[0]) * 0.1; endX = a + 1e-6; break;
+                case 'from_left': startX = a - (domain[1] - domain[0]) * 0.1; endX = a - 1e-6; break;
+            }
+
+            const point = g.append("circle").attr("class", "limit-point").attr("r", 5).attr("fill", "#ef4444").attr("stroke", "white").attr("stroke-width", 2);
+            point.transition().duration(duration).ease(d3.easeLinear)
+                .attrTween("transform", () => t => {
+                    const currentX = startX + t * (endX - startX);
+                    const currentY = currentFunction.evaluate(currentX);
+                    const yPos = yScale(currentY);
+                    const height = yScale.range()[0]; // Get the height from scale range
+
+                    if (Number.isFinite(currentY) && yPos >= 0 && yPos <= height) {
+                       point.style("opacity", 1);
+                       return `translate(${xScale(currentX)}, ${yPos})`;
+                    }
+                    point.style("opacity", 0);
+                    return point.attr("transform") || `translate(${xScale(currentX)}, ${height/2})`;
+                })
+                .on("end", () => setTimeout(() => point.remove(), 500));
+        }
+        
+        // Navigation function 已移除 - 此页面作为iframe嵌入主课件
+
+        // --- Initial State ---
+        updateStatus('请在上方输入框中描述一个函数公式，例如 1/x 。');
+    </script>
+</body>
+</html>
+

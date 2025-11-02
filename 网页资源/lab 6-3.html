@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab 6.3 定积分的换元与分部积分实验室</title>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            startup: {
+                pageReady: () => {
+                    return MathJax.startup.defaultPageReady().then(() => {
+                        if (typeof window.scheduleMathRender === 'function') {
+                            window.scheduleMathRender();
+                        }
+                        console.log('MathJax加载完成');
+                    });
+                }
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+            }
+        };
+    </script>
+    <script defer src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js"></script>
+    <script defer src="../common-assets/js/lab-math-enhancer.js"></script>
+    <style>
+        :root {
+            --h1-size: 22px;
+            --h2-size: 20px;
+            --h3-size: 18px;
+            --btn-size: 16px;
+            --formula-size: 20px;
+            --text-size: 16px;
+            --primary: #4f46e5;
+            --primary-light: #6366f1;
+            --primary-dark: #3730a3;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-500: #6b7280;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --border: #e5e7eb;
+            --card-radius: 14px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        *::-webkit-scrollbar { width: 0; background: transparent; }
+        * { scrollbar-width: none; -ms-overflow-style: none; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
+            background: var(--gray-50);
+            color: var(--gray-800);
+            font-size: var(--text-size);
+            line-height: 1.5;
+        }
+
+        .return-home-panel { position: fixed; bottom: 12px; right: 12px; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; z-index: 40; }
+        .return-toggle { width: 40px; height: 40px; border-radius: 50%; border: none; background: linear-gradient(135deg, rgba(79,70,229,0.96), rgba(99,102,241,0.9)); color: #fff; font-size: 20px; cursor: pointer; box-shadow: 0 10px 18px rgba(79,70,229,0.28); transition: transform 0.2s, box-shadow 0.2s; }
+        .return-toggle:hover { transform: translateY(-1px) scale(1.03); box-shadow: 0 14px 26px rgba(79,70,229,0.35); }
+        .return-links { display: none; flex-direction: column; gap: 6px; padding: 10px; border-radius: 10px; background: rgba(255,255,255,0.96); border: 1px solid rgba(79,70,229,0.18); box-shadow: 0 10px 30px rgba(15,23,42,0.14); opacity: 0; transition: opacity 0.16s; }
+        .return-link { text-decoration: none; font-size: 15px; color: var(--primary-dark); padding: 6px 12px; border-radius: 8px; background: rgba(99,102,241,0.12); transition: background 0.2s; }
+        .return-link:hover { background: rgba(79,70,229,0.18); }
+
+                .container {
+
+                    max-width: 1400px;
+
+                    margin: 0 auto;
+
+                    padding: 24px 24px 32px;
+
+                }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+        .header h1 { font-size: var(--h2-size); color: var(--primary-dark); }
+        .main { display: flex; gap: 18px; min-height: 620px; }
+        .sidebar { width: 120px; display: flex; flex-direction: column; gap: 12px; }
+        .nav-btn { padding: 12px 10px; border-radius: 4px; margin-bottom: 4px; border: 1px solid var(--border); background: #ffffff; color: var(--gray-700); font-size: var(--btn-size); font-weight: 600; cursor: pointer; transition: all 0.2s ease; }
+        .nav-btn:hover, .nav-btn.active { background: linear-gradient(135deg, rgba(79,70,229,0.95), rgba(99,102,241,0.88)); color: #ffffff; border-color: transparent; box-shadow: 0 12px 20px rgba(79,70,229,0.2); }
+
+        .content { flex: 1; display: none; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+        .content.active { display: grid; }
+        .column { display: flex; flex-direction: column; gap: 16px; max-height: 640px; overflow-y: auto; padding-right: 4px; }
+        .card { background: #ffffff; border-radius: var(--card-radius); border: 1px solid var(--gray-200); padding: 16px; box-shadow: 0 10px 20px rgba(15,23,42,0.08); }
+        .card h3 { font-size: var(--h3-size); color: var(--primary-dark); margin-bottom: 10px; }
+        .info-box { background: rgba(79,70,229,0.08); border: 1px solid rgba(79,70,229,0.18); border-radius: 12px; padding: 12px; color: var(--primary-dark); }
+        .step-list { display: flex; flex-direction: column; gap: 10px; }
+        .step-item { padding: 10px 12px; border-radius: 12px; border: 1px dashed rgba(79,70,229,0.3); background: rgba(79,70,229,0.04); }
+        .step-item.active { background: rgba(79,70,229,0.12); border-color: var(--primary); }
+
+        .input-row { display: flex; align-items: center; gap: 12px; }
+        .input-row label { min-width: 110px; font-weight: 600; color: var(--gray-700); }
+        .input-row input { flex: 1; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--gray-300); font-size: 15px; }
+
+        .choice-grid { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
+        .choice-card { border-radius: 12px; border: 1px solid var(--gray-200); padding: 12px; background: var(--gray-100); cursor: pointer; transition: all 0.2s ease; }
+        .choice-card.selected { border-color: rgba(79,70,229,0.5); background: rgba(79,70,229,0.12); color: var(--primary-dark); }
+
+        .action-btn { padding: 10px 16px; border: none; border-radius: 12px; font-size: var(--btn-size); font-weight: 600; background: linear-gradient(135deg, rgba(79,70,229,0.95), rgba(129,140,248,0.9)); color: #ffffff; cursor: pointer; transition: transform 0.2s ease, box-shadow 0.2s ease; }
+        .action-btn:hover { transform: translateY(-1px); box-shadow: 0 14px 30px rgba(79,70,229,0.28); }
+
+        .status-tag { display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; padding: 6px 12px; font-size: 14px; font-weight: 600; }
+        .status-tag.success { background: rgba(16,185,129,0.18); color: var(--success); }
+        .status-tag.warning { background: rgba(245,158,11,0.18); color: var(--warning); }
+        .status-tag.danger { background: rgba(239,68,68,0.18); color: var(--danger); }
+
+        .canvas-wrapper { position: relative; background: linear-gradient(180deg, rgba(129,140,248,0.12), rgba(129,140,248,0)); border-radius: var(--card-radius); border: 1px solid var(--gray-200); padding: 12px; }
+        canvas { width: 100%; height: 360px; border-radius: 10px; background: #ffffff; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 8px 10px; border-bottom: 1px solid var(--gray-200); text-align: left; }
+        th { color: var(--gray-600); font-weight: 600; }
+
+        @media (max-width: 1024px) {
+            .main { flex-direction: column; }
+            .sidebar { flex-direction: row; width: 100%; overflow-x: auto; }
+            .content { grid-template-columns: 1fr; }
+            canvas { height: 300px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>Lab 6.3 定积分的换元与分部积分实验室</h1>
+        </header>
+
+        <div class="main">
+            <nav class="sidebar">
+                <button class="nav-btn active"  data-panel="substitution"onclick="switchPanel('substitution')">换元法（定限）</button>
+                <button class="nav-btn"  data-panel="integrationByParts"onclick="switchPanel('integrationByParts')">分部积分法</button>
+            </nav>
+
+            <div class="content active" id="substitution">
+                <div class="column">
+                    <div class="card">
+                        <h3>示例：$\int_0^1 2x\sqrt{1+x^2}\,dx$</h3>
+                        <div class="info-box">设 $u=1+x^2$，则 $du=2x\,dx$，积分化为 $\int_{u(0)}^{u(1)} \sqrt{u}\,du$。请先更新积分限，再求值。</div>
+                    </div>
+                    <div class="card">
+                        <h3>更新积分限</h3>
+                        <div class="input-row">
+                            <label for="limitA">$u(a=0)$</label>
+                            <input id="limitA" type="text" placeholder="填写新的下限">
+                        </div>
+                        <div class="input-row">
+                            <label for="limitB">$u(b=1)$</label>
+                            <input id="limitB" type="text" placeholder="填写新的上限">
+                        </div>
+                        <div class="input-row">
+                            <label for="subIntegral">$\int_{?}^{?} \sqrt{u}\,du$</label>
+                            <input id="subIntegral" type="text" placeholder="求出积分结果">
+                        </div>
+                        <button class="action-btn" onclick="checkSubstitution()">检查换元步骤</button>
+                        <div id="subFeedback" style="margin-top:12px"></div>
+                    </div>
+                    <div class="card">
+                        <h3>流程提示</h3>
+                        <div class="step-list">
+                            <div class="step-item active">① 变量代换：$u=1+x^2$。</div>
+                            <div class="step-item">② 替换微分：$du=2x\,dx$，原积分中的 $2x\,dx$ 直接替换。</div>
+                            <div class="step-item">③ 更新积分限：$x=0\Rightarrow u=?$，$x=1\Rightarrow u=?$。</div>
+                            <div class="step-item">④ 在 $u$-轴下求新的定积分。</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="card canvas-wrapper">
+                        <canvas id="subCanvas" width="640" height="360" aria-label="换元法可视化"></canvas>
+                    </div>
+                    <div class="card">
+                        <h3>几何理解</h3>
+                        <div class="info-box" id="subNote">左侧显示原函数曲线和积分区间；右侧条形展示 $u$ 轴的对应区间长度，体会区间被拉伸到 $[1,2]$。</div>
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <td>原积分值</td>
+                                    <td id="subTrue">\(\frac{2\sqrt{2}-2}{3}\approx0.943\)</td>
+                                </tr>
+                                <tr>
+                                    <td>换元后积分</td>
+                                    <td id="subAfter">待验证</td>
+                                </tr>
+                                <tr>
+                                    <td>状态</td>
+                                    <td id="subStatus">待检查</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content" id="integrationByParts">
+                <div class="column">
+                    <div class="card">
+                        <h3>示例：$\int_0^{\pi} x\sin x\,dx$</h3>
+                        <div class="info-box">选择合适的 $u$ 和 $dv$，使用公式 $\int_a^b u\,dv = [uv]_a^b - \int_a^b v\,du$。请按照常见策略：多项式设为 $u$。</div>
+                    </div>
+                    <div class="card">
+                        <h3>选择 $u$ 与 $dv$</h3>
+                        <div class="choice-grid">
+                            <div class="choice-card" data-choice="correct" onclick="selectChoice('correct')">$u=x$<br>$dv=\sin x\,dx$</div>
+                            <div class="choice-card" data-choice="wrong1" onclick="selectChoice('wrong1')">$u=\sin x$<br>$dv=x\,dx$</div>
+                            <div class="choice-card" data-choice="wrong2" onclick="selectChoice('wrong2')">$u=1$<br>$dv=x\sin x\,dx$</div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3>填写结果</h3>
+                        <div class="input-row">
+                            <label for="boundaryValue">$[uv]_0^{\pi}$</label>
+                            <input id="boundaryValue" type="text" placeholder="例如 \pi">
+                        </div>
+                        <div class="input-row">
+                            <label for="remainingIntegral">$\int_0^{\pi} v\,du$</label>
+                            <input id="remainingIntegral" type="text" placeholder="例如 ?">
+                        </div>
+                        <div class="input-row">
+                            <label for="partsResult">最终结果</label>
+                            <input id="partsResult" type="text" placeholder="填写数值">
+                        </div>
+                        <button class="action-btn" onclick="checkIntegrationByParts()">检查分部积分</button>
+                        <div id="partsFeedback" style="margin-top:12px"></div>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="card canvas-wrapper">
+                        <canvas id="partsCanvas" width="640" height="360" aria-label="分部积分可视化"></canvas>
+                    </div>
+                    <div class="card">
+                        <h3>积分小结</h3>
+                        <div class="info-box" id="partsNote">拖动结果时，右侧曲线展示 $x\sin x$ 的图像及正负区间，积分结果应为 $\pi$。</div>
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <td>推荐选择</td>
+                                    <td>$u=x$, $dv=\sin x\,dx$</td>
+                                </tr>
+                                <tr>
+                                    <td>计算结果</td>
+                                    <td>$\pi$</td>
+                                </tr>
+                                <tr>
+                                    <td>策略提示</td>
+                                    <td>多项式设 $u$，三角/指数放入 $dv$，后续积分更简单。</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvases = {};
+        let selectedChoice = null;
+
+        function switchPanel(id, trigger) {
+            const activeButton = trigger instanceof HTMLElement ? trigger :
+
+                (typeof event !== 'undefined' && event?.currentTarget instanceof HTMLElement ? event.currentTarget :
+
+                    document.querySelector(`.nav-btn[data-panel="${id}"]`) ||
+
+                    document.querySelector(`.nav-btn[data-target="${id}"]`) ||
+
+                    null);
+
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.content').forEach(panel => panel.classList.remove('active'));
+            const btn = document.querySelector(`.nav-btn[onclick="switchPanel('${id}')"]`);
+            const panel = document.getElementById(id);
+            if (btn && panel) {
+                btn.classList.add('active');
+                panel.classList.add('active');
+                scheduleMathRender();
+            }
+            resizeAllCanvases();
+        }
+
+        function resizeCanvas(canvas) {
+            const wrapper = canvas.parentElement;
+            const width = wrapper.clientWidth - 24;
+            const height = 340;
+            canvas.style.width = width + 'px';
+            canvas.style.height = height + 'px';
+            const ratio = window.devicePixelRatio || 1;
+            canvas.width = width * ratio;
+            canvas.height = height * ratio;
+            const ctx = canvas.getContext('2d');
+            ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+            return ctx;
+        }
+
+        function resizeAllCanvases() {
+            Object.keys(canvases).forEach(key => {
+                canvases[key].ctx = resizeCanvas(canvases[key].canvas);
+                canvases[key].draw();
+            });
+        }
+
+        function drawAxes(ctx, width, height) {
+            ctx.clearRect(0, 0, width, height);
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, width, height);
+            ctx.strokeStyle = '#d1d5db';
+            ctx.lineWidth = 1;
+            const padL = 60;
+            const padB = 40;
+            ctx.beginPath();
+            ctx.moveTo(padL, 20);
+            ctx.lineTo(padL, height - padB);
+            ctx.lineTo(width - 20, height - padB);
+            ctx.stroke();
+            ctx.fillStyle = '#6b7280';
+            ctx.font = '14px "Microsoft YaHei"';
+            ctx.fillText('x', width - 28, height - padB - 6);
+            ctx.fillText('y', padL - 18, 30);
+            return { padL, padB };
+        }
+
+        function mapToCanvas(x, y, width, height, axis, config) {
+            const { a, b, fx } = config;
+            const sampleY = [];
+            for (let t = 0; t <= 1; t += 0.05) sampleY.push(fx(a + t * (b - a)));
+            const maxY = Math.max(...sampleY, fx(b)) + 1;
+            const minY = Math.min(0, ...sampleY);
+            const w = width - axis.padL - 40;
+            const h = height - axis.padB - 20;
+            const px = axis.padL + ((x - a) / (b - a)) * w;
+            const py = height - axis.padB - ((y - minY) / (maxY - minY)) * h;
+            return [px, py];
+        }
+
+        const subConfig = {
+            a: 0,
+            b: 1,
+            fx: x => 2 * x * Math.sqrt(1 + x * x)
+        };
+
+        function drawSubstitution() {
+            const canvas = canvases.sub.canvas;
+            const ctx = canvases.sub.ctx;
+            const width = canvas.clientWidth;
+            const height = canvas.clientHeight;
+            const axis = drawAxes(ctx, width, height);
+            const { a, b, fx } = subConfig;
+
+            ctx.strokeStyle = '#4f46e5';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            for (let x = a; x <= b + 0.001; x += (b - a) / 80) {
+                const [px, py] = mapToCanvas(x, fx(x), width, height, axis, subConfig);
+                if (x === a) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+            }
+            ctx.stroke();
+
+            const [aX, baseY] = mapToCanvas(a, 0, width, height, axis, subConfig);
+            const [bX] = mapToCanvas(b, 0, width, height, axis, subConfig);
+            ctx.fillStyle = 'rgba(129,140,248,0.25)';
+            ctx.beginPath();
+            ctx.moveTo(aX, baseY);
+            for (let x = a; x <= b + 0.001; x += (b - a) / 120) {
+                const [px, py] = mapToCanvas(x, fx(x), width, height, axis, subConfig);
+                ctx.lineTo(px, py);
+            }
+            ctx.lineTo(bX, baseY);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.fillStyle = '#1f2937';
+            ctx.font = '15px "Microsoft YaHei"';
+            ctx.fillText('x=0', aX - 12, baseY + 22);
+            ctx.fillText('x=1', bX - 12, baseY + 22);
+
+            // right-side bar for u axis
+            const barX = width - 140;
+            ctx.fillStyle = 'rgba(79,70,229,0.12)';
+            ctx.fillRect(barX, 60, 40, 220);
+            ctx.strokeStyle = 'rgba(79,70,229,0.4)';
+            ctx.strokeRect(barX, 60, 40, 220);
+            ctx.fillStyle = '#4f46e5';
+            ctx.font = '14px "Microsoft YaHei"';
+            ctx.fillText('u轴', barX - 2, 50);
+            ctx.fillText('1', barX + 50, 65);
+            ctx.fillText('2', barX + 50, 275);
+            ctx.fillStyle = 'rgba(79,70,229,0.35)';
+            ctx.fillRect(barX + 6, 60, 28, 220);
+        }
+
+        function selectChoice(key) {
+            selectedChoice = key;
+            document.querySelectorAll('.choice-card').forEach(card => {
+                card.classList.remove('selected');
+                if (card.dataset.choice === key) card.classList.add('selected');
+            });
+        }
+
+        function checkSubstitution() {
+            const limitA = (document.getElementById('limitA').value || '').replace(/\s+/g, '');
+            const limitB = (document.getElementById('limitB').value || '').replace(/\s+/g, '');
+            const subIntegral = document.getElementById('subIntegral').value || '';
+            const feedback = [];
+            let correct = true;
+
+            if (limitA === '1') {
+                feedback.push('<span class="status-tag success">下限正确</span> $x=0$ 对应 $u=1$。');
+            } else {
+                feedback.push('<span class="status-tag warning">下限待改进</span> 应填写 $1$。');
+                correct = false;
+            }
+
+            if (limitB === '2') {
+                feedback.push('<span class="status-tag success">上限正确</span> $x=1$ 对应 $u=2$。');
+            } else {
+                feedback.push('<span class="status-tag warning">上限待改进</span> 应填写 $2$。');
+                correct = false;
+            }
+
+            const normalized = subIntegral.replace(/\s+/g, '');
+            const approxValue = (2 * Math.sqrt(2) - 2) / 3;
+            const numeric = Number(normalized);
+            if (!Number.isNaN(numeric) && Math.abs(numeric - approxValue) < 1e-2) {
+                feedback.push('<span class="status-tag success">换元积分正确</span> 数值与原积分一致。');
+            } else if (normalized === '(2\*Math.sqrt(2)-2)/3' || normalized === '(2sqrt2-2)/3' || normalized.includes('2√2') || normalized.includes('2sqrt2')) {
+                feedback.push('<span class="status-tag success">换元积分正确</span> 得到同样的数值。');
+            } else if (normalized === '2/3' || normalized === '0.666') {
+                feedback.push('<span class="status-tag danger">积分值错误</span> 请记得积分上限是 2。');
+                correct = false;
+            } else if (normalized.trim() === '') {
+                feedback.push('<span class="status-tag warning">尚未填写积分值</span> 将结果写成 $\tfrac{2\sqrt{2}-2}{3}$。');
+                correct = false;
+            } else {
+                feedback.push('<span class="status-tag warning">请核对结果</span> 建议化简为 $\tfrac{2\sqrt{2}-2}{3}$。');
+                correct = false;
+            }
+
+            document.getElementById('subFeedback').innerHTML = feedback.join('<br>');
+            document.getElementById('subAfter').textContent = subIntegral || '待验证';
+            document.getElementById('subStatus').innerHTML = correct ? '<span class="status-tag success">换元完成</span>' : '<span class="status-tag warning">继续调整</span>';
+        }
+
+        function checkIntegrationByParts() {
+            const boundary = document.getElementById('boundaryValue').value.replace(/\s+/g, '');
+            const remaining = document.getElementById('remainingIntegral').value.replace(/\s+/g, '');
+            const result = document.getElementById('partsResult').value.replace(/\s+/g, '');
+            const feedback = [];
+            let correct = true;
+
+            if (selectedChoice === 'correct') {
+                feedback.push('<span class="status-tag success">选择正确</span> 多项式设为 $u$，便于求导。');
+            } else {
+                feedback.push('<span class="status-tag danger">重新选择</span> 请选择 $u=x$, $dv=\sin x dx$。');
+                correct = false;
+            }
+
+            if (boundary === '-(cos(pi)*pi - cos(0)*0)' || boundary === '-(-1*pi-1*0)' || boundary === 'pi' || boundary === 'π' || boundary === 'Pi') {
+                feedback.push('<span class="status-tag success">边界项正确</span> $[uv]_0^{\pi}=\pi$。');
+            } else {
+                feedback.push('<span class="status-tag warning">边界项待核对</span> 计算 $x(-\cos x)$ 在上下限的差。');
+                correct = false;
+            }
+
+            if (remaining === '\int_0^{\pi}(-\cos x)dx' || remaining === '-intcosx' || remaining.includes('-cosx')) {
+                feedback.push('<span class="status-tag success">剩余积分正确</span> $\int_0^{\pi} (-\cos x)dx = 0$。');
+            } else if (remaining === '' || remaining === '0') {
+                feedback.push('<span class="status-tag warning">请写出剩余积分</span> 结果为 0，但需要展示过程。');
+                correct = false;
+            } else {
+                feedback.push('<span class="status-tag warning">剩余积分可能有误</span> 记得 $du=dx$，$v=-\cos x$。');
+                correct = false;
+            }
+
+            if (result === 'pi' || result === 'π' || result === 'Pi' || result === '3.1416' || result === '3.14159') {
+                feedback.push('<span class="status-tag success">结果正确</span> $\int_0^{\pi} x\sin x dx = \pi$。');
+            } else {
+                feedback.push('<span class="status-tag warning">最终结果待确认</span> 应为 $\pi$。');
+                correct = false;
+            }
+
+            document.getElementById('partsFeedback').innerHTML = feedback.join('<br>');
+            document.getElementById('partsNote').textContent = correct ? '恭喜！分部积分链条完整，图像中的正负面积抵消后剩下 \u03c0。' : '请按反馈逐项修正，尤其注意边界项与剩余积分写法。';
+        }
+
+        function drawIntegrationByParts() {
+            const canvas = canvases.parts.canvas;
+            const ctx = canvases.parts.ctx;
+            const width = canvas.clientWidth;
+            const height = canvas.clientHeight;
+            const axis = drawAxes(ctx, width, height);
+            const config = {
+                a: 0,
+                b: Math.PI,
+                fx: x => x * Math.sin(x)
+            };
+
+            ctx.strokeStyle = '#4f46e5';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            for (let x = config.a; x <= config.b + 0.001; x += (config.b - config.a) / 160) {
+                const [px, py] = mapToCanvas(x, config.fx(x), width, height, axis, config);
+                if (x === config.a) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+            }
+            ctx.stroke();
+
+            const baseline = mapToCanvas(0, 0, width, height, axis, config)[1];
+            ctx.fillStyle = 'rgba(129,140,248,0.2)';
+            ctx.beginPath();
+            for (let x = 0; x <= Math.PI + 0.001; x += Math.PI / 160) {
+                const [px, py] = mapToCanvas(x, config.fx(x), width, height, axis, config);
+                ctx.lineTo(px, py);
+            }
+            const [endX] = mapToCanvas(Math.PI, 0, width, height, axis, config);
+            ctx.lineTo(endX, baseline);
+            ctx.lineTo(mapToCanvas(0, 0, width, height, axis, config)[0], baseline);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.setLineDash([6, 6]);
+            ctx.strokeStyle = 'rgba(239, 68, 68, 0.6)';
+            const [piX] = mapToCanvas(Math.PI, 0, width, height, axis, config);
+            ctx.beginPath();
+            ctx.moveTo(piX, baseline - 140);
+            ctx.lineTo(piX, baseline + 40);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.fillStyle = '#ef4444';
+            ctx.fillText('x=\pi', piX - 14, baseline + 28);
+        }
+
+        function scheduleMathRender() {
+            if (window.MathJax && MathJax.typesetPromise) {
+                MathJax.typesetPromise().catch(err => console.warn('MathJax 渲染异常', err));
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            canvases.sub = { canvas: document.getElementById('subCanvas'), draw: drawSubstitution };
+            canvases.parts = { canvas: document.getElementById('partsCanvas'), draw: drawIntegrationByParts };
+            resizeAllCanvases();
+            drawSubstitution();
+            drawIntegrationByParts();
+            scheduleMathRender();
+        });
+
+        window.addEventListener('resize', resizeAllCanvases);
+
+        function toggleReturnLinks() { const p = document.querySelector('.return-links'); if (!p) return; if (p.style.display === 'flex') { p.style.opacity = '0'; setTimeout(() => p.style.display = 'none', 160); } else { p.style.display = 'flex'; requestAnimationFrame(() => p.style.opacity = '1'); } }
+    </script>
+
+    <div class="return-home-panel"><button class="return-toggle" onclick="toggleReturnLinks()"><i class="fa-solid fa-house"></i></button><div class="return-links"><a class="return-link" href="index.html"><i class="fa-solid fa-arrow-left"></i> 返回目录</a><a class="return-link" href="../index.html"><i class="fa-solid fa-house"></i> 返回主站</a></div></div>
+</body>
+</html>
