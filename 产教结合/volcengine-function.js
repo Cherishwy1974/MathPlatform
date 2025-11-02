@@ -52,6 +52,8 @@ exports.handler = async (event, context) => {
 
         // 确定 API 路径
         let apiPath = '/chat/completions';
+        let finalRequestBody = requestBody;
+
         if (event.path && event.path !== '/') {
             apiPath = event.path;
         } else if (event.rawPath && event.rawPath !== '/') {
@@ -63,8 +65,53 @@ exports.handler = async (event, context) => {
             apiPath = '/images/generations';
         }
 
+        // 🔧 视频生成特殊处理
+        if (apiPath === '/videos/generations') {
+            // 使用正确的视频生成API路径
+            apiPath = '/contents/generations/tasks';
+
+            const content = [];
+
+            // 判断是文生视频（t2v）还是图生视频（i2v）
+            if (requestBody.image_url) {
+                // 图生视频（i2v）：需要图片 + 可选文本
+                console.log('检测到图生视频请求（i2v）');
+
+                content.push({
+                    type: "image_url",
+                    image_url: {
+                        url: requestBody.image_url
+                    }
+                });
+
+                if (requestBody.prompt) {
+                    content.push({
+                        type: "text",
+                        text: requestBody.prompt
+                    });
+                }
+            } else if (requestBody.prompt) {
+                // 文生视频（t2v）：只需要文本
+                console.log('检测到文生视频请求（t2v）');
+
+                content.push({
+                    type: "text",
+                    text: requestBody.prompt
+                });
+            } else {
+                throw new Error('视频生成请求必须包含 image_url 或 prompt');
+            }
+
+            finalRequestBody = {
+                model: requestBody.model,
+                content: content
+            };
+
+            console.log('视频生成请求，转换格式:', JSON.stringify(finalRequestBody, null, 2));
+        }
+
         console.log('转发请求到:', `${VOLCENGINE_BASE_URL}${apiPath}`);
-        console.log('请求体:', JSON.stringify(requestBody));
+        console.log('请求体:', JSON.stringify(finalRequestBody));
 
         // 转发请求到火山引擎 API
         const response = await fetch(`${VOLCENGINE_BASE_URL}${apiPath}`, {
@@ -73,7 +120,7 @@ exports.handler = async (event, context) => {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${VOLCENGINE_API_KEY}`
             },
-            body: JSON.stringify(requestBody)
+            body: JSON.stringify(finalRequestBody)
         });
         
         console.log('火山引擎响应状态:', response.status);

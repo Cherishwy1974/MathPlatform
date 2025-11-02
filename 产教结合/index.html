@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -15,18 +16,7 @@
     
     <!-- 使用本地 JavaScript 库 -->
     <script src="js/lib/core-js.min.js"></script>
-    
-    <!-- 预加载关键资源 -->
-    <!-- <link rel="preconnect" href="https://www.gstatic.com">
-    <link rel="preconnect" href="https://cdnjs.cloudflare.com"> -->
-    
-    <!-- PWA相关配置暂时注释掉,等文件准备好再启用 -->
-    <!-- <link rel="manifest" href="/manifest.json">
-    <link rel="apple-touch-icon" href="/icon-192x192.png"> -->
-    
-    <!-- 移除外部 polyfill -->
-    <!-- <script src="https://polyfill.io/v3/polyfill.min.js?features=es6" defer></script> -->
-    
+     
     <!-- MathJax配置优化 -->
     <style>
         /* 代码块样式优化 */
@@ -1099,62 +1089,96 @@ function runPythonCode(codeId, outputId) {
 }
     </script>
     
-    <!-- AI助手样式 -->
+    <!-- AI助手样式 - 优化版 -->
     <style>
-        /* AI 功能按钮统一样式 */
-        .ai-feature-btn {
-            width: 70px;
-            height: 70px;
-            border-radius: 16px;
-            color: white;
+        .ai-floating-actions {
+            position: fixed;
+            bottom: 32px;
+            right: 32px;
             display: flex;
             flex-direction: column;
+            gap: 12px;
+            align-items: flex-end;
+            z-index: 2000;
+        }
+
+        .ai-floating-btn {
+            display: flex;
             align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            transition: all 0.3s ease;
-            border: none;
+            gap: 10px;
+            padding: 0 18px;
+            height: 48px;
+            border-radius: 24px;
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            background: linear-gradient(135deg, #2563eb, #3b82f6);
+            color: #ffffff;
+            font-size: 13px;
             font-weight: 600;
+            letter-spacing: 0.01em;
+            cursor: pointer;
+            box-shadow: 0 18px 34px rgba(37, 99, 235, 0.35);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
         }
 
-        .ai-feature-btn:hover {
-            transform: translateY(-3px) scale(1.05);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        .ai-floating-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 24px 44px rgba(37, 99, 235, 0.4);
+            filter: brightness(1.05);
         }
 
-        .ai-feature-btn:active {
-            transform: translateY(-1px) scale(1.02);
+        .ai-floating-btn:active {
+            transform: translateY(-1px);
+            box-shadow: 0 16px 28px rgba(37, 99, 235, 0.3);
+            filter: brightness(0.95);
         }
 
-        /* 录音状态动画 */
-        .ai-feature-btn.recording {
-            animation: pulse-recording 1.5s ease-in-out infinite;
+        .ai-floating-btn:focus-visible {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.35);
         }
 
-        @keyframes pulse-recording {
-            0%, 100% {
-                transform: scale(1);
-                box-shadow: 0 4px 15px rgba(255, 107, 107, 0.5);
+        .ai-floating-icon {
+            width: 18px;
+            height: 18px;
+            display: block;
+        }
+
+        .ai-floating-icon svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .ai-floating-text {
+            line-height: 1;
+            white-space: nowrap;
+        }
+
+        @media (max-width: 768px) {
+            .ai-floating-actions {
+                bottom: 20px;
+                right: 18px;
             }
-            50% {
-                transform: scale(1.1);
-                box-shadow: 0 8px 30px rgba(255, 107, 107, 0.8);
+
+            .ai-floating-btn {
+                height: 44px;
+                padding: 0 16px;
+                font-size: 12px;
+                border-radius: 22px;
             }
         }
 
-        /* 模态框遮罩 */
         .modal-overlay {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(15, 23, 42, 0.45);
+            backdrop-filter: blur(8px);
             z-index: 1998;
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .modal-overlay.active {
@@ -1162,184 +1186,1182 @@ function runPythonCode(codeId, outputId) {
             pointer-events: all;
         }
 
-        /* AI 语音助手模态框 */
-        .voice-assistant-modal {
+        .ai-assistant-panel {
             position: fixed;
-            top: 50%;
+            top: 4vh;
             left: 50%;
-            transform: translate(-50%, -50%) scale(0.9);
-            width: 90%;
-            max-width: 600px;
-            max-height: 85vh;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            transform: translate(-50%, 0) scale(0.95);
+            width: 92%;
+            max-width: 940px;
+            height: 92vh;
+            background: rgba(248, 250, 252, 0.95);
+            border-radius: 22px;
+            border: 1px solid rgba(203, 213, 225, 0.7);
+            box-shadow: 0 30px 70px rgba(15, 23, 42, 0.16);
+            backdrop-filter: blur(18px) saturate(120%);
             z-index: 1999;
             opacity: 0;
             pointer-events: none;
-            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .voice-assistant-modal.active {
+        .ai-assistant-panel.active {
             opacity: 1;
             pointer-events: all;
-            transform: translate(-50%, -50%) scale(1);
+            transform: translate(-50%, 0) scale(1);
         }
 
-        .voice-chat-history {
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px;
-            background: #f9fafb;
-        }
-
-        .voice-message {
-            margin: 12px 0;
-            padding: 12px 16px;
-            border-radius: 12px;
-            line-height: 1.6;
-            max-width: 80%;
-            word-wrap: break-word;
-        }
-
-        .voice-message.user {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            margin-left: auto;
-            text-align: right;
-        }
-
-        .voice-message.assistant {
-            background: white;
-            color: #333;
-            margin-right: auto;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .voice-status {
-            text-align: center;
-            padding: 15px;
-            color: #666;
-            font-size: 14px;
-            background: white;
-            border-top: 1px solid #e5e7eb;
-        }
-
-        .voice-controls {
-            padding: 20px;
-            background: white;
-            border-top: 1px solid #e5e7eb;
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-        }
-
-        .voice-control-btn {
-            padding: 15px 30px;
-            border-radius: 12px;
-            border: none;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
+        .ai-assistant-header {
             display: flex;
             align-items: center;
-            gap: 8px;
+            justify-content: space-between;
+            padding: 22px 28px;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.12), rgba(14, 116, 144, 0.08));
+            border-bottom: 1px solid rgba(148, 163, 184, 0.35);
+            color: #0f172a;
+            box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.35);
         }
 
-        .voice-control-btn.primary {
-            background: linear-gradient(135deg, #f093fb, #f5576c);
-            color: white;
-            box-shadow: 0 4px 15px rgba(245, 87, 108, 0.3);
+        .ai-assistant-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.3rem;
+            font-weight: 700;
         }
 
-        .voice-control-btn.primary:hover {
+        .ai-assistant-title svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .ai-assistant-header button {
+            width: 36px;
+            height: 36px;
+            border-radius: 12px;
+            border: 1px solid rgba(148, 163, 184, 0.4);
+            background: #ffffff;
+            color: #1f2937;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 18px rgba(15, 23, 42, 0.12);
+            transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+        }
+
+        .ai-assistant-header button:hover {
+            background: #e2e8f0;
+            border-color: rgba(148, 163, 184, 0.6);
+            transform: translateY(-1px);
+        }
+
+        .ai-assistant-body {
+            flex: 1;
+            display: flex;
+            background: #f8fafc;
+        }
+
+        .ai-mode-sidebar {
+            width: 144px;
+            padding: 26px 18px;
+            background: rgba(248, 249, 251, 0.8);
+            border-right: 1px solid rgba(203, 213, 225, 0.55);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            backdrop-filter: blur(14px);
+        }
+
+        .ai-mode-btn {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            padding: 14px 12px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(241, 245, 249, 0.9));
+            border: 1px solid rgba(203, 213, 225, 0.7);
+            border-radius: 14px;
+            color: #1f2937;
+            font-weight: 600;
+            cursor: pointer;
+            overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+        }
+
+        .ai-mode-btn::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at top, rgba(96, 165, 250, 0.25), transparent 72%);
+            opacity: 0;
+            transition: opacity 0.25s ease;
+        }
+
+        .ai-mode-btn * {
+            pointer-events: none;
+        }
+
+        .ai-mode-icon {
+            width: 18px;
+            height: 18px;
+            display: block;
+            color: inherit;
+        }
+
+        .ai-mode-icon svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .ai-mode-btn .ai-mode-label {
+            font-size: 12px;
+            letter-spacing: 0.02em;
+        }
+
+        .ai-mode-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(245, 87, 108, 0.4);
+            border-color: rgba(37, 99, 235, 0.6);
+            box-shadow: 0 12px 26px rgba(37, 99, 235, 0.18);
+            color: #1d4ed8;
         }
 
-        .voice-control-btn.primary.recording {
-            background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
-            animation: pulse-btn 1.5s ease-in-out infinite;
+        .ai-mode-btn:hover::after {
+            opacity: 1;
         }
 
-        @keyframes pulse-btn {
-            0%, 100% { box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3); }
-            50% { box-shadow: 0 6px 25px rgba(255, 107, 107, 0.6); }
+        .ai-mode-btn.active {
+            background: #1d4ed8;
+            color: #ffffff;
+            border-color: #1d4ed8;
+            box-shadow: 0 8px 18px rgba(29, 78, 216, 0.35);
         }
 
-        /* 留言板模态框 */
+        .ai-mode-btn.active::after {
+            opacity: 1;
+            background: radial-gradient(circle at top, rgba(255, 255, 255, 0.45), transparent 70%);
+        }
+
+        .ai-mode-btn:focus-visible {
+            outline: none;
+            border-color: rgba(37, 99, 235, 0.8);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+        }
+
+        .ai-assistant-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #ffffff;
+        }
+
+        .ai-chat-history {
+            flex: 1;
+            overflow-y: auto;
+            padding: 28px 34px 32px;
+            background: radial-gradient(circle at top, rgba(37, 99, 235, 0.05), rgba(148, 163, 184, 0.08));
+            scrollbar-width: thin;
+            scrollbar-color: rgba(148, 163, 184, 0.4) transparent;
+        }
+
+        .ai-chat-history::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .ai-chat-history::-webkit-scrollbar-track {
+            background: rgba(226, 232, 240, 0.5);
+        }
+
+        .ai-chat-history::-webkit-scrollbar-thumb {
+            background: rgba(148, 163, 184, 0.7);
+            border-radius: 3px;
+        }
+
+        .ai-chat-history::-webkit-scrollbar-thumb:hover {
+            background: rgba(100, 116, 139, 0.8);
+        }
+
+        .ai-input-area {
+            padding: 22px 26px;
+            background: linear-gradient(135deg, rgba(248, 250, 252, 0.9), rgba(237, 242, 255, 0.85));
+            border-top: 1px solid rgba(203, 213, 225, 0.5);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
+        }
+
+        .chat-input-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .media-input-row {
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .media-input-row textarea {
+            flex: 1 1 240px;
+        }
+
+        .media-input-row .chat-send-btn {
+            flex-shrink: 0;
+            height: 44px;
+            padding: 0 20px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .media-upload-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 18px;
+            height: 44px;
+            border-radius: 12px;
+            border: 1px solid rgba(148, 163, 184, 0.6);
+            background: rgba(248, 250, 252, 0.88);
+            color: #1d4ed8;
+            font-weight: 600;
+            letter-spacing: 0.01em;
+            box-shadow: 0 8px 18px rgba(15, 23, 42, 0.12);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+        }
+
+        .media-upload-btn:hover {
+            border-color: rgba(37, 99, 235, 0.6);
+            box-shadow: 0 12px 24px rgba(37, 99, 235, 0.18);
+            background: rgba(237, 242, 255, 0.95);
+        }
+
+        .media-upload-btn:focus-visible {
+            outline: none;
+            border-color: rgba(37, 99, 235, 0.8);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+        }
+
+        .media-upload-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .chat-input-row input,
+        .chat-input-row textarea {
+            flex: 1;
+            padding: 12px 16px;
+            border-radius: 14px;
+            border: 1px solid rgba(203, 213, 225, 0.9);
+            font-size: 14.5px;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 8px 16px rgba(15, 23, 42, 0.08);
+        }
+
+        .chat-input-row textarea {
+            min-height: 88px;
+            resize: vertical;
+        }
+
+        .chat-input-row input:focus,
+        .chat-input-row textarea:focus {
+            outline: none;
+            border-color: rgba(99, 102, 241, 0.8);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.18);
+        }
+
+        .chat-send-btn {
+            padding: 12px 24px;
+            border-radius: 12px;
+            border: none;
+            background: #1d4ed8;
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+        }
+
+        .chat-send-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 22px rgba(29, 78, 216, 0.25);
+            background: #2563eb;
+        }
+
+        /* 暗色模式适配 */
+        .dark .ai-floating-btn {
+            background: linear-gradient(135deg, #1d4ed8, #312e81);
+            color: #f8fafc;
+            border-color: rgba(96, 165, 250, 0.4);
+            box-shadow: 0 16px 32px rgba(8, 47, 73, 0.45);
+        }
+
+        .dark .ai-floating-btn:hover {
+            background: linear-gradient(135deg, #1e3a8a, #1f2937);
+        }
+
+        .dark .ai-assistant-panel {
+            background: rgba(17, 24, 39, 0.92);
+            border-color: rgba(30, 41, 59, 0.8);
+            box-shadow: 0 32px 72px rgba(2, 6, 23, 0.45);
+        }
+
+        .dark .ai-assistant-header {
+            background: linear-gradient(135deg, rgba(14, 116, 144, 0.35), rgba(30, 64, 175, 0.25));
+            color: #f8fafc;
+            border-bottom-color: rgba(56, 85, 138, 0.5);
+            box-shadow: inset 0 -1px 0 rgba(15, 23, 42, 0.55);
+        }
+
+        .dark .ai-assistant-header button {
+            background: #1f2937;
+            color: #e5e7eb;
+            border-color: rgba(71, 85, 105, 0.65);
+            box-shadow: 0 10px 22px rgba(2, 6, 23, 0.35);
+        }
+
+        .dark .ai-assistant-header button:hover {
+            background: #334155;
+            border-color: rgba(96, 165, 250, 0.55);
+        }
+
+        .dark .ai-assistant-body {
+            background: rgba(15, 23, 42, 0.9);
+        }
+
+        .dark .ai-mode-sidebar {
+            background: rgba(17, 24, 39, 0.78);
+            border-right-color: rgba(56, 78, 126, 0.45);
+        }
+
+        .dark .ai-mode-btn {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(17, 24, 39, 0.88));
+            border-color: rgba(51, 65, 85, 0.65);
+            color: #e5e7eb;
+            box-shadow: 0 10px 22px rgba(2, 6, 23, 0.28);
+        }
+
+        .dark .ai-mode-btn:hover {
+            border-color: #60a5fa;
+            color: #60a5fa;
+            box-shadow: 0 12px 26px rgba(59, 130, 246, 0.35);
+        }
+
+        .dark .ai-mode-btn.active {
+            background: linear-gradient(135deg, #1d4ed8, #312e81);
+            border-color: transparent;
+            box-shadow: 0 12px 28px rgba(37, 99, 235, 0.45);
+            color: #f8fafc;
+        }
+
+        .dark .ai-assistant-main {
+            background: #111827;
+        }
+
+        .dark .ai-chat-history {
+            background: radial-gradient(circle at top, rgba(29, 78, 216, 0.15), rgba(15, 23, 42, 0.9));
+        }
+
+        .dark .chat-message {
+            background: linear-gradient(135deg, rgba(17, 24, 39, 0.92), rgba(30, 41, 59, 0.88));
+            border-color: rgba(71, 85, 105, 0.5);
+            color: #e5e7eb;
+            box-shadow: 0 14px 30px rgba(2, 6, 23, 0.45);
+        }
+
+        .dark .chat-message.ai-message {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(59, 130, 246, 0.18));
+        }
+
+        .dark .chat-message.user-message {
+            background: linear-gradient(135deg, #1e40af, #4338ca);
+            box-shadow: 0 18px 32px rgba(17, 24, 39, 0.55);
+        }
+
+        .dark .ai-input-area {
+            background: linear-gradient(135deg, rgba(17, 24, 39, 0.92), rgba(30, 41, 59, 0.88));
+            border-top-color: rgba(30, 64, 175, 0.45);
+        }
+
+        .dark .chat-input-row input,
+        .dark .chat-input-row textarea {
+            background: rgba(17, 24, 39, 0.88);
+            border-color: rgba(71, 85, 105, 0.7);
+            box-shadow: 0 10px 22px rgba(2, 6, 23, 0.35);
+            color: #f8fafc;
+        }
+
+        .dark .media-upload-btn {
+            background: rgba(30, 41, 59, 0.85);
+            border-color: rgba(96, 165, 250, 0.45);
+            color: #bfdbfe;
+            box-shadow: 0 12px 26px rgba(2, 6, 23, 0.45);
+        }
+
+        .dark .media-upload-btn:hover {
+            background: rgba(37, 51, 80, 0.9);
+            border-color: rgba(96, 165, 250, 0.65);
+            box-shadow: 0 16px 30px rgba(37, 99, 235, 0.35);
+        }
+
+        .dark .chat-send-btn {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        }
+
+        .dark .chat-send-btn:hover {
+            box-shadow: 0 14px 28px rgba(59, 130, 246, 0.45);
+            background: linear-gradient(135deg, #1e3a8a, #1f2937);
+        }
+
+        .chat-send-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .ai-assistant-body {
+            overflow-y: auto;
+        }
+
+        .ai-assistant-panel * {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .ai-assistant-panel *::-webkit-scrollbar {
+            width: 0;
+            height: 0;
+        }
+
+        .message-board-modal * {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(148, 163, 184, 0.35) transparent;
+        }
+
+        .message-board-modal *::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        .message-board-modal *::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, rgba(148, 163, 184, 0.45), rgba(96, 165, 250, 0.45));
+            border-radius: 999px;
+        }
+
+        .message-board-modal *::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        #all-submissions-list {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+            padding-right: 4px;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(148, 163, 184, 0.4) transparent;
+        }
+
+        #all-submissions-list::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        #all-submissions-list::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, rgba(99, 102, 241, 0.58), rgba(6, 182, 212, 0.42));
+            border-radius: 999px;
+        }
+
+        .chat-message {
+            max-width: 78%;
+            padding: 16px 20px;
+            border-radius: 20px;
+            font-size: 15px;
+            line-height: 1.7;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(236, 241, 255, 0.9));
+            border: 1px solid rgba(209, 213, 219, 0.7);
+            margin: 12px 0;
+            word-break: break-word;
+            box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+            position: relative;
+        }
+
+        .chat-message.ai-message {
+            margin-right: auto;
+            color: #1f2937;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(224, 231, 255, 0.92));
+        }
+
+        .chat-message.user-message {
+            margin-left: auto;
+            background: linear-gradient(135deg, #1d4ed8, #4338ca);
+            color: #ffffff;
+            border: none;
+            border-bottom-right-radius: 10px;
+            box-shadow: 0 16px 28px rgba(29, 78, 216, 0.35);
+        }
+
+        .chat-message strong {
+            font-weight: 600;
+        }
+
+        .chat-message ul,
+        .chat-message ol {
+            margin: 8px 0 0 18px;
+        }
+
+        .chat-message code {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            background: rgba(99, 102, 241, 0.08);
+            padding: 2px 6px;
+            border-radius: 6px;
+            font-size: 0.9em;
+        }
+
+        .typing-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 16px;
+            border-radius: 14px;
+            background: rgba(226, 232, 240, 0.7);
+        }
+
+        .typing-indicator span {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: rgba(100, 116, 139, 0.7);
+            opacity: 0.4;
+        }
+
+        .typing-indicator span:nth-child(1) { animation: blink 1s infinite 0.2s; }
+        .typing-indicator span:nth-child(2) { animation: blink 1s infinite 0.4s; }
+        .typing-indicator span:nth-child(3) { animation: blink 1s infinite 0.6s; }
+
+        @keyframes blink {
+            50% { opacity: 1; }
+        }
+
+        .media-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .media-square {
+            width: 100%;
+            max-width: 360px;
+            aspect-ratio: 1 / 1;
+            border-radius: 20px;
+            background: #f8fafc;
+            border: 1px dashed rgba(148, 163, 184, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .media-stage {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .media-stage img,
+        .media-stage video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .media-caption {
+            color: #64748b;
+            font-size: 0.88rem;
+            text-align: center;
+            line-height: 1.6;
+            max-width: 360px;
+        }
+
+        .media-placeholder {
+            color: #94a3b8;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            padding: 0 18px;
+            text-align: center;
+        }
+
+        .case-ai-btn {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 18px;
+            background: linear-gradient(135deg, #1d4ed8, #7c3aed 55%, #c084fc);
+            background-size: 180% 180%;
+            color: #f8fafc;
+            border: none;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.01em;
+            cursor: pointer;
+            box-shadow: 0 14px 28px rgba(76, 29, 149, 0.35);
+            transition: transform 0.25s ease, box-shadow 0.3s ease, background-position 0.6s ease;
+            isolation: isolate;
+        }
+
+        .case-ai-btn::before {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: inherit;
+            background: radial-gradient(120% 140% at 0% 0%, rgba(59, 130, 246, 0.65), transparent 60%),
+                        radial-gradient(110% 150% at 100% 100%, rgba(192, 132, 252, 0.55), transparent 55%);
+            opacity: 0;
+            filter: blur(14px);
+            transition: opacity 0.35s ease;
+            z-index: -1;
+        }
+
+        .case-ai-btn::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0));
+            mix-blend-mode: screen;
+            opacity: 0.55;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .case-ai-btn:hover {
+            transform: translateY(-4px) scale(1.01);
+            background-position: 100% 0;
+            box-shadow: 0 20px 38px rgba(76, 29, 149, 0.4);
+        }
+
+        .case-ai-btn:hover::before {
+            opacity: 0.9;
+        }
+
+        .case-ai-btn:hover::after {
+            opacity: 0.85;
+        }
+
+        .case-ai-btn:focus-visible {
+            outline: 2px solid rgba(191, 219, 254, 0.85);
+            outline-offset: 3px;
+        }
+
+        .case-ai-btn svg {
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+            filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.35));
+        }
+
+        .case-ai-btn {
+            pointer-events: auto !important;
+        }
+
+        .case-ai-btn svg,
+        .case-ai-btn * {
+            pointer-events: none;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .case-ai-btn {
+                transition: none;
+                transform: none;
+                background-size: 100% 100%;
+            }
+
+            .case-ai-btn:hover {
+                transform: none;
+                box-shadow: 0 12px 24px rgba(76, 29, 149, 0.35);
+                background-position: 50% 50%;
+            }
+
+            .case-ai-btn:hover::before {
+                opacity: 0.75;
+            }
+        }
+
         .message-board-modal {
             position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(0.9);
-            width: 90%;
-            max-width: 700px;
-            max-height: 85vh;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            top: 4vh;
+            right: 2vw;
+            width: min(420px, 92vw);
+            height: 92vh;
+            background: rgba(248, 250, 252, 0.96);
+            border-radius: 26px;
+            border: 1px solid rgba(203, 213, 225, 0.6);
+            box-shadow: -24px 38px 80px rgba(15, 23, 42, 0.24);
+            backdrop-filter: blur(22px) saturate(135%);
             z-index: 1999;
             opacity: 0;
             pointer-events: none;
-            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            transform: translateX(48px) scale(0.98);
+            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease;
             display: flex;
             flex-direction: column;
             overflow: hidden;
+        }
+
+        .message-board-modal::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at top left, rgba(59, 130, 246, 0.18), transparent 62%);
+            pointer-events: none;
+        }
+
+        .message-board-modal::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            mix-blend-mode: screen;
+            opacity: 0.55;
+            pointer-events: none;
         }
 
         .message-board-modal.active {
             opacity: 1;
-            transform: translate(-50%, -50%) scale(1);
-            pointer-events: all;
+            pointer-events: auto;
+            transform: translateX(0) scale(1);
+        }
+
+        .message-sidebar {
+            position: fixed;
+            top: 50%;
+            right: 24px;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            z-index: 1980;
+        }
+
+        .message-sidebar-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 18px;
+            border-radius: 999px;
+            border: 1px solid rgba(148, 163, 184, 0.4);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(241, 245, 249, 0.92));
+            color: #0f172a;
+            font-weight: 600;
+            font-size: 0.9rem;
+            letter-spacing: 0.01em;
+            cursor: pointer;
+            box-shadow: 0 20px 38px rgba(15, 23, 42, 0.14);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+
+        .message-sidebar-btn svg {
+            width: 20px;
+            height: 20px;
+            color: #2563eb;
+        }
+
+        .message-sidebar-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 26px 48px rgba(37, 99, 235, 0.2);
+            border-color: rgba(59, 130, 246, 0.45);
+        }
+
+        .message-sidebar-btn:active {
+            transform: translateY(0);
         }
 
         .message-board-header {
-            padding: 20px;
-            background: linear-gradient(135deg, #8b5cf6, #6366f1);
-            color: white;
+            position: relative;
             display: flex;
             align-items: center;
             justify-content: space-between;
+            padding: 24px 30px;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.14), rgba(14, 164, 233, 0.18));
+            border-bottom: 1px solid rgba(148, 163, 184, 0.35);
+            box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.6);
+            z-index: 1;
         }
 
-        .message-board-body {
+        .message-board-heading {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            color: #0f172a;
+        }
+
+        .message-board-heading svg {
+            width: 28px;
+            height: 28px;
+            color: #2563eb;
+        }
+
+        .message-board-title-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .message-board-title {
+            font-size: 1.45rem;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            background: linear-gradient(120deg, #0f172a, #2563eb 50%, #14b8a6 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+
+        .message-board-subtitle {
+            font-size: 0.9rem;
+            color: #475569;
+            letter-spacing: 0.01em;
+        }
+
+        .message-board-close {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            border: 1px solid rgba(148, 163, 184, 0.4);
+            background: rgba(255, 255, 255, 0.92);
+            color: #1f2937;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 12px 28px rgba(15, 23, 42, 0.18);
+        }
+
+        .message-board-close:hover {
+            background: #eff6ff;
+            border-color: rgba(59, 130, 246, 0.45);
+            transform: translateY(-2px);
+            box-shadow: 0 18px 36px rgba(37, 99, 235, 0.28);
+        }
+
+        .message-board-close svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .message-board-content {
             flex: 1;
-            overflow-y: auto;
-            padding: 20px;
+            padding: 26px 28px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
 
-        .message-board-footer {
-            padding: 16px 20px;
-            border-top: 1px solid #e5e7eb;
-            background: #f9fafb;
+        .message-board-section {
+            display: none;
+            flex-direction: column;
+            gap: 20px;
+            height: 100%;
+        }
+
+        .message-board-section.active {
+            display: flex;
+        }
+
+        .message-board-card {
+            position: relative;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            padding: 24px 26px;
+            border-radius: 22px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(226, 232, 240, 0.85);
+            box-shadow: 0 20px 48px rgba(15, 23, 42, 0.16);
+            overflow: hidden;
+        }
+
+        .message-board-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.12), transparent 70%);
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .message-board-card::after {
+            content: '';
+            position: absolute;
+            inset: 1px;
+            border-radius: inherit;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            mix-blend-mode: screen;
+            pointer-events: none;
+            opacity: 0.6;
+        }
+
+        .message-board-card > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .message-board-feed-card {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .message-board-section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .message-board-section-title {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            color: #0f172a;
+        }
+
+        .message-board-section-title svg {
+            width: 22px;
+            height: 22px;
+            color: #2563eb;
+        }
+
+        .message-board-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #1e293b;
+            background: rgba(191, 219, 254, 0.7);
+            border: 1px solid rgba(96, 165, 250, 0.5);
+        }
+
+        .message-board-feed-list {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+            padding-right: 6px;
+        }
+
+        .message-board-empty {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 14px;
+            padding: 40px 0;
+            color: #94a3b8;
+            text-align: center;
+        }
+
+        .message-board-empty svg {
+            width: 52px;
+            height: 52px;
+            color: #cbd5f5;
+        }
+
+        .message-board-form-card {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
         }
 
         .message-item {
-            background: white;
-            padding: 16px;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-            margin-bottom: 12px;
-            transition: all 0.3s ease;
+            background: linear-gradient(135deg, rgba(248, 250, 252, 0.96), rgba(241, 245, 249, 0.92));
+            border: 1px solid rgba(209, 213, 219, 0.7);
+            border-radius: 18px;
+            padding: 18px 20px;
+            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
+            transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
         }
 
         .message-item:hover {
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+            transform: translateY(-3px);
+            box-shadow: 0 24px 48px rgba(37, 99, 235, 0.2);
+            border-color: rgba(96, 165, 250, 0.55);
         }
 
-        /* 标签页样式 */
+        .message-item h4,
+        .message-item h5 {
+            color: #0f172a !important;
+            font-size: 1rem;
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+
+        .message-item p {
+            color: #475569 !important;
+            font-size: 0.92rem;
+            line-height: 1.6;
+        }
+
+        .message-item .text-xs {
+            color: #64748b !important;
+            font-size: 0.78rem;
+        }
+
+        .message-item .inline-flex {
+            background: rgba(59, 130, 246, 0.08);
+            color: #2563eb;
+        }
+
+        .message-board-form-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .message-board-field-group {
+            display: grid;
+            gap: 16px;
+        }
+
+        .message-board-field-group.two-column {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .message-board-field {
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: 14px;
+            border: 1px solid rgba(148, 163, 184, 0.55);
+            background: rgba(248, 250, 252, 0.96);
+            color: #0f172a;
+            font-size: 0.95rem;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+            box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.05);
+        }
+
+        .message-board-field::placeholder {
+            color: #94a3b8;
+        }
+
+        .message-board-field:focus {
+            outline: none;
+            border-color: rgba(59, 130, 246, 0.65);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+            transform: translateY(-1px);
+        }
+
+        .message-board-textarea {
+            min-height: 160px;
+            resize: vertical;
+        }
+
+        .message-board-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            padding-top: 6px;
+        }
+
+        .message-board-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 14px 22px;
+            border-radius: 14px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+            box-shadow: 0 16px 32px rgba(15, 23, 42, 0.18);
+        }
+
+        .message-board-button svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .message-board-button.primary {
+            flex: 1 1 auto;
+            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 50%, #06b6d4 100%);
+            color: #f8fafc;
+        }
+
+        .message-board-button.secondary {
+            flex: 0 0 auto;
+            background: linear-gradient(135deg, #f97316 0%, #ef4444 100%);
+            color: #fff7ed;
+        }
+
+        .message-board-button:hover {
+            transform: translateY(-2px);
+            filter: saturate(112%);
+        }
+
+        .message-board-button:active {
+            transform: translateY(0);
+        }
+
+        .delete-submission-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 9px;
+            border: 1px solid rgba(203, 213, 225, 0.8);
+            background: rgba(255, 255, 255, 0.9);
+            color: #475569;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease;
+        }
+
+        .delete-submission-btn:hover {
+            transform: translateY(-1px);
+            background: rgba(251, 191, 36, 0.18);
+            color: #ea580c;
+        }
+
+        #unified-feedback {
+            color: #2563eb;
+            min-height: 1.25rem;
+            text-align: center;
+            font-weight: 500;
+        }
+
         .tab-btn {
             cursor: pointer;
+            transition: color 0.2s ease, border-color 0.2s ease;
         }
 
         .tab-btn.active {
-            border-bottom-color: #8b5cf6 !important;
-            color: #8b5cf6 !important;
+            border-bottom-color: #111827 !important;
+            color: #111827 !important;
+            font-weight: 600;
         }
 
         .tab-content {
@@ -1349,196 +2371,176 @@ function runPythonCode(codeId, outputId) {
         .tab-content.active {
             display: block;
         }
-        
-        /* 聊天界面容器 */
-        .chat-container {
-            position: fixed;
-            bottom: 100px;
-            right: 30px;
-            width: 350px;
-            height: 500px;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
-            display: flex;
-            flex-direction: column;
-            z-index: 999;
-            overflow: hidden;
-            opacity: 0;
-            transform: translateY(20px) scale(0.95);
-            pointer-events: none;
-            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+
+        @media (max-width: 1280px) {
+            .message-board-modal {
+                max-width: 860px;
+            }
         }
-        
-        .chat-container.active {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-            pointer-events: all;
+
+        @media (max-width: 1024px) {
+            .ai-assistant-panel {
+                width: 96%;
+            }
+
+            .message-board-modal {
+                width: 96%;
+                max-width: 720px;
+                height: 94vh;
+            }
+
+            .message-board-main {
+                flex-direction: column;
+            }
+
+            .message-board-sidebar {
+                width: 100%;
+                flex-direction: row;
+                justify-content: space-between;
+                border-right: none;
+                border-bottom: 1px solid rgba(203, 213, 225, 0.45);
+                padding: 20px 22px;
+                gap: 16px;
+            }
+
+            .message-board-nav-btn {
+                flex: 1;
+                flex-direction: row;
+                justify-content: center;
+                gap: 8px;
+            }
+
+            .message-board-content {
+                padding: 22px 24px;
+                overflow-y: auto;
+            }
+
+            .message-sidebar {
+                top: auto;
+                bottom: 28px;
+                right: 24px;
+                transform: none;
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .ai-chat-history {
+                padding: 22px;
+            }
         }
-        
-        /* 聊天界面头部 */
-        .chat-header {
-            padding: 15px;
-            background: linear-gradient(90deg, #4f46e5, #9333ea);
-            color: white;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+
+        @media (max-width: 768px) {
+            .ai-assistant-panel {
+                top: 2vh;
+                height: 96vh;
+            }
+
+            .ai-assistant-body {
+                flex-direction: column;
+            }
+
+            .ai-mode-sidebar {
+                width: 100%;
+                flex-direction: row;
+                justify-content: space-between;
+                border-right: none;
+                border-bottom: 1px solid rgba(203, 213, 225, 0.7);
+            }
+
+            .ai-mode-btn {
+                flex: 1;
+                flex-direction: row;
+                justify-content: center;
+                gap: 8px;
+            }
+
+            .chat-message {
+                max-width: 88%;
+                font-size: 14px;
+            }
+
+            .message-board-modal {
+                top: 2vh;
+                height: 96vh;
+                border-radius: 22px;
+            }
+
+            .message-board-sidebar {
+                padding: 18px 18px;
+                gap: 12px;
+            }
+
+            .message-board-content {
+                padding: 20px 18px 24px;
+            }
+
+            .message-board-feed-list {
+                max-height: none;
+            }
+
+            .message-sidebar {
+                bottom: 20px;
+                right: 20px;
+            }
+
+            .message-board-field-group.two-column {
+                grid-template-columns: 1fr;
+            }
+
+            .message-board-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
         }
-        
-        .close-chat {
-            background: none;
-            border: none;
-            color: white;
-            cursor: pointer;
-            font-size: 20px;
-        }
-        
-        /* 聊天消息区域 */
-        .chat-messages {
-            flex: 1;
-            padding: 15px;
-            overflow-y: auto;
-            background: #f8fafc;
-        }
-        
-        .message {
-            margin-bottom: 15px;
-            max-width: 80%;
-            padding: 10px 15px;
-            border-radius: 18px;
-            line-height: 1.5;
-            position: relative;
-            animation: fadeIn 0.3s ease;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .user-message {
-            background: #e0e7ff;
-            color: #1e293b;
-            margin-left: auto;
-            border-bottom-right-radius: 5px;
-        }
-        
-        .ai-message {
-            background: white;
-            color: #1e293b;
-            border-bottom-left-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-        }
-        
-        /* 输入区域 */
-        .chat-input-container {
-            padding: 15px;
-            border-top: 1px solid #e2e8f0;
-            background: white;
-            display: flex;
-            align-items: center;
-        }
-        
-        .chat-input {
-            flex: 1;
-            padding: 10px 15px;
-            border: 1px solid #e2e8f0;
-            border-radius: 24px;
-            outline: none;
-            transition: border 0.3s ease;
-        }
-        
-        .chat-input:focus {
-            border-color: #4f46e5;
-        }
-        
-        .send-btn {
-            background: #4f46e5;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            margin-left: 10px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background 0.3s ease;
-        }
-        
-        .send-btn:hover {
-            background: #4338ca;
-        }
-        
-        .send-btn:disabled {
-            background: #9ca3af;
-            cursor: not-allowed;
-        }
-        
-        /* 案例卡片中的AI助手按钮 */
-        .case-ai-btn {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            padding: 6px 12px;
-            background: linear-gradient(135deg, #4f46e5, #9333ea);
-            color: white;
-            border: none;
-            border-radius: 20px;
-            font-size: 13px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-left: 8px;
-        }
-        
-        .case-ai-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(79, 70, 229, 0.3);
-        }
-        
-        .case-ai-btn svg {
-            width: 16px;
-            height: 16px;
-        }
-        
-        /* 加载效果 */
-        .typing-indicator {
-            padding: 15px;
-            background: white;
-            border-radius: 18px;
-            display: inline-block;
-            margin-bottom: 15px;
-            position: relative;
-            animation: fadeIn 0.3s ease;
-        }
-        
-        .typing-indicator span {
-            height: 8px;
-            width: 8px;
-            margin: 0 2px;
-            background-color: #9ca3af;
-            display: inline-block;
-            border-radius: 50%;
-            opacity: 0.4;
-        }
-        
-        .typing-indicator span:nth-child(1) {
-            animation: blink 1s infinite 0.3s;
-        }
-        
-        .typing-indicator span:nth-child(2) {
-            animation: blink 1s infinite 0.5s;
-        }
-        
-        .typing-indicator span:nth-child(3) {
-            animation: blink 1s infinite 0.7s;
-        }
-        
-        @keyframes blink {
-            50% { opacity: 1; }
+
+        @media (max-width: 480px) {
+            .message-board-modal {
+                width: 95%;
+                padding-bottom: env(safe-area-inset-bottom);
+            }
+
+            .message-board-header {
+                padding: 20px;
+            }
+
+            .message-board-title {
+                font-size: 1.32rem;
+            }
+
+            .message-board-sidebar {
+                padding: 16px 14px;
+            }
+
+            .message-board-content {
+                padding: 18px 16px 20px;
+            }
+
+            .message-board-card {
+                padding: 20px;
+            }
+
+            .message-sidebar {
+                right: 16px;
+                left: 16px;
+                bottom: 18px;
+                flex-direction: row;
+                justify-content: space-between;
+            }
+
+            .message-sidebar-btn {
+                flex: 1 1 auto;
+                justify-content: center;
+            }
+
+            .message-board-section-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            .message-board-chip {
+                align-self: flex-start;
+            }
         }
     </style>
 
@@ -1551,8 +2553,8 @@ function runPythonCode(codeId, outputId) {
         // 3. 创建或查看 API Key（格式：以 "ak-" 开头）
         // 4. 将 API Key 粘贴到下方 apiKey 字段
         window.volcengineConfig = {
-            apiKey: "348522f9-6a1b-4d0b-ad6b-8faab8ea09c0",
-            baseUrl: "https://sd413i7v6n5j6uua1gn70.apigateway-cn-beijing.volceapi.com",
+            apiKey: "",
+            baseUrl: "/api",
             accountId: "2100415977",  // 账号ID
             username: "jianghui",     // 用户名
 
@@ -1601,11 +2603,21 @@ function runPythonCode(codeId, outputId) {
 <body class="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 min-h-screen">
     <div class="container mx-auto px-2 py-4 max-w-7xl">
         <!-- 标题区 -->
-        <div class="mb-4 text-center">
-            <h1 class="text-2xl">产教思政育人案例库</h1>
-            <p class="mt-1 text-gray-600 dark:text-gray-400 text-base max-w-2xl mx-auto">
-                充分挖掘课程蕴含思政教育元素，实现思想价值教育与知识体系教育的有机统一
-            </p>
+        <div class="mb-6 text-center">
+            <h1 class="text-4xl font-bold bg-gradient-to-r from-red-600 via-purple-600 to-blue-600 bg-clip-text text-transparent tracking-tight">
+                慧工坊
+            </h1>
+            <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-200 mt-2">
+                产教思政育人案例库
+            </h2>
+            <div class="mt-4 inline-flex items-center px-4 py-2 bg-gradient-to-r from-red-50 to-purple-50 dark:from-red-900/20 dark:to-purple-900/20 rounded-full border border-red-200 dark:border-red-800">
+                <svg class="w-5 h-5 text-red-600 dark:text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"/>
+                </svg>
+                <p class="text-gray-700 dark:text-gray-300 text-sm font-medium">
+                    充分挖掘课程蕴含思政教育元素，实现思想价值教育与知识体系教育的有机统一
+                </p>
+            </div>
         </div>
 
         <!-- 控制栏 -->
@@ -1681,280 +2693,836 @@ function runPythonCode(codeId, outputId) {
         </div>
 
     </div>
-
-
-
-    <!-- 页脚 -->
-    <footer class="mt-12 py-8 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm">
-        <div class="container mx-auto px-4 text-center">
-            <p class="text-gray-600 dark:text-gray-400">© 2024 智慧产教案例库. All rights reserved.</p>
-            <p class="text-xs text-gray-500 dark:text-gray-500 mt-2">
-                数据存储于 <a href="https://gitee.com/swywy_admin/video" target="_blank" class="text-blue-500 hover:underline">Gitee 仓库</a>
-            </p>
-        </div>
-    </footer>
-
-    <!-- AI 功能区 -->
-    <div style="position: fixed; bottom: 30px; right: 30px; z-index: 1000; display: flex; flex-direction: column; gap: 15px; align-items: flex-end;">
-
-        <!-- AI 功能标签 -->
-        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);">
-            🤖 AI 助手
-        </div>
-
-        <!-- 文生视频按钮 -->
-        <button class="ai-feature-btn" id="text-to-video-btn" aria-label="文生视频" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
-            <span style="font-size: 24px;">🎬</span>
-            <span style="font-size: 11px; margin-top: 2px;">文生视频</span>
+    <!-- 留言侧边栏 -->
+    <aside class="message-sidebar">
+        <button type="button" class="message-sidebar-btn" id="message-compose-btn" aria-controls="message-board-modal">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+            </svg>
+            <span>留言共创</span>
         </button>
-
-        <!-- 文生图按钮 -->
-        <button class="ai-feature-btn" id="text-to-image-btn" aria-label="文生图" style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);">
-            <span style="font-size: 24px;">🎨</span>
-            <span style="font-size: 11px; margin-top: 2px;">文生图</span>
+        <button type="button" class="message-sidebar-btn" id="message-recent-btn" aria-controls="message-board-modal">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <span>最近提交</span>
         </button>
-
-        <!-- AI 语音助手按钮 -->
-        <button class="ai-feature-btn" id="voice-assistant-btn" aria-label="AI语音助手" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-            <span style="font-size: 24px;">🎤</span>
-            <span style="font-size: 11px; margin-top: 2px;">语音助手</span>
-        </button>
-
-        <!-- AI 对话按钮 -->
-        <button class="ai-feature-btn" id="ai-assistant-btn" aria-label="AI对话" style="background: linear-gradient(135deg, #4f46e5 0%, #9333ea 100%);">
-            <span style="font-size: 24px;">💬</span>
-            <span style="font-size: 11px; margin-top: 2px;">AI对话</span>
-        </button>
-
-        <!-- 留言板按钮 -->
-        <button class="ai-feature-btn" id="message-board-btn" aria-label="留言板" style="background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);">
-            <span style="font-size: 24px;">📝</span>
-            <span style="font-size: 11px; margin-top: 2px;">留言板</span>
-        </button>
-    </div>
+    </aside>
 
     <!-- 模态框遮罩 -->
     <div class="modal-overlay" id="modal-overlay"></div>
 
-    <!-- AI 语音助手模态框 -->
-    <div class="voice-assistant-modal" id="voice-assistant-modal">
-        <div class="message-board-header">
-            <h3 class="text-xl font-bold flex items-center gap-2">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/>
+    <!-- 案例AI助手统一面板 -->
+    <div class="ai-assistant-panel" id="case-ai-panel">
+        <div class="ai-assistant-header">
+            <div class="ai-assistant-title">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M21 10c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 18l1.395-3.72C3.512 13.042 3 11.574 3 10c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
                 </svg>
-                AI 语音助手
-            </h3>
-            <button id="close-voice-assistant" class="text-gray-500 hover:text-gray-700 transition">
+                <span>AI 智能助手</span>
+            </div>
+            <button id="close-case-ai-panel" aria-label="关闭 AI 助手">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                 </svg>
             </button>
         </div>
-
-        <div class="voice-chat-history" id="voice-chat-history">
-            <div class="voice-message assistant">
-                你好！我是 AI 语音助手。点击下方麦克风按钮开始对话，我可以帮你：
-                <ul style="margin-top: 8px; padding-left: 20px;">
-                    <li>💬 语音对话交流</li>
-                    <li>🎨 生成图像（描述你想要的图片）</li>
-                    <li>📝 文本问答</li>
-                </ul>
+        <div class="ai-assistant-body">
+            <div class="ai-mode-sidebar">
+                <button id="ai-chat-mode-btn" class="ai-mode-btn active" data-mode="chat">
+                    <span class="ai-mode-icon">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8 10h.01M12 10h.01M16 10h.01M21 10c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 18l1.395-3.72C3.512 13.042 3 11.574 3 10c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                        </svg>
+                    </span>
+                    <span class="ai-mode-label">AI对话</span>
+                </button>
+                <button id="ai-image-mode-btn" class="ai-mode-btn" data-mode="image">
+                    <span class="ai-mode-icon">
+                        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 15l-5-5L5 21" />
+                        </svg>
+                    </span>
+                    <span class="ai-mode-label">文生图</span>
+                </button>
+                <button id="ai-text-video-mode-btn" class="ai-mode-btn" data-mode="text-video">
+                    <span class="ai-mode-icon">
+                        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect>
+                            <line x1="2" y1="8" x2="22" y2="8"></line>
+                            <line x1="6" y1="2" x2="6" y2="6"></line>
+                            <line x1="10" y1="2" x2="10" y2="6"></line>
+                            <line x1="14" y1="2" x2="14" y2="6"></line>
+                            <line x1="18" y1="2" x2="18" y2="6"></line>
+                        </svg>
+                    </span>
+                    <span class="ai-mode-label">文生视频</span>
+                </button>
+                <button id="ai-image-video-mode-btn" class="ai-mode-btn" data-mode="image-video">
+                    <span class="ai-mode-icon">
+                        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M23 7l-7 5 7 5V7z" />
+                            <rect x="2" y="5" width="14" height="14" rx="2" ry="2"></rect>
+                        </svg>
+                    </span>
+                    <span class="ai-mode-label">图生视频</span>
+                </button>
+            </div>
+            <div class="ai-assistant-main">
+                <div class="ai-chat-history" id="ai-content-area">
+                    <div class="chat-message ai-message">请选择左侧的功能模式开始体验 AI 助手。</div>
+                </div>
+                <div class="ai-input-area" id="ai-input-area">
+                    <div style="color: #94a3b8; text-align: center;">等待选择功能模式...</div>
+                </div>
             </div>
         </div>
-
-        <div class="voice-status" id="voice-status">准备就绪</div>
-
-        <div class="voice-controls">
-            <button id="voice-record-btn" class="voice-control-btn primary">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/>
-                </svg>
-                <span id="voice-btn-text">开始语音</span>
-            </button>
-        </div>
     </div>
 
-    <!-- 文生图模态框 -->
-    <div class="voice-assistant-modal" id="text-to-image-modal">
-        <div class="message-board-header">
-            <h3 class="text-xl font-bold flex items-center gap-2">
-                🎨 文生图
-            </h3>
-            <button id="close-text-to-image" class="text-gray-500 hover:text-gray-700 transition">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                </svg>
-            </button>
-        </div>
-
-        <div class="voice-chat-history" id="image-result-area" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
-            <p style="color: #666; text-align: center;">请在下方输入图像描述</p>
-        </div>
-
-        <div style="padding: 20px; background: white; border-top: 1px solid #e5e7eb;">
-            <textarea id="image-prompt-input" placeholder="例如：一只可爱的小猫在草地上玩耍"
-                style="width: 100%; min-height: 80px; padding: 12px; border: 2px solid #e5e7eb; border-radius: 12px; font-size: 14px; resize: vertical;"></textarea>
-            <button id="generate-image-btn"
-                style="width: 100%; margin-top: 12px; padding: 12px; background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); color: white; border: none; border-radius: 12px; font-weight: 600; cursor: pointer; font-size: 16px;">
-                🎨 生成图像
-            </button>
-        </div>
-    </div>
-
-    <!-- 文生视频模态框 -->
-    <div class="voice-assistant-modal" id="text-to-video-modal">
-        <div class="message-board-header">
-            <h3 class="text-xl font-bold flex items-center gap-2">
-                🎬 文生视频
-            </h3>
-            <button id="close-text-to-video" class="text-gray-500 hover:text-gray-700 transition">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                </svg>
-            </button>
-        </div>
-
-        <div class="voice-chat-history" id="video-result-area" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
-            <p style="color: #666; text-align: center;">请在下方输入视频描述</p>
-        </div>
-
-        <div style="padding: 20px; background: white; border-top: 1px solid #e5e7eb;">
-            <textarea id="video-prompt-input" placeholder="例如：小猫在草地上追逐蝴蝶"
-                style="width: 100%; min-height: 80px; padding: 12px; border: 2px solid #e5e7eb; border-radius: 12px; font-size: 14px; resize: vertical;"></textarea>
-            <button id="generate-video-btn"
-                style="width: 100%; margin-top: 12px; padding: 12px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; border: none; border-radius: 12px; font-weight: 600; cursor: pointer; font-size: 16px;">
-                🎬 生成视频
-            </button>
-        </div>
-    </div>
-
-    <!-- 留言板模态框 -->
-    <div class="message-board-modal" id="message-board-modal">
-        <div class="message-board-header">
-            <h3 class="text-xl font-bold flex items-center gap-2">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <!-- 留言与提交弹窗 -->
+    <div class="message-board-modal" id="message-board-modal" aria-hidden="true">
+        <header class="message-board-header">
+            <div class="message-board-heading">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/>
                 </svg>
-                互动交流平台
-            </h3>
-            <button id="close-message-board" class="text-white hover:bg-white/20 rounded-full w-10 h-10 flex items-center justify-center transition text-2xl">×</button>
-        </div>
-
-        <div class="message-board-body">
-            <!-- 所有提交记录 -->
-            <div class="mb-6">
-                <h4 class="text-lg font-semibold mb-3 text-gray-800 flex items-center gap-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                    最近提交
-                </h4>
-                <div id="all-submissions-list" class="space-y-3 max-h-60 overflow-y-auto">
-                    <div class="text-center text-gray-500 py-8">
-                        <svg class="w-12 h-12 mx-auto mb-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
-                        </svg>
-                        加载中...
-                    </div>
+                <div class="message-board-title-wrap">
+                    <span class="message-board-title">互动交流平台</span>
+                    <span class="message-board-subtitle">凝聚教师、学生与产业伙伴的灵感，让观点在此自由碰撞。</span>
                 </div>
             </div>
-
-            <!-- 统一提交表单 -->
-            <div class="bg-gradient-to-br from-purple-50 to-blue-50 p-5 rounded-xl border-2 border-purple-200">
-                <h4 class="text-lg font-bold mb-4 text-gray-800 flex items-center gap-2">
-                    <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                    </svg>
-                    留言反馈 & 共创案例
-                </h4>
-                <form id="unified-form" class="space-y-3">
-                    <!-- 基本信息 -->
-                    <div class="grid grid-cols-2 gap-3">
-                        <input type="text" id="unified-username" placeholder="您的昵称 *" required
-                            class="px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none transition text-sm bg-white">
-                        <input type="email" id="unified-email" placeholder="邮箱（可选）"
-                            class="px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none transition text-sm bg-white">
-                    </div>
-
-                    <!-- 案例类型和领域 -->
-                    <div class="grid grid-cols-2 gap-3">
-                        <select id="unified-case-type" class="px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none transition text-sm bg-white">
-                            <option value="">选择类型（可选）</option>
-                            <option value="industry">产业案例</option>
-                            <option value="political">思政育人案例</option>
-                            <option value="feedback">意见反馈</option>
-                            <option value="suggestion">建议</option>
-                            <option value="question">问题咨询</option>
-                        </select>
-                        <select id="unified-case-domain" class="px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none transition text-sm bg-white">
-                            <option value="">选择领域（可选）</option>
-                        </select>
-                    </div>
-
-                    <!-- 标题 -->
-                    <input type="text" id="unified-title" placeholder="标题 *" required
-                        class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none transition text-sm bg-white">
-
-                    <!-- 内容 -->
-                    <textarea id="unified-content" rows="5" placeholder="请输入内容（支持TeX公式，如：C(t)=C_0e^{-kt}）*&#10;&#10;可以是：&#10;• 教学案例分享&#10;• 意见和建议&#10;• 问题咨询&#10;• 其他反馈" required
-                        class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none resize-none transition text-sm bg-white"></textarea>
-
-                    <!-- 知识点/标签 -->
-                    <input type="text" id="unified-tags" placeholder="知识点/标签（可选，多个用逗号分隔）"
-                        class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-purple-500 outline-none transition text-sm bg-white">
-
-                    <!-- 按钮组 -->
-                    <div class="flex gap-2 pt-2">
-                        <button type="submit" id="unified-submit-btn" class="flex-1 px-4 py-2.5 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-lg hover:shadow-lg transition-all font-semibold text-sm">
-                            💬 提交
-                        </button>
-                        <button type="button" id="unified-ai-enhance-btn" class="px-4 py-2.5 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-lg hover:shadow-lg transition-all font-semibold text-sm flex items-center gap-1">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
-                            </svg>
-                            AI优化
-                        </button>
-                    </div>
-                    <div id="unified-feedback" class="text-sm text-center font-medium"></div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- 聊天界面容器 -->
-    <div class="chat-container" id="chat-container">
-        <div class="chat-header">
-            <div>AI案例分析助手</div>
-            <button class="close-chat" id="close-chat">×</button>
-        </div>
-        <div class="chat-messages" id="chat-messages">
-            <div class="message ai-message">
-                你好！我是AI案例分析助手，可以解答您关于案例的任何问题，提供思政教育与案例分析建议。
-            </div>
-        </div>
-        <div class="chat-input-container">
-            <input type="text" id="chat-input" class="chat-input" placeholder="输入您的问题..." />
-            <button id="send-btn" class="send-btn" disabled>
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="18" height="18">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                        d="M5 12h14M12 5l7 7-7 7"/>
+            <button type="button" class="message-board-close" data-close-message-modal aria-label="关闭互动交流平台">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                 </svg>
             </button>
+        </header>
+
+        <div class="message-board-main">
+            <nav class="message-board-sidebar">
+                <button type="button" class="message-board-nav-btn active" data-target="message-board-compose">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                    </svg>
+                    <span>留言共创</span>
+                </button>
+                <button type="button" class="message-board-nav-btn" data-target="message-board-recent">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <span>最近提交</span>
+                </button>
+            </nav>
+
+            <div class="message-board-content">
+                <section class="message-board-section active" id="message-board-compose">
+                    <div class="message-board-card message-board-form-card">
+                        <div class="message-board-section-header">
+                            <h4 class="message-board-section-title">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                </svg>
+                                留言反馈 & 共创案例
+                            </h4>
+                            <span class="message-board-chip">AI助力创作</span>
+                        </div>
+
+                        <form id="unified-form" class="message-board-form-grid">
+                            <div class="message-board-field-group two-column">
+                                <input type="text" id="unified-username" class="message-board-field" placeholder="您的昵称 *" required>
+                                <input type="email" id="unified-email" class="message-board-field" placeholder="邮箱（可选）">
+                            </div>
+                            <div class="message-board-field-group two-column">
+                                <select id="unified-case-type" class="message-board-field">
+                                    <option value="">选择类型（可选）</option>
+                                    <option value="industry">产业案例</option>
+                                    <option value="political">思政育人案例</option>
+                                    <option value="feedback">意见反馈</option>
+                                    <option value="suggestion">建议</option>
+                                    <option value="question">问题咨询</option>
+                                </select>
+                                <select id="unified-case-domain" class="message-board-field">
+                                    <option value="">选择领域（可选）</option>
+                                </select>
+                            </div>
+                            <input type="text" id="unified-title" class="message-board-field" placeholder="标题 *" required>
+                            <textarea id="unified-content" class="message-board-field message-board-textarea" rows="5" placeholder="请输入内容（支持TeX公式，如：C(t)=C_0e^{-kt}）*&#10;&#10;可以是：&#10;• 教学案例分享&#10;• 意见和建议&#10;• 问题咨询&#10;• 其他反馈" required></textarea>
+                            <input type="text" id="unified-tags" class="message-board-field" placeholder="知识点/标签（可选，多个用逗号分隔）">
+                            <div class="message-board-actions">
+                                <button type="submit" id="unified-submit-btn" class="message-board-button primary">
+                                    <span>提交</span>
+                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10l9-7 9 7-9 7-9-7z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10v11l9-7 9 7V10"/>
+                                    </svg>
+                                </button>
+                                <button type="button" id="unified-ai-enhance-btn" class="message-board-button secondary">
+                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548-.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                                    </svg>
+                                    <span>AI优化</span>
+                                </button>
+                            </div>
+                            <div id="unified-feedback"></div>
+                        </form>
+                    </div>
+                </section>
+
+                <section class="message-board-section" id="message-board-recent">
+                    <div class="message-board-card message-board-feed-card">
+                        <div class="message-board-section-header">
+                            <h4 class="message-board-section-title">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                最近提交
+                            </h4>
+                            <span class="message-board-chip">实时更新</span>
+                        </div>
+                        <div id="all-submissions-list" class="message-board-feed-list">
+                            <div class="message-board-empty">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                                </svg>
+                                <span>加载中...</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
         </div>
     </div>
 
     <script>
-        // 全局变量
-        let currentCaseId = null;  // 当前打开的案例ID
+        // 全局变量        let currentCaseId = null;  // 当前打开的案例ID
         let currentCaseContent = null;  // 当前案例内容
         let casesContentCache = {};  // 存储已打开过的案例内容的缓存
         let isProcessing = false;  // 标记是否正在处理消息
         let filterBtns = null;  // 分类按钮集合
         let cases = [];  // 案例数据
+        
+        // 火山引擎API配置 - 全局常量
+        const VOLCENGINE_API_KEY = window.volcengineConfig?.apiKey || '';
+        const VOLCENGINE_BASE_URL = '/api';
+        const LLM_MODEL = 'ep-20251030011739-pxv56';  // Doubao-lite-32k（快速模型）
+        const IMAGE_MODEL = 'ep-20251030011616-nrd29';  // Doubao-Seedream-4.0
+        const TEXT_VIDEO_MODEL = 'ep-20251030022319-6chbt';  // Doubao-Seedance-1.0-pro（文生视频 t2v）
+        const IMAGE_VIDEO_MODEL = 'ep-20251030004255-jhlf6';  // Doubao-Seedance-1.0-lite-i2v（图生视频 i2v）
+        const MODEL_3D = 'ep-20251030011539-w2822';  // Doubao-Seed3D-1.0（3D生成）
+        
+        // 为特定案例打开AI助手 - 必须在全局作用域定义，确保按钮onclick可以调用
+        window.openAiAssistantForCase = function(index) {
+            console.log('AI按钮被点击，索引:', index);
+            console.log('尝试打开案例AI助手，索引:', index);
+
+            // 确保window.cases存在
+            if (!window.cases) {
+                console.error('window.cases不存在');
+                return;
+            }
+
+            const caseItem = window.cases[index];
+            if (!caseItem) {
+                console.error('无法找到索引为', index, '的案例');
+                return;
+            }
+
+            console.log('已找到案例:', caseItem.title);
+            currentCaseId = index;
+
+            // 构建案例内容文本，去除HTML标签
+            currentCaseContent = `标题：${caseItem.title}\n内容：${stripHtml(caseItem.content)}\n知识点：${caseItem.knowledgePoints.join(', ')}`;
+            // 缓存当前案例内容
+            casesContentCache[index] = {
+                title: caseItem.title,
+                content: currentCaseContent
+            };
+            console.log(`已设置案例[${index}]上下文:`, caseItem.title);
+
+            // 打开统一AI面板
+            const caseAiPanel = document.getElementById('case-ai-panel');
+            const modalOverlay = document.getElementById('modal-overlay');
+
+            if (caseAiPanel && modalOverlay) {
+                caseAiPanel.classList.add('active');
+                modalOverlay.classList.add('active');
+
+                // 初始化为对话模式，延迟执行确保面板已显示
+                setTimeout(() => {
+                    if (window.switchAiMode) {
+                        console.log('初始化AI对话模式');
+                        window.switchAiMode('chat');
+                    } else {
+                        console.error('switchAiMode函数不存在');
+                    }
+                }, 300); // 等待面板动画完成
+            } else {
+                console.error('无法找到案例AI面板元素');
+            }
+        };
+        
+        // 切换AI模式 - 必须在全局作用域定义
+        window.switchAiMode = function(mode) {
+            console.log('切换AI模式:', mode);
+
+            // 更新按钮状态
+            document.querySelectorAll('.ai-mode-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`[data-mode="${mode}"]`)?.classList.add('active');
+
+            const contentArea = document.getElementById('ai-content-area');
+            const inputArea = document.getElementById('ai-input-area');
+
+            console.log('获取元素状态:', {
+                contentArea: !!contentArea,
+                inputArea: !!inputArea,
+                currentCaseId: currentCaseId
+            });
+
+            if (!contentArea) {
+                console.error('找不到 ai-content-area 元素');
+                alert('错误：找不到内容显示区域！');
+                return;
+            }
+            
+            if (!inputArea) {
+                console.error('找不到 ai-input-area 元素');
+                alert('错误：找不到输入控制区域！');
+                return;
+            }
+            
+            console.log('所需元素均已找到');
+
+            const caseItem = window.cases[currentCaseId];
+            if (!caseItem) return;
+
+            switch(mode) {
+                case 'chat':
+                    // AI对话模式
+                    contentArea.innerHTML = `
+                        <div class="chat-message ai-message">
+                            <p>你好！我是 AI 助手，已经阅读了 <strong>${caseItem.title}</strong> 这个案例。</p>
+                            <ul>
+                                <li>解读其中的数学概念与模型</li>
+                                <li>分析课堂与产业的衔接要点</li>
+                                <li>梳理知识点之间的关联</li>
+                            </ul>
+                            <p>直接向我提问即可，我会尽量用浅显易懂的方式说明。</p>
+                        </div>
+                    `;
+                    inputArea.innerHTML = `
+                        <div class="chat-input-row">
+                            <input type="text" id="case-chat-input" placeholder="输入您的问题..." autocomplete="off">
+                            <button id="case-chat-send-btn" class="chat-send-btn">发送</button>
+                        </div>
+                    `;
+
+                    // 绑定发送事件
+                    const chatInput = document.getElementById('case-chat-input');
+                    const chatSendBtn = document.getElementById('case-chat-send-btn');
+
+                    if (chatSendBtn) {
+                        chatSendBtn.addEventListener('click', () => window.sendCaseChat());
+                    }
+                    if (chatInput) {
+                        chatInput.addEventListener('keypress', (e) => {
+                            if (e.key === 'Enter') window.sendCaseChat();
+                        });
+                    }
+                    break;
+
+                case 'image':
+                    // 文生图模式
+                    console.log('正在设置文生图界面');
+                    contentArea.innerHTML = `
+                        <div class="media-stack">
+                            <div class="media-square">
+                                <div class="media-stage" id="case-image-result">
+                                    <span class="media-placeholder">等待生成图像，描述越详细越贴近预期效果。</span>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="media-caption" id="case-image-caption"></p>
+                    `;
+                    inputArea.innerHTML = `
+                        <div class="chat-input-row media-input-row">
+                            <textarea id="case-image-prompt" placeholder="描述您想生成的图像（例如：现代化数控机床正在加工金属零件，冷色调，柔和光线）">${caseItem.title}</textarea>
+                            <button id="case-generate-image-btn" class="chat-send-btn">生成图像</button>
+                        </div>
+                    `;
+                    console.log('文生图界面已渲染，inputArea.innerHTML长度:', inputArea.innerHTML.length);
+
+                    // 绑定生成事件（延迟以确保DOM已更新）
+                    setTimeout(() => {
+                        const generateImageBtn = document.getElementById('case-generate-image-btn');
+                        if (generateImageBtn) {
+                            generateImageBtn.addEventListener('click', () => window.generateCaseImage());
+                            console.log('文生图按钮事件已绑定');
+                        } else {
+                            console.error('未找到文生图按钮');
+                        }
+                    }, 100);
+                    break;
+
+                case 'text-video':
+                    // 文生视频模式（t2v）
+                    console.log('正在设置文生视频界面');
+                    contentArea.innerHTML = `
+                        <div class="media-stack">
+                            <div class="media-square">
+                                <div class="media-stage" id="case-text-video-result">
+                                    <span class="media-placeholder">等待生成视频，可描述镜头、节奏与环境氛围。</span>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="media-caption" id="case-text-video-caption"></p>
+                    `;
+                    inputArea.innerHTML = `
+                        <div class="chat-input-row media-input-row">
+                            <textarea id="case-text-video-prompt" placeholder="描述您想生成的视频场景（例如：镜头缓慢推进，展示数控机床加工零件，工厂灯光柔和）">${caseItem.title}</textarea>
+                            <button id="case-generate-text-video-btn" class="chat-send-btn">生成视频</button>
+                        </div>
+                    `;
+                    console.log('文生视频界面已渲染，inputArea.innerHTML长度:', inputArea.innerHTML.length);
+
+                    // 绑定生成事件（延迟以确保DOM已更新）
+                    setTimeout(() => {
+                        const generateTextVideoBtn = document.getElementById('case-generate-text-video-btn');
+                        if (generateTextVideoBtn) {
+                            generateTextVideoBtn.addEventListener('click', () => window.generateCaseTextVideo());
+                            console.log('文生视频按钮事件已绑定');
+                        } else {
+                            console.error('未找到文生视频按钮');
+                        }
+                    }, 100);
+                    break;
+
+                case 'image-video':
+                    // 图生视频模式（i2v）
+                    console.log('正在设置图生视频界面');
+                    contentArea.innerHTML = `
+                        <div class="media-stack">
+                            <div class="media-square">
+                                <div class="media-stage" id="case-image-video-preview">
+                                    <span class="media-placeholder">上传一张图片，让它动起来。</span>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="media-caption" id="case-image-video-caption"></p>
+                    `;
+                    inputArea.innerHTML = `
+                        <input type="file" id="case-image-video-input" accept="image/*" style="display: none;">
+                        <div class="chat-input-row media-input-row">
+                            <button id="case-upload-image-video-btn" class="media-upload-btn">上传图片</button>
+                            <textarea id="case-image-video-prompt" placeholder="可选：描述希望出现的运动（例如：镜头轻微摇摆，突出设备结构）"></textarea>
+                            <button id="case-generate-image-video-btn" class="chat-send-btn" disabled>生成视频</button>
+                        </div>
+                    `;
+                    console.log('图生视频界面已渲染，inputArea.innerHTML长度:', inputArea.innerHTML.length);
+
+                    // 绑定上传和生成事件（延迟以确保DOM已更新）
+                    setTimeout(() => {
+                        window.setupImageVideoGeneration();
+                        console.log('图生视频功能事件已绑定');
+                    }, 100);
+                    break;
+            }
+        };
+        
+        // ========== 案例AI助手功能函数 - 必须在全局作用域定义 ==========
+        
+        // 发送案例对话
+        window.sendCaseChat = async function() {
+            const chatInput = document.getElementById('case-chat-input');
+            const contentArea = document.getElementById('ai-content-area');
+
+            if (!chatInput || !contentArea) return;
+
+            const question = chatInput.value.trim();
+            if (!question) return;
+
+            // 添加用户消息
+            const userMsg = document.createElement('div');
+            userMsg.className = 'chat-message user-message';
+            userMsg.textContent = question;
+            contentArea.appendChild(userMsg);
+
+            chatInput.value = '';
+
+            // 添加加载提示
+            const loadingMsg = document.createElement('div');
+            loadingMsg.className = 'chat-message ai-message';
+            loadingMsg.innerHTML = '<div class="typing-indicator"><span></span><span></span><span></span></div>';
+            contentArea.appendChild(loadingMsg);
+            contentArea.scrollTop = contentArea.scrollHeight;
+
+            try {
+                // 构建包含案例上下文的消息
+                const messages = [
+                    {
+                        role: 'system',
+                        content: `你是一个专业的数学教育AI助手。当前案例内容：\n${currentCaseContent}\n\n请基于这个案例回答学生的问题，用简洁易懂的语言解释数学概念和产业应用。`
+                    },
+                    {
+                        role: 'user',
+                        content: question
+                    }
+                ];
+
+                const response = await fetch(`${VOLCENGINE_BASE_URL}/chat/completions`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        model: LLM_MODEL,
+                        messages: messages,
+                        stream: false,
+                        temperature: 0.7,
+                        max_tokens: 1000
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API调用失败: ${response.status}`);
+                }
+
+                const data = await response.json();
+                const answer = data.choices[0].message.content;
+
+                // 移除加载提示
+                loadingMsg.remove();
+
+                // 添加AI回复
+                const aiMsg = document.createElement('div');
+                aiMsg.className = 'chat-message ai-message';
+                aiMsg.textContent = answer;
+                contentArea.appendChild(aiMsg);
+                contentArea.scrollTop = contentArea.scrollHeight;
+
+            } catch (error) {
+                console.error('对话失败:', error);
+                loadingMsg.innerHTML = `<p style="color: #ef4444;">出现错误：${error.message}</p>`;
+            }
+        };
+        
+        // 视频任务轮询函数
+        window.pollVideoTask = async function(taskId, resultArea, captionEl) {
+            let attempts = 0;
+            const maxAttempts = 24;
+
+            const checkStatus = async () => {
+                if (attempts >= maxAttempts) {
+                    resultArea.innerHTML = '<span class="media-placeholder" style="color: #b45309;">视频生成超时，请稍后在控制台查看。</span>';
+                    if (captionEl) {
+                        captionEl.innerHTML = `任务 ID: ${taskId}，已停止轮询，可稍后通过火山引擎控制台查询结果。`;
+                    }
+                    return;
+                }
+
+                attempts++;
+
+                // 使用正确的查询路径（veFaaS会自动添加/api/v3前缀）
+                const queryResponse = await fetch(`${VOLCENGINE_BASE_URL}/contents/generations/tasks/${taskId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                        // Authorization 由 veFaaS 函数自动添加
+                    }
+                });
+
+                if (!queryResponse.ok) {
+                    console.error(`第${attempts}次查询失败:`, queryResponse.status);
+                    await new Promise(resolve => setTimeout(resolve, 5000));
+                    await checkStatus();
+                    return;
+                }
+
+                const queryData = await queryResponse.json();
+                console.log(`第${attempts}次查询结果:`, queryData);
+
+                // 适配火山引擎实际返回的格式：content.video_url
+                if (queryData.status === 'succeeded' && queryData.content && queryData.content.video_url) {
+                    const videoUrl = queryData.content.video_url;
+                    resultArea.innerHTML = `
+                        <video controls playsinline loop>
+                            <source src="${videoUrl}" type="video/mp4">
+                        </video>
+                    `;
+                    if (captionEl) {
+                        captionEl.innerHTML = `视频生成完成，可 <a href="${videoUrl}" download style="color: #2563eb; font-weight: 600;">下载保存</a> 或直接播放展示。`;
+                    }
+                    return;
+                } else if (queryData.status === 'failed') {
+                    throw new Error('视频生成失败');
+                }
+
+                resultArea.innerHTML = '<span class="media-placeholder">视频生成中，请耐心等待...</span>';
+                if (captionEl) {
+                    captionEl.innerHTML = `任务 ID: ${taskId}，已查询 ${attempts} 次，状态：${queryData.status || '处理中'}。`;
+                }
+
+                await new Promise(resolve => setTimeout(resolve, 5000));
+                await checkStatus();
+            };
+
+            await checkStatus();
+        };
+        
+        // 生成案例图像
+        window.generateCaseImage = async function() {
+            const promptInput = document.getElementById('case-image-prompt');
+            const resultArea = document.getElementById('case-image-result');
+            const caption = document.getElementById('case-image-caption');
+            const generateBtn = document.getElementById('case-generate-image-btn');
+
+            if (!promptInput || !resultArea || !generateBtn) return;
+
+            const prompt = promptInput.value.trim();
+            if (!prompt) {
+                alert('请输入图像描述');
+                return;
+            }
+
+            generateBtn.disabled = true;
+            generateBtn.textContent = '生成中...';
+            resultArea.innerHTML = '<span class="media-placeholder">正在生成图像，请稍候...</span>';
+            if (caption) {
+                caption.innerHTML = 'AI 正在生成图像，请稍候。';
+            }
+
+            try {
+                const response = await fetch(`${VOLCENGINE_BASE_URL}/images/generations`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        model: IMAGE_MODEL,
+                        prompt: prompt,
+                        size: '1024x1024',
+                        n: 1
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`生成失败: ${response.status}`);
+                }
+
+                const data = await response.json();
+                if (data.data && data.data[0] && data.data[0].url) {
+                    const imageUrl = data.data[0].url;
+                    resultArea.innerHTML = `
+                        <img src="${imageUrl}" alt="生成的图像">
+                    `;
+                    if (caption) {
+                        caption.innerHTML = `图像生成完成，可 <a href="${imageUrl}" target="_blank" style="color: #2563eb; font-weight: 600;">下载高清版本</a> 或直接用于案例展示。`;
+                    }
+                } else {
+                    throw new Error('未返回图像URL');
+                }
+            } catch (error) {
+                console.error('图像生成失败:', error);
+                resultArea.innerHTML = `<span class="media-placeholder" style="color: #ef4444;">生成失败：${error.message}</span>`;
+                if (caption) {
+                    caption.innerHTML = '请检查描述是否合规或稍后重试。';
+                }
+            } finally {
+                generateBtn.disabled = false;
+                generateBtn.textContent = '生成图像';
+            }
+        };
+        
+        // 生成文生视频（t2v）
+        window.generateCaseTextVideo = async function() {
+            const promptInput = document.getElementById('case-text-video-prompt');
+            const resultArea = document.getElementById('case-text-video-result');
+            const caption = document.getElementById('case-text-video-caption');
+            const generateBtn = document.getElementById('case-generate-text-video-btn');
+
+            if (!promptInput || !resultArea || !generateBtn) return;
+
+            const prompt = promptInput.value.trim();
+            if (!prompt) {
+                alert('请输入视频描述');
+                return;
+            }
+
+            generateBtn.disabled = true;
+            generateBtn.textContent = '生成中...';
+            resultArea.innerHTML = '<span class="media-placeholder">正在提交视频生成任务...</span>';
+            if (caption) {
+                caption.innerHTML = 'AI 正在生成视频，请耐心等待。';
+            }
+
+            try {
+                // 使用正确的路径（veFaaS会自动添加/api/v3前缀）
+                const response = await fetch(`${VOLCENGINE_BASE_URL}/contents/generations/tasks`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        model: TEXT_VIDEO_MODEL,
+                        content: [
+                            {
+                                type: 'text',
+                                text: `${prompt} --resolution 1080x1080 --duration 5 --camera fixed false --watermark false`
+                            }
+                        ]
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('🔴 API返回错误:', errorText);
+                    try {
+                        const errorJson = JSON.parse(errorText);
+                        throw new Error(`创建任务失败 (${response.status}): ${errorJson.error?.message || errorJson.message || errorText}`);
+                    } catch {
+                        throw new Error(`创建任务失败 (${response.status}): ${errorText}`);
+                    }
+                }
+
+                const data = await response.json();
+                console.log('视频任务创建成功:', data);
+                if (!data.id) {
+                    throw new Error('未返回任务ID');
+                }
+
+                const taskId = data.id;
+                resultArea.innerHTML = '<span class="media-placeholder">视频生成任务已提交，正在渲染...</span>';
+                if (caption) {
+                    caption.innerHTML = `任务 ID: ${taskId}，系统将持续轮询结果。`;
+                }
+
+                // 轮询查询结果
+                await window.pollVideoTask(taskId, resultArea, caption);
+
+            } catch (error) {
+                console.error('文生视频失败:', error);
+                resultArea.innerHTML = `<span class="media-placeholder" style="color: #ef4444;">生成失败：${error.message}</span>`;
+                if (caption) {
+                    caption.innerHTML = '请调整描述或稍后重试。';
+                }
+            } finally {
+                generateBtn.disabled = false;
+                generateBtn.textContent = '生成视频';
+            }
+        };
+        
+        // 设置图生视频功能（i2v）
+        window.setupImageVideoGeneration = function() {
+            const uploadBtn = document.getElementById('case-upload-image-video-btn');
+            const imageInput = document.getElementById('case-image-video-input');
+            const previewArea = document.getElementById('case-image-video-preview');
+            const caption = document.getElementById('case-image-video-caption');
+            const generateBtn = document.getElementById('case-generate-image-video-btn');
+            const promptInput = document.getElementById('case-image-video-prompt');
+
+            let uploadedImageUrl = null;
+
+            if (uploadBtn && imageInput) {
+                uploadBtn.addEventListener('click', () => {
+                    imageInput.click();
+                });
+
+                imageInput.addEventListener('change', (e) => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        uploadedImageUrl = event.target.result;
+                        previewArea.innerHTML = `
+                            <img src="${uploadedImageUrl}" alt="上传的图片">
+                        `;
+                        generateBtn.disabled = false;
+                        if (caption) {
+                            caption.innerHTML = '图片已就绪，可描述希望呈现的动作后再生成视频。';
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+
+            if (generateBtn) {
+                generateBtn.addEventListener('click', async () => {
+                    if (!uploadedImageUrl) {
+                        alert('请先上传图片');
+                        return;
+                    }
+
+                    const prompt = promptInput.value.trim() || '让图片动起来';
+
+                    generateBtn.disabled = true;
+                    generateBtn.textContent = '生成中...';
+                    previewArea.innerHTML = '<span class="media-placeholder">正在提交视频生成任务...</span>';
+                    if (caption) {
+                        caption.innerHTML = '系统正在根据图片生成视频，请耐心等待。';
+                    }
+
+                    try {
+                        // 使用正确的路径（图生视频，veFaaS会自动添加/api/v3前缀）
+                        const response = await fetch(`${VOLCENGINE_BASE_URL}/contents/generations/tasks`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                model: IMAGE_VIDEO_MODEL,
+                                content: [
+                                    {
+                                        type: 'text',
+                                        text: `${prompt} --resolution 1080x1080 --duration 5 --camera fixed false --watermark false`
+                                    },
+                                    {
+                                        type: 'image_url',
+                                        image_url: {
+                                            url: uploadedImageUrl
+                                        }
+                                    }
+                                ]
+                            })
+                        });
+
+                        if (!response.ok) {
+                            throw new Error(`创建任务失败: ${response.status}`);
+                        }
+
+                        const data = await response.json();
+                        if (!data.id) {
+                            throw new Error('未返回任务ID');
+                        }
+
+                        const taskId = data.id;
+                        previewArea.innerHTML = '<span class="media-placeholder">视频生成任务已提交，正在渲染...</span>';
+                        if (caption) {
+                            caption.innerHTML = `任务 ID: ${taskId}，系统将持续轮询结果。`;
+                        }
+
+                        // 轮询查询结果
+                        await window.pollVideoTask(taskId, previewArea, caption);
+
+                    } catch (error) {
+                        console.error('图生视频失败:', error);
+                        previewArea.innerHTML = `<span class="media-placeholder" style="color: #ef4444;">生成失败：${error.message}</span>`;
+                        if (caption) {
+                            caption.innerHTML = '请尝试更换图片或调整描述后重试。';
+                        }
+                    } finally {
+                        generateBtn.disabled = false;
+                        generateBtn.textContent = '生成视频';
+                    }
+                });
+            }
+        };
         
         // 初始化聊天界面
         document.addEventListener('DOMContentLoaded', () => {
@@ -1965,8 +3533,8 @@ function runPythonCode(codeId, outputId) {
             let lastSubmitted = null;
             let lastSubmittedId = null;
 
-            // 直接渲染案例列表
-            renderCases(cases.filter(c => c.type === 'political'));
+            // 直接渲染所有案例
+            renderCases(cases);
             updateCounter();
             
             // 获取所有过滤按钮
@@ -2035,7 +3603,7 @@ function runPythonCode(codeId, outputId) {
             
             // 添加全局点击事件监听，处理案例分析按钮点击
             document.addEventListener('click', function(e) {
-                // 查找点击的是否是案例分析按钮
+                // 查找点击的是否是案例分析按钮或其子元素
                 const aiBtn = e.target.closest('.case-ai-btn');
                 if (aiBtn) {
                     e.preventDefault();
@@ -2043,71 +3611,16 @@ function runPythonCode(codeId, outputId) {
                     
                     // 获取案例索引
                     const index = parseInt(aiBtn.dataset.index);
+                    console.log('点击了AI按钮，索引:', index, 'target:', e.target, 'button:', aiBtn);
+                    
                     if (!isNaN(index)) {
                         console.log('全局监听：点击了案例分析按钮，索引:', index);
                         openAiAssistantForCase(index);
+                    } else {
+                        console.error('无效的索引值:', aiBtn.dataset.index);
                     }
                 }
-            });
-        });
-
-        // 在页面加载后再次确保AI助手相关的事件绑定
-        window.addEventListener('load', function() {
-            // AI助手相关初始化
-            const aiAssistantBtn = document.getElementById('ai-assistant-btn');
-            const chatContainer = document.getElementById('chat-container');
-            const closeChat = document.getElementById('close-chat');
-            const chatInput = document.getElementById('chat-input');
-            const sendBtn = document.getElementById('send-btn');
-            
-            if (!aiAssistantBtn || !chatContainer || !closeChat || !chatInput || !sendBtn) {
-                console.error('无法获取AI助手相关元素');
-                return;
-            }
-            
-            // 打开聊天界面
-            aiAssistantBtn.addEventListener('click', function() {
-                console.log('切换聊天窗口显示状态');
-                // 检查当前状态，如果已经打开则关闭，如果关闭则打开
-                if (chatContainer.classList.contains('active')) {
-                    // 如果已经打开，则关闭
-                    chatContainer.classList.remove('active');
-                } else {
-                    // 如果关闭，则打开
-                    chatContainer.classList.add('active');
-                    chatInput.focus();
-                }
-            });
-            
-            // 关闭聊天界面 - 使用具体函数而不是箭头函数
-            closeChat.addEventListener('click', function() {
-                console.log('关闭聊天窗口');
-                chatContainer.classList.remove('active');
-            });
-            
-            // 监听输入框变化
-            chatInput.addEventListener('input', function() {
-                sendBtn.disabled = chatInput.value.trim() === '' || isProcessing;
-            });
-            
-            // 确保聊天框输入为空时发送按钮禁用
-            sendBtn.disabled = chatInput.value.trim() === '' || isProcessing;
-            
-            // 发送消息 - 使用具体函数而不是引用已有函数
-            sendBtn.addEventListener('click', function() {
-                console.log('发送消息');
-                sendMessage();
-            });
-            
-            // 回车发送消息
-            chatInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter' && !sendBtn.disabled) {
-                    console.log('回车发送消息');
-                    sendMessage();
-                }
-            });
-            
-            console.log('AI助手初始化完成');
+            }, true); // 使用捕获阶段
         });
 
         // 定义不同类型的关联领域
@@ -2158,7 +3671,9 @@ function runPythonCode(codeId, outputId) {
             updateDomainOptions('industry');
         }
 
-        document.getElementById('case-form').addEventListener('submit', async function(e) {
+        const caseForm = document.getElementById('case-form');
+        if (caseForm) {
+            caseForm.addEventListener('submit', async function(e) {
             e.preventDefault();
             
             const formFeedback = document.getElementById('form-feedback');
@@ -2258,9 +3773,9 @@ function runPythonCode(codeId, outputId) {
                         window.cases[caseIndex].id = result.data.id;
                     }
                     
-                    showFeedback('✓ 案例已成功提交: ' + result.data.message, 'green');
+                    showFeedback('案例已成功提交: ' + result.data.message, 'green');
                 } else {
-                    showFeedback('✓ 案例已提交（本地显示，服务器返回异常）', 'green');
+                    showFeedback('案例已提交（本地显示，服务器返回异常）', 'green');
                 }
                 this.reset();
             } catch (error) {
@@ -2268,21 +3783,22 @@ function runPythonCode(codeId, outputId) {
                 
                 // 显示不同类型的错误提示
                 if (error.message.includes('超时')) {
-                    showFeedback('✓ 案例已提交', 'green');
+                    showFeedback('案例已提交', 'green');
                 } else if (error.code === 'unavailable' || error.code === 'network-request-failed') {
-                    showFeedback('✓ 案例已提交', 'green');
+                    showFeedback('案例已提交', 'green');
                 } else if (error.message.includes('Firebase服务不可用')) {
-                    showFeedback('✓ 案例已提交', 'green');
+                    showFeedback('案例已提交', 'green');
                 } else if (error.message.includes('Cloud Functions未初始化')) {
-                    showFeedback('✓ 案例已提交', 'green');
+                    showFeedback('案例已提交', 'green');
                 } else {
-                    showFeedback('✓ 案例已提交', 'green');
+                    showFeedback('案例已提交', 'green');
                 }
                 
                 // 仍然重置表单
                 this.reset();   
             }
         });
+        }
 
         // 渲染案例列表
         function renderCases(casesToRender) {
@@ -2427,12 +3943,12 @@ function runPythonCode(codeId, outputId) {
                             <div class="mb-6">
                                 <div class="flex items-center justify-between mb-2">
                                     <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100">${caseItem.title}</h2>
-                                    <button class="case-ai-btn" data-index="${realIndex}">
+                                    <button class="case-ai-btn" data-index="${realIndex}" onclick="openAiAssistantForCase(${realIndex}); return false;">
                                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
                                                 d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
                                         </svg>
-                                        AI案例分析
+                                        火山引擎AI
                                     </button>
                                 </div>
                                 <div class="flex items-center gap-2 mb-4">
@@ -2612,57 +4128,20 @@ function runPythonCode(codeId, outputId) {
             }
         }, 100);
     }
-        
-        // 为特定案例打开AI助手
-        function openAiAssistantForCase(index) {
-            console.log('尝试打开案例分析助手，索引:', index);
-            
-            // 确保window.cases存在
-            if (!window.cases) {
-                console.error('window.cases不存在');
-                return;
-            }
-            
-            const caseItem = window.cases[index];
-            if (!caseItem) {
-                console.error('无法找到索引为', index, '的案例');
-                return;
-            }
-            
-            // 获取聊天窗口元素
+
+        // 旧的聊天窗口初始化（保留兼容性）
+        function initOldChatWindow() {
             const chatContainer = document.getElementById('chat-container');
             const chatMessages = document.getElementById('chat-messages');
-            
-            if (!chatContainer || !chatMessages) {
-                console.error('无法获取聊天窗口元素');
-                return;
-            }
-            
-            // 检查当前状态 - 如果聊天窗口已打开且是同一个案例，则关闭聊天窗口
-            if (chatContainer.classList.contains('active') && currentCaseId === index) {
-                console.log('已经是当前案例，关闭聊天窗口');
-                chatContainer.classList.remove('active');
-                return;
-            }
-            
-            console.log('已找到案例:', caseItem.title);
-            currentCaseId = index;
-            
-            // 构建案例内容文本，去除HTML标签
-            currentCaseContent = `标题：${caseItem.title}\n内容：${stripHtml(caseItem.content)}\n知识点：${caseItem.knowledgePoints.join(', ')}`;
-            // 缓存当前案例内容
-            casesContentCache[index] = {
-                title: caseItem.title,
-                content: currentCaseContent
-            };
-            console.log(`已设置案例[${index}]上下文:`, caseItem.title);
-            
-            // 检查是否设置了API密钥
-            const apiKeySet = window.aiConfig && window.aiConfig.apiKey;
-            
+
+            if (!chatContainer || !chatMessages) return;
+
+            const caseItem = window.cases[currentCaseId];
+            if (!caseItem) return;
+
             // 重置聊天界面，添加初始上下文消息
             chatMessages.innerHTML = `
-                <div class="message ai-message">
+                <div class="chat-message ai-message">
                     你好！我是火山引擎 AI 案例分析助手，已经阅读了"${caseItem.title}"这个案例。请问有什么可以帮助您分析的？
                 </div>
             `;
@@ -2670,7 +4149,7 @@ function runPythonCode(codeId, outputId) {
             // 如果没有设置API密钥，添加提示信息
             if (!apiKeySet) {
                 chatMessages.innerHTML += `
-                    <div class="message ai-message" style="background-color: #fff7e6; border-left: 4px solid #ffab00;">
+                    <div class="chat-message ai-message" style="background-color: #fff7e6; border-left: 4px solid #ffab00;">
                         <strong>提示：</strong> 您当前使用的是预设回复模式。要启用实时AI功能，请配置火山引擎 API Key。
                     </div>
                 `;
@@ -2688,232 +4167,13 @@ function runPythonCode(codeId, outputId) {
             }
         }
         
-        // 发送消息到AI
-        async function sendMessage() {
-            console.log('开始发送消息...');
-            const chatInput = document.getElementById('chat-input');
-            const chatMessages = document.getElementById('chat-messages');
-            const sendBtn = document.getElementById('send-btn');
-            
-            if (!chatInput || !chatMessages || !sendBtn) {
-                console.error('无法获取聊天元素');
-                return;
-            }
-            
-            // 获取用户消息
-            const userMessage = chatInput.value.trim();
-            console.log('用户消息:', userMessage);
-            
-            if (userMessage === '') {
-                console.log('消息为空，不发送');
-                return;
-            }
-            
-            if (isProcessing) {
-                console.log('正在处理上一条消息，不发送');
-                return;
-            }
-            
-            // 禁用发送按钮并清空输入框
-            isProcessing = true;
-            sendBtn.disabled = true;
-            chatInput.value = '';
-            
-            // 添加用户消息到聊天界面
-            chatMessages.innerHTML += `
-                <div class="message user-message">${escapeHtml(userMessage)}</div>
-            `;
-            
-            // 滚动到底部
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-            console.log('已添加用户消息到界面');
-            
-            // 添加"正在输入"指示器
-            chatMessages.innerHTML += `
-                <div class="typing-indicator" id="typing-indicator">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </div>
-            `;
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-            console.log('已添加输入指示器');
-            
-            try {
-                // 获取当前案例内容
-                const currentCase = currentCaseId !== null && casesContentCache[currentCaseId] 
-                    ? casesContentCache[currentCaseId] 
-                    : null;
-                
-                console.log('准备调用火山引擎 API，当前案例:', currentCase ? currentCase.title : '未选择案例');
-                
-                // 构建发送到API的消息
-                const messages = [
-                    {
-                        role: "system",
-                        content: "你是一位专业的职业教育案例分析助手，擅长解读教学案例，提供思政育人分析和教学建议。请针对用户提出的问题，根据案例内容给出专业、详细的分析建议。"
-                    }
-                ];
-                
-                // 如果有当前案例上下文，添加到消息中
-                if (currentCase && currentCase.content) {
-                    console.log('添加案例上下文到消息:', currentCase.title);
-                    messages.push({
-                        role: "system",
-                        content: `以下是当前正在分析的教学案例信息，请基于此回答问题：\n${currentCase.content}`
-                    });
-                }
-                
-                // 添加用户消息
-                messages.push({
-                    role: "user",
-                    content: userMessage
-                });
 
-                // 检查是否配置了火山引擎 API
-                if (!window.VolcengineAI || !window.volcengineConfig || !window.volcengineConfig.apiKey) {
-                    throw new Error("未配置火山引擎 API");
-                }
-
-                try {
-                    let aiResponse;
-
-                    console.log('正在调用火山引擎 API...');
-
-                    // 构建提示词
-                    let prompt = userMessage;
-                    if (currentCase && currentCase.content) {
-                        prompt = `基于以下教学案例回答问题：\n\n案例：${currentCase.title}\n内容：${currentCase.content.substring(0, 500)}...\n\n问题：${userMessage}`;
-                    }
-
-                    aiResponse = await window.VolcengineAI.generateText(prompt, {
-                        temperature: 0.7,
-                        maxTokens: 2000
-                    });
-                    console.log('火山引擎 API 调用成功');
-
-                    if (!aiResponse) {
-                        throw new Error('AI 未返回内容');
-                    }
-
-                    // 移除"正在输入"指示器
-                    const typingIndicator = document.getElementById('typing-indicator');
-                    if (typingIndicator) {
-                        typingIndicator.remove();
-                    }
-
-                    // 添加AI回复
-                    chatMessages.innerHTML += `
-                        <div class="message ai-message">${formatAiResponse(aiResponse)}</div>
-                    `;
-
-                    // 滚动到底部
-                    chatMessages.scrollTop = chatMessages.scrollHeight;
-                    console.log('已添加AI回复');
-                } catch (apiError) {
-                    console.error("API调用错误:", apiError);
-                    
-                    // 如果API调用失败，则使用备用的本地回复
-                    console.log('API调用失败，使用本地备用回复');
-                    const typingIndicator = document.getElementById('typing-indicator');
-                    if (typingIndicator) {
-                        typingIndicator.remove();
-                    }
-                    
-                    let aiResponse;
-                    if (currentCase && currentCase.content) {
-                        // 仅在API请求失败时才使用本地模拟响应
-                        aiResponse = generateAiResponse(userMessage, currentCase.title);
-                    } else {
-                        aiResponse = "我可以帮您分析案例中的教学要点、思政元素以及教学建议。请先选择一个具体的案例，这样我能提供更有针对性的分析。";
-                    }
-                    
-                    // 添加备用AI回复
-                    chatMessages.innerHTML += `
-                        <div class="message ai-message">${formatAiResponse(aiResponse)}</div>
-                        <div class="message ai-message" style="font-size: 12px; color: #888;">(备注: 当前使用的是离线备用回复，因为API连接失败: ${apiError.message})</div>
-                    `;
-                    
-                    // 滚动到底部
-                    chatMessages.scrollTop = chatMessages.scrollHeight;
-                }
-                
-                // 恢复发送按钮
-                isProcessing = false;
-                sendBtn.disabled = chatInput.value.trim() === '';
-                
-            } catch (error) {
-                console.error("AI助手错误:", error);
-                
-                // 移除"正在输入"指示器
-                const typingIndicator = document.getElementById('typing-indicator');
-                if (typingIndicator) {
-                    typingIndicator.remove();
-                }
-                
-                // 显示错误消息
-                chatMessages.innerHTML += `
-                    <div class="message ai-message">抱歉，处理您的请求时出现了问题: ${error.message}。请稍后再试。</div>
-                `;
-                
-                // 滚动到底部
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-                
-                // 恢复发送按钮
-                isProcessing = false;
-                sendBtn.disabled = chatInput.value.trim() === '';
-            }
-        }
-        
-        // 生成AI回复（模拟）- 仅作为API调用失败时的备用方案
-        function generateAiResponse(userMessage, caseTitle) {
-            const lowerCaseMsg = userMessage.toLowerCase();
-            let response = "";
-            
-            // 基于用户消息内容生成回复
-            if (lowerCaseMsg.includes("思政") || lowerCaseMsg.includes("思想政治")) {
-                response = `[演示回复] 关于"${caseTitle}"案例的思政教育分析：\n\n1. **家国情怀**：通过数学应用展示科技发展与国家建设的关系\n2. **工匠精神**：强调精益求精的专业态度和追求卓越的品质\n3. **科学精神**：培养学生的批判性思维和求真务实的科学态度\n\n建议在教学中可以引导学生思考数学知识如何服务于国家发展和社会进步，增强学生的专业自信和责任感。`;
-            } else if (lowerCaseMsg.includes("教学") || lowerCaseMsg.includes("课堂")) {
-                response = `[演示回复] 针对"${caseTitle}"案例的教学设计建议：\n\n1. **课前准备**：可以让学生预先了解相关行业背景知识\n2. **课堂实施**：采用小组讨论和案例分析相结合的方式\n3. **评价方式**：结合过程性评价和成果展示\n\n教学重点应放在知识应用能力和分析解决问题能力的培养上，注重理论与实践的结合。`;
-            } else if (lowerCaseMsg.includes("难点") || lowerCaseMsg.includes("挑战")) {
-                response = `[演示回复] "${caseTitle}"案例实施中可能遇到的难点和应对策略：\n\n1. **知识基础差异**：可以通过分层教学和同伴互助解决\n2. **实践操作困难**：提供详细的操作指导和演示视频\n3. **思政元素融入不自然**：找准切入点，避免生硬说教\n\n建议在教学过程中灵活调整，关注学生的实际反馈和学习状态。`;
-            } else if (lowerCaseMsg.includes("知识点") || lowerCaseMsg.includes("重点")) {
-                response = `[演示回复] "${caseTitle}"案例中的核心知识点包括：\n\n1. **数学模型的建立**：将实际问题抽象为数学模型\n2. **数据分析方法**：包括统计分析和预测模型\n3. **算法优化思路**：如何提高计算效率和精度\n\n这些知识点在实际工作中具有广泛应用，建议通过实例演示帮助学生理解抽象概念。`;
-            } else if (lowerCaseMsg.includes("产业") || lowerCaseMsg.includes("行业") || lowerCaseMsg.includes("企业")) {
-                response = `[演示回复] "${caseTitle}"案例与产业发展的关联分析：\n\n1. **行业需求**：当前相关行业对此类技能人才的迫切需求\n2. **岗位要求**：岗位所需的具体能力和素质要求\n3. **发展趋势**：行业技术发展方向和人才需求变化\n\n在教学中可以邀请企业专家参与，增强学生对产业实际需求的认识。`;
-            } else {
-                response = `[演示回复] "${caseTitle}"是产教融合思政育人的典型范例。从教学设计角度，建议注重以下几点：\n\n1. **案例导入**：用真实的产业场景引发学生兴趣\n2. **知识解析**：清晰讲解案例中涉及的数学原理和应用方法\n3. **实践应用**：设计小型实践项目，让学生亲自动手解决问题\n4. **思政融入**：在适当环节渗透工匠精神、创新意识等价值观\n\n案例分析不仅要关注知识点的掌握，还要重视学生解决问题能力和职业素养的培养。`;
-            }
-            
-            response += "\n\n---\n*提示: 此为预设的演示回复。配置火山引擎 API Key 可获得更具针对性的实时AI回复。*";
-            
-            return response;
-        }
-        
-        // 工具函数：HTML转义
-        function escapeHtml(unsafe) {
-            return unsafe
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;")
-                .replace(/'/g, "&#039;");
-        }
         
         // 工具函数：从HTML中提取纯文本
         function stripHtml(html) {
             const temp = document.createElement('div');
             temp.innerHTML = html;
             return temp.textContent || temp.innerText || '';
-        }
-        
-        // 工具函数：格式化AI回复（支持简单的markdown语法）
-        function formatAiResponse(text) {
-            return text
-                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // 粗体
-                .replace(/\*(.*?)\*/g, '<em>$1</em>') // 斜体
-                .replace(/\n\n/g, '<br><br>') // 段落
-                .replace(/\n/g, '<br>'); // 换行
         }
         
         // 更新案例计数
@@ -3000,10 +4260,72 @@ function runPythonCode(codeId, outputId) {
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // 留言板模态框控制
-            const messageBoardBtn = document.getElementById('message-board-btn');
+            const messageSidebar = document.querySelector('.message-sidebar');
+            const messageComposeBtn = document.getElementById('message-compose-btn');
+            const messageRecentBtn = document.getElementById('message-recent-btn');
             const messageBoardModal = document.getElementById('message-board-modal');
             const modalOverlay = document.getElementById('modal-overlay');
-            const closeMessageBoard = document.getElementById('close-message-board');
+            const messageBoardNavBtns = document.querySelectorAll('.message-board-nav-btn');
+            const messageBoardSections = document.querySelectorAll('.message-board-section');
+            const messageModalClosers = document.querySelectorAll('[data-close-message-modal]');
+
+            function setActiveMessageBoardSection(targetId) {
+                messageBoardNavBtns.forEach(btn => {
+                    const isActive = btn.dataset.target === targetId;
+                    btn.classList.toggle('active', isActive);
+                });
+
+                messageBoardSections.forEach(section => {
+                    const isActive = section.id === targetId;
+                    section.classList.toggle('active', isActive);
+                });
+
+                if (targetId === 'message-board-recent') {
+                    loadAllSubmissions();
+                }
+            }
+
+            function openMessageBoard(initialSection = 'message-board-compose') {
+                if (!messageBoardModal || !modalOverlay) return;
+                setActiveMessageBoardSection(initialSection);
+                messageBoardModal.classList.add('active');
+                modalOverlay.classList.add('active');
+            }
+
+            function closeMessageBoardModal() {
+                if (!messageBoardModal || !modalOverlay) return;
+                messageBoardModal.classList.remove('active');
+                const caseAiPanel = document.getElementById('case-ai-panel');
+                if (!caseAiPanel || !caseAiPanel.classList.contains('active')) {
+                    modalOverlay.classList.remove('active');
+                }
+            }
+
+            if (messageComposeBtn) {
+                messageComposeBtn.addEventListener('click', () => openMessageBoard('message-board-compose'));
+            }
+
+            if (messageRecentBtn) {
+                messageRecentBtn.addEventListener('click', () => openMessageBoard('message-board-recent'));
+            }
+
+            messageBoardNavBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const target = btn.dataset.target;
+                    if (target) {
+                        setActiveMessageBoardSection(target);
+                    }
+                });
+            });
+
+            messageModalClosers.forEach(btn => {
+                btn.addEventListener('click', closeMessageBoardModal);
+            });
+
+            if (messageSidebar && !messageComposeBtn && !messageRecentBtn) {
+                messageSidebar.addEventListener('click', () => openMessageBoard('message-board-compose'));
+            }
+
 
             // 类型和领域联动
             const unifiedCaseType = document.getElementById('unified-case-type');
@@ -3035,30 +4357,7 @@ function runPythonCode(codeId, outputId) {
                 });
             }
 
-            // 打开留言板
-            function openMessageBoard() {
-                messageBoardModal.classList.add('active');
-                modalOverlay.classList.add('active');
-                // 加载所有提交记录
-                loadAllSubmissions();
-            }
-
-            // 关闭留言板
-            function closeMessageBoardModal() {
-                messageBoardModal.classList.remove('active');
-                modalOverlay.classList.remove('active');
-            }
-
-            // 事件监听
-            if (messageBoardBtn) {
-                messageBoardBtn.addEventListener('click', openMessageBoard);
-            }
-            if (closeMessageBoard) {
-                closeMessageBoard.addEventListener('click', closeMessageBoardModal);
-            }
-            if (modalOverlay) {
-                modalOverlay.addEventListener('click', closeMessageBoardModal);
-            }
+            // modalOverlay 的点击事件由全局处理逻辑统一控制，避免与 AI 面板冲突
 
             // 统一表单提交
             const unifiedForm = document.getElementById('unified-form');
@@ -3085,11 +4384,11 @@ function runPythonCode(codeId, outputId) {
                     );
                     if (response.ok) {
                         const data = await response.json();
-                        console.log('✓ Gitee 仓库验证成功:', data.full_name);
+                        console.log('Gitee 仓库验证成功:', data.full_name);
                         return true;
                     } else {
                         const errorData = await response.json();
-                        console.error('✗ Gitee 仓库验证失败:', errorData);
+                        console.error('Gitee 仓库验证失败:', errorData);
 
                         // 显示友好的错误提示
                         if (response.status === 404) {
@@ -3216,7 +4515,7 @@ ${issueBody}
                         const result = await response.json();
                         console.log('提交成功:', result);
 
-                        unifiedFeedback.innerHTML = `<span class="text-green-500">✓ 提交成功！已保存到 Gitee</span>`;
+                        unifiedFeedback.innerHTML = `<span class="text-green-500">提交成功，已保存到 Gitee</span>`;
                         unifiedForm.reset();
                         updateDomainOptions(''); // 重置领域选项
 
@@ -3227,7 +4526,7 @@ ${issueBody}
 
                     } catch (error) {
                         console.error('提交失败:', error);
-                        unifiedFeedback.innerHTML = `<span class="text-red-500">✗ 提交失败: ${error.message}</span>`;
+                        unifiedFeedback.innerHTML = `<span class="text-red-500">提交失败: ${error.message}</span>`;
                     }
 
                     // 5秒后清除反馈信息
@@ -3249,7 +4548,7 @@ ${issueBody}
                     console.log('当前内容:', content);
 
                     if (!content) {
-                        unifiedFeedback.innerHTML = '<span class="text-yellow-500">⚠ 请先输入内容</span>';
+                        unifiedFeedback.innerHTML = '<span class="text-yellow-500">请先输入内容</span>';
                         setTimeout(() => {
                             unifiedFeedback.innerHTML = '';
                         }, 3000);
@@ -3258,7 +4557,7 @@ ${issueBody}
 
                     // 显示处理中状态
                     unifiedAiEnhanceBtn.disabled = true;
-                    unifiedAiEnhanceBtn.innerHTML = '<span class="animate-pulse">⏳</span> 优化中...';
+                    unifiedAiEnhanceBtn.innerHTML = '<span class="animate-pulse">优化中...</span>';
                     unifiedFeedback.innerHTML = '<span class="text-blue-500">正在优化内容...</span>';
 
                     try {
@@ -3267,34 +4566,14 @@ ${issueBody}
                         console.log('window.volcengineConfig:', window.volcengineConfig);
                         console.log('window.VolcengineAI:', window.VolcengineAI);
 
-                        if (!window.volcengineConfig || !window.volcengineConfig.apiKey ||
-                            window.volcengineConfig.apiKey === 'YOUR_VOLCENGINE_API_KEY') {
-
-                            // 显示详细的配置指引
-                            const configGuide = `
-⚠️ 火山引擎 API Key 未配置
-
-请按以下步骤获取并配置 API Key：
-
-1. 登录火山引擎控制台
-   https://console.volcengine.com/
-
-2. 进入：火山方舟 → API 访问密钥
-
-3. 创建或查看 API Key
-   （格式：ak-xxxxxxxxxx）
-
-4. 打开 index.html 文件
-   找到第 1463 行附近的配置
-
-5. 替换 YOUR_VOLCENGINE_API_KEY
-   为您的真实 API Key
-
-详细说明请查看：API配置说明.md
-                            `.trim();
-
-                            console.warn(configGuide);
-                            throw new Error('请先配置火山引擎 API Key（查看控制台获取详细步骤）');
+                        const isLocalProxy = (window.volcengineConfig && window.volcengineConfig.baseUrl || '').startsWith('/');
+                        if (!isLocalProxy) {
+                            if (!window.volcengineConfig || !window.volcengineConfig.apiKey ||
+                                window.volcengineConfig.apiKey === 'YOUR_VOLCENGINE_API_KEY') {
+                                const configGuide = `\n火山引擎 API Key 未配置（当前未使用本机代理）\n\n如需直连方舟网关，请按以下步骤配置 API Key；若已改用本机代理 /api 可忽略此提示。\n\n1. 登录火山引擎控制台 https://console.volcengine.com/\n2. 方舟 → API 访问密钥，获取密钥（ak- 开头）\n3. 在 index.html 的 window.volcengineConfig 中设置 apiKey\n`.trim();
+                                console.warn(configGuide);
+                                throw new Error('请先配置火山引擎 API Key（非本机代理模式）');
+                            }
                         }
 
                         if (!window.VolcengineAI) {
@@ -3314,7 +4593,7 @@ ${issueBody}
 
                         if (enhancedContent && enhancedContent.trim()) {
                             contentTextarea.value = enhancedContent.trim();
-                            unifiedFeedback.innerHTML = `<span class="text-green-500">✓ AI 优化完成</span>`;
+                            unifiedFeedback.innerHTML = `<span class="text-green-500">AI 优化完成</span>`;
                             setTimeout(() => {
                                 unifiedFeedback.innerHTML = '';
                             }, 5000);
@@ -3324,7 +4603,7 @@ ${issueBody}
                     } catch (error) {
                         console.error('AI 优化失败:', error);
                         let errorMsg = error.message || 'API 调用失败';
-                        unifiedFeedback.innerHTML = `<span class="text-red-500">✗ AI 优化失败: ${errorMsg}</span>`;
+                        unifiedFeedback.innerHTML = `<span class="text-red-500">AI 优化失败: ${errorMsg}</span>`;
                         setTimeout(() => {
                             unifiedFeedback.innerHTML = '';
                         }, 5000);
@@ -3417,7 +4696,9 @@ ${issueBody}
                                     labels: labelsMatch ? labelsMatch[1].split(',').map(l => l.trim()) : [],
                                     time: timeMatch ? timeMatch[1].trim() : '',
                                     content: content,
-                                    fileName: file.name
+                                    fileName: file.name,
+                                    filename: file.path,
+                                    sha: fileData.sha
                                 };
                             } catch (error) {
                                 console.error('解析文件失败:', file.name, error);
@@ -3438,7 +4719,6 @@ ${issueBody}
                     allSubmissionsList.innerHTML = validMessages.map(msg => {
                         // 根据标签确定显示样式
                         let badgeColor = 'bg-gray-100 text-gray-600';
-                        let badgeIcon = '📝';
                         let badgeText = '提交';
 
                         if (msg.labels.length > 0) {
@@ -3446,23 +4726,18 @@ ${issueBody}
                             if (label) {
                                 if (label.includes('产业')) {
                                     badgeColor = 'bg-blue-100 text-blue-600';
-                                    badgeIcon = '🏭';
                                     badgeText = '产业案例';
                                 } else if (label.includes('思政')) {
                                     badgeColor = 'bg-green-100 text-green-600';
-                                    badgeIcon = '📚';
                                     badgeText = '思政案例';
                                 } else if (label.includes('反馈')) {
                                     badgeColor = 'bg-purple-100 text-purple-600';
-                                    badgeIcon = '💬';
                                     badgeText = '反馈';
                                 } else if (label.includes('建议')) {
                                     badgeColor = 'bg-yellow-100 text-yellow-600';
-                                    badgeIcon = '💡';
                                     badgeText = '建议';
                                 } else if (label.includes('问题')) {
                                     badgeColor = 'bg-red-100 text-red-600';
-                                    badgeIcon = '❓';
                                     badgeText = '问题';
                                 }
                             }
@@ -3476,7 +4751,7 @@ ${issueBody}
                         const preview = contentLines[0] || '';
 
                         return `
-                            <div class="bg-white rounded-lg p-3 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+                            <div class="message-item" style="position: relative;">
                                 <div class="flex items-start justify-between mb-2">
                                     <div class="flex items-center gap-2 flex-1">
                                         <div class="w-7 h-7 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold text-xs">
@@ -3487,9 +4762,16 @@ ${issueBody}
                                             <div class="text-xs text-gray-500">${msg.time || '未知时间'}</div>
                                         </div>
                                     </div>
-                                    <span class="${badgeColor} px-2 py-0.5 rounded-full text-xs font-semibold whitespace-nowrap ml-2">
-                                        ${badgeIcon} ${badgeText}
-                                    </span>
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <span class="${badgeColor} px-2 py-0.5 rounded-full text-xs font-semibold whitespace-nowrap">
+                                            ${badgeText}
+                                        </span>
+                                        <button onclick="deleteSubmission('${msg.filename}', '${msg.sha}')" class="delete-submission-btn" title="删除此记录">
+                                            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                            </svg>
+                                        </button>
+                                    </div>
                                 </div>
                                 <h4 class="font-semibold text-gray-900 mb-1 text-sm line-clamp-1">${msg.title}</h4>
                                 <p class="text-xs text-gray-600 line-clamp-2">${preview}</p>
@@ -3503,710 +4785,130 @@ ${issueBody}
                 }
             }
 
-            // 初始加载
-            loadAllSubmissions();
-        });
-    </script>
-
-    <!-- AI 语音助手功能 - 纯前端版本 -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const voiceAssistantBtn = document.getElementById('voice-assistant-btn');
-            const voiceAssistantModal = document.getElementById('voice-assistant-modal');
-            const closeVoiceAssistant = document.getElementById('close-voice-assistant');
-            const modalOverlay = document.getElementById('modal-overlay');
-            const voiceRecordBtn = document.getElementById('voice-record-btn');
-            const voiceBtnText = document.getElementById('voice-btn-text');
-            const voiceStatus = document.getElementById('voice-status');
-            const voiceChatHistory = document.getElementById('voice-chat-history');
-
-            // 火山引擎配置（已配置 veFaaS 函数 URL）
-            const VOLCENGINE_API_KEY = window.volcengineConfig?.apiKey || '348522f9-6a1b-4d0b-ad6b-8faab8ea09c0';
-            const VOLCENGINE_BASE_URL = 'https://sd413i7v6n5j6uua1gn70.apigateway-cn-beijing.volceapi.com';
-            const LLM_MODEL = 'ep-20251030011739-pxv56';  // Doubao-lite-32k（快速模型）
-            const IMAGE_MODEL = 'ep-20251030011616-nrd29';  // Doubao-Seedream-4.0
-            const VIDEO_MODEL = 'ep-20251030004255-jhlf6';  // Doubao-Seedance-1.0-lite-i2v（图生视频）
-            const MODEL_3D = 'ep-20251030011539-w2822';  // Doubao-Seed3D-1.0（3D生成）
-
-            let isRecording = false;
-            let recognition = null;
-            let chatMessages = [];
-            let isSpeaking = false;
-
-            // 初始化浏览器语音识别
-            function initSpeechRecognition() {
-                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-
-                if (!SpeechRecognition) {
-                    voiceStatus.textContent = '您的浏览器不支持语音识别，请使用 Chrome 或 Edge';
-                    voiceRecordBtn.disabled = true;
-                    return false;
+            // 删除提交记录函数 - 全局函数
+            window.deleteSubmission = async function(filepath, sha) {
+                // 弹出密码输入框
+                const password = prompt('请输入管理员密码以删除此记录：');
+                
+                // 验证密码
+                if (password !== '0828') {
+                    if (password !== null) {  // 用户没有点击取消
+                        alert('密码错误');
+                    }
+                    return;
                 }
 
-                recognition = new SpeechRecognition();
-                recognition.lang = 'zh-CN';
-                recognition.continuous = true;  // 持续识别
-                recognition.interimResults = true;  // 显示中间结果
-                recognition.maxAlternatives = 1;
-
-                recognition.onstart = () => {
-                    console.log('语音识别已启动');
-                };
-
-                recognition.onresult = (event) => {
-                    console.log('收到识别结果:', event);
-
-                    let interimTranscript = '';
-                    let finalTranscript = '';
-
-                    for (let i = event.resultIndex; i < event.results.length; i++) {
-                        const transcript = event.results[i][0].transcript;
-                        console.log(`结果 ${i}:`, transcript, 'isFinal:', event.results[i].isFinal);
-
-                        if (event.results[i].isFinal) {
-                            finalTranscript += transcript;
-                        } else {
-                            interimTranscript += transcript;
-                        }
-                    }
-
-                    // 显示中间结果
-                    if (interimTranscript) {
-                        console.log('中间结果:', interimTranscript);
-                        voiceStatus.textContent = `🎤 识别中: ${interimTranscript}`;
-                    }
-
-                    // 处理最终结果
-                    if (finalTranscript) {
-                        console.log('最终结果:', finalTranscript);
-                        voiceStatus.textContent = `✅ 识别完成: ${finalTranscript}`;
-                        addMessage('user', finalTranscript);
-
-                        // 发送请求
-                        sendChatRequest(finalTranscript);
-                    }
-                };
-
-                recognition.onerror = (event) => {
-                    console.error('语音识别错误:', event.error);
-
-                    // 忽略 no-speech 和 aborted 错误（这些是正常的）
-                    if (event.error === 'no-speech') {
-                        voiceStatus.textContent = '⚠️ 未检测到语音，请重试';
-                    } else if (event.error === 'aborted') {
-                        voiceStatus.textContent = '✅ 准备就绪';
-                    } else {
-                        voiceStatus.textContent = `❌ 识别错误: ${event.error}`;
-                    }
-
-                    stopRecording();
-                };
-
-                recognition.onend = () => {
-                    console.log('语音识别已结束，isRecording:', isRecording);
-
-                    // 如果还在录音状态，自动重启识别（持续监听）
-                    if (isRecording) {
-                        console.log('重启语音识别...');
-                        setTimeout(() => {
-                            if (isRecording) {
-                                try {
-                                    recognition.start();
-                                } catch (error) {
-                                    console.error('重启识别失败:', error);
-                                }
-                            }
-                        }, 100);
-                    }
-                };
-
-                return true;
-            }
-
-            // 打开语音助手
-            voiceAssistantBtn.addEventListener('click', () => {
-                voiceAssistantModal.classList.add('active');
-                modalOverlay.classList.add('active');
-
-                // 初始化语音识别
-                if (!recognition) {
-                    initSpeechRecognition();
-                }
-            });
-
-            // 文生图功能
-            const textToImageBtn = document.getElementById('text-to-image-btn');
-            const textToImageModal = document.getElementById('text-to-image-modal');
-            const closeTextToImage = document.getElementById('close-text-to-image');
-            const imagePromptInput = document.getElementById('image-prompt-input');
-            const generateImageBtn = document.getElementById('generate-image-btn');
-            const imageResultArea = document.getElementById('image-result-area');
-
-            if (textToImageBtn) {
-                textToImageBtn.addEventListener('click', () => {
-                    textToImageModal.classList.add('active');
-                    modalOverlay.classList.add('active');
-                    imagePromptInput.focus();
-                });
-            }
-
-            if (closeTextToImage) {
-                closeTextToImage.addEventListener('click', () => {
-                    textToImageModal.classList.remove('active');
-                    modalOverlay.classList.remove('active');
-                });
-            }
-
-            if (generateImageBtn) {
-                generateImageBtn.addEventListener('click', async () => {
-                    const prompt = imagePromptInput.value.trim();
-                    if (!prompt) {
-                        alert('请输入图像描述');
-                        return;
-                    }
-
-                    generateImageBtn.disabled = true;
-                    generateImageBtn.textContent = '🎨 生成中...';
-                    imageResultArea.innerHTML = '<p style="color: #666;">🎨 正在生成图像，请稍候...</p>';
-
-                    try {
-                        const response = await fetch(`${VOLCENGINE_BASE_URL}/images/generations`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                model: IMAGE_MODEL,
-                                prompt: prompt,
-                                size: '1024x1024',
-                                n: 1
-                            })
-                        });
-
-                        if (!response.ok) {
-                            throw new Error(`生成失败: ${response.status}`);
-                        }
-
-                        const data = await response.json();
-                        if (data.data && data.data[0] && data.data[0].url) {
-                            const imageUrl = data.data[0].url;
-                            imageResultArea.innerHTML = `
-                                <img src="${imageUrl}" style="max-width: 100%; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" alt="生成的图像">
-                                <p style="margin-top: 12px; color: #10b981; font-weight: 600;">✅ 图像生成完成</p>
-                                <a href="${imageUrl}" target="_blank" style="display: inline-block; margin-top: 8px; padding: 8px 16px; background: #10b981; color: white; text-decoration: none; border-radius: 8px;">下载图像</a>
-                            `;
-                        } else {
-                            throw new Error('未返回图像URL');
-                        }
-                    } catch (error) {
-                        console.error('图像生成失败:', error);
-                        imageResultArea.innerHTML = `<p style="color: #ef4444;">❌ 生成失败：${error.message}</p>`;
-                    } finally {
-                        generateImageBtn.disabled = false;
-                        generateImageBtn.textContent = '🎨 生成图像';
-                    }
-                });
-            }
-
-            // 文生视频功能
-            const textToVideoBtn = document.getElementById('text-to-video-btn');
-            const textToVideoModal = document.getElementById('text-to-video-modal');
-            const closeTextToVideo = document.getElementById('close-text-to-video');
-            const videoPromptInput = document.getElementById('video-prompt-input');
-            const generateVideoBtn = document.getElementById('generate-video-btn');
-            const videoResultArea = document.getElementById('video-result-area');
-
-            if (textToVideoBtn) {
-                textToVideoBtn.addEventListener('click', () => {
-                    textToVideoModal.classList.add('active');
-                    modalOverlay.classList.add('active');
-                    videoPromptInput.focus();
-                });
-            }
-
-            if (closeTextToVideo) {
-                closeTextToVideo.addEventListener('click', () => {
-                    textToVideoModal.classList.remove('active');
-                    modalOverlay.classList.remove('active');
-                });
-            }
-
-            if (generateVideoBtn) {
-                generateVideoBtn.addEventListener('click', async () => {
-                    const prompt = videoPromptInput.value.trim();
-                    if (!prompt) {
-                        alert('请输入视频描述');
-                        return;
-                    }
-
-                    generateVideoBtn.disabled = true;
-                    generateVideoBtn.textContent = '🎬 生成中...';
-                    videoResultArea.innerHTML = '<p style="color: #666;">🎬 正在生成视频，这可能需要几分钟，请稍候...</p>';
-
-                    try {
-                        const response = await fetch(`${VOLCENGINE_BASE_URL}/videos/generations`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                model: VIDEO_MODEL,
-                                prompt: prompt,
-                                duration: 5
-                            })
-                        });
-
-                        if (!response.ok) {
-                            throw new Error(`生成失败: ${response.status}`);
-                        }
-
-                        const data = await response.json();
-                        if (data.task_id) {
-                            videoResultArea.innerHTML = `
-                                <div style="padding: 20px; background: #f0f9ff; border-radius: 12px; border-left: 4px solid #3b82f6;">
-                                    <p style="margin: 0; color: #1e40af; font-weight: 600;">📋 视频生成任务已提交</p>
-                                    <p style="margin: 8px 0 0 0; font-size: 14px; color: #64748b;">任务ID: ${data.task_id}</p>
-                                    <p style="margin: 4px 0 0 0; font-size: 12px; color: #64748b;">请稍后在火山引擎控制台查看结果</p>
-                                </div>
-                            `;
-                        } else if (data.data && data.data[0] && data.data[0].url) {
-                            const videoUrl = data.data[0].url;
-                            videoResultArea.innerHTML = `
-                                <video controls style="max-width: 100%; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                                    <source src="${videoUrl}" type="video/mp4">
-                                </video>
-                                <p style="margin-top: 12px; color: #10b981; font-weight: 600;">✅ 视频生成完成</p>
-                                <a href="${videoUrl}" target="_blank" style="display: inline-block; margin-top: 8px; padding: 8px 16px; background: #10b981; color: white; text-decoration: none; border-radius: 8px;">下载视频</a>
-                            `;
-                        } else {
-                            throw new Error('未返回视频URL或任务ID');
-                        }
-                    } catch (error) {
-                        console.error('视频生成失败:', error);
-                        videoResultArea.innerHTML = `<p style="color: #ef4444;">❌ 生成失败：${error.message}</p>`;
-                    } finally {
-                        generateVideoBtn.disabled = false;
-                        generateVideoBtn.textContent = '🎬 生成视频';
-                    }
-                });
-            }
-
-            // 关闭语音助手
-            closeVoiceAssistant.addEventListener('click', () => {
-                voiceAssistantModal.classList.remove('active');
-                modalOverlay.classList.remove('active');
-                if (isRecording) {
-                    stopRecording();
-                }
-                if (isSpeaking) {
-                    window.speechSynthesis.cancel();
-                    isSpeaking = false;
-                }
-            });
-
-            // 点击遮罩关闭（但不关闭语音助手，避免与留言板冲突）
-            // modalOverlay 的点击事件由留言板处理
-
-            // 录音按钮
-            voiceRecordBtn.addEventListener('click', () => {
-                if (isRecording) {
-                    stopRecording();
-                } else {
-                    startRecording();
-                }
-            });
-
-            // 开始录音（使用浏览器语音识别）
-            function startRecording() {
-                if (!recognition) {
-                    voiceStatus.textContent = '❌ 语音识别未初始化';
+                // 二次确认
+                if (!confirm('确定要删除这条记录吗？此操作不可撤销！')) {
                     return;
                 }
 
                 try {
-                    isRecording = true;
-                    voiceRecordBtn.classList.add('recording');
-                    voiceBtnText.textContent = '⏹️ 停止录音';
-                    voiceStatus.textContent = '🎤 正在听，请说话...';
+                    // 显示加载状态
+                    const loadingDiv = document.createElement('div');
+                    loadingDiv.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0, 0, 0, 0.8); color: white; padding: 20px 40px; border-radius: 12px; z-index: 9999; font-size: 16px; font-weight: 600;';
+                    loadingDiv.textContent = '正在删除...';
+                    document.body.appendChild(loadingDiv);
 
-                    recognition.start();
-                } catch (error) {
-                    console.error('启动语音识别失败:', error);
-                    voiceStatus.textContent = '❌ 启动失败，请重试';
-                    stopRecording();
-                }
-            }
-
-            // 停止录音
-            function stopRecording() {
-                isRecording = false;
-                voiceRecordBtn.classList.remove('recording');
-                voiceBtnText.textContent = '🎤 开始语音';
-                voiceStatus.textContent = '✅ 准备就绪';
-
-                if (recognition) {
-                    try {
-                        recognition.stop();
-                    } catch (error) {
-                        console.error('停止语音识别失败:', error);
-                    }
-                }
-            }
-
-            // 发送对话请求（直接调用火山引擎 API）
-            async function sendChatRequest(text) {
-                console.log('收到请求:', text);
-                voiceStatus.textContent = '🤔 AI 正在思考...';
-                chatMessages.push({ role: 'user', content: text });
-
-                try {
-                    // 检查是否是3D生成请求
-                    const model3DKeywords = ['生成3D', '做个3D', '3D模型', '三维模型', '立体模型'];
-                    const is3DRequest = model3DKeywords.some(keyword => text.includes(keyword));
-
-                    if (is3DRequest) {
-                        console.log('检测到3D生成请求');
-                        await generate3D(text);
-                        return;
-                    }
-
-                    // 检查是否是视频生成请求
-                    const videoKeywords = ['生成视频', '做个视频', '制作视频', '视频', '动画', '动起来', '视频化'];
-                    const isVideoRequest = videoKeywords.some(keyword => text.includes(keyword));
-
-                    if (isVideoRequest) {
-                        console.log('检测到视频生成请求');
-                        await generateVideo(text);
-                        return;
-                    }
-
-                    // 检查是否是图像生成请求
-                    const imageKeywords = ['画', '生成图片', '生成图像', '画一个', '画一张', '帮我画', '图片', '图像', '绘制'];
-                    const isImageRequest = imageKeywords.some(keyword => text.includes(keyword));
-
-                    if (isImageRequest) {
-                        console.log('检测到图像生成请求');
-                        await generateImage(text);
-                        return;
-                    }
-
-                    console.log('普通对话请求');
-
-                    // 调用火山引擎 LLM API（通过 veFaaS 代理）
-                    const response = await fetch(`${VOLCENGINE_BASE_URL}/chat/completions`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            model: LLM_MODEL,
-                            messages: chatMessages,
-                            stream: false,  // veFaaS 不支持流式响应
-                            temperature: 0.7,
-                            max_tokens: 1000,  // 减少 token 数量，加快响应
-                            top_p: 0.9
-                        })
-                    });
-
-                    if (!response.ok) {
-                        const errorText = await response.text();
-                        console.error('API 错误:', errorText);
-                        throw new Error(`API 调用失败: ${response.status}`);
-                    }
-
-                    // 读取非流式响应
-                    const data = await response.json();
-                    console.log('API 返回:', data);
-
-                    if (!data.choices || !data.choices[0] || !data.choices[0].message) {
-                        throw new Error('API 返回格式错误');
-                    }
-
-                    const assistantText = data.choices[0].message.content;
-
-                    if (!assistantText) {
-                        throw new Error('AI 未返回内容');
-                    }
-
-                    // 显示 AI 回复
-                    addMessage('assistant', assistantText);
-
-                    chatMessages.push({ role: 'assistant', content: assistantText });
-                    voiceStatus.textContent = '🔊 正在合成语音...';
-
-                    // 使用浏览器 TTS
-                    speakText(assistantText);
-
-                } catch (error) {
-                    console.error('对话请求失败:', error);
-                    voiceStatus.textContent = '✅ 准备就绪';
-                    addMessage('assistant', `❌ 抱歉，出现错误：${error.message}`);
-                    speakText('抱歉，出现错误');
-                }
-            }
-
-            // 生成图像
-            async function generateImage(prompt) {
-                // 提取图像描述
-                const cleanPrompt = prompt.replace(/画|生成图片|生成图像|画一个|画一张|帮我画|图片|图像|绘制/g, '').trim();
-
-                // 如果在语音助手中，显示状态
-                if (voiceStatus) {
-                    voiceStatus.textContent = '🎨 正在生成图像...';
-                    addMessage('assistant', '🎨 正在为您生成图像，请稍候...');
-                } else {
-                    // 在主页面显示提示
-                    alert('🎨 正在生成图像，请稍候...');
-                }
-
-                try {
-                    const response = await fetch(`${VOLCENGINE_BASE_URL}/images/generations`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            model: IMAGE_MODEL,
-                            prompt: cleanPrompt,
-                            size: '1024x1024',
-                            n: 1
-                        })
-                    });
-
-                    if (!response.ok) {
-                        const errorText = await response.text();
-                        console.error('图像生成错误:', errorText);
-                        throw new Error(`图像生成失败: ${response.status}`);
-                    }
-
-                    const data = await response.json();
-                    console.log('图像生成返回:', data);
-
-                    if (data.data && data.data[0] && data.data[0].url) {
-                        const imageUrl = data.data[0].url;
-
-                        if (voiceStatus) {
-                            // 在语音助手中显示
-                            const imgHtml = `<div style="margin-top: 10px;">
-                                <img src="${imageUrl}" style="max-width: 100%; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" alt="生成的图像">
-                                <p style="margin-top: 8px; font-size: 12px; color: #666;">✨ 图像生成完成</p>
-                            </div>`;
-                            addMessage('assistant', imgHtml, true);
-                            voiceStatus.textContent = '✅ 图像生成完成';
-                            speakText('图像已生成完成，请查看');
-                        } else {
-                            // 在新窗口打开图像
-                            window.open(imageUrl, '_blank');
-                            alert('✅ 图像生成完成！已在新窗口打开');
+                    // 调用 Gitee API 删除文件
+                    const response = await fetch(
+                        `${window.giteeConfig.apiBase}/repos/${window.giteeConfig.owner}/${window.giteeConfig.repo}/contents/${filepath}`,
+                        {
+                            method: 'DELETE',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                access_token: window.giteeConfig.accessToken,
+                                sha: sha,
+                                message: `删除记录: ${filepath}`
+                            })
                         }
-                    } else {
-                        throw new Error('未返回图像 URL');
-                    }
+                    );
 
-                } catch (error) {
-                    console.error('图像生成失败:', error);
-                    if (voiceStatus) {
-                        voiceStatus.textContent = '准备就绪';
-                        addMessage('assistant', `❌ 图像生成失败：${error.message}`);
-                        speakText('抱歉，图像生成失败');
-                    } else {
-                        alert(`❌ 图像生成失败：${error.message}`);
-                    }
-                }
-            }
-
-            // 生成视频
-            async function generateVideo(prompt) {
-                // 提取视频描述
-                const cleanPrompt = prompt.replace(/生成视频|做个视频|制作视频|视频|动画|动起来|视频化/g, '').trim();
-
-                // 如果在语音助手中，显示状态
-                if (voiceStatus) {
-                    voiceStatus.textContent = '🎬 正在生成视频...';
-                    addMessage('assistant', '🎬 正在为您生成视频，这可能需要几分钟时间，请稍候...');
-                } else {
-                    // 在主页面显示提示
-                    alert('🎬 正在生成视频，这可能需要几分钟时间，请稍候...');
-                }
-
-                try {
-                    const response = await fetch(`${VOLCENGINE_BASE_URL}/videos/generations`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            model: VIDEO_MODEL,
-                            prompt: cleanPrompt,
-                            duration: 5
-                        })
-                    });
+                    // 移除加载状态
+                    document.body.removeChild(loadingDiv);
 
                     if (!response.ok) {
-                        const errorText = await response.text();
-                        console.error('视频生成错误:', errorText);
-                        throw new Error(`视频生成失败: ${response.status}`);
+                        throw new Error(`删除失败: ${response.status}`);
                     }
 
-                    const data = await response.json();
-                    console.log('视频生成返回:', data);
+                    // 显示成功消息
+                    const successDiv = document.createElement('div');
+                    successDiv.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 20px 40px; border-radius: 12px; z-index: 9999; font-size: 16px; font-weight: 600; box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);';
+                    successDiv.textContent = '删除成功！';
+                    document.body.appendChild(successDiv);
 
-                    if (data.task_id) {
-                        const message = `📋 视频生成任务已提交\n任务ID: ${data.task_id}\n请稍后在火山引擎控制台查看结果`;
+                    setTimeout(() => {
+                        document.body.removeChild(successDiv);
+                    }, 2000);
 
-                        if (voiceStatus) {
-                            const taskHtml = `<div style="margin-top: 10px; padding: 12px; background: #f0f9ff; border-radius: 8px; border-left: 4px solid #3b82f6;">
-                                <p style="margin: 0; color: #1e40af;">📋 视频生成任务已提交</p>
-                                <p style="margin: 8px 0 0 0; font-size: 12px; color: #64748b;">任务ID: ${data.task_id}</p>
-                                <p style="margin: 4px 0 0 0; font-size: 12px; color: #64748b;">请稍后在火山引擎控制台查看结果</p>
-                            </div>`;
-                            addMessage('assistant', taskHtml, true);
-                            voiceStatus.textContent = '✅ 视频生成任务已提交';
-                            speakText('视频生成任务已提交，请稍后查看结果');
-                        } else {
-                            alert(message);
-                        }
-                    } else if (data.data && data.data[0] && data.data[0].url) {
-                        const videoUrl = data.data[0].url;
-
-                        if (voiceStatus) {
-                            const videoHtml = `<div style="margin-top: 10px;">
-                                <video controls style="max-width: 100%; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                                    <source src="${videoUrl}" type="video/mp4">
-                                    您的浏览器不支持视频播放
-                                </video>
-                                <p style="margin-top: 8px; font-size: 12px; color: #666;">✨ 视频生成完成</p>
-                            </div>`;
-                            addMessage('assistant', videoHtml, true);
-                            voiceStatus.textContent = '✅ 视频生成完成';
-                            speakText('视频已生成完成，请查看');
-                        } else {
-                            window.open(videoUrl, '_blank');
-                            alert('✅ 视频生成完成！已在新窗口打开');
-                        }
-                    } else {
-                        throw new Error('未返回视频URL或任务ID');
-                    }
+                    // 刷新列表
+                    setTimeout(() => {
+                        loadAllSubmissions();
+                    }, 500);
 
                 } catch (error) {
-                    console.error('视频生成失败:', error);
-                    if (voiceStatus) {
-                        voiceStatus.textContent = '准备就绪';
-                        addMessage('assistant', `❌ 视频生成失败：${error.message}`);
-                        speakText('抱歉，视频生成失败');
-                    } else {
-                        alert(`❌ 视频生成失败：${error.message}`);
+                    console.error('删除失败:', error);
+                    alert(`删除失败: ${error.message}`);
+                }
+            };
+
+            // 初始加载
+            loadAllSubmissions();
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const caseAiPanel = document.getElementById('case-ai-panel');
+            const modalOverlay = document.getElementById('modal-overlay');
+            const closeCaseAiPanel = document.getElementById('close-case-ai-panel');
+
+            const modeButtons = caseAiPanel ? caseAiPanel.querySelectorAll('.ai-mode-btn') : [];
+            modeButtons.forEach(btn => {
+                btn.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    const mode = btn.dataset.mode;
+                    if (typeof window.switchAiMode === 'function') {
+                        window.switchAiMode(mode);
                     }
+                });
+            });
+
+            function closeAiPanel() {
+                if (!caseAiPanel) return;
+                caseAiPanel.classList.remove('active');
+                const messageBoardModal = document.getElementById('message-board-modal');
+                if (!messageBoardModal || !messageBoardModal.classList.contains('active')) {
+                    modalOverlay?.classList.remove('active');
                 }
             }
 
-            // 生成3D模型
-            async function generate3D(prompt) {
-                voiceStatus.textContent = '🎲 正在生成3D模型...';
-                addMessage('assistant', '🎲 正在为您生成3D模型，这可能需要几分钟时间，请稍候...');
+            closeCaseAiPanel?.addEventListener('click', () => {
+                closeAiPanel();
+            });
 
-                try {
-                    // 提取3D描述
-                    const cleanPrompt = prompt.replace(/生成3D|做个3D|3D模型|三维模型|立体模型/g, '').trim();
+            if (modalOverlay) {
+                modalOverlay.addEventListener('click', () => {
+                    const messageBoardModal = document.getElementById('message-board-modal');
+                    const boardOpen = messageBoardModal?.classList.contains('active');
+                    const aiOpen = caseAiPanel?.classList.contains('active');
 
-                    const response = await fetch(`${VOLCENGINE_BASE_URL}/3d/generations`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            model: MODEL_3D,
-                            prompt: cleanPrompt
-                        })
-                    });
-
-                    if (!response.ok) {
-                        const errorText = await response.text();
-                        console.error('3D生成错误:', errorText);
-                        throw new Error(`3D生成失败: ${response.status}`);
+                    if (boardOpen) {
+                        messageBoardModal.classList.remove('active');
                     }
-
-                    const data = await response.json();
-                    console.log('3D生成返回:', data);
-
-                    if (data.task_id) {
-                        const taskHtml = `<div style="margin-top: 10px; padding: 12px; background: #f0fdf4; border-radius: 8px; border-left: 4px solid #10b981;">
-                            <p style="margin: 0; color: #065f46;">📋 3D模型生成任务已提交</p>
-                            <p style="margin: 8px 0 0 0; font-size: 12px; color: #64748b;">任务ID: ${data.task_id}</p>
-                            <p style="margin: 4px 0 0 0; font-size: 12px; color: #64748b;">请稍后在火山引擎控制台查看结果</p>
-                        </div>`;
-                        addMessage('assistant', taskHtml, true);
-                        voiceStatus.textContent = '✅ 3D生成任务已提交';
-                        speakText('3D模型生成任务已提交，请稍后查看结果');
-                    } else if (data.data && data.data[0] && data.data[0].url) {
-                        const modelUrl = data.data[0].url;
-                        const modelHtml = `<div style="margin-top: 10px; padding: 12px; background: #f0fdf4; border-radius: 8px;">
-                            <p style="margin: 0; color: #065f46;">✨ 3D模型已生成</p>
-                            <a href="${modelUrl}" target="_blank" style="display: inline-block; margin-top: 8px; padding: 8px 16px; background: #10b981; color: white; text-decoration: none; border-radius: 6px; font-size: 14px;">下载3D模型</a>
-                        </div>`;
-                        addMessage('assistant', modelHtml, true);
-                        voiceStatus.textContent = '✅ 3D模型生成完成';
-                        speakText('3D模型已生成完成，请下载查看');
-                    } else {
-                        throw new Error('未返回3D模型URL或任务ID');
+                    if (aiOpen) {
+                        caseAiPanel.classList.remove('active');
                     }
-
-                } catch (error) {
-                    console.error('3D生成失败:', error);
-                    voiceStatus.textContent = '准备就绪';
-                    addMessage('assistant', `❌ 3D生成失败：${error.message}`);
-                    speakText('抱歉，3D模型生成失败');
-                }
-            }
-
-            // 使用浏览器语音合成
-            function speakText(text) {
-                if (isSpeaking) {
-                    window.speechSynthesis.cancel();
-                }
-
-                // 清理文本中的 HTML 标签和特殊字符
-                const cleanText = text.replace(/<[^>]*>/g, '').replace(/[🎨🎬🎲✨✅❌📋]/g, '').trim();
-
-                if (!cleanText) return;
-
-                const utterance = new SpeechSynthesisUtterance(cleanText);
-                utterance.lang = 'zh-CN';
-                utterance.rate = 1.1;  // 稍微加快语速
-                utterance.pitch = 1.0;
-                utterance.volume = 1.0;
-
-                utterance.onstart = () => {
-                    isSpeaking = true;
-                    voiceStatus.textContent = '🔊 AI 正在说话...';
-                };
-
-                utterance.onend = () => {
-                    isSpeaking = false;
-                    voiceStatus.textContent = '✅ 准备就绪';
-                };
-
-                utterance.onerror = (error) => {
-                    console.error('语音合成错误:', error);
-                    isSpeaking = false;
-                    voiceStatus.textContent = '✅ 准备就绪';
-                };
-
-                window.speechSynthesis.speak(utterance);
-            }
-
-            // 添加消息到聊天历史
-            function addMessage(role, content, isHtml = false) {
-                const div = document.createElement('div');
-                div.className = `voice-message ${role}`;
-
-                if (isHtml) {
-                    div.innerHTML = content;
-                } else {
-                    div.textContent = content;
-                }
-
-                voiceChatHistory.appendChild(div);
-                voiceChatHistory.scrollTop = voiceChatHistory.scrollHeight;
-                return div;
+                    if (boardOpen || aiOpen) {
+                        modalOverlay.classList.remove('active');
+                    }
+                });
             }
         });
     </script>
-</body>
+
+
+
+    </body>
 </html>
