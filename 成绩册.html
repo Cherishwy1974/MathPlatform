@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -387,9 +387,9 @@
 </head>
 <body>
     <div class="header">
-        <div>
+        <div style="display:flex; align-items:center; gap:20px;">
             <span style="font-size: 18px; font-weight: bold;">学生成绩管理系统</span>
-            <span style="margin-left: 20px;">
+            <span>
                 <select id="classSelector" onchange="selectClassFromDropdown()" style="padding: 8px 15px; font-size: 14px; border: 2px solid #fff; border-radius: 4px; background: #34495e; color: white; cursor: pointer;">
                     <option value="">-- 请选择班级 --</option>
                     <option value="25无人机三班">25无人机三班（陆军）- 40人</option>
@@ -398,15 +398,14 @@
                     <option value="25应电12班">25应电1-2班 - 86人</option>
                 </select>
             </span>
+            <button class="btn btn-primary" onclick="openCloudRestore(); return false;" style="margin-left: 30px; font-weight:bold; background: #8e44ad; border-color: #8e44ad; color: #fff;">☁️ 从云端恢复</button>
         </div>
         <div>
             <button class="btn btn-success" onclick="pushToGitee(); return false;" style="font-weight:bold;">💾 保存到云端</button>
-            <button class="btn btn-primary" onclick="pullFromGitee(); return false;">🔄 加载最新数据</button>
-            <button class="btn btn-warning" onclick="window.open('https://gitee.com/swywy_admin/123', '_blank'); return false;">📂 查看仓库</button>
-            <button class="btn btn-success" onclick="showPasteImport(); return false;" style="margin-left:10px;">📋 从Excel导入</button>
-            <input type="file" id="fileInput" style="display:none;" accept=".xlsx,.xls" onchange="loadFile(event)">
+            <button class="btn btn-warning" onclick="pushToGiteeAsBackup(); return false;" style="font-weight:bold; margin-left: 10px;">📦 保存为备份</button>
         </div>
     </div>
+    <input type="file" id="fileInput" style="display:none;" accept=".xlsx,.xls" onchange="loadFile(event)">
     
     
     <div id="main">
@@ -581,51 +580,87 @@
         </div>
     </div>
     
-    <!-- 历史记录模态窗口 -->
+    <!-- 历史记录 / 云端版本 模态窗口 -->
     <div id="historyModal" class="modal">
         <div class="modal-content" style="max-width: 1000px;">
-            <h3>📜 历史数据记录</h3>
-            <div style="background: #f8f9fa; padding: 15px; margin: 15px 0; border-radius: 5px; text-align: center;">
-                <strong>历史记录总数：</strong><span id="historyCount" style="font-size: 20px; color: #2196f3; margin: 0 5px;">0</span>条
+            <h3>📜 历史记录与云端版本</h3>
+
+            <div style="display:flex; gap:10px; margin:15px 0;">
+                <button id="historyTabLocal" class="btn btn-primary" style="flex:1;" onclick="setHistoryTab('local')">🗃️ 本地历史</button>
+                <button id="historyTabCloud" class="btn btn-warning" style="flex:1;" onclick="setHistoryTab('cloud')">☁️ 云端版本</button>
             </div>
-            
-            <div style="max-height: 500px; overflow-y: auto; border: 1px solid #ddd; border-radius: 4px;">
-                <table style="width: 100%;">
-                    <thead>
-                        <tr style="background: #f5f5f5; position: sticky; top: 0;">
-                            <th style="padding: 10px;">时间</th>
-                            <th style="padding: 10px;">班级</th>
-                            <th style="padding: 10px;">操作类型</th>
-                            <th style="padding: 10px;">影响人数</th>
-                            <th style="padding: 10px;">操作</th>
-                        </tr>
-                    </thead>
-                    <tbody id="historyTableBody">
-                        <tr>
-                            <td colspan="5" style="text-align: center; padding: 30px; color: #999;">
-                                暂无历史记录
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+
+            <div id="historyLocalPanel">
+                <div style="background: #f8f9fa; padding: 12px; margin-bottom: 12px; border-radius: 5px; text-align: center; font-size: 14px;">
+                    <strong>本地历史记录总数：</strong><span id="historyCount" style="font-size: 20px; color: #2196f3; margin: 0 5px;">0</span>条
+                </div>
+                <div style="max-height: 460px; overflow-y: auto; border: 1px solid #ddd; border-radius: 4px;">
+                    <table style="width: 100%;">
+                        <thead>
+                            <tr style="background: #f5f5f5; position: sticky; top: 0;">
+                                <th style="padding: 10px;">时间</th>
+                                <th style="padding: 10px;">班级</th>
+                                <th style="padding: 10px;">操作类型</th>
+                                <th style="padding: 10px;">影响人数</th>
+                                <th style="padding: 10px;">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTableBody">
+                            <tr>
+                                <td colspan="5" style="text-align: center; padding: 30px; color: #999;">
+                                    暂无历史记录
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div style="margin-top: 18px; display: flex; gap: 10px; justify-content: space-between;">
+                    <button class="btn btn-danger" onclick="clearAllHistory()" style="background: #dc3545;">
+                        🗑️ 清除所有历史
+                    </button>
+                    <div>
+                        <button class="btn btn-success" onclick="exportHistory()">
+                            💾 导出历史记录
+                        </button>
+                        <button class="btn btn-danger" onclick="closeHistoryModal()">
+                            关闭
+                        </button>
+                    </div>
+                </div>
             </div>
-            
-            <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: space-between;">
-                <button class="btn btn-danger" onclick="clearAllHistory()" style="background: #dc3545;">
-                    🗑️ 清除所有历史
-                </button>
-                <div>
-                    <button class="btn btn-success" onclick="exportHistory()">
-                        💾 导出历史记录
-                    </button>
-                    <button class="btn btn-danger" onclick="closeHistoryModal()">
-                        关闭
-                    </button>
+
+            <div id="historyCloudPanel" style="display:none;">
+                <div id="cloudFileListStatus" style="background: #f0f4ff; padding: 12px; margin-bottom: 12px; border-left: 4px solid #2196f3; border-radius: 4px; font-size: 13px; color: #1b4f72;">
+                    正在加载文件列表...
+                </div>
+                <div style="max-height: 460px; overflow-y: auto; border: 1px solid #ddd; border-radius: 4px;">
+                    <table style="width: 100%; font-size: 13px;">
+                        <thead>
+                            <tr style="background: #f5f5f5; position: sticky; top: 0;">
+                                <th style="padding: 8px;">文件 / 时间</th>
+                                <th style="padding: 8px; width: 110px;">大小</th>
+                                <th style="padding: 8px; width: 170px;">时间戳</th>
+                                <th style="padding: 8px; width: 220px;">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cloudFileTableBody">
+                            <tr>
+                                <td colspan="4" style="text-align:center; padding: 25px; color: #999;">正在加载...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div style="margin-top: 18px; display: flex; gap: 10px; justify-content: space-between;">
+                    <div>
+                        <button class="btn btn-primary" onclick="refreshGiteeFileList(true)">🔄 刷新列表</button>
+                        <button class="btn btn-primary" onclick="showCloudDataModal()" style="background:#607d8b; border-color:#607d8b;">👀 预览最近加载</button>
+                    </div>
+                    <button class="btn btn-danger" onclick="closeHistoryModal()">关闭</button>
                 </div>
             </div>
         </div>
     </div>
-    
+
     <!-- 随机抽号模态窗口 -->
     <div id="randomPickModal" class="modal">
         <div class="modal-content" style="max-width: 650px;">
@@ -703,17 +738,50 @@
     let historyRecords = []; // 历史记录数组
     let pickedNumbers = []; // 已抽取的号码（防止重复）
     let currentNumberRange = { start: 1, end: 40 }; // 当前号码范围
+    let lastPulledCloudData = null;
+    let lastPulledFileMeta = null;
+    let giteeFileListCache = null;
+    let giteeFileListLoading = false;
 
     // Gitee同步相关变量
     let giteeConfig = loadGiteeConfigFromStorage();
     let syncInProgress = false;
     let lastSyncTime = null;
 
+
+
+    function refreshClassSelectorOptions(preserveValue = true) {
+        const selector = document.getElementById('classSelector');
+        if (!selector) return;
+
+        const baseOrder = Object.keys(classesData);
+        const remoteNames = allClassesData ? Object.keys(allClassesData) : [];
+        const extras = remoteNames.filter(name => !baseOrder.includes(name)).sort();
+        const ordered = baseOrder.concat(extras);
+        const previousValue = preserveValue ? selector.value : '';
+
+        let optionsHtml = '<option value="">-- 请选择班级 --</option>';
+        ordered.forEach(name => {
+            const count = Array.isArray(allClassesData?.[name])
+                ? allClassesData[name].length
+                : (Array.isArray(classesData?.[name]) ? classesData[name].length : 0);
+            optionsHtml += `<option value="${escapeHtml(name)}">${escapeHtml(name)}${count ? ` - ${count}人` : ''}</option>`;
+        });
+
+        selector.innerHTML = optionsHtml;
+        if (previousValue && ordered.includes(previousValue)) {
+            selector.value = previousValue;
+        }
+    }
+
+
     function loadGiteeConfigFromStorage() {
         try {
             const saved = localStorage.getItem('giteeConfig_v1');
             if (saved) {
-                return JSON.parse(saved);
+                const config = JSON.parse(saved);
+                config.autoSync = false;
+                return config;
             }
         } catch (e) {
             console.error('加载Gitee配置失败:', e);
@@ -724,11 +792,36 @@
             token: GITEE_CONFIG.token,
             branch: GITEE_CONFIG.branch,
             filePath: GITEE_CONFIG.filePath,
-            autoSync: true,
+            autoSync: false,
             pollingInterval: 30000,
             lastSyncTime: null,
             sha: null
         };
+    }
+
+    function setHistoryTab(tab = 'local') {
+        const localPanel = document.getElementById('historyLocalPanel');
+        const cloudPanel = document.getElementById('historyCloudPanel');
+        const localBtn = document.getElementById('historyTabLocal');
+        const cloudBtn = document.getElementById('historyTabCloud');
+
+        const showLocal = tab !== 'cloud';
+
+        if (localPanel) localPanel.style.display = showLocal ? 'block' : 'none';
+        if (cloudPanel) cloudPanel.style.display = showLocal ? 'none' : 'block';
+
+        if (localBtn) {
+            localBtn.style.boxShadow = showLocal ? '0 0 0 2px rgba(46,125,50,0.4) inset' : 'none';
+            localBtn.style.opacity = showLocal ? '1' : '0.7';
+        }
+        if (cloudBtn) {
+            cloudBtn.style.boxShadow = showLocal ? 'none' : '0 0 0 2px rgba(241,196,15,0.6) inset';
+            cloudBtn.style.opacity = showLocal ? '0.7' : '1';
+        }
+
+        if (!showLocal) {
+            refreshGiteeFileList(true);
+        }
     }
 
     function saveGiteeConfigToStorage() {
@@ -737,6 +830,138 @@
         } catch (e) {
             console.error('保存Gitee配置失败:', e);
         }
+    }
+
+    function escapeHtml(str = '') {
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    function formatFileSize(bytes) {
+        if (!Number.isFinite(bytes)) return '-';
+        if (bytes < 1024) return `${bytes} B`;
+        if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+        return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+    }
+
+    function formatDateTime(value) {
+        if (!value) return '-';
+        try {
+            const date = value instanceof Date ? value : new Date(value);
+            if (Number.isNaN(date.getTime())) {
+                return typeof value === 'string' ? value : '-';
+            }
+            return date.toLocaleString('zh-CN', { hour12: false });
+        } catch (e) {
+            return typeof value === 'string' ? value : '-';
+        }
+    }
+
+    
+
+    async function fetchJsonWithFallback(url, options = {}) {
+        const tryFetch = async (target, note) => {
+            try {
+                const resp = await fetch(target, options);
+                if (!resp.ok) {
+                    throw new Error(`HTTP ${resp.status}`);
+                }
+                return { data: await resp.json(), note };
+            } catch (error) {
+                console.warn('请求失败:', target, error);
+                throw error;
+            }
+        };
+
+        try {
+            return await tryFetch(url, '');
+        } catch (error) {
+            if (!(error instanceof TypeError)) {
+                throw error;
+            }
+        }
+
+        const proxies = [
+            target => `https://cors.isomorphic-git.org/${target}`,
+            target => `https://corsproxy.io/?${encodeURIComponent(target)}`
+        ];
+
+        for (const build of proxies) {
+            const proxyUrl = build(url);
+            try {
+                return await tryFetch(proxyUrl, proxyUrl.includes('corsproxy.io') ? '（通过 corsproxy.io 代理）' : '（通过 cors.isomorphic-git.org 代理）');
+            } catch (error) {
+                continue;
+            }
+        }
+
+        throw new Error('网络请求被浏览器拦截（可能是CORS限制）');
+    }
+    function buildGiteeApiUrl(pathSegments = []) {
+        const base = `https://gitee.com/api/v5/repos/${giteeConfig.owner}/${giteeConfig.repo}/contents`;
+        const cleaned = (pathSegments || []).filter(Boolean).map(seg => encodeURIComponent(seg));
+        const path = cleaned.join('/');
+        const suffix = path ? `/${path}` : '';
+        const branch = (giteeConfig.branch || 'master').trim() || 'master';
+        const params = new URLSearchParams({
+            access_token: giteeConfig.token,
+            ref: branch
+        });
+        return `${base}${suffix}?${params.toString()}`;
+    }
+
+    function getConfiguredDirectories() {
+        const dirs = new Set();
+        const manual = (giteeConfig.fileDirectory || '').trim().replace(/^\/+|\/+$/g, '');
+        if (manual) dirs.add(manual);
+        const filePath = (giteeConfig.filePath || '').trim();
+        if (filePath.includes('/')) {
+            const segments = filePath.split('/');
+            segments.pop();
+            const dir = segments.join('/');
+            if (dir) dirs.add(dir);
+        }
+        dirs.add('');
+        return Array.from(dirs);
+    }
+
+    function uniqueKeyFromFile(item) {
+        if (!item) return Math.random().toString(36);
+        if (item.path) return item.path;
+        const dir = (item.__directory || '').replace(/^\/+|\/+$/g, '');
+        const name = item.name || 'unknown.json';
+        return dir ? `${dir}/${name}` : name;
+    }
+
+    function parseTimestampFromName(name = '') {
+        const match = name.match(/(20\d{2})(\d{2})(\d{2})[_-]?(\d{2})(\d{2})(\d{2})/);
+        if (!match) return null;
+        const [, y, m, d, hh, mm, ss] = match;
+        const iso = `${y}-${m}-${d}T${hh}:${mm}:${ss}`;
+        const date = new Date(iso);
+        return Number.isNaN(date.getTime()) ? null : date;
+    }
+
+    function formatFileEntryName(item) {
+        const name = item?.name || item?.path || '未知文件';
+        const timestamp = parseTimestampFromName(name) || (item?.last_commit?.committer?.date ? new Date(item.last_commit.committer.date) : null);
+        const metaDate = item?.updated_at ? new Date(item.updated_at) : null;
+        const parts = [];
+        if (timestamp) {
+            parts.push(formatDateTime(timestamp));
+        } else if (metaDate) {
+            parts.push(formatDateTime(metaDate));
+        }
+        if (item?.__directory) {
+            const dirLabel = item.__directory || '根目录';
+            parts.push(`目录：${escapeHtml(dirLabel || '根目录')}`);
+        }
+        const prefix = parts.length ? `<span style="color:#555;font-size:12px;">${parts.join(' · ')}</span><br>` : '';
+        return `${prefix}<span style="font-weight:600;">${escapeHtml(name)}</span>`;
     }
 
     // Toast通知函数
@@ -1549,12 +1774,7 @@
              snapshot: JSON.parse(JSON.stringify(allClassesData[currentClass] || []))
          };
          
-         historyRecords.unshift(record); // 添加到数组开头
-         
-         // 只保留最近100条记录
-         if (historyRecords.length > 100) {
-             historyRecords = historyRecords.slice(0, 100);
-         }
+        historyRecords.unshift(record); // 添加到数组开头
          
          saveHistoryToStorage();
          
@@ -1593,16 +1813,16 @@
      }
      
      // 显示历史记录模态窗口
-     function showHistoryModal() {
-         console.log('📜 打开历史记录窗口');
-         console.log('历史记录总数:', historyRecords.length);
-         
-         // 直接显示所有记录
-         renderHistoryTable();
-         
-         document.getElementById('historyModal').classList.add('show');
-         console.log('✅ 历史记录窗口已显示');
-     }
+    function showHistoryModal(tab = 'local') {
+        console.log('📜 打开历史记录窗口');
+        console.log('历史记录总数:', historyRecords.length);
+
+        renderHistoryTable();
+
+        document.getElementById('historyModal').classList.add('show');
+        setHistoryTab(tab);
+        console.log('✅ 历史记录窗口已显示');
+    }
      
      // 渲染历史记录表格
      function renderHistoryTable() {
@@ -1659,11 +1879,6 @@
                  `;
              });
          }
-     }
-     
-     // 关闭历史记录模态窗口
-     function closeHistoryModal() {
-         document.getElementById('historyModal').classList.remove('show');
      }
      
      // 查看历史快照
@@ -1775,34 +1990,351 @@
          renderHistoryTable();
          
          showToast('所有历史记录已清除', 'success');
-     }
-     
-     // 导出历史记录
-     function exportHistory() {
-         try {
-             const exportData = {
-                 version: '1.0',
-                 exportTime: new Date().toISOString(),
-                 totalRecords: historyRecords.length,
-                 records: historyRecords
-             };
-             
-             const dataStr = JSON.stringify(exportData, null, 2);
-             const dataBlob = new Blob([dataStr], {type: 'application/json'});
-             const url = URL.createObjectURL(dataBlob);
-             
-             const link = document.createElement('a');
-             link.href = url;
-             link.download = `成绩历史记录_${new Date().toISOString().split('T')[0]}.json`;
-             link.click();
-             
-             URL.revokeObjectURL(url);
-             showToast('历史记录导出成功', 'success');
-         } catch (error) {
-             console.error('导出失败:', error);
-             alert('导出失败：' + error.message);
-         }
-     }
+    }
+
+    // 导出历史记录
+    function exportHistory() {
+        try {
+            const exportData = {
+                version: '1.0',
+                exportTime: new Date().toISOString(),
+                totalRecords: historyRecords.length,
+                records: historyRecords
+            };
+            
+            const dataStr = JSON.stringify(exportData, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `成绩历史记录_${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            
+            URL.revokeObjectURL(url);
+            showToast('历史记录导出成功', 'success');
+        } catch (error) {
+            console.error('导出失败:', error);
+            alert('导出失败：' + error.message);
+        }
+    }
+
+    // ==================== 云端数据预览 / 恢复 ====================
+
+    function openCloudRestore() {
+        showHistoryModal('cloud');
+    }
+
+    function showCloudDataModal() {
+        if (!lastPulledCloudData) {
+            alert('尚未从云端加载数据，请先点击“☁️ 从云端恢复”。');
+            return;
+        }
+        const modal = document.getElementById('cloudDataModal');
+        if (modal) {
+            modal.classList.add('show');
+            updateCloudDataPreview();
+        }
+    }
+
+    function closeCloudDataModal() {
+        const modal = document.getElementById('cloudDataModal');
+        if (modal) {
+            modal.classList.remove('show');
+        }
+    }
+
+    function copyCloudData() {
+        if (!lastPulledCloudData) {
+            alert('暂无可复制的云端数据，请先恢复或预览云端版本。');
+            return;
+        }
+        const dataStr = JSON.stringify(lastPulledCloudData, null, 2);
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(dataStr)
+                .then(() => showToast('✅ 已复制云端JSON数据', 'success'))
+                .catch(err => {
+                    console.error('复制失败:', err);
+                    fallbackCopy(dataStr);
+                });
+        } else {
+            fallbackCopy(dataStr);
+        }
+    }
+
+    function fallbackCopy(text) {
+        try {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            showToast('✅ 已复制云端JSON数据', 'success');
+        } catch (e) {
+            console.error('复制失败:', e);
+            alert('复制失败，请手动选中后复制。');
+        }
+    }
+
+    function updateCloudDataPreview() {
+        const summaryEl = document.getElementById('cloudDataSummary');
+        const textarea = document.getElementById('cloudDataTextarea');
+        if (!summaryEl || !textarea) return;
+
+        if (!lastPulledCloudData) {
+            summaryEl.textContent = '尚未加载云端数据，请先点击“☁️ 从云端恢复”。';
+            textarea.value = '';
+            return;
+        }
+
+        const classes = lastPulledCloudData.classes || {};
+        const classNames = Object.keys(classes);
+        const studentCount = classNames.reduce((sum, name) => {
+            const arr = classes[name];
+            return sum + (Array.isArray(arr) ? arr.length : 0);
+        }, 0);
+        const historyList = lastPulledCloudData.historyRecords || lastPulledCloudData.history || [];
+        const historyCount = Array.isArray(historyList) ? historyList.length : 0;
+        const timestamp = lastPulledCloudData.timestamp || lastPulledCloudData.lastModified || lastPulledCloudData.exportTime || '';
+        const meta = lastPulledFileMeta || {};
+
+        summaryEl.innerHTML = `
+            <strong>云端数据概览</strong><br>
+            班级：${classNames.length} 个 | 学生记录：${studentCount} 条${historyCount ? ` | 历史记录：${historyCount} 条` : ''}
+            ${timestamp ? `<br>数据时间：${timestamp}` : ''}
+            ${meta.path ? `<br>来源文件：${escapeHtml(meta.path)}${meta.applied === false ? '（仅预览）' : ''}` : ''}
+            ${meta.size ? `<br>文件大小：${formatFileSize(meta.size)}` : ''}
+            ${meta.fetchedAt ? `<br>拉取时间：${formatDateTime(meta.fetchedAt)}` : ''}
+            ${classNames.length > 0 ? `<br>班级列表：${classNames.map(escapeHtml).join('、')}` : ''}
+        `;
+
+        if (textarea) {
+            textarea.value = JSON.stringify(lastPulledCloudData, null, 2);
+            textarea.scrollTop = 0;
+        }
+    }
+
+    async function refreshGiteeFileList(force = false) {
+        if (force) {
+            giteeFileListCache = null;
+        }
+        const statusEl = document.getElementById('cloudFileListStatus');
+        const tbody = document.getElementById('cloudFileTableBody');
+        if (statusEl) {
+            statusEl.textContent = '正在加载文件列表...';
+        }
+        if (tbody) {
+            tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 25px; color: #999;">正在加载...</td></tr>`;
+        }
+        const list = await fetchGiteeFileList();
+        renderGiteeFileList(list);
+    }
+
+    async function fetchGiteeFileList() {
+        if (giteeFileListCache && !giteeFileListLoading) {
+            return giteeFileListCache;
+        }
+        if (giteeFileListLoading) {
+            return giteeFileListCache || [];
+        }
+
+        if (!giteeConfig.owner || !giteeConfig.repo || !giteeConfig.token) {
+            showToast('❌ Gitee配置不完整，无法获取文件列表', 'error', 5000);
+            return [];
+        }
+
+        giteeFileListLoading = true;
+
+        const statusEl = document.getElementById('cloudFileListStatus');
+        if (statusEl) {
+            statusEl.textContent = '正在从云端拉取文件列表...';
+        }
+
+        try {
+            const branchName = encodeURIComponent(giteeConfig.branch || 'master');
+            const branchUrl = `https://gitee.com/api/v5/repos/${giteeConfig.owner}/${giteeConfig.repo}/branches/${branchName}?access_token=${giteeConfig.token}`;
+            const { data: branchData, note: branchNote } = await fetchJsonWithFallback(branchUrl, { method: 'GET' });
+            const sha = branchData.commit && branchData.commit.sha;
+            if (!sha) {
+                throw new Error('分支信息缺少 commit.sha');
+            }
+
+            const treeUrl = `https://gitee.com/api/v5/repos/${giteeConfig.owner}/${giteeConfig.repo}/git/trees/${sha}?recursive=1&access_token=${giteeConfig.token}`;
+            const { data: treeData, note: treeNote } = await fetchJsonWithFallback(treeUrl, { method: 'GET' });
+            if (!treeData || !Array.isArray(treeData.tree)) {
+                throw new Error('仓库文件树返回格式异常');
+            }
+
+            const fetchNote = branchNote || treeNote || '';
+            const truncated = !!treeData.truncated;
+            const directories = getConfiguredDirectories();
+            const list = treeData.tree
+                .filter(node => node.type === 'blob' && node.path && node.path.toLowerCase().endsWith('.json'))
+                .filter(node => {
+                    if (!directories || directories.length === 0) return true;
+                    return directories.some(dir => {
+                        const normalizedDir = (dir || '').replace(/^\/+/g, '').replace(/\/+$/g, '');
+                        const prefix = normalizedDir ? `${normalizedDir}/` : '';
+                        return node.path.startsWith(prefix);
+                    });
+                })
+                .map(node => {
+                    const dir = node.path.includes('/') ? node.path.substring(0, node.path.lastIndexOf('/')) : '';
+                    return {
+                        type: 'file',
+                        name: node.path.split('/').pop(),
+                        path: node.path,
+                        size: node.size,
+                        __directory: dir,
+                        last_commit: null,
+                        updated_at: null
+                    };
+                })
+                .sort((a, b) => {
+                    const dateA = parseTimestampFromName(a.name);
+                    const dateB = parseTimestampFromName(b.name);
+                    const timeA = dateA ? dateA.getTime() : 0;
+                    const timeB = dateB ? dateB.getTime() : 0;
+                    return timeB - timeA;
+                });
+
+            giteeFileListCache = list;
+
+            if (statusEl) {
+                const parts = [
+                    `共找到 <strong>${list.length}</strong> 个文件${giteeConfig.filePath ? `（当前默认：${escapeHtml(giteeConfig.filePath)}）` : ''}`
+                ];
+                const dirLabels = directories.map(dir => dir || '根目录').join('、');
+                if (dirLabels) {
+                    parts.push(`目录：${escapeHtml(dirLabels)}`);
+                }
+                if (truncated) {
+                    parts.push('<span style="color:#c0392b;">⚠️ 返回数据被截断，仓库文件较多时可能遗漏，请考虑缩小目录范围。</span>');
+                }
+                if (fetchNote) {
+                    parts.push(`<span style="color:#34495e;">数据来源${escapeHtml(fetchNote)}</span>`);
+                }
+                statusEl.innerHTML = parts.join('<br>');
+            }
+
+            return list;
+        } catch (error) {
+            console.error('获取文件列表失败:', error);
+            showToast(`❌ 获取文件列表失败：${error.message}`, 'error', 6000);
+            if (statusEl) {
+                statusEl.innerHTML = `<span style="color:#c0392b;">获取云端文件列表失败：${escapeHtml(error.message)}。请确认 token 权限，或在浏览器控制台查看是否有跨域（CORS）报错。</span>`;
+            }
+            return [];
+        } finally {
+            giteeFileListLoading = false;
+        }
+    }
+
+
+function renderGiteeFileList(list = []) {
+        const statusEl = document.getElementById('cloudFileListStatus');
+        const tbody = document.getElementById('cloudFileTableBody');
+        if (!tbody) return;
+
+        if (!list || list.length === 0) {
+            if (statusEl) {
+                statusEl.textContent = '未找到任何JSON文件，请确认仓库中已上传数据。';
+            }
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="4" style="text-align:center; padding: 25px; color: #999;">暂无文件</td>
+                </tr>`;
+            return;
+        }
+
+        if (statusEl) {
+            const defaultInfo = giteeConfig.filePath ? `（当前默认：${escapeHtml(giteeConfig.filePath)}）` : '';
+            const dirLabels = getConfiguredDirectories().map(dir => dir || '根目录').join('、');
+            statusEl.innerHTML = `共找到 <strong>${list.length}</strong> 个文件，点击“加载”即可恢复到该版本，或“预览”查看内容。${defaultInfo}` +
+                (dirLabels ? `<br>目录：${escapeHtml(dirLabels)}` : '');
+        }
+
+        tbody.innerHTML = '';
+        list.forEach(item => {
+            const tr = document.createElement('tr');
+            const nameTd = document.createElement('td');
+            nameTd.style.padding = '8px';
+            const displayNameHtml = formatFileEntryName(item);
+            if (item.path === giteeConfig.filePath) {
+                tr.style.background = '#fff7e6';
+                nameTd.innerHTML = `${displayNameHtml}<div style="color:#d35400; font-size:12px; margin-top:4px;">当前默认文件</div>`;
+            } else {
+                nameTd.innerHTML = displayNameHtml;
+            }
+
+            const sizeTd = document.createElement('td');
+            sizeTd.style.padding = '8px';
+            sizeTd.textContent = formatFileSize(item.size);
+
+            const dateTd = document.createElement('td');
+            dateTd.style.padding = '8px';
+            const parsedTime = parseTimestampFromName(item.name) || item.last_commit?.committer?.date || item.updated_at;
+            dateTd.textContent = formatDateTime(parsedTime);
+
+            const actionTd = document.createElement('td');
+            actionTd.style.padding = '8px';
+            actionTd.style.display = 'flex';
+            actionTd.style.gap = '8px';
+            actionTd.style.flexWrap = 'wrap';
+
+            const previewBtn = document.createElement('button');
+            previewBtn.className = 'btn btn-primary';
+            previewBtn.textContent = '预览';
+            previewBtn.style.padding = '4px 10px';
+            previewBtn.onclick = () => previewGiteeFile(item.path || uniqueKeyFromFile(item));
+
+            const loadBtn = document.createElement('button');
+            loadBtn.className = 'btn btn-success';
+            loadBtn.textContent = '加载';
+            loadBtn.style.padding = '4px 10px';
+            loadBtn.onclick = () => loadGiteeFile(item.path || uniqueKeyFromFile(item), { setDefault: false });
+
+            const setDefaultBtn = document.createElement('button');
+            setDefaultBtn.className = 'btn btn-warning';
+            setDefaultBtn.textContent = '加载并设为默认';
+            setDefaultBtn.style.padding = '4px 10px';
+            setDefaultBtn.onclick = () => loadGiteeFile(item.path || uniqueKeyFromFile(item), { setDefault: true });
+
+            actionTd.appendChild(previewBtn);
+            actionTd.appendChild(loadBtn);
+            actionTd.appendChild(setDefaultBtn);
+
+            tr.appendChild(nameTd);
+            tr.appendChild(sizeTd);
+            tr.appendChild(dateTd);
+            tr.appendChild(actionTd);
+
+            tbody.appendChild(tr);
+        });
+    }
+
+    async function previewGiteeFile(path) {
+        const success = await pullFromGitee({ path, apply: false, silent: true, reason: 'preview-file' });
+        if (success) {
+            showCloudDataModal();
+            showToast(`👀 已预览 ${path}`, 'info', 2200);
+        }
+    }
+
+    async function loadGiteeFile(path, options = {}) {
+        const { setDefault = false } = options;
+        const success = await pullFromGitee({ path, setDefault, apply: true, silent: false, reason: 'manual-file-select' });
+        if (success) {
+            setHistoryTab('local');
+        }
+    }
+
+    function closeHistoryModal() {
+        document.getElementById('historyModal').classList.remove('show');
+    }
 
      // ==================== 随机抽号功能 ====================
      
@@ -3103,7 +3635,101 @@
         }
     }
 
-    // 推送数据到Gitee
+    // 通用的 Gitee 推送函数（内部使用）
+    async function pushToGiteeInternal(targetPath, message) {
+        const branch = giteeConfig.branch || GITEE_CONFIG.branch || 'master';
+        
+        // 保存当前班级数据
+        if (currentClass && students.length > 0) {
+            allClassesData[currentClass] = JSON.parse(JSON.stringify(students));
+        }
+
+        // 准备JSON数据
+        const jsonData = {
+            version: '1.0',
+            timestamp: new Date().toISOString(),
+            lastModified: new Date().toLocaleString('zh-CN'),
+            classes: allClassesData
+        };
+
+        const content = JSON.stringify(jsonData, null, 2);
+        const base64Content = btoa(unescape(encodeURIComponent(content)));
+
+        // 获取文件SHA
+        let sha = null;
+        let fileExists = false;
+        try {
+            const getResponse = await fetch(
+                `https://gitee.com/api/v5/repos/${giteeConfig.owner}/${giteeConfig.repo}/contents/${targetPath}?access_token=${giteeConfig.token}&ref=${branch}`,
+                { method: 'GET' }
+            );
+            if (getResponse.ok) {
+                const fileData = await getResponse.json();
+                if (fileData && fileData.sha) {
+                    sha = fileData.sha;
+                    fileExists = true;
+                }
+            }
+        } catch (e) {
+            // 文件不存在，继续创建新文件
+        }
+
+        // 构建请求
+        const url = `https://gitee.com/api/v5/repos/${giteeConfig.owner}/${giteeConfig.repo}/contents/${targetPath}`;
+        const body = {
+            access_token: giteeConfig.token,
+            content: base64Content,
+            message: message,
+            branch: branch
+        };
+
+        // 【关键修复】根据 Gitee API 文档：
+        // - 创建新文件应使用 POST 方法，不需要 sha
+        // - 更新已存在文件应使用 PUT 方法，需要提供 sha
+        let response;
+        if (sha) {
+            // 文件已存在，使用 PUT 更新（需要提供 sha）
+            body.sha = sha;
+            console.log('📝 更新已存在文件，SHA:', sha.substring(0, 8));
+            response = await fetch(url, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+        } else {
+            // 文件不存在，使用 POST 创建新文件（不需要 sha）
+            console.log('📝 创建新文件（使用POST方法）');
+            response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+        }
+
+        if (!response.ok) {
+            let errorMsg = '推送失败';
+            try {
+                const error = await response.json();
+                console.error('❌ API错误详情:', error);
+                errorMsg = error.message || error.error || JSON.stringify(error);
+                
+                // 如果是 sha 相关的错误，提供更详细的提示
+                if (error.messages && Array.isArray(error.messages)) {
+                    const shaError = error.messages.find(msg => msg.includes('sha'));
+                    if (shaError) {
+                        errorMsg = `Gitee API要求提供sha字段: ${shaError}\n\n这可能是因为首次在仓库中创建文件时的特殊要求。\n\n解决方案：\n1. 先点击"💾 保存到云端"创建默认文件（grades-data.json）\n2. 然后再使用"📦 保存为备份"功能\n\n一旦仓库中有了第一个文件，后续创建备份文件就可以正常工作了。`;
+                    }
+                }
+            } catch (e) {
+                errorMsg = `HTTP ${response.status}: ${response.statusText}`;
+            }
+            throw new Error(errorMsg);
+        }
+
+        return await response.json();
+    }
+
+    // 推送数据到Gitee（使用通用函数，确保逻辑一致）
     async function pushToGitee() {
         console.log('💾 pushToGitee函数被调用');
 
@@ -3119,105 +3745,43 @@
             showToast('正在推送到Gitee...', 'info', 2000);
             console.log('🚀 开始推送数据');
 
-            // 保存当前班级数据
-            if (currentClass && students.length > 0) {
-                allClassesData[currentClass] = JSON.parse(JSON.stringify(students));
-            }
+            // 使用通用函数推送
+            const targetPath = giteeConfig.filePath || GITEE_CONFIG.filePath || 'grades-data.json';
+            const result = await pushToGiteeInternal(
+                targetPath,
+                `更新成绩数据 - ${new Date().toLocaleString('zh-CN')}`
+            );
 
-            // 准备JSON数据
+            // 更新配置
+            if (result.content && result.content.sha) {
+                giteeConfig.sha = result.content.sha;
+            }
+            giteeConfig.lastSyncTime = new Date().toISOString();
+            saveGiteeConfigToStorage();
+            lastSyncTime = new Date();
+
+            const totalStudents = Object.values(allClassesData).reduce((sum, arr) => sum + arr.length, 0);
+            updateSyncStatus(`已保存 ${totalStudents} 条记录到云端 ${new Date().toLocaleTimeString()}`, 'success');
+            updateGiteeStatus(`已同步 ${new Date().toLocaleTimeString()}`, '#4caf50');
+            console.log('✅ Gitee推送成功');
+
+            // 更新预览数据
             const jsonData = {
                 version: '1.0',
                 timestamp: new Date().toISOString(),
                 lastModified: new Date().toLocaleString('zh-CN'),
                 classes: allClassesData
             };
-
-            const content = JSON.stringify(jsonData, null, 2);
-            const base64Content = btoa(unescape(encodeURIComponent(content)));
-            console.log('📦 数据已编码，大小:', content.length, '字节');
-
-            // 【关键改进】总是重新获取最新的SHA，避免冲突
-            let sha = null;
-            console.log('🔍 获取最新文件SHA...');
-                try {
-                    const getResponse = await fetch(
-                        `https://gitee.com/api/v5/repos/${giteeConfig.owner}/${giteeConfig.repo}/contents/${giteeConfig.filePath}?access_token=${giteeConfig.token}&ref=${giteeConfig.branch}`,
-                        { method: 'GET' }
-                    );
-                    if (getResponse.ok) {
-                        const fileData = await getResponse.json();
-                        sha = fileData.sha;
-                        console.log('✅ 获取SHA成功:', sha.substring(0, 8));
-                } else if (getResponse.status === 404) {
-                    console.log('📝 文件不存在，将创建新文件');
-                } else {
-                    console.warn('⚠ 获取SHA失败，状态码:', getResponse.status);
-                    }
-                } catch (e) {
-                console.log('⚠ 获取SHA异常:', e.message);
-            }
-
-            // 推送到Gitee
-            console.log('📤 正在推送到Gitee API...');
-            const url = `https://gitee.com/api/v5/repos/${giteeConfig.owner}/${giteeConfig.repo}/contents/${giteeConfig.filePath}`;
-            const body = {
-                access_token: giteeConfig.token,
-                content: base64Content,
-                message: `更新成绩数据 - ${new Date().toLocaleString('zh-CN')}`,
-                branch: giteeConfig.branch
+            lastPulledCloudData = jsonData;
+            lastPulledFileMeta = {
+                path: targetPath,
+                size: JSON.stringify(jsonData, null, 2).length,
+                sha: giteeConfig.sha,
+                fetchedAt: new Date().toISOString(),
+                applied: true
             };
-
-            // 如果有SHA，说明文件已存在，需要提供SHA用于更新
-            if (sha) {
-                body.sha = sha;
-                console.log('📝 更新现有文件，SHA:', sha.substring(0, 8));
-            } else {
-                console.log('📝 创建新文件');
-            }
-
-            // Gitee API：创建和更新都使用PUT方法
-            const response = await fetch(url, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(body)
-            });
-
-            console.log('📡 API响应状态:', response.status);
-
-            if (!response.ok) {
-                let errorMsg = '推送失败';
-                try {
-                const error = await response.json();
-                    console.error('❌ API错误详情:', error);
-                    errorMsg = error.message || error.error || errorMsg;
-                    
-                    // 特殊错误处理
-                    if (response.status === 400) {
-                        errorMsg = '请求参数错误，请检查token和仓库配置';
-                    } else if (response.status === 401) {
-                        errorMsg = 'Token无效或已过期，请检查配置';
-                    } else if (response.status === 403) {
-                        errorMsg = '没有权限，请检查Token权限';
-                    } else if (response.status === 404) {
-                        errorMsg = '仓库不存在，请检查owner和repo配置';
-                    }
-                } catch (e) {
-                    errorMsg = `HTTP ${response.status}: ${response.statusText}`;
-                }
-                throw new Error(errorMsg);
-            }
-
-            const result = await response.json();
-            giteeConfig.sha = result.content.sha;
-            giteeConfig.lastSyncTime = new Date().toISOString();
-            saveGiteeConfigToStorage();
-            lastSyncTime = new Date();
-
-            const totalStudents = Object.values(allClassesData).reduce((sum, arr) => sum + arr.length, 0);
-            // 成功推送，底部小字提示
-            updateSyncStatus(`已保存 ${totalStudents} 条记录到云端 ${new Date().toLocaleTimeString()}`, 'success');
-            updateGiteeStatus(`已同步 ${new Date().toLocaleTimeString()}`, '#4caf50');
-            console.log('✅ Gitee推送成功');
+            updateCloudDataPreview();
+            giteeFileListCache = null;
             
             // 添加历史记录
             addHistory('保存到云端', totalStudents, {
@@ -3247,90 +3811,267 @@
         }
     }
 
-    // 从Gitee拉取数据
-    async function pullFromGitee() {
+    // 保存为备份（带时间戳的文件名，不覆盖默认文件）
+    async function pushToGiteeAsBackup() {
+        console.log('📦 pushToGiteeAsBackup函数被调用');
+
         if (syncInProgress) {
             showToast('正在同步中，请稍候...', 'warning');
+            console.log('⚠ 已有同步进行中');
             return;
         }
+
+        // 检查配置是否完整
+        if (!giteeConfig.owner || !giteeConfig.repo || !giteeConfig.token) {
+            showToast('❌ Gitee配置不完整，无法保存备份\n\n请检查：\n1. 仓库所有者(owner)\n2. 仓库名称(repo)\n3. Token', 'error', 6000);
+            console.error('❌ Gitee配置不完整:', {
+                owner: giteeConfig.owner,
+                repo: giteeConfig.repo,
+                token: giteeConfig.token ? '已设置' : '未设置'
+            });
+            return;
+        }
+
+        // 生成带时间戳的文件名，格式：grades-data-20241115-143022.json
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hour = String(now.getHours()).padStart(2, '0');
+        const minute = String(now.getMinutes()).padStart(2, '0');
+        const second = String(now.getSeconds()).padStart(2, '0');
+        
+        // 获取原文件名（不含扩展名）
+        const originalPath = giteeConfig.filePath || GITEE_CONFIG.filePath || 'grades-data.json';
+        const pathParts = originalPath.split('/');
+        const fileName = pathParts.pop() || 'grades-data.json';
+        const baseName = fileName.replace(/\.json$/, '');
+        const directory = pathParts.length > 0 ? pathParts.join('/') + '/' : '';
+        
+        // 生成备份文件名：grades-data-20241115-143022.json
+        const backupFileName = `${baseName}-${year}${month}${day}-${hour}${minute}${second}.json`;
+        const backupPath = directory + backupFileName;
+        
+        console.log('📝 备份配置:', {
+            owner: giteeConfig.owner,
+            repo: giteeConfig.repo,
+            branch: giteeConfig.branch || 'master',
+            backupPath: backupPath
+        });
+
+        try {
+            syncInProgress = true;
+            updateGiteeStatus('备份中...', '#ff9800');
+            showToast(`正在保存备份: ${backupFileName}...`, 'info', 3000);
+            console.log('🚀 开始保存备份到:', backupPath);
+
+            // 使用通用的推送函数，确保逻辑完全一致
+            const result = await pushToGiteeInternal(
+                backupPath,
+                `保存备份 - ${now.toLocaleString('zh-CN')} - 包含11月数据`
+            );
+
+            const totalStudents = Object.values(allClassesData).reduce((sum, arr) => sum + arr.length, 0);
+            
+            // 成功备份，显示提示
+            updateSyncStatus(`已保存备份 ${backupFileName} (${totalStudents}条记录) ${now.toLocaleTimeString()}`, 'success');
+            updateGiteeStatus(`备份完成 ${now.toLocaleTimeString()}`, '#4caf50');
+            console.log('✅ 备份保存成功:', backupPath);
+            
+            showToast(`✅ 备份已保存: ${backupFileName}\n\n共 ${totalStudents} 条记录\n\n⚠️ 这是备份文件，不会覆盖默认的 grades-data.json`, 'success', 6000);
+            
+            // 刷新文件列表缓存，以便在"云端版本"中可以看到新备份
+            giteeFileListCache = null;
+            
+            // 添加历史记录
+            addHistory('保存备份到云端', totalStudents, {
+                '时间': now.toLocaleString('zh-CN'),
+                '备份文件': backupFileName
+            });
+
+        } catch (error) {
+            console.error('❌ 备份保存失败:', error);
+            
+            let userMessage = `备份失败: ${error.message}\n\n`;
+            if (error.message.includes('Token')) {
+                userMessage += '请检查：\n1. Token是否正确\n2. Token是否有写入权限';
+            } else if (error.message.includes('仓库')) {
+                userMessage += '请检查：\n1. 仓库地址是否正确\n2. 仓库是否存在';
+            } else if (error.message.includes('网络') || error.message.includes('Failed to fetch')) {
+                userMessage += '请检查网络连接';
+            } else {
+                userMessage += '请查看控制台获取详细错误信息';
+            }
+            
+            showToast(`❌ ${userMessage}`, 'error', 8000);
+            updateGiteeStatus('备份失败', '#f44336');
+        } finally {
+            syncInProgress = false;
+            console.log('🏁 备份流程结束');
+        }
+    }
+
+    // 从Gitee拉取数据
+    async function pullFromGitee(options = {}) {
+        const {
+            silent = false,
+            reason = 'manual',
+            path = null,
+            setDefault = false,
+            apply = true
+        } = options;
+        const targetPath = (path || giteeConfig.filePath || '').trim();
+        console.log(`🌐 pullFromGitee触发 (${silent ? 'silent' : 'manual'}, reason: ${reason}, path: ${targetPath || '默认'})`);
+
+        if (!targetPath) {
+            if (!silent) {
+                showToast('❌ 尚未设置云端文件路径，无法恢复数据', 'error', 5000);
+            }
+            updateGiteeStatus('配置不完整', '#f44336');
+            return false;
+        }
+
+        if (!giteeConfig.token || !giteeConfig.owner || !giteeConfig.repo) {
+            if (!silent) {
+                showToast('❌ Gitee配置不完整，无法拉取数据', 'error', 5000);
+            }
+            updateGiteeStatus('配置不完整', '#f44336');
+            return false;
+        }
+
+        if (syncInProgress) {
+            if (!silent) {
+                showToast('正在同步中，请稍候...', 'warning');
+            } else {
+                console.log('⚠ 自动拉取时检测到同步进行中，跳过本次');
+            }
+            return false;
+        }
+
+        let success = false;
 
         try {
             syncInProgress = true;
             updateGiteeStatus('拉取中...', '#2196f3');
-            showToast('正在从Gitee拉取数据...', 'info', 2000);
+            const statusMsg = `正在从 ${targetPath} 拉取数据...`;
+            if (silent) {
+                updateSyncStatus(statusMsg, 'info');
+            } else {
+                showToast(statusMsg, 'info', 2500);
+            }
 
-            const url = `https://gitee.com/api/v5/repos/${giteeConfig.owner}/${giteeConfig.repo}/contents/${giteeConfig.filePath}?access_token=${giteeConfig.token}&ref=${giteeConfig.branch}`;
-
+            const segments = targetPath.split('/').filter(Boolean);
+            const url = buildGiteeApiUrl(segments);
             const response = await fetch(url, { method: 'GET' });
 
             if (!response.ok) {
                 if (response.status === 404) {
-                    showToast('<i class="fa-solid fa-triangle-exclamation"></i> Gitee仓库中还没有数据，请先推送', 'warning', 4000);
+                    const msg = `<i class="fa-solid fa-triangle-exclamation"></i> 云端未找到文件：${targetPath}`;
+                    if (!silent) {
+                        showToast(msg, 'warning', 4000);
+                    } else {
+                        updateSyncStatus(msg, 'warning');
+                    }
                     updateGiteeStatus('无数据', '#ff9800');
-                    return;
+                    return false;
                 }
-                throw new Error('拉取失败');
+                throw new Error(`拉取失败（HTTP ${response.status}）`);
             }
 
             const fileData = await response.json();
-            console.log('📦 Gitee返回的数据结构:', fileData);
-
-            // 检查是否返回空数组（文件不存在）
-            if (Array.isArray(fileData) && fileData.length === 0) {
-                console.log('<i class="fa-solid fa-triangle-exclamation"></i> 文件不存在，这是首次使用');
-                throw new Error('文件不存在，请先点击"保存到云端"创建数据文件');
-            }
-
-            if (!fileData.content) {
-                console.error('❌ Gitee返回数据缺少content字段:', fileData);
+            if (!fileData || !fileData.content) {
                 throw new Error('Gitee返回数据格式错误：缺少content字段');
             }
 
-            giteeConfig.sha = fileData.sha;
-
-            // 解码Base64内容（先去除换行符）
-            const base64Content = fileData.content.replace(/\s/g, '');
+            const base64Content = (fileData.content || '').replace(/\s/g, '');
             const content = decodeURIComponent(escape(atob(base64Content)));
             const jsonData = JSON.parse(content);
-            console.log('✅ Base64解码成功');
+            console.log('✅ 成功解码云端数据', { path: targetPath, size: fileData.size });
 
-            // 应用数据
-            if (jsonData.classes) {
+            lastPulledCloudData = jsonData;
+            lastPulledFileMeta = {
+                path: targetPath,
+                size: fileData.size,
+                sha: fileData.sha,
+                fetchedAt: new Date().toISOString(),
+                applied: apply
+            };
+            updateCloudDataPreview();
+
+            if (apply && jsonData.classes) {
                 allClassesData = jsonData.classes;
+                refreshClassSelectorOptions();
 
-                // 如果当前有选中的班级，更新显示
                 if (currentClass && allClassesData[currentClass]) {
                     students = JSON.parse(JSON.stringify(allClassesData[currentClass]));
                     render();
+                } else if (!currentClass && Object.keys(allClassesData).length > 0) {
+                    const firstClass = Object.keys(allClassesData)[0];
+                    selectClass(firstClass);
                 }
 
                 updateClassStatus();
-                saveToLocalStorage();
+                saveToLocalStorage({ skipDirty: true, skipAutoSync: true });
                 giteeConfig.lastSyncTime = new Date().toISOString();
                 saveGiteeConfigToStorage();
                 lastSyncTime = new Date();
 
                 const totalStudents = Object.values(allClassesData).reduce((sum, arr) => sum + arr.length, 0);
-                // 成功拉取，底部小字提示
-                updateSyncStatus(`已从云端加载 ${totalStudents} 条记录 ${new Date().toLocaleTimeString()}`, 'success');
+                updateSyncStatus(`已从 ${targetPath} 加载 ${totalStudents} 条记录 ${new Date().toLocaleTimeString()}`, 'success');
                 updateGiteeStatus(`已同步 ${new Date().toLocaleTimeString()}`, '#4caf50');
-                console.log('✅ Gitee拉取成功');
+                if (!silent) {
+                    showToast(`✅ 已从 ${targetPath} 恢复数据`, 'success', 2600);
+                }
+                success = true;
+            } else {
+                updateSyncStatus(`已获取 ${targetPath}（预览模式）`, 'info');
+                updateGiteeStatus('预览完成', '#2196f3');
+                if (!silent) {
+                    showToast(`👀 已预览 ${targetPath}`, 'info', 2200);
+                }
+                success = true;
+            }
+
+            giteeFileListCache = null;
+
+            if (apply) {
+                if (setDefault) {
+                    giteeConfig.filePath = targetPath;
+                    giteeConfig.sha = fileData.sha;
+                    saveGiteeConfigToStorage();
+                } else if (targetPath === giteeConfig.filePath) {
+                    giteeConfig.sha = fileData.sha;
+                    saveGiteeConfigToStorage();
+                }
+            } else if (setDefault) {
+                giteeConfig.filePath = targetPath;
+                giteeConfig.sha = fileData.sha;
+                saveGiteeConfigToStorage();
             }
 
         } catch (error) {
             console.error('Gitee拉取失败:', error);
-            showToast(`❌ 拉取失败: ${error.message}`, 'error', 5000);
+            const msg = `拉取失败: ${error.message}`;
+            if (!silent) {
+                showToast(`❌ ${msg}`, 'error', 5000);
+            } else {
+                updateSyncStatus(msg, 'warning');
+            }
             updateGiteeStatus('拉取失败', '#f44336');
+            success = false;
         } finally {
             syncInProgress = false;
         }
+
+        return success;
     }
+
 
     // 自动同步（定期拉取）- 已禁用
     let autoSyncTimer = null;
     function startAutoSync() {
         // 已禁用自动同步功能
-        console.log('⚠ 自动同步已禁用，请手动点击"🔄 加载最新数据"按钮');
+        console.log('⚠ 自动同步已禁用，请手动点击"☁️ 从云端恢复"按钮');
         return;
     }
 
@@ -4085,8 +4826,8 @@
         // 定期保存到本地（每5秒）
         setInterval(() => saveToLocalStorage({ skipDirty: true, skipAutoSync: true }), 5000);
 
-        // 显示加载提示
-        showToast('🔄 正在从Gitee同步最新数据...', 'info', 10000);
+        // 显示提示
+        showToast('☁️ 请点击“☁️ 从云端恢复”获取云端数据，或先选择班级后开始录入', 'info', 6000);
 
         // 初始化Gitee同步
         console.log('☁️ 初始化Gitee云同步...');
@@ -4097,37 +4838,9 @@
             autoSync: giteeConfig.autoSync
         });
 
-        // 【关键】强制从Gitee拉取最新数据
-        pullFromGitee()
-            .then(() => {
-                console.log('✅ 已从Gitee同步最新数据');
-                // 成功时底部小字提示
-                updateSyncStatus('云端数据已加载', 'success');
-
-                // 【已禁用】自动同步功能
-                // if (giteeConfig.autoSync) {
-                //     startAutoSync();
-                //     console.log('✅ 自动同步已启动');
-                // }
-            })
-            .catch(err => {
-                console.warn('<i class="fa-solid fa-triangle-exclamation"></i> Gitee拉取失败:', err.message);
-
-                // 判断是否是文件不存在
-                if (err.message.includes('文件不存在')) {
-                    showToast('<i class="fa-solid fa-triangle-exclamation"></i> 首次使用，请点击"💾 保存到云端"创建数据文件', 'warning', 6000);
-                    updateGiteeStatus('未初始化', '#ff9800');
-                } else {
-                    // 网络错误时底部小字提示
-                    updateSyncStatus('离线模式，使用本地数据', 'warning');
-                    updateGiteeStatus('离线模式', '#ff9800');
-                }
-
-                // 【已禁用】自动同步功能
-                // if (giteeConfig.autoSync) {
-                //     startAutoSync();
-                // }
-            });
+        stopAutoSync();
+        updateSyncStatus('尚未加载云端数据，请点击“☁️ 从云端恢复”按钮', 'warning');
+        updateGiteeStatus('待手动加载', '#ff9800');
 
         // 如果没有选择班级，提示用户
         if (!currentClass) {
@@ -4154,6 +4867,3 @@
     </script>
 </body>
 </html>
-
-
-

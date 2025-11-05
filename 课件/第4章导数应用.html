@@ -14,7 +14,7 @@
         window.MathJax = {
             tex: {
                 inlineMath: [['$', '$'], ['\\(', '\\)']],
-                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                displayMath: [['$', '$'], ['\\[', '\\]']],
                 processEscapes: true,
                 processEnvironments: true
             },
@@ -233,6 +233,44 @@
             font-size: 16px;
             border: none;
             box-shadow: none;
+        }
+
+        /* 减少MathJax公式和中文之间的间距 */
+        .left-content .MathJax, 
+        .left-content .MathJax_SVG,
+        .left-content span[class*="MathJax"],
+        .left-content .MathJax_Display {
+            display: inline !important;
+            margin: 0 0.1em !important;
+            padding: 0 !important;
+            vertical-align: baseline !important;
+        }
+        
+        .left-content p .MathJax, 
+        .left-content p .MathJax_SVG,
+        .left-content p span[class*="MathJax"] {
+            margin-left: 0.05em !important;
+            margin-right: 0.05em !important;
+            padding: 0 !important;
+        }
+        
+        /* 确保行内公式和文字紧密排列 */
+        .left-content p {
+            word-spacing: normal;
+            letter-spacing: normal;
+        }
+        
+        /* 针对MathJax SVG的特定样式 */
+        .left-content .MathJax_SVG svg {
+            display: inline-block;
+            vertical-align: middle;
+        }
+        
+        /* 行内公式特别紧凑 */
+        .left-content p .MathJax_SVG,
+        .left-content p .MathJax {
+            margin-left: 0.05em !important;
+            margin-right: 0.05em !important;
         }
 
         .highlight {
@@ -860,14 +898,7 @@
 <div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
 <h2>罗尔定理</h2>
 <div class="formula-highlight">
-<p><strong>定理内容：</strong></p>
-<p>若函数 $f(x)$ 满足：</p>
-<ol style="text-align: left; margin: 15px 0; padding-left: 40px;">
-<li>在闭区间 $[a,b]$ 上连续</li>
-<li>在开区间 $(a,b)$ 内可导</li>
-<li>$f(a) = f(b)$（端点函数值相等）</li>
-</ol>
-<p>则至少存在一点 $\xi \in (a,b)$，使得 $f'(\xi) = 0$</p>
+<p><strong>定理内容：</strong>若函数 $f(x)$ 满足：①在闭区间 $[a,b]$ 上连续；②在开区间 $(a,b)$ 内可导；③$f(a) = f(b)$（端点函数值相等）。则至少存在一点 $\xi \in (a,b)$，使得 $f'(\xi) = 0$</p>
 </div>
 <h3>几何意义</h3>
 <p>如果一条光滑曲线的两端在同一水平高度，那么在中间某处<span class="highlight">必定存在水平切线</span>。</p>
@@ -879,14 +910,7 @@
 <div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
 <h2>拉格朗日中值定理</h2>
 <div class="formula-highlight">
-<p><strong>定理内容：</strong></p>
-<p>若函数 $f(x)$ 满足：</p>
-<ol style="text-align: left; margin: 15px 0; padding-left: 40px;">
-<li>在闭区间 $[a,b]$ 上连续</li>
-<li>在开区间 $(a,b)$ 内可导</li>
-</ol>
-<p>则至少存在一点 $\xi \in (a,b)$，使得</p>
-$$f'(\xi) = \frac{f(b) - f(a)}{b - a}$$
+<p><strong>定理内容：</strong>若函数 $f(x)$ 满足：①在闭区间 $[a,b]$ 上连续；②在开区间 $(a,b)$ 内可导。则至少存在一点 $\xi \in (a,b)$，使得 $f'(\xi) = \frac{f(b) - f(a)}{b - a}$</p>
 </div>
 <h3>几何意义</h3>
 <p>曲线上<span class="highlight">两点连线的斜率</span>（平均变化率）等于曲线在<span class="highlight">某一点的切线斜率</span>（瞬时变化率）。</p>
@@ -899,15 +923,7 @@ $$f'(\xi) = \frac{f(b) - f(a)}{b - a}$$
 <div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
 <h2>柯西中值定理</h2>
 <div class="formula-highlight">
-<p><strong>定理内容：</strong></p>
-<p>若函数 $f(x)$ 和 $g(x)$ 满足：</p>
-<ol style="text-align: left; margin: 15px 0; padding-left: 40px;">
-<li>在闭区间 $[a,b]$ 上连续</li>
-<li>在开区间 $(a,b)$ 内可导</li>
-<li>$g'(x) \neq 0$ 在 $(a,b)$ 内成立</li>
-</ol>
-<p>则至少存在一点 $\xi \in (a,b)$，使得</p>
-$$\frac{f'(\xi)}{g'(\xi)} = \frac{f(b) - f(a)}{g(b) - g(a)}$$
+<p><strong>定理内容：</strong>若函数 $f(x)$ 和 $g(x)$ 满足：①在闭区间 $[a,b]$ 上连续；②在开区间 $(a,b)$ 内可导；③$g'(x) \neq 0$ 在 $(a,b)$ 内成立。则至少存在一点 $\xi \in (a,b)$，使得 $\frac{f'(\xi)}{g'(\xi)} = \frac{f(b) - f(a)}{g(b) - g(a)}$</p>
 </div>
 <h3>与拉格朗日定理的关系</h3>
 <p>当 $g(x) = x$ 时，柯西中值定理就退化为<span class="highlight">拉格朗日中值定理</span>。</p>
@@ -915,6 +931,513 @@ $$\frac{f'(\xi)}{g'(\xi)} = \frac{f(b) - f(a)}{g(b) - g(a)}$$
 <p><strong>应用：</strong>洛必达法则的理论基础</p>
 </div>
 </div><div class="right-visual"><div id="vis-cauchy"></div></div></div></div>
+<!-- 第7.5页：微分中值定理三合一可视化 -->
+<div class="slide"><div class="slide-container" style="display: flex;"><div class="left-content" style="width: 0; flex-shrink: 0; padding: 0; margin: 0; overflow: hidden; display: none; border: none;"></div><div class="right-visual" style="width: 100%; flex: 1; height: 100vh; padding: 0; overflow: hidden;">
+<div id="mvt-interactive-vis" style="width: 100%; height: 100%; overflow: auto; background: #FAFAFA; padding: 20px;">
+<!-- 引入Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+    #mvt-interactive-vis {
+        font-family: 'Inter', 'Helvetica Neue', 'Arial', 'sans-serif';
+        overscroll-behavior: none;
+    }
+    /* 自定义滑块样式 */
+    #mvt-interactive-vis input[type=range]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 20px;
+        height: 20px;
+        background: #4F46E5;
+        cursor: pointer;
+        border-radius: 50%;
+        margin-top: -6px;
+    }
+    #mvt-interactive-vis input[type=range]::-moz-range-thumb {
+        width: 20px;
+        height: 20px;
+        background: #4F46E5;
+        cursor: pointer;
+        border-radius: 50%;
+    }
+    #mvt-interactive-vis canvas {
+        touch-action: none;
+    }
+    /* 选项卡激活样式 */
+    #mvt-interactive-vis .tab-btn.active {
+        background-color: #4F46E5;
+        color: white;
+        font-weight: 600;
+    }
+</style>
+<div class="bg-gray-100 text-gray-800 flex flex-col items-center justify-center min-h-full p-4">
+
+    <div class="w-full max-w-4xl bg-white shadow-2xl rounded-2xl p-6 md:p-10">
+
+
+
+        <!-- 1. 选项卡按钮 -->
+        <div class="flex justify-center rounded-lg shadow-sm mb-6" role="tablist">
+            <button id="tab-lagrange" class="tab-btn active w-1/3 p-3 text-sm md:text-base font-medium text-gray-700 bg-gray-100 rounded-l-lg hover:bg-gray-200 transition-all" role="tab">
+                拉格朗日 (标准)
+            </button>
+            <button id="tab-rolle" class="tab-btn w-1/3 p-3 text-sm md:text-base font-medium text-gray-700 bg-gray-100 border-l border-r border-gray-200 hover:bg-gray-200 transition-all" role="tab">
+                罗尔 (特殊)
+            </button>
+            <button id="tab-cauchy" class="tab-btn w-1/3 p-3 text-sm md:text-base font-medium text-gray-700 bg-gray-100 rounded-r-lg hover:bg-gray-200 transition-all" role="tab">
+                柯西 (加强)
+            </button>
+        </div>
+
+        <!-- 2. 可视化区域 -->
+        <div class="w-full aspect-[4/3] bg-gray-50 border-2 border-gray-200 rounded-lg overflow-hidden shadow-inner relative">
+            <canvas id="mvtCanvas" style="width: 100%; height: 100%; display: block;"></canvas>
+        </div>
+
+        <!-- 3. 控制区域 (Lagrange 和 Cauchy 共用) -->
+        <div id="controls-sliders" class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+            <!-- A点控制 -->
+            <div class="bg-blue-50 p-4 rounded-lg shadow">
+                <label for="sliderA" class="text-lg font-medium text-blue-800 flex justify-between">
+                    起点 A (蓝色)
+                    <span id="labelA" class="font-bold">0.5</span>
+                </label>
+                <input type="range" id="sliderA" min="0.1" max="4.5" value="0.5" step="0.01" class="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer mt-2">
+            </div>
+            
+            <!-- B点控制 -->
+            <div class="bg-green-50 p-4 rounded-lg shadow">
+                <label for="sliderB" class="text-lg font-medium text-green-800 flex justify-between">
+                    终点 B (绿色)
+                    <span id="labelB" class="font-bold">8.0</span>
+                </label>
+                <input type="range" id="sliderB" min="5.0" max="9.5" value="8.0" step="0.01" class="w-full h-2 bg-green-200 rounded-lg appearance-none cursor-pointer mt-2">
+            </div>
+        </div>
+
+        <!-- 4. 柯西定理的专属数据显示 -->
+        <div id="cauchy-display" class="hidden mt-6 p-4 bg-purple-50 rounded-lg shadow text-center">
+            <h3 class="text-xl font-semibold text-purple-800">柯西 (Cauchy) - "两车"比值</h3>
+            <div class="grid grid-cols-2 gap-4 mt-2">
+                <div class="p-3 bg-white rounded shadow-sm">
+                    <div class="text-sm text-gray-500">平均比值 (全程)</div>
+                    <div id="cauchy-avg-ratio" class="text-2xl font-bold text-purple-700">0.00</div>
+                </div>
+                <div class="p-3 bg-white rounded shadow-sm">
+                    <div class="text-sm text-gray-500">瞬时比值 (在 C 点)</div>
+                    <div id="cauchy-inst-ratio" class="text-2xl font-bold text-red-600">0.00</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. 解释区域 -->
+        <div class="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+            <!-- 解释内容会由 JS 动态插入 -->
+            <div id="explanation-content"></div>
+            
+            <div id="matchMessage" class="text-center text-2xl font-bold text-green-600 mt-3 h-8 transition-opacity duration-300 opacity-0">
+                <!-- 消息会由 JS 动态插入 -->
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+            // 等待DOM加载完成
+            (function() {
+                let initialized = false;
+                
+                function initMVT() {
+                    // 防止重复初始化
+                    if (initialized) return;
+                    
+                    // --- 1. 初始化 ---
+                    const canvas = document.getElementById('mvtCanvas');
+                    if (!canvas) {
+                        return;
+                    }
+                    
+                    const slide = canvas.closest('.slide');
+                    if (!slide || !slide.classList.contains('active')) {
+                        return;
+                    }
+                    
+                    initialized = true;
+                const ctx = canvas.getContext('2d');
+                const sliderA = document.getElementById('sliderA');
+                const sliderB = document.getElementById('sliderB');
+                const labelA = document.getElementById('labelA');
+                const labelB = document.getElementById('labelB');
+                const matchMessage = document.getElementById('matchMessage');
+                
+                const controlsSliders = document.getElementById('controls-sliders');
+                const cauchyDisplay = document.getElementById('cauchy-display');
+                const explanationContent = document.getElementById('explanation-content');
+                
+                const tabLagrange = document.getElementById('tab-lagrange');
+                const tabRolle = document.getElementById('tab-rolle');
+                const tabCauchy = document.getElementById('tab-cauchy');
+                const tabs = [tabLagrange, tabRolle, tabCauchy];
+
+                var w, h; // Canvas 宽高
+                var c = 0; // 红色切线 (瞬时) 的 x 坐标
+                var cDirection = 1; // 扫描方向
+                var lastA = -1, lastB = -1;
+
+                var currentTheorem = 'lagrange'; // 'lagrange', 'rolle', 'cauchy'
+
+                // --- 2. 数学函数定义 ---
+                
+                // Lagrange (f)
+                const f_lag = (x) => Math.sin(x * 0.8) * 3 + x * 0.5 + 5;
+                const f_lag_prime = (x) => Math.cos(x * 0.8) * 0.8 * 3 + 0.5;
+                
+                // Rolle (g)
+                const f_rolle = (x) => Math.cos(x) * 5 + 10;
+                const f_rolle_prime = (x) => -Math.sin(x) * 5;
+                const rolle_a = 1.0;
+                const rolle_b = 1.0 + 2 * Math.PI; // 约 7.28
+                
+                // Cauchy (f & g)
+                const f_cauchy = f_lag; // f(x)
+                const f_cauchy_prime = f_lag_prime; // f'(x)
+                const g_cauchy = (x) => x * x * 0.1 + 2; // g(x)
+                const g_cauchy_prime = (x) => x * 0.2; // g'(x)
+
+                // --- 3. 坐标转换 ---
+                const minX = 0, maxX = 10;
+                const minY = 0, maxY = 20;
+                const mapX = (x) => w * (x - minX) / (maxX - minX);
+                const mapY = (y) => h * (1 - (y - minY) / (maxY - minY));
+
+                // --- 4. 核心绘图函数 ---
+
+                function resizeCanvas() {
+                    const container = canvas.parentElement;
+                    if (!container || container.clientWidth === 0 || container.clientHeight === 0) {
+                        setTimeout(resizeCanvas, 100);
+                        return;
+                    }
+                    w = container.clientWidth;
+                    h = container.clientHeight;
+                    const dpr = window.devicePixelRatio || 1;
+                    canvas.width = w * dpr;
+                    canvas.height = h * dpr;
+                    ctx.scale(dpr, dpr);
+                    canvas.style.width = w + 'px';
+                    canvas.style.height = h + 'px';
+                }
+
+                function drawAxes() {
+                    ctx.strokeStyle = '#ccc';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(mapX(minX), mapY(minY)); ctx.lineTo(mapX(minX), mapY(maxY));
+                    ctx.moveTo(mapX(minX), mapY(minY)); ctx.lineTo(mapX(maxX), mapY(minY));
+                    ctx.stroke();
+                }
+
+                // 通用：画函数曲线
+                function drawFunction(f, color = '#333', lineWidth = 3) {
+                    ctx.strokeStyle = color;
+                    ctx.lineWidth = lineWidth;
+                    ctx.beginPath();
+                    ctx.moveTo(mapX(minX), mapY(f(minX)));
+                    for (let x = minX; x <= maxX; x += 0.1) {
+                        ctx.lineTo(mapX(x), mapY(f(x)));
+                    }
+                    ctx.stroke();
+                }
+
+                // 通用：画点
+                function drawPoint(x, y, color = 'red', radius = 8) {
+                    ctx.fillStyle = color;
+                    ctx.beginPath();
+                    ctx.arc(mapX(x), mapY(y), radius, 0, 2 * Math.PI);
+                    ctx.fill();
+                }
+
+                // 通用：画割线
+                function drawSecant(f, a, b, color = 'rgba(37, 99, 235, 0.8)', lineWidth = 5) {
+                    const pA = { x: mapX(a), y: mapY(f(a)) };
+                    const pB = { x: mapX(b), y: mapY(f(b)) };
+                    ctx.strokeStyle = color;
+                    ctx.lineWidth = lineWidth;
+                    ctx.beginPath();
+                    ctx.moveTo(pA.x, pA.y);
+                    ctx.lineTo(pB.x, pB.y);
+                    ctx.stroke();
+                    drawPoint(a, f(a), '#2563EB', 8);
+                    drawPoint(b, f(b), '#16A34A', 8);
+                }
+
+                // 通用：画切线
+                function drawTangent(f, f_prime_val, c, color = 'red', lineWidth = 2) {
+                    const pC = { x: mapX(c), y: mapY(f(c)) };
+                    const m_inst = f_prime_val;
+                    const x1 = c - 2, y1 = f(c) + m_inst * (x1 - c);
+                    const x2 = c + 2, y2 = f(c) + m_inst * (x2 - c);
+                    ctx.strokeStyle = color;
+                    ctx.lineWidth = lineWidth;
+                    ctx.beginPath();
+                    ctx.moveTo(mapX(x1), mapY(y1));
+                    ctx.lineTo(mapX(x2), mapY(y2));
+                    ctx.stroke();
+                    drawPoint(c, f(c), color, 6);
+                }
+
+                // --- 5. UI 更新 (切换选项卡) ---
+                
+                const explanations = {
+                    lagrange: `
+                        <h3 class="text-xl font-semibold mb-3 text-gray-700">拉格朗日 (标准版)</h3>
+                        <div class="flex items-center mb-2">
+                            <div class="w-10 h-1 bg-blue-500 rounded-full mr-3"></div>
+                            <span class="text-gray-600"><strong>蓝色粗线:</strong> 代表"<strong>平均速度</strong>"。</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-10 h-1 bg-red-500 rounded-full mr-3"></div>
+                            <span class="text-gray-600"><strong>红色细线:</strong> 代表"<strong>瞬时速度</strong>"。</span>
+                        </div>
+                        <p class="mt-4 text-center text-lg font-medium text-indigo-600">
+                            拖动滑块！红线在扫描时，总有某一刻会和蓝线<strong>完全平行</strong>。
+                        </p>`,
+                    rolle: `
+                        <h3 class="text-xl font-semibold mb-3 text-gray-700">罗尔 (特殊版)</h3>
+                        <p class="text-gray-600 mb-2">这是"拉格朗日"的特殊情况：当起点 A 和终点 B 一样高时（回到原地）。</p>
+                        <div class="flex items-center mb-2">
+                            <div class="w-10 h-1 bg-blue-500 rounded-full mr-3"></div>
+                            <span class="text-gray-600"><strong>蓝色粗线:</strong> "平均速度" 为 0 (因为没位移)。</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-10 h-1 bg-red-500 rounded-full mr-3"></div>
+                            <span class="text-gray-600"><strong>红色细线:</strong> "瞬时速度"在扫描。</span>
+                        </div>
+                        <p class="mt-4 text-center text-lg font-medium text-indigo-600">
+                            定理说：红线在扫描时，一定有某一刻也会是<strong>水平的（速度为0）</strong>。
+                        </p>`,
+                    cauchy: `
+                        <h3 class="text-xl font-semibold mb-3 text-gray-700">柯西 (加强版)</h3>
+                        <p class="text-gray-600 mb-2">这是"两辆车"(黑色曲线f, 紫色曲线g)的比赛。我们比较的是它们速度的<strong>比值</strong>。</p>
+                        <div class="flex items-center mb-2">
+                            <div class="w-10 h-1 bg-purple-700 rounded-full mr-3"></div>
+                            <span class="text-gray-600"><strong>平均比值:</strong> <code>(f(b)-f(a)) / (g(b)-g(a))</code></span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-10 h-1 bg-red-500 rounded-full mr-3"></div>
+                            <span class="text-gray-600"><strong>瞬时比值:</strong> <code>f'(c) / g'(c)</code> (在C点)</span>
+                        </div>
+                        <p class="mt-4 text-center text-lg font-medium text-indigo-600">
+                            拖动滑块！在 C 点扫描时，看下面的数字，总有某一刻<strong>两个比值会相等</strong>。
+                        </p>`
+                };
+
+                const matchMessages = {
+                    lagrange: "✨ 平行了！平均速度 = 瞬时速度 ✨",
+                    rolle: "✨ 水平了！瞬时速度为 0 ✨",
+                    cauchy: "✨ 比值相等了！ ✨"
+                };
+
+                function updateUI(theorem) {
+                    currentTheorem = theorem;
+                    tabs.forEach(tab => tab.classList.remove('active'));
+                    
+                    if (theorem === 'lagrange') {
+                        tabLagrange.classList.add('active');
+                        controlsSliders.style.display = 'grid';
+                        cauchyDisplay.style.display = 'none';
+                    } else if (theorem === 'rolle') {
+                        tabRolle.classList.add('active');
+                        controlsSliders.style.display = 'none';
+                        cauchyDisplay.style.display = 'none';
+                        c = rolle_a; // 重置扫描
+                    } else if (theorem === 'cauchy') {
+                        tabCauchy.classList.add('active');
+                        controlsSliders.style.display = 'grid';
+                        cauchyDisplay.style.display = 'block';
+                    }
+                    
+                    explanationContent.innerHTML = explanations[theorem];
+                    matchMessage.innerHTML = matchMessages[theorem];
+                    matchMessage.style.opacity = '0';
+                }
+
+                // --- 6. 动画循环 ---
+                function animate() {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    drawAxes();
+
+                    let a = parseFloat(sliderA.value);
+                    let b = parseFloat(sliderB.value);
+                    if (b <= a + 0.5) { // 确保 b > a
+                        b = a + 0.5;
+                        sliderB.value = b;
+                    }
+                    if (a !== lastA || b !== lastB) { // 重置扫描
+                        c = a;
+                        cDirection = 1;
+                        lastA = a;
+                        lastB = b;
+                    }
+                    labelA.textContent = a.toFixed(1);
+                    labelB.textContent = b.toFixed(1);
+
+                    let isMatch = false;
+
+                    switch (currentTheorem) {
+                        case 'lagrange':
+                            drawFunction(f_lag);
+                            const m_avg_lag = (f_lag(b) - f_lag(a)) / (b - a);
+                            const m_inst_lag = f_lag_prime(c);
+                            
+                            drawSecant(f_lag, a, b);
+                            drawTangent(f_lag, m_inst_lag, c, 'rgba(239, 68, 68, 0.9)');
+                            
+                            if (Math.abs(m_avg_lag - m_inst_lag) < 0.03) {
+                                isMatch = true;
+                                drawTangent(f_lag, m_inst_lag, c, '#16A34A', 6); // 绿色高亮
+                            }
+                            c += (cDirection * 0.05);
+                            if (c > b || c < a) cDirection *= -1;
+                            c = Math.max(a, Math.min(b, c));
+                            break;
+                        
+                        case 'rolle':
+                            drawFunction(f_rolle);
+                            const m_avg_rolle = (f_rolle(rolle_b) - f_rolle(rolle_a)) / (rolle_b - rolle_a); // (值为 0)
+                            const m_inst_rolle = f_rolle_prime(c);
+
+                            drawSecant(f_rolle, rolle_a, rolle_b); // 会画一条水平线
+                            drawTangent(f_rolle, m_inst_rolle, c, 'rgba(239, 68, 68, 0.9)');
+
+                            if (Math.abs(m_inst_rolle) < 0.05) { // 检查瞬时斜率是否接近 0
+                                isMatch = true;
+                                drawTangent(f_rolle, m_inst_rolle, c, '#16A34A', 6);
+                            }
+                            c += (cDirection * 0.05);
+                            if (c > rolle_b || c < rolle_a) cDirection *= -1;
+                            c = Math.max(rolle_a, Math.min(rolle_b, c));
+                            break;
+                        
+                        case 'cauchy':
+                            // 画两条曲线
+                            drawFunction(f_cauchy, '#333', 3); // f(x)
+                            drawFunction(g_cauchy, '#7E22CE', 2); // g(x)
+
+                            // 画 A, B 点
+                            drawPoint(a, f_cauchy(a), '#2563EB', 8);
+                            drawPoint(b, f_cauchy(b), '#16A34A', 8);
+                            drawPoint(a, g_cauchy(a), '#2563EB', 8);
+                            drawPoint(b, g_cauchy(b), '#16A34A', 8);
+
+                            // 画 C 点
+                            drawPoint(c, f_cauchy(c), 'red', 6);
+                            drawPoint(c, g_cauchy(c), 'red', 6);
+                            
+                            // 计算比值
+                            const avg_ratio = (f_cauchy(b) - f_cauchy(a)) / (g_cauchy(b) - g_cauchy(a));
+                            const inst_ratio = f_cauchy_prime(c) / g_cauchy_prime(c); // g'(c) 不为 0 (因为 a > 0.1)
+
+                            // 更新数字显示
+                            document.getElementById('cauchy-avg-ratio').textContent = avg_ratio.toFixed(3);
+                            document.getElementById('cauchy-inst-ratio').textContent = inst_ratio.toFixed(3);
+                            
+                            if (Math.abs(avg_ratio - inst_ratio) < 0.05) {
+                                isMatch = true;
+                                // 高亮 C 点
+                                drawPoint(c, f_cauchy(c), '#16A34A', 10);
+                                drawPoint(c, g_cauchy(c), '#16A34A', 10);
+                            }
+                            c += (cDirection * 0.05);
+                            if (c > b || c < a) cDirection *= -1;
+                            c = Math.max(a, Math.min(b, c));
+                            break;
+                    }
+                    
+                    matchMessage.style.opacity = isMatch ? '1' : '0';
+                    requestAnimationFrame(animate);
+                }
+
+                // --- 7. 启动 ---
+                tabLagrange.addEventListener('click', () => updateUI('lagrange'));
+                tabRolle.addEventListener('click', () => updateUI('rolle'));
+                tabCauchy.addEventListener('click', () => updateUI('cauchy'));
+                
+                window.addEventListener('resize', resizeCanvas);
+
+                resizeCanvas();
+                updateUI('lagrange'); // 默认显示拉格朗日
+                c = parseFloat(sliderA.value); // 初始化 c
+                animate();
+            }
+            
+            // 等待DOM加载完成后再初始化
+            function tryInit() {
+                const canvas = document.getElementById('mvtCanvas');
+                if (!canvas) {
+                    setTimeout(tryInit, 200);
+                    return;
+                }
+                
+                const slide = canvas.closest('.slide');
+                if (!slide) {
+                    setTimeout(tryInit, 200);
+                    return;
+                }
+                
+                // 如果slide已激活，初始化
+                if (slide.classList.contains('active')) {
+                    initMVT();
+                } else {
+                    // 否则等待激活
+                    setTimeout(tryInit, 200);
+                }
+            }
+            
+            // 监听slide激活事件
+            function observeSlideActivation() {
+                const canvas = document.getElementById('mvtCanvas');
+                if (!canvas) {
+                    setTimeout(observeSlideActivation, 100);
+                    return;
+                }
+                
+                const slide = canvas.closest('.slide');
+                if (slide) {
+                    // 使用MutationObserver监听slide的class变化
+                    const observer = new MutationObserver(function(mutations) {
+                        mutations.forEach(function(mutation) {
+                            if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                                if (slide.classList.contains('active')) {
+                                    setTimeout(() => {
+                                        if (!initialized) {
+                                            initMVT();
+                                        }
+                                    }, 100);
+                                }
+                            }
+                        });
+                    });
+                    observer.observe(slide, { attributes: true, attributeFilter: ['class'] });
+                }
+                
+                // 如果slide已经激活，立即初始化
+                if (slide && slide.classList.contains('active')) {
+                    setTimeout(tryInit, 100);
+                } else {
+                    setTimeout(tryInit, 200);
+                }
+            }
+            
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', observeSlideActivation);
+            } else {
+                observeSlideActivation();
+            }
+        })();
+    </script>
+</div>
+</div>
+</div></div></div>
 <!-- 第8页：第二部分过渡页 -->
 <div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
 <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; text-align: center;">
@@ -931,17 +1454,10 @@ $$\frac{f'(\xi)}{g'(\xi)} = \frac{f(b) - f(a)}{g(b) - g(a)}$$
 <h2>洛必达法则</h2>
 <p>用于求解<span class="highlight">未定式极限</span>的重要工具。</p>
 <div class="formula-highlight">
-<p><strong>定理：</strong>若 $\lim\limits_{x \to a} f(x) = \lim\limits_{x \to a} g(x) = 0$ 或 $\pm\infty$，且 $g'(x) \neq 0$，则</p>
-$$\lim_{x \to a} \frac{f(x)}{g(x)} = \lim_{x \to a} \frac{f'(x)}{g'(x)}$$
+<p><strong>定理：</strong>若 $\lim\limits_{x \to a} f(x) = \lim\limits_{x \to a} g(x) = 0$ 或 $\pm\infty$，且 $g'(x) \neq 0$，则 $\lim_{x \to a} \frac{f(x)}{g(x)} = \lim_{x \to a} \frac{f'(x)}{g'(x)}$</p>
 </div>
 <h3>适用的未定式类型</h3>
-<ul>
-<li>$\frac{0}{0}$ 型</li>
-<li>$\frac{\infty}{\infty}$ 型</li>
-<li>$0 \cdot \infty$ 型（转化后使用）</li>
-<li>$\infty - \infty$ 型（转化后使用）</li>
-<li>$1^{\infty}$、$0^0$、$\infty^0$ 型（取对数后使用）</li>
-</ul>
+<p>$\frac{0}{0}$ 型；$\frac{\infty}{\infty}$ 型；$0 \cdot \infty$ 型（转化后使用）；$\infty - \infty$ 型（转化后使用）；$1^{\infty}$、$0^0$、$\infty^0$ 型（取对数后使用）</p>
 <div class="note">
 <p><strong>注意：</strong>使用前必须验证条件，可能需要多次应用</p>
 </div>
@@ -950,25 +1466,9 @@ $$\lim_{x \to a} \frac{f(x)}{g(x)} = \lim_{x \to a} \frac{f'(x)}{g'(x)}$$
 <div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
 <h2>洛必达法则解题步骤</h2>
 <h3>标准解题流程</h3>
-<div class="example">
-<p><strong>第一步：验证未定式</strong></p>
-<p>检查是否为 $\frac{0}{0}$ 或 $\frac{\infty}{\infty}$ 型</p>
-</div>
-<div class="example">
-<p><strong>第二步：求导</strong></p>
-<p>分别对分子和分母求导：$\frac{f'(x)}{g'(x)}$</p>
-</div>
-<div class="example">
-<p><strong>第三步：计算极限</strong></p>
-<p>如果仍是未定式，重复应用法则</p>
-</div>
+<p><strong>第一步：验证未定式</strong>检查是否为 $\frac{0}{0}$ 或 $\frac{\infty}{\infty}$ 型；<strong>第二步：求导</strong>分别对分子和分母求导：$\frac{f'(x)}{g'(x)}$；<strong>第三步：计算极限</strong>如果仍是未定式，重复应用法则</p>
 <h3>常见题型解法</h3>
-<div class="theorem">
-<p><strong>$\frac{0}{0}$ 型：</strong>直接应用法则</p>
-<p><strong>$0 \cdot \infty$ 型：</strong>化为 $\frac{0}{\frac{1}{\infty}} = \frac{0}{0}$</p>
-<p><strong>$\infty - \infty$ 型：</strong>通分化为 $\frac{0}{0}$ 或 $\frac{\infty}{\infty}$</p>
-<p><strong>$1^{\infty}$ 型：</strong>取对数后应用</p>
-</div>
+<p><strong>$\frac{0}{0}$ 型：</strong>直接应用法则；<strong>$0 \cdot \infty$ 型：</strong>化为 $\frac{0}{\frac{1}{\infty}} = \frac{0}{0}$；<strong>$\infty - \infty$ 型：</strong>通分化为 $\frac{0}{0}$ 或 $\frac{\infty}{\infty}$；<strong>$1^{\infty}$ 型：</strong>取对数后应用</p>
 </div><div class="right-visual"><div id="vis-lhopital-examples"></div></div></div></div>
 <!-- 第11页：第三部分过渡页 -->
 <div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
@@ -985,12 +1485,7 @@ $$\lim_{x \to a} \frac{f(x)}{g(x)} = \lim_{x \to a} \frac{f'(x)}{g'(x)}$$
 <div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
 <h2>导数是什么？</h2>
 <h3>瞬时变化率</h3>
-<p>导数就是函数在某一点的<span class="highlight">瞬时变化率</span>。</p>
-<ul>
-<li>速度是位置的变化率</li>
-<li>加速度是速度的变化率</li>
-<li>成本变化率告诉我们增产的代价</li>
-</ul>
+<p>导数就是函数在某一点的<span class="highlight">瞬时变化率</span>。速度是位置的变化率；加速度是速度的变化率；成本变化率告诉我们增产的代价。</p>
 <div class="math-formula">
                 $f'(x) = \lim\limits_{\Delta x \to 0} \frac{f(x+\Delta x) - f(x)}{\Delta x}$
             </div>
@@ -1004,75 +1499,46 @@ $$\lim_{x \to a} \frac{f(x)}{g(x)} = \lim_{x \to a} \frac{f'(x)}{g'(x)}$$
                 切线方程：$y - f(x_0) = f'(x_0)(x - x_0)$
             </div>
 <h3>斜率与函数行为</h3>
-<ul>
-<li>$f'(x) &gt; 0$：切线向上倾斜，函数上升</li>
-<li>$f'(x) &lt; 0$：切线向下倾斜，函数下降</li>
-<li>$f'(x) = 0$：切线水平，可能是极值点</li>
-</ul>
+<p>$f'(x) &gt; 0$：切线向上倾斜，函数上升；$f'(x) &lt; 0$：切线向下倾斜，函数下降；$f'(x) = 0$：切线水平，可能是极值点</p>
 </div><div class="right-visual"><div id="vis-tangent-line"></div></div></div></div>
 <!-- 第14页：导数与单调性 -->
 <div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
 <h2>用导数判断单调性</h2>
 <p>导数的符号决定了函数的<span class="highlight">增减性</span>：</p>
 <div class="formula-rule">
-<p>若 $f'(x) &gt; 0$，则 $f(x)$ 在该区间<span class="highlight">单调递增 ↗</span></p>
-<p>若 $f'(x) &lt; 0$，则 $f(x)$ 在该区间<span class="highlight">单调递减 ↘</span></p>
+<p>若 $f'(x) &gt; 0$，则 $f(x)$ 在该区间<span class="highlight">单调递增 ↗</span>；若 $f'(x) &lt; 0$，则 $f(x)$ 在该区间<span class="highlight">单调递减 ↘</span></p>
 </div>
 <h3>判断步骤</h3>
-<ol>
-<li>求导数 $f'(x)$</li>
-<li>解不等式 $f'(x) &gt; 0$ 或 $f'(x) &lt; 0$</li>
-<li>确定单调区间</li>
-</ol>
+<p>①求导数 $f'(x)$；②解不等式 $f'(x) &gt; 0$ 或 $f'(x) &lt; 0$；③确定单调区间</p>
 </div><div class="right-visual"><div id="vis-monotonicity"></div></div></div></div>
 <!-- 第15页：单调性实例 -->
 <div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
 <h2>单调性判断实例</h2>
 <p>例：判断 $f(x) = x^3 - 3x$ 的单调性</p>
 <h3>解题步骤</h3>
-<p>1. 求导：$f'(x) = 3x^2 - 3 = 3(x^2 - 1)$</p>
-<p>2. 令 $f'(x) = 0$：$x = \pm 1$</p>
-<p>3. 判断符号：</p>
-<ul>
-<li>$x &lt; -1$ 时，$f'(x) &gt; 0$，递增</li>
-<li>$-1 &lt; x &lt; 1$ 时，$f'(x) &lt; 0$，递减</li>
-<li>$x &gt; 1$ 时，$f'(x) &gt; 0$，递增</li>
-</ul>
+<p>1. 求导：$f'(x) = 3x^2 - 3 = 3(x^2 - 1)$；2. 令 $f'(x) = 0$：$x = \pm 1$；3. 判断符号：$x &lt; -1$ 时，$f'(x) &gt; 0$，递增；$-1 &lt; x &lt; 1$ 时，$f'(x) &lt; 0$，递减；$x &gt; 1$ 时，$f'(x) &gt; 0$，递增</p>
 </div><div class="right-visual"><div id="vis-monotonicity-example"></div></div></div></div>
 <!-- 第16页：求单调区间的方法与例题 -->
 <div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
 <h2>求单调区间的方法</h2>
 <h3>标准步骤</h3>
-<div class="example">
-<p><strong>第一步：</strong>求导数 $f'(x)$</p>
-<p><strong>第二步：</strong>求驻点，令 $f'(x) = 0$</p>
-<p><strong>第三步：</strong>列表判断导数符号</p>
-<p><strong>第四步：</strong>写出单调区间</p>
-</div>
+<p><strong>第一步：</strong>求导数 $f'(x)$；<strong>第二步：</strong>求驻点，令 $f'(x) = 0$；<strong>第三步：</strong>列表判断导数符号；<strong>第四步：</strong>写出单调区间</p>
 <h3>例题：求 $f(x) = x^3 - 6x^2 + 9x + 1$ 的单调区间</h3>
 <div class="example">
-<p><strong>解：</strong></p>
-<p>$f'(x) = 3x^2 - 12x + 9 = 3(x^2 - 4x + 3) = 3(x-1)(x-3)$</p>
-<p>令 $f'(x) = 0$，得 $x = 1$ 或 $x = 3$</p>
-<p>列表分析：</p>
+<p><strong>解：</strong>$f'(x) = 3x^2 - 12x + 9 = 3(x^2 - 4x + 3) = 3(x-1)(x-3)$；令 $f'(x) = 0$，得 $x = 1$ 或 $x = 3$；列表分析：</p>
 <table style="margin: 10px 0; border-collapse: collapse;">
 <tr><td style="border: 1px solid #ccc; padding: 5px;">$x$</td><td style="border: 1px solid #ccc; padding: 5px;">$(-\infty, 1)$</td><td style="border: 1px solid #ccc; padding: 5px;">$(1, 3)$</td><td style="border: 1px solid #ccc; padding: 5px;">$(3, +\infty)$</td></tr>
 <tr><td style="border: 1px solid #ccc; padding: 5px;">$f'(x)$</td><td style="border: 1px solid #ccc; padding: 5px;">$+$</td><td style="border: 1px solid #ccc; padding: 5px;">$-$</td><td style="border: 1px solid #ccc; padding: 5px;">$+$</td></tr>
 <tr><td style="border: 1px solid #ccc; padding: 5px;">$f(x)$</td><td style="border: 1px solid #ccc; padding: 5px;">↗</td><td style="border: 1px solid #ccc; padding: 5px;">↘</td><td style="border: 1px solid #ccc; padding: 5px;">↗</td></tr>
 </table>
-<p><strong>答：</strong>单调递增区间：$(-\infty, 1)$ 和 $(3, +\infty)$</p>
-<p>单调递减区间：$(1, 3)$</p>
+<p><strong>答：</strong>单调递增区间：$(-\infty, 1)$ 和 $(3, +\infty)$；单调递减区间：$(1, 3)$</p>
 </div>
 </div><div class="right-visual"><div id="vis-monotonic-intervals"></div></div></div></div>
 <!-- 第17页：极值的概念 -->
 <div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
 <h2>极值</h2>
 <h3>什么是极值？</h3>
-<p><span class="highlight">极值</span>是函数在局部范围内的最大值或最小值。</p>
-<ul>
-<li><strong>极大值</strong>：比周围所有点都大</li>
-<li><strong>极小值</strong>：比周围所有点都小</li>
-</ul>
+<p><span class="highlight">极值</span>是函数在局部范围内的最大值或最小值。<strong>极大值</strong>：比周围所有点都大；<strong>极小值</strong>：比周围所有点都小</p>
 <div class="formula-rule">
                 极值点处：$f'(x) = 0$ 或 $f'(x)$ 不存在
             </div>
@@ -1082,39 +1548,22 @@ $$\lim_{x \to a} \frac{f(x)}{g(x)} = \lim_{x \to a} \frac{f'(x)}{g'(x)}$$
 <div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
 <h2>极值判断方法</h2>
 <h3>第一判别法（导数符号法）</h3>
-<p>在 $x = x_0$ 处，如果：</p>
-<ul>
-<li>$f'(x)$ 由正变负 → <span class="highlight">极大值</span></li>
-<li>$f'(x)$ 由负变正 → <span class="highlight">极小值</span></li>
-<li>$f'(x)$ 不变号 → 无极值</li>
-</ul>
+<p>在 $x = x_0$ 处，如果：$f'(x)$ 由正变负 → <span class="highlight">极大值</span>；$f'(x)$ 由负变正 → <span class="highlight">极小值</span>；$f'(x)$ 不变号 → 无极值</p>
 <h3>步骤</h3>
-<ol>
-<li>求 $f'(x) = 0$ 的点</li>
-<li>判断这些点两侧导数符号</li>
-<li>确定极值点和极值</li>
-</ol>
+<p>①求 $f'(x) = 0$ 的点；②判断这些点两侧导数符号；③确定极值点和极值</p>
 </div><div class="right-visual"><div id="vis-extremum-test"></div></div></div></div>
 <!-- 第19页：极值例题 -->
 <div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
 <h2>求函数极值例题</h2>
 <h3>例题：求 $f(x) = x^3 - 12x + 5$ 的极值</h3>
 <div class="example">
-<p><strong>解：</strong></p>
-<p><strong>第一步：求导数</strong></p>
-<p>$f'(x) = 3x^2 - 12 = 3(x^2 - 4) = 3(x-2)(x+2)$</p>
-<p><strong>第二步：求驻点</strong></p>
-<p>令 $f'(x) = 0$，得 $x = -2$ 或 $x = 2$</p>
-<p><strong>第三步：判断极值（第一判别法）</strong></p>
+<p><strong>解：</strong><strong>第一步：求导数</strong>$f'(x) = 3x^2 - 12 = 3(x^2 - 4) = 3(x-2)(x+2)$<strong>第二步：求驻点</strong>令 $f'(x) = 0$，得 $x = -2$ 或 $x = 2$<strong>第三步：判断极值（第一判别法）</strong></p>
 <table style="margin: 10px 0; border-collapse: collapse; width: 100%;">
 <tr><td style="border: 1px solid #ccc; padding: 5px;">$x$</td><td style="border: 1px solid #ccc; padding: 5px;">$(-\infty, -2)$</td><td style="border: 1px solid #ccc; padding: 5px;">$-2$</td><td style="border: 1px solid #ccc; padding: 5px;">$(-2, 2)$</td><td style="border: 1px solid #ccc; padding: 5px;">$2$</td><td style="border: 1px solid #ccc; padding: 5px;">$(2, +\infty)$</td></tr>
 <tr><td style="border: 1px solid #ccc; padding: 5px;">$f'(x)$</td><td style="border: 1px solid #ccc; padding: 5px;">$+$</td><td style="border: 1px solid #ccc; padding: 5px;">$0$</td><td style="border: 1px solid #ccc; padding: 5px;">$-$</td><td style="border: 1px solid #ccc; padding: 5px;">$0$</td><td style="border: 1px solid #ccc; padding: 5px;">$+$</td></tr>
 <tr><td style="border: 1px solid #ccc; padding: 5px;">$f(x)$</td><td style="border: 1px solid #ccc; padding: 5px;">↗</td><td style="border: 1px solid #ccc; padding: 5px;">极大</td><td style="border: 1px solid #ccc; padding: 5px;">↘</td><td style="border: 1px solid #ccc; padding: 5px;">极小</td><td style="border: 1px solid #ccc; padding: 5px;">↗</td></tr>
 </table>
-<p><strong>第四步：计算极值</strong></p>
-<p>$f(-2) = (-2)^3 - 12(-2) + 5 = -8 + 24 + 5 = 21$（极大值）</p>
-<p>$f(2) = 2^3 - 12(2) + 5 = 8 - 24 + 5 = -11$（极小值）</p>
-<p><strong>答：</strong>极大值为 $21$（在 $x = -2$ 处），极小值为 $-11$（在 $x = 2$ 处）</p>
+<p><strong>第四步：计算极值</strong>$f(-2) = (-2)^3 - 12(-2) + 5 = -8 + 24 + 5 = 21$（极大值）；$f(2) = 2^3 - 12(2) + 5 = 8 - 24 + 5 = -11$（极小值）<strong>答：</strong>极大值为 $21$（在 $x = -2$ 处），极小值为 $-11$（在 $x = 2$ 处）</p>
 </div>
 </div><div class="right-visual"><div id="vis-extremum-example"></div></div></div></div>
 <!-- 第20页：第五部分过渡页 -->
@@ -1133,36 +1582,16 @@ $$\lim_{x \to a} \frac{f(x)}{g(x)} = \lim_{x \to a} \frac{f'(x)}{g'(x)}$$
 <h2>最大值与最小值</h2>
 <p>在闭区间 $[a, b]$ 上，连续函数必有<span class="highlight">最大值</span>和<span class="highlight">最小值</span>。</p>
 <h3>最值可能出现在：</h3>
-<ul>
-<li>区间内的极值点</li>
-<li>区间端点</li>
-</ul>
+<p>区间内的极值点；区间端点</p>
 <h3>求最值步骤</h3>
-<ol>
-<li>求出所有极值点</li>
-<li>计算极值点和端点的函数值</li>
-<li>比较大小，确定最值</li>
-</ol>
+<p>①求出所有极值点；②计算极值点和端点的函数值；③比较大小，确定最值</p>
 </div><div class="right-visual"><div id="vis-max-min"></div></div></div></div>
 <!-- 第22页：最值例题 -->
 <div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
 <h2>求最值例题</h2>
 <h3>例题：求 $f(x) = 2x^3 - 3x^2 - 12x + 5$ 在 $[-2, 3]$ 上的最值</h3>
 <div class="example">
-<p><strong>解：</strong></p>
-<p><strong>第一步：求导数</strong></p>
-<p>$f'(x) = 6x^2 - 6x - 12 = 6(x^2 - x - 2) = 6(x-2)(x+1)$</p>
-<p><strong>第二步：求区间内的驻点</strong></p>
-<p>令 $f'(x) = 0$，得 $x = -1$ 或 $x = 2$（均在 $[-2, 3]$ 内）</p>
-<p><strong>第三步：计算关键点的函数值</strong></p>
-<ul>
-<li>$f(-2) = 2(-2)^3 - 3(-2)^2 - 12(-2) + 5 = -16 - 12 + 24 + 5 = 1$</li>
-<li>$f(-1) = 2(-1)^3 - 3(-1)^2 - 12(-1) + 5 = -2 - 3 + 12 + 5 = 12$</li>
-<li>$f(2) = 2(2)^3 - 3(2)^2 - 12(2) + 5 = 16 - 12 - 24 + 5 = -15$</li>
-<li>$f(3) = 2(3)^3 - 3(3)^2 - 12(3) + 5 = 54 - 27 - 36 + 5 = -4$</li>
-</ul>
-<p><strong>第四步：比较确定最值</strong></p>
-<p><strong>答：</strong>最大值为 $12$（在 $x = -1$ 处），最小值为 $-15$（在 $x = 2$ 处）</p>
+<p><strong>解：</strong><strong>第一步：求导数</strong>$f'(x) = 6x^2 - 6x - 12 = 6(x^2 - x - 2) = 6(x-2)(x+1)$<strong>第二步：求区间内的驻点</strong>令 $f'(x) = 0$，得 $x = -1$ 或 $x = 2$（均在 $[-2, 3]$ 内）<strong>第三步：计算关键点的函数值</strong>$f(-2) = 1$；$f(-1) = 12$；$f(2) = -15$；$f(3) = -4$<strong>第四步：比较确定最值</strong><strong>答：</strong>最大值为 $12$（在 $x = -1$ 处），最小值为 $-15$（在 $x = 2$ 处）</p>
 </div>
 </div><div class="right-visual"><div id="vis-maxmin-example"></div></div></div></div>
 <!-- 第23页：利用导数求最值的方法 -->
@@ -1173,69 +1602,35 @@ $$\lim_{x \to a} \frac{f(x)}{g(x)} = \lim_{x \to a} \frac{f'(x)}{g'(x)}$$
 <p><strong>定理：</strong>闭区间 $[a,b]$ 上的连续函数必有最大值和最小值</p>
 </div>
 <h3>求最值的完整步骤</h3>
-<div class="example">
-<p><strong>第一步：</strong>求导数 $f'(x)$</p>
-<p><strong>第二步：</strong>求驻点，令 $f'(x) = 0$</p>
-<p><strong>第三步：</strong>找出不可导点</p>
-<p><strong>第四步：</strong>计算关键点和端点的函数值</p>
-<p><strong>第五步：</strong>比较所有函数值，确定最值</p>
-</div>
+<p><strong>第一步：</strong>求导数 $f'(x)$；<strong>第二步：</strong>求驻点，令 $f'(x) = 0$；<strong>第三步：</strong>找出不可导点；<strong>第四步：</strong>计算关键点和端点的函数值；<strong>第五步：</strong>比较所有函数值，确定最值</p>
 <h3>例题：求 $f(x) = x^3 - 3x$ 在 $[-2, 2]$ 上的最值</h3>
 <div class="example">
-<p><strong>解：</strong></p>
-<p>$f'(x) = 3x^2 - 3 = 3(x^2 - 1) = 3(x-1)(x+1)$</p>
-<p>驻点：$x = \pm 1$</p>
-<p>计算函数值：</p>
-<ul>
-<li>$f(-2) = (-2)^3 - 3(-2) = -8 + 6 = -2$</li>
-<li>$f(-1) = (-1)^3 - 3(-1) = -1 + 3 = 2$</li>
-<li>$f(1) = 1^3 - 3(1) = 1 - 3 = -2$</li>
-<li>$f(2) = 2^3 - 3(2) = 8 - 6 = 2$</li>
-</ul>
-<p><strong>答：</strong>最大值为 $2$（在 $x = -1, 2$ 处），最小值为 $-2$（在 $x = -2, 1$ 处）</p>
+<p><strong>解：</strong>$f'(x) = 3x^2 - 3 = 3(x^2 - 1) = 3(x-1)(x+1)$；驻点：$x = \pm 1$；计算函数值：$f(-2) = -2$；$f(-1) = 2$；$f(1) = -2$；$f(2) = 2$<strong>答：</strong>最大值为 $2$（在 $x = -1, 2$ 处），最小值为 $-2$（在 $x = -2, 1$ 处）</p>
 </div>
 </div><div class="right-visual"><div id="vis-max-value-method"></div></div></div></div>
 <!-- 第24页：实际应用-成本最小化 -->
 <div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
 <h2>应用：成本最小化</h2>
 <h3>问题</h3>
-<p>某工厂生产成本函数为：</p>
-<div class="math-formula">
-                $C(x) = x^2 - 10x + 100$
-            </div>
-<p>其中 $x$ 是产量（百件），$C$ 是成本（万元）。</p>
-<p>求：最小成本是多少？对应产量是多少？</p>
+<p>某工厂生产成本函数为：$C(x) = x^2 - 10x + 100$，其中 $x$ 是产量（百件），$C$ 是成本（万元）。求：最小成本是多少？对应产量是多少？</p>
 <h3>解答</h3>
-<p>1. 求导：$C'(x) = 2x - 10$</p>
-<p>2. 令 $C'(x) = 0$：$x = 5$</p>
-<p>3. 最小成本：$C(5) = 75$ 万元</p>
+<p>1. 求导：$C'(x) = 2x - 10$；2. 令 $C'(x) = 0$：$x = 5$；3. 最小成本：$C(5) = 75$ 万元</p>
 </div><div class="right-visual"><div id="vis-cost-optimization"></div></div></div></div>
 <!-- 第25页：实际应用-利润最大化 -->
 <div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
 <h2>应用：利润最大化</h2>
 <h3>问题</h3>
-<p>某产品的利润函数为：</p>
-<div class="math-formula">
-                $P(x) = -x^2 + 12x - 20$
-            </div>
-<p>其中 $x$ 是销售量（千件），$P$ 是利润（万元）。</p>
-<p>求：最大利润是多少？</p>
+<p>某产品的利润函数为：$P(x) = -x^2 + 12x - 20$，其中 $x$ 是销售量（千件），$P$ 是利润（万元）。求：最大利润是多少？</p>
 <h3>解答</h3>
-<p>1. 求导：$P'(x) = -2x + 12$</p>
-<p>2. 令 $P'(x) = 0$：$x = 6$</p>
-<p>3. 最大利润：$P(6) = 16$ 万元</p>
+<p>1. 求导：$P'(x) = -2x + 12$；2. 令 $P'(x) = 0$：$x = 6$；3. 最大利润：$P(6) = 16$ 万元</p>
 </div><div class="right-visual"><div id="vis-profit-optimization"></div></div></div></div>
 <!-- 第26页：实际应用-容器设计 -->
 <div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
 <h2>应用：容器设计</h2>
 <h3>问题</h3>
-<p>用一张边长为 20cm 的正方形铁皮，四角各剪去相同的小正方形，做成无盖容器。</p>
-<p>问：剪去多大的正方形，容器容积最大？</p>
+<p>用一张边长为 20cm 的正方形铁皮，四角各剪去相同的小正方形，做成无盖容器。问：剪去多大的正方形，容器容积最大？</p>
 <h3>解答</h3>
-<p>设剪去边长为 $x$ cm，则：</p>
-<p>容积 $V(x) = x(20-2x)^2$</p>
-<p>求导后得：$x = \frac{10}{3}$ cm</p>
-<p>最大容积：$V(\frac{10}{3}) \approx 592.6$ cm³</p>
+<p>设剪去边长为 $x$ cm，则：容积 $V(x) = x(20-2x)^2$；求导后得：$x = \frac{10}{3}$ cm；最大容积：$V(\frac{10}{3}) \approx 592.6$ cm³</p>
 </div><div class="right-visual"><div id="vis-container-design"></div></div></div></div>
 <!-- 第27页：泰勒展开 -->
 <div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
@@ -1243,22 +1638,12 @@ $$\lim_{x \to a} \frac{f(x)}{g(x)} = \lim_{x \to a} \frac{f'(x)}{g'(x)}$$
 <p>用<span class="highlight">多项式</span>来近似表示函数的重要工具。</p>
 <div class="formula-highlight">
 <p><strong>泰勒公式：</strong></p>
-$$f(x) = f(x_0) + f'(x_0)(x-x_0) + \frac{f''(x_0)}{2!}(x-x_0)^2 + \cdots + \frac{f^{(n)}(x_0)}{n!}(x-x_0)^n + R_n(x)$$
+$f(x) = f(x_0) + f'(x_0)(x-x_0) + \frac{f''(x_0)}{2!}(x-x_0)^2 + \cdots + \frac{f^{(n)}(x_0)}{n!}(x-x_0)^n + R_n(x)$
 </div>
 <h3>求泰勒展开的步骤</h3>
-<div class="example">
-<p><strong>第一步：</strong>确定展开点 $x_0$（通常取 $x_0 = 0$）</p>
-<p><strong>第二步：</strong>计算函数在 $x_0$ 处的各阶导数值</p>
-<p><strong>第三步：</strong>代入泰勒公式得到展开式</p>
-<p><strong>第四步：</strong>确定展开的项数（根据精度要求）</p>
-</div>
+<p><strong>第一步：</strong>确定展开点 $x_0$（通常取 $x_0 = 0$）；<strong>第二步：</strong>计算函数在 $x_0$ 处的各阶导数值；<strong>第三步：</strong>代入泰勒公式得到展开式；<strong>第四步：</strong>确定展开的项数（根据精度要求）</p>
 <h3>常用展开式（$x_0 = 0$）</h3>
-<ul>
-<li>$e^x = 1 + x + \frac{x^2}{2!} + \frac{x^3}{3!} + \cdots$</li>
-<li>$\sin x = x - \frac{x^3}{3!} + \frac{x^5}{5!} - \cdots$</li>
-<li>$\cos x = 1 - \frac{x^2}{2!} + \frac{x^4}{4!} - \cdots$</li>
-<li>$\ln(1+x) = x - \frac{x^2}{2} + \frac{x^3}{3} - \cdots$</li>
-</ul>
+<p>$e^x = 1 + x + \frac{x^2}{2!} + \frac{x^3}{3!} + \cdots$；$\sin x = x - \frac{x^3}{3!} + \frac{x^5}{5!} - \cdots$；$\cos x = 1 - \frac{x^2}{2!} + \frac{x^4}{4!} - \cdots$；$\ln(1+x) = x - \frac{x^2}{2} + \frac{x^3}{3} - \cdots$</p>
 <div class="note">
 <p><strong>应用：</strong>函数近似计算、误差估计、极限计算</p>
 </div>
@@ -1268,24 +1653,11 @@ $$f(x) = f(x_0) + f'(x_0)(x-x_0) + \frac{f''(x_0)}{2!}(x-x_0)^2 + \cdots + \frac
 <h2>相关变化率</h2>
 <p>当几个变量之间存在函数关系时，它们的<span class="highlight">变化率之间也存在关系</span>。</p>
 <h3>解题步骤</h3>
-<div class="example">
-<p><strong>第一步：</strong>设定变量，建立函数关系式</p>
-<p><strong>第二步：</strong>对时间 $t$ 求导（隐函数求导）</p>
-<p><strong>第三步：</strong>代入已知条件和数值</p>
-<p><strong>第四步：</strong>求解未知的变化率</p>
-</div>
+<p><strong>第一步：</strong>设定变量，建立函数关系式；<strong>第二步：</strong>对时间 $t$ 求导（隐函数求导）；<strong>第三步：</strong>代入已知条件和数值；<strong>第四步：</strong>求解未知的变化率</p>
 <h3>常见题型</h3>
-<div class="theorem">
-<p><strong>几何问题：</strong>面积、体积、长度的变化</p>
-<p><strong>物理问题：</strong>速度、加速度、距离的变化</p>
-<p><strong>经济问题：</strong>成本、收益、利润的变化</p>
-</div>
+<p><strong>几何问题：</strong>面积、体积、长度的变化；<strong>物理问题：</strong>速度、加速度、距离的变化；<strong>经济问题：</strong>成本、收益、利润的变化</p>
 <h3>解题要点</h3>
-<ul>
-<li>正确建立变量间的函数关系</li>
-<li>注意变化率的正负号含义</li>
-<li>代入数值时要对应具体时刻</li>
-</ul>
+<p>正确建立变量间的函数关系；注意变化率的正负号含义；代入数值时要对应具体时刻</p>
 </div><div class="right-visual"><div id="vis-related-rates"></div></div></div></div>
 <!-- 第29页：第四部分过渡页 -->
 <div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
@@ -1303,30 +1675,19 @@ $$f(x) = f(x_0) + f'(x_0)(x-x_0) + \frac{f''(x_0)}{2!}(x-x_0)^2 + \cdots + \frac
 <h2>曲线的凹凸性</h2>
 <p>二阶导数 $f''(x)$ 决定曲线的<span class="highlight">弯曲方向</span>：</p>
 <div class="formula-rule">
-<p>$f''(x) &gt; 0$：曲线<span class="highlight">凹向上 ∪</span></p>
-<p>$f''(x) &lt; 0$：曲线<span class="highlight">凹向下 ∩</span></p>
+<p>$f''(x) &gt; 0$：曲线<span class="highlight">凹向上 ∪</span>；$f''(x) &lt; 0$：曲线<span class="highlight">凹向下 ∩</span></p>
 </div>
 <h3>拐点</h3>
-<p>凹凸性改变的点叫<span class="highlight">拐点</span>。</p>
-<p>在拐点处：$f''(x) = 0$ 或不存在</p>
+<p>凹凸性改变的点叫<span class="highlight">拐点</span>。在拐点处：$f''(x) = 0$ 或不存在</p>
 </div><div class="right-visual"><div id="vis-concavity"></div></div></div></div>
 <!-- 第31页：凹凸性与拐点例题 -->
 <div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
 <h2>求凹凸区间与拐点</h2>
 <h3>解题步骤</h3>
-<div class="example">
-<p><strong>第一步：</strong>求二阶导数 $f''(x)$</p>
-<p><strong>第二步：</strong>令 $f''(x) = 0$，求可能的拐点</p>
-<p><strong>第三步：</strong>判断 $f''(x)$ 的符号变化</p>
-<p><strong>第四步：</strong>确定凹凸区间和拐点</p>
-</div>
+<p><strong>第一步：</strong>求二阶导数 $f''(x)$；<strong>第二步：</strong>令 $f''(x) = 0$，求可能的拐点；<strong>第三步：</strong>判断 $f''(x)$ 的符号变化；<strong>第四步：</strong>确定凹凸区间和拐点</p>
 <h3>例题：求 $f(x) = x^4 - 6x^2 + 3$ 的凹凸区间和拐点</h3>
 <div class="example">
-<p><strong>解：</strong></p>
-<p>$f'(x) = 4x^3 - 12x$</p>
-<p>$f''(x) = 12x^2 - 12 = 12(x^2 - 1) = 12(x-1)(x+1)$</p>
-<p>令 $f''(x) = 0$，得 $x = \pm 1$</p>
-<p>列表分析：</p>
+<p><strong>解：</strong>$f'(x) = 4x^3 - 12x$；$f''(x) = 12x^2 - 12 = 12(x^2 - 1) = 12(x-1)(x+1)$；令 $f''(x) = 0$，得 $x = \pm 1$；列表分析：</p>
 <table style="margin: 10px 0; border-collapse: collapse;">
 <tr><td style="border: 1px solid #ccc; padding: 5px;">$x$</td><td style="border: 1px solid #ccc; padding: 5px;">$(-\infty, -1)$</td><td style="border: 1px solid #ccc; padding: 5px;">$(-1, 1)$</td><td style="border: 1px solid #ccc; padding: 5px;">$(1, +\infty)$</td></tr>
 <tr><td style="border: 1px solid #ccc; padding: 5px;">$f''(x)$</td><td style="border: 1px solid #ccc; padding: 5px;">$+$</td><td style="border: 1px solid #ccc; padding: 5px;">$-$</td><td style="border: 1px solid #ccc; padding: 5px;">$+$</td></tr>
@@ -1366,7 +1727,7 @@ $$f(x) = f(x_0) + f'(x_0)(x-x_0) + \frac{f''(x_0)}{2!}(x-x_0)^2 + \cdots + \frac
 <p>衡量需求量对价格变化的<span class="highlight">敏感程度</span>。</p>
 <div class="formula-highlight">
 <p><strong>点弹性公式：</strong></p>
-$$E_d = -\frac{dQ}{dP} \cdot \frac{P}{Q}$$
+$E_d = -\frac{dQ}{dP} \cdot \frac{P}{Q}$
 <p>其中 $Q$ 是需求量，$P$ 是价格</p>
 </div>
 <h3>弹性计算步骤</h3>
@@ -1407,27 +1768,10 @@ $$E_d = -\frac{dQ}{dP} \cdot \frac{P}{Q}$$
 <p>求极限：$\lim\limits_{x \to 0} \frac{e^x - 1 - x}{x^2}$</p>
 <h3>解题步骤</h3>
 <div class="example">
-<p><strong>第1步：</strong>验证未定式类型</p>
-<p>当 $x \to 0$ 时：</p>
-<ul>
-<li>分子：$e^0 - 1 - 0 = 1 - 1 - 0 = 0$</li>
-<li>分母：$0^2 = 0$</li>
-</ul>
-<p>确认为 $\frac{0}{0}$ 型，可以使用洛必达法则。</p>
-</div>
-<div class="example">
-<p><strong>第2步：</strong>第一次应用洛必达法则</p>
-<p>对分子分母分别求导：</p>
-$$\lim_{x \to 0} \frac{e^x - 1 - x}{x^2} = \lim_{x \to 0} \frac{(e^x - 1 - x)'}{(x^2)'} = \lim_{x \to 0} \frac{e^x - 1}{2x}$$
-</div>
-<div class="example">
-<p><strong>第3步：</strong>再次验证</p>
-<p>当 $x \to 0$ 时：$e^0 - 1 = 0$，$2 \cdot 0 = 0$</p>
-<p>仍为 $\frac{0}{0}$ 型，继续应用洛必达法则。</p>
-</div>
-<div class="example">
-<p><strong>第4步：</strong>第二次应用洛必达法则</p>
-$$\lim_{x \to 0} \frac{e^x - 1}{2x} = \lim_{x \to 0} \frac{(e^x - 1)'}{(2x)'} = \lim_{x \to 0} \frac{e^x}{2} = \frac{e^0}{2} = \frac{1}{2}$$
+<p><strong>第1步：验证未定式类型</strong>当 $x \to 0$ 时：分子：$e^0 - 1 - 0 = 1 - 1 - 0 = 0$；分母：$0^2 = 0$。确认为 $\frac{0}{0}$ 型，可以使用洛必达法则。</p>
+<p><strong>第2步：第一次应用洛必达法则</strong>对分子分母分别求导：$\lim_{x \to 0} \frac{e^x - 1 - x}{x^2} = \lim_{x \to 0} \frac{(e^x - 1 - x)'}{(x^2)'} = \lim_{x \to 0} \frac{e^x - 1}{2x}$</p>
+<p><strong>第3步：再次验证</strong>当 $x \to 0$ 时：$e^0 - 1 = 0$，$2 \cdot 0 = 0$。仍为 $\frac{0}{0}$ 型，继续应用洛必达法则。</p>
+<p><strong>第4步：第二次应用洛必达法则</strong>$\lim_{x \to 0} \frac{e^x - 1}{2x} = \lim_{x \to 0} \frac{(e^x - 1)'}{(2x)'} = \lim_{x \to 0} \frac{e^x}{2} = \frac{e^0}{2} = \frac{1}{2}$</p>
 </div>
 <div class="formula-highlight">
 <p><strong>答案：</strong>$\lim\limits_{x \to 0} \frac{e^x - 1 - x}{x^2} = \frac{1}{2}$</p>
@@ -1451,18 +1795,18 @@ $$\lim_{x \to 0} \frac{e^x - 1}{2x} = \lim_{x \to 0} \frac{(e^x - 1)'}{(2x)'} = 
 <p><strong>第2步：</strong>消除变量</p>
 <p>由约束条件得：$h = \frac{V}{\pi r^2}$</p>
 <p>代入目标函数：</p>
-$$S(r) = 2\pi r^2 + 2\pi r \cdot \frac{V}{\pi r^2} = 2\pi r^2 + \frac{2V}{r}$$
+$S(r) = 2\pi r^2 + 2\pi r \cdot \frac{V}{\pi r^2} = 2\pi r^2 + \frac{2V}{r}$
 </div>
 <div class="example">
 <p><strong>第3步：</strong>求导并令其为零</p>
-$$S'(r) = 4\pi r - \frac{2V}{r^2} = 0$$
+$S'(r) = 4\pi r - \frac{2V}{r^2} = 0$
 <p>解得：$4\pi r = \frac{2V}{r^2}$</p>
 <p>即：$4\pi r^3 = 2V$，所以 $r^3 = \frac{V}{2\pi}$</p>
 </div>
 <div class="example">
 <p><strong>第4步：</strong>求最优比值</p>
 <p>由 $h = \frac{V}{\pi r^2}$ 和 $r^3 = \frac{V}{2\pi}$：</p>
-$$\frac{h}{r} = \frac{V}{\pi r^3} = \frac{V}{\pi \cdot \frac{V}{2\pi}} = \frac{V \cdot 2\pi}{\pi V} = 2$$
+$\frac{h}{r} = \frac{V}{\pi r^3} = \frac{V}{\pi \cdot \frac{V}{2\pi}} = \frac{V \cdot 2\pi}{\pi V} = 2$
 </div>
 <div class="formula-highlight">
 <p><strong>答案：</strong>最优的高与底面半径之比为 $h : r = 2 : 1$</p>
@@ -1478,20 +1822,20 @@ $$\frac{h}{r} = \frac{V}{\pi r^3} = \frac{V}{\pi \cdot \frac{V}{2\pi}} = \frac{V
 <div class="example">
 <p><strong>(1) 边际成本函数</strong></p>
 <p>边际成本 $MC = C'(x)$：</p>
-$$MC(x) = \frac{d}{dx}(50 + 3x + 0.02x^2) = 3 + 0.04x$$
+$MC(x) = \frac{d}{dx}(50 + 3x + 0.02x^2) = 3 + 0.04x$
 </div>
 <div class="example">
 <p><strong>(2) 边际收益函数</strong></p>
 <p>收益函数：$R(x) = p \cdot x = (15 - 0.01x) \cdot x = 15x - 0.01x^2$</p>
 <p>边际收益 $MR = R'(x)$：</p>
-$$MR(x) = \frac{d}{dx}(15x - 0.01x^2) = 15 - 0.02x$$
+$MR(x) = \frac{d}{dx}(15x - 0.01x^2) = 15 - 0.02x$
 </div>
 <div class="example">
 <p><strong>(3) 最优产量</strong></p>
 <p>利润最大化条件：$MR = MC$</p>
-$$15 - 0.02x = 3 + 0.04x$$
-$$12 = 0.06x$$
-$$x = 200$$
+$15 - 0.02x = 3 + 0.04x$
+$12 = 0.06x$
+$x = 200$
 </div>
 <div class="example">
 <p><strong>验证：</strong>二阶条件</p>
@@ -1521,22 +1865,22 @@ $$x = 200$$
 <div class="example">
 <p><strong>第2步：</strong>建立函数关系</p>
 <p>根据勾股定理：</p>
-$$x^2 + y^2 = L^2 = 25$$
+$x^2 + y^2 = L^2 = 25$
 </div>
 <div class="example">
 <p><strong>第3步：</strong>对时间求导</p>
 <p>对等式两边关于 $t$ 求导：</p>
-$$\frac{d}{dt}(x^2 + y^2) = \frac{d}{dt}(25)$$
-$$2x\frac{dx}{dt} + 2y\frac{dy}{dt} = 0$$
+$\frac{d}{dt}(x^2 + y^2) = \frac{d}{dt}(25)$
+$2x\frac{dx}{dt} + 2y\frac{dy}{dt} = 0$
 </div>
 <div class="example">
 <p><strong>第4步：</strong>求解特定时刻的值</p>
 <p>当 $x = 3$ 时，由 $x^2 + y^2 = 25$ 得：</p>
-$$y = \sqrt{25 - 9} = \sqrt{16} = 4 \text{ m}$$
+$y = \sqrt{25 - 9} = \sqrt{16} = 4 \text{ m}$
 <p>代入导数方程：</p>
-$$2 \times 3 \times 1 + 2 \times 4 \times \frac{dy}{dt} = 0$$
-$$6 + 8\frac{dy}{dt} = 0$$
-$$\frac{dy}{dt} = -\frac{6}{8} = -\frac{3}{4} \text{ m/s}$$
+$2 \times 3 \times 1 + 2 \times 4 \times \frac{dy}{dt} = 0$
+$6 + 8\frac{dy}{dt} = 0$
+$\frac{dy}{dt} = -\frac{6}{8} = -\frac{3}{4} \text{ m/s}$
 </div>
 <div class="formula-highlight">
 <p><strong>答案：</strong>梯子顶端下滑速度为 $\frac{3}{4}$ m/s（负号表示向下）</p>
@@ -4870,12 +5214,11 @@ function setupD3(containerId, margins = {top: 40, right: 40, bottom: 40, left: 4
 
     // 第7页：洛必达法则可视化 - 解题步骤展示
     function visualizeLHopital(containerId) {
-        const setup = setupD3(containerId);
-        if (!setup) return;
-        const { container, svg, g, width, height } = setup;
+        const container = d3.select(`#${containerId}`);
+        if (container.empty()) return;
         
-        // 清除SVG，使用HTML展示步骤
-        svg.selectAll("*").remove();
+        // 清除所有内容，使用HTML展示步骤
+        container.html('');
         
         const mainContainer = container.append('div')
             .style('position', 'absolute')
@@ -4989,12 +5332,11 @@ function setupD3(containerId, margins = {top: 40, right: 40, bottom: 40, left: 4
 
     // 第8页：洛必达法则解题步骤可视化
     function visualizeLHopitalExamples(containerId) {
-        const setup = setupD3(containerId);
-        if (!setup) return;
-        const { container, svg, g, width, height } = setup;
+        const container = d3.select(`#${containerId}`);
+        if (container.empty()) return;
         
-        // 清除SVG，使用HTML展示步骤
-        svg.selectAll("*").remove();
+        // 清除所有内容，使用HTML展示步骤
+        container.html('');
         
         const mainContainer = container.append('div')
             .style('position', 'absolute')
@@ -5743,7 +6085,7 @@ function setupD3(containerId, margins = {top: 40, right: 40, bottom: 40, left: 4
             .style('margin-top', '5px')
             .style('color', '#7f8c8d')
             .style('font-size', '14px')
-            .html('求解：$$\\lim_{x \\to 0} \\frac{e^x - 1 - x}{x^2}$$');
+            .html('求解：$\\lim_{x \\to 0} \\frac{e^x - 1 - x}{x^2}$');
         
         // 解题步骤 - 详细版本
         const steps = [
@@ -5764,7 +6106,7 @@ function setupD3(containerId, margins = {top: 40, right: 40, bottom: 40, left: 4
                 content: [
                     '$(e^x - 1 - x)\' = e^x - 1$',
                     '$(x^2)\' = 2x$',
-                    '$$\\lim_{x \\to 0} \\frac{e^x - 1 - x}{x^2} = \\lim_{x \\to 0} \\frac{e^x - 1}{2x}$$'
+                    '$\\lim_{x \\to 0} \\frac{e^x - 1 - x}{x^2} = \\lim_{x \\to 0} \\frac{e^x - 1}{2x}$'
                 ],
                 delay: 2000,
                 color: '#e74c3c'
@@ -5786,7 +6128,7 @@ function setupD3(containerId, margins = {top: 40, right: 40, bottom: 40, left: 4
                 content: [
                     '$(e^x - 1)\' = e^x$',
                     '$(2x)\' = 2$',
-                    '$$\\lim_{x \\to 0} \\frac{e^x - 1}{2x} = \\lim_{x \\to 0} \\frac{e^x}{2}$$'
+                    '$\\lim_{x \\to 0} \\frac{e^x - 1}{2x} = \\lim_{x \\to 0} \\frac{e^x}{2}$'
                 ],
                 delay: 6000,
                 color: '#9b59b6'
@@ -5795,7 +6137,7 @@ function setupD3(containerId, margins = {top: 40, right: 40, bottom: 40, left: 4
                 title: '第5步：计算最终结果',
                 formula: '代入极限值：',
                 content: [
-                    '$$\\lim_{x \\to 0} \\frac{e^x}{2} = \\frac{e^0}{2} = \\frac{1}{2}$$'
+                    '$\\lim_{x \\to 0} \\frac{e^x}{2} = \\frac{e^0}{2} = \\frac{1}{2}$'
                 ],
                 delay: 8000,
                 color: '#27ae60'
@@ -5873,7 +6215,7 @@ function setupD3(containerId, margins = {top: 40, right: 40, bottom: 40, left: 4
                         answerBox.append('div')
                             .style('font-size', '24px')
                             .style('font-weight', 'bold')
-                            .html('$$\\lim_{x \\to 0} \\frac{e^x - 1 - x}{x^2} = \\frac{1}{2}$$');
+                            .html('$\\lim_{x \\to 0} \\frac{e^x - 1 - x}{x^2} = \\frac{1}{2}$');
                         
                         answerBox.transition()
                             .duration(1000)
