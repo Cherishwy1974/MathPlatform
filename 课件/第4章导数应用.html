@@ -767,6 +767,99 @@
             box-shadow: 0 8px 16px rgba(79, 70, 229, 0.3);
         }
     </style>
+    <style>
+        /* 可视化组件样式 */
+        .value-display {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            font-size: 14px;
+            z-index: 10;
+        }
+
+        .value-item {
+            margin: 8px 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .value-label {
+            font-weight: 600;
+            color: #555;
+            margin-right: 10px;
+        }
+
+        .value-number {
+            color: #3498db;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .slider-container {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+            z-index: 10;
+        }
+
+        .slider {
+            width: 300px;
+            margin-top: 10px;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            background: #ddd;
+            border-radius: 3px;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #3498db;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: #3498db;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        /* 动画效果 */
+        .pulse {
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* 确保可视化容器有正确的尺寸 */
+        .right-visual > div {
+            position: relative;
+            min-height: 100%;
+        }
+    </style>
 </head>
 <body>
     <div class="return-home-panel">
@@ -2022,11 +2115,14 @@ $\frac{dy}{dt} = -\frac{6}{8} = -\frac{3}{4} \text{ m/s}$
         }
         
         updateNavButtons();
-        runVisualization(currentSlide);
         
-        // 渲染MathJax
+        // 先渲染MathJax，然后运行可视化
         if (window.MathJax && window.MathJax.typesetPromise) {
-            window.MathJax.typesetPromise([slides[currentSlide]]);
+            window.MathJax.typesetPromise([slides[currentSlide]]).then(() => {
+                runVisualization(currentSlide);
+            });
+        } else {
+            runVisualization(currentSlide);
         }
     }
 
@@ -2052,12 +2148,25 @@ $\frac{dy}{dt} = -\frac{6}{8} = -\frac{3}{4} \text{ m/s}$
 
 function setupD3(containerId, margins = {top: 40, right: 40, bottom: 40, left: 40}) {
         const container = d3.select(`#${containerId}`);
-        if (container.empty()) return null;
+        if (container.empty()) {
+            console.error(`setupD3: Container with id '${containerId}' not found`);
+            return null;
+        }
         
         container.html('');
         
         const bounds = container.node().getBoundingClientRect();
-        if (bounds.width === 0 || bounds.height === 0) return null;
+        if (bounds.width === 0 || bounds.height === 0) {
+            console.warn(`setupD3: Container '${containerId}' has zero dimensions`, bounds);
+            // 尝试使用父容器的尺寸
+            const parentBounds = container.node().parentElement.getBoundingClientRect();
+            if (parentBounds.width > 0 && parentBounds.height > 0) {
+                bounds.width = parentBounds.width;
+                bounds.height = parentBounds.height;
+            } else {
+                return null;
+            }
+        }
         
         const svg = container.append('svg')
             .attr('width', bounds.width)
@@ -2107,7 +2216,9 @@ function setupD3(containerId, margins = {top: 40, right: 40, bottom: 40, left: 4
             currentAnimation();
         }
         
-        switch(slideIndex) {
+        // 延迟执行，确保容器尺寸正确
+        setTimeout(() => {
+            switch(slideIndex) {
             case 0: visualizeTitle('vis-title'); break;
             case 1: visualizeContents('vis-contents'); break;
             case 2: visualizeSection1('vis-section1'); break;
@@ -2147,7 +2258,8 @@ function setupD3(containerId, margins = {top: 40, right: 40, bottom: 40, left: 4
             case 36: visualizePractice3('vis-practice-3'); break;
             case 37: visualizePractice4('vis-practice-4'); break;
             case 38: visualizeSummary('vis-summary'); break;
-        }
+            }
+        }, 100); // 延迟100ms执行
     }
 
     // 过渡页可视化函数（通用）

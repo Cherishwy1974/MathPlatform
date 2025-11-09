@@ -265,51 +265,7 @@
             margin-top: 5px;
         }
         
-        /* WPS API 集成样式 */
-        .wps-status {
-            position: fixed;
-            bottom: 12px;
-            right: 12px;
-            padding: 8px 12px;
-            border-radius: 4px;
-            font-size: 12px;
-            z-index: 1000;
-            transition: all 0.3s;
-        }
-        
-        .wps-status.connected {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        
-        .wps-status.disconnected {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        
-        .wps-status.syncing {
-            background: #fff3cd;
-            color: #856404;
-            border: 1px solid #ffeaa7;
-        }
-        
-        .wps-config {
-            background: #f8f9fa;
-            padding: 15px;
-            margin: 10px 0;
-            border-radius: 5px;
-            border-left: 4px solid #28a745;
-        }
-        
-        .wps-config input {
-            width: 100%;
-            padding: 8px;
-            margin: 5px 0;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
+        /* (已移除 WPS 相关样式) */
         
         .control-bar {
             background: white;
@@ -413,22 +369,7 @@
             <button class="btn btn-primary" onclick="showHistoryModal()">📜 查看历史记录</button>
             <button class="btn btn-success" onclick="showRandomPickModal()">🎲 随机抽号</button>
             
-            <!-- 批量操作区（折叠） -->
-            <div class="suffix-tools" style="display: none;">
-                <label for="suffixField">调整项目:</label>
-                <select id="suffixField">
-                    <option value="ketang">课堂表现</option>
-                    <option value="xiaozu">小组活动</option>
-                    <option value="kaoshi">考试成绩</option>
-                </select>
-                <label for="suffixDelta">分值:</label>
-                <input type="number" id="suffixDelta" value="1" min="-20" max="20" style="width:80px;">
-                <button class="btn btn-primary" onclick="selectBySuffix()">定位</button>
-                <button class="btn btn-success" onclick="adjustSuffix(true)">批量加分</button>
-                <button class="btn btn-danger" onclick="adjustSuffix(false)">批量扣分</button>
-                <button class="btn btn-warning" onclick="clearSuffixHighlight()">清除标记</button>
-    </div>
-    
+            
             <select id="groupFilter" onchange="filterGroup()">
                 <option value="">全部组别</option>
             </select>
@@ -463,7 +404,7 @@
                         <th>平时总分(50)</th>
                         <th>考试成绩(50)</th>
                         <th>总分(100)</th>
-                        <th>操作</th>
+                        <th>操作 <span id="opBackupBadge" style="display:none; margin-left:6px; padding:2px 6px; font-size:11px; border-radius:10px; background:#fff3cd; color:#856404; border:1px solid #ffe08a; vertical-align:middle;">请备份</span></th>
                     </tr>
                 </thead>
                 <tbody id="tbody"></tbody>
@@ -545,40 +486,7 @@
         </div>
     </div>
     
-    <!-- WPS配置界面 -->
-    <div id="wpsConfigModal" class="modal">
-        <div class="modal-content">
-            <h3>⚙️ WPS在线协作配置</h3>
-            <div class="wps-config">
-                <label>🔗 Worker服务地址:</label>
-                <input type="text" id="wpsWorkerUrl" placeholder="https://your-worker.your-subdomain.workers.dev" value="">
-                <small style="color: #666; display: block; margin: 5px 0 15px;">
-                    部署Cloudflare Worker后获得的URL
-                </small>
-                
-                <label>📄 WPS文档ID:</label>
-                <input type="text" id="wpsFileId" placeholder="从WPS文档链接中提取" value="">
-                <small style="color: #666; display: block; margin: 5px 0 15px;">
-                    打开WPS表格后，在URL或开发者工具中找到fileId
-                </small>
-                
-                <label>
-                    <input type="checkbox" id="wpsAutoSyncCheck"> 启用自动同步（每60秒）
-                </label>
-                
-                <div style="margin-top: 20px; padding: 10px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px;">
-                    <strong><i class="fa-solid fa-book"></i> 配置步骤：</strong><br>
-                    1. 部署Cloudflare Worker（见wps-sync-worker.js）<br>
-                    2. 获取Worker URL并填入上方<br>
-                    3. 从WPS文档获取文件ID并填入<br>
-                    4. 保存配置后即可双向同步
-                </div>
-                </div>
-            <button class="btn btn-success" onclick="saveWPSConfigReal()">💾 保存配置</button>
-            <button class="btn btn-primary" onclick="testWPSConnection()">🔌 测试连接</button>
-            <button class="btn btn-danger" onclick="closeWPSConfigReal()">取消</button>
-        </div>
-    </div>
+    
     
     <!-- 历史记录 / 云端版本 模态窗口 -->
     <div id="historyModal" class="modal">
@@ -1042,15 +950,23 @@
         }, 3000);
     }
     
-    function saveWPSConfigToStorage() {
-        try {
-            localStorage.setItem('wpsConfig_v2', JSON.stringify(wpsConfig));
-        } catch (e) {
-            console.error('保存WPS配置失败:', e);
-        }
+    // 统一的修改数据提醒
+    function showBackupReminder() {
+        updateSyncStatus('💡 已修改数据，请及时点击“📦 保存为备份”', 'warning');
+        showOperationBackupBadge();
     }
 
-    let wpsConnected = false;
+    function showOperationBackupBadge() {
+        const el = document.getElementById('opBackupBadge');
+        if (el) el.style.display = 'inline-block';
+    }
+
+    function hideOperationBackupBadge() {
+        const el = document.getElementById('opBackupBadge');
+        if (el) el.style.display = 'none';
+    }
+    
+    
 
     // 批量选择相关变量
     let isSelecting = false;
@@ -1482,10 +1398,8 @@
         render();
         saveToLocalStorage();
         
-        // 如果启用了自动同步，使用防抖同步
-        if (wpsConfig.autoSync && wpsConnected) {
-            debouncedSync();
-        }
+        
+        showBackupReminder();
     }
     
     // 切换选择
@@ -1573,10 +1487,8 @@
         render();
         saveToLocalStorage();
         
-        // 如果启用了自动同步，使用防抖同步
-        if (wpsConfig.autoSync && wpsConnected) {
-            debouncedSync();
-        }
+        
+        showBackupReminder();
     }
     
     // 快速扣分 - 允许扣成负分
@@ -1594,11 +1506,7 @@
         
         render();
         saveToLocalStorage();
-        
-        // 如果启用了自动同步，使用防抖同步
-        if (wpsConfig.autoSync && wpsConnected) {
-            debouncedSync();
-        }
+        showBackupReminder();
     }
     
     // 兼容旧函数名
@@ -1642,10 +1550,7 @@
         saveToLocalStorage();
         showToast(`✅ 成功为${selected.length}名学生加分`, 'success');
         
-        // 如果启用了自动同步，使用防抖同步
-        if (wpsConfig.autoSync && wpsConnected) {
-            debouncedSync();
-        }
+        showBackupReminder();
     }
     
     // 批量扣分 - 允许扣成负分
@@ -1688,10 +1593,7 @@
         saveToLocalStorage();
         showToast(`✅ 成功为${selected.length}名学生扣分`, 'success');
         
-        // 如果启用了自动同步，使用防抖同步
-        if (wpsConfig.autoSync && wpsConnected) {
-            debouncedSync();
-        }
+        showBackupReminder();
     }
     
     // 编辑笔记
@@ -1713,11 +1615,7 @@
         closeNote();
         render();
         saveToLocalStorage();
-        
-        // 如果启用了自动同步，使用防抖同步
-        if (wpsConfig.autoSync && wpsConnected) {
-            debouncedSync();
-        }
+        showBackupReminder();
     }
     
     // 关闭笔记
@@ -2565,10 +2463,7 @@ function renderGiteeFileList(list = []) {
          
          showToast(`✅ 成功为${selected.length}名学生${action}分！`, 'success');
          
-         // 如果启用了自动同步，使用防抖同步
-         if (wpsConfig.autoSync && wpsConnected) {
-             debouncedSync();
-         }
+        showBackupReminder();
      }
      
      // 清除学号后缀高亮
@@ -2875,7 +2770,7 @@ function renderGiteeFileList(list = []) {
         if (firstClass && allClassesData[firstClass]) {
             currentClass = firstClass;
             students = JSON.parse(JSON.stringify(allClassesData[firstClass]));
-            document.getElementById('className').textContent = currentClass;
+            
             currentFilter = '';
             showMain();
             updateGroups();
@@ -3104,6 +2999,7 @@ function renderGiteeFileList(list = []) {
         render();
         saveToLocalStorage();
         updateClassStatus();
+        showBackupReminder();
         alert(`${currentClass} 的成绩已重置！`);
     }
     
@@ -3230,399 +3126,7 @@ function renderGiteeFileList(list = []) {
         }
     });
     
-    // ==================== WPS API 集成功能 ====================
-    const REMOTE_SYNC = {
-        lastRevision: null,
-        pollingTimer: null,
-        pendingPush: null,
-        lastPullTime: null
-    };
-
-    function hasCloudEndpoint() {
-        return currentCloudEndpoint().length > 0;
-    }
-
-    function ensureBooleanFlag(value) {
-        if (value === true || value === false) return value;
-        if (typeof value === 'number') return value > 0;
-        if (typeof value === 'string') {
-            const normalized = value.trim();
-            return normalized === '√' || normalized === 'true' || normalized === '1' || normalized === '是';
-        }
-        return false;
-    }
-
-    function createBaseStudent(className, baseTuple, index) {
-        const studentId = baseTuple[0];
-        const studentName = baseTuple[1];
-        const baseGroup = className === '25应电12班'
-            ? getGroupForYingDian(index)
-            : getGroupForStudent(className, index);
-
-        return {
-            学号: studentId,
-            姓名: studentName,
-            组别: baseGroup,
-            子班级: className === '25应电12班' ? getSubClass(studentId) : '',
-            课堂表现: 0,
-            小组活动: 0,
-            笔记1: false,
-            笔记2: false,
-            笔记总分: 0,
-            考试成绩: 0,
-            平时总分: 0,
-            总分: 0,
-            最后更新: null,
-            selected: false
-        };
-    }
-
-    function recalcStudentRecord(record) {
-        record.课堂表现 = parseFloat(record.课堂表现) || 0;
-        record.小组活动 = parseFloat(record.小组活动) || 0;
-        record.考试成绩 = Math.min(50, Math.max(0, parseFloat(record.考试成绩) || 0));
-        record.笔记1 = ensureBooleanFlag(record.笔记1);
-        record.笔记2 = ensureBooleanFlag(record.笔记2);
-        record.笔记总分 = (record.笔记1 ? 5 : 0) + (record.笔记2 ? 5 : 0);
-        record.平时总分 = record.课堂表现 + record.小组活动 + record.笔记总分;
-        record.总分 = record.平时总分 + record.考试成绩;
-        record.selected = false;
-        return record;
-    }
-
-    function mergeStudentData(baseStudent, snapshot) {
-        if (!snapshot) {
-            return recalcStudentRecord(baseStudent);
-        }
-
-        const merged = { ...baseStudent };
-        const numericFields = ['课堂表现', '小组活动', '笔记总分', '平时总分', '考试成绩', '总分'];
-        numericFields.forEach(field => {
-            if (snapshot[field] !== undefined && snapshot[field] !== null && snapshot[field] !== '') {
-                merged[field] = snapshot[field];
-            }
-        });
-
-        if (snapshot.笔记1 !== undefined) merged.笔记1 = ensureBooleanFlag(snapshot.笔记1);
-        if (snapshot.笔记2 !== undefined) merged.笔记2 = ensureBooleanFlag(snapshot.笔记2);
-        if (snapshot.组别) merged.组别 = snapshot.组别;
-        if (snapshot.子班级) merged.子班级 = snapshot.子班级;
-        if (snapshot.备注) merged.备注 = snapshot.备注;
-        merged.最后更新 = snapshot.最后更新 || snapshot.lastUpdated || merged.最后更新 || null;
-
-        return recalcStudentRecord(merged);
-    }
-
-    function buildClassSnapshot(className, remoteList = []) {
-        const baseline = classesData[className] || [];
-        const remoteMap = new Map();
-        remoteList.forEach(item => {
-            if (!item) return;
-            if (item.学号) {
-                remoteMap.set(String(item.学号).trim(), item);
-            }
-        });
-
-        return baseline.map((entry, index) => {
-            const baseStudent = createBaseStudent(className, entry, index);
-            const remote = remoteMap.get(baseStudent.学号) || remoteList.find(s => s && s.姓名 === baseStudent.姓名);
-            return mergeStudentData(baseStudent, remote);
-        });
-    }
-
-    function serializeStudentForRemote(student) {
-        const timestamp = new Date().toISOString();
-        const payload = {
-            学号: student.学号,
-            姓名: student.姓名,
-            组别: student.组别,
-            子班级: student.子班级 || '',
-            课堂表现: student.课堂表现,
-            小组活动: student.小组活动,
-            笔记1: !!student.笔记1,
-            笔记2: !!student.笔记2,
-            笔记总分: student.笔记总分,
-            平时总分: student.平时总分,
-            考试成绩: student.考试成绩,
-            总分: student.总分,
-            最后更新: student.最后更新 || timestamp
-        };
-        student.最后更新 = payload.最后更新;
-        return payload;
-    }
-
-    function applyRemoteSnapshot(snapshot = {}, options = {}) {
-        if (!snapshot || !snapshot.classes) {
-            return;
-        }
-
-        let hasUpdates = false;
-        Object.keys(classesData).forEach(className => {
-            const remoteStudents = snapshot.classes[className];
-            if (remoteStudents) {
-                allClassesData[className] = buildClassSnapshot(className, remoteStudents);
-                hasUpdates = true;
-            } else if (!allClassesData[className]) {
-                allClassesData[className] = buildClassSnapshot(className, []);
-            }
-        });
-
-        if (hasUpdates || options.forceRender) {
-            if (currentClass && allClassesData[currentClass]) {
-                students = JSON.parse(JSON.stringify(allClassesData[currentClass]));
-                updateGroups();
-                render();
-            }
-            updateClassStatus();
-            saveToLocalStorage({ skipDirty: true });
-        }
-    }
-
-    async function fetchRemoteSnapshot(options = {}) {
-        const endpoint = currentCloudEndpoint();
-        if (!endpoint) {
-            updateWPSStatus('disconnected', '未配置同步服务');
-            return null;
-        }
-
-        try {
-            syncInProgress = true;
-            if (!options.silent) {
-                updateWPSStatus('syncing', '正在从WPS加载数据...');
-            }
-
-            const payload = {
-                fileId: wpsConfig.fileId
-            };
-            
-            const response = await axios.post(`${endpoint}/api/load`, payload, {
-                timeout: 30000,
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-            const result = response.data || {};
-
-            if (result.success) {
-                const data = result.data || {};
-                REMOTE_SYNC.lastRevision = result.timestamp || Date.now();
-                REMOTE_SYNC.lastPullTime = new Date();
-                
-                // 应用远程数据
-                const snapshot = { classes: data };
-                applyRemoteSnapshot(snapshot, { forceRender: !currentClass });
-                
-                wpsConnected = true;
-                localDirtyFlag = false;
-                wpsConfig.lastSyncTime = new Date().toISOString();
-                saveWPSConfigToStorage();
-                updateWPSStatus('connected', `已拉取 ${new Date().toLocaleTimeString()}`);
-                
-                if (options.toast) {
-                    const totalStudents = Object.values(data).reduce((sum, students) => sum + students.length, 0);
-                    alert(`✅ 已从WPS加载最新数据\n\n共 ${totalStudents} 条学生记录`);
-                }
-                
-                if (wpsConfig.autoSync) {
-                    startRemotePolling();
-                }
-                return data;
-            }
-
-            throw new Error(result.error || 'WPS接口返回未知错误');
-        } catch (error) {
-            console.error('从WPS加载数据失败:', error);
-            if (!options.silent) {
-                alert('❌ 从WPS加载数据失败\n\n' +
-                      '错误：' + (error.message || '未知错误') + '\n\n' +
-                      '请检查：\n' +
-                      '1. Worker服务是否正常运行\n' +
-                      '2. WPS文档ID是否正确\n' +
-                      '3. 网络连接是否正常');
-            }
-            updateWPSStatus('disconnected', '离线模式');
-            wpsConnected = false;
-            throw error;
-        } finally {
-            syncInProgress = false;
-        }
-    }
     
-    // 手动刷新功能
-    async function refreshFromWPS() {
-        try {
-            await fetchRemoteSnapshot({ toast: true });
-        } catch (error) {
-            // 错误已在fetchRemoteSnapshot中处理
-        }
-    }
-
-    function scheduleAutoPush(delay = 3000) {
-        if (!wpsConfig.autoSync) return;
-        if (!hasCloudEndpoint() || !wpsConnected) return;
-        if (REMOTE_SYNC.pendingPush) {
-            clearTimeout(REMOTE_SYNC.pendingPush);
-        }
-        REMOTE_SYNC.pendingPush = setTimeout(() => {
-            if (!localDirtyFlag || syncInProgress) {
-                return;
-            }
-            pushRemoteSnapshot({ silent: true }).catch(() => {});
-        }, delay);
-    }
-
-    async function pushRemoteSnapshot(options = {}) {
-        const endpoint = currentCloudEndpoint();
-        if (!endpoint) {
-            if (!options.silent) {
-                alert('尚未配置同步服务地址。\n\n请先点击"⚙️ WPS配置"按钮进行配置。');
-            }
-            return null;
-        }
-
-        if (syncInProgress && !options.force) {
-            return;
-        }
-
-        // 准备同步数据
-        const syncData = prepareSyncData();
-
-        const requestPayload = {
-            fileId: wpsConfig.fileId,
-            data: syncData.classes
-        };
-
-        try {
-            syncInProgress = true;
-            if (!options.silent) {
-                updateWPSStatus('syncing', '正在同步至WPS...');
-            }
-
-            const response = await axios.post(`${endpoint}/api/sync`, requestPayload, {
-                timeout: 30000,
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-            const result = response.data || {};
-
-            if (result.success) {
-                REMOTE_SYNC.lastRevision = result.timestamp || Date.now();
-                REMOTE_SYNC.lastPullTime = new Date();
-                wpsConnected = true;
-                localDirtyFlag = false;
-                wpsConfig.lastSyncTime = new Date().toISOString();
-                saveWPSConfigToStorage();
-                updateWPSStatus('connected', `已同步 ${new Date().toLocaleTimeString()}`);
-                if (options.toast !== false) {
-                    const total = syncData.totalStudents || 0;
-                    alert(`🎉 同步成功！\n\n已推送 ${total} 条学生记录到WPS在线表格`);
-                }
-                return result;
-            }
-
-            throw new Error(result.error || '同步失败');
-        } catch (error) {
-            console.error('同步到WPS失败:', error);
-            if (!options.silent) {
-                alert('❌ 同步到WPS失败\n\n' +
-                      '错误：' + (error.message || '未知错误') + '\n\n' +
-                      '请检查：\n' +
-                      '1. Worker服务是否正常运行\n' +
-                      '2. WPS文档ID是否正确\n' +
-                      '3. 网络连接是否正常');
-            }
-            updateWPSStatus('disconnected', '同步失败');
-            wpsConnected = false;
-            throw error;
-        } finally {
-            syncInProgress = false;
-        }
-    }
-
-    function startRemotePolling() {
-        if (!wpsConfig.autoSync) return;
-        if (!hasCloudEndpoint()) return;
-        stopRemotePolling();
-        const interval = Number.isFinite(wpsConfig.pollingInterval) ? wpsConfig.pollingInterval : 60000;
-        REMOTE_SYNC.pollingTimer = setInterval(() => {
-            fetchRemoteSnapshot({ silent: true }).catch(() => {});
-        }, Math.max(interval, 15000));
-    }
-
-    function stopRemotePolling() {
-        if (REMOTE_SYNC.pollingTimer) {
-            clearInterval(REMOTE_SYNC.pollingTimer);
-            REMOTE_SYNC.pollingTimer = null;
-        }
-    }
-
-    async function initializeRemoteSync() {
-        // 更新按钮显示状态
-        const hasConfig = hasCloudEndpoint();
-        document.getElementById('wpsSyncBtn').style.display = 'inline-block'; // 总是显示同步按钮
-        document.getElementById('wpsRefreshBtn').style.display = hasConfig ? 'inline-block' : 'none';
-        
-        if (!hasConfig) {
-            updateWPSStatus('disconnected', '未配置 - 点击"⚙️ WPS配置"');
-            console.log('<i class="fa-solid fa-lightbulb"></i> 提示：点击"⚙️ WPS配置"按钮配置Worker服务');
-            return;
-        }
-        
-        updateWPSStatus('disconnected', '已配置 - 点击"同步"测试');
-        console.log('✅ 已配置WPS同步服务');
-        
-        // 如果启用自动同步，尝试拉取最新数据
-        if (wpsConfig.autoSync) {
-        try {
-            await fetchRemoteSnapshot({ silent: true });
-        } catch (error) {
-            console.warn('初始化WPS同步失败:', error.message || error);
-            }
-        }
-    }
-
-    async function refreshFromWPS() {
-        try {
-            await fetchRemoteSnapshot({ toast: true });
-        } catch (error) {
-            console.warn('手动拉取WPS数据失败:', error.message || error);
-        }
-    }
-
-    
-    // WPS 辅助函数
-    function currentCloudEndpoint() {
-        return (wpsConfig.syncEndpoint || DEFAULT_CLOUD_FUNCTION_URL || '').trim();
-    }
-
-    console.log('WPS 云端同步模块已加载');
-
-    async function testWPSConnection() {
-        if (!hasCloudEndpoint()) {
-            alert('<i class="fa-solid fa-lightbulb"></i> 提示：您尚未配置同步服务地址\n\n' +
-                  '当前为【手动同步模式】，功能说明：\n' +
-                  '━━━━━━━━━━━━━━━━━━━\n' +
-                  '✅ 本地存储：数据安全保存在浏览器\n' +
-                  '✅ 手动同步：点击"📤 同步"按钮\n' +
-                  '✅ 自动复制：数据自动复制到剪贴板\n' +
-                  '✅ 简单粘贴：在WPS表格中按Ctrl+V粘贴\n\n' +
-                  '━━━━━━━━━━━━━━━━━━━\n' +
-                  '如需自动同步，请配置同步服务地址（Worker URL）');
-            return false;
-        }
-
-        try {
-            await fetchRemoteSnapshot({ silent: false });
-            alert('✅ WPS同步服务连接成功！');
-            return true;
-        } catch (error) {
-            console.error('WPS连接测试失败:', error);
-            updateWPSStatus('disconnected', '离线模式');
-            alert('<i class="fa-solid fa-triangle-exclamation"></i> 暂时无法连接到WPS同步服务，请稍后再试。');
-            return false;
-        }
-    }
 
     // ==================== Gitee 云同步功能 ====================
 
@@ -4301,398 +3805,7 @@ function renderGiteeFileList(list = []) {
         saveToLocalStorage();
     }
     
-    // 更新WPS状态显示
-    function updateWPSStatus(status, message) {
-        const statusEl = document.getElementById('wpsStatus');
-        
-        // 如果状态元素不存在，忽略（已简化UI，可能已移除该元素）
-        if (!statusEl) {
-            console.log('WPS状态:', status, message);
-            return;
-        }
-        
-        statusEl.className = `wps-status ${status}`;
-        statusEl.innerHTML = `<span class="sync-indicator ${status}"></span>${message}`;
-    }
     
-     // 显示WPS配置界面
-    function showWPSConfig() {
-         document.getElementById('wpsWorkerUrl').value = wpsConfig.syncEndpoint || '';
-         document.getElementById('wpsFileId').value = wpsConfig.fileId || '';
-         document.getElementById('wpsAutoSyncCheck').checked = wpsConfig.autoSync || false;
-        document.getElementById('wpsConfigModal').classList.add('show');
-    }
-    
-    // 保存WPS配置
-    function saveWPSConfigReal() {
-        const workerUrl = document.getElementById('wpsWorkerUrl').value.trim();
-        const fileId = document.getElementById('wpsFileId').value.trim();
-        const autoSync = document.getElementById('wpsAutoSyncCheck').checked;
-        
-        if (!workerUrl) {
-            alert('请输入Worker服务地址');
-            return;
-        }
-        
-        if (!fileId) {
-            alert('请输入WPS文档ID');
-            return;
-        }
-        
-        // 验证URL格式
-        try {
-            new URL(workerUrl);
-        } catch (e) {
-            alert('Worker URL格式不正确，请检查');
-            return;
-        }
-        
-        wpsConfig.syncEndpoint = workerUrl;
-        wpsConfig.fileId = fileId;
-        wpsConfig.autoSync = autoSync;
-        
-        saveWPSConfigToStorage();
-        
-        alert('✅ WPS配置已保存！\n\n' +
-              '现在可以：\n' +
-              '• 点击"📤 同步"按钮将数据推送到WPS\n' +
-              '• 点击"🔄 拉取最新"从WPS获取最新数据\n' +
-              (autoSync ? '• 系统将每60秒自动同步' : ''));
-        
-        closeWPSConfigReal();
-        
-        // 如果启用自动同步，初始化
-        if (autoSync) {
-                initializeRemoteSync();
-            } else {
-            stopRemotePolling();
-        }
-        
-        // 更新状态
-        updateWPSStatus('disconnected', hasCloudEndpoint() ? '已配置，点击同步测试' : '未配置');
-        
-        // 显示同步按钮
-        document.getElementById('wpsSyncBtn').style.display = hasCloudEndpoint() ? 'inline-block' : 'none';
-        document.getElementById('openWPSBtn').style.display = 'inline-block';
-    }
-    
-    // 测试WPS连接
-    async function testWPSConnection() {
-        const workerUrl = document.getElementById('wpsWorkerUrl').value.trim();
-        const fileId = document.getElementById('wpsFileId').value.trim();
-        
-        if (!workerUrl || !fileId) {
-            alert('请先填写Worker URL和文档ID');
-            return;
-        }
-        
-        try {
-            updateWPSStatus('syncing', '正在测试连接...');
-            
-            // 测试Worker健康检查接口
-            const response = await axios.get(`${workerUrl}/api/health`, { timeout: 5000 });
-            
-            if (response.data && response.data.status === 'ok') {
-                alert('✅ Worker连接成功！\n\n' +
-                      '服务状态：正常\n' +
-                      '现在可以保存配置并开始使用');
-                updateWPSStatus('connected', 'Worker连接正常');
-            } else {
-                throw new Error('Worker响应格式异常');
-            }
-        } catch (error) {
-            console.error('连接测试失败:', error);
-            alert('❌ 连接测试失败\n\n' +
-                  '错误信息：' + (error.message || '未知错误') + '\n\n' +
-                  '请检查：\n' +
-                  '1. Worker URL是否正确\n' +
-                  '2. Worker是否已部署\n' +
-                  '3. 网络连接是否正常');
-            updateWPSStatus('disconnected', '连接失败');
-        }
-    }
-    
-    // 关闭WPS配置
-    function closeWPSConfigReal() {
-        document.getElementById('wpsConfigModal').classList.remove('show');
-    }
-    
-    // 检查是否配置了云端点
-    function hasCloudEndpoint() {
-        return !!(wpsConfig.syncEndpoint && wpsConfig.fileId);
-    }
-    
-    // 获取当前云端点
-    function currentCloudEndpoint() {
-        if (!wpsConfig.syncEndpoint || !wpsConfig.fileId) {
-            return null;
-        }
-        return wpsConfig.syncEndpoint;
-    }
-    
-    // 自动同步功能已简化（使用防抖机制）
-    
-    // 防抖同步 - 避免频繁同步
-    let syncTimeout = null;
-    function debouncedSync() {
-        localDirtyFlag = true;
-        if (syncTimeout) {
-            clearTimeout(syncTimeout);
-        }
-        syncTimeout = setTimeout(() => {
-            scheduleAutoPush();
-        }, 2000);
-    }
-    
-    // 增强的同步功能 - 包含重试机制
-    async function syncToWPSWithRetry(maxRetries = 3) {
-        let retryCount = 0;
-        
-        while (retryCount < maxRetries) {
-            try {
-                await syncToWPS();
-                return true;
-            } catch (error) {
-                retryCount++;
-                console.warn(`WPS同步失败，重试第${retryCount}次:`, error);
-                
-                if (retryCount < maxRetries) {
-                    // 等待一段时间后重试
-                    await new Promise(resolve => setTimeout(resolve, 2000 * retryCount));
-                } else {
-                    console.error('WPS同步最终失败:', error);
-                    updateWPSStatus('disconnected', '同步失败');
-                    return false;
-                }
-            }
-        }
-    }
-    
-    // 连接状态检查已简化（不再需要OAuth方式）
-    
-    // 显示CORS帮助信息
-    function showCORSHelp() {
-        const helpMessage = `
-        CORS跨域问题解决方案：
-        
-        方案1：使用代理服务器（推荐）
-        1. 安装Node.js: https://nodejs.org/
-        2. 在项目目录运行：
-           npm install
-           npm start
-        3. 访问: http://localhost:3001/成绩册.html
-        
-        方案2：使用本地存储增强
-        系统已自动启用本地存储增强功能，
-        数据会安全保存在浏览器中。
-        
-        方案3：部署到Web服务器
-        将文件上传到支持HTTPS的Web服务器。
-        `;
-        
-        alert(helpMessage);
-        
-        // 启用本地存储增强模式
-        enableLocalStorageMode();
-    }
-    
-    // 启用离线模式
-    function enableOfflineMode() {
-        console.log('启用离线模式');
-        updateWPSStatus('disconnected', '离线模式');
-        stopRemotePolling();
-        wpsConnected = false;
-
-        // 显示离线模式提示
-        showOfflineModeHelp();
-
-        // 增强本地存储功能
-        enhanceLocalStorage();
-    }
-    
-    // 显示离线模式帮助
-    function showOfflineModeHelp() {
-        const helpMessage = `
-        系统已启用离线模式！
-        
-        ✅ 数据安全：所有数据保存在浏览器本地
-        ✅ 自动备份：每30秒自动备份一次
-        ✅ 数据导出：支持JSON格式导出
-        ✅ 完全离线：无需网络连接
-        
-        如需使用WPS云端同步：
-        1. 启动代理服务器：npm start
-        2. 访问：http://localhost:3001/成绩册.html
-        
-        当前功能完全正常，可以正常使用所有成绩管理功能！
-        `;
-        
-        // 延迟显示，避免阻塞初始化
-        setTimeout(() => {
-            alert(helpMessage);
-        }, 1000);
-    }
-    
-    // 启用本地存储增强模式
-    function enableLocalStorageMode() {
-        console.log('启用本地存储增强模式');
-        updateWPSStatus('disconnected', '本地存储模式');
-        stopRemotePolling();
-
-        // 增强本地存储功能
-        enhanceLocalStorage();
-    }
-    
-    // 增强本地存储功能
-    function enhanceLocalStorage() {
-        // 增加数据备份频率
-        setInterval(() => {
-            saveToLocalStorage({ skipDirty: true, skipAutoSync: true });
-            console.log('本地数据已备份');
-        }, 30000); // 每30秒备份一次
-        
-        // 添加数据导出功能
-        addLocalExportFeatures();
-    }
-    
-    // 添加本地导出功能
-    function addLocalExportFeatures() {
-        // 在控制栏添加本地导出按钮
-        const controlBar = document.querySelector('.control-bar');
-        if (controlBar && !document.getElementById('localExportBtn')) {
-            const localExportBtn = document.createElement('button');
-            localExportBtn.id = 'localExportBtn';
-            localExportBtn.className = 'btn btn-primary';
-            localExportBtn.textContent = '导出本地数据';
-            localExportBtn.onclick = exportLocalData;
-            controlBar.appendChild(localExportBtn);
-        }
-    }
-    
-    // 导出本地数据
-    function exportLocalData() {
-        try {
-            // 保存当前班级数据
-            if (currentClass && students.length > 0) {
-                allClassesData[currentClass] = JSON.parse(JSON.stringify(students));
-            }
-            
-            // 准备导出数据
-            const exportData = {
-                timestamp: new Date().toISOString(),
-                version: '1.0',
-                classes: {},
-                summary: {
-                    totalClasses: Object.keys(allClassesData).length,
-                    totalStudents: Object.values(allClassesData).reduce((sum, arr) => sum + arr.length, 0)
-                }
-            };
-            
-            // 导出所有班级数据
-            Object.keys(allClassesData).forEach(className => {
-                const classStudents = allClassesData[className];
-                exportData.classes[className] = classStudents.map(s => ({
-                    学号: s.学号,
-                    姓名: s.姓名,
-                    组别: s.组别,
-                    子班级: s.子班级,
-                    课堂表现: s.课堂表现,
-                    小组活动: s.小组活动,
-                    笔记1: s.笔记1,
-                    笔记2: s.笔记2,
-                    笔记总分: s.笔记总分,
-                    平时总分: s.平时总分,
-                    考试成绩: s.考试成绩,
-                    总分: s.总分
-                }));
-            });
-            
-            // 创建下载链接
-            const dataStr = JSON.stringify(exportData, null, 2);
-            const dataBlob = new Blob([dataStr], {type: 'application/json'});
-            const url = URL.createObjectURL(dataBlob);
-            
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `成绩册数据_${new Date().toISOString().split('T')[0]}.json`;
-            link.click();
-            
-            URL.revokeObjectURL(url);
-            
-            alert('本地数据导出成功！');
-            
-        } catch (error) {
-            console.error('导出失败:', error);
-            alert('导出失败：' + error.message);
-        }
-    }
-    
-    // 导入本地数据
-    function importLocalData() {
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = '.json';
-        input.onchange = function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const data = JSON.parse(e.target.result);
-                    
-                    if (data.classes) {
-                        // 恢复班级数据
-                        Object.keys(data.classes).forEach(className => {
-                            if (classesData[className]) {
-                                allClassesData[className] = data.classes[className].map(s => ({
-                                    ...s,
-                                    selected: false
-                                }));
-                            }
-                        });
-                        
-                        // 更新显示
-                        if (currentClass && allClassesData[currentClass]) {
-                            students = JSON.parse(JSON.stringify(allClassesData[currentClass]));
-                            render();
-                        }
-                        
-                        updateClassStatus();
-                        saveToLocalStorage();
-                        
-                        alert('本地数据导入成功！');
-                    } else {
-                        alert('数据格式错误！');
-                    }
-                } catch (error) {
-                    console.error('导入失败:', error);
-                    alert('导入失败：' + error.message);
-                }
-            };
-            reader.readAsText(file);
-        };
-        input.click();
-    }
-    
-    // 加载WPS配置
-    function loadWPSConfig() {
-        try {
-            const saved = localStorage.getItem('wpsConfig');
-            if (saved) {
-                const savedConfig = JSON.parse(saved);
-                wpsConfig = { ...wpsConfig, ...savedConfig };
-            }
-            if (!wpsConfig.syncEndpoint) {
-                wpsConfig.syncEndpoint = DEFAULT_CLOUD_FUNCTION_URL;
-            }
-            if (!wpsConfig.pollingInterval) {
-                wpsConfig.pollingInterval = 60000;
-            }
-        } catch (error) {
-            console.error('加载WPS配置失败:', error);
-        }
-    }
     
     // ==================== 粘贴导入功能 ====================
     
@@ -4781,6 +3894,7 @@ function renderGiteeFileList(list = []) {
             
             saveToLocalStorage();
             updateClassStatus();
+            showBackupReminder();
             
             // 添加历史记录
             addHistory('粘贴导入数据', imported, {
