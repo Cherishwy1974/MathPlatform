@@ -92,7 +92,7 @@ window.exerciseData = {
     `
     },
     {
-      title: "高阶导数与隐函数求导",
+      title: "高阶导数",
       content: `
       <div style="padding: 10px 0; font-family: 'Microsoft YaHei', Arial, sans-serif;">
         <div style="border-left: 4px solid #e15759; padding-left: 10px; margin-bottom: 20px; background: white; padding: 15px; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.08);">
@@ -106,8 +106,6 @@ window.exerciseData = {
                 <li style="margin-bottom: 5px;">$(\\cos x)^{(n)} = \\cos(x + \\frac{n\\pi}{2})$</li>
               </ul>
             </li>
-            <li style="margin-bottom: 10px;"><strong>隐函数求导</strong>：对于由方程 $F(x,y) = 0$ 确定的隐函数 $y = f(x)$，两边同时对 $x$ 求导，利用复合函数求导法则求出 $\\frac{dy}{dx}$</li>
-            <li style="margin-bottom: 10px;"><strong>参数方程求导</strong>：设参数方程为 $\\begin{cases} x = \\phi(t) \\\\ y = \\psi(t) \\end{cases}$，则 $\\frac{dy}{dx} = \\frac{\\frac{dy}{dt}}{\\frac{dx}{dt}} = \\frac{\\psi'(t)}{\\phi'(t)}$（$\\phi'(t) \\neq 0$）</li>
           </ul>
         </div>
       </div>
@@ -151,7 +149,7 @@ window.exerciseData.exercises = [
       id: 1,
       type: "选择题",
       title: "可微与可导的关系",
-      question: "3. （黑龙江2022年）函数在某点处可微是其在该点处可导的（）\nA. 必要不充分条件\nB. 充分不充分条件\nC. 充分必要条件\nD. 既非充分也非必要条件",
+      question: "（黑龙江2022年）函数在某点处可微是其在该点处可导的（）\nA. 必要不充分条件\nB. 充分不充分条件\nC. 充分必要条件\nD. 既非充分也非必要条件",
       essence: "这道题考查一元函数可微与可导的关系。对于一元函数，可微与可导是等价的，即充分必要条件。需要理解可微和可导的定义及其等价性。",
       explanation: `本题考查可微与可导的关系
 
@@ -182,7 +180,7 @@ window.exerciseData.exercises = [
       id: 2,
       type: "选择题",
       title: "函数的微分",
-      question: "9. （山东高数三2020年）函数 $y = \\sqrt[3]{x} + \\sqrt{x}$ 的微分 $dy = $ （）\nA. $\\left(3x^2 + \\frac{\\sqrt{x}}{2}\\right)dx$ \nB. $\\left(\\frac{1}{3\\sqrt[3]{x^2}} + \\frac{1}{2\\sqrt{x}}\\right)dx$ \nC. $\\left(x^2 + \\frac{\\sqrt{x}}{2}\\right)dx$ \nD. $\\left(\\frac{1}{2\\sqrt{x}} + x^2\\right)dx$",
+      question: "（山东高数三2020年）函数 $y = \\sqrt[3]{x} + \\sqrt{x}$ 的微分 $dy = $ （）\nA. $\\left(3x^2 + \\frac{\\sqrt{x}}{2}\\right)dx$ \nB. $\\left(\\frac{1}{3\\sqrt[3]{x^2}} + \\frac{1}{2\\sqrt{x}}\\right)dx$ \nC. $\\left(x^2 + \\frac{\\sqrt{x}}{2}\\right)dx$ \nD. $\\left(\\frac{1}{2\\sqrt{x}} + x^2\\right)dx$",
       essence: "这道题考查函数的微分计算。需要先求导数，然后写出微分形式 $dy = y'dx$。注意幂函数的求导公式和根式的指数表示。",
       explanation: `第一步：求导数
 $$y = x^{\\frac{1}{3}} + x^{\\frac{1}{2}}$$
@@ -205,7 +203,7 @@ $$dy = y'dx = \\left(\\frac{1}{3\\sqrt[3]{x^2}} + \\frac{1}{2\\sqrt{x}}\\right)d
       id: 3,
       type: "选择题",
       title: "复合函数的微分",
-      question: "10. （黑龙江2022年）设 $f'(x) = g(x)$，则 $df(\\sin^2 x) = $ （）\nA. $2g(x)\\sin x dx$ \nB. $f(x)\\sin 2x dx$ \nC. $g(\\sin^2 x)\\sin 2x dx$ \nD. $g(\\sin 2x) dx$",
+      question: "（黑龙江2022年）设 $f'(x) = g(x)$，则 $df(\\sin^2 x) = $ （）\nA. $2g(x)\\sin x dx$ \nB. $f(x)\\sin 2x dx$ \nC. $g(\\sin^2 x)\\sin 2x dx$ \nD. $g(\\sin 2x) dx$",
       essence: "这道题考查复合函数的微分计算。需要使用链式法则求导，然后写出微分形式。注意 $f'(x) = g(x)$ 这个条件的使用。",
       explanation: `第一步：设置复合函数
 令 $u = \\sin^2 x$，则 $f(\\sin^2 x) = f(u)$
@@ -232,7 +230,7 @@ $$df(\\sin^2 x) = g(\\sin^2 x) \\sin 2x dx$$`,
       id: 4,
       type: "选择题",
       title: "复合函数导数",
-      question: "22. 设 $f(\\sin^2 x) = \\cos^2 x + 1$，则 $f'(1) = $ （）\nA. -1 \nB. 1 \nC. -2 \nD. 2",
+      question: "设 $f(\\sin^2 x) = \\cos^2 x + 1$，则 $f'(1) = $ （）\nA. -1 \nB. 1 \nC. -2 \nD. 2",
       essence: "这道题考查复合函数的导数计算。关键是通过换元法求出 $f(x)$ 的表达式，然后求导。",
       explanation: `<strong>理解题意</strong>
 题目给出了 $f(\\sin^2 x) = \\cos^2 x + 1$，要求 $f'(1)$
@@ -262,31 +260,10 @@ $$f'(x) = 0 - 1 = -1$$
       method: "换元法"
     },
     {
-      id: 5,
-      type: "选择题",
-      title: "对数函数求导",
-      question: "23. $f(x) = \\ln\\frac{2-x}{1+x}$，则 $f'(x) = $ （）\nA. $\\frac{1}{x^2-1}$ \nB. $\\frac{-3}{(2-x)(1+x)}$ \nC. $\\frac{1}{2-x} - \\frac{1}{1+x}$ \nD. $\\frac{1}{1+x} - \\frac{1}{2-x}$",
-      essence: "这道题考查对数函数的求导。需要先利用对数的性质 $\\ln\\frac{a}{b} = \\ln a - \\ln b$ 化简函数，然后分别对各项求导。",
-      explanation: `第一步：化简函数
-$$f(x) = \\ln(2-x) - \\ln(1+x)$$
-
-第二步：分别求导
-$$f'(x) = \\frac{1}{2-x} \\cdot (-1) - \\frac{1}{1+x} \\cdot 1$$
-
-第三步：化简
-$$f'(x) = -\\frac{1}{2-x} - \\frac{1}{1+x}$$
-$$= -\\frac{1+x + 2-x}{(2-x)(1+x)}$$
-$$= -\\frac{3}{(2-x)(1+x)}$$`,
-      answer: "B",
-      difficulty: "medium",
-      category: "对数函数",
-      method: "对数性质"
-    },
-    {
       id: 6,
       type: "选择题",
       title: "指数函数切线",
-      question: "24. 曲线 $y = xe^x$ 在 $x = 0$ 处的切线方程是（）\nA. $y - 2x - 1 = 0$ \nB. $y - 2x - 2 = 0$ \nC. $y - x - 2 = 0$ \nD. $y - x = 0$",
+      question: "曲线 $y = xe^x$ 在 $x = 0$ 处的切线方程是（）\nA. $y - 2x - 1 = 0$ \nB. $y - 2x - 2 = 0$ \nC. $y - x - 2 = 0$ \nD. $y - x = 0$",
       essence: "这道题考查指数函数乘积的切线方程求解。需要先求导数得到切线斜率，然后利用点斜式方程写出切线方程。注意乘积法则的应用。",
       explanation: `第一步：求切点
 当 $x = 0$ 时，$y = 0 \\cdot e^0 = 0$
@@ -312,8 +289,8 @@ $$y = x$$
     {
       id: 7,
       type: "选择题",
-      title: "三角函数微分",
-      question: "25. 设函数 $y = \\cos^2 x$，则 $dy = $ （） $dx$\nA. $-2\\sin^2 x$ \nB. $2\\cos^2 x$ \nC. $-2\\sin x \\cos x$ \nD. $2\\sin x \\cos x$",
+      title: "复合函数求导",
+      question: "设函数 $y = \\cos^2 x$，则 $dy = $ （） $dx$\nA. $-2\\sin^2 x$ \nB. $2\\cos^2 x$ \nC. $-2\\sin x \\cos x$ \nD. $2\\sin x \\cos x$",
       essence: "这道题考查三角函数的微分计算。需要使用链式法则求导，然后写出微分形式 $dy = y'dx$。注意 $\\cos^2 x$ 是复合函数。",
       explanation: `第一步：求导数
 $$y = \\cos^2 x$$
@@ -326,16 +303,16 @@ $$= -2\\sin x \\cos x$$
 $$dy = -2\\sin x \\cos x dx$$`,
       answer: "C",
       difficulty: "easy",
-      category: "微分",
+      category: "复合函数求导",
       method: "链式法则"
     },
 
     {
       id: 8,
       type: "选择题",
-      title: "对数函数高阶导数",
-      question: "27. $y = x\\ln x$，则 $y''' = $ （）\nA. $\\ln x$ \nB. $x$ \nC. $\\frac{1}{x^2}$ \nD. $-\\frac{1}{x^2}$",
-      essence: "这道题考查对数函数的高阶导数计算。需要逐次求导，先求一阶导数，再求二阶导数，最后求三阶导数。注意乘积法则的应用。",
+      title: "导数四则运算",
+      question: "$y = x\\ln x$，则 $y''' = $ （）\nA. $\\ln x$ \nB. $x$ \nC. $\\frac{1}{x^2}$ \nD. $-\\frac{1}{x^2}$",
+      essence: "这道题考查导数四则运算中的乘积法则和高阶导数计算。需要逐次求导，先求一阶导数，再求二阶导数，最后求三阶导数。注意乘积法则的应用。",
       explanation: `第一步：求一阶导数
 $$y' = \\ln x + x \\cdot \\frac{1}{x} = \\ln x + 1$$
 
@@ -346,15 +323,15 @@ $$y'' = \\frac{1}{x}$$
 $$y''' = -\\frac{1}{x^2}$$`,
       answer: "D",
       difficulty: "easy",
-      category: "高阶导数",
-      method: "逐次求导"
+      category: "导数四则运算",
+      method: "乘积法则与高阶导数"
     },
 
     {
       id: 9,
       type: "选择题",
-      title: "反三角函数复合",
-      question: "39. 函数 $f(x) = \\arcsin(2x)$ 的导数是（）\nA. $\\frac{1}{\\sqrt{1-4x^2}}$ \nB. $\\frac{2}{\\sqrt{1-4x^2}}$ \nC. $\\frac{1}{\\sqrt{1-x^2}}$ \nD. $\\frac{2}{\\sqrt{1-x^2}}$",
+      title: "复合函数求导",
+      question: "函数 $f(x) = \\arcsin(2x)$ 的导数是（）\nA. $\\frac{1}{\\sqrt{1-4x^2}}$ \nB. $\\frac{2}{\\sqrt{1-4x^2}}$ \nC. $\\frac{1}{\\sqrt{1-x^2}}$ \nD. $\\frac{2}{\\sqrt{1-x^2}}$",
       essence: "这道题考查反三角函数的复合函数求导。需要使用链式法则，先对外层反三角函数求导，再对内层线性函数求导。注意复合函数中内层函数导数的系数。",
       explanation: `使用链式法则：设 $u = 2x$，则 $f(x) = \\arcsin u$
 
@@ -375,8 +352,8 @@ $f'(x) = \\frac{1}{\\sqrt{1-u^2}} \\cdot 2 = \\frac{2}{\\sqrt{1-4x^2}}$`,
     {
       id: 10,
       type: "选择题",
-      title: "反余弦函数复合",
-      question: "40. 函数 $f(x) = \\arccos(x^2)$ 的导数是（）\nA. $\\frac{2x}{\\sqrt{1-x^4}}$ \nB. $-\\frac{2x}{\\sqrt{1-x^4}}$ \nC. $\\frac{1}{\\sqrt{1-x^4}}$ \nD. $-\\frac{1}{\\sqrt{1-x^4}}$",
+      title: "复合函数求导",
+      question: "函数 $f(x) = \\arccos(x^2)$ 的导数是（）\nA. $\\frac{2x}{\\sqrt{1-x^4}}$ \nB. $-\\frac{2x}{\\sqrt{1-x^4}}$ \nC. $\\frac{1}{\\sqrt{1-x^4}}$ \nD. $-\\frac{1}{\\sqrt{1-x^4}}$",
       essence: "这道题考查反余弦函数的复合函数求导。需要使用链式法则，先对外层反余弦函数求导，再对内层幂函数求导。注意反余弦函数导数的负号。",
       explanation: `使用链式法则：设 $u = x^2$，则 $f(x) = \\arccos u$
 
@@ -397,8 +374,8 @@ $f'(x) = -\\frac{1}{\\sqrt{1-u^2}} \\cdot 2x = -\\frac{2x}{\\sqrt{1-x^4}}$`,
     {
       id: 11,
       type: "选择题",
-      title: "对数指数三角复合",
-      question: "48. 函数 $f(x) = \\ln(\\sin(e^x))$ 的导数是（）\nA. $\\frac{e^x \\cos(e^x)}{\\sin(e^x)}$ \nB. $\\frac{\\cos(e^x)}{\\sin(e^x)}$ \nC. $\\frac{e^x}{\\sin(e^x)}$ \nD. $\\frac{\\cos(e^x)}{e^x \\sin(e^x)}$",
+      title: "复合函数求导",
+      question: "函数 $f(x) = \\ln(\\sin(e^x))$ 的导数是（）\nA. $\\frac{e^x \\cos(e^x)}{\\sin(e^x)}$ \nB. $\\frac{\\cos(e^x)}{\\sin(e^x)}$ \nC. $\\frac{e^x}{\\sin(e^x)}$ \nD. $\\frac{\\cos(e^x)}{e^x \\sin(e^x)}$",
       essence: "这道题考查对数、指数、三角函数的三层复合函数求导。需要多次应用链式法则，从外到内逐层求导。注意每层函数的导数公式。",
       explanation: `使用链式法则：设 $u = \\sin(e^x)$，则 $f(x) = \\ln u$
 
@@ -414,13 +391,14 @@ $u' = \\cos v \\cdot v' = \\cos(e^x) \\cdot e^x = e^x \\cos(e^x)$
       method: "链式法则"
     },
 
+
     // ==================== 填空题部分 ====================
 
     {
       id: 12,
       type: "填空题",
-      title: "三角函数高阶导数",
-      question: "17. （福建2020年）若函数 $f(x) = x + \\sin x$，则 $f''(x) = $ ____________",
+      title: "高阶导数运算",
+      question: "（福建2020年）若函数 $f(x) = x + \\sin x$，则 $f''(x) = $ ____________",
       essence: "这道题考查三角函数的高阶导数计算。需要逐次求导，先求一阶导数，再求二阶导数。注意常数项的导数为0。",
       explanation: `第一步：求一阶导数
 $$f'(x) = 1 + \\cos x$$
@@ -429,15 +407,15 @@ $$f'(x) = 1 + \\cos x$$
 $$f''(x) = -\\sin x$$`,
       answer: "$-\\sin x$",
       difficulty: "easy",
-      category: "高阶导数",
+      category: "高阶导数运算",
       method: "直接求导"
     },
 
     {
       id: 13,
       type: "填空题",
-      title: "反正切函数复合",
-      question: "41. 函数 $f(x) = \\arctan(3x)$ 的导数是 ______",
+      title: "复合函数求导",
+      question: "函数 $f(x) = \\arctan(3x)$ 的导数是 ______",
       essence: "这道题考查反正切函数的复合函数求导。需要使用链式法则，先对外层反正切函数求导，再对内层线性函数求导。",
       explanation: `使用链式法则：设 $u = 3x$，则 $f(x) = \\arctan u$
 
@@ -453,8 +431,8 @@ $$f''(x) = -\\sin x$$`,
     {
       id: 14,
       type: "填空题",
-      title: "余弦函数复合",
-      question: "43. 函数 $f(x) = \\cos(x^2)$ 的导数是 ______",
+      title: "复合函数求导",
+      question: "函数 $f(x) = \\cos(x^2)$ 的导数是 ______",
       essence: "这道题考查余弦函数的复合函数求导。需要使用链式法则，先对外层余弦函数求导，再对内层幂函数求导。注意余弦函数导数的负号。",
       explanation: `使用链式法则：设 $u = x^2$，则 $f(x) = \\cos u$
 
@@ -470,8 +448,8 @@ $$f''(x) = -\\sin x$$`,
     {
       id: 15,
       type: "填空题",
-      title: "根式三角复合",
-      question: "47. 函数 $f(x) = \\sqrt{\\sin(2x)}$ 的导数是 ______",
+      title: "复合函数求导",
+      question: "函数 $f(x) = \\sqrt{\\sin(2x)}$ 的导数是 ______",
       essence: "这道题考查根式与三角函数的复合函数求导。需要将根式表示为幂函数形式，然后使用链式法则逐层求导。注意定义域的限制。",
       explanation: `$\\sqrt{\\sin(2x)} = [\\sin(2x)]^{1/2}$，使用链式法则：
 
@@ -491,8 +469,8 @@ $u' = \\cos v \\cdot v' = \\cos(2x) \\cdot 2 = 2\\cos(2x)$
     {
       id: 16,
       type: "填空题",
-      title: "反函数复合",
-      question: "49. 函数 $f(x) = \\arcsin(\\sqrt{x})$ 的导数是 ______",
+      title: "复合函数求导",
+      question: "函数 $f(x) = \\arcsin(\\sqrt{x})$ 的导数是 ______",
       essence: "这道题考查反三角函数与根式函数的复合函数求导。需要使用链式法则，先对外层反三角函数求导，再对内层根式函数求导。注意定义域的限制。",
       explanation: `使用链式法则：设 $u = \\sqrt{x} = x^{1/2}$，则 $f(x) = \\arcsin u$
 
@@ -508,11 +486,12 @@ $u' = \\cos v \\cdot v' = \\cos(2x) \\cdot 2 = 2\\cos(2x)$
     },
 
     // ==================== 计算题部分 ====================
+ 
     {
       id: 17,
       type: "计算题",
-      title: "对数函数求导(1)",
-      question: "31. 求函数 $y = \\ln(3-2x)$ 的导数",
+      title: "复合函数求导",
+      question: "求函数 $y = \\ln(3-2x)$ 的导数",
       essence: "这道题考查对数函数的复合函数求导。需要使用链式法则，先对外层对数函数求导，再对内层线性函数求导。",
       explanation: `第一步：设中间变量
 设 $u = 3-2x$，则 $y = \\ln u$
@@ -528,39 +507,15 @@ $\\frac{du}{dx} = -2$
 $\\frac{dy}{dx} = \\frac{1}{u} \\cdot (-2) = \\frac{-2}{3-2x}$`,
       answer: "$y' = \\frac{-2}{3-2x}$",
       difficulty: "easy",
-      category: "对数求导",
+      category: "复合函数求导",
       method: "链式法则"
     },
-    {
-      id: 18,
-      type: "计算题",
-      title: "对数函数求导(2)",
-      question: "32. 求函数 $y = e^x \\ln x$ 的导数",
-      essence: "这道题考查指数函数与对数函数乘积的求导。需要使用乘积法则 $(uv)' = u'v + uv'$，分别对两个函数求导。",
-      explanation: `第一步：应用乘积法则
-设 $u = e^x$，$v = \\ln x$
-则 $y = uv$，$y' = u'v + uv'$
 
-第二步：分别求导
-$u' = e^x$
-$v' = \\frac{1}{x}$
-
-第三步：代入乘积法则
-$y' = e^x \\cdot \\ln x + e^x \\cdot \\frac{1}{x}$
-
-第四步：提取公因子
-$y' = e^x\\left(\\ln x + \\frac{1}{x}\\right)$`,
-      answer: "$y' = e^x\\left(\\ln x + \\frac{1}{x}\\right)$",
-      difficulty: "easy",
-      category: "乘积法则",
-      method: "乘积求导"
-    },
- 
     {
       id: 19,
       type: "计算题",
-      title: "反三角函数求导",
-      question: "34. 求函数 $y = \\arcsin\\sqrt{1-4x^2}$ 的导数",
+      title: "复合函数求导",
+      question: "求函数 $y = \\arcsin\\sqrt{1-4x^2}$ 的导数",
       essence: "这道题考查反三角函数的复合函数求导。需要使用链式法则，先对外层反三角函数求导，再对内层根式函数求导。注意定义域的限制。",
       explanation: `第一步：设中间变量
 设 $u = \\sqrt{1-4x^2}$，则 $y = \\arcsin u$
@@ -585,33 +540,10 @@ $y' = \\frac{1}{\\sqrt{4x^2}} \\cdot \\frac{-4x}{\\sqrt{1-4x^2}} = \\frac{1}{2x}
     },
     
     {
-      id: 20,
-      type: "计算题",
-      title: "参数方程求导",
-      question: "36. 设 $\\begin{cases} x = e^t \\sin t \\\\ y = e^t \\cos t \\end{cases}$，求 $\\frac{dy}{dx}$",
-      essence: "这道题考查参数方程的求导。需要使用参数方程求导公式 $\\frac{dy}{dx} = \\frac{\\frac{dy}{dt}}{\\frac{dx}{dt}}$，先分别对 $x(t)$ 和 $y(t)$ 求导，然后计算比值。",
-      explanation: `第一步：求 $\\frac{dx}{dt}$
-应用乘积法则：
-$\\frac{dx}{dt} = e^t\\sin t + e^t\\cos t = e^t(\\sin t + \\cos t)$
-
-第二步：求 $\\frac{dy}{dt}$
-$\\frac{dy}{dt} = e^t\\cos t - e^t\\sin t = e^t(\\cos t - \\sin t)$
-
-第三步：求 $\\frac{dy}{dx}$
-$\\frac{dy}{dx} = \\frac{\\frac{dy}{dt}}{\\frac{dx}{dt}} = \\frac{e^t(\\cos t - \\sin t)}{e^t(\\sin t + \\cos t)}$
-
-第四步：化简
-$\\frac{dy}{dx} = \\frac{\\cos t - \\sin t}{\\sin t + \\cos t}$`,
-      answer: "$\\frac{dy}{dx} = \\frac{\\cos t - \\sin t}{\\sin t + \\cos t}$",
-      difficulty: "medium",
-      category: "参数方程",
-      method: "参数方程求导"
-    },
-    {
       id: 21,
       type: "计算题",
       title: "微分计算",
-      question: "37. 设函数 $y = x^4\\sin x$，求 $dy$",
+      question: "设函数 $y = x^4\\sin x$，求 $dy$",
       essence: "这道题考查函数的微分计算。需要先使用乘积法则求导数，然后写出微分形式 $dy = y'dx$。注意乘积法则的应用和因式分解。",
       explanation: `第一步：求导数
 应用乘积法则：
@@ -638,7 +570,7 @@ $dy = y'dx = x^3(4\\sin x + x\\cos x)dx$`,
     {
       id: 22,
       type: "计算题",
-      title: "复合函数求导-三角函数",
+      title: "复合函数求导",
       question: "设函数 $y = \\sin 2x$，求 $\\frac{dy}{dx}$",
       essence: "这道题考查复合函数的链式法则。$y = \\sin 2x$ 是由外层函数 $y = \\sin u$ 和内层函数 $u = 2x$ 复合而成。",
       explanation: `<strong>第一步：识别复合函数</strong>
@@ -655,14 +587,14 @@ $dy = y'dx = x^3(4\\sin x + x\\cos x)dx$`,
   $$\\frac{dy}{dx} = \\cos u \\cdot 2 = 2\\cos 2x$$`,
       answer: "$2\\cos 2x$",
       difficulty: "easy",
-      category: "导数计算",
+      category: "复合函数求导",
       method: "链式法则"
     },
 
     {
       id: 23,
       type: "计算题",
-      title: "复合函数求导-根式函数",
+      title: "复合函数求导",
       question: "设函数 $y = \\sqrt{x^2 + 1}$，求 $\\frac{dy}{dx}$",
       essence: "这道题考查复合函数的链式法则。根式函数求导需要将其转化为幂函数形式，然后应用复合函数求导法则。",
       explanation: `<strong>第一步：识别复合函数</strong>
@@ -681,42 +613,43 @@ $dy = y'dx = x^3(4\\sin x + x\\cos x)dx$`,
   <strong>说明：</strong>熟练后可不必写出中间变量，直接求导`,
       answer: "$\\frac{x}{\\sqrt{x^2 + 1}}$",
       difficulty: "easy",
-      category: "导数计算",
+      category: "复合函数求导",
       method: "链式法则"
     },
 
     {
       id: 24,
       type: "计算题",
-      title: "复合函数求导-余弦函数",
+      title: "复合函数求导",
       question: "设函数 $y = \\cos(3x+1)$，求 $y'$",
       essence: "这道题考查复合函数求导的简化写法。熟练掌握链式法则后，可以不写出中间变量，直接求导。",
       explanation: `<strong>直接应用链式法则：</strong>
   $$y' = [\\cos(3x+1)]' = -\\sin(3x+1) \\cdot (3x+1)' = -3\\sin(3x+1)$$`,
       answer: "$-3\\sin(3x+1)$",
       difficulty: "easy",
-      category: "导数计算",
+      category: "复合函数求导",
       method: "链式法则"
     },
 
     {
       id: 25,
       type: "计算题",
-      title: "复合函数求导-对数函数",
+      title: "复合函数求导",
       question: "设函数 $y = \\ln(x^2 - 1)$，求 $y'$",
       essence: "这道题考查对数复合函数的求导。对数函数 $\\ln u$ 的导数是 $\\frac{1}{u}$，再乘以内层函数的导数。",
       explanation: `<strong>应用链式法则：</strong>
   $$y' = [\\ln(x^2 - 1)]' = \\frac{1}{x^2 - 1} \\cdot (x^2 - 1)' = \\frac{1}{x^2 - 1} \\cdot 2x = \\frac{2x}{x^2 - 1}$$`,
       answer: "$\\frac{2x}{x^2 - 1}$",
       difficulty: "easy",
-      category: "导数计算",
+      category: "复合函数求导",
       method: "链式法则"
     },
+
 
     {
       id: 26,
       type: "计算题",
-      title: "乘积和复合函数求导",
+      title: "导数四则运算",
       question: "设函数 $y = x\\sqrt{1-x}$，求 $y'$",
       essence: "这道题综合考查乘积法则和复合函数求导。需要先用乘积法则，再对根式部分用链式法则。",
       explanation: `<strong>第一步：应用乘积法则</strong>
@@ -733,30 +666,24 @@ $dy = y'dx = x^3(4\\sin x + x\\cos x)dx$`,
   $$= \\frac{2(1-x) - x}{2\\sqrt{1-x}} = \\frac{2-3x}{2\\sqrt{1-x}}$$`,
       answer: "$\\frac{2-3x}{2\\sqrt{1-x}}$",
       difficulty: "medium",
-      category: "导数计算",
+      category: "导数四则运算",
       method: "乘积法则与链式法则"
     },
 
     {
       id: 27,
       type: "计算题",
-      title: "二阶导数计算",
-      question: "求下列函数的二阶导数：(1) $y = 2x^4 - 3x^5 + \\sqrt{2}x^3 + 8$；(2) $y = x \\ln x$",
+      title: "高阶导数运算",
+      question: "求函数 $y = 2x^4 - 3x^5 + \\sqrt{2}x^3 + 8$ 的二阶导数",
       essence: "二阶导数：对一阶导数再求导",
-      explanation: `(1) 第一步：求一阶导数
+      explanation: `第一步：求一阶导数
 $$y' = 8x^3 - 15x^4 + 3\\sqrt{2}x^2$$
 
 第二步：求二阶导数
-$$y'' = 24x^2 - 60x^3 + 6\\sqrt{2}x$$
-
-(2) 第一步：求一阶导数
-$$y' = \\ln x + 1$$
-
-第二步：求二阶导数
-$$y'' = \\frac{1}{x}$$`,
-      answer: "(1) $y'' = 24x^2 - 60x^3 + 6\\sqrt{2}x$；(2) $y'' = \\frac{1}{x}$",
+$$y'' = 24x^2 - 60x^3 + 6\\sqrt{2}x$$`,
+      answer: "$y'' = 24x^2 - 60x^3 + 6\\sqrt{2}x$",
       difficulty: "easy",
-      category: "高阶导数",
+      category: "高阶导数运算",
       method: "逐阶求导法"
     },
 
@@ -836,26 +763,24 @@ $y' = \\left(\\frac{1}{x}\\right)' = -\\frac{1}{x^2}$
     {
       id: 32,
       type: "计算题",
-      title: "导数四则运算（4题）",
-      question: "求下列函数的导数：(1) $y = 3x^2 - 2x + 1$；(2) $y = \\frac{2}{x} + 3\\cos x - e^x$；(3) $y = (x^2 + 1) \\ln x$；(4) $y = \\frac{x - 1}{x + 1}$",
+      title: "导数四则运算",
+      question: "求下列函数的导数：(1) $y = 3x^2 - 2x + 1$；(2) $y = \\frac{2}{x} + 3\\cos x - e^x$；(3) $y = \\frac{x - 1}{x + 1}$",
       essence: "和差积商的导数运算法则",
       explanation: `(1) $y' = 6x - 2$
 
 (2) $y' = 2(x^{-1})' + 3(\\cos x)' - (e^x)' = -\\frac{2}{x^2} - 3\\sin x - e^x$
 
-(3) $y' = (x^2+1)'\\ln x + (x^2+1)(\\ln x)' = 2x\\ln x + \\frac{x^2+1}{x} = 2x\\ln x + x + \\frac{1}{x}$
-
-(4) $y' = \\frac{1 \\cdot (x+1) - (x-1) \\cdot 1}{(x+1)^2} = \\frac{2}{(x+1)^2}$`,
-      answer: "(1) $6x-2$；(2) $-\\frac{2}{x^2}-3\\sin x-e^x$；(3) $2x\\ln x+x+\\frac{1}{x}$；(4) $\\frac{2}{(x+1)^2}$",
+(3) $y' = \\frac{1 \\cdot (x+1) - (x-1) \\cdot 1}{(x+1)^2} = \\frac{2}{(x+1)^2}$`,
+      answer: "(1) $6x-2$；(2) $-\\frac{2}{x^2}-3\\sin x-e^x$；(3) $\\frac{2}{(x+1)^2}$",
       difficulty: "medium",
-      category: "导数计算",
+      category: "导数四则运算",
       method: "四则运算法则"
     },
 
     {
       id: 33,
       type: "计算题",
-      title: "正切函数的导数",
+      title: "导数四则运算",
       question: "设函数 $y = \\tan x$，求 $y'$",
       essence: "利用商法则推导正切函数导数",
       explanation: `$y' = (\\tan x)' = \\left(\\frac{\\sin x}{\\cos x}\\right)'$
@@ -870,14 +795,14 @@ $(\\sec x)' = \\sec x \\tan x$
 $(\\csc x)' = -\\csc x \\cot x$`,
       answer: "$(\\tan x)' = \\sec^2 x$",
       difficulty: "medium",
-      category: "导数计算",
+      category: "导数四则运算",
       method: "商法则"
     },
 
     {
       id: 34,
       type: "计算题",
-      title: "三角函数复合导数",
+      title: "导数四则运算",
       question: "设函数 $y = x \\tan x - 2 \\sec x$，求 $y'$",
       essence: "积法则与三角函数导数",
       explanation: `$y' = (x \\tan x)' - 2(\\sec x)'$
@@ -887,41 +812,39 @@ $= x'\\tan x + x(\\tan x)' - 2\\sec x \\tan x$
 $= \\tan x + x\\sec^2 x - 2\\sec x \\tan x$`,
       answer: "$\\tan x + x\\sec^2 x - 2\\sec x \\tan x$",
       difficulty: "medium",
-      category: "导数计算",
+      category: "导数四则运算",
       method: "积法则"
     },
 
     {
       id: 35,
       type: "计算题",
-      title: "基本函数求导练习（8题）",
-      question: "求下列函数的导数：(1) $y = x^5 + 2\\sqrt{x} - \\sin\\frac{1}{\\pi}$；(2) $y = 2x^3 - 5x^2 + 7x - 9$；(3) $y = 2^x - \\frac{1}{x} + \\log_2 x + 2^{10}$；(4) $y = \\sqrt{x\\sqrt{x}}$；(5) $y = (x^2 + 1) \\ln x$；(6) $y = (e^x + 1) \\tan x$；(7) $y = \\frac{\\sin x}{x}$；(8) $y = \\frac{x}{x^2 + 1}$",
+      title: "导数四则运算",
+      question: "求下列函数的导数：(1) $y = x^5 + 2\\sqrt{x} - \\sin\\frac{1}{\\pi}$；(2) $y = 2x^3 - 5x^2 + 7x - 9$；(3) $y = 2^x - \\frac{1}{x} + 2^{10}$；(4) $y = \\sqrt{x\\sqrt{x}}$；(5) $y = (e^x + 1) \\tan x$；(6) $y = \\frac{\\sin x}{x}$；(7) $y = \\frac{x}{x^2 + 1}$",
       essence: "综合运用求导公式和法则",
       explanation: `(1) $y' = 5x^4 + x^{-\\frac{1}{2}} = 5x^4 + \\frac{1}{\\sqrt{x}}$（常数的导数为0）
 
 (2) $y' = 6x^2 - 10x + 7$
 
-(3) $y' = 2^x\\ln 2 + \\frac{1}{x^2} + \\frac{1}{x\\ln 2}$
+(3) $y' = 2^x\\ln 2 + \\frac{1}{x^2}$（常数的导数为0）
 
 (4) $y = x^{\\frac{3}{4}}$，$y' = \\frac{3}{4}x^{-\\frac{1}{4}}$
 
-(5) $y' = 2x\\ln x + x + \\frac{1}{x}$
+(5) $y' = e^x\\tan x + (e^x+1)\\sec^2 x$
 
-(6) $y' = e^x\\tan x + (e^x+1)\\sec^2 x$
+(6) $y' = \\frac{x\\cos x - \\sin x}{x^2}$
 
-(7) $y' = \\frac{x\\cos x - \\sin x}{x^2}$
-
-(8) $y' = \\frac{1-x^2}{(x^2+1)^2}$`,
+(7) $y' = \\frac{1-x^2}{(x^2+1)^2}$`,
       answer: "见解析",
       difficulty: "medium",
-      category: "导数计算",
+      category: "导数四则运算",
       method: "综合运算"
     },
 
     {
       id: 36,
       type: "计算题",
-      title: "多项式的二阶导数",
+      title: "高阶导数运算",
       question: "设函数 $y = x^4 + x^3 - x^2 + 1$，求 $y''$",
       essence: "逐次求导",
       explanation: `$y' = 4x^3 + 3x^2 - 2x$
@@ -929,14 +852,14 @@ $= \\tan x + x\\sec^2 x - 2\\sec x \\tan x$`,
 $y'' = 12x^2 + 6x - 2$`,
       answer: "$y'' = 12x^2 + 6x - 2$",
       difficulty: "easy",
-      category: "高阶导数",
+      category: "高阶导数运算",
       method: "逐次求导"
     },
 
     {
       id: 37,
       type: "计算题",
-      title: "三角函数的二阶导数",
+      title: "高阶导数运算",
       question: "设函数 $y = \\sin^2 x$，求 $y''$",
       essence: "复合函数求导与二倍角公式",
       explanation: `$y' = 2\\sin x \\cos x = \\sin 2x$
@@ -944,7 +867,7 @@ $y'' = 12x^2 + 6x - 2$`,
 $y'' = (\\sin 2x)' = 2\\cos 2x$`,
       answer: "$y'' = 2\\cos 2x$",
       difficulty: "medium",
-      category: "高阶导数",
+      category: "高阶导数运算",
       method: "链式法则"
     }
 ];

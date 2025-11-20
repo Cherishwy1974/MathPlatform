@@ -1,10 +1,11 @@
 ﻿<!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>导数运算法则实验室</title>
-    
+
     <!-- MathJax配置 -->
     <script>
         window.MathJax = {
@@ -26,17 +27,18 @@
         };
     </script>
     <script src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js" defer></script>
-    
+    <script src="../common-assets/js/axis-utils.js"></script>
+
     <style>
         /* 用户要求：字号统一 */
         :root {
-            --h1-size: 22px;      
-            --h2-size: 20px;      
-            --h3-size: 18px;      
-            --btn-size: 16px;     
-            --formula-size: 20px; 
+            --h1-size: 22px;
+            --h2-size: 20px;
+            --h3-size: 18px;
+            --btn-size: 16px;
+            --formula-size: 20px;
             --text-size: 16px;
-            
+
             --primary: #4f46e5;
             --primary-light: #6366f1;
             --primary-dark: #3730a3;
@@ -64,7 +66,7 @@
             width: 0;
             background: transparent;
         }
-        
+
         * {
             scrollbar-width: none;
             -ms-overflow-style: none;
@@ -345,7 +347,7 @@
 
         .rule-card:hover {
             border-color: var(--primary);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
         .rule-card .rule-name {
@@ -410,9 +412,17 @@
 
         /* 动画效果 */
         @keyframes highlight {
-            0% { background: transparent; }
-            50% { background: #fef3c7; }
-            100% { background: transparent; }
+            0% {
+                background: transparent;
+            }
+
+            50% {
+                background: #fef3c7;
+            }
+
+            100% {
+                background: transparent;
+            }
         }
 
         .highlight {
@@ -461,17 +471,71 @@
             }
         }
 
-        .return-home-panel { position: fixed; bottom: 12px; right: 12px; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; z-index: 40; }
-        .return-toggle { width: 40px; height: 40px; border-radius: 50%; border: none; background: linear-gradient(135deg, rgba(79,70,229,0.96), rgba(99,102,241,0.9)); color: #fff; font-size: 20px; cursor: pointer; box-shadow: 0 10px 18px rgba(79,70,229,0.28); transition: transform 0.2s, box-shadow 0.2s; }
-        .return-toggle:hover { transform: translateY(-1px) scale(1.03); box-shadow: 0 14px 26px rgba(79,70,229,0.35); }
-        .return-links { display: none; flex-direction: column; gap: 6px; padding: 10px; border-radius: 10px; background: rgba(255,255,255,0.96); border: 1px solid rgba(79,70,229,0.18); box-shadow: 0 10px 30px rgba(15,23,42,0.14); opacity: 0; transition: opacity 0.16s; }
-        .return-link { text-decoration: none; font-size: 15px; color: var(--primary-dark); padding: 6px 12px; border-radius: 8px; background: rgba(99,102,241,0.12); transition: background 0.2s; }
-        .return-link:hover { background: rgba(79,70,229,0.18); }
+        .return-home-panel {
+            position: fixed;
+            bottom: 12px;
+            right: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+            z-index: 40;
+        }
+
+        .return-toggle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.96), rgba(99, 102, 241, 0.9));
+            color: #fff;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 10px 18px rgba(79, 70, 229, 0.28);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .return-toggle:hover {
+            transform: translateY(-1px) scale(1.03);
+            box-shadow: 0 14px 26px rgba(79, 70, 229, 0.35);
+        }
+
+        .return-links {
+            display: none;
+            flex-direction: column;
+            gap: 6px;
+            padding: 10px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.96);
+            border: 1px solid rgba(79, 70, 229, 0.18);
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.14);
+            opacity: 0;
+            transition: opacity 0.16s;
+        }
+
+        .return-link {
+            text-decoration: none;
+            font-size: 15px;
+            color: var(--primary-dark);
+            padding: 6px 12px;
+            border-radius: 8px;
+            background: rgba(99, 102, 241, 0.12);
+            transition: background 0.2s;
+        }
+
+        .return-link:hover {
+            background: rgba(79, 70, 229, 0.18);
+        }
     </style>
 
 </head>
+
 <body>
-    <div class="return-home-panel"><button class="return-toggle" onclick="toggleReturnLinks()"><i class="fa-solid fa-house"></i></button><div class="return-links"><a class="return-link" href="index.html"><i class="fa-solid fa-arrow-left"></i> 返回目录</a><a class="return-link" href="../index.html"><i class="fa-solid fa-house"></i> 返回主站</a></div></div>
+    <div class="return-home-panel"><button class="return-toggle" onclick="toggleReturnLinks()"><i
+                class="fa-solid fa-house"></i></button>
+        <div class="return-links"><a class="return-link" href="index.html"><i class="fa-solid fa-arrow-left"></i>
+                返回目录</a><a class="return-link" href="../index.html"><i class="fa-solid fa-house"></i> 返回主站</a></div>
+    </div>
     <div class="container">
         <header class="header">
             <h1>导数运算法则实验室</h1>
@@ -587,7 +651,7 @@
                                 例：$(x^2 + \sin x)' = 2x + \cos x$
                             </div>
                         </div>
-                        
+
                         <div class="rule-card">
                             <div class="rule-name">减法法则</div>
                             <div class="rule-formula">
@@ -805,316 +869,136 @@
             if (window.MathJax && MathJax.typesetPromise) {
                 MathJax.typesetPromise().catch(err => console.log('渲染错误:', err));
             }
-        }
+            function calculateSum() {
+                const f1 = document.getElementById('f1Select').value;
+                const op = document.getElementById('opSelect').value;
+                const f2 = document.getElementById('f2Select').value;
 
-        // ==========================================
-        // 技巧2：Canvas设置工具
-        // ==========================================
-        function setupCanvas(canvas) {
-            const ctx = canvas.getContext('2d');
-            const rect = canvas.getBoundingClientRect();
-            const dpr = window.devicePixelRatio || 1;
-            
-            canvas.width = rect.width * dpr;
-            canvas.height = rect.height * dpr;
-            canvas.style.width = rect.width + 'px';
-            canvas.style.height = rect.height + 'px';
-            
-            ctx.scale(dpr, dpr);
-            
-            return { ctx, width: rect.width, height: rect.height };
-        }
+                // 技巧5：构建导数表达式
+                const derivatives = {
+                    'x2': '2x',
+                    'x3': '3x²',
+                    'sin': 'cos(x)',
+                    'ln': '1/x',
+                    'x': '1',
+                    'cos': '-sin(x)',
+                    'ex': 'eˣ',
+                    'const': '0'
+                };
 
-        // ==========================================
-        // 技巧3：绘制坐标轴
-        // ==========================================
-        function drawAxes(ctx, width, height, padding = 40) {
-            ctx.strokeStyle = '#374151';
-            ctx.lineWidth = 2;
-            
-            // X轴
-            ctx.beginPath();
-            ctx.moveTo(padding, height / 2);
-            ctx.lineTo(width - padding, height / 2);
-            ctx.stroke();
-            
-            // Y轴
-            ctx.beginPath();
-            ctx.moveTo(width / 2, padding);
-            ctx.lineTo(width / 2, height - padding);
-            ctx.stroke();
-            
-            // 原点标记
-            ctx.fillStyle = '#374151';
-            ctx.font = '12px Arial';
-            ctx.fillText('O', width / 2 - 15, height / 2 + 15);
-            ctx.fillText('x', width - padding + 10, height / 2);
-            ctx.fillText('y', width / 2, padding - 5);
-        }
+                const functions = {
+                    'x2': 'x²',
+                    'x3': 'x³',
+                    'sin': 'sin(x)',
+                    'ln': 'ln(x)',
+                    'x': 'x',
+                    'cos': 'cos(x)',
+                    'ex': 'eˣ',
+                    'const': '5'
+                };
 
-        // ==========================================
-        // 技巧4：绘制网格
-        // ==========================================
-        function drawGrid(ctx, width, height, padding = 40) {
-            ctx.strokeStyle = '#e5e7eb';
-            ctx.lineWidth = 0.5;
-            
-            const gridSize = 40;
-            
-            // 垂直网格线
-            for (let x = padding; x <= width - padding; x += gridSize) {
+                const df1 = derivatives[f1];
+                const df2 = derivatives[f2];
+                const opSymbol = op === 'add' ? '+' : '-';
+
+                const result = `$(${functions[f1]} ${opSymbol} ${functions[f2]})' = ${df1} ${opSymbol} ${df2}$`;
+
+                document.getElementById('sumResult').innerHTML = result;
+                renderMath();
+
+                // 绘制图形
+                drawSumVisualization(f1, op, f2);
+            }
+
+            function drawSumVisualization(f1Type, op, f2Type) {
+                const canvas = document.getElementById('sumCanvas');
+                if (!canvas) return;
+
+                const { ctx, width, height } = setupCanvas(canvas);
+
+                ctx.clearRect(0, 0, width, height);
+                drawGrid(ctx, width, height);
+                drawAxes(ctx, width, height);
+
+                // 定义函数映射
+                const functionMap = {
+                    'x2': (x) => x * x,
+                    'x3': (x) => x * x * x,
+                    'sin': Math.sin,
+                    'ln': Math.log,
+                    'x': (x) => x,
+                    'cos': Math.cos,
+                    'ex': Math.exp,
+                    'const': () => 0.5
+                };
+
+                const f1 = functionMap[f1Type];
+                const f2 = functionMap[f2Type];
+                const combined = op === 'add'
+                    ? (x) => f1(x) + f2(x)
+                    : (x) => f1(x) - f2(x);
+
+                // 绘制 f(x)
+                ctx.strokeStyle = '#4f46e5';
+                ctx.lineWidth = 2;
+                drawFunction(ctx, f1, width, height);
+
+                // 绘制 g(x)
+                ctx.strokeStyle = '#ef4444';
+                ctx.lineWidth = 2;
+                drawFunction(ctx, f2, width, height);
+
+                // 绘制组合函数
+                ctx.strokeStyle = '#10b981';
+                ctx.lineWidth = 3;
+                drawFunction(ctx, combined, width, height);
+            }
+
+            function drawFunction(ctx, func, width, height) {
                 ctx.beginPath();
-                ctx.moveTo(x, padding);
-                ctx.lineTo(x, height - padding);
+                let firstPoint = true;
+
+                for (let px = 0; px <= width; px += 2) {
+                    const x = -3 + 6 * px / width;
+                    const y = func(x);
+
+                    if (!isNaN(y) && isFinite(y) && Math.abs(y) < 10) {
+                        const py = height / 2 - y * 40;
+
+                        if (firstPoint) {
+                            ctx.moveTo(px, py);
+                            firstPoint = false;
+                        } else {
+                            ctx.lineTo(px, py);
+                        }
+                    }
+                }
                 ctx.stroke();
             }
-            
-            // 水平网格线
-            for (let y = padding; y <= height - padding; y += gridSize) {
-                ctx.beginPath();
-                ctx.moveTo(padding, y);
-                ctx.lineTo(width - padding, y);
-                ctx.stroke();
-            }
-        }
 
-        // ==========================================
-        // 基本公式页面
-        // ==========================================
-        function showFormulaDemo(type) {
-            const canvas = document.getElementById('formulaCanvas');
-            if (!canvas) return;
-            
-            const { ctx, width, height } = setupCanvas(canvas);
-            
-            ctx.clearRect(0, 0, width, height);
-            drawGrid(ctx, width, height);
-            drawAxes(ctx, width, height);
-            
-            let f, df, info;
-            const xRange = [-3, 3];
-            const yRange = [-4, 4];
-            
-            switch (type) {
-                case 'constant':
-                    f = (x) => 2;
-                    df = (x) => 0;
-                    info = '常数函数 f(x) = 2，导数 f\'(x) = 0';
-                    break;
-                case 'power':
-                    f = (x) => x * x;
-                    df = (x) => 2 * x;
-                    info = '幂函数 f(x) = x²，导数 f\'(x) = 2x';
-                    break;
-                case 'exponential':
-                    f = (x) => Math.exp(x);
-                    df = (x) => Math.exp(x);
-                    info = '指数函数 f(x) = eˣ，导数 f\'(x) = eˣ（不变！）';
-                    break;
-                case 'logarithm':
-                    f = (x) => Math.log(x);
-                    df = (x) => 1 / x;
-                    info = '对数函数 f(x) = ln(x)，导数 f\'(x) = 1/x';
-                    break;
-                case 'sine':
-                    f = (x) => Math.sin(x);
-                    df = (x) => Math.cos(x);
-                    info = '正弦函数 f(x) = sin(x)，导数 f\'(x) = cos(x)';
-                    break;
-                case 'cosine':
-                    f = (x) => Math.cos(x);
-                    df = (x) => -Math.sin(x);
-                    info = '余弦函数 f(x) = cos(x)，导数 f\'(x) = -sin(x)';
-                    break;
-            }
-            
-            // 绘制原函数
-            ctx.strokeStyle = '#4f46e5';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            
-            let firstPoint = true;
-            for (let px = 0; px <= width; px += 2) {
-                const x = xRange[0] + (xRange[1] - xRange[0]) * px / width;
-                const y = f(x);
-                
-                if (!isNaN(y) && isFinite(y)) {
-                    const py = height / 2 - y * 50;
-                    
-                    if (firstPoint) {
-                        ctx.moveTo(px, py);
-                        firstPoint = false;
-                    } else {
-                        ctx.lineTo(px, py);
-                    }
-                }
-            }
-            ctx.stroke();
-            
-            // 绘制导函数
-            ctx.strokeStyle = '#10b981';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            
-            firstPoint = true;
-            for (let px = 0; px <= width; px += 2) {
-                const x = xRange[0] + (xRange[1] - xRange[0]) * px / width;
-                const y = df(x);
-                
-                if (!isNaN(y) && isFinite(y) && Math.abs(y) < 10) {
-                    const py = height / 2 - y * 50;
-                    
-                    if (firstPoint) {
-                        ctx.moveTo(px, py);
-                        firstPoint = false;
-                    } else {
-                        ctx.lineTo(px, py);
-                    }
-                }
-            }
-            ctx.stroke();
-            
-            document.getElementById('formulaInfo').textContent = info;
-            
-            // 添加高亮效果
-            const rows = document.querySelectorAll('.formula-table tr');
-            rows.forEach(row => row.classList.remove('highlight'));
-            event.target.closest('tr').classList.add('highlight');
-        }
+            // ==========================================
+            // 乘积法则页面
+            // ==========================================
+            function updateProductDemo() {
+                const example = document.getElementById('productExample').value;
+                const canvas = document.getElementById('productCanvas');
+                if (!canvas) return;
 
-        // ==========================================
-        // 和差法则页面
-        // ==========================================
-        function calculateSum() {
-            const f1 = document.getElementById('f1Select').value;
-            const op = document.getElementById('opSelect').value;
-            const f2 = document.getElementById('f2Select').value;
-            
-            // 技巧5：构建导数表达式
-            const derivatives = {
-                'x2': '2x',
-                'x3': '3x²',
-                'sin': 'cos(x)',
-                'ln': '1/x',
-                'x': '1',
-                'cos': '-sin(x)',
-                'ex': 'eˣ',
-                'const': '0'
-            };
-            
-            const functions = {
-                'x2': 'x²',
-                'x3': 'x³',
-                'sin': 'sin(x)',
-                'ln': 'ln(x)',
-                'x': 'x',
-                'cos': 'cos(x)',
-                'ex': 'eˣ',
-                'const': '5'
-            };
-            
-            const df1 = derivatives[f1];
-            const df2 = derivatives[f2];
-            const opSymbol = op === 'add' ? '+' : '-';
-            
-            const result = `$(${functions[f1]} ${opSymbol} ${functions[f2]})' = ${df1} ${opSymbol} ${df2}$`;
-            
-            document.getElementById('sumResult').innerHTML = result;
-            renderMath();
-            
-            // 绘制图形
-            drawSumVisualization(f1, op, f2);
-        }
+                const { ctx, width, height } = setupCanvas(canvas);
 
-        function drawSumVisualization(f1Type, op, f2Type) {
-            const canvas = document.getElementById('sumCanvas');
-            if (!canvas) return;
-            
-            const { ctx, width, height } = setupCanvas(canvas);
-            
-            ctx.clearRect(0, 0, width, height);
-            drawGrid(ctx, width, height);
-            drawAxes(ctx, width, height);
-            
-            // 定义函数映射
-            const functionMap = {
-                'x2': (x) => x * x,
-                'x3': (x) => x * x * x,
-                'sin': Math.sin,
-                'ln': Math.log,
-                'x': (x) => x,
-                'cos': Math.cos,
-                'ex': Math.exp,
-                'const': () => 0.5
-            };
-            
-            const f1 = functionMap[f1Type];
-            const f2 = functionMap[f2Type];
-            const combined = op === 'add' 
-                ? (x) => f1(x) + f2(x)
-                : (x) => f1(x) - f2(x);
-            
-            // 绘制 f(x)
-            ctx.strokeStyle = '#4f46e5';
-            ctx.lineWidth = 2;
-            drawFunction(ctx, f1, width, height);
-            
-            // 绘制 g(x)
-            ctx.strokeStyle = '#ef4444';
-            ctx.lineWidth = 2;
-            drawFunction(ctx, f2, width, height);
-            
-            // 绘制组合函数
-            ctx.strokeStyle = '#10b981';
-            ctx.lineWidth = 3;
-            drawFunction(ctx, combined, width, height);
-        }
+                ctx.clearRect(0, 0, width, height);
+                drawGrid(ctx, width, height);
+                drawAxes(ctx, width, height);
 
-        function drawFunction(ctx, func, width, height) {
-            ctx.beginPath();
-            let firstPoint = true;
-            
-            for (let px = 0; px <= width; px += 2) {
-                const x = -3 + 6 * px / width;
-                const y = func(x);
-                
-                if (!isNaN(y) && isFinite(y) && Math.abs(y) < 10) {
-                    const py = height / 2 - y * 40;
-                    
-                    if (firstPoint) {
-                        ctx.moveTo(px, py);
-                        firstPoint = false;
-                    } else {
-                        ctx.lineTo(px, py);
-                    }
-                }
-            }
-            ctx.stroke();
-        }
+                let f, g, fg, dfg, steps;
 
-        // ==========================================
-        // 乘积法则页面
-        // ==========================================
-        function updateProductDemo() {
-            const example = document.getElementById('productExample').value;
-            const canvas = document.getElementById('productCanvas');
-            if (!canvas) return;
-            
-            const { ctx, width, height } = setupCanvas(canvas);
-            
-            ctx.clearRect(0, 0, width, height);
-            drawGrid(ctx, width, height);
-            drawAxes(ctx, width, height);
-            
-            let f, g, fg, dfg, steps;
-            
-            switch (example) {
-                case 'x_sin':
-                    f = (x) => x;
-                    g = Math.sin;
-                    fg = (x) => x * Math.sin(x);
-                    dfg = (x) => Math.sin(x) + x * Math.cos(x);
-                    steps = `
+                switch (example) {
+                    case 'x_sin':
+                        f = (x) => x;
+                        g = Math.sin;
+                        fg = (x) => x * Math.sin(x);
+                        dfg = (x) => Math.sin(x) + x * Math.cos(x);
+                        steps = `
                         <strong>$(x \\cdot \\sin x)' = ?$</strong><br>
                         1. $f(x) = x$，$f'(x) = 1$<br>
                         2. $g(x) = \\sin x$，$g'(x) = \\cos x$<br>
@@ -1122,13 +1006,13 @@
                         4. $= 1 \\cdot \\sin x + x \\cdot \\cos x$<br>
                         5. $= \\sin x + x\\cos x$
                     `;
-                    break;
-                case 'x2_ex':
-                    f = (x) => x * x;
-                    g = Math.exp;
-                    fg = (x) => x * x * Math.exp(x);
-                    dfg = (x) => 2 * x * Math.exp(x) + x * x * Math.exp(x);
-                    steps = `
+                        break;
+                    case 'x2_ex':
+                        f = (x) => x * x;
+                        g = Math.exp;
+                        fg = (x) => x * x * Math.exp(x);
+                        dfg = (x) => 2 * x * Math.exp(x) + x * x * Math.exp(x);
+                        steps = `
                         <strong>$(x^2 \\cdot e^x)' = ?$</strong><br>
                         1. $f(x) = x^2$，$f'(x) = 2x$<br>
                         2. $g(x) = e^x$，$g'(x) = e^x$<br>
@@ -1136,13 +1020,13 @@
                         4. $= 2x \\cdot e^x + x^2 \\cdot e^x$<br>
                         5. $= e^x(2x + x^2)$
                     `;
-                    break;
-                case 'ln_cos':
-                    f = (x) => Math.log(Math.abs(x) + 0.1);
-                    g = Math.cos;
-                    fg = (x) => Math.log(Math.abs(x) + 0.1) * Math.cos(x);
-                    dfg = (x) => (1 / (x + 0.1)) * Math.cos(x) - Math.log(Math.abs(x) + 0.1) * Math.sin(x);
-                    steps = `
+                        break;
+                    case 'ln_cos':
+                        f = (x) => Math.log(Math.abs(x) + 0.1);
+                        g = Math.cos;
+                        fg = (x) => Math.log(Math.abs(x) + 0.1) * Math.cos(x);
+                        dfg = (x) => (1 / (x + 0.1)) * Math.cos(x) - Math.log(Math.abs(x) + 0.1) * Math.sin(x);
+                        steps = `
                         <strong>$(\\ln x \\cdot \\cos x)' = ?$</strong><br>
                         1. $f(x) = \\ln x$，$f'(x) = \\frac{1}{x}$<br>
                         2. $g(x) = \\cos x$，$g'(x) = -\\sin x$<br>
@@ -1150,125 +1034,125 @@
                         4. $= \\frac{1}{x} \\cdot \\cos x + \\ln x \\cdot (-\\sin x)$<br>
                         5. $= \\frac{\\cos x}{x} - \\ln x \\cdot \\sin x$
                     `;
-                    break;
-            }
-            
-            // 绘制原函数的乘积
-            ctx.strokeStyle = '#4f46e5';
-            ctx.lineWidth = 2;
-            drawFunction(ctx, fg, width, height);
-            
-            // 绘制导函数
-            ctx.strokeStyle = '#f59e0b';
-            ctx.lineWidth = 2;
-            ctx.setLineDash([5, 5]);
-            drawFunction(ctx, dfg, width, height);
-            ctx.setLineDash([]);
-            
-            document.getElementById('productSteps').innerHTML = steps;
-            renderMath();
-        }
+                        break;
+                }
 
-        // ==========================================
-        // 链式法则页面
-        // ==========================================
-        function updateChainDemo() {
-            const type = document.getElementById('chainSelect').value;
-            const canvas = document.getElementById('chainCanvas');
-            if (!canvas) return;
-            
-            const { ctx, width, height } = setupCanvas(canvas);
-            
-            ctx.clearRect(0, 0, width, height);
-            drawGrid(ctx, width, height);
-            drawAxes(ctx, width, height);
-            
-            let f, df, info;
-            
-            switch (type) {
-                case 'sin2x':
-                    f = (x) => Math.sin(2 * x);
-                    df = (x) => 2 * Math.cos(2 * x);
-                    info = '外层：sin(u)，内层：u = 2x，导数：2cos(2x)';
-                    break;
-                case 'sqrt_x2_1':
-                    f = (x) => Math.sqrt(x * x + 1);
-                    df = (x) => x / Math.sqrt(x * x + 1);
-                    info = '外层：√u，内层：u = x²+1，导数：x/√(x²+1)';
-                    break;
-                case 'e_sin':
-                    f = (x) => Math.exp(Math.sin(x));
-                    df = (x) => Math.exp(Math.sin(x)) * Math.cos(x);
-                    info = '外层：eᵘ，内层：u = sin(x)，导数：e^(sin x) · cos(x)';
-                    break;
-                case 'ln_x2':
-                    f = (x) => Math.log(x * x + 0.1);
-                    df = (x) => 2 * x / (x * x + 0.1);
-                    info = '外层：ln(u)，内层：u = x²，导数：2x/x² = 2/x';
-                    break;
-            }
-            
-            // 绘制原函数
-            ctx.strokeStyle = '#4f46e5';
-            ctx.lineWidth = 2;
-            drawFunction(ctx, f, width, height);
-            
-            // 绘制导函数
-            ctx.strokeStyle = '#10b981';
-            ctx.lineWidth = 2;
-            ctx.setLineDash([5, 5]);
-            drawFunction(ctx, df, width, height);
-            ctx.setLineDash([]);
-            
-            document.getElementById('chainInfo').textContent = info;
-            
-            // 技巧6：绘制分解示意图
-            drawChainDecomposition(ctx, width, height, type);
-        }
+                // 绘制原函数的乘积
+                ctx.strokeStyle = '#4f46e5';
+                ctx.lineWidth = 2;
+                drawFunction(ctx, fg, width, height);
 
-        function drawChainDecomposition(ctx, width, height, type) {
-            // 在右上角绘制分解示意
-            const boxX = width - 180;
-            const boxY = 20;
-            
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-            ctx.fillRect(boxX, boxY, 160, 80);
-            ctx.strokeStyle = '#4f46e5';
-            ctx.lineWidth = 1;
-            ctx.strokeRect(boxX, boxY, 160, 80);
-            
-            ctx.fillStyle = '#374151';
-            ctx.font = '12px Arial';
-            
-            switch (type) {
-                case 'sin2x':
-                    ctx.fillText('f(g(x)) = sin(2x)', boxX + 10, boxY + 20);
-                    ctx.fillText('外: f(u) = sin(u)', boxX + 10, boxY + 40);
-                    ctx.fillText('内: g(x) = 2x', boxX + 10, boxY + 60);
-                    ctx.fillText("f'·g' = cos(2x)·2", boxX + 10, boxY + 80);
-                    break;
-            }
-        }
+                // 绘制导函数
+                ctx.strokeStyle = '#f59e0b';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([5, 5]);
+                drawFunction(ctx, dfg, width, height);
+                ctx.setLineDash([]);
 
-        function checkChainAnswer() {
-            const answer = document.getElementById('chainAnswer').value.trim();
-            const feedback = document.getElementById('chainFeedback');
-            
-            // 简单检查答案（实际应该更复杂）
-            if (answer.includes('15') && answer.includes('3x+1') && answer.includes('4')) {
-                feedback.className = 'feedback correct';
-                feedback.textContent = '✓ 正确！答案是 15(3x+1)⁴';
-            } else {
-                feedback.className = 'feedback incorrect';
-                feedback.textContent = '✗ 不正确，请再试试';
+                document.getElementById('productSteps').innerHTML = steps;
+                renderMath();
             }
-        }
 
-        function showChainSolution() {
-            const solution = document.getElementById('chainSolution');
-            solution.style.display = solution.style.display === 'none' ? 'block' : 'none';
-            
-            solution.innerHTML = `
+            // ==========================================
+            // 链式法则页面
+            // ==========================================
+            function updateChainDemo() {
+                const type = document.getElementById('chainSelect').value;
+                const canvas = document.getElementById('chainCanvas');
+                if (!canvas) return;
+
+                const { ctx, width, height } = setupCanvas(canvas);
+
+                ctx.clearRect(0, 0, width, height);
+                drawGrid(ctx, width, height);
+                drawAxes(ctx, width, height);
+
+                let f, df, info;
+
+                switch (type) {
+                    case 'sin2x':
+                        f = (x) => Math.sin(2 * x);
+                        df = (x) => 2 * Math.cos(2 * x);
+                        info = '外层：sin(u)，内层：u = 2x，导数：2cos(2x)';
+                        break;
+                    case 'sqrt_x2_1':
+                        f = (x) => Math.sqrt(x * x + 1);
+                        df = (x) => x / Math.sqrt(x * x + 1);
+                        info = '外层：√u，内层：u = x²+1，导数：x/√(x²+1)';
+                        break;
+                    case 'e_sin':
+                        f = (x) => Math.exp(Math.sin(x));
+                        df = (x) => Math.exp(Math.sin(x)) * Math.cos(x);
+                        info = '外层：eᵘ，内层：u = sin(x)，导数：e^(sin x) · cos(x)';
+                        break;
+                    case 'ln_x2':
+                        f = (x) => Math.log(x * x + 0.1);
+                        df = (x) => 2 * x / (x * x + 0.1);
+                        info = '外层：ln(u)，内层：u = x²，导数：2x/x² = 2/x';
+                        break;
+                }
+
+                // 绘制原函数
+                ctx.strokeStyle = '#4f46e5';
+                ctx.lineWidth = 2;
+                drawFunction(ctx, f, width, height);
+
+                // 绘制导函数
+                ctx.strokeStyle = '#10b981';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([5, 5]);
+                drawFunction(ctx, df, width, height);
+                ctx.setLineDash([]);
+
+                document.getElementById('chainInfo').textContent = info;
+
+                // 技巧6：绘制分解示意图
+                drawChainDecomposition(ctx, width, height, type);
+            }
+
+            function drawChainDecomposition(ctx, width, height, type) {
+                // 在右上角绘制分解示意
+                const boxX = width - 180;
+                const boxY = 20;
+
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+                ctx.fillRect(boxX, boxY, 160, 80);
+                ctx.strokeStyle = '#4f46e5';
+                ctx.lineWidth = 1;
+                ctx.strokeRect(boxX, boxY, 160, 80);
+
+                ctx.fillStyle = '#374151';
+                ctx.font = '12px Arial';
+
+                switch (type) {
+                    case 'sin2x':
+                        ctx.fillText('f(g(x)) = sin(2x)', boxX + 10, boxY + 20);
+                        ctx.fillText('外: f(u) = sin(u)', boxX + 10, boxY + 40);
+                        ctx.fillText('内: g(x) = 2x', boxX + 10, boxY + 60);
+                        ctx.fillText("f'·g' = cos(2x)·2", boxX + 10, boxY + 80);
+                        break;
+                }
+            }
+
+            function checkChainAnswer() {
+                const answer = document.getElementById('chainAnswer').value.trim();
+                const feedback = document.getElementById('chainFeedback');
+
+                // 简单检查答案（实际应该更复杂）
+                if (answer.includes('15') && answer.includes('3x+1') && answer.includes('4')) {
+                    feedback.className = 'feedback correct';
+                    feedback.textContent = '✓ 正确！答案是 15(3x+1)⁴';
+                } else {
+                    feedback.className = 'feedback incorrect';
+                    feedback.textContent = '✗ 不正确，请再试试';
+                }
+            }
+
+            function showChainSolution() {
+                const solution = document.getElementById('chainSolution');
+                solution.style.display = solution.style.display === 'none' ? 'block' : 'none';
+
+                solution.innerHTML = `
                 <div class="steps">
                     <strong>解答过程：</strong><br>
                     设 $y = (3x + 1)^5$<br>
@@ -1279,56 +1163,25 @@
                     5. $y' = 15(3x + 1)^4$
                 </div>
             `;
-            renderMath();
-        }
-
-        // ==========================================
-        // 页面切换
-        // ==========================================
-        function switchPanel(panel) {
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
-            
-            event.target.classList.add('active');
-            document.getElementById(panel).classList.add('active');
-            
-            setTimeout(() => {
                 renderMath();
-                
-                switch (panel) {
-                    case 'formulas':
-                        showFormulaDemo('power');
-                        break;
-                    case 'sum':
-                        calculateSum();
-                        break;
-                    case 'product':
-                        updateProductDemo();
-                        break;
-                    case 'chain':
-                        updateChainDemo();
-                        break;
-                }
-            }, 50);
-        }
+            }
 
-        // ==========================================
-        // 技巧7：响应式重绘
-        // ==========================================
-        let resizeTimeout;
-        window.addEventListener('resize', function() {
-            clearTimeout(resizeTimeout);
-            resizeTimeout = setTimeout(() => {
-                const activePanel = document.querySelector('.content.active');
-                if (activePanel) {
-                    const panelId = activePanel.id;
-                    switch (panelId) {
+            // ==========================================
+            // 页面切换
+            // ==========================================
+            function switchPanel(panel) {
+                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+
+                event.target.classList.add('active');
+                document.getElementById(panel).classList.add('active');
+
+                setTimeout(() => {
+                    renderMath();
+
+                    switch (panel) {
                         case 'formulas':
-                            const lastType = document.querySelector('.formula-table tr.highlight');
-                            if (lastType) {
-                                const type = lastType.cells[0].textContent.toLowerCase();
-                                showFormulaDemo(type);
-                            }
+                            showFormulaDemo('power');
                             break;
                         case 'sum':
                             calculateSum();
@@ -1340,21 +1193,53 @@
                             updateChainDemo();
                             break;
                     }
-                }
-            }, 150);
-        });
+                }, 50);
+            }
 
-        // ==========================================
-        // 初始化
-        // ==========================================
-        window.addEventListener('DOMContentLoaded', function() {
-            setTimeout(() => {
-                showFormulaDemo('power');
-                renderMath();
-            }, 100);
-        });
+            // ==========================================
+            // 技巧7：响应式重绘
+            // ==========================================
+            let resizeTimeout;
+            window.addEventListener('resize', function () {
+                clearTimeout(resizeTimeout);
+                resizeTimeout = setTimeout(() => {
+                    const activePanel = document.querySelector('.content.active');
+                    if (activePanel) {
+                        const panelId = activePanel.id;
+                        switch (panelId) {
+                            case 'formulas':
+                                const lastType = document.querySelector('.formula-table tr.highlight');
+                                if (lastType) {
+                                    const type = lastType.cells[0].textContent.toLowerCase();
+                                    showFormulaDemo(type);
+                                }
+                                break;
+                            case 'sum':
+                                calculateSum();
+                                break;
+                            case 'product':
+                                updateProductDemo();
+                                break;
+                            case 'chain':
+                                updateChainDemo();
+                                break;
+                        }
+                    }
+                }, 150);
+            });
 
-        function toggleReturnLinks() { const p = document.querySelector('.return-links'); if (!p) return; if (p.style.display === 'flex') { p.style.opacity = '0'; setTimeout(() => p.style.display = 'none', 160); } else { p.style.display = 'flex'; requestAnimationFrame(() => p.style.opacity = '1'); } }
+            // ==========================================
+            // 初始化
+            // ==========================================
+            window.addEventListener('DOMContentLoaded', function () {
+                setTimeout(() => {
+                    showFormulaDemo('power');
+                    renderMath();
+                }, 100);
+            });
+
+            function toggleReturnLinks() { const p = document.querySelector('.return-links'); if (!p) return; if (p.style.display === 'flex') { p.style.opacity = '0'; setTimeout(() => p.style.display = 'none', 160); } else { p.style.display = 'flex'; requestAnimationFrame(() => p.style.opacity = '1'); } }
     </script>
 </body>
+
 </html>

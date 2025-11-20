@@ -1,10 +1,11 @@
 ﻿<!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>导数几何意义探索实验室</title>
-    
+
     <!-- MathJax配置 -->
     <script>
         window.MathJax = {
@@ -26,17 +27,18 @@
         };
     </script>
     <script src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js" defer></script>
-    
+    <script src="../common-assets/js/axis-utils.js"></script>
+
     <style>
         /* 用户要求：字号统一 */
         :root {
-            --h1-size: 22px;      
-            --h2-size: 20px;      
-            --h3-size: 18px;      
-            --btn-size: 16px;     
-            --formula-size: 20px; 
+            --h1-size: 22px;
+            --h2-size: 20px;
+            --h3-size: 18px;
+            --btn-size: 16px;
+            --formula-size: 20px;
             --text-size: 16px;
-            
+
             --primary: #4f46e5;
             --primary-light: #6366f1;
             --primary-dark: #3730a3;
@@ -64,7 +66,7 @@
             width: 0;
             background: transparent;
         }
-        
+
         * {
             scrollbar-width: none;
             -ms-overflow-style: none;
@@ -450,17 +452,71 @@
             }
         }
 
-        .return-home-panel { position: fixed; bottom: 12px; right: 12px; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; z-index: 40; }
-        .return-toggle { width: 40px; height: 40px; border-radius: 50%; border: none; background: linear-gradient(135deg, rgba(79,70,229,0.96), rgba(99,102,241,0.9)); color: #fff; font-size: 20px; cursor: pointer; box-shadow: 0 10px 18px rgba(79,70,229,0.28); transition: transform 0.2s, box-shadow 0.2s; }
-        .return-toggle:hover { transform: translateY(-1px) scale(1.03); box-shadow: 0 14px 26px rgba(79,70,229,0.35); }
-        .return-links { display: none; flex-direction: column; gap: 6px; padding: 10px; border-radius: 10px; background: rgba(255,255,255,0.96); border: 1px solid rgba(79,70,229,0.18); box-shadow: 0 10px 30px rgba(15,23,42,0.14); opacity: 0; transition: opacity 0.16s; }
-        .return-link { text-decoration: none; font-size: 15px; color: var(--primary-dark); padding: 6px 12px; border-radius: 8px; background: rgba(99,102,241,0.12); transition: background 0.2s; }
-        .return-link:hover { background: rgba(79,70,229,0.18); }
+        .return-home-panel {
+            position: fixed;
+            bottom: 12px;
+            right: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+            z-index: 40;
+        }
+
+        .return-toggle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.96), rgba(99, 102, 241, 0.9));
+            color: #fff;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 10px 18px rgba(79, 70, 229, 0.28);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .return-toggle:hover {
+            transform: translateY(-1px) scale(1.03);
+            box-shadow: 0 14px 26px rgba(79, 70, 229, 0.35);
+        }
+
+        .return-links {
+            display: none;
+            flex-direction: column;
+            gap: 6px;
+            padding: 10px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.96);
+            border: 1px solid rgba(79, 70, 229, 0.18);
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.14);
+            opacity: 0;
+            transition: opacity 0.16s;
+        }
+
+        .return-link {
+            text-decoration: none;
+            font-size: 15px;
+            color: var(--primary-dark);
+            padding: 6px 12px;
+            border-radius: 8px;
+            background: rgba(99, 102, 241, 0.12);
+            transition: background 0.2s;
+        }
+
+        .return-link:hover {
+            background: rgba(79, 70, 229, 0.18);
+        }
     </style>
 
 </head>
+
 <body>
-    <div class="return-home-panel"><button class="return-toggle" onclick="toggleReturnLinks()"><i class="fa-solid fa-house"></i></button><div class="return-links"><a class="return-link" href="index.html"><i class="fa-solid fa-arrow-left"></i> 返回目录</a><a class="return-link" href="../index.html"><i class="fa-solid fa-house"></i> 返回主站</a></div></div>
+    <div class="return-home-panel"><button class="return-toggle" onclick="toggleReturnLinks()"><i
+                class="fa-solid fa-house"></i></button>
+        <div class="return-links"><a class="return-link" href="index.html"><i class="fa-solid fa-arrow-left"></i>
+                返回目录</a><a class="return-link" href="../index.html"><i class="fa-solid fa-house"></i> 返回主站</a></div>
+    </div>
     <div class="container">
         <header class="header">
             <h1>导数几何意义探索实验室</h1>
@@ -496,8 +552,7 @@
                         </div>
                         <div class="slider-group">
                             <label>间距 h =</label>
-                            <input type="range" class="slider" id="hSlider" 
-                                   min="0.05" max="2" step="0.05" value="1">
+                            <input type="range" class="slider" id="hSlider" min="0.05" max="2" step="0.05" value="1">
                             <span class="slider-value" id="hValue">1.00</span>
                         </div>
                         <div class="animation-controls">
@@ -589,7 +644,7 @@
                             <div class="geometric-icon"><i class="fa-solid fa-chart-line-down"></i></div>
                             <div class="geometric-text">
                                 斜率 < 0：下降趋势<br>
-                                数值越小，下降越陡
+                                    数值越小，下降越陡
                             </div>
                         </div>
                     </div>
@@ -635,14 +690,12 @@
                         </div>
                         <div class="slider-group">
                             <label>调整斜率</label>
-                            <input type="range" class="slider" id="slopeSlider" 
-                                   min="-3" max="3" step="0.1" value="1">
+                            <input type="range" class="slider" id="slopeSlider" min="-3" max="3" step="0.1" value="1">
                             <span class="slider-value" id="slopeValue">1.0</span>
                         </div>
                         <div class="slider-group">
                             <label>选择点 x =</label>
-                            <input type="range" class="slider" id="xSlider" 
-                                   min="-2" max="2" step="0.1" value="0">
+                            <input type="range" class="slider" id="xSlider" min="-2" max="2" step="0.1" value="0">
                             <span class="slider-value" id="xValue">0.0</span>
                         </div>
                         <div class="result" id="angleDisplay">
@@ -702,8 +755,8 @@
                         </div>
                         <div class="slider-group">
                             <label>移动切点</label>
-                            <input type="range" class="slider" id="tangentSlider" 
-                                   min="-2" max="2" step="0.05" value="0">
+                            <input type="range" class="slider" id="tangentSlider" min="-2" max="2" step="0.05"
+                                value="0">
                             <span class="slider-value" id="tangentValue">0.00</span>
                         </div>
                         <div class="result" id="tangentInfo">
@@ -731,8 +784,7 @@
                         </div>
                         <div class="slider-group">
                             <label>放大倍数</label>
-                            <input type="range" class="slider" id="zoomSlider" 
-                                   min="1" max="100" step="1" value="1">
+                            <input type="range" class="slider" id="zoomSlider" min="1" max="100" step="1" value="1">
                             <span class="slider-value" id="zoomValue">1×</span>
                         </div>
                         <div class="animation-controls">
@@ -805,82 +857,29 @@
             const ctx = canvas.getContext('2d');
             const rect = canvas.getBoundingClientRect();
             const dpr = window.devicePixelRatio || 1;
-            
+
             canvas.width = rect.width * dpr;
             canvas.height = rect.height * dpr;
             canvas.style.width = rect.width + 'px';
             canvas.style.height = rect.height + 'px';
-            
+
             ctx.scale(dpr, dpr);
-            
+
             return { ctx, width: rect.width, height: rect.height };
         }
 
         // ==========================================
         // 技巧3：绘制坐标轴
         // ==========================================
-        function drawAxes(ctx, width, height, padding = 40) {
-            ctx.strokeStyle = '#374151';
-            ctx.lineWidth = 2;
-            
-            // X轴
-            ctx.beginPath();
-            ctx.moveTo(padding, height - padding);
-            ctx.lineTo(width - padding, height - padding);
-            ctx.stroke();
-            
-            // Y轴
-            ctx.beginPath();
-            ctx.moveTo(padding, padding);
-            ctx.lineTo(padding, height - padding);
-            ctx.stroke();
-            
-            // 箭头
-            ctx.fillStyle = '#374151';
-            
-            // X轴箭头
-            ctx.beginPath();
-            ctx.moveTo(width - padding, height - padding);
-            ctx.lineTo(width - padding - 8, height - padding - 4);
-            ctx.lineTo(width - padding - 8, height - padding + 4);
-            ctx.fill();
-            
-            // Y轴箭头
-            ctx.beginPath();
-            ctx.moveTo(padding, padding);
-            ctx.lineTo(padding - 4, padding + 8);
-            ctx.lineTo(padding + 4, padding + 8);
-            ctx.fill();
-            
-            // 坐标轴标签
-            ctx.font = '14px Arial';
-            ctx.fillText('x', width - padding + 10, height - padding + 5);
-            ctx.fillText('y', padding - 5, padding - 10);
-        }
+        // ==========================================
+        // 技巧3：绘制坐标轴 (已废弃，使用 axis-utils.js)
+        // ==========================================
+        // function drawAxes(ctx, width, height, padding = 40) { ... }
 
         // ==========================================
-        // 技巧4：绘制网格
+        // 技巧4：绘制网格 (已废弃，使用 axis-utils.js)
         // ==========================================
-        function drawGrid(ctx, width, height, padding = 40, gridSize = 40) {
-            ctx.strokeStyle = '#e5e7eb';
-            ctx.lineWidth = 0.5;
-            
-            // 垂直网格线
-            for (let x = padding + gridSize; x < width - padding; x += gridSize) {
-                ctx.beginPath();
-                ctx.moveTo(x, padding);
-                ctx.lineTo(x, height - padding);
-                ctx.stroke();
-            }
-            
-            // 水平网格线
-            for (let y = padding + gridSize; y < height - padding; y += gridSize) {
-                ctx.beginPath();
-                ctx.moveTo(padding, y);
-                ctx.lineTo(width - padding, y);
-                ctx.stroke();
-            }
-        }
+        // function drawGrid(ctx, width, height, padding = 40, gridSize = 40) { ... }
 
         // ==========================================
         // 技巧5：坐标转换（数学坐标到画布坐标）
@@ -888,10 +887,10 @@
         function mathToCanvas(x, y, width, height, xRange, yRange, padding = 40) {
             const plotWidth = width - 2 * padding;
             const plotHeight = height - 2 * padding;
-            
+
             const canvasX = padding + (x - xRange[0]) / (xRange[1] - xRange[0]) * plotWidth;
             const canvasY = height - padding - (y - yRange[0]) / (yRange[1] - yRange[0]) * plotHeight;
-            
+
             return { x: canvasX, y: canvasY };
         }
 
@@ -901,113 +900,116 @@
         function drawSecantVisualization() {
             const canvas = document.getElementById('secantCanvas');
             if (!canvas) return;
-            
+
             const { ctx, width, height } = setupCanvas(canvas);
-            
+
             ctx.clearRect(0, 0, width, height);
-            drawGrid(ctx, width, height);
-            drawAxes(ctx, width, height);
-            
+            // drawGrid(ctx, width, height);
+            // drawAxes(ctx, width, height);
+
             // 获取参数
             const h = parseFloat(document.getElementById('hSlider').value);
-            
+
             // 定义函数：简单的二次函数
             const f = (x) => x * x;
             const df = (x) => 2 * x; // 导数
-            
+
             // 固定点A
             const x0 = 1;
             const y0 = f(x0);
-            
+
             // 点B
             const x1 = x0 + h;
             const y1 = f(x1);
-            
+
+            // 数学坐标范围
             // 数学坐标范围
             const xRange = [-1, 4];
             const yRange = [-1, 8];
-            
+
+            drawEnhancedAxes(ctx, { width, height, xRange, yRange });
+
             // 绘制函数曲线
             ctx.strokeStyle = '#4f46e5';
             ctx.lineWidth = 2;
             ctx.beginPath();
-            
+
             for (let i = 0; i <= 100; i++) {
                 const x = xRange[0] + (xRange[1] - xRange[0]) * i / 100;
                 const y = f(x);
                 const point = mathToCanvas(x, y, width, height, xRange, yRange);
-                
+
                 if (i === 0) ctx.moveTo(point.x, point.y);
                 else ctx.lineTo(point.x, point.y);
             }
             ctx.stroke();
-            
+
             // 绘制切线（目标线）
             const tangentSlope = df(x0);
             ctx.strokeStyle = '#ef4444';
             ctx.lineWidth = 2;
             ctx.setLineDash([5, 5]);
             ctx.beginPath();
-            
+
             const tangentX1 = xRange[0];
             const tangentX2 = xRange[1];
             const tangentY1 = y0 + tangentSlope * (tangentX1 - x0);
             const tangentY2 = y0 + tangentSlope * (tangentX2 - x0);
-            
+
             const tp1 = mathToCanvas(tangentX1, tangentY1, width, height, xRange, yRange);
             const tp2 = mathToCanvas(tangentX2, tangentY2, width, height, xRange, yRange);
-            
+
             ctx.moveTo(tp1.x, tp1.y);
             ctx.lineTo(tp2.x, tp2.y);
             ctx.stroke();
             ctx.setLineDash([]);
-            
+
             // 绘制割线
             const secantSlope = (y1 - y0) / h;
             ctx.strokeStyle = '#10b981';
             ctx.lineWidth = 2;
             ctx.beginPath();
-            
+
             const secantX1 = xRange[0];
             const secantX2 = xRange[1];
             const secantY1 = y0 + secantSlope * (secantX1 - x0);
             const secantY2 = y0 + secantSlope * (secantX2 - x0);
-            
+
             const sp1 = mathToCanvas(secantX1, secantY1, width, height, xRange, yRange);
             const sp2 = mathToCanvas(secantX2, secantY2, width, height, xRange, yRange);
-            
+
             ctx.moveTo(sp1.x, sp1.y);
             ctx.lineTo(sp2.x, sp2.y);
             ctx.stroke();
-            
+
             // 绘制点A和点B
             const pointA = mathToCanvas(x0, y0, width, height, xRange, yRange);
             const pointB = mathToCanvas(x1, y1, width, height, xRange, yRange);
-            
+
             // 点A（固定点）
             ctx.fillStyle = '#ef4444';
             ctx.beginPath();
             ctx.arc(pointA.x, pointA.y, 6, 0, Math.PI * 2);
             ctx.fill();
-            
+
             // 点B（移动点）
             ctx.fillStyle = '#10b981';
             ctx.beginPath();
             ctx.arc(pointB.x, pointB.y, 6, 0, Math.PI * 2);
             ctx.fill();
-            
+
             // 标注点
             ctx.fillStyle = '#374151';
             ctx.font = '14px Arial';
             ctx.fillText('A', pointA.x - 15, pointA.y - 10);
             ctx.fillText('B', pointB.x + 10, pointB.y - 10);
-            
+
             // 更新数值显示
             document.getElementById('hDisplay').textContent = h.toFixed(2);
             document.getElementById('secantSlope').textContent = secantSlope.toFixed(2);
             document.getElementById('tangentSlope').textContent = tangentSlope.toFixed(2);
             document.getElementById('slopeError').textContent = Math.abs(secantSlope - tangentSlope).toFixed(2);
-            
+
             // 更新信息
             if (h < 0.2) {
                 document.getElementById('secantInfo').textContent = '割线几乎与切线重合了！';
@@ -1020,13 +1022,13 @@
 
         // 动画演示
         let secantAnimationId = null;
-        
+
         function animateSecant() {
             if (secantAnimationId) return;
-            
+
             let h = 2.0;
             const step = 0.02;
-            
+
             function animate() {
                 h -= step;
                 if (h < 0.05) {
@@ -1035,17 +1037,17 @@
                     secantAnimationId = null;
                     return;
                 }
-                
+
                 document.getElementById('hSlider').value = h;
                 document.getElementById('hValue').textContent = h.toFixed(2);
                 drawSecantVisualization();
-                
+
                 secantAnimationId = requestAnimationFrame(animate);
             }
-            
+
             animate();
         }
-        
+
         function resetSecant() {
             if (secantAnimationId) {
                 cancelAnimationFrame(secantAnimationId);
@@ -1062,87 +1064,89 @@
         function drawSlopeVisualization() {
             const canvas = document.getElementById('slopeCanvas');
             if (!canvas) return;
-            
+
             const { ctx, width, height } = setupCanvas(canvas);
-            
+
             ctx.clearRect(0, 0, width, height);
-            drawGrid(ctx, width, height);
-            drawAxes(ctx, width, height);
-            
+            // drawGrid(ctx, width, height);
+            // drawAxes(ctx, width, height);
+
             const slope = parseFloat(document.getElementById('slopeSlider').value);
             const xPoint = parseFloat(document.getElementById('xSlider').value);
-            
+
             // 绘制直线 y = slope * (x - xPoint) + yPoint
             const yPoint = 2; // 固定y值
-            
+
             const xRange = [-3, 3];
             const yRange = [-4, 6];
-            
+
+            drawEnhancedAxes(ctx, { width, height, xRange, yRange });
+
             // 绘制直线
             ctx.strokeStyle = '#4f46e5';
             ctx.lineWidth = 3;
             ctx.beginPath();
-            
+
             const lineX1 = xRange[0];
             const lineX2 = xRange[1];
             const lineY1 = yPoint + slope * (lineX1 - xPoint);
             const lineY2 = yPoint + slope * (lineX2 - xPoint);
-            
+
             const p1 = mathToCanvas(lineX1, lineY1, width, height, xRange, yRange);
             const p2 = mathToCanvas(lineX2, lineY2, width, height, xRange, yRange);
-            
+
             ctx.moveTo(p1.x, p1.y);
             ctx.lineTo(p2.x, p2.y);
             ctx.stroke();
-            
+
             // 绘制参考点
             const point = mathToCanvas(xPoint, yPoint, width, height, xRange, yRange);
             ctx.fillStyle = '#ef4444';
             ctx.beginPath();
             ctx.arc(point.x, point.y, 6, 0, Math.PI * 2);
             ctx.fill();
-            
+
             // 技巧6：绘制直角三角形来展示斜率
             if (Math.abs(slope) > 0.1) {
                 const dx = 1; // 水平距离
                 const dy = slope * dx; // 垂直距离
-                
+
                 const x2 = xPoint + dx;
                 const y2 = yPoint + dy;
-                
+
                 const p0 = mathToCanvas(xPoint, yPoint, width, height, xRange, yRange);
                 const px = mathToCanvas(x2, yPoint, width, height, xRange, yRange);
                 const py = mathToCanvas(x2, y2, width, height, xRange, yRange);
-                
+
                 // 绘制直角三角形
                 ctx.strokeStyle = '#10b981';
                 ctx.lineWidth = 1;
                 ctx.setLineDash([3, 3]);
-                
+
                 // 水平边
                 ctx.beginPath();
                 ctx.moveTo(p0.x, p0.y);
                 ctx.lineTo(px.x, px.y);
                 ctx.stroke();
-                
+
                 // 垂直边
                 ctx.beginPath();
                 ctx.moveTo(px.x, px.y);
                 ctx.lineTo(py.x, py.y);
                 ctx.stroke();
-                
+
                 ctx.setLineDash([]);
-                
+
                 // 标注
                 ctx.fillStyle = '#374151';
                 ctx.font = '12px Arial';
                 ctx.fillText('1', (p0.x + px.x) / 2, p0.y + 15);
                 ctx.fillText(slope.toFixed(1), px.x + 10, (px.y + py.y) / 2);
             }
-            
+
             // 计算角度
             const angle = Math.atan(slope) * 180 / Math.PI;
-            document.getElementById('angleDisplay').textContent = 
+            document.getElementById('angleDisplay').textContent =
                 `角度 θ = ${angle.toFixed(1)}°`;
         }
 
@@ -1152,16 +1156,16 @@
         function drawTangentDemo() {
             const canvas = document.getElementById('tangentCanvas');
             if (!canvas) return;
-            
+
             const { ctx, width, height } = setupCanvas(canvas);
-            
+
             ctx.clearRect(0, 0, width, height);
-            drawGrid(ctx, width, height);
-            drawAxes(ctx, width, height);
-            
+            // drawGrid(ctx, width, height);
+            // drawAxes(ctx, width, height);
+
             const funcType = document.getElementById('tangentFunc').value;
             const xValue = parseFloat(document.getElementById('tangentSlider').value);
-            
+
             // 定义不同的函数
             let f, df, xRange, yRange;
             switch (funcType) {
@@ -1190,53 +1194,55 @@
                     yRange = [-3, 3];
                     break;
             }
-            
+
+            drawEnhancedAxes(ctx, { width, height, xRange, yRange });
+
             // 绘制函数曲线
             ctx.strokeStyle = '#4f46e5';
             ctx.lineWidth = 2;
             ctx.beginPath();
-            
+
             for (let i = 0; i <= 200; i++) {
                 const x = xRange[0] + (xRange[1] - xRange[0]) * i / 200;
                 const y = f(x);
                 const point = mathToCanvas(x, y, width, height, xRange, yRange);
-                
+
                 if (i === 0) ctx.moveTo(point.x, point.y);
                 else ctx.lineTo(point.x, point.y);
             }
             ctx.stroke();
-            
+
             // 计算切点和切线
             const y0 = f(xValue);
             const slope = df(xValue);
-            
+
             // 绘制切线
             ctx.strokeStyle = '#ef4444';
             ctx.lineWidth = 2;
             ctx.beginPath();
-            
+
             const tangentLength = (xRange[1] - xRange[0]) / 2;
             const tangentX1 = Math.max(xRange[0], xValue - tangentLength);
             const tangentX2 = Math.min(xRange[1], xValue + tangentLength);
             const tangentY1 = y0 + slope * (tangentX1 - xValue);
             const tangentY2 = y0 + slope * (tangentX2 - xValue);
-            
+
             const p1 = mathToCanvas(tangentX1, tangentY1, width, height, xRange, yRange);
             const p2 = mathToCanvas(tangentX2, tangentY2, width, height, xRange, yRange);
-            
+
             ctx.moveTo(p1.x, p1.y);
             ctx.lineTo(p2.x, p2.y);
             ctx.stroke();
-            
+
             // 绘制切点
             const point = mathToCanvas(xValue, y0, width, height, xRange, yRange);
             ctx.fillStyle = '#10b981';
             ctx.beginPath();
             ctx.arc(point.x, point.y, 6, 0, Math.PI * 2);
             ctx.fill();
-            
+
             // 更新信息
-            document.getElementById('tangentInfo').textContent = 
+            document.getElementById('tangentInfo').textContent =
                 `切点：(${xValue.toFixed(2)}, ${y0.toFixed(2)})，斜率：${slope.toFixed(2)}`;
         }
 
@@ -1244,12 +1250,12 @@
         function showMultipleTangents() {
             const canvas = document.getElementById('tangentCanvas');
             if (!canvas) return;
-            
+
             const { ctx, width, height } = setupCanvas(canvas);
-            
+
             // 在现有图形上添加多条切线
             const funcType = document.getElementById('tangentFunc').value;
-            
+
             let f, df;
             switch (funcType) {
                 case 'parabola':
@@ -1269,29 +1275,29 @@
                     df = (x) => 2 * Math.cos(x);
                     break;
             }
-            
+
             const xRange = [-3, 3];
             const yRange = [-4, 6];
-            
+
             // 绘制多条切线
             const tangentPoints = [-1.5, -0.5, 0.5, 1.5];
-            
+
             tangentPoints.forEach(x => {
                 const y = f(x);
                 const slope = df(x);
-                
+
                 ctx.strokeStyle = 'rgba(239, 68, 68, 0.3)';
                 ctx.lineWidth = 1;
                 ctx.beginPath();
-                
+
                 const tangentX1 = x - 0.5;
                 const tangentX2 = x + 0.5;
                 const tangentY1 = y + slope * (tangentX1 - x);
                 const tangentY2 = y + slope * (tangentX2 - x);
-                
+
                 const p1 = mathToCanvas(tangentX1, tangentY1, width, height, xRange, yRange);
                 const p2 = mathToCanvas(tangentX2, tangentY2, width, height, xRange, yRange);
-                
+
                 ctx.moveTo(p1.x, p1.y);
                 ctx.lineTo(p2.x, p2.y);
                 ctx.stroke();
@@ -1304,95 +1310,97 @@
         function drawZoomVisualization() {
             const canvas = document.getElementById('zoomCanvas');
             if (!canvas) return;
-            
+
             const { ctx, width, height } = setupCanvas(canvas);
-            
+
             ctx.clearRect(0, 0, width, height);
-            
+
             const zoom = parseFloat(document.getElementById('zoomSlider').value);
-            
+
             // 固定观察点
             const x0 = 1;
             const y0 = Math.sin(x0); // 使用正弦函数
-            
+
             // 根据放大倍数调整范围
             const baseRange = 3;
             const range = baseRange / zoom;
-            
+
             const xRange = [x0 - range, x0 + range];
             const yRange = [y0 - range, y0 + range];
-            
+
             // 绘制坐标轴（根据缩放调整）
-            drawGrid(ctx, width, height, 40, 40 * zoom / 10);
-            drawAxes(ctx, width, height);
-            
+            // 绘制坐标轴（根据缩放调整）
+            // drawGrid(ctx, width, height, 40, 40 * zoom / 10);
+            // drawAxes(ctx, width, height);
+            drawEnhancedAxes(ctx, { width, height, xRange, yRange });
+
             // 绘制函数曲线
             ctx.strokeStyle = '#4f46e5';
             ctx.lineWidth = 2;
             ctx.beginPath();
-            
+
             for (let i = 0; i <= 200; i++) {
                 const x = xRange[0] + (xRange[1] - xRange[0]) * i / 200;
                 const y = Math.sin(x);
                 const point = mathToCanvas(x, y, width, height, xRange, yRange);
-                
+
                 if (i === 0) ctx.moveTo(point.x, point.y);
                 else ctx.lineTo(point.x, point.y);
             }
             ctx.stroke();
-            
+
             // 绘制切线
             const slope = Math.cos(x0); // sin的导数是cos
-            
+
             ctx.strokeStyle = '#ef4444';
             ctx.lineWidth = 2;
             ctx.beginPath();
-            
+
             const tangentX1 = xRange[0];
             const tangentX2 = xRange[1];
             const tangentY1 = y0 + slope * (tangentX1 - x0);
             const tangentY2 = y0 + slope * (tangentX2 - x0);
-            
+
             const p1 = mathToCanvas(tangentX1, tangentY1, width, height, xRange, yRange);
             const p2 = mathToCanvas(tangentX2, tangentY2, width, height, xRange, yRange);
-            
+
             ctx.moveTo(p1.x, p1.y);
             ctx.lineTo(p2.x, p2.y);
             ctx.stroke();
-            
+
             // 绘制观察点
             const point = mathToCanvas(x0, y0, width, height, xRange, yRange);
             ctx.fillStyle = '#10b981';
             ctx.beginPath();
             ctx.arc(point.x, point.y, 6, 0, Math.PI * 2);
             ctx.fill();
-            
+
             // 更新信息
             if (zoom > 50) {
-                document.getElementById('zoomInfo').textContent = 
+                document.getElementById('zoomInfo').textContent =
                     '曲线几乎变成直线了！这就是"局部线性"';
             } else if (zoom > 20) {
-                document.getElementById('zoomInfo').textContent = 
+                document.getElementById('zoomInfo').textContent =
                     '曲线的弯曲越来越不明显';
             } else if (zoom > 5) {
-                document.getElementById('zoomInfo').textContent = 
+                document.getElementById('zoomInfo').textContent =
                     '继续放大，曲线正在变直';
             } else {
-                document.getElementById('zoomInfo').textContent = 
+                document.getElementById('zoomInfo').textContent =
                     '开始放大，注意观察曲线的变化';
             }
         }
 
         // 自动放大动画
         let zoomAnimationId = null;
-        
+
         function autoZoom() {
             if (zoomAnimationId) return;
-            
+
             let zoom = 1;
             const maxZoom = 100;
             const step = 1.5;
-            
+
             function animate() {
                 zoom *= step;
                 if (zoom > maxZoom) {
@@ -1401,17 +1409,17 @@
                     zoomAnimationId = null;
                     return;
                 }
-                
+
                 document.getElementById('zoomSlider').value = zoom;
                 document.getElementById('zoomValue').textContent = Math.round(zoom) + '×';
                 drawZoomVisualization();
-                
+
                 zoomAnimationId = requestAnimationFrame(animate);
             }
-            
+
             animate();
         }
-        
+
         function resetZoom() {
             if (zoomAnimationId) {
                 cancelAnimationFrame(zoomAnimationId);
@@ -1428,13 +1436,13 @@
         function switchPanel(panel) {
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
-            
+
             event.target.classList.add('active');
             document.getElementById(panel).classList.add('active');
-            
+
             setTimeout(() => {
                 renderMath();
-                
+
                 switch (panel) {
                     case 'secant':
                         drawSecantVisualization();
@@ -1460,32 +1468,32 @@
         // ==========================================
         // 事件监听器
         // ==========================================
-        
+
         // 割线页面
-        document.getElementById('hSlider')?.addEventListener('input', function() {
+        document.getElementById('hSlider')?.addEventListener('input', function () {
             document.getElementById('hValue').textContent = parseFloat(this.value).toFixed(2);
             drawSecantVisualization();
         });
 
         // 斜率页面
-        document.getElementById('slopeSlider')?.addEventListener('input', function() {
+        document.getElementById('slopeSlider')?.addEventListener('input', function () {
             document.getElementById('slopeValue').textContent = parseFloat(this.value).toFixed(1);
             drawSlopeVisualization();
         });
 
-        document.getElementById('xSlider')?.addEventListener('input', function() {
+        document.getElementById('xSlider')?.addEventListener('input', function () {
             document.getElementById('xValue').textContent = parseFloat(this.value).toFixed(1);
             drawSlopeVisualization();
         });
 
         // 切线页面
-        document.getElementById('tangentSlider')?.addEventListener('input', function() {
+        document.getElementById('tangentSlider')?.addEventListener('input', function () {
             document.getElementById('tangentValue').textContent = parseFloat(this.value).toFixed(2);
             drawTangentDemo();
         });
 
         // 放大页面
-        document.getElementById('zoomSlider')?.addEventListener('input', function() {
+        document.getElementById('zoomSlider')?.addEventListener('input', function () {
             document.getElementById('zoomValue').textContent = Math.round(this.value) + '×';
             drawZoomVisualization();
         });
@@ -1494,7 +1502,7 @@
         // 技巧7：响应式重绘
         // ==========================================
         let resizeTimeout;
-        window.addEventListener('resize', function() {
+        window.addEventListener('resize', function () {
             clearTimeout(resizeTimeout);
             resizeTimeout = setTimeout(() => {
                 const activePanel = document.querySelector('.content.active');
@@ -1521,7 +1529,7 @@
         // ==========================================
         // 初始化
         // ==========================================
-        window.addEventListener('DOMContentLoaded', function() {
+        window.addEventListener('DOMContentLoaded', function () {
             setTimeout(() => {
                 drawSecantVisualization();
                 renderMath();
@@ -1531,4 +1539,5 @@
         function toggleReturnLinks() { const p = document.querySelector('.return-links'); if (!p) return; if (p.style.display === 'flex') { p.style.opacity = '0'; setTimeout(() => p.style.display = 'none', 160); } else { p.style.display = 'flex'; requestAnimationFrame(() => p.style.opacity = '1'); } }
     </script>
 </body>
+
 </html>

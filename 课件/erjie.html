@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>f'(x0)=0 且 f' 单调递增 ⇒ 负→正（无文字重叠版）</title>
+<style>
+  :root{
+    --bg:#ffffff; --fg:#0f172a; --muted:#64748b; --line:#e5e7eb;
+    --green:#10b981; --red:#ef4444; --amber:#f59e0b; --blue:#2563eb;
+  }
+  *{box-sizing:border-box;font-family:Inter,Segoe UI,PingFang SC,Microsoft YaHei,system-ui,-apple-system,sans-serif}
+  body{margin:0;background:var(--bg);color:var(--fg)}
+  .wrap{max-width:960px;margin:18px auto;padding:16px}
+  .title{font-size:20px;font-weight:800;margin-bottom:6px}
+  .sub{color:var(--muted);margin-bottom:10px}
+  .card{border:1px solid var(--line);border-radius:14px;padding:12px;background:#fafafa}
+  .row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .tag{font-size:14px;border:1px solid var(--line);background:#fff;border-radius:999px;padding:4px 10px}
+  .slider{width:280px}
+  svg{width:100%;height:auto;display:block}
+  .bar{display:flex;justify-content:center;gap:10px;align-items:center;
+       margin-top:8px;font-weight:700}
+  .chip{border:1px solid var(--line);background:#fff;border-radius:9999px;padding:6px 12px}
+  .chip.red{color:#ef4444}
+  .chip.green{color:#10b981}
+  .chip.amber{color:#b45309}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="title">只展示一件事：f′(x₀)=0 且 f′ 单调递增 ⟹ f′ 从负到正</div>
+  <div class="sub">模型取 <b>f′(x)=k(x−x₀)</b>（k&gt;0）。我们只画 f′(x)、y=0、以及 x=x₀ 竖线；文字说明固定在画布外，避免任何重叠。</div>
+
+  <div class="card">
+    <div class="row">
+      <span class="tag">移动 x₀</span>
+      <input type="range" min="-2" max="2" step="0.01" value="0" id="x0" class="slider" />
+      <span class="tag">x₀ = <b id="x0v">0.00</b></span>
+      <span class="tag">f′ 单调递增（f″&gt;0）</span>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <svg id="plot" viewBox="0 0 1000 380" aria-label="f'(x) 单调递增且过零方向示意"></svg>
+
+    <!-- 固定位置的信息条，不随 x₀ 改变位置，彻底避免重叠 -->
+    <div class="bar">
+      <span class="chip red">x&lt;x₀：f′(x)&lt;0</span>
+      <span class="chip amber">过零方向：负 → 正</span>
+      <span class="chip green">x&gt;x₀：f′(x)&gt;0</span>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  // 单调递增导数的最简模型
+  const k = 1.2;
+
+  const svg = document.getElementById('plot');
+  const W = 1000, H = 380;
+  const pad = {l:70, r:30, t:26, b:40};
+  const xMin=-3, xMax=3;
+  const yMin=-3, yMax=3;
+
+  const x2px = x => pad.l + (x - xMin) * (W - pad.l - pad.r) / (xMax - xMin);
+  const y2px = y => pad.t + (yMax - y) * (H - pad.t - pad.b) / (yMax - yMin);
+
+  // 基础绘图函数
+  function line(x1,y1,x2,y2, stroke='#cbd5e1', sw=1, dash=''){
+    const el = document.createElementNS('http://www.w3.org/2000/svg','line');
+    el.setAttribute('x1',x1); el.setAttribute('y1',y1);
+    el.setAttribute('x2',x2); el.setAttribute('y2',y2);
+    el.setAttribute('stroke',stroke); el.setAttribute('stroke-width',sw);
+    if(dash) el.setAttribute('stroke-dasharray',dash);
+    svg.appendChild(el); return el;
+  }
+  function rect(x,y,w,h, fill, opacity=1, parent=svg){
+    const el = document.createElementNS('http://www.w3.org/2000/svg','rect');
+    el.setAttribute('x',x); el.setAttribute('y',y);
+    el.setAttribute('width',w); el.setAttribute('height',h);
+    el.setAttribute('fill',fill); el.setAttribute('opacity',opacity);
+    (parent||svg).appendChild(el); return el;
+  }
+  function path(d, stroke, sw, fill='none', parent=svg){
+    const el = document.createElementNS('http://www.w3.org/2000/svg','path');
+    el.setAttribute('d', d);
+    el.setAttribute('fill', fill);
+    el.setAttribute('stroke', stroke);
+    el.setAttribute('stroke-width', sw || 2.6);
+    el.setAttribute('stroke-linecap','round');
+    (parent||svg).appendChild(el); return el;
+  }
+  function circle(cx,cy,r,fill,stroke,sw,parent=svg){
+    const el = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    el.setAttribute('cx',cx); el.setAttribute('cy',cy); el.setAttribute('r',r);
+    if(fill) el.setAttribute('fill',fill);
+    if(stroke){ el.setAttribute('stroke',stroke); el.setAttribute('stroke-width', sw||2) }
+    (parent||svg).appendChild(el); return el;
+  }
+
+  // 背景与坐标轴（固定元素）
+  (function drawStatic(){
+    // 外背景
+    rect(8,8,W-16,H-16,'#f5f7fb');
+    // y=0 与 x=0
+    line(pad.l, y2px(0), W-pad.r, y2px(0), '#94a3b8', 1.4); // y=0
+    line(x2px(0), pad.t, x2px(0), H-pad.b, '#e2e8f0', 1.0); // x=0
+  })();
+
+  // 动态图层
+  const gShades = document.createElementNS('http://www.w3.org/2000/svg','g'); svg.appendChild(gShades);
+  const gCurve  = document.createElementNS('http://www.w3.org/2000/svg','g'); svg.appendChild(gCurve);
+  const gMarks  = document.createElementNS('http://www.w3.org/2000/svg','g'); svg.appendChild(gMarks);
+
+  // 裁剪区，确保着色只在绘图区内，避免任何外溢
+  const clipId = 'clipPlot';
+  const clip = document.createElementNS('http://www.w3.org/2000/svg','clipPath');
+  clip.setAttribute('id', clipId);
+  const clipRect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+  clipRect.setAttribute('x', pad.l);
+  clipRect.setAttribute('y', pad.t);
+  clipRect.setAttribute('width', (W-pad.l-pad.r));
+  clipRect.setAttribute('height', (H-pad.t-pad.b));
+  clip.appendChild(clipRect);
+  const defs = document.createElementNS('http://www.w3.org/2000/svg','defs');
+  defs.appendChild(clip);
+  svg.appendChild(defs);
+  gShades.setAttribute('clip-path', `url(#${clipId})`);
+  gCurve.setAttribute('clip-path', `url(#${clipId})`);
+  gMarks.setAttribute('clip-path', `url(#${clipId})`);
+
+  // 控件
+  const x0Input = document.getElementById('x0');
+  const x0View  = document.getElementById('x0v');
+
+  function draw(){
+    gShades.innerHTML=''; gCurve.innerHTML=''; gMarks.innerHTML='';
+
+    const x0 = parseFloat(x0Input.value);
+    x0View.textContent = x0.toFixed(2);
+    const x0px = x2px(x0);
+
+    // 左右着色（固定颜色，不含文字，永不重叠）
+    rect(pad.l, pad.t,           x0px - pad.l, (H-pad.t-pad.b), '#ef444415', 1, gShades); // 左：红（f'<0）
+    rect(x0px,   pad.t, (W-pad.r) - x0px,      (H-pad.t-pad.b), '#10b98115', 1, gShades); // 右：绿（f'>0）
+
+    // f'(x) = k(x - x0)
+    const N=200, dx=(xMax-xMin)/N;
+    let d='';
+    for(let i=0;i<=N;i++){
+      const x = xMin + i*dx;
+      const y = k*(x - x0);
+      const px = x2px(x), py = y2px(y);
+      d += (i===0?`M ${px} ${py}`:` L ${px} ${py}`);
+    }
+    path(d, '#2563eb', 2.8, 'none', gCurve);
+
+    // x = x0 竖线与交点（不含文字）
+    line(x0px, pad.t, x0px, H-pad.b, '#cbd5e1', 1.2, '6,6');
+    circle(x0px, y2px(0), 5, '#fff', '#f59e0b', 2, gMarks);
+  }
+
+  x0Input.addEventListener('input', draw);
+  draw();
+})();
+</script>
+</body>
+</html>

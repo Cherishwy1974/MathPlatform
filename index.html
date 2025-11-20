@@ -1,23 +1,23 @@
 ﻿<!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>高等应用数学在线课堂</title>
-    
+
     <!-- 字体预加载 -->
     <link rel="preload" href="./common-assets/fonts/jf-openhuninn-2.1.ttf" as="font" type="font/ttf" crossorigin>
-    <link rel="preload" href="./common-assets/fonts/WD-XLLubrifontSC-Regular.otf" as="font" type="font/otf" crossorigin>   
- 
-    
+    <link rel="preload" href="./common-assets/fonts/WD-XLLubrifontSC-Regular.otf" as="font" type="font/otf" crossorigin>
+
+
     <!-- Three.js 全局脚本（file:// 兼容） -->
     <script src="./common-assets/js/three-0.160.0.min.js"></script>
     <script src="./common-assets/js/OrbitControls.legacy.js"></script>
     <script>window.OrbitControls = window.OrbitControls || (window.THREE && window.THREE.OrbitControls);</script>
-    
-    <style>
 
-/* 全局字体引入与设置 */
+    <style>
+        /* 全局字体引入与设置 */
         @font-face {
             font-family: 'WDXLubrifontSC';
             src: url('./common-assets/fonts/WD-XLLubrifontSC-Regular.otf') format('opentype');
@@ -108,9 +108,12 @@
         }
 
         @keyframes moveGlow {
-            0%, 100% {
+
+            0%,
+            100% {
                 transform: translate(0, 0);
             }
+
             50% {
                 transform: translate(30px, -30px);
             }
@@ -124,9 +127,9 @@
             z-index: 1000;
             width: 56px;
             height: 56px;
-            background: linear-gradient(135deg, 
-                rgba(255, 255, 255, 0.95) 0%, 
-                rgba(250, 251, 253, 0.9) 100%);
+            background: linear-gradient(135deg,
+                    rgba(255, 255, 255, 0.95) 0%,
+                    rgba(250, 251, 253, 0.9) 100%);
             border: 2px solid rgba(100, 130, 180, 0.15);
             border-radius: 16px;
             color: rgba(50, 80, 150, 0.85);
@@ -135,7 +138,7 @@
             align-items: center;
             justify-content: center;
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 
+            box-shadow:
                 0 4px 16px rgba(100, 130, 180, 0.12),
                 inset 0 1px 0 rgba(255, 255, 255, 0.8),
                 inset 0 -1px 0 rgba(100, 130, 180, 0.05);
@@ -149,10 +152,10 @@
             inset: -2px;
             border-radius: 16px;
             padding: 2px;
-            background: linear-gradient(135deg, 
-                rgba(180, 200, 240, 0.4) 0%, 
-                rgba(140, 170, 220, 0.2) 50%,
-                rgba(100, 130, 180, 0.1) 100%);
+            background: linear-gradient(135deg,
+                    rgba(180, 200, 240, 0.4) 0%,
+                    rgba(140, 170, 220, 0.2) 50%,
+                    rgba(100, 130, 180, 0.1) 100%);
             -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
             mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
             -webkit-mask-composite: xor;
@@ -165,7 +168,7 @@
             transform: translateY(-2px) scale(1.05);
             color: rgba(50, 80, 150, 1);
             border-color: rgba(100, 130, 180, 0.3);
-            box-shadow: 
+            box-shadow:
                 0 8px 24px rgba(100, 130, 180, 0.2),
                 0 4px 12px rgba(140, 170, 220, 0.15),
                 inset 0 1px 0 rgba(255, 255, 255, 1),
@@ -178,7 +181,7 @@
 
         .grade-btn:active {
             transform: translateY(0) scale(1.02);
-            box-shadow: 
+            box-shadow:
                 0 2px 8px rgba(100, 130, 180, 0.15),
                 inset 0 1px 3px rgba(100, 130, 180, 0.1);
         }
@@ -237,7 +240,7 @@
             color: rgba(30, 50, 100, 1);
             line-height: 1.2;
             position: relative;
-            text-shadow: 
+            text-shadow:
                 0 1px 2px rgba(30, 50, 100, 0.1);
         }
 
@@ -252,6 +255,7 @@
             align-items: center;
             overflow: hidden;
         }
+
         /* 导航网格 - 简洁设计 */
         .nav-grid {
             display: flex;
@@ -264,9 +268,10 @@
                 linear-gradient(180deg,
                     rgba(252, 252, 254, 1) 0%,
                     rgba(250, 251, 253, 1) 50%,
-                    rgba(252, 252, 254, 1) 100%);            border-radius: 24px;
+                    rgba(252, 252, 254, 1) 100%);
+            border-radius: 24px;
             border: 1px solid rgba(100, 130, 180, 0.15);
-            box-shadow: 
+            box-shadow:
                 0 8px 32px rgba(100, 130, 180, 0.1),
                 inset 0 1px 0 rgba(255, 255, 255, 0.8);
             backdrop-filter: blur(5px);
@@ -281,7 +286,8 @@
                 linear-gradient(180deg,
                     rgba(252, 252, 254, 1) 0%,
                     rgba(250, 251, 253, 1) 50%,
-                    rgba(252, 252, 254, 1) 100%);            border: 1px solid rgba(100, 130, 180, 0.1);
+                    rgba(252, 252, 254, 1) 100%);
+            border: 1px solid rgba(100, 130, 180, 0.1);
             border-radius: 16px;
             text-decoration: none;
             padding: 10px 20px;
@@ -291,7 +297,7 @@
             align-items: center;
             justify-content: center;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 
+            box-shadow:
                 0 2px 8px rgba(100, 130, 180, 0.08),
                 inset 0 1px 0 rgba(255, 255, 255, 0.6);
             min-width: 80px;
@@ -301,7 +307,7 @@
             background: rgba(255, 255, 255, 0.9);
             border-color: rgba(100, 130, 180, 0.25);
             transform: translateY(-4px) scale(1.02);
-            box-shadow: 
+            box-shadow:
                 0 12px 24px rgba(100, 130, 180, 0.15),
                 inset 0 1px 0 rgba(255, 255, 255, 1);
         }
@@ -323,6 +329,14 @@
             color: rgba(30, 50, 100, 1);
             letter-spacing: 0.35em;
         }
+
+
+
+
+
+
+
+
 
         /* 响应式设计 */
         @media (max-width: 768px) {
@@ -360,9 +374,12 @@
                 width: 20px;
                 height: 20px;
             }
+
+
         }
     </style>
 </head>
+
 <body>
     <!-- 粒子背景 -->
     <div class="particle-background" id="particleBackground"></div>
@@ -382,20 +399,26 @@
             <polyline points="10,9 9,9 8,9"></polyline>
         </svg>
     </button>
-    
+
+
+
+
+
+
+
     <!-- 3D背景容器 -->
     <div id="three-container"></div>
-    
+
     <!-- 扫描线效果 -->
     <div class="scan-line"></div>
-    
+
     <!-- 主容器 -->
     <div class="main-container">
         <!-- 标题区域 -->
         <header class="header-section">
             <h1 class="main-title">高等应用数学</h1>
         </header>
-        
+
         <!-- 导航容器 -->
         <nav class="nav-container">
             <div class="nav-grid">
@@ -415,14 +438,14 @@
                     <h2 class="nav-title">数学画廊</h2>
                 </div>
 
-                <div class="nav-item" onclick="window.location.href='https://ai.projectmath.xyz/产教结合/index.html'">
+                <div class="nav-item" onclick="window.location.href='https://ai.projectmath.xyz/project/index.html'">
                     <!-- 产教融合页面链接（部署时需要修改为实际部署AI功能的域名） -->
                     <h2 class="nav-title">产教融合</h2>
                 </div>
             </div>
         </nav>
     </div>
-    
+
     <!-- Three.js 3D背景 -->
     <script>
 
@@ -514,11 +537,11 @@
                 const radius = minRadius + Math.random() * (maxRadius - minRadius);
                 const theta = Math.random() * Math.PI * 2;
                 const phi = Math.acos((Math.random() * 2) - 1);
-                
+
                 positions[i3] = radius * Math.sin(phi) * Math.cos(theta);
                 positions[i3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
                 positions[i3 + 2] = radius * Math.cos(phi);
-                
+
                 // 渐变颜色:按半径由内向外过渡(青色→橙红)
                 const t = (radius - minRadius) / (maxRadius - minRadius);
                 const color = new THREE.Color();
@@ -531,7 +554,7 @@
                 colors[i3] = color.r;
                 colors[i3 + 1] = color.g;
                 colors[i3 + 2] = color.b;
-                
+
                 velocities[i3] = (Math.random() - 0.5) * 0.01;
                 velocities[i3 + 1] = (Math.random() - 0.5) * 0.01;
                 velocities[i3 + 2] = (Math.random() - 0.5) * 0.01;
@@ -557,11 +580,11 @@
             material.color = new THREE.Color(0xffffff);
             material.vertexColors = true;
             material.needsUpdate = true;
-            
+
             particles = new THREE.Points(geometry, material);
             scene.add(particles);
         }
-        
+
         // --- 创建外部的线框外壳 ---
         function createOuterShell() {
             const geometry = new THREE.IcosahedronGeometry(120, 1);
@@ -592,7 +615,7 @@
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         }
-        
+
         // --- 鼠标移动时的回调 ---
         function onMouseMove(event) {
             mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
@@ -602,52 +625,52 @@
         // --- 动画循环 ---
         function animate() {
             requestAnimationFrame(animate);
-            
+
             const elapsedTime = clock.getElapsedTime();
 
             // 更新粒子系统
             const positions = particles.geometry.attributes.position.array;
             const velocities = particles.geometry.attributes.velocity.array;
-            
+
             const mouseForce = 100;
             const flowSpeed = 0.1;
             const damping = 0.98;
-            
+
             for (let i = 0; i < positions.length / 3; i++) {
                 const i3 = i * 3;
-                
+
                 // 向中心引力
-                let p = new THREE.Vector3(positions[i3], positions[i3+1], positions[i3+2]);
+                let p = new THREE.Vector3(positions[i3], positions[i3 + 1], positions[i3 + 2]);
                 let directionToCenter = p.clone().negate().normalize();
                 velocities[i3] += directionToCenter.x * 0.01;
-                velocities[i3+1] += directionToCenter.y * 0.01;
-                velocities[i3+2] += directionToCenter.z * 0.01;
+                velocities[i3 + 1] += directionToCenter.y * 0.01;
+                velocities[i3 + 2] += directionToCenter.z * 0.01;
 
                 // 鼠标推开效果
                 let dx = positions[i3] - (mouse.x * camera.position.z * 0.5);
-                let dy = positions[i3+1] - (mouse.y * camera.position.z * 0.5);
+                let dy = positions[i3 + 1] - (mouse.y * camera.position.z * 0.5);
                 let distSq = dx * dx + dy * dy;
                 if (distSq < mouseForce * mouseForce) {
                     let force = (mouseForce - Math.sqrt(distSq)) / mouseForce;
                     velocities[i3] += (dx / Math.sqrt(distSq)) * force * 0.5;
-                    velocities[i3+1] += (dy / Math.sqrt(distSq)) * force * 0.5;
+                    velocities[i3 + 1] += (dy / Math.sqrt(distSq)) * force * 0.5;
                 }
 
                 // 流动效果
                 positions[i3] += (Math.sin(elapsedTime * 0.5 + i) * flowSpeed) + velocities[i3];
-                positions[i3+1] += (Math.cos(elapsedTime * 0.5 + i) * flowSpeed) + velocities[i3+1];
-                positions[i3+2] += (Math.sin(elapsedTime * 0.3 + i) * flowSpeed) + velocities[i3+2];
-                
+                positions[i3 + 1] += (Math.cos(elapsedTime * 0.5 + i) * flowSpeed) + velocities[i3 + 1];
+                positions[i3 + 2] += (Math.sin(elapsedTime * 0.3 + i) * flowSpeed) + velocities[i3 + 2];
+
                 // 速度衰减
                 velocities[i3] *= damping;
-                velocities[i3+1] *= damping;
-                velocities[i3+2] *= damping;
+                velocities[i3 + 1] *= damping;
+                velocities[i3 + 2] *= damping;
             }
             particles.geometry.attributes.position.needsUpdate = true;
-            
+
             // 更新外部线框
             outerShell.rotation.y += 0.0005;
-            
+
             // 更新控制器和渲染
             controls.update();
             renderer.render(scene, camera);
@@ -656,20 +679,23 @@
         // --- 启动 ---
         init();
     </script>
-    
+
     <!-- 增强交互功能 -->
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+
+
+        document.addEventListener('DOMContentLoaded', function () {
             // 创建粒子背景
             createParticleBackground();
 
             // 键盘导航
-            document.addEventListener('keydown', function(e) {
+            document.addEventListener('keydown', function (e) {
                 if (e.key === '1') window.location.href = '课件/index.html'; // 课程中心
                 if (e.key === '2') window.location.href = '网页资源/index.html'; // 仿真实验平台
                 if (e.key === '3') window.location.href = '习题/index.html'; // 智能题库
                 if (e.key === '4') window.location.href = '故事书/index.html'; // 数学画廊
-                if (e.key === '5') window.location.href = 'https://ai.projectmath.xyz/产教结合/index.html'; // 产教融合（必须使用绝对URL，指向有AI功能的域名）
+                if (e.key === '5') window.location.href = 'https://ai.projectmath.xyz/project/index.html'; // 产教融合（必须使用绝对URL，指向有AI功能的域名）
+
             });
 
             // 导航项入场动画
@@ -683,7 +709,7 @@
             });
 
             // 视差效果
-            document.addEventListener('mousemove', function(e) {
+            document.addEventListener('mousemove', function (e) {
                 const moveX = (e.clientX - window.innerWidth / 2) / window.innerWidth;
                 const moveY = (e.clientY - window.innerHeight / 2) / window.innerHeight;
 
@@ -692,6 +718,10 @@
                     header.style.transform = `translate(-50%, ${moveY * 10}px)`;
                 }
             });
+
+
+
+
         });
 
         // 创建拟态粒子背景(金属光感)
@@ -815,4 +845,5 @@
         }
     </script>
 </body>
+
 </html>

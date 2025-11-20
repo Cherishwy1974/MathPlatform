@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="format-detection" content="telephone=no">
+    <title>二阶导数与凹凸性</title>
+    
+    <!-- MathJax 配置 -->
+    <script src="../common-assets/js/mathjax-config.js"></script>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true,
+                processEnvironments: true
+            },
+            svg: {
+                fontCache: 'global'
+            },
+            startup: {
+                pageReady: () => {
+                    return window.MathJax.startup.defaultPageReady().then(() => {
+                        console.log('MathJax is ready!');
+                    });
+                }
+            }
+        };
+    </script>
+    <script async id="MathJax-script" type="text/javascript" src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js"></script>
+
+    <!-- Font Awesome 图标库 -->
+    <link rel="stylesheet" href="../common-assets/css/fontawesome.min.css">
+    <link rel="stylesheet" href="../common-assets/css/solid.min.css">
+
+    <style>
+        /* === RESET AND BASE STYLES === */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: 16px;
+            height: 100%;
+        }
+
+        body {
+            font-family: 'Inter', 'Source Han Sans SC', 'Noto Sans SC', 'Microsoft YaHei', system-ui, -apple-system, sans-serif;
+            background: #FAFAFA;
+            overflow: hidden;
+            color: #1a1a1a;
+            height: 100%;
+            line-height: 1.6;
+            font-weight: 400;
+        }
+
+        /* === SLIDE LAYOUT === */
+        .slide-container {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            position: relative;
+            gap: 0;
+            padding: 0;
+        }
+
+        /* Left Content Area */
+        .left-content {
+            width: 50%;
+            height: 100vh;
+            padding: 60px 80px 60px 60px;
+            background: #FBFBFB;
+            overflow-y: auto;
+            font-size: 16px;
+            line-height: 1.6;
+            border: none;
+            box-shadow: none;
+            border-radius: 0;
+        }
+
+        /* Right Visualization Area */
+        .right-visual {
+            width: 50%;
+            height: 100vh;
+            background: #F8F9FA;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            border: none;
+            box-shadow: none;
+            border-radius: 0;
+            padding: 40px;
+        }
+
+        /* === SLIDE TRANSITIONS === */
+        .slide {
+            display: none;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .slide.active {
+            display: flex;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* === Typography === */
+        h1 {
+            color: #003366;
+            font-size: 24px;
+            line-height: 1.2;
+            font-weight: 700;
+            margin: 0 0 16px 0;
+            padding: 0;
+            letter-spacing: -0.02em;
+        }
+
+        h2 {
+            color: #008080;
+            font-size: 20px;
+            line-height: 1.3;
+            font-weight: 600;
+            margin: 20px 0 12px 0;
+            position: relative;
+            padding-left: 0;
+        }
+
+        h2::before {
+            content: '';
+            position: absolute;
+            left: -20px;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: #008080;
+            border-radius: 2px;
+        }
+
+        h3 {
+            color: #1a1a1a;
+            font-size: 18px;
+            line-height: 1.3;
+            font-weight: 600;
+            margin: 16px 0 8px 0;
+        }
+
+        p {
+            margin-bottom: 12px;
+            color: #2d2d2d;
+            font-weight: 400;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+
+        /* 特殊样式 */
+        .highlight {
+            background: rgba(59, 130, 246, 0.1);
+            padding: 2px 4px;
+            border-radius: 3px;
+            color: #2563eb;
+            font-weight: 500;
+        }
+
+        .formula-highlight {
+            background: #f0f9ff;
+            border-left: 4px solid #3b82f6;
+            padding: 16px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        /* 图形容器 */
+        .graph-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            padding: 30px;
+        }
+
+        canvas {
+            flex: 1;
+            width: 100%;
+            cursor: pointer;
+            display: block;
+            border-radius: 8px;
+            background: #fafafa;
+        }
+
+        /* 控制面板 */
+        .control-panel {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .slider-container {
+            flex: 1;
+        }
+
+        .slider-label {
+            font-size: 14px;
+            color: #4b5563;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .slider {
+            width: 100%;
+            height: 6px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: #e5e7eb;
+            border-radius: 3px;
+            outline: none;
+            transition: background 0.3s;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #3b82f6;
+            cursor: pointer;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s;
+        }
+
+        .slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: #3b82f6;
+            cursor: pointer;
+            border-radius: 50%;
+            border: none;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s;
+        }
+
+        .slider::-moz-range-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .slider-marks {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 5px;
+            font-size: 12px;
+            color: #9ca3af;
+        }
+
+        /* 数据显示面板 */
+        .data-panel {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .data-card {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .data-card.highlight-positive {
+            background: #f0f9ff;
+            border-color: #3b82f6;
+        }
+
+        .data-card.highlight-negative {
+            background: #fef3c7;
+            border-color: #f59e0b;
+        }
+
+        .data-card.highlight-zero {
+            background: #f3f4f6;
+            border-color: #9ca3af;
+        }
+
+        .data-label {
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 4px;
+        }
+
+        .data-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1f2937;
+            font-family: 'Monaco', 'Consolas', monospace;
+        }
+
+        .data-description {
+            font-size: 13px;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+
+        /* 凹凸性指示器 */
+        .concavity-indicator {
+            text-align: center;
+            padding: 20px;
+            background: #f9fafb;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .concavity-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+            transition: all 0.3s;
+        }
+
+        .concavity-icon.concave-up {
+            color: #3b82f6;
+        }
+
+        .concavity-icon.concave-down {
+            color: #f59e0b;
+        }
+
+        .concavity-icon.inflection {
+            color: #6b7280;
+        }
+
+        .concavity-text {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        /* 导航按钮 */
+        .nav-buttons {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        .nav-btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            font-size: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover {
+            background: #2563eb;
+            transform: scale(1.02);
+        }
+
+        .nav-btn:disabled {
+            background: #cbd5e1;
+            cursor: not-allowed;
+            transform: scale(1);
+        }
+
+        /* 幻灯片计数器 */
+        .slide-counter {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            font-size: 16px;
+            color: #64748b;
+            background: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
+        /* 提示文本 */
+        .hint-text {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 12px;
+            color: #9ca3af;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        /* 重点说明框 */
+        .key-point {
+            background: #fef3c7;
+            border: 1px solid #fbbf24;
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin: 16px 0;
+            font-size: 14px;
+            color: #92400e;
+        }
+
+        .key-point strong {
+            color: #78350f;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1024px) {
+            .slide-container {
+                flex-direction: column;
+            }
+
+            .left-content, .right-visual {
+                width: 100%;
+                height: 50vh;
+                padding: 30px;
+            }
+
+            .data-panel {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 10px;
+            }
+
+            .data-value {
+                font-size: 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .left-content {
+                padding: 20px;
+            }
+
+            .right-visual {
+                padding: 20px;
+            }
+
+            .data-panel {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            h1 {
+                font-size: 20px;
+            }
+
+            h2 {
+                font-size: 18px;
+            }
+
+            .nav-buttons {
+                bottom: 20px;
+                gap: 10px;
+            }
+
+            .nav-btn {
+                padding: 8px 16px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 幻灯片 1: 凹向上 -->
+    <div class="slide active">
+        <div class="slide-container">
+            <div class="left-content">
+                <h1>二阶导数与凹凸性</h1>
+                <h2>1. 凹向上（开口向上）</h2>
+                
+                <p>当函数图形像一个<span class="highlight">微笑</span>或<span class="highlight">碗</span>的形状时，我们说它是凹向上的。</p>
+                
+                <div class="formula-highlight">
+                    <p><strong>数学定义：</strong>当 $f''(x) > 0$ 时，函数在该区间凹向上</p>
+                    <p><strong>几何意义：</strong>切线斜率递增，函数向上弯曲</p>
+                </div>
+                
+                <h3>直观理解</h3>
+                <p>想象你在滑雪：</p>
+                <p>• 如果坡道越来越陡（加速下滑），这就是凹向上</p>
+                <p>• 切线的斜率在增加：从负变得更正</p>
+                
+                <h3>实际例子</h3>
+                <p>• 抛物线 $y = x^2$ 在整个定义域上都是凹向上的</p>
+                <p>• 指数函数 $y = e^x$ 也是凹向上的</p>
+                <p>• 成本函数通常是凹向上的（边际成本递增）</p>
+                
+                <div class="key-point">
+                    <strong>记忆技巧：</strong>凹向上像个笑脸 ⌣，二阶导数为正
+                </div>
+                
+                <p style="color: #3b82f6; margin-top: 20px;">
+                    <i class="fas fa-hand-pointer"></i> 
+                    <strong>互动提示：</strong>拖动滑块观察函数的凹凸性变化
+                </p>
+            </div>
+            
+            <div class="right-visual">
+                <div class="graph-container">
+                    <div class="control-panel">
+                        <div class="slider-container">
+                            <label class="slider-label" for="xSlider1">选择 x 的值：</label>
+                            <input type="range" id="xSlider1" class="slider" min="-2" max="2" step="0.01" value="1">
+                            <div class="slider-marks">
+                                <span>-2</span>
+                                <span>0</span>
+                                <span>2</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="data-panel">
+                        <div class="data-card">
+                            <div class="data-label">$x$</div>
+                            <div class="data-value" id="xValue1">1.00</div>
+                        </div>
+                        <div class="data-card">
+                            <div class="data-label">$f'(x)$ (斜率)</div>
+                            <div class="data-value" id="fpValue1">2.00</div>
+                            <div class="data-description" id="fpDesc1">递增</div>
+                        </div>
+                        <div class="data-card highlight-positive">
+                            <div class="data-label">$f''(x)$ (凹凸性)</div>
+                            <div class="data-value" id="fppValue1">2.00</div>
+                            <div class="data-description">凹向上</div>
+                        </div>
+                    </div>
+                    
+                    <canvas id="canvas1"></canvas>
+                    <div class="hint-text">点击图形可选择 x 值</div>
+                    
+                    <div class="concavity-indicator">
+                        <div class="concavity-icon concave-up">⌣</div>
+                        <div class="concavity-text">凹向上 (f'' > 0)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 幻灯片 2: 凹向下 -->
+    <div class="slide">
+        <div class="slide-container">
+            <div class="left-content">
+                <h1>二阶导数与凹凸性</h1>
+                <h2>2. 凹向下（开口向下）</h2>
+                
+                <p>当函数图形像一个<span class="highlight">倒置的碗</span>或<span class="highlight">山峰</span>的形状时，我们说它是凹向下的。</p>
+                
+                <div class="formula-highlight">
+                    <p><strong>数学定义：</strong>当 $f''(x) < 0$ 时，函数在该区间凹向下</p>
+                    <p><strong>几何意义：</strong>切线斜率递减，函数向下弯曲</p>
+                </div>
+                
+                <h3>直观理解</h3>
+                <p>继续想象滑雪的例子：</p>
+                <p>• 如果坡道越来越平缓（减速下滑），这就是凹向下</p>
+                <p>• 切线的斜率在减少：从正变得更负</p>
+                
+                <h3>实际例子</h3>
+                <p>• 抛物线 $y = -x^2$ 在整个定义域上都是凹向下的</p>
+                <p>• 对数函数 $y = \ln x$ 是凹向下的</p>
+                <p>• 效用函数通常是凹向下的（边际效用递减）</p>
+                
+                <div class="key-point">
+                    <strong>记忆技巧：</strong>凹向下像个哭脸 ⌢，二阶导数为负
+                </div>
+                
+                <p style="color: #3b82f6; margin-top: 20px;">
+                    <i class="fas fa-lightbulb"></i> 
+                    <strong>经济学应用：</strong>边际效用递减定律就体现在效用函数的凹向下特性
+                </p>
+            </div>
+            
+            <div class="right-visual">
+                <div class="graph-container">
+                    <div class="control-panel">
+                        <div class="slider-container">
+                            <label class="slider-label" for="xSlider2">选择 x 的值：</label>
+                            <input type="range" id="xSlider2" class="slider" min="-2" max="2" step="0.01" value="-1">
+                            <div class="slider-marks">
+                                <span>-2</span>
+                                <span>0</span>
+                                <span>2</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="data-panel">
+                        <div class="data-card">
+                            <div class="data-label">$x$</div>
+                            <div class="data-value" id="xValue2">-1.00</div>
+                        </div>
+                        <div class="data-card">
+                            <div class="data-label">$f'(x)$ (斜率)</div>
+                            <div class="data-value" id="fpValue2">2.00</div>
+                            <div class="data-description" id="fpDesc2">递增</div>
+                        </div>
+                        <div class="data-card highlight-negative">
+                            <div class="data-label">$f''(x)$ (凹凸性)</div>
+                            <div class="data-value" id="fppValue2">-2.00</div>
+                            <div class="data-description">凹向下</div>
+                        </div>
+                    </div>
+                    
+                    <canvas id="canvas2"></canvas>
+                    <div class="hint-text">点击图形可选择 x 值</div>
+                    
+                    <div class="concavity-indicator">
+                        <div class="concavity-icon concave-down">⌢</div>
+                        <div class="concavity-text">凹向下 (f'' < 0)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 幻灯片 3: 拐点 -->
+    <div class="slide">
+        <div class="slide-container">
+            <div class="left-content">
+                <h1>二阶导数与凹凸性</h1>
+                <h2>3. 拐点（凹凸性改变）</h2>
+                
+                <p><span class="highlight">拐点</span>是函数凹凸性发生改变的点，是凹向上与凹向下的分界点。</p>
+                
+                <div class="formula-highlight">
+                    <p><strong>数学定义：</strong>当 $f''(x) = 0$ 且两侧符号相反时，该点为拐点</p>
+                    <p><strong>几何意义：</strong>函数从凹向上变为凹向下，或相反</p>
+                </div>
+                
+                <h3>拐点的特征</h3>
+                <p>• 二阶导数为零：$f''(x_0) = 0$</p>
+                <p>• 二阶导数在该点两侧变号</p>
+                <p>• 函数图形在该点改变弯曲方向</p>
+                
+                <h3>典型例子：$f(x) = x^3$</h3>
+                <p>• $f'(x) = 3x^2$（一阶导数）</p>
+                <p>• $f''(x) = 6x$（二阶导数）</p>
+                <p>• 当 $x = 0$ 时，$f''(0) = 0$</p>
+                <p>• $x < 0$ 时凹向下，$x > 0$ 时凹向上</p>
+                
+                <div class="key-point">
+                    <strong>注意：</strong>$f''(x) = 0$ 只是拐点的必要条件，还需要检查两侧符号是否相反。
+                    类似于 $f'(x) = 0$ 对于极值点的关系！
+                </div>
+                
+                <h3>拐点的应用</h3>
+                <p>• 成本分析：找到规模经济的转折点</p>
+                <p>• 增长模型：确定增长速度的变化点</p>
+                <p>• 工程设计：优化曲线的平滑过渡</p>
+            </div>
+            
+            <div class="right-visual">
+                <div class="graph-container">
+                    <div class="control-panel">
+                        <div class="slider-container">
+                            <label class="slider-label" for="xSlider3">选择 x 的值：</label>
+                            <input type="range" id="xSlider3" class="slider" min="-2" max="2" step="0.01" value="0.5">
+                            <div class="slider-marks">
+                                <span>-2</span>
+                                <span>0</span>
+                                <span>2</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="data-panel">
+                        <div class="data-card">
+                            <div class="data-label">$x$</div>
+                            <div class="data-value" id="xValue3">0.50</div>
+                        </div>
+                        <div class="data-card">
+                            <div class="data-label">$f'(x)$ (斜率)</div>
+                            <div class="data-value" id="fpValue3">0.75</div>
+                            <div class="data-description" id="fpDesc3">递增</div>
+                        </div>
+                        <div class="data-card" id="fppCard3">
+                            <div class="data-label">$f''(x)$ (凹凸性)</div>
+                            <div class="data-value" id="fppValue3">3.00</div>
+                            <div class="data-description" id="fppDesc3">凹向上</div>
+                        </div>
+                    </div>
+                    
+                    <canvas id="canvas3"></canvas>
+                    <div class="hint-text">点击图形可选择 x 值</div>
+                    
+                    <div class="concavity-indicator">
+                        <div class="concavity-icon" id="concavityIcon3">⌣</div>
+                        <div class="concavity-text" id="concavityText3">凹向上 (f'' > 0)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentSlide = 1;
+        const totalSlides = 3;
+
+        // Canvas 高DPI支持
+        function setupCanvas(canvas) {
+            const ctx = canvas.getContext('2d');
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.getBoundingClientRect();
+            
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            
+            ctx.scale(dpr, dpr);
+            
+            canvas.style.width = rect.width + 'px';
+            canvas.style.height = rect.height + 'px';
+            
+            return ctx;
+        }
+
+        // 导航功能（内部幻灯片切换）
+        function showSlide(n) {
+            const slides = document.querySelectorAll('.slide');
+            if (n > totalSlides) currentSlide = totalSlides;
+            if (n < 1) currentSlide = 1;
+            
+            slides.forEach(slide => slide.classList.remove('active'));
+            slides[currentSlide - 1].classList.add('active');
+            
+            // 重绘当前幻灯片的图形
+            setTimeout(() => {
+                if (currentSlide === 1) drawSlide1();
+                if (currentSlide === 2) drawSlide2();
+                if (currentSlide === 3) drawSlide3();
+            }, 100);
+        }
+
+        function nextSlide() {
+            currentSlide++;
+            showSlide(currentSlide);
+        }
+
+        function prevSlide() {
+            currentSlide--;
+            showSlide(currentSlide);
+        }
+        
+        // 暴露给父窗口的导航函数（供主课件使用）
+        window.nextInternalSlide = nextSlide;
+        window.prevInternalSlide = prevSlide;
+
+        // 绘制坐标轴
+        function drawAxes(ctx, width, height, xMin, xMax, yMin, yMax) {
+            const padding = 40;
+            const centerX = width / 2;
+            const centerY = height / 2;
+            
+            // 坐标轴
+            ctx.strokeStyle = '#e5e7eb';
+            ctx.lineWidth = 1.5;
+            
+            // X轴
+            ctx.beginPath();
+            ctx.moveTo(padding, centerY);
+            ctx.lineTo(width - padding, centerY);
+            ctx.stroke();
+            
+            // Y轴
+            ctx.beginPath();
+            ctx.moveTo(centerX, padding);
+            ctx.lineTo(centerX, height - padding);
+            ctx.stroke();
+            
+            // 箭头
+            ctx.fillStyle = '#9ca3af';
+            // X轴箭头
+            ctx.beginPath();
+            ctx.moveTo(width - padding, centerY);
+            ctx.lineTo(width - padding - 8, centerY - 4);
+            ctx.lineTo(width - padding - 8, centerY + 4);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Y轴箭头
+            ctx.beginPath();
+            ctx.moveTo(centerX, padding);
+            ctx.lineTo(centerX - 4, padding + 8);
+            ctx.lineTo(centerX + 4, padding + 8);
+            ctx.closePath();
+            ctx.fill();
+            
+            // 标签
+            ctx.fillStyle = '#6b7280';
+            ctx.font = '13px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('x', width - padding + 10, centerY + 20);
+            ctx.fillText('y', centerX + 15, padding - 10);
+            ctx.fillText('0', centerX - 15, centerY + 18);
+            
+            // 刻度
+            ctx.fillText(xMin.toString(), padding, centerY + 18);
+            ctx.fillText(xMax.toString(), width - padding, centerY + 18);
+        }
+
+        // 坐标转换函数
+        function mapX(x, width, xMin, xMax) {
+            const padding = 40;
+            return padding + (x - xMin) / (xMax - xMin) * (width - 2 * padding);
+        }
+
+        function mapY(y, height, yMin, yMax) {
+            const padding = 40;
+            return height - padding - (y - yMin) / (yMax - yMin) * (height - 2 * padding);
+        }
+
+        function unmapX(px, width, xMin, xMax) {
+            const padding = 40;
+            return xMin + (px - padding) / (width - 2 * padding) * (xMax - xMin);
+        }
+
+        // 绘制函数曲线
+        function drawFunction(ctx, width, height, f, xMin, xMax, yMin, yMax) {
+            ctx.strokeStyle = '#3b82f6';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            
+            for (let px = 40; px < width - 40; px++) {
+                const x = unmapX(px, width, xMin, xMax);
+                const y = f(x);
+                const py = mapY(y, height, yMin, yMax);
+                
+                if (px === 40) {
+                    ctx.moveTo(px, py);
+                } else {
+                    ctx.lineTo(px, py);
+                }
+            }
+            ctx.stroke();
+        }
+
+        // 绘制切线
+        function drawTangent(ctx, width, height, x0, f, df, xMin, xMax, yMin, yMax) {
+            const y0 = f(x0);
+            const m = df(x0);
+            
+            // 切线方程: y - y0 = m(x - x0)
+            const extend = 1.5;
+            const x1 = Math.max(xMin, x0 - extend);
+            const x2 = Math.min(xMax, x0 + extend);
+            const y1 = y0 + m * (x1 - x0);
+            const y2 = y0 + m * (x2 - x0);
+            
+            ctx.strokeStyle = '#f59e0b';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(mapX(x1, width, xMin, xMax), mapY(y1, height, yMin, yMax));
+            ctx.lineTo(mapX(x2, width, xMin, xMax), mapY(y2, height, yMin, yMax));
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+
+        // 绘制点和垂线
+        function drawPoint(ctx, width, height, x, f, xMin, xMax, yMin, yMax) {
+            const y = f(x);
+            const px = mapX(x, width, xMin, xMax);
+            const py = mapY(y, height, yMin, yMax);
+            
+            // 垂直虚线
+            ctx.strokeStyle = '#3b82f6';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([4, 4]);
+            ctx.beginPath();
+            ctx.moveTo(px, height - 40);
+            ctx.lineTo(px, py);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            // 点
+            ctx.fillStyle = '#2563eb';
+            ctx.beginPath();
+            ctx.arc(px, py, 6, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        }
+
+        // 幻灯片1: y = x^2 (凹向上)
+        function drawSlide1() {
+            const canvas = document.getElementById('canvas1');
+            const ctx = setupCanvas(canvas);
+            const width = canvas.getBoundingClientRect().width;
+            const height = canvas.getBoundingClientRect().height;
+            
+            const slider = document.getElementById('xSlider1');
+            const x = parseFloat(slider.value);
+            
+            const f = x => x * x;
+            const df = x => 2 * x;
+            const ddf = x => 2;
+            
+            // 更新数据
+            document.getElementById('xValue1').textContent = x.toFixed(2);
+            document.getElementById('fpValue1').textContent = df(x).toFixed(2);
+            document.getElementById('fppValue1').textContent = ddf(x).toFixed(2);
+            
+            const fpVal = df(x);
+            if (fpVal > 0.01) {
+                document.getElementById('fpDesc1').textContent = '递增';
+            } else if (fpVal < -0.01) {
+                document.getElementById('fpDesc1').textContent = '递减';
+            } else {
+                document.getElementById('fpDesc1').textContent = '水平';
+            }
+            
+            // 绘图
+            ctx.clearRect(0, 0, width, height);
+            drawAxes(ctx, width, height, -2, 2, -1, 5);
+            drawFunction(ctx, width, height, f, -2, 2, -1, 5);
+            drawTangent(ctx, width, height, x, f, df, -2, 2, -1, 5);
+            drawPoint(ctx, width, height, x, f, -2, 2, -1, 5);
+        }
+
+        // 幻灯片2: y = -x^2 + 4 (凹向下)
+        function drawSlide2() {
+            const canvas = document.getElementById('canvas2');
+            const ctx = setupCanvas(canvas);
+            const width = canvas.getBoundingClientRect().width;
+            const height = canvas.getBoundingClientRect().height;
+            
+            const slider = document.getElementById('xSlider2');
+            const x = parseFloat(slider.value);
+            
+            const f = x => -x * x + 4;
+            const df = x => -2 * x;
+            const ddf = x => -2;
+            
+            // 更新数据
+            document.getElementById('xValue2').textContent = x.toFixed(2);
+            document.getElementById('fpValue2').textContent = df(x).toFixed(2);
+            document.getElementById('fppValue2').textContent = ddf(x).toFixed(2);
+            
+            const fpVal = df(x);
+            if (fpVal > 0.01) {
+                document.getElementById('fpDesc2').textContent = '递增';
+            } else if (fpVal < -0.01) {
+                document.getElementById('fpDesc2').textContent = '递减';
+            } else {
+                document.getElementById('fpDesc2').textContent = '水平';
+            }
+            
+            // 绘图
+            ctx.clearRect(0, 0, width, height);
+            drawAxes(ctx, width, height, -2, 2, -1, 5);
+            drawFunction(ctx, width, height, f, -2, 2, -1, 5);
+            drawTangent(ctx, width, height, x, f, df, -2, 2, -1, 5);
+            drawPoint(ctx, width, height, x, f, -2, 2, -1, 5);
+        }
+
+        // 幻灯片3: y = x^3 (拐点)
+        function drawSlide3() {
+            const canvas = document.getElementById('canvas3');
+            const ctx = setupCanvas(canvas);
+            const width = canvas.getBoundingClientRect().width;
+            const height = canvas.getBoundingClientRect().height;
+            
+            const slider = document.getElementById('xSlider3');
+            const x = parseFloat(slider.value);
+            
+            const f = x => x * x * x;
+            const df = x => 3 * x * x;
+            const ddf = x => 6 * x;
+            
+            // 更新数据
+            document.getElementById('xValue3').textContent = x.toFixed(2);
+            document.getElementById('fpValue3').textContent = df(x).toFixed(2);
+            document.getElementById('fppValue3').textContent = ddf(x).toFixed(2);
+            
+            const fpVal = df(x);
+            if (fpVal > 0.01) {
+                document.getElementById('fpDesc3').textContent = '递增';
+            } else if (fpVal < -0.01) {
+                document.getElementById('fpDesc3').textContent = '递减';
+            } else {
+                document.getElementById('fpDesc3').textContent = '水平';
+            }
+            
+            // 更新凹凸性显示
+            const fppCard = document.getElementById('fppCard3');
+            const concavityIcon = document.getElementById('concavityIcon3');
+            const concavityText = document.getElementById('concavityText3');
+            const fppVal = ddf(x);
+            
+            fppCard.classList.remove('highlight-positive', 'highlight-negative', 'highlight-zero');
+            concavityIcon.classList.remove('concave-up', 'concave-down', 'inflection');
+            
+            if (fppVal > 0.01) {
+                document.getElementById('fppDesc3').textContent = '凹向上';
+                fppCard.classList.add('highlight-positive');
+                concavityIcon.classList.add('concave-up');
+                concavityIcon.textContent = '⌣';
+                concavityText.textContent = '凹向上 (f\'\' > 0)';
+            } else if (fppVal < -0.01) {
+                document.getElementById('fppDesc3').textContent = '凹向下';
+                fppCard.classList.add('highlight-negative');
+                concavityIcon.classList.add('concave-down');
+                concavityIcon.textContent = '⌢';
+                concavityText.textContent = '凹向下 (f\'\' < 0)';
+            } else {
+                document.getElementById('fppDesc3').textContent = '拐点';
+                fppCard.classList.add('highlight-zero');
+                concavityIcon.classList.add('inflection');
+                concavityIcon.textContent = '—';
+                concavityText.textContent = '拐点 (f\'\' = 0)';
+            }
+            
+            // 绘图
+            ctx.clearRect(0, 0, width, height);
+            drawAxes(ctx, width, height, -2, 2, -8, 8);
+            drawFunction(ctx, width, height, f, -2, 2, -8, 8);
+            drawTangent(ctx, width, height, x, f, df, -2, 2, -8, 8);
+            drawPoint(ctx, width, height, x, f, -2, 2, -8, 8);
+        }
+
+        // 设置交互事件
+        function setupInteractions() {
+            // 滑块事件
+            document.getElementById('xSlider1').addEventListener('input', drawSlide1);
+            document.getElementById('xSlider2').addEventListener('input', drawSlide2);
+            document.getElementById('xSlider3').addEventListener('input', drawSlide3);
+            
+            // Canvas点击事件
+            const setupCanvasClick = (canvasId, slideNum, xMin, xMax) => {
+                const canvas = document.getElementById(canvasId);
+                const slider = document.getElementById(`xSlider${slideNum}`);
+                
+                canvas.addEventListener('click', (e) => {
+                    const rect = canvas.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const worldX = unmapX(x, rect.width, xMin, xMax);
+                    
+                    if (worldX >= xMin && worldX <= xMax) {
+                        slider.value = worldX;
+                        if (slideNum === 1) drawSlide1();
+                        if (slideNum === 2) drawSlide2();
+                        if (slideNum === 3) drawSlide3();
+                    }
+                });
+            };
+            
+            setupCanvasClick('canvas1', 1, -2, 2);
+            setupCanvasClick('canvas2', 2, -2, 2);
+            setupCanvasClick('canvas3', 3, -2, 2);
+        }
+
+        // 初始化
+        window.addEventListener('load', () => {
+            showSlide(1);
+            setupInteractions();
+        });
+
+        // 窗口调整
+        window.addEventListener('resize', () => {
+            if (currentSlide === 1) drawSlide1();
+            if (currentSlide === 2) drawSlide2();
+            if (currentSlide === 3) drawSlide3();
+        });
+    </script>
+</body>
+</html>

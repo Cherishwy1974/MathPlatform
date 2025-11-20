@@ -14,7 +14,7 @@
         window.MathJax = {
             tex: {
                 inlineMath: [['$', '$'], ['\\(', '\\)']],
-                displayMath: [['$', '$'], ['\\[', '\\]']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
                 processEscapes: true,
                 processEnvironments: true
             },
@@ -91,22 +91,50 @@
             border: none;
             box-shadow: none;
             border-radius: 0;
+            padding: 20px;
+            box-sizing: border-box;
         }
-
-        /* 可视化容器样式 */
+        
+        /* 确保图表容器充分利用空间 */
         .right-visual > div {
             width: 100%;
             height: 100%;
+            max-width: 100%;
+            max-height: 100%;
         }
 
         /* === SLIDE TRANSITIONS === */
         .slide {
             display: none;
             animation: slideIn 0.5s ease-out;
+            width: 100vw;
+            height: 100vh;
+            position: relative;
         }
 
         .slide.active {
             display: flex;
+        }
+        
+        /* 嵌入的交互式页面特殊样式 */
+        .slide.active.extremum-interactive-slide,
+        .slide.active.concavity-interactive-slide,
+        .slide.active.derivatives-relation-slide {
+            display: block !important;
+        }
+        
+        /* iframe嵌入页面特殊样式 - 直接显示iframe，不使用flex布局 */
+        .slide.active:has(iframe) {
+            display: block;
+        }
+        
+        .slide iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
         }
 
         @keyframes slideIn {
@@ -123,7 +151,7 @@
         /* === 统一的字体系统 === */
         h1 {
             color: #003366;
-            font-size: 24px;
+            font-size: 32px;
             line-height: 1.2;
             font-weight: 700;
             margin: 0 0 16px 0;
@@ -133,7 +161,7 @@
 
         h2 {
             color: #008080;
-            font-size: 20px;
+            font-size: 28px;
             line-height: 1.3;
             font-weight: 600;
             margin: 20px 0 12px 0;
@@ -154,7 +182,7 @@
 
         h3 {
             color: #1a1a1a;
-            font-size: 18px;
+            font-size: 26px;
             line-height: 1.3;
             font-weight: 600;
             margin: 16px 0 8px 0;
@@ -162,7 +190,7 @@
 
         h4 {
             color: #333333;
-            font-size: 16px;
+            font-size: 24px;
             line-height: 1.3;
             font-weight: 500;
             margin: 12px 0 6px 0;
@@ -170,7 +198,7 @@
 
         h5 {
             color: #555555;
-            font-size: 14px;
+            font-size: 22px;
             line-height: 1.3;
             font-weight: 500;
             margin: 10px 0 6px 0;
@@ -180,8 +208,8 @@
             margin-bottom: 12px;
             color: #2d2d2d;
             font-weight: 400;
-            font-size: 15px;
-            line-height: 1.5;
+            font-size: 20px;
+            line-height: 2;
         }
 
         ul, ol {
@@ -235,42 +263,160 @@
             box-shadow: none;
         }
 
-        /* 减少MathJax公式和中文之间的间距 */
-        .left-content .MathJax, 
-        .left-content .MathJax_SVG,
-        .left-content span[class*="MathJax"],
-        .left-content .MathJax_Display {
+        /* === MathJax 3.x 行内公式样式（mjx-container） === */
+        /* 确保.left-content中的行内公式使用inline显示 */
+        .left-content mjx-container:not([display="true"]) {
+            display: inline !important;
+            margin: 0 0.05em !important;
+            padding: 0 !important;
+            vertical-align: baseline !important;
+        }
+
+        .left-content p mjx-container:not([display="true"]) {
+            display: inline !important;
+            margin: 0 0.05em !important;
+            padding: 0 !important;
+            vertical-align: baseline !important;
+        }
+        
+        /* 确保mjx-container内部的元素也是行内显示 */
+        .left-content mjx-container:not([display="true"]) mjx-math,
+        .left-content mjx-container:not([display="true"]) mjx-annotation,
+        .left-content mjx-container:not([display="true"]) svg {
+            display: inline !important;
+            vertical-align: baseline !important;
+        }
+
+        .left-content p mjx-container:not([display="true"]) mjx-math,
+        .left-content p mjx-container:not([display="true"]) mjx-annotation,
+        .left-content p mjx-container:not([display="true"]) svg {
+            display: inline !important;
+            vertical-align: baseline !important;
+        }
+        
+        /* MathJax 2.x 兼容样式 - 行内公式 */
+        .left-content .MathJax:not(.MathJax_Display), 
+        .left-content .MathJax_SVG:not(.MathJax_Display),
+        .left-content span[class*="MathJax"]:not(.MathJax_Display) {
             display: inline !important;
             margin: 0 0.1em !important;
             padding: 0 !important;
             vertical-align: baseline !important;
         }
         
-        .left-content p .MathJax, 
-        .left-content p .MathJax_SVG,
-        .left-content p span[class*="MathJax"] {
+        .left-content p .MathJax:not(.MathJax_Display), 
+        .left-content p .MathJax_SVG:not(.MathJax_Display),
+        .left-content p span[class*="MathJax"]:not(.MathJax_Display) {
             margin-left: 0.05em !important;
             margin-right: 0.05em !important;
             padding: 0 !important;
+            display: inline !important;
         }
         
         /* 确保行内公式和文字紧密排列 */
         .left-content p {
             word-spacing: normal;
             letter-spacing: normal;
+            line-height: 1.5;
+            white-space: normal;
         }
-        
+
         /* 针对MathJax SVG的特定样式 */
-        .left-content .MathJax_SVG svg {
+        .left-content .MathJax_SVG:not(.MathJax_Display) svg {
             display: inline-block;
             vertical-align: middle;
         }
         
-        /* 行内公式特别紧凑 */
-        .left-content p .MathJax_SVG,
-        .left-content p .MathJax {
-            margin-left: 0.05em !important;
-            margin-right: 0.05em !important;
+        /* === 块级公式样式（保持居中显示） === */
+        /* MathJax 3.x 块级公式 - 只在明确标记为display="true"时居中 */
+        .left-content mjx-container[display="true"],
+        .formula-highlight mjx-container[display="true"],
+        .math-formula mjx-container[display="true"] {
+            display: block !important;
+            text-align: center !important;
+            margin: 16px 0 !important;
+            padding: 0 !important;
+        }
+        
+        /* MathJax 2.x 块级公式 */
+        .left-content .MathJax_Display,
+        .formula-highlight .MathJax_Display,
+        .math-formula .MathJax_Display {
+            display: block !important;
+            text-align: center !important;
+            margin: 16px 0 !important;
+            padding: 0 !important;
+        }
+        
+        /* .formula-highlight和.math-formula中的行内公式保持行内显示 */
+        .formula-highlight p mjx-container:not([display="true"]),
+        .math-formula p mjx-container:not([display="true"]) {
+            display: inline !important;
+            margin: 0 0.05em !important;
+            padding: 0 !important;
+            vertical-align: baseline !important;
+        }
+
+        .formula-highlight p mjx-container:not([display="true"]) mjx-math,
+        .math-formula p mjx-container:not([display="true"]) mjx-math {
+            display: inline !important;
+            vertical-align: baseline !important;
+        }
+        
+        .formula-highlight p .MathJax:not(.MathJax_Display),
+        .formula-highlight p .MathJax_SVG:not(.MathJax_Display),
+        .math-formula p .MathJax:not(.MathJax_Display),
+        .math-formula p .MathJax_SVG:not(.MathJax_Display) {
+            display: inline !important;
+            margin: 0 0.05em !important;
+            padding: 0 !important;
+        }
+        
+        /* .definition、.theorem、.example中的行内公式 */
+        .definition mjx-container:not([display="true"]),
+        .theorem mjx-container:not([display="true"]),
+        .example mjx-container:not([display="true"]),
+        .note mjx-container:not([display="true"]) {
+            display: inline !important;
+            margin: 0 0.05em !important;
+            padding: 0 !important;
+            vertical-align: baseline !important;
+        }
+
+        .definition p mjx-container:not([display="true"]),
+        .theorem p mjx-container:not([display="true"]),
+        .example p mjx-container:not([display="true"]),
+        .note p mjx-container:not([display="true"]) {
+            display: inline !important;
+            margin: 0 0.05em !important;
+            padding: 0 !important;
+            vertical-align: baseline !important;
+        }
+
+        .definition mjx-container:not([display="true"]) mjx-math,
+        .theorem mjx-container:not([display="true"]) mjx-math,
+        .example mjx-container:not([display="true"]) mjx-math,
+        .note mjx-container:not([display="true"]) mjx-math {
+            display: inline !important;
+            vertical-align: baseline !important;
+        }
+        
+        .definition .MathJax:not(.MathJax_Display),
+        .theorem .MathJax:not(.MathJax_Display),
+        .example .MathJax:not(.MathJax_Display),
+        .note .MathJax:not(.MathJax_Display) {
+            display: inline !important;
+            margin: 0 0.1em !important;
+            padding: 0 !important;
+        }
+        
+        .definition p .MathJax:not(.MathJax_Display),
+        .theorem p .MathJax:not(.MathJax_Display),
+        .example p .MathJax:not(.MathJax_Display),
+        .note p .MathJax:not(.MathJax_Display) {
+            display: inline !important;
+            margin: 0 0.05em !important;
+            padding: 0 !important;
         }
 
         .highlight {
@@ -498,6 +644,232 @@
         .submenu-text { font-size: 14px; color: #374151; font-weight: 500; }
         .submenu-close { position: absolute; top: 10px; right: 14px; width: 36px; height: 36px; border-radius: 50%; border: none; background: rgba(255,255,255,0.3); color: #fff; font-size: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; }
         .submenu-close:hover { background: rgba(255,255,255,0.45); transform: rotate(90deg); }
+    </style>
+    <!-- 凹凸性交互式演示样式 -->
+    <style>
+        /* 凹凸性交互式演示专用样式 */
+        .concavity-interactive-slide {
+            background: #FAFAFA;
+        }
+        
+        .concavity-slide-container {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            position: relative;
+            gap: 0;
+            padding: 0;
+        }
+        
+        .concavity-slide-container-inner {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            position: relative;
+            gap: 0;
+            padding: 0;
+        }
+        
+        .concavity-slide {
+            display: none;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .concavity-slide.active {
+            display: flex;
+        }
+        
+        .concavity-left-content {
+            width: 50%;
+            height: 100vh;
+            padding: 60px 80px 60px 60px;
+            background: #FBFBFB;
+            overflow-y: auto;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .concavity-right-visual {
+            width: 50%;
+            height: 100vh;
+            background: #F8F9FA;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: 40px;
+        }
+        
+        .concavity-graph-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            padding: 30px;
+        }
+        
+        .concavity-graph-container canvas {
+            flex: 1;
+            width: 100%;
+            cursor: pointer;
+            display: block;
+            border-radius: 8px;
+            background: #fafafa;
+        }
+        
+        .concavity-control-panel {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .concavity-slider-container {
+            flex: 1;
+        }
+        
+        .concavity-slider-label {
+            font-size: 14px;
+            color: #4b5563;
+            margin-bottom: 8px;
+            display: block;
+        }
+        
+        .concavity-slider {
+            width: 100%;
+            height: 6px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: #e5e7eb;
+            border-radius: 3px;
+            outline: none;
+        }
+        
+        .concavity-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #3b82f6;
+            cursor: pointer;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .concavity-slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: #3b82f6;
+            cursor: pointer;
+            border-radius: 50%;
+            border: none;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .concavity-slider-marks {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 5px;
+            font-size: 12px;
+            color: #9ca3af;
+        }
+        
+        .concavity-data-panel {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .concavity-data-card {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        
+        .concavity-data-card.concavity-highlight-positive {
+            background: #f0f9ff;
+            border-color: #3b82f6;
+        }
+        
+        .concavity-data-card.concavity-highlight-negative {
+            background: #fef3c7;
+            border-color: #f59e0b;
+        }
+        
+        .concavity-data-card.concavity-highlight-zero {
+            background: #f3f4f6;
+            border-color: #9ca3af;
+        }
+        
+        .concavity-data-label {
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 4px;
+        }
+        
+        .concavity-data-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1f2937;
+            font-family: 'Monaco', 'Consolas', monospace;
+        }
+        
+        .concavity-data-description {
+            font-size: 13px;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+        
+        .concavity-indicator {
+            text-align: center;
+            padding: 20px;
+            background: #f9fafb;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+        
+        .concavity-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+            transition: all 0.3s;
+        }
+        
+        .concavity-icon.concavity-concave-up {
+            color: #3b82f6;
+        }
+        
+        .concavity-icon.concavity-concave-down {
+            color: #f59e0b;
+        }
+        
+        .concavity-icon.concavity-inflection {
+            color: #6b7280;
+        }
+        
+        .concavity-text {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1f2937;
+        }
+        
+        .concavity-hint-text {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 20px;
+            color: #9ca3af;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
     </style>
     <style>
         /* 统一封面样式（与第1/2/3章一致） */
@@ -880,13 +1252,12 @@
 <a class="home-link-btn" href="../index.html"><span>主页</span></a>
 <a class="home-link-btn" href="../故事书/第四章/侯爵的交易.html"><span>故事书</span></a>
 <a class="home-link-btn" href="../习题/assets/derivative-application.html"><span>习题</span></a>
-<a class="home-link-btn" href="https://ai.projectmath.xyz/产教结合/index.html"><span>产教融合</span></a>
+<a class="home-link-btn" href="https://ai.projectmath.xyz/project/index.html"><span>产教融合</span></a>
 </div>
 </div><div class="right-visual cover-right"><div class="cover-visual">
 <div class="math-badge b1">MVT</div>
 <div class="math-badge b2">f'(x)=0</div>
 <div class="math-badge b3">max/min</div>
-<div class="math-badge b4">Taylor</div>
 <div class="orbit"><span class="dot"></span></div>
 <div id="vis-title"></div>
 </div></div></div></div>
@@ -924,7 +1295,9 @@
         <div class="ch4-toc-items">
             <div class="ch4-toc-link" onclick="try{ goToSlide(12);}catch(_){ }">• 导数与单调性</div>
             <div class="ch4-toc-link" onclick="try{ goToSlide(14);}catch(_){ }">• 单调区间求法</div>
-            <div class="ch4-toc-link" onclick="try{ goToSlide(16);}catch(_){ }">• 极值判定与求法</div>
+            <div class="ch4-toc-link" onclick="try{ goToSlide(16);}catch(_){ }">• 极值的概念</div>
+            <div class="ch4-toc-link" onclick="try{ goToSlide(17);}catch(_){ }">• 为什么f'(x)=0只是嫌疑点</div>
+            <div class="ch4-toc-link" onclick="try{ goToSlide(18);}catch(_){ }">• 极值判定与求法</div>
         </div>
     </div>
     <div class="ch4-toc-section">
@@ -933,20 +1306,21 @@
             <h3 class="ch4-toc-h3">曲线的凹凸性与拐点</h3>
         </div>
         <div class="ch4-toc-items">
-            <div class="ch4-toc-link" onclick="try{ goToSlide(30);}catch(_){ }">• 凹凸性判定</div>
+            <div class="ch4-toc-link" onclick="try{ goToSlide(29);}catch(_){ }">• 凹凸性判定</div>
+            <div class="ch4-toc-link" onclick="try{ goToSlide(30);}catch(_){ }">• 二阶导数与凹凸性（交互式）</div>
             <div class="ch4-toc-link" onclick="try{ goToSlide(31);}catch(_){ }">• 拐点求法</div>
-            <div class="ch4-toc-link" onclick="try{ goToSlide(32);}catch(_){ }">• 应用实例</div>
+            <div class="ch4-toc-link" onclick="try{ goToSlide(33);}catch(_){ }">• 应用实例</div>
         </div>
     </div>
     <div class="ch4-toc-section">
-        <div class="ch4-toc-titleline" onclick="try{ goToSlide(19);}catch(_){ }">
+        <div class="ch4-toc-titleline" onclick="try{ goToSlide(20);}catch(_){ }">
             <span class="ch4-toc-num">05</span>
             <h3 class="ch4-toc-h3">利用导数求最值</h3>
         </div>
         <div class="ch4-toc-items">
-            <div class="ch4-toc-link" onclick="try{ goToSlide(23);}catch(_){ }">• 最值求法</div>
-            <div class="ch4-toc-link" onclick="try{ goToSlide(21);}catch(_){ }">• 优化问题</div>
-            <div class="ch4-toc-link" onclick="try{ goToSlide(22);}catch(_){ }">• 实际应用</div>
+            <div class="ch4-toc-link" onclick="try{ goToSlide(24);}catch(_){ }">• 最值求法</div>
+            <div class="ch4-toc-link" onclick="try{ goToSlide(22);}catch(_){ }">• 优化问题</div>
+            <div class="ch4-toc-link" onclick="try{ goToSlide(23);}catch(_){ }">• 实际应用</div>
         </div>
     </div>
  </div>
@@ -991,7 +1365,10 @@
 <div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
 <h2>罗尔定理</h2>
 <div class="formula-highlight">
-<p><strong>定理内容：</strong>若函数 $f(x)$ 满足：①在闭区间 $[a,b]$ 上连续；②在开区间 $(a,b)$ 内可导；③$f(a) = f(b)$（端点函数值相等）。则至少存在一点 $\xi \in (a,b)$，使得 $f'(\xi) = 0$</p>
+<p><strong>定理内容：</strong>若函数 $f(x)$ 满足以下条件，则至少存在一点 $\xi \in (a,b)$，使得 $f'(\xi) = 0$。</p>
+<p><strong>① 连续性：</strong>在闭区间 $[a,b]$ 上连续</p>
+<p><strong>② 可导性：</strong>在开区间 $(a,b)$ 内可导</p>
+<p><strong>③ 端点相等：</strong>$f(a) = f(b)$（端点函数值相等）</p>
 </div>
 <h3>几何意义</h3>
 <p>如果一条光滑曲线的两端在同一水平高度，那么在中间某处<span class="highlight">必定存在水平切线</span>。</p>
@@ -1003,7 +1380,9 @@
 <div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
 <h2>拉格朗日中值定理</h2>
 <div class="formula-highlight">
-<p><strong>定理内容：</strong>若函数 $f(x)$ 满足：①在闭区间 $[a,b]$ 上连续；②在开区间 $(a,b)$ 内可导。则至少存在一点 $\xi \in (a,b)$，使得 $f'(\xi) = \frac{f(b) - f(a)}{b - a}$</p>
+<p><strong>定理内容：</strong>若函数 $f(x)$ 满足以下条件，则至少存在一点 $\xi \in (a,b)$，使得 $f'(\xi) = \frac{f(b) - f(a)}{b - a}$。</p>
+<p><strong>① 连续性：</strong>在闭区间 $[a,b]$ 上连续</p>
+<p><strong>② 可导性：</strong>在开区间 $(a,b)$ 内可导</p>
 </div>
 <h3>几何意义</h3>
 <p>曲线上<span class="highlight">两点连线的斜率</span>（平均变化率）等于曲线在<span class="highlight">某一点的切线斜率</span>（瞬时变化率）。</p>
@@ -1016,7 +1395,10 @@
 <div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
 <h2>柯西中值定理</h2>
 <div class="formula-highlight">
-<p><strong>定理内容：</strong>若函数 $f(x)$ 和 $g(x)$ 满足：①在闭区间 $[a,b]$ 上连续；②在开区间 $(a,b)$ 内可导；③$g'(x) \neq 0$ 在 $(a,b)$ 内成立。则至少存在一点 $\xi \in (a,b)$，使得 $\frac{f'(\xi)}{g'(\xi)} = \frac{f(b) - f(a)}{g(b) - g(a)}$</p>
+<p><strong>定理内容：</strong>若函数 $f(x)$ 和 $g(x)$ 满足以下条件，则至少存在一点 $\xi \in (a,b)$，使得 $\frac{f'(\xi)}{g'(\xi)} = \frac{f(b) - f(a)}{g(b) - g(a)}$。</p>
+<p><strong>① 同时连续：</strong>$f(x)$、$g(x)$ 在闭区间 $[a,b]$ 上连续</p>
+<p><strong>② 同时可导：</strong>$f(x)$、$g(x)$ 在开区间 $(a,b)$ 内可导</p>
+<p><strong>③ 分母有意义：</strong>$g'(x) \neq 0$ 在 $(a,b)$ 内成立</p>
 </div>
 <h3>与拉格朗日定理的关系</h3>
 <p>当 $g(x) = x$ 时，柯西中值定理就退化为<span class="highlight">拉格朗日中值定理</span>。</p>
@@ -1559,7 +1941,9 @@
 <div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
 <h2>洛必达法则解题步骤</h2>
 <h3>标准解题流程</h3>
-<p><strong>第一步：验证未定式</strong>检查是否为 $\frac{0}{0}$ 或 $\frac{\infty}{\infty}$ 型；<strong>第二步：求导</strong>分别对分子和分母求导：$\frac{f'(x)}{g'(x)}$；<strong>第三步：计算极限</strong>如果仍是未定式，重复应用法则</p>
+<p><strong>第一步：验证未定式</strong> 检查是否为 $\frac{0}{0}$ 或 $\frac{\infty}{\infty}$ 型</p>
+<p><strong>第二步：求导</strong> 分别对分子和分母求导，得到 $\frac{f'(x)}{g'(x)}$</p>
+<p><strong>第三步：计算极限</strong> 若仍为未定式，则继续重复应用洛必达法则</p>
 <h3>常见题型解法</h3>
 <p><strong>$\frac{0}{0}$ 型：</strong>直接应用法则；<strong>$0 \cdot \infty$ 型：</strong>化为 $\frac{0}{\frac{1}{\infty}} = \frac{0}{0}$；<strong>$\infty - \infty$ 型：</strong>通分化为 $\frac{0}{0}$ 或 $\frac{\infty}{\infty}$；<strong>$1^{\infty}$ 型：</strong>取对数后应用</p>
 </div><div class="right-visual"><div id="vis-lhopital-examples"></div></div></div></div>
@@ -1602,20 +1986,27 @@
 <p>若 $f'(x) &gt; 0$，则 $f(x)$ 在该区间<span class="highlight">单调递增 ↗</span>；若 $f'(x) &lt; 0$，则 $f(x)$ 在该区间<span class="highlight">单调递减 ↘</span></p>
 </div>
 <h3>判断步骤</h3>
-<p>①求导数 $f'(x)$；②解不等式 $f'(x) &gt; 0$ 或 $f'(x) &lt; 0$；③确定单调区间</p>
+<p><strong>① 求导数：</strong>先求出 $f'(x)$ 的表达式</p>
+<p><strong>② 判断符号：</strong>解不等式 $f'(x) &gt; 0$ 或 $f'(x) &lt; 0$</p>
+<p><strong>③ 列出结论：</strong>根据导数符号写出对应的单调区间</p>
 </div><div class="right-visual"><div id="vis-monotonicity"></div></div></div></div>
 <!-- 第15页：单调性实例 -->
 <div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
 <h2>单调性判断实例</h2>
 <p>例：判断 $f(x) = x^3 - 3x$ 的单调性</p>
 <h3>解题步骤</h3>
-<p>1. 求导：$f'(x) = 3x^2 - 3 = 3(x^2 - 1)$；2. 令 $f'(x) = 0$：$x = \pm 1$；3. 判断符号：$x &lt; -1$ 时，$f'(x) &gt; 0$，递增；$-1 &lt; x &lt; 1$ 时，$f'(x) &lt; 0$，递减；$x &gt; 1$ 时，$f'(x) &gt; 0$，递增</p>
+<p><strong>步骤1：</strong>求导得到 $f'(x) = 3x^2 - 3 = 3(x^2 - 1)$</p>
+<p><strong>步骤2：</strong>令 $f'(x) = 0$，可得驻点 $x = \pm 1$</p>
+<p><strong>步骤3：</strong>判断导数符号：$x &lt; -1$ 时 $f'(x) &gt; 0$ 为递增；$-1 &lt; x &lt; 1$ 时 $f'(x) &lt; 0$ 为递减；$x &gt; 1$ 时 $f'(x) &gt; 0$ 为递增</p>
 </div><div class="right-visual"><div id="vis-monotonicity-example"></div></div></div></div>
 <!-- 第16页：求单调区间的方法与例题 -->
 <div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
 <h2>求单调区间的方法</h2>
 <h3>标准步骤</h3>
-<p><strong>第一步：</strong>求导数 $f'(x)$；<strong>第二步：</strong>求驻点，令 $f'(x) = 0$；<strong>第三步：</strong>列表判断导数符号；<strong>第四步：</strong>写出单调区间</p>
+<p><strong>第一步：</strong>求导数 $f'(x)$</p>
+<p><strong>第二步：</strong>求驻点，令 $f'(x) = 0$</p>
+<p><strong>第三步：</strong>通过列表判断导数符号</p>
+<p><strong>第四步：</strong>写出对应的单调区间</p>
 <h3>例题：求 $f(x) = x^3 - 6x^2 + 9x + 1$ 的单调区间</h3>
 <div class="example">
 <p><strong>解：</strong>$f'(x) = 3x^2 - 12x + 9 = 3(x^2 - 4x + 3) = 3(x-1)(x-3)$；令 $f'(x) = 0$，得 $x = 1$ 或 $x = 3$；列表分析：</p>
@@ -1637,20 +2028,757 @@
             </div>
 <p>注意：$f'(x) = 0$ 的点不一定是极值点！</p>
 </div><div class="right-visual"><div id="vis-extremum-concept"></div></div></div></div>
+<!-- 第17.5页：为什么f'(x)=0只是嫌疑点 - 交互式演示 -->
+<div class="slide extremum-interactive-slide" style="display: none; width: 100vw; height: 100vh; margin: 0; padding: 0; overflow: hidden; position: relative;">
+<style>
+/* 极值点交互式演示 - 作用域样式 */
+.extremum-interactive-slide {
+    font-family: 'Inter', 'Source Han Sans SC', 'Noto Sans SC', 'Microsoft YaHei', system-ui, -apple-system, sans-serif;
+    background: #FAFAFA;
+    overflow: hidden;
+    color: #1a1a1a;
+}
+.extremum-interactive-slide .extremum-slide-container {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    position: relative;
+    gap: 0;
+    padding: 0;
+}
+.extremum-interactive-slide .extremum-left-content {
+    width: 50%;
+    height: 100vh;
+    padding: 60px 80px 60px 60px;
+    background: #FBFBFB;
+    overflow-y: auto;
+    font-size: 16px;
+    line-height: 1.6;
+}
+.extremum-interactive-slide .extremum-right-visual {
+    width: 50%;
+    height: 100vh;
+    background: #F8F9FA;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    padding: 40px;
+}
+.extremum-interactive-slide .extremum-slide {
+    display: none;
+}
+.extremum-interactive-slide .extremum-slide.active {
+    display: flex;
+}
+.extremum-interactive-slide h1 {
+    color: #003366;
+    font-size: 24px;
+    line-height: 1.2;
+    font-weight: 700;
+    margin: 0 0 16px 0;
+}
+.extremum-interactive-slide h2 {
+    color: #008080;
+    font-size: 20px;
+    line-height: 1.3;
+    font-weight: 600;
+    margin: 20px 0 12px 0;
+    position: relative;
+    padding-left: 20px;
+}
+.extremum-interactive-slide h2::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: #008080;
+    border-radius: 2px;
+}
+.extremum-interactive-slide h3 {
+    color: #1a1a1a;
+    font-size: 18px;
+    line-height: 1.3;
+    font-weight: 600;
+    margin: 16px 0 8px 0;
+}
+.extremum-interactive-slide p {
+    margin-bottom: 12px;
+    color: #2d2d2d;
+    font-weight: 400;
+    font-size: 15px;
+    line-height: 1.5;
+}
+.extremum-interactive-slide .highlight {
+    background: rgba(59, 130, 246, 0.1);
+    padding: 2px 4px;
+    border-radius: 3px;
+    color: #2563eb;
+    font-weight: 500;
+}
+.extremum-interactive-slide .formula-highlight {
+    background: #f0f9ff;
+    border-left: 4px solid #3b82f6;
+    padding: 16px;
+    margin: 20px 0;
+    border-radius: 4px;
+}
+.extremum-interactive-slide .graph-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    padding: 20px;
+}
+.extremum-interactive-slide canvas {
+    flex: 1;
+    width: 100%;
+    cursor: crosshair;
+    display: block;
+    border-radius: 8px;
+}
+.extremum-interactive-slide .controls-panel {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+.extremum-interactive-slide .control-button {
+    background: #3b82f6;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    font-size: 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.extremum-interactive-slide .control-button:hover {
+    background: #2563eb;
+    transform: translateY(-1px);
+}
+.extremum-interactive-slide .control-button.active {
+    background: #10b981;
+}
+.extremum-interactive-slide .info-panel {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 12px 16px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    font-size: 14px;
+    min-width: 150px;
+}
+.extremum-interactive-slide .key-point {
+    background: #fef3c7;
+    border: 1px solid #fbbf24;
+    padding: 12px 16px;
+    border-radius: 6px;
+    margin: 16px 0;
+    font-size: 14px;
+    color: #92400e;
+}
+</style>
+<div class="extremum-slide-counter" style="position: fixed; top: 30px; right: 30px; font-size: 16px; color: #64748b; background: white; padding: 8px 16px; border-radius: 20px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06); z-index: 1000;"><span id="extremumCurrentSlide">1</span> / 3</div>
+<!-- 内部子页导航按钮（不影响外层课件导航） -->
+<div class="extremum-slide-nav" style="position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); display: flex; gap: 12px; z-index: 1000;">
+    <button type="button" class="control-button" onclick="extremumPrevSlide(event)">上一页</button>
+    <button type="button" class="control-button" onclick="extremumNextSlide(event)">下一页</button>
+</div>
+<div class="extremum-tooltip" id="extremumTooltip" style="position: absolute; background: rgba(0, 0, 0, 0.8); color: white; padding: 6px 10px; border-radius: 4px; font-size: 13px; pointer-events: none; display: none; z-index: 1000;"></div>
+<div class="extremum-slide active">
+    <div class="extremum-slide-container">
+        <div class="extremum-left-content">
+            <h1>为什么 f'(x)=0 只是"嫌疑点"？</h1>
+            <h2>1. 局部最大值 (山顶)</h2>
+            <p>想象你在爬山，当你到达<span class="highlight">山顶</span>时，会发生什么？</p>
+            <h3>关键观察</h3>
+            <p>在山顶的那一刻，你既不是在上坡，也不是在下坡——你处于<strong>水平状态</strong>。</p>
+            <div class="formula-highlight">
+                <p><strong>数学表达：</strong>在极大值点 $x_0$ 处，有 $f'(x_0) = 0$</p>
+                <p><strong>几何意义：</strong>切线是水平的（斜率为0）</p>
+            </div>
+            <h3>判断极大值的方法</h3>
+            <p>在 $x_0$ 附近：</p>
+            <p>• 左侧：$f'(x) > 0$（函数递增，像上坡）</p>
+            <p>• 右侧：$f'(x) < 0$（函数递减，像下坡）</p>
+            <div class="key-point">
+                <strong>记忆口诀：</strong>"左增右减是山顶"——这是真正的极大值点！
+            </div>
+            <p style="color: #3b82f6; margin-top: 20px;">
+                <i class="fas fa-hand-pointer"></i> 
+                <strong>互动提示：</strong>点击右侧图形查看任意点的切线和导数值
+            </p>
+        </div>
+        <div class="extremum-right-visual">
+            <div class="graph-container">
+                <canvas id="extremumMaxCanvas"></canvas>
+                <div class="info-panel" id="extremumMaxInfo" style="display: none;">
+                    <strong>点击信息</strong><br>
+                    x = <span id="extremumMaxX">0</span><br>
+                    y = <span id="extremumMaxY">0</span><br>
+                    f'(x) = <span id="extremumMaxDerivative">0</span>
+                </div>
+                <div class="controls-panel">
+                    <button class="control-button" onclick="extremumToggleAnimation('max')">
+                        <i class="fas fa-play"></i>
+                        <span>播放动画</span>
+</button>
+                    <button class="control-button active" onclick="extremumToggleTangent('max')">
+                        <i class="fas fa-ruler-horizontal"></i>
+                        <span>显示切线</span>
+                    </button>
+                    <button class="control-button" onclick="extremumToggleDerivative('max')">
+                        <i class="fas fa-chart-line"></i>
+                        <span>显示导数</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="extremum-slide">
+    <div class="extremum-slide-container">
+        <div class="extremum-left-content">
+            <h1>为什么 f'(x)=0 只是"嫌疑点"？</h1>
+            <h2>2. 局部最小值 (谷底)</h2>
+            <p>现在想象你在<span class="highlight">山谷</span>的最低处，情况又如何？</p>
+            <h3>关键观察</h3>
+            <p>在谷底，你同样处于<strong>水平状态</strong>——既不是下坡，也不是上坡。</p>
+            <div class="formula-highlight">
+                <p><strong>数学表达：</strong>在极小值点 $x_0$ 处，有 $f'(x_0) = 0$</p>
+                <p><strong>几何意义：</strong>切线是水平的（斜率为0）</p>
+            </div>
+            <h3>判断极小值的方法</h3>
+            <p>在 $x_0$ 附近：</p>
+            <p>• 左侧：$f'(x) < 0$（函数递减，像下坡）</p>
+            <p>• 右侧：$f'(x) > 0$（函数递增，像上坡）</p>
+            <div class="key-point">
+                <strong>记忆口诀：</strong>"左减右增是谷底"——这是真正的极小值点！
+            </div>
+            <h3>实际应用</h3>
+            <p>极小值在优化问题中非常重要，比如：</p>
+            <p>• 最小成本</p>
+            <p>• 最短路径</p>
+            <p>• 最少时间</p>
+            <p style="color: #3b82f6; margin-top: 20px;">
+                <i class="fas fa-hand-pointer"></i> 
+                <strong>互动提示：</strong>试试点击动画按钮，观察导数如何变化
+            </p>
+        </div>
+        <div class="extremum-right-visual">
+            <div class="graph-container">
+                <canvas id="extremumMinCanvas"></canvas>
+                <div class="info-panel" id="extremumMinInfo" style="display: none;">
+                    <strong>点击信息</strong><br>
+                    x = <span id="extremumMinX">0</span><br>
+                    y = <span id="extremumMinY">0</span><br>
+                    f'(x) = <span id="extremumMinDerivative">0</span>
+                </div>
+                <div class="controls-panel">
+                    <button class="control-button" onclick="extremumToggleAnimation('min')">
+                        <i class="fas fa-play"></i>
+                        <span>播放动画</span>
+                    </button>
+                    <button class="control-button active" onclick="extremumToggleTangent('min')">
+                        <i class="fas fa-ruler-horizontal"></i>
+                        <span>显示切线</span>
+                    </button>
+                    <button class="control-button" onclick="extremumToggleDerivative('min')">
+                        <i class="fas fa-chart-line"></i>
+                        <span>显示导数</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="extremum-slide">
+    <div class="extremum-slide-container">
+        <div class="extremum-left-content">
+            <h1>为什么 f'(x)=0 只是"嫌疑点"？</h1>
+            <h2>3. 拐点 (半山腰平台)</h2>
+            <p>但是！不是所有 $f'(x) = 0$ 的点都是极值点。看看这个<span class="highlight">特殊情况</span>：</p>
+            <h3>拐点的特征</h3>
+            <p>在某些点，虽然切线是水平的，但函数<strong>一直在增加</strong>（或一直在减少）。</p>
+            <div class="formula-highlight">
+                <p><strong>例子：</strong>$f(x) = x^3$ 在 $x = 0$ 处</p>
+                <p>• $f'(0) = 0$（切线水平）</p>
+                <p>• 但 $x < 0$ 时 $f'(x) > 0$，$x > 0$ 时 $f'(x) > 0$</p>
+                <p>• 函数始终递增，<strong>不是极值点！</strong></p>
+            </div>
+            <h3>为什么会这样？</h3>
+            <p>想象在爬山途中遇到一个<strong>平台</strong>：</p>
+            <p>• 你暂时走在水平路上（$f'(x) = 0$）</p>
+            <p>• 但整体趋势仍是上山（函数递增）</p>
+            <p>• 这只是一个"喘息点"，不是山顶或谷底</p>
+            <div class="key-point">
+                <strong>重要结论：</strong>$f'(x) = 0$ 只是极值点的<strong>必要条件</strong>，不是充分条件。
+                这就是为什么我们称它为"嫌疑点"——需要进一步检验！
+            </div>
+            <h3>判断方法总结</h3>
+            <p><strong>第一步：</strong>找出所有 $f'(x) = 0$ 的点（嫌疑点）</p>
+            <p><strong>第二步：</strong>检查每个点两侧导数的符号变化</p>
+            <p><strong>第三步：</strong>只有符号发生变化的点才是真正的极值点</p>
+        </div>
+        <div class="extremum-right-visual">
+            <div class="graph-container">
+                <canvas id="extremumInflectionCanvas"></canvas>
+                <div class="info-panel" id="extremumInflectionInfo" style="display: none;">
+                    <strong>点击信息</strong><br>
+                    x = <span id="extremumInflectionX">0</span><br>
+                    y = <span id="extremumInflectionY">0</span><br>
+                    f'(x) = <span id="extremumInflectionDerivative">0</span>
+                </div>
+                <div class="controls-panel">
+                    <button class="control-button" onclick="extremumToggleAnimation('inflection')">
+                        <i class="fas fa-play"></i>
+                        <span>播放动画</span>
+                    </button>
+                    <button class="control-button active" onclick="extremumToggleTangent('inflection')">
+                        <i class="fas fa-ruler-horizontal"></i>
+                        <span>显示切线</span>
+                    </button>
+                    <button class="control-button" onclick="extremumToggleDerivative('inflection')">
+                        <i class="fas fa-chart-line"></i>
+                        <span>显示导数</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+(function() {
+    'use strict';
+    let extremumCurrentSlide = 1;
+    const extremumTotalSlides = 3;
+    const extremumGraphStates = {
+        max: { animation: false, tangent: true, derivative: false, clickPoint: null },
+        min: { animation: false, tangent: true, derivative: false, clickPoint: null },
+        inflection: { animation: false, tangent: true, derivative: false, clickPoint: null }
+    };
+    let extremumAnimationFrames = {};
+    let extremumAnimationProgress = {};
+
+    function extremumSetupCanvas(canvas) {
+        const ctx = canvas.getContext('2d');
+        const dpr = window.devicePixelRatio || 1;
+        const rect = canvas.getBoundingClientRect();
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        ctx.scale(dpr, dpr);
+        canvas.style.width = rect.width + 'px';
+        canvas.style.height = rect.height + 'px';
+        return ctx;
+    }
+
+    function extremumShowSlide(n) {
+        const container = document.querySelector('.extremum-interactive-slide');
+        if (!container) return;
+        const slides = container.querySelectorAll('.extremum-slide');
+        if (slides.length === 0) return;
+        if (n > extremumTotalSlides) extremumCurrentSlide = extremumTotalSlides;
+        if (n < 1) extremumCurrentSlide = 1;
+        slides.forEach(slide => slide.classList.remove('active'));
+        if (slides[extremumCurrentSlide - 1]) {
+            slides[extremumCurrentSlide - 1].classList.add('active');
+        }
+        const currentSlideEl = document.getElementById('extremumCurrentSlide');
+        if (currentSlideEl) currentSlideEl.textContent = extremumCurrentSlide;
+        Object.keys(extremumAnimationFrames).forEach(key => {
+            if (extremumAnimationFrames[key]) {
+                cancelAnimationFrame(extremumAnimationFrames[key]);
+                extremumAnimationFrames[key] = null;
+            }
+        });
+        setTimeout(() => extremumDrawCurrentSlide(), 100);
+    }
+
+    function extremumDrawCurrentSlide() {
+        if (extremumCurrentSlide === 1) extremumDrawMaximum();
+        if (extremumCurrentSlide === 2) extremumDrawMinimum();
+        if (extremumCurrentSlide === 3) extremumDrawInflection();
+    }
+
+    function extremumDrawMaximum() {
+        const canvas = document.getElementById('extremumMaxCanvas');
+        if (!canvas) return;
+        const ctx = extremumSetupCanvas(canvas);
+        const rect = canvas.getBoundingClientRect();
+        const width = rect.width;
+        const height = rect.height;
+        ctx.clearRect(0, 0, width, height);
+        const padding = 40;
+        const centerX = width / 2;
+        const centerY = height / 2;
+        ctx.strokeStyle = '#e5e7eb';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(padding, centerY);
+        ctx.lineTo(width - padding, centerY);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(centerX, padding);
+        ctx.lineTo(centerX, height - padding);
+        ctx.stroke();
+        ctx.fillStyle = '#9ca3af';
+        ctx.beginPath();
+        ctx.moveTo(width - padding, centerY);
+        ctx.lineTo(width - padding - 8, centerY - 4);
+        ctx.lineTo(width - padding - 8, centerY + 4);
+        ctx.closePath();
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(centerX, padding);
+        ctx.lineTo(centerX - 4, padding + 8);
+        ctx.lineTo(centerX + 4, padding + 8);
+        ctx.closePath();
+        ctx.fill();
+        ctx.strokeStyle = '#3b82f6';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        for (let px = padding; px < width - padding; px++) {
+            const x = ((px - centerX) / (width - 2 * padding)) * 6;
+            const y = -x * x + 2;
+            const py = centerY - y * 50;
+            if (px === padding) ctx.moveTo(px, py);
+            else ctx.lineTo(px, py);
+        }
+        ctx.stroke();
+        const state = extremumGraphStates.max;
+        const targetX = state.clickPoint ? state.clickPoint.x : 0;
+        const targetY = -targetX * targetX + 2;
+        const targetPx = centerX + targetX * (width - 2 * padding) / 6;
+        const targetPy = centerY - targetY * 50;
+        ctx.fillStyle = state.clickPoint ? '#f59e0b' : '#ef4444';
+        ctx.beginPath();
+        ctx.arc(targetPx, targetPy, 6, 0, Math.PI * 2);
+        ctx.fill();
+        if (state.tangent) {
+            const derivative = -2 * targetX;
+            const xScale = (width - 2 * padding) / 6;
+            const adjustedSlope = -derivative * 50 / xScale;
+            ctx.strokeStyle = '#10b981';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(targetPx - 150, targetPy + adjustedSlope * -150);
+            ctx.lineTo(targetPx + 150, targetPy + adjustedSlope * 150);
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+        if (state.clickPoint) {
+            const maxInfo = document.getElementById('extremumMaxInfo');
+            if (maxInfo) maxInfo.style.display = 'block';
+            const maxX = document.getElementById('extremumMaxX');
+            const maxY = document.getElementById('extremumMaxY');
+            const maxDerivative = document.getElementById('extremumMaxDerivative');
+            if (maxX) maxX.textContent = targetX.toFixed(2);
+            if (maxY) maxY.textContent = targetY.toFixed(2);
+            if (maxDerivative) maxDerivative.textContent = (-2 * targetX).toFixed(2);
+        }
+    }
+
+    function extremumDrawMinimum() {
+        const canvas = document.getElementById('extremumMinCanvas');
+        if (!canvas) return;
+        const ctx = extremumSetupCanvas(canvas);
+        const rect = canvas.getBoundingClientRect();
+        const width = rect.width;
+        const height = rect.height;
+        ctx.clearRect(0, 0, width, height);
+        const padding = 40;
+        const centerX = width / 2;
+        const centerY = height / 2;
+        ctx.strokeStyle = '#e5e7eb';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(padding, centerY);
+        ctx.lineTo(width - padding, centerY);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(centerX, padding);
+        ctx.lineTo(centerX, height - padding);
+        ctx.stroke();
+        ctx.strokeStyle = '#3b82f6';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        for (let px = padding; px < width - padding; px++) {
+            const x = ((px - centerX) / (width - 2 * padding)) * 6;
+            const y = x * x - 2;
+            const py = centerY - y * 50;
+            if (px === padding) ctx.moveTo(px, py);
+            else ctx.lineTo(px, py);
+        }
+        ctx.stroke();
+        const state = extremumGraphStates.min;
+        const targetX = state.clickPoint ? state.clickPoint.x : 0;
+        const targetY = targetX * targetX - 2;
+        const targetPx = centerX + targetX * (width - 2 * padding) / 6;
+        const targetPy = centerY - targetY * 50;
+        ctx.fillStyle = state.clickPoint ? '#f59e0b' : '#ef4444';
+        ctx.beginPath();
+        ctx.arc(targetPx, targetPy, 6, 0, Math.PI * 2);
+        ctx.fill();
+        if (state.tangent) {
+            const derivative = 2 * targetX;
+            const xScale = (width - 2 * padding) / 6;
+            const adjustedSlope = -derivative * 50 / xScale;
+            ctx.strokeStyle = '#10b981';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(targetPx - 150, targetPy + adjustedSlope * -150);
+            ctx.lineTo(targetPx + 150, targetPy + adjustedSlope * 150);
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+        if (state.clickPoint) {
+            const minInfo = document.getElementById('extremumMinInfo');
+            if (minInfo) minInfo.style.display = 'block';
+            const minX = document.getElementById('extremumMinX');
+            const minY = document.getElementById('extremumMinY');
+            const minDerivative = document.getElementById('extremumMinDerivative');
+            if (minX) minX.textContent = targetX.toFixed(2);
+            if (minY) minY.textContent = targetY.toFixed(2);
+            if (minDerivative) minDerivative.textContent = (2 * targetX).toFixed(2);
+        }
+    }
+
+    function extremumDrawInflection() {
+        const canvas = document.getElementById('extremumInflectionCanvas');
+        if (!canvas) return;
+        const ctx = extremumSetupCanvas(canvas);
+        const rect = canvas.getBoundingClientRect();
+        const width = rect.width;
+        const height = rect.height;
+        ctx.clearRect(0, 0, width, height);
+        const padding = 40;
+        const centerX = width / 2;
+        const centerY = height / 2;
+        ctx.strokeStyle = '#e5e7eb';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(padding, centerY);
+        ctx.lineTo(width - padding, centerY);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(centerX, padding);
+        ctx.lineTo(centerX, height - padding);
+        ctx.stroke();
+        ctx.strokeStyle = '#3b82f6';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        for (let px = padding; px < width - padding; px++) {
+            const x = ((px - centerX) / (width - 2 * padding)) * 4;
+            const y = x * x * x;
+            const py = centerY - y * 30;
+            if (px === padding) ctx.moveTo(px, py);
+            else ctx.lineTo(px, py);
+        }
+        ctx.stroke();
+        const state = extremumGraphStates.inflection;
+        const targetX = state.clickPoint ? state.clickPoint.x : 0;
+        const targetY = targetX * targetX * targetX;
+        const targetPx = centerX + targetX * (width - 2 * padding) / 4;
+        const targetPy = centerY - targetY * 30;
+        ctx.fillStyle = '#f59e0b';
+        ctx.beginPath();
+        ctx.arc(targetPx, targetPy, 6, 0, Math.PI * 2);
+        ctx.fill();
+        if (state.tangent) {
+            const derivative = 3 * targetX * targetX;
+            const xScale = (width - 2 * padding) / 4;
+            const adjustedSlope = -derivative * 30 / xScale;
+            ctx.strokeStyle = '#10b981';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(targetPx - 150, targetPy + adjustedSlope * -150);
+            ctx.lineTo(targetPx + 150, targetPy + adjustedSlope * 150);
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+        if (state.clickPoint) {
+            const inflectionInfo = document.getElementById('extremumInflectionInfo');
+            if (inflectionInfo) inflectionInfo.style.display = 'block';
+            const inflectionX = document.getElementById('extremumInflectionX');
+            const inflectionY = document.getElementById('extremumInflectionY');
+            const inflectionDerivative = document.getElementById('extremumInflectionDerivative');
+            if (inflectionX) inflectionX.textContent = targetX.toFixed(2);
+            if (inflectionY) inflectionY.textContent = targetY.toFixed(2);
+            if (inflectionDerivative) inflectionDerivative.textContent = (3 * targetX * targetX).toFixed(2);
+        }
+    }
+
+    function extremumSetupInteraction() {
+        ['extremumMaxCanvas', 'extremumMinCanvas', 'extremumInflectionCanvas'].forEach((canvasId, index) => {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+            const type = ['max', 'min', 'inflection'][index];
+            canvas.addEventListener('click', (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const centerX = rect.width / 2;
+                const padding = 40;
+                const range = type === 'inflection' ? 4 : 6;
+                const fx = ((x - centerX) / (rect.width - 2 * padding)) * range;
+                if (Math.abs(fx) <= range/2) {
+                    extremumGraphStates[type].clickPoint = { x: fx };
+                    extremumDrawCurrentSlide();
+                }
+            });
+        });
+    }
+
+    window.extremumToggleAnimation = function(type) {
+        extremumGraphStates[type].animation = !extremumGraphStates[type].animation;
+        if (extremumGraphStates[type].animation) {
+            if (!extremumAnimationProgress[type]) {
+                extremumAnimationProgress[type] = type === 'inflection' ? -2 : -3;
+            }
+            function animate() {
+                const range = type === 'inflection' ? 2 : 3;
+                extremumAnimationProgress[type] += 0.02;
+                if (extremumAnimationProgress[type] > range) {
+                    extremumAnimationProgress[type] = -range;
+                }
+                extremumGraphStates[type].clickPoint = { x: extremumAnimationProgress[type] };
+                extremumDrawCurrentSlide();
+                if (extremumGraphStates[type].animation) {
+                    extremumAnimationFrames[type] = requestAnimationFrame(animate);
+                }
+            }
+            animate();
+        } else if (extremumAnimationFrames[type]) {
+            cancelAnimationFrame(extremumAnimationFrames[type]);
+            extremumAnimationFrames[type] = null;
+        }
+    };
+
+    window.extremumToggleTangent = function(type) {
+        extremumGraphStates[type].tangent = !extremumGraphStates[type].tangent;
+        extremumDrawCurrentSlide();
+    };
+
+    window.extremumToggleDerivative = function(type) {
+        extremumGraphStates[type].derivative = !extremumGraphStates[type].derivative;
+        extremumDrawCurrentSlide();
+    };
+
+    window.extremumNextSlide = function(evt) {
+        if (evt) {
+            evt.stopPropagation();
+            evt.preventDefault();
+        }
+        extremumCurrentSlide++;
+        extremumShowSlide(extremumCurrentSlide);
+    };
+    window.extremumPrevSlide = function(evt) {
+        if (evt) {
+            evt.stopPropagation();
+            evt.preventDefault();
+        }
+        extremumCurrentSlide--;
+        extremumShowSlide(extremumCurrentSlide);
+    };
+
+    let extremumKeyHandler = null;
+    let extremumInitialized = false;
+    const extremumSlide = document.querySelector('.extremum-interactive-slide');
+    if (extremumSlide) {
+        // 确保所有内部slide初始状态正确
+        const internalSlides = extremumSlide.querySelectorAll('.extremum-slide');
+        internalSlides.forEach((slide, index) => {
+            if (index === 0) {
+                slide.classList.add('active');
+            } else {
+                slide.classList.remove('active');
+            }
+        });
+        
+        const checkAndInit = () => {
+            const isActive = extremumSlide.classList.contains('active');
+            if (isActive) {
+                if (!extremumInitialized) {
+                    extremumInitialized = true;
+                    extremumCurrentSlide = 1;
+                    extremumShowSlide(1);
+                    extremumSetupInteraction();
+                    setTimeout(() => extremumDrawCurrentSlide(), 200);
+                    // 添加键盘导航（只添加一次）
+                    if (!extremumKeyHandler) {
+                        extremumKeyHandler = (e) => {
+                            if (extremumSlide.classList.contains('active')) {
+                                if (e.key === 'ArrowLeft') {
+                                    e.stopPropagation();
+                                    extremumPrevSlide();
+                                } else if (e.key === 'ArrowRight') {
+                                    e.stopPropagation();
+                                    extremumNextSlide();
+                                }
+                            }
+                        };
+                        document.addEventListener('keydown', extremumKeyHandler, true);
+                    }
+                } else {
+                    // 如果已经初始化，确保当前slide正确显示
+                    extremumShowSlide(extremumCurrentSlide);
+                }
+            } else {
+                extremumInitialized = false;
+            }
+        };
+        // 初始检查
+        setTimeout(checkAndInit, 100);
+        // 监听主课件的slide切换
+        const observer = new MutationObserver(checkAndInit);
+        observer.observe(extremumSlide, { attributes: true, attributeFilter: ['class'] });
+        // 监听所有slide的变化，以便在主课件切换时也能检测到
+        const allSlides = document.querySelectorAll('.slide');
+        allSlides.forEach(slide => {
+            const slideObserver = new MutationObserver(() => {
+                if (slide.classList.contains('active') && slide === extremumSlide) {
+                    checkAndInit();
+                }
+            });
+            slideObserver.observe(slide, { attributes: true, attributeFilter: ['class'] });
+        });
+    }
+})();
+</script>
+</div>
 <!-- 第18页：极值判断方法 -->
 <div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
 <h2>极值判断方法</h2>
 <h3>第一判别法（导数符号法）</h3>
 <p>在 $x = x_0$ 处，如果：$f'(x)$ 由正变负 → <span class="highlight">极大值</span>；$f'(x)$ 由负变正 → <span class="highlight">极小值</span>；$f'(x)$ 不变号 → 无极值</p>
 <h3>步骤</h3>
-<p>①求 $f'(x) = 0$ 的点；②判断这些点两侧导数符号；③确定极值点和极值</p>
+<p><strong>① 求驻点：</strong>先求解 $f'(x) = 0$</p>
+<p><strong>② 判符号：</strong>观察每个候选点两侧的导数符号</p>
+<p><strong>③ 判极值：</strong>只有符号发生变化的点才是真正的极值点</p>
 </div><div class="right-visual"><div id="vis-extremum-test"></div></div></div></div>
 <!-- 第19页：极值例题 -->
 <div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
 <h2>求函数极值例题</h2>
 <h3>例题：求 $f(x) = x^3 - 12x + 5$ 的极值</h3>
 <div class="example">
-<p><strong>解：</strong><strong>第一步：求导数</strong>$f'(x) = 3x^2 - 12 = 3(x^2 - 4) = 3(x-2)(x+2)$<strong>第二步：求驻点</strong>令 $f'(x) = 0$，得 $x = -2$ 或 $x = 2$<strong>第三步：判断极值（第一判别法）</strong></p>
+<p><strong>解：</strong></p>
+<p><strong>第一步：求导数</strong> $f'(x) = 3x^2 - 12 = 3(x^2 - 4) = 3(x-2)(x+2)$</p>
+<p><strong>第二步：求驻点</strong> 令 $f'(x) = 0$，得 $x = -2$ 或 $x = 2$</p>
+<p><strong>第三步：判断极值（第一判别法）</strong> 结合导数符号确定极大极小</p>
 <table style="margin: 10px 0; border-collapse: collapse; width: 100%;">
 <tr><td style="border: 1px solid #ccc; padding: 5px;">$x$</td><td style="border: 1px solid #ccc; padding: 5px;">$(-\infty, -2)$</td><td style="border: 1px solid #ccc; padding: 5px;">$-2$</td><td style="border: 1px solid #ccc; padding: 5px;">$(-2, 2)$</td><td style="border: 1px solid #ccc; padding: 5px;">$2$</td><td style="border: 1px solid #ccc; padding: 5px;">$(2, +\infty)$</td></tr>
 <tr><td style="border: 1px solid #ccc; padding: 5px;">$f'(x)$</td><td style="border: 1px solid #ccc; padding: 5px;">$+$</td><td style="border: 1px solid #ccc; padding: 5px;">$0$</td><td style="border: 1px solid #ccc; padding: 5px;">$-$</td><td style="border: 1px solid #ccc; padding: 5px;">$0$</td><td style="border: 1px solid #ccc; padding: 5px;">$+$</td></tr>
@@ -1677,14 +2805,20 @@
 <h3>最值可能出现在：</h3>
 <p>区间内的极值点；区间端点</p>
 <h3>求最值步骤</h3>
-<p>①求出所有极值点；②计算极值点和端点的函数值；③比较大小，确定最值</p>
+<p><strong>① 列候选：</strong>求出区间内所有极值点</p>
+<p><strong>② 算函数值：</strong>计算极值点与区间端点处的函数值</p>
+<p><strong>③ 比较大小：</strong>对比所有结果以确定最大值和最小值</p>
 </div><div class="right-visual"><div id="vis-max-min"></div></div></div></div>
 <!-- 第22页：最值例题 -->
 <div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
 <h2>求最值例题</h2>
 <h3>例题：求 $f(x) = 2x^3 - 3x^2 - 12x + 5$ 在 $[-2, 3]$ 上的最值</h3>
 <div class="example">
-<p><strong>解：</strong><strong>第一步：求导数</strong>$f'(x) = 6x^2 - 6x - 12 = 6(x^2 - x - 2) = 6(x-2)(x+1)$<strong>第二步：求区间内的驻点</strong>令 $f'(x) = 0$，得 $x = -1$ 或 $x = 2$（均在 $[-2, 3]$ 内）<strong>第三步：计算关键点的函数值</strong>$f(-2) = 1$；$f(-1) = 12$；$f(2) = -15$；$f(3) = -4$<strong>第四步：比较确定最值</strong><strong>答：</strong>最大值为 $12$（在 $x = -1$ 处），最小值为 $-15$（在 $x = 2$ 处）</p>
+<p><strong>解：</strong></p>
+<p><strong>第一步：求导数</strong> $f'(x) = 6x^2 - 6x - 12 = 6(x^2 - x - 2) = 6(x-2)(x+1)$</p>
+<p><strong>第二步：求区间内的驻点</strong> 令 $f'(x) = 0$，得 $x = -1$ 或 $x = 2$（均在 $[-2, 3]$ 内）</p>
+<p><strong>第三步：计算关键点的函数值</strong> $f(-2) = 1$，$f(-1) = 12$，$f(2) = -15$，$f(3) = -4$</p>
+<p><strong>第四步：比较确定最值</strong> <strong>答：</strong>最大值为 $12$（在 $x = -1$ 处），最小值为 $-15$（在 $x = 2$ 处）</p>
 </div>
 </div><div class="right-visual"><div id="vis-maxmin-example"></div></div></div></div>
 <!-- 第23页：利用导数求最值的方法 -->
@@ -1695,7 +2829,11 @@
 <p><strong>定理：</strong>闭区间 $[a,b]$ 上的连续函数必有最大值和最小值</p>
 </div>
 <h3>求最值的完整步骤</h3>
-<p><strong>第一步：</strong>求导数 $f'(x)$；<strong>第二步：</strong>求驻点，令 $f'(x) = 0$；<strong>第三步：</strong>找出不可导点；<strong>第四步：</strong>计算关键点和端点的函数值；<strong>第五步：</strong>比较所有函数值，确定最值</p>
+<p><strong>第一步：</strong>求导数 $f'(x)$</p>
+<p><strong>第二步：</strong>求驻点，令 $f'(x) = 0$</p>
+<p><strong>第三步：</strong>找出不可导点</p>
+<p><strong>第四步：</strong>计算关键点和端点的函数值</p>
+<p><strong>第五步：</strong>比较所有函数值，确定最值</p>
 <h3>例题：求 $f(x) = x^3 - 3x$ 在 $[-2, 2]$ 上的最值</h3>
 <div class="example">
 <p><strong>解：</strong>$f'(x) = 3x^2 - 3 = 3(x^2 - 1) = 3(x-1)(x+1)$；驻点：$x = \pm 1$；计算函数值：$f(-2) = -2$；$f(-1) = 2$；$f(1) = -2$；$f(2) = 2$<strong>答：</strong>最大值为 $2$（在 $x = -1, 2$ 处），最小值为 $-2$（在 $x = -2, 1$ 处）</p>
@@ -1707,7 +2845,9 @@
 <h3>问题</h3>
 <p>某工厂生产成本函数为：$C(x) = x^2 - 10x + 100$，其中 $x$ 是产量（百件），$C$ 是成本（万元）。求：最小成本是多少？对应产量是多少？</p>
 <h3>解答</h3>
-<p>1. 求导：$C'(x) = 2x - 10$；2. 令 $C'(x) = 0$：$x = 5$；3. 最小成本：$C(5) = 75$ 万元</p>
+<p><strong>步骤1：</strong>求导得到 $C'(x) = 2x - 10$</p>
+<p><strong>步骤2：</strong>令 $C'(x) = 0$，解得 $x = 5$</p>
+<p><strong>步骤3：</strong>计算最小成本：$C(5) = 75$ 万元</p>
 </div><div class="right-visual"><div id="vis-cost-optimization"></div></div></div></div>
 <!-- 第25页：实际应用-利润最大化 -->
 <div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
@@ -1715,7 +2855,9 @@
 <h3>问题</h3>
 <p>某产品的利润函数为：$P(x) = -x^2 + 12x - 20$，其中 $x$ 是销售量（千件），$P$ 是利润（万元）。求：最大利润是多少？</p>
 <h3>解答</h3>
-<p>1. 求导：$P'(x) = -2x + 12$；2. 令 $P'(x) = 0$：$x = 6$；3. 最大利润：$P(6) = 16$ 万元</p>
+<p><strong>步骤1：</strong>求导得到 $P'(x) = -2x + 12$</p>
+<p><strong>步骤2：</strong>令 $P'(x) = 0$，得到 $x = 6$</p>
+<p><strong>步骤3：</strong>计算最大利润：$P(6) = 16$ 万元</p>
 </div><div class="right-visual"><div id="vis-profit-optimization"></div></div></div></div>
 <!-- 第26页：实际应用-容器设计 -->
 <div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
@@ -1725,28 +2867,15 @@
 <h3>解答</h3>
 <p>设剪去边长为 $x$ cm，则：容积 $V(x) = x(20-2x)^2$；求导后得：$x = \frac{10}{3}$ cm；最大容积：$V(\frac{10}{3}) \approx 592.6$ cm³</p>
 </div><div class="right-visual"><div id="vis-container-design"></div></div></div></div>
-<!-- 第27页：泰勒展开 -->
-<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
-<h2>泰勒展开</h2>
-<p>用<span class="highlight">多项式</span>来近似表示函数的重要工具。</p>
-<div class="formula-highlight">
-<p><strong>泰勒公式：</strong></p>
-$f(x) = f(x_0) + f'(x_0)(x-x_0) + \frac{f''(x_0)}{2!}(x-x_0)^2 + \cdots + \frac{f^{(n)}(x_0)}{n!}(x-x_0)^n + R_n(x)$
-</div>
-<h3>求泰勒展开的步骤</h3>
-<p><strong>第一步：</strong>确定展开点 $x_0$（通常取 $x_0 = 0$）；<strong>第二步：</strong>计算函数在 $x_0$ 处的各阶导数值；<strong>第三步：</strong>代入泰勒公式得到展开式；<strong>第四步：</strong>确定展开的项数（根据精度要求）</p>
-<h3>常用展开式（$x_0 = 0$）</h3>
-<p>$e^x = 1 + x + \frac{x^2}{2!} + \frac{x^3}{3!} + \cdots$；$\sin x = x - \frac{x^3}{3!} + \frac{x^5}{5!} - \cdots$；$\cos x = 1 - \frac{x^2}{2!} + \frac{x^4}{4!} - \cdots$；$\ln(1+x) = x - \frac{x^2}{2} + \frac{x^3}{3} - \cdots$</p>
-<div class="note">
-<p><strong>应用：</strong>函数近似计算、误差估计、极限计算</p>
-</div>
-</div><div class="right-visual"><div id="vis-taylor"></div></div></div></div>
 <!-- 第28页：相关变化率 -->
 <div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
 <h2>相关变化率</h2>
 <p>当几个变量之间存在函数关系时，它们的<span class="highlight">变化率之间也存在关系</span>。</p>
 <h3>解题步骤</h3>
-<p><strong>第一步：</strong>设定变量，建立函数关系式；<strong>第二步：</strong>对时间 $t$ 求导（隐函数求导）；<strong>第三步：</strong>代入已知条件和数值；<strong>第四步：</strong>求解未知的变化率</p>
+<p><strong>第一步：</strong>设定变量，建立函数关系式</p>
+<p><strong>第二步：</strong>对时间 $t$ 求导（隐函数求导）</p>
+<p><strong>第三步：</strong>代入已知条件和数值</p>
+<p><strong>第四步：</strong>求解未知的变化率</p>
 <h3>常见题型</h3>
 <p><strong>几何问题：</strong>面积、体积、长度的变化；<strong>物理问题：</strong>速度、加速度、距离的变化；<strong>经济问题：</strong>成本、收益、利润的变化</p>
 <h3>解题要点</h3>
@@ -1773,6 +2902,818 @@ $f(x) = f(x_0) + f'(x_0)(x-x_0) + \frac{f''(x_0)}{2!}(x-x_0)^2 + \cdots + \frac{
 <h3>拐点</h3>
 <p>凹凸性改变的点叫<span class="highlight">拐点</span>。在拐点处：$f''(x) = 0$ 或不存在</p>
 </div><div class="right-visual"><div id="vis-concavity"></div></div></div></div>
+<!-- 第30.5页：二阶导数与凹凸性 - 交互式演示 -->
+<div class="slide concavity-interactive-slide" style="display: none; width: 100vw; height: 100vh; margin: 0; padding: 0; overflow: hidden; position: relative;">
+<!-- 内部子页页码与导航（固定定位，避免影响版式） -->
+<div class="concavity-slide-counter" style="position: fixed; top: 30px; right: 30px; font-size: 16px; color: #64748b; background: white; padding: 8px 16px; border-radius: 20px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06); z-index: 1000;"><span id="concavityCurrentSlide">1</span> / 3</div>
+<div class="concavity-slide-nav" style="position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); display: flex; gap: 12px; z-index: 1000;">
+    <button type="button" class="concavity-nav-btn" onclick="concavityPrevSlide(event)" style="background:#3b82f6;color:#fff;border:none;padding:8px 16px;font-size:14px;border-radius:6px;cursor:pointer;">上一页</button>
+    <button type="button" class="concavity-nav-btn" onclick="concavityNextSlide(event)" style="background:#3b82f6;color:#fff;border:none;padding:8px 16px;font-size:14px;border-radius:6px;cursor:pointer;">下一页</button>
+</div>
+<!-- 嵌入的凹凸性交互式演示内容 -->
+<div class="concavity-slide-container" style="width: 100%; height: 100vh; display: flex; position: relative; gap: 0; padding: 0;">
+<!-- 幻灯片 1: 凹向上 -->
+<div class="concavity-slide active" id="concavity-slide-1">
+    <div class="concavity-slide-container-inner">
+        <div class="concavity-left-content">
+            <h1>二阶导数与凹凸性</h1>
+            <h2>1. 凹向上（开口向上）</h2>
+            <p>当函数图形像一个<span class="highlight">微笑</span>或<span class="highlight">碗</span>的形状时，我们说它是凹向上的。</p>
+            <div class="formula-highlight">
+                <p><strong>数学定义：</strong>当 $f''(x) > 0$ 时，函数在该区间凹向上</p>
+                <p><strong>几何意义：</strong>切线斜率递增，函数向上弯曲</p>
+            </div>
+            <h3>直观理解</h3>
+            <p>想象你在滑雪：</p>
+            <p>• 如果坡道越来越陡（加速下滑），这就是凹向上</p>
+            <p>• 切线的斜率在增加：从负变得更正</p>
+            <h3>实际例子</h3>
+            <p>• 抛物线 $y = x^2$ 在整个定义域上都是凹向上的</p>
+            <p>• 指数函数 $y = e^x$ 也是凹向上的</p>
+            <p>• 成本函数通常是凹向上的（边际成本递增）</p>
+            <div class="key-point">
+                <strong>记忆技巧：</strong>凹向上像个笑脸 ⌣，二阶导数为正
+            </div>
+            <p style="color: #3b82f6; margin-top: 20px;">
+                <i class="fas fa-hand-pointer"></i> 
+                <strong>互动提示：</strong>拖动滑块观察函数的凹凸性变化
+            </p>
+        </div>
+        <div class="concavity-right-visual">
+            <div class="concavity-graph-container">
+                <div class="concavity-control-panel">
+                    <div class="concavity-slider-container">
+                        <label class="concavity-slider-label" for="concavity-xSlider1">选择 x 的值：</label>
+                        <input type="range" id="concavity-xSlider1" class="concavity-slider" min="-2" max="2" step="0.01" value="1">
+                        <div class="concavity-slider-marks">
+                            <span>-2</span>
+                            <span>0</span>
+                            <span>2</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="concavity-data-panel">
+                    <div class="concavity-data-card">
+                        <div class="concavity-data-label">$x$</div>
+                        <div class="concavity-data-value" id="concavity-xValue1">1.00</div>
+                    </div>
+                    <div class="concavity-data-card">
+                        <div class="concavity-data-label">$f'(x)$ (斜率)</div>
+                        <div class="concavity-data-value" id="concavity-fpValue1">2.00</div>
+                        <div class="concavity-data-description" id="concavity-fpDesc1">递增</div>
+                    </div>
+                    <div class="concavity-data-card concavity-highlight-positive">
+                        <div class="concavity-data-label">$f''(x)$ (凹凸性)</div>
+                        <div class="concavity-data-value" id="concavity-fppValue1">2.00</div>
+                        <div class="concavity-data-description">凹向上</div>
+                    </div>
+                </div>
+                <canvas id="concavity-canvas1"></canvas>
+                <div class="concavity-hint-text">点击图形可选择 x 值</div>
+                <div class="concavity-indicator">
+                    <div class="concavity-icon concavity-concave-up">⌣</div>
+                    <div class="concavity-text">凹向上 (f'' > 0)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 幻灯片 2: 凹向下 -->
+<div class="concavity-slide" id="concavity-slide-2">
+    <div class="concavity-slide-container-inner">
+        <div class="concavity-left-content">
+            <h1>二阶导数与凹凸性</h1>
+            <h2>2. 凹向下（开口向下）</h2>
+            <p>当函数图形像一个<span class="highlight">倒置的碗</span>或<span class="highlight">山峰</span>的形状时，我们说它是凹向下的。</p>
+            <div class="formula-highlight">
+                <p><strong>数学定义：</strong>当 $f''(x) < 0$ 时，函数在该区间凹向下</p>
+                <p><strong>几何意义：</strong>切线斜率递减，函数向下弯曲</p>
+            </div>
+            <h3>直观理解</h3>
+            <p>继续想象滑雪的例子：</p>
+            <p>• 如果坡道越来越平缓（减速下滑），这就是凹向下</p>
+            <p>• 切线的斜率在减少：从正变得更负</p>
+            <h3>实际例子</h3>
+            <p>• 抛物线 $y = -x^2$ 在整个定义域上都是凹向下的</p>
+            <p>• 对数函数 $y = \ln x$ 是凹向下的</p>
+            <p>• 效用函数通常是凹向下的（边际效用递减）</p>
+            <div class="key-point">
+                <strong>记忆技巧：</strong>凹向下像个哭脸 ⌢，二阶导数为负
+            </div>
+            <p style="color: #3b82f6; margin-top: 20px;">
+                <i class="fas fa-lightbulb"></i> 
+                <strong>经济学应用：</strong>边际效用递减定律就体现在效用函数的凹向下特性
+            </p>
+        </div>
+        <div class="concavity-right-visual">
+            <div class="concavity-graph-container">
+                <div class="concavity-control-panel">
+                    <div class="concavity-slider-container">
+                        <label class="concavity-slider-label" for="concavity-xSlider2">选择 x 的值：</label>
+                        <input type="range" id="concavity-xSlider2" class="concavity-slider" min="-2" max="2" step="0.01" value="-1">
+                        <div class="concavity-slider-marks">
+                            <span>-2</span>
+                            <span>0</span>
+                            <span>2</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="concavity-data-panel">
+                    <div class="concavity-data-card">
+                        <div class="concavity-data-label">$x$</div>
+                        <div class="concavity-data-value" id="concavity-xValue2">-1.00</div>
+                    </div>
+                    <div class="concavity-data-card">
+                        <div class="concavity-data-label">$f'(x)$ (斜率)</div>
+                        <div class="concavity-data-value" id="concavity-fpValue2">2.00</div>
+                        <div class="concavity-data-description" id="concavity-fpDesc2">递增</div>
+                    </div>
+                    <div class="concavity-data-card concavity-highlight-negative">
+                        <div class="concavity-data-label">$f''(x)$ (凹凸性)</div>
+                        <div class="concavity-data-value" id="concavity-fppValue2">-2.00</div>
+                        <div class="concavity-data-description">凹向下</div>
+                    </div>
+                </div>
+                <canvas id="concavity-canvas2"></canvas>
+                <div class="concavity-hint-text">点击图形可选择 x 值</div>
+                <div class="concavity-indicator">
+                    <div class="concavity-icon concavity-concave-down">⌢</div>
+                    <div class="concavity-text">凹向下 (f'' < 0)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 幻灯片 3: 拐点 -->
+<div class="concavity-slide" id="concavity-slide-3">
+    <div class="concavity-slide-container-inner">
+        <div class="concavity-left-content">
+            <h1>二阶导数与凹凸性</h1>
+            <h2>3. 拐点（凹凸性改变）</h2>
+            <p><span class="highlight">拐点</span>是函数凹凸性发生改变的点，是凹向上与凹向下的分界点。</p>
+            <div class="formula-highlight">
+                <p><strong>数学定义：</strong>当 $f''(x) = 0$ 且两侧符号相反时，该点为拐点</p>
+                <p><strong>几何意义：</strong>函数从凹向上变为凹向下，或相反</p>
+            </div>
+            <h3>拐点的特征</h3>
+            <p>• 二阶导数为零：$f''(x_0) = 0$</p>
+            <p>• 二阶导数在该点两侧变号</p>
+            <p>• 函数图形在该点改变弯曲方向</p>
+            <h3>典型例子：$f(x) = x^3$</h3>
+            <p>• $f'(x) = 3x^2$（一阶导数）</p>
+            <p>• $f''(x) = 6x$（二阶导数）</p>
+            <p>• 当 $x = 0$ 时，$f''(0) = 0$</p>
+            <p>• $x < 0$ 时凹向下，$x > 0$ 时凹向上</p>
+            <div class="key-point">
+                <strong>注意：</strong>$f''(x) = 0$ 只是拐点的必要条件，还需要检查两侧符号是否相反。
+                类似于 $f'(x) = 0$ 对于极值点的关系！
+            </div>
+            <h3>拐点的应用</h3>
+            <p>• 成本分析：找到规模经济的转折点</p>
+            <p>• 增长模型：确定增长速度的变化点</p>
+            <p>• 工程设计：优化曲线的平滑过渡</p>
+        </div>
+        <div class="concavity-right-visual">
+            <div class="concavity-graph-container">
+                <div class="concavity-control-panel">
+                    <div class="concavity-slider-container">
+                        <label class="concavity-slider-label" for="concavity-xSlider3">选择 x 的值：</label>
+                        <input type="range" id="concavity-xSlider3" class="concavity-slider" min="-2" max="2" step="0.01" value="0.5">
+                        <div class="concavity-slider-marks">
+                            <span>-2</span>
+                            <span>0</span>
+                            <span>2</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="concavity-data-panel">
+                    <div class="concavity-data-card">
+                        <div class="concavity-data-label">$x$</div>
+                        <div class="concavity-data-value" id="concavity-xValue3">0.50</div>
+                    </div>
+                    <div class="concavity-data-card">
+                        <div class="concavity-data-label">$f'(x)$ (斜率)</div>
+                        <div class="concavity-data-value" id="concavity-fpValue3">0.75</div>
+                        <div class="concavity-data-description" id="concavity-fpDesc3">递增</div>
+                    </div>
+                    <div class="concavity-data-card" id="concavity-fppCard3">
+                        <div class="concavity-data-label">$f''(x)$ (凹凸性)</div>
+                        <div class="concavity-data-value" id="concavity-fppValue3">3.00</div>
+                        <div class="concavity-data-description" id="concavity-fppDesc3">凹向上</div>
+                    </div>
+                </div>
+                <canvas id="concavity-canvas3"></canvas>
+                <div class="concavity-hint-text">点击图形可选择 x 值</div>
+                <div class="concavity-indicator">
+                    <div class="concavity-icon" id="concavity-concavityIcon3">⌣</div>
+                    <div class="concavity-text" id="concavity-concavityText3">凹向上 (f'' > 0)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+</div>
+</div>
+</div>
+<!-- 第30.6页：f'(x)与f''(x)的关系 - 交互式演示 -->
+<div class="slide derivatives-relation-slide" style="display: none; width: 100vw; height: 100vh; margin: 0; padding: 0; overflow: hidden; position: relative;">
+<!-- 嵌入的导数关系可视化内容 -->
+<style>
+/* 导数关系可视化专用样式 */
+.derivatives-relation-slide {
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background: #f9fafb;
+}
+.derivatives-relation-slide * {
+    box-sizing: border-box;
+}
+.derivatives-relation-slide .container-wrapper {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+.derivatives-relation-slide .main-container {
+    width: 100%;
+    max-width: 1400px;
+    height: 100%;
+    max-height: 900px;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+.derivatives-relation-slide .content-area {
+    padding: 40px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+.derivatives-relation-slide h1 {
+    font-size: 32px;
+    font-weight: bold;
+    color: #1f2937;
+    margin-bottom: 10px;
+}
+.derivatives-relation-slide .subtitle {
+    font-size: 18px;
+    color: #6b7280;
+    margin-bottom: 30px;
+}
+.derivatives-relation-slide .main-layout {
+    display: flex;
+    gap: 40px;
+    flex: 1;
+    min-height: 0;
+}
+.derivatives-relation-slide .charts-section {
+    flex: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+.derivatives-relation-slide .control-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+.derivatives-relation-slide .chart-container {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 20px;
+    position: relative;
+}
+.derivatives-relation-slide .chart-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+.derivatives-relation-slide .chart-title {
+    font-size: 20px;
+    font-weight: bold;
+}
+.derivatives-relation-slide .value-badge {
+    font-size: 14px;
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-family: monospace;
+    font-weight: 500;
+}
+.derivatives-relation-slide .blue-badge {
+    background: #dbeafe;
+    color: #1e40af;
+}
+.derivatives-relation-slide .green-badge {
+    background: #d1fae5;
+    color: #064e3b;
+}
+.derivatives-relation-slide .purple-badge {
+    background: #ede9fe;
+    color: #5b21b6;
+}
+.derivatives-relation-slide .canvas-wrapper {
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+    height: 220px;
+}
+.derivatives-relation-slide .canvas-wrapper.tall {
+    height: 280px;
+}
+.derivatives-relation-slide canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+.derivatives-relation-slide .slider-container {
+    margin-bottom: 30px;
+}
+.derivatives-relation-slide .slider-label {
+    font-size: 14px;
+    color: #374151;
+    font-weight: 500;
+    margin-bottom: 10px;
+}
+.derivatives-relation-slide .x-value {
+    color: #2563eb;
+    font-weight: bold;
+}
+.derivatives-relation-slide input[type="range"] {
+    width: 100%;
+    height: 8px;
+    background: #e5e7eb;
+    border-radius: 4px;
+    outline: none;
+    appearance: none;
+    cursor: pointer;
+}
+.derivatives-relation-slide input[type="range"]::-webkit-slider-thumb {
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background: #2563eb;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+.derivatives-relation-slide .slider-scale {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #9ca3af;
+    margin-top: 5px;
+}
+.derivatives-relation-slide .info-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+.derivatives-relation-slide .info-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+.derivatives-relation-slide .info-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #374151;
+}
+.derivatives-relation-slide .info-icon {
+    font-size: 28px;
+}
+.derivatives-relation-slide .info-text {
+    font-size: 16px;
+    font-weight: 500;
+    color: #4b5563;
+}
+.derivatives-relation-slide .info-note {
+    font-size: 14px;
+    color: #6b7280;
+    margin-top: 10px;
+    line-height: 1.5;
+}
+.derivatives-relation-slide .highlight-card {
+    background: #eff6ff;
+    border: 2px solid #3b82f6;
+    box-shadow: 0 4px 6px rgba(59, 130, 246, 0.15);
+}
+.derivatives-relation-slide .highlight-card .info-title {
+    color: #1d4ed8;
+}
+.derivatives-relation-slide .highlight-card .info-text {
+    font-size: 24px;
+    color: #2563eb;
+}
+.derivatives-relation-slide .concavity-icon {
+    font-size: 48px;
+    color: #2563eb;
+    font-family: monospace;
+}
+.derivatives-relation-slide .explanation-box {
+    background: #f9fafb;
+    border-radius: 12px;
+    padding: 20px;
+    font-size: 14px;
+    color: #374151;
+    line-height: 1.8;
+    margin-top: auto;
+}
+.derivatives-relation-slide .explanation-box p {
+    margin-bottom: 8px;
+}
+.derivatives-relation-slide .explanation-box strong {
+    color: #1f2937;
+}
+</style>
+
+<div class="container-wrapper">
+    <div class="main-container">
+        <div class="content-area">
+            <h1>f'(x) 与 f''(x) 的关系</h1>
+            <p class="subtitle">观察 f''(x) (紫色) 如何决定 f'(x) (绿色) 的趋势，以及 f'(x) 如何塑造 f(x) (蓝色) 的形状</p>
+            
+            <div class="main-layout">
+                <!-- 左侧：图表 -->
+                <div class="charts-section">
+                    <!-- 图表 1: f(x) -->
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <span class="chart-title blue-badge">主函数: f(x) = x³</span>
+                            <span class="value-badge blue-badge">f(x) = <span id="derFValueText">0.00</span></span>
+                        </div>
+                        <div class="canvas-wrapper tall">
+                            <canvas id="derFCanvas"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- 图表 2: f'(x) 和 f''(x) -->
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <span class="chart-title">导数图像</span>
+                            <span class="value-badge green-badge">f'(x) = <span id="derFpValueText">0.00</span></span>
+                            <span class="value-badge purple-badge">f''(x) = <span id="derFppValueText">0.00</span></span>
+                        </div>
+                        <div class="canvas-wrapper">
+                            <canvas id="derDCanvas"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 右侧：控制面板和数据 -->
+                <div class="control-section">
+                    <!-- 滑块 -->
+                    <div class="slider-container">
+                        <div class="slider-label">选择 x 的值 (当前: <span id="derXValueText" class="x-value">0.00</span>)</div>
+                        <input type="range" id="derXSlider" min="-2" max="2" step="0.01" value="0.28">
+                        <div class="slider-scale">
+                            <span>-2.0</span>
+                            <span>0.0</span>
+                            <span>2.0</span>
+                        </div>
+                    </div>
+                    
+                    <!-- f'(x) 卡片 -->
+                    <div class="info-card">
+                        <div class="info-header">
+                            <span class="info-title">f'(x) (斜率)</span>
+                            <span id="derSlopeIcon" class="info-icon">➡️</span>
+                        </div>
+                        <div id="derSlopeText" class="info-text">水平 (f' = 0)</div>
+                        <div class="info-note green-badge" style="margin-top: 10px; text-align: center;">
+                            查看绿色曲线在导数图上的位置
+                        </div>
+                    </div>
+                    
+                    <!-- f''(x) 卡片 -->
+                    <div id="derConcavityCard" class="info-card highlight-card">
+                        <div class="info-header">
+                            <span class="info-title">f''(x) (凹凸性)</span>
+                            <span id="derConcaveIcon" class="concavity-icon">⌣</span>
+                        </div>
+                        <div id="derConcaveText" class="info-text">凹向上 (f'' > 0)</div>
+                        <div class="info-note purple-badge" style="margin-top: 10px; text-align: center; background: #ede9fe; color: #5b21b6;">
+                            查看紫色曲线是否在x轴上方
+                        </div>
+                    </div>
+                    
+                    <!-- 解释 -->
+                    <div id="derExplanation" class="explanation-box">
+                        <!-- 动态解释会在这里更新 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    // --- 导数关系可视化脚本 ---
+    const derXSlider = document.getElementById('derXSlider');
+    const derFCanvas = document.getElementById('derFCanvas');
+    const derFCtx = derFCanvas.getContext('2d');
+    const derDCanvas = document.getElementById('derDCanvas');
+    const derDCtx = derDCanvas.getContext('2d');
+    
+    const derXValueText = document.getElementById('derXValueText');
+    const derFValueText = document.getElementById('derFValueText');
+    const derFpValueText = document.getElementById('derFpValueText');
+    const derFppValueText = document.getElementById('derFppValueText');
+    const derExplanation = document.getElementById('derExplanation');
+    const derSlopeIcon = document.getElementById('derSlopeIcon');
+    const derSlopeText = document.getElementById('derSlopeText');
+    const derConcavityCard = document.getElementById('derConcavityCard');
+    const derConcaveIcon = document.getElementById('derConcaveIcon');
+    const derConcaveText = document.getElementById('derConcaveText');
+    
+    // 函数定义
+    const f = (x) => x * x * x;
+    const fp = (x) => 3 * x * x;
+    const fpp = (x) => 6 * x;
+    
+    // 图表参数
+    let xMin = -2, xMax = 2;
+    let xRange = xMax - xMin;
+    let f_yMin = -8, f_yMax = 8;
+    let f_yRange = f_yMax - f_yMin;
+    let d_yMin = -12, d_yMax = 12;
+    let d_yRange = d_yMax - d_yMin;
+    
+    // 坐标映射
+    function mapX(x, canvas) {
+        return canvas.width * (x - xMin) / xRange;
+    }
+    
+    function mapY(y, yMin, yRange, canvas) {
+        return canvas.height * (1 - (y - yMin) / yRange);
+    }
+    
+    function unmapX(px, canvas) {
+        return (px / canvas.width) * xRange + xMin;
+    }
+    
+    // 绘制坐标轴
+    function drawAxes(ctx, yMin, yMax, yRange) {
+        const canvas = ctx.canvas;
+        ctx.strokeStyle = '#9ca3af';
+        ctx.fillStyle = '#6b7280';
+        ctx.lineWidth = 1;
+        ctx.font = '12px sans-serif';
+        
+        // Y轴
+        const yAxisX = mapX(0, canvas);
+        ctx.beginPath();
+        ctx.moveTo(yAxisX, 0);
+        ctx.lineTo(yAxisX, canvas.height);
+        ctx.stroke();
+        
+        // X轴
+        const xAxisY = mapY(0, yMin, yRange, canvas);
+        ctx.beginPath();
+        ctx.moveTo(0, xAxisY);
+        ctx.lineTo(canvas.width, xAxisY);
+        ctx.stroke();
+        
+        // 标签
+        ctx.fillText('0', yAxisX + 5, xAxisY + 12);
+    }
+    
+    // 绘制函数曲线
+    function drawCurve(ctx, func, yMin, yRange, color, lineWidth) {
+        const canvas = ctx.canvas;
+        ctx.strokeStyle = color;
+        ctx.lineWidth = lineWidth;
+        ctx.beginPath();
+        
+        for (let px = 0; px <= canvas.width; px++) {
+            const x = unmapX(px, canvas);
+            const y = func(x);
+            const py = mapY(y, yMin, yRange, canvas);
+            if (px === 0) ctx.moveTo(px, py);
+            else ctx.lineTo(px, py);
+        }
+        ctx.stroke();
+    }
+    
+    // 绘制f(x)图表
+    function drawFCanvas(x_val) {
+        const canvas = derFCtx.canvas;
+        derFCtx.clearRect(0, 0, canvas.width, canvas.height);
+        drawAxes(derFCtx, f_yMin, f_yMax, f_yRange);
+        
+        // 绘制f(x)
+        drawCurve(derFCtx, f, f_yMin, f_yRange, '#3b82f6', 3);
+        
+        // 绘制切线
+        const y = f(x_val);
+        const m = fp(x_val);
+        const x1 = x_val - 1, y1 = m * (x1 - x_val) + y;
+        const x2 = x_val + 1, y2 = m * (x2 - x_val) + y;
+        
+        derFCtx.strokeStyle = '#f97316';
+        derFCtx.lineWidth = 2;
+        derFCtx.beginPath();
+        derFCtx.moveTo(mapX(x1, canvas), mapY(y1, f_yMin, f_yRange, canvas));
+        derFCtx.lineTo(mapX(x2, canvas), mapY(y2, f_yMin, f_yRange, canvas));
+        derFCtx.stroke();
+        
+        // 绘制scrubber
+        drawScrubber(derFCtx, x_val, f(x_val), f_yMin, f_yRange, '#0284c7');
+    }
+    
+    // 绘制导数图表
+    function drawDCanvas(x_val) {
+        const canvas = derDCtx.canvas;
+        derDCtx.clearRect(0, 0, canvas.width, canvas.height);
+        drawAxes(derDCtx, d_yMin, d_yMax, d_yRange);
+        
+        // 绘制f'(x)
+        drawCurve(derDCtx, fp, d_yMin, d_yRange, '#16a34a', 3);
+        
+        // 绘制f''(x)
+        drawCurve(derDCtx, fpp, d_yMin, d_yRange, '#7e22ce', 3);
+        
+        // 绘制scrubbers
+        drawScrubber(derDCtx, x_val, fp(x_val), d_yMin, d_yRange, '#15803d');
+        drawScrubber(derDCtx, x_val, fpp(x_val), d_yMin, d_yRange, '#6b21a8');
+    }
+    
+    // 绘制scrubber
+    function drawScrubber(ctx, x, y, yMin, yRange, color) {
+        const canvas = ctx.canvas;
+        const px = mapX(x, canvas);
+        const py = mapY(y, yMin, yRange, canvas);
+        
+        // 垂直虚线
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 1;
+        ctx.setLineDash([5, 5]);
+        ctx.beginPath();
+        ctx.moveTo(px, 0);
+        ctx.lineTo(px, canvas.height);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        
+        // 点
+        ctx.fillStyle = color;
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(px, py, 6, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.stroke();
+    }
+    
+    // 主更新函数
+    function updateDerivatives(x_str) {
+        const x = parseFloat(x_str);
+        const val_f = f(x);
+        const val_fp = fp(x);
+        const val_fpp = fpp(x);
+        
+        // 更新文本
+        derXValueText.textContent = x.toFixed(2);
+        derFValueText.textContent = val_f.toFixed(2);
+        derFpValueText.textContent = val_fp.toFixed(2);
+        derFppValueText.textContent = val_fpp.toFixed(2);
+        
+        // 更新f'(x)卡片
+        if (val_fp > 0.01) {
+            derSlopeIcon.textContent = '📈';
+            derSlopeText.textContent = "递增 (f' > 0)";
+        } else if (val_fp < -0.01) {
+            derSlopeIcon.textContent = '📉';
+            derSlopeText.textContent = "递减 (f' < 0)";
+        } else {
+            derSlopeIcon.textContent = '➡️';
+            derSlopeText.textContent = "水平 (f' = 0)";
+        }
+        
+        // 更新f''(x)卡片
+        derConcavityCard.className = 'info-card highlight-card';
+        let explainerText = "";
+        
+        if (val_fpp > 0.01) {
+            derConcaveIcon.textContent = '⌣';
+            derConcaveText.textContent = "凹向上 (f'' > 0)";
+            explainerText = `
+                <p><strong>f''(x) 为正 (${val_fpp.toFixed(2)})</strong></p>
+                <p style="color: #7e22ce;">🟣 f''(x) 曲线在x轴上方</p>
+                <p>这迫使 f'(x) (斜率) <strong>增加</strong></p>
+                <p style="color: #16a34a;">🟢 f'(x) 曲线正在上升</p>
+                <p>这塑造了 f(x) <strong>向上弯曲 ⌣</strong> 的形状</p>
+            `;
+        } else if (val_fpp < -0.01) {
+            derConcaveIcon.textContent = '⌢';
+            derConcaveText.textContent = "凹向下 (f'' < 0)";
+            derConcavityCard.style.borderColor = '#f97316';
+            derConcavityCard.style.backgroundColor = '#fff7ed';
+            explainerText = `
+                <p><strong>f''(x) 为负 (${val_fpp.toFixed(2)})</strong></p>
+                <p style="color: #7e22ce;">🟣 f''(x) 曲线在x轴下方</p>
+                <p>这迫使 f'(x) (斜率) <strong>减少</strong></p>
+                <p style="color: #16a34a;">🟢 f'(x) 曲线正在下降</p>
+                <p>这塑造了 f(x) <strong>向下弯曲 ⌢</strong> 的形状</p>
+            `;
+        } else {
+            derConcaveIcon.textContent = '—';
+            derConcaveText.textContent = "拐点 (f'' = 0)";
+            derConcavityCard.style.borderColor = '#6b7280';
+            derConcavityCard.style.backgroundColor = '#f9fafb';
+            explainerText = `
+                <p><strong>f''(x) 为零 (0.00)</strong></p>
+                <p style="color: #7e22ce;">🟣 f''(x) 曲线正在穿越x轴</p>
+                <p>f'(x) (斜率) 停止了减少，即将开始增加</p>
+                <p style="color: #16a34a;">🟢 f'(x) 曲线达到了它的最低点</p>
+                <p>f(x) 正在<strong>改变弯曲方向</strong></p>
+            `;
+        }
+        
+        derExplanation.innerHTML = explainerText;
+        
+        // 重绘图表
+        drawFCanvas(x);
+        drawDCanvas(x);
+    }
+    
+    // 设置画布
+    function setupDerivativesCanvases() {
+        const dpr = window.devicePixelRatio || 1;
+        
+        [derFCanvas, derDCanvas].forEach(canvas => {
+            const parent = canvas.parentElement;
+            canvas.width = parent.clientWidth * dpr;
+            canvas.height = parent.clientHeight * dpr;
+            const ctx = canvas.getContext('2d');
+            ctx.scale(dpr, dpr);
+        });
+        
+        updateDerivatives(derXSlider.value);
+    }
+    
+    // 事件监听
+    derXSlider.addEventListener('input', (e) => updateDerivatives(e.target.value));
+    
+    // 初始化（当导数关系幻灯片显示时）
+    let derivativesInitialized = false;
+    const derivativesSlide = document.querySelector('.derivatives-relation-slide');
+    
+    if (derivativesSlide) {
+        const checkAndInit = () => {
+            const isActive = derivativesSlide.classList.contains('active');
+            if (isActive && !derivativesInitialized) {
+                derivativesInitialized = true;
+                setTimeout(() => {
+                    setupDerivativesCanvases();
+                    
+                    // 响应式处理
+                    const resizeObserver = new ResizeObserver(() => {
+                        setupDerivativesCanvases();
+                    });
+                    resizeObserver.observe(derFCanvas.parentElement);
+                    resizeObserver.observe(derDCanvas.parentElement);
+                }, 100);
+            } else if (!isActive) {
+                derivativesInitialized = false;
+            }
+        };
+        
+        // 监听slide变化
+        setTimeout(checkAndInit, 100);
+        const observer = new MutationObserver(checkAndInit);
+        observer.observe(derivativesSlide, { attributes: true, attributeFilter: ['class'] });
+        
+        // 监听所有slide变化
+        const allSlides = document.querySelectorAll('.slide');
+        allSlides.forEach(slide => {
+            const slideObserver = new MutationObserver(() => {
+                if (slide.classList.contains('active') && slide === derivativesSlide) {
+                    checkAndInit();
+                }
+            });
+            slideObserver.observe(slide, { attributes: true, attributeFilter: ['class'] });
+        });
+    }
+})();
+</script>
+</div>
 <!-- 第31页：凹凸性与拐点例题 -->
 <div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
 <h2>求凹凸区间与拐点</h2>
@@ -1990,7 +3931,6 @@ $\frac{dy}{dt} = -\frac{6}{8} = -\frac{3}{4} \text{ m/s}$
 <li>极值点：$f'(x) = 0$ 且符号改变</li>
 <li>最值 = 比较极值和端点值</li>
 <li>洛必达法则：求未定式极限的利器</li>
-<li>泰勒展开：函数的多项式近似</li>
 <li>边际分析：经济决策的数学基础</li>
 <li>实际问题：建模 → 求导 → 求极值</li>
 </ul>
@@ -2004,9 +3944,9 @@ $\frac{dy}{dt} = -\frac{6}{8} = -\frac{3}{4} \text{ m/s}$
     <div class="nav-controls" role="navigation" aria-label="幻灯片导航">
         <button class="nav-btn" onclick="previousSlide()" aria-label="上一页" title="上一页 (<i class="fa-solid fa-arrow-left"></i>)"><i class="fa-solid fa-arrow-left"></i> 上一页</button>
         <div class="slide-number" role="status" aria-live="polite">
-            <input type="number" id="slideNumberInput" min="1" max="39" value="1"
+            <input type="number" id="slideNumberInput" min="1" max="38" value="1"
                    onchange="jumpToSlide(this.value)"
-                   aria-label="当前页码">/<span id="slideNumberTotal">39</span>
+                   aria-label="当前页码">/<span id="slideNumberTotal">38</span>
         </div>
         <button class="nav-btn" onclick="nextSlide()" aria-label="下一页" title="下一页 (→)">下一页 →</button>
     </div>
@@ -2146,7 +4086,7 @@ $\frac{dy}{dt} = -\frac{6}{8} = -\frac{3}{4} \text{ m/s}$
         surface: rootStyles.getPropertyValue('--card-bg').trim() || '#ffffff'
     };
 
-function setupD3(containerId, margins = {top: 40, right: 40, bottom: 40, left: 40}) {
+function setupD3(containerId, margins = {top: 20, right: 20, bottom: 30, left: 30}) {
         const container = d3.select(`#${containerId}`);
         if (container.empty()) {
             console.error(`setupD3: Container with id '${containerId}' not found`);
@@ -2155,14 +4095,17 @@ function setupD3(containerId, margins = {top: 40, right: 40, bottom: 40, left: 4
         
         container.html('');
         
+        // 设置容器样式确保充分利用空间
+        container.style('width', '100%').style('height', '100%');
+        
         const bounds = container.node().getBoundingClientRect();
         if (bounds.width === 0 || bounds.height === 0) {
             console.warn(`setupD3: Container '${containerId}' has zero dimensions`, bounds);
             // 尝试使用父容器的尺寸
             const parentBounds = container.node().parentElement.getBoundingClientRect();
             if (parentBounds.width > 0 && parentBounds.height > 0) {
-                bounds.width = parentBounds.width;
-                bounds.height = parentBounds.height;
+                bounds.width = parentBounds.width * 0.95; // 使用95%的宽度
+                bounds.height = parentBounds.height * 0.95; // 使用95%的高度
             } else {
                 return null;
             }
@@ -2170,7 +4113,8 @@ function setupD3(containerId, margins = {top: 40, right: 40, bottom: 40, left: 4
         
         const svg = container.append('svg')
             .attr('width', bounds.width)
-            .attr('height', bounds.height);
+            .attr('height', bounds.height)
+            .style('display', 'block');
         
         const width = bounds.width - margins.left - margins.right;
         const height = bounds.height - margins.top - margins.bottom;
@@ -2186,13 +4130,15 @@ function setupD3(containerId, margins = {top: 40, right: 40, bottom: 40, left: 4
         g.append('g')
             .attr('transform', `translate(0, ${yScale(0)})`)
             .call(d3.axisBottom(xScale).ticks(10))
-            .call(g => g.select(".domain").attr("stroke-width", 1.5).attr("stroke", "#333"));
+            .call(g => g.select(".domain").attr("stroke-width", 1.5).attr("stroke", "#333"))
+            .style('font-size', '14px');
 
         // Y轴
         g.append('g')
             .attr('transform', `translate(${xScale(0)}, 0)`)
             .call(d3.axisLeft(yScale).ticks(10))
-            .call(g => g.select(".domain").attr("stroke-width", 1.5).attr("stroke", "#333"));
+            .call(g => g.select(".domain").attr("stroke-width", 1.5).attr("stroke", "#333"))
+            .style('font-size', '14px');
             
         // 添加网格线
         g.append('g')
@@ -2218,6 +4164,63 @@ function setupD3(containerId, margins = {top: 40, right: 40, bottom: 40, left: 4
         
         // 延迟执行，确保容器尺寸正确
         setTimeout(() => {
+            // 先尝试通过容器ID查找并调用对应的可视化函数
+            const slideEl = slides[slideIndex];
+            if (slideEl) {
+                const visDiv = slideEl.querySelector('.right-visual > div[id]');
+                if (visDiv && visDiv.id) {
+                    const containerId = visDiv.id;
+                    // 根据容器ID调用对应的可视化函数
+                    const visMap = {
+                        'vis-title': visualizeTitle,
+                        'vis-contents': visualizeContents,
+                        'vis-section1': visualizeSection1,
+                        'vis-mvt-overview': visualizeMVTOverview,
+                        'vis-rolle': visualizeRolle,
+                        'vis-lagrange': visualizeLagrange,
+                        'vis-cauchy': visualizeCauchy,
+                        'vis-section2': visualizeSection2,
+                        'vis-lhopital': visualizeLHopital,
+                        'vis-lhopital-examples': visualizeLHopitalExamples,
+                        'vis-section3': visualizeSection3,
+                        'vis-derivative-intro': visualizeDerivativeIntro,
+                        'vis-tangent-line': visualizeTangentLine,
+                        'vis-monotonicity': visualizeMonotonicity,
+                        'vis-monotonicity-example': visualizeMonotonicityExample,
+                        'vis-monotonic-intervals': visualizeMonotonicIntervals,
+                        'vis-extremum-concept': visualizeExtremumConcept,
+                        'vis-extremum-test': visualizeExtremumTest,
+                        'vis-extremum-example': visualizeExtremumExample,
+                        'vis-section5': visualizeSection5,
+                        'vis-max-min': visualizeMaxMin,
+                        'vis-maxmin-example': visualizeMaxMinExample,
+                        'vis-max-value-method': visualizeMaxValueMethod,
+                        'vis-cost-optimization': visualizeCostOptimization,
+                        'vis-profit-optimization': visualizeProfitOptimization,
+                        'vis-container-design': visualizeContainerDesign,
+                        'vis-related-rates': visualizeRelatedRates,
+                        'vis-section4': visualizeSection4,
+                        'vis-concavity': visualizeConcavity,
+                        'vis-concavity-example': visualizeConcavityExample,
+                        'vis-marginal-analysis': visualizeMarginalAnalysis,
+                        'vis-elasticity': visualizeElasticity,
+                        'vis-curve-sketching': visualizeCurveSketching,
+                        'vis-practice-1': visualizePractice1,
+                        'vis-practice-2': visualizePractice2,
+                        'vis-practice-3': visualizePractice3,
+                        'vis-practice-4': visualizePractice4,
+                        'vis-summary': visualizeSummary
+                    };
+                    
+                    const visFn = visMap[containerId];
+                    if (visFn && typeof visFn === 'function') {
+                        visFn(containerId);
+                        return;
+                    }
+                }
+            }
+            
+            // 如果通过ID找不到，则使用索引映射（向后兼容）
             switch(slideIndex) {
             case 0: visualizeTitle('vis-title'); break;
             case 1: visualizeContents('vis-contents'); break;
@@ -2244,20 +4247,19 @@ function setupD3(containerId, margins = {top: 40, right: 40, bottom: 40, left: 4
             case 22: visualizeMaxValueMethod('vis-max-value-method'); break;
             case 23: visualizeCostOptimization('vis-cost-optimization'); break;
             case 24: visualizeProfitOptimization('vis-profit-optimization'); break;
-            case 25: visualizeContainerDesign('vis-container-design'); break;
-            case 26: visualizeTaylor('vis-taylor'); break;
-            case 27: visualizeRelatedRates('vis-related-rates'); break;
-            case 28: visualizeSection4('vis-section4'); break;
-            case 29: visualizeConcavity('vis-concavity'); break;
-            case 30: visualizeConcavityExample('vis-concavity-example'); break;
-            case 31: visualizeMarginalAnalysis('vis-marginal-analysis'); break;
-            case 32: visualizeElasticity('vis-elasticity'); break;
-            case 33: visualizeCurveSketching('vis-curve-sketching'); break;
-            case 34: visualizePractice1('vis-practice-1'); break;
-            case 35: visualizePractice2('vis-practice-2'); break;
-            case 36: visualizePractice3('vis-practice-3'); break;
-            case 37: visualizePractice4('vis-practice-4'); break;
-            case 38: visualizeSummary('vis-summary'); break;
+case 25: visualizeContainerDesign('vis-container-design'); break;
+case 26: visualizeRelatedRates('vis-related-rates'); break;
+case 27: visualizeSection4('vis-section4'); break;
+case 28: visualizeConcavity('vis-concavity'); break;
+case 29: visualizeConcavityExample('vis-concavity-example'); break;
+case 30: visualizeMarginalAnalysis('vis-marginal-analysis'); break;
+case 31: visualizeElasticity('vis-elasticity'); break;
+case 32: visualizeCurveSketching('vis-curve-sketching'); break;
+case 33: visualizePractice1('vis-practice-1'); break;
+case 34: visualizePractice2('vis-practice-2'); break;
+case 35: visualizePractice3('vis-practice-3'); break;
+case 36: visualizePractice4('vis-practice-4'); break;
+case 37: visualizeSummary('vis-summary'); break;
             }
         }, 100); // 延迟100ms执行
     }
@@ -2912,7 +4914,7 @@ function setupD3(containerId, margins = {top: 40, right: 40, bottom: 40, left: 4
                     .attr('x', xScale(x))
                     .attr('y', yScale(rolleFunc(x)) - 15)
                     .attr('text-anchor', 'middle')
-                    .style('font-size', '14px')
+                    .style('font-size', '16px')
                     .style('fill', '#dc2626')
                     .style('opacity', 0)
                     .text(i === 0 ? 'f(a)' : 'f(b)')
@@ -2932,7 +4934,7 @@ function setupD3(containerId, margins = {top: 40, right: 40, bottom: 40, left: 4
                     .attr('fill', '#f59e0b')
                     .transition()
                     .duration(500)
-                    .attr('r', 8);
+                    .attr('r', 10);
                 
                 // 绘制水平切线
                 chart.append('line')
@@ -3072,7 +5074,7 @@ function setupD3(containerId, margins = {top: 40, right: 40, bottom: 40, left: 4
                     .attr('fill', '#f59e0b')
                     .transition()
                     .duration(500)
-                    .attr('r', 8);
+                    .attr('r', 10);
                 
                 chart.append('text')
                     .attr('x', xScale(xi))
@@ -3092,7 +5094,7 @@ function setupD3(containerId, margins = {top: 40, right: 40, bottom: 40, left: 4
                     .attr('x', innerWidth / 2)
                     .attr('y', -10)
                     .attr('text-anchor', 'middle')
-                    .style('font-size', '14px')
+                    .style('font-size', '16px')
                     .style('fill', '#666')
                     .style('opacity', 0)
                     .text("切线斜率 = 割线斜率")
@@ -3206,14 +5208,14 @@ function setupD3(containerId, margins = {top: 40, right: 40, bottom: 40, left: 4
                     .attr('fill', '#f59e0b')
                     .transition()
                     .duration(500)
-                    .attr('r', 8);
+                    .attr('r', 10);
                 
                 // 添加标题
                 chart.append('text')
                     .attr('x', innerWidth / 2)
                     .attr('y', -30)
                     .attr('text-anchor', 'middle')
-                    .style('font-size', '14px')
+                    .style('font-size', '16px')
                     .style('fill', '#666')
                     .style('opacity', 0)
                     .text("参数曲线的中值定理")
@@ -3588,7 +5590,7 @@ function setupD3(containerId, margins = {top: 40, right: 40, bottom: 40, left: 4
                     .attr('class', 'pulse')
                     .transition()
                     .duration(500)
-                    .attr('r', 8);
+                    .attr('r', 10);
                 
                 g.append('line')
                     .attr('x1', xScale(x))
@@ -3607,7 +5609,7 @@ function setupD3(containerId, margins = {top: 40, right: 40, bottom: 40, left: 4
                     .attr('x', xScale(x))
                     .attr('y', yScale(f(x)) + (x === -1 ? -20 : 30))
                     .text(x === -1 ? '极大值' : '极小值')
-                    .style('font-size', '14px')
+                    .style('font-size', '16px')
                     .style('font-weight', 'bold')
                     .style('text-anchor', 'middle')
                     .style('fill', '#e74c3c')
@@ -3866,14 +5868,14 @@ function setupD3(containerId, margins = {top: 40, right: 40, bottom: 40, left: 4
                     .attr('class', 'pulse')
                     .transition()
                     .duration(500)
-                    .attr('r', 8);
+                    .attr('r', 10);
                 
                 // 标签
                 g.append('text')
                     .attr('x', xScale(point.x))
                     .attr('y', yScale(point.y) + (point.type === '极大值' ? -20 : 30))
                     .text(point.type)
-                    .style('font-size', '14px')
+                    .style('font-size', '16px')
                     .style('font-weight', 'bold')
                     .style('text-anchor', 'middle')
                     .style('fill', point.color)
@@ -3940,7 +5942,7 @@ function setupD3(containerId, margins = {top: 40, right: 40, bottom: 40, left: 4
                     .attr('fill', leftSign === '+' && rightSign === '-' ? '#e74c3c' : '#2ecc71')
                     .transition()
                     .duration(500)
-                    .attr('r', 8);
+                    .attr('r', 10);
                 
                 // 导数符号
                 g.append('text')
@@ -4053,7 +6055,7 @@ function setupD3(containerId, margins = {top: 40, right: 40, bottom: 40, left: 4
                     .attr('class', isMax || isMin ? 'pulse' : '')
                     .transition()
                     .duration(500)
-                    .attr('r', 8);
+                    .attr('r', 10);
                 
                 g.append('text')
                     .attr('x', xScale(point.x))
@@ -5425,7 +7427,7 @@ function setupD3(containerId, margins = {top: 40, right: 40, bottom: 40, left: 4
                 textDiv.append('div')
                     .style('font-weight', 'bold')
                     .style('color', step.color)
-                    .style('font-size', '14px')
+                    .style('font-size', '16px')
                     .text(step.title);
                 
                 textDiv.append('div')
@@ -5539,7 +7541,7 @@ function setupD3(containerId, margins = {top: 40, right: 40, bottom: 40, left: 4
                 textDiv.append('div')
                     .style('font-weight', 'bold')
                     .style('color', '#2c3e50')
-                    .style('font-size', '14px')
+                    .style('font-size', '16px')
                     .text(step.title);
                 
                 textDiv.append('div')
@@ -5663,169 +7665,7 @@ function setupD3(containerId, margins = {top: 40, right: 40, bottom: 40, left: 4
             .attr('d', line);
     }
 
-    // 第13页：泰勒展开可视化
-    function visualizeTaylor(containerId) {
-        const setup = setupD3(containerId);
-        if (!setup) return;
-        const { container, svg, g, width, height } = setup;
-        
-        // 清除SVG，使用HTML展示步骤
-        svg.selectAll("*").remove();
-        
-        const mainContainer = container.append('div')
-            .style('position', 'absolute')
-            .style('top', '0')
-            .style('left', '0')
-            .style('right', '0')
-            .style('bottom', '0')
-            .style('padding', '15px')
-            .style('background', 'white')
-            .style('border-radius', '8px')
-            .style('overflow-y', 'auto')
-            .style('font-family', 'inherit')
-            .style('border', '1px solid #e0e0e0');
-        
-        // 标题
-        mainContainer.append('div')
-            .style('text-align', 'center')
-            .style('margin-bottom', '15px')
-            .style('padding', '10px')
-            .style('background', 'rgba(255,255,255,0.9)')
-            .style('border-radius', '6px')
-            .style('color', '#2c3e50')
-            .style('font-size', '16px')
-            .style('font-weight', 'bold')
-            .text('泰勒展开解题步骤');
-        
-        const steps = [
-            {
-                step: '1',
-                title: '确定展开点',
-                content: '选择合适的展开点 x₀（通常为0）',
-                formula: 'x₀ = 0 (麦克劳林级数)',
-                color: '#fd79a8'
-            },
-            {
-                step: '2',
-                title: '计算各阶导数',
-                content: '求函数在x₀处的各阶导数值',
-                formula: 'f(0), f\'(0), f\'\'(0), ...',
-                color: '#fdcb6e'
-            },
-            {
-                step: '3',
-                title: '代入泰勒公式',
-                content: '将导数值代入泰勒展开公式',
-                formula: 'f(x) = Σ f⁽ⁿ⁾(0)xⁿ/n!',
-                color: '#00b894'
-            },
-            {
-                step: '4',
-                title: '确定项数',
-                content: '根据精度要求确定展开项数',
-                formula: '误差估计：|Rₙ(x)|',
-                color: '#6c5ce7'
-            }
-        ];
-        
-        steps.forEach((step, i) => {
-            setTimeout(() => {
-                const stepContainer = mainContainer.append('div')
-                    .style('margin-bottom', '12px')
-                    .style('padding', '12px')
-                    .style('background', 'rgba(255,255,255,0.95)')
-                    .style('border-radius', '8px')
-                    .style('border-left', `5px solid ${step.color}`)
-                    .style('opacity', '0')
-                    .style('transform', 'translateY(20px)');
-                
-                const headerDiv = stepContainer.append('div')
-                    .style('display', 'flex')
-                    .style('align-items', 'center')
-                    .style('margin-bottom', '8px');
-                
-                headerDiv.append('div')
-                    .style('width', '30px')
-                    .style('height', '30px')
-                    .style('border-radius', '50%')
-                    .style('background', step.color)
-                    .style('color', 'white')
-                    .style('display', 'flex')
-                    .style('align-items', 'center')
-                    .style('justify-content', 'center')
-                    .style('font-weight', 'bold')
-                    .style('margin-right', '10px')
-                    .text(step.step);
-                
-                const textDiv = headerDiv.append('div');
-                textDiv.append('div')
-                    .style('font-weight', 'bold')
-                    .style('color', '#2c3e50')
-                    .style('font-size', '14px')
-                    .text(step.title);
-                
-                textDiv.append('div')
-                    .style('color', '#636e72')
-                    .style('font-size', '12px')
-                    .text(step.content);
-                
-                stepContainer.append('div')
-                    .style('margin-top', '8px')
-                    .style('padding', '6px')
-                    .style('background', '#f8f9fa')
-                    .style('border-radius', '4px')
-                    .style('font-size', '11px')
-                    .style('color', '#495057')
-                    .style('font-family', 'monospace')
-                    .text(step.formula);
-                
-                stepContainer.transition()
-                    .duration(800)
-                    .ease(d3.easeBackOut)
-                    .style('opacity', '1')
-                    .style('transform', 'translateY(0px)');
-            }, i * 1000);
-        });
-        
-        // 添加常用展开式示例
-        setTimeout(() => {
-            const exampleContainer = mainContainer.append('div')
-                .style('margin-top', '15px')
-                .style('padding', '12px')
-                .style('background', 'rgba(255,255,255,0.95)')
-                .style('border-radius', '8px')
-                .style('border', '2px solid #00b894')
-                .style('opacity', '0');
-            
-            exampleContainer.append('div')
-                .style('font-weight', 'bold')
-                .style('color', '#00b894')
-                .style('margin-bottom', '8px')
-                .style('font-size', '14px')
-                .text('常用展开式');
-            
-            const examples = [
-                'eˣ = 1 + x + x²/2! + x³/3! + ...',
-                'sin x = x - x³/3! + x⁵/5! - ...',
-                'cos x = 1 - x²/2! + x⁴/4! - ...'
-            ];
-            
-            examples.forEach(example => {
-                exampleContainer.append('div')
-                    .style('margin-bottom', '4px')
-                    .style('font-size', '12px')
-                    .style('color', '#2c3e50')
-                    .style('font-family', 'monospace')
-                    .text(example);
-            });
-            
-            exampleContainer.transition()
-                .duration(800)
-                .style('opacity', '1');
-        }, steps.length * 1000 + 500);
-    }
-
-    // 第14页：相关变化率解题步骤可视化
+        // 第14页：相关变化率解题步骤可视化
     function visualizeRelatedRates(containerId) {
         const setup = setupD3(containerId);
         if (!setup) return;
@@ -5923,7 +7763,7 @@ function setupD3(containerId, margins = {top: 40, right: 40, bottom: 40, left: 4
                 textDiv.append('div')
                     .style('font-weight', 'bold')
                     .style('color', '#2c3e50')
-                    .style('font-size', '14px')
+                    .style('font-size', '16px')
                     .text(step.title);
                 
                 textDiv.append('div')
@@ -6281,7 +8121,7 @@ function setupD3(containerId, margins = {top: 40, right: 40, bottom: 40, left: 4
                 if (step.formula) {
                     stepContainer.append('div')
                         .style('color', '#2c3e50')
-                        .style('font-size', '14px')
+                        .style('font-size', '16px')
                         .style('margin-bottom', '8px')
                         .style('font-style', 'italic')
                         .html(step.formula);
@@ -6291,7 +8131,7 @@ function setupD3(containerId, margins = {top: 40, right: 40, bottom: 40, left: 4
                 step.content.forEach(content => {
                     stepContainer.append('div')
                         .style('color', '#34495e')
-                        .style('font-size', '14px')
+                        .style('font-size', '16px')
                         .style('line-height', '1.6')
                         .style('margin-bottom', '5px')
                         .style('padding-left', '10px')
@@ -6815,7 +8655,7 @@ function setupD3(containerId, margins = {top: 40, right: 40, bottom: 40, left: 4
                     .style('padding', '5px')
                     .style('background', i === steps.length - 1 ? '#e8f5e8' : '#f8f9fa')
                     .style('border-radius', '4px')
-                    .style('font-size', '14px')
+                    .style('font-size', '16px')
                     .style('color', '#2c3e50')
                     .text(step)
                     .style('opacity', 0)
@@ -7049,6 +8889,498 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
+// ========== 凹凸性交互式演示 JavaScript ==========
+(function() {
+    let concavityCurrentSlide = 1;
+    const concavityTotalSlides = 3;
+
+    // Canvas 高DPI支持
+    function concavitySetupCanvas(canvas) {
+        const ctx = canvas.getContext('2d');
+        const dpr = window.devicePixelRatio || 1;
+        const rect = canvas.getBoundingClientRect();
+        
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        
+        ctx.scale(dpr, dpr);
+        
+        canvas.style.width = rect.width + 'px';
+        canvas.style.height = rect.height + 'px';
+        
+        return ctx;
+    }
+
+    // 导航功能（内部幻灯片切换）
+    function concavityShowSlide(n) {
+        const container = document.querySelector('.concavity-interactive-slide');
+        if (!container) return;
+        const slides = container.querySelectorAll('.concavity-slide');
+        if (slides.length === 0) return;
+        if (n > concavityTotalSlides) concavityCurrentSlide = concavityTotalSlides;
+        if (n < 1) concavityCurrentSlide = 1;
+        
+        slides.forEach(slide => slide.classList.remove('active'));
+        if (slides[concavityCurrentSlide - 1]) {
+            slides[concavityCurrentSlide - 1].classList.add('active');
+        }
+        // 更新内部计数器（若存在）
+        const concavityCounterEl = document.getElementById('concavityCurrentSlide');
+        if (concavityCounterEl) concavityCounterEl.textContent = concavityCurrentSlide;
+        
+        // 重绘当前幻灯片的图形
+        setTimeout(() => {
+            if (concavityCurrentSlide === 1) concavityDrawSlide1();
+            if (concavityCurrentSlide === 2) concavityDrawSlide2();
+            if (concavityCurrentSlide === 3) concavityDrawSlide3();
+        }, 100);
+    }
+
+    // 绘制坐标轴
+    function concavityDrawAxes(ctx, width, height, xMin, xMax, yMin, yMax) {
+        const padding = 40;
+        const centerX = width / 2;
+        const centerY = height / 2;
+        
+        ctx.strokeStyle = '#e5e7eb';
+        ctx.lineWidth = 1.5;
+        
+        // X轴
+        ctx.beginPath();
+        ctx.moveTo(padding, centerY);
+        ctx.lineTo(width - padding, centerY);
+        ctx.stroke();
+        
+        // Y轴
+        ctx.beginPath();
+        ctx.moveTo(centerX, padding);
+        ctx.lineTo(centerX, height - padding);
+        ctx.stroke();
+        
+        // 箭头
+        ctx.fillStyle = '#9ca3af';
+        ctx.beginPath();
+        ctx.moveTo(width - padding, centerY);
+        ctx.lineTo(width - padding - 8, centerY - 4);
+        ctx.lineTo(width - padding - 8, centerY + 4);
+        ctx.closePath();
+        ctx.fill();
+        
+        ctx.beginPath();
+        ctx.moveTo(centerX, padding);
+        ctx.lineTo(centerX - 4, padding + 8);
+        ctx.lineTo(centerX + 4, padding + 8);
+        ctx.closePath();
+        ctx.fill();
+        
+        // 标签
+        ctx.fillStyle = '#6b7280';
+        ctx.font = '13px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('x', width - padding + 10, centerY + 20);
+        ctx.fillText('y', centerX + 15, padding - 10);
+        ctx.fillText('0', centerX - 15, centerY + 18);
+        ctx.fillText(xMin.toString(), padding, centerY + 18);
+        ctx.fillText(xMax.toString(), width - padding, centerY + 18);
+    }
+
+    // 坐标转换函数
+    function concavityMapX(x, width, xMin, xMax) {
+        const padding = 40;
+        return padding + (x - xMin) / (xMax - xMin) * (width - 2 * padding);
+    }
+
+    function concavityMapY(y, height, yMin, yMax) {
+        const padding = 40;
+        return height - padding - (y - yMin) / (yMax - yMin) * (height - 2 * padding);
+    }
+
+    function concavityUnmapX(px, width, xMin, xMax) {
+        const padding = 40;
+        return xMin + (px - padding) / (width - 2 * padding) * (xMax - xMin);
+    }
+
+    // 绘制函数曲线
+    function concavityDrawFunction(ctx, width, height, f, xMin, xMax, yMin, yMax) {
+        ctx.strokeStyle = '#3b82f6';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        
+        for (let px = 40; px < width - 40; px++) {
+            const x = concavityUnmapX(px, width, xMin, xMax);
+            const y = f(x);
+            const py = concavityMapY(y, height, yMin, yMax);
+            
+            if (px === 40) {
+                ctx.moveTo(px, py);
+            } else {
+                ctx.lineTo(px, py);
+            }
+        }
+        ctx.stroke();
+    }
+
+    // 绘制切线
+    function concavityDrawTangent(ctx, width, height, x0, f, df, xMin, xMax, yMin, yMax) {
+        const y0 = f(x0);
+        const m = df(x0);
+        
+        const extend = 1.5;
+        const x1 = Math.max(xMin, x0 - extend);
+        const x2 = Math.min(xMax, x0 + extend);
+        const y1 = y0 + m * (x1 - x0);
+        const y2 = y0 + m * (x2 - x0);
+        
+        ctx.strokeStyle = '#f59e0b';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([5, 5]);
+        ctx.beginPath();
+        ctx.moveTo(concavityMapX(x1, width, xMin, xMax), concavityMapY(y1, height, yMin, yMax));
+        ctx.lineTo(concavityMapX(x2, width, xMin, xMax), concavityMapY(y2, height, yMin, yMax));
+        ctx.stroke();
+        ctx.setLineDash([]);
+    }
+
+    // 绘制点和垂线
+    function concavityDrawPoint(ctx, width, height, x, f, xMin, xMax, yMin, yMax) {
+        const y = f(x);
+        const px = concavityMapX(x, width, xMin, xMax);
+        const py = concavityMapY(y, height, yMin, yMax);
+        
+        ctx.strokeStyle = '#3b82f6';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.moveTo(px, height - 40);
+        ctx.lineTo(px, py);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        
+        ctx.fillStyle = '#2563eb';
+        ctx.beginPath();
+        ctx.arc(px, py, 6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = 'white';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+    }
+
+    // 幻灯片1: y = x^2 (凹向上)
+    function concavityDrawSlide1() {
+        const canvas = document.getElementById('concavity-canvas1');
+        if (!canvas) return;
+        const ctx = concavitySetupCanvas(canvas);
+        const width = canvas.getBoundingClientRect().width;
+        const height = canvas.getBoundingClientRect().height;
+        
+        const slider = document.getElementById('concavity-xSlider1');
+        if (!slider) return;
+        const x = parseFloat(slider.value);
+        
+        const f = x => x * x;
+        const df = x => 2 * x;
+        const ddf = x => 2;
+        
+        // 更新数据
+        const xValueEl = document.getElementById('concavity-xValue1');
+        const fpValueEl = document.getElementById('concavity-fpValue1');
+        const fppValueEl = document.getElementById('concavity-fppValue1');
+        const fpDescEl = document.getElementById('concavity-fpDesc1');
+        
+        if (xValueEl) xValueEl.textContent = x.toFixed(2);
+        if (fpValueEl) fpValueEl.textContent = df(x).toFixed(2);
+        if (fppValueEl) fppValueEl.textContent = ddf(x).toFixed(2);
+        
+        const fpVal = df(x);
+        if (fpDescEl) {
+            if (fpVal > 0.01) {
+                fpDescEl.textContent = '递增';
+            } else if (fpVal < -0.01) {
+                fpDescEl.textContent = '递减';
+            } else {
+                fpDescEl.textContent = '水平';
+            }
+        }
+        
+        // 绘图
+        ctx.clearRect(0, 0, width, height);
+        concavityDrawAxes(ctx, width, height, -2, 2, -1, 5);
+        concavityDrawFunction(ctx, width, height, f, -2, 2, -1, 5);
+        concavityDrawTangent(ctx, width, height, x, f, df, -2, 2, -1, 5);
+        concavityDrawPoint(ctx, width, height, x, f, -2, 2, -1, 5);
+    }
+
+    // 幻灯片2: y = -x^2 + 4 (凹向下)
+    function concavityDrawSlide2() {
+        const canvas = document.getElementById('concavity-canvas2');
+        if (!canvas) return;
+        const ctx = concavitySetupCanvas(canvas);
+        const width = canvas.getBoundingClientRect().width;
+        const height = canvas.getBoundingClientRect().height;
+        
+        const slider = document.getElementById('concavity-xSlider2');
+        if (!slider) return;
+        const x = parseFloat(slider.value);
+        
+        const f = x => -x * x + 4;
+        const df = x => -2 * x;
+        const ddf = x => -2;
+        
+        // 更新数据
+        const xValueEl = document.getElementById('concavity-xValue2');
+        const fpValueEl = document.getElementById('concavity-fpValue2');
+        const fppValueEl = document.getElementById('concavity-fppValue2');
+        const fpDescEl = document.getElementById('concavity-fpDesc2');
+        
+        if (xValueEl) xValueEl.textContent = x.toFixed(2);
+        if (fpValueEl) fpValueEl.textContent = df(x).toFixed(2);
+        if (fppValueEl) fppValueEl.textContent = ddf(x).toFixed(2);
+        
+        const fpVal = df(x);
+        if (fpDescEl) {
+            if (fpVal > 0.01) {
+                fpDescEl.textContent = '递增';
+            } else if (fpVal < -0.01) {
+                fpDescEl.textContent = '递减';
+            } else {
+                fpDescEl.textContent = '水平';
+            }
+        }
+        
+        // 绘图
+        ctx.clearRect(0, 0, width, height);
+        concavityDrawAxes(ctx, width, height, -2, 2, -1, 5);
+        concavityDrawFunction(ctx, width, height, f, -2, 2, -1, 5);
+        concavityDrawTangent(ctx, width, height, x, f, df, -2, 2, -1, 5);
+        concavityDrawPoint(ctx, width, height, x, f, -2, 2, -1, 5);
+    }
+
+    // 幻灯片3: y = x^3 (拐点)
+    function concavityDrawSlide3() {
+        const canvas = document.getElementById('concavity-canvas3');
+        if (!canvas) return;
+        const ctx = concavitySetupCanvas(canvas);
+        const width = canvas.getBoundingClientRect().width;
+        const height = canvas.getBoundingClientRect().height;
+        
+        const slider = document.getElementById('concavity-xSlider3');
+        if (!slider) return;
+        const x = parseFloat(slider.value);
+        
+        const f = x => x * x * x;
+        const df = x => 3 * x * x;
+        const ddf = x => 6 * x;
+        
+        // 更新数据
+        const xValueEl = document.getElementById('concavity-xValue3');
+        const fpValueEl = document.getElementById('concavity-fpValue3');
+        const fppValueEl = document.getElementById('concavity-fppValue3');
+        const fpDescEl = document.getElementById('concavity-fpDesc3');
+        
+        if (xValueEl) xValueEl.textContent = x.toFixed(2);
+        if (fpValueEl) fpValueEl.textContent = df(x).toFixed(2);
+        if (fppValueEl) fppValueEl.textContent = ddf(x).toFixed(2);
+        
+        const fpVal = df(x);
+        if (fpDescEl) {
+            if (fpVal > 0.01) {
+                fpDescEl.textContent = '递增';
+            } else if (fpVal < -0.01) {
+                fpDescEl.textContent = '递减';
+            } else {
+                fpDescEl.textContent = '水平';
+            }
+        }
+        
+        // 更新凹凸性显示
+        const fppCard = document.getElementById('concavity-fppCard3');
+        const concavityIcon = document.getElementById('concavity-concavityIcon3');
+        const concavityText = document.getElementById('concavity-concavityText3');
+        const fppDescEl3 = document.getElementById('concavity-fppDesc3');
+        const fppVal = ddf(x);
+        
+        if (fppCard) {
+            fppCard.classList.remove('concavity-highlight-positive', 'concavity-highlight-negative', 'concavity-highlight-zero');
+        }
+        if (concavityIcon) {
+            concavityIcon.classList.remove('concavity-concave-up', 'concavity-concave-down', 'concavity-inflection');
+        }
+        
+        if (fppVal > 0.01) {
+            if (fppDescEl3) fppDescEl3.textContent = '凹向上';
+            if (fppCard) fppCard.classList.add('concavity-highlight-positive');
+            if (concavityIcon) {
+                concavityIcon.classList.add('concavity-concave-up');
+                concavityIcon.textContent = '⌣';
+            }
+            if (concavityText) concavityText.textContent = '凹向上 (f\'\' > 0)';
+        } else if (fppVal < -0.01) {
+            if (fppDescEl3) fppDescEl3.textContent = '凹向下';
+            if (fppCard) fppCard.classList.add('concavity-highlight-negative');
+            if (concavityIcon) {
+                concavityIcon.classList.add('concavity-concave-down');
+                concavityIcon.textContent = '⌢';
+            }
+            if (concavityText) concavityText.textContent = '凹向下 (f\'\' < 0)';
+        } else {
+            if (fppDescEl3) fppDescEl3.textContent = '拐点';
+            if (fppCard) fppCard.classList.add('concavity-highlight-zero');
+            if (concavityIcon) {
+                concavityIcon.classList.add('concavity-inflection');
+                concavityIcon.textContent = '—';
+            }
+            if (concavityText) concavityText.textContent = '拐点 (f\'\' = 0)';
+        }
+        
+        // 绘图
+        ctx.clearRect(0, 0, width, height);
+        concavityDrawAxes(ctx, width, height, -2, 2, -8, 8);
+        concavityDrawFunction(ctx, width, height, f, -2, 2, -8, 8);
+        concavityDrawTangent(ctx, width, height, x, f, df, -2, 2, -8, 8);
+        concavityDrawPoint(ctx, width, height, x, f, -2, 2, -8, 8);
+    }
+
+    // 设置交互事件
+    function concavitySetupInteractions() {
+        // 滑块事件
+        const slider1 = document.getElementById('concavity-xSlider1');
+        const slider2 = document.getElementById('concavity-xSlider2');
+        const slider3 = document.getElementById('concavity-xSlider3');
+        
+        if (slider1) slider1.addEventListener('input', concavityDrawSlide1);
+        if (slider2) slider2.addEventListener('input', concavityDrawSlide2);
+        if (slider3) slider3.addEventListener('input', concavityDrawSlide3);
+        
+        // Canvas点击事件
+        const setupCanvasClick = (canvasId, slideNum, xMin, xMax) => {
+            const canvas = document.getElementById(canvasId);
+            const slider = document.getElementById(`concavity-xSlider${slideNum}`);
+            
+            if (!canvas || !slider) return;
+            
+            canvas.addEventListener('click', (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const worldX = concavityUnmapX(x, rect.width, xMin, xMax);
+                
+                if (worldX >= xMin && worldX <= xMax) {
+                    slider.value = worldX;
+                    if (slideNum === 1) concavityDrawSlide1();
+                    if (slideNum === 2) concavityDrawSlide2();
+                    if (slideNum === 3) concavityDrawSlide3();
+                }
+            });
+        };
+        
+        setupCanvasClick('concavity-canvas1', 1, -2, 2);
+        setupCanvasClick('concavity-canvas2', 2, -2, 2);
+        setupCanvasClick('concavity-canvas3', 3, -2, 2);
+    }
+
+    window.concavityNextSlide = function(evt) {
+        if (evt) {
+            evt.stopPropagation();
+            evt.preventDefault();
+        }
+        concavityCurrentSlide++;
+        concavityShowSlide(concavityCurrentSlide);
+    };
+    window.concavityPrevSlide = function(evt) {
+        if (evt) {
+            evt.stopPropagation();
+            evt.preventDefault();
+        }
+        concavityCurrentSlide--;
+        concavityShowSlide(concavityCurrentSlide);
+    };
+
+    let concavityKeyHandler = null;
+    let concavityInitialized = false;
+    // 初始化（当凹凸性幻灯片显示时）
+    function initConcavityInteractive() {
+        const concavitySlide = document.querySelector('.concavity-interactive-slide');
+        if (!concavitySlide) return;
+        
+        // 确保所有内部slide初始状态正确
+        const internalSlides = concavitySlide.querySelectorAll('.concavity-slide');
+        internalSlides.forEach((slide, index) => {
+            if (index === 0) {
+                slide.classList.add('active');
+            } else {
+                slide.classList.remove('active');
+            }
+        });
+        
+        const checkAndInit = () => {
+            const isActive = concavitySlide.classList.contains('active');
+            if (isActive) {
+                if (!concavityInitialized) {
+                    concavityInitialized = true;
+                    concavityCurrentSlide = 1;
+                    concavityShowSlide(1);
+                    concavitySetupInteractions();
+                    setTimeout(() => {
+                        if (concavityCurrentSlide === 1) concavityDrawSlide1();
+                        if (concavityCurrentSlide === 2) concavityDrawSlide2();
+                        if (concavityCurrentSlide === 3) concavityDrawSlide3();
+                    }, 200);
+                    // 添加键盘导航（只添加一次）
+                    if (!concavityKeyHandler) {
+                        concavityKeyHandler = (e) => {
+                            if (concavitySlide.classList.contains('active')) {
+                                if (e.key === 'ArrowLeft') {
+                                    e.stopPropagation();
+                                    concavityPrevSlide();
+                                } else if (e.key === 'ArrowRight') {
+                                    e.stopPropagation();
+                                    concavityNextSlide();
+                                }
+                            }
+                        };
+                        document.addEventListener('keydown', concavityKeyHandler, true);
+                    }
+                } else {
+                    // 如果已经初始化，确保当前slide正确显示
+                    concavityShowSlide(concavityCurrentSlide);
+                }
+            } else {
+                concavityInitialized = false;
+            }
+        };
+        
+        // 初始检查
+        setTimeout(checkAndInit, 100);
+        // 监听主课件的slide切换
+        const observer = new MutationObserver(checkAndInit);
+        observer.observe(concavitySlide, { attributes: true, attributeFilter: ['class'] });
+        // 监听所有slide的变化，以便在主课件切换时也能检测到
+        const allSlides = document.querySelectorAll('.slide');
+        allSlides.forEach(slide => {
+            const slideObserver = new MutationObserver(() => {
+                if (slide.classList.contains('active') && slide === concavitySlide) {
+                    checkAndInit();
+                }
+            });
+            slideObserver.observe(slide, { attributes: true, attributeFilter: ['class'] });
+        });
+    }
+
+    // 窗口加载时初始化
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initConcavityInteractive);
+    } else {
+        initConcavityInteractive();
+    }
+
+    // 窗口调整
+    window.addEventListener('resize', () => {
+        if (concavityCurrentSlide === 1) concavityDrawSlide1();
+        if (concavityCurrentSlide === 2) concavityDrawSlide2();
+        if (concavityCurrentSlide === 3) concavityDrawSlide3();
+    });
+})();
+// ========== 凹凸性交互式演示 JavaScript 结束 ==========
 </script>
 
 </div></body>

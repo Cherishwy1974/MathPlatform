@@ -174,7 +174,7 @@ exercises: [
       id: 1,
       type: "选择题",
       title: "洛必达法则",
-      question: "1. （河北高数二2021年）$\\lim\\limits_{x \\to 0} \\frac{x + \\sin 2x}{4x - \\sin x} = $ （）\nA. -1 \nB. 0 \nC. 1 \nD. 2",
+      question: "（河北高数二2021年）$\\lim\\limits_{x \\to 0} \\frac{x + \\sin 2x}{4x - \\sin x} = $ （）\nA. -1 \nB. 0 \nC. 1 \nD. 2",
       essence: "这道题考查洛必达法则求极限。当极限为 $\\frac{0}{0}$ 型时，可以对分子分母同时求导，然后代入极限值计算。关键是要正确应用洛必达法则的条件和步骤。",
       explanation: `本题考查洛必达法则求极限。
 第一步：判断极限类型。当 $x \\to 0$ 时，分子 $x + \\sin 2x \\to 0$，分母 $4x - \\sin x \\to 0$，为 $\\frac{0}{0}$ 型
@@ -191,7 +191,7 @@ $$= \\frac{1 + 2\\cos 0}{4 - \\cos 0} = \\frac{1 + 2 \\times 1}{4 - 1} = \\frac{
       id: 2,
       type: "选择题",
       title: "简单求导",
-      question: "2. 函数 $f(x) = x^2 + 2x$ 的导数是（）\nA. $2x$ \nB. $2x + 2$ \nC. $x^2$ \nD. $2$",
+      question: "函数 $f(x) = x^2 + 2x$ 的导数是（）\nA. $2x$ \nB. $2x + 2$ \nC. $x^2$ \nD. $2$",
       essence: "这道题考查基本求导公式。需要对每一项分别求导：$x^2$ 的导数是 $2x$，$2x$ 的导数是 $2$。",
       explanation: `本题考查基本求导。求导规则：$(x^2)' = 2x$，$(2x)' = 2$
 所以：$f'(x) = (x^2 + 2x)' = (x^2)' + (2x)' = 2x + 2$`,
@@ -204,7 +204,7 @@ $$= \\frac{1 + 2\\cos 0}{4 - \\cos 0} = \\frac{1 + 2 \\times 1}{4 - 1} = \\frac{
       id: 3,
       type: "判断题",
       title: "极值点判断",
-      question: "3. 判断：如果 $f'(x_0) = 0$，那么 $x_0$ 一定是函数 $f(x)$ 的极值点（）\nA. 正确 \nB. 错误 \nC. 需要更多条件 \nD. 只对连续函数正确",
+      question: "判断：如果 $f'(x_0) = 0$，那么 $x_0$ 一定是函数 $f(x)$ 的极值点（）\nA. 正确 \nB. 错误 \nC. 需要更多条件 \nD. 只对连续函数正确",
       essence: "这道题考查极值点的判断条件。$f'(x_0) = 0$ 只是极值点的必要条件，不是充分条件。还需要在 $x_0$ 两侧导数变号才能确定是极值点。可以用 $f(x) = x^3$ 作为反例。",
       explanation: `本题考查极值点的判断条件。这个说法是错误的！
 $f'(x_0) = 0$ 只是极值点的必要条件，不是充分条件。
@@ -221,7 +221,7 @@ $f'(x_0) = 0$ 只是极值点的必要条件，不是充分条件。
       id: 4,
       type: "选择题",
       title: "最值问题",
-      question: "4. 函数 $f(x) = x^2 - 4x + 3$ 在区间 $[0,3]$ 上的最小值是（）\nA. -1 \nB. 0 \nC. 3 \nD. 4",
+      question: "函数 $f(x) = x^2 - 4x + 3$ 在区间 $[0,3]$ 上的最小值是（）\nA. -1 \nB. 0 \nC. 3 \nD. 4",
       essence: "这道题考查闭区间上的最值问题。需要比较驻点和端点的函数值，找出最大值和最小值。先求导数找驻点，然后计算驻点和端点的函数值进行比较。",
       explanation: `本题考查闭区间上的最值问题。方法：比较驻点和端点的函数值
 第一步：求导数和驻点。$f'(x) = 2x - 4$，令 $f'(x) = 0$，得 $x = 2$
@@ -236,7 +236,7 @@ $f'(x_0) = 0$ 只是极值点的必要条件，不是充分条件。
       id: 5,
       type: "填空题",
       title: "极值点",
-      question: "5. 函数 $f(x) = x^3 - 3x$ 的极小值点是 $x = $ ______",
+      question: "函数 $f(x) = x^3 - 3x$ 的极小值点是 $x = $ ______",
       essence: "这道题考查极值点的求解。需要先求导数找驻点，然后通过分析导数在驻点两侧的符号变化来判断是极大值点还是极小值点。",
       explanation: `本题考查极值点的求解。
 第一步：求导数 $f'(x) = 3x^2 - 3 = 3(x^2 - 1) = 3(x-1)(x+1)$
@@ -254,7 +254,7 @@ $f'(x_0) = 0$ 只是极值点的必要条件，不是充分条件。
       id: 6,
       type: "填空题",
       title: "单调递增区间",
-      question: "6. 函数 $f(x) = x^3 - 12x$ 的单调递增区间是 ______",
+      question: "函数 $f(x) = x^3 - 12x$ 的单调递增区间是 ______",
       essence: "这道题考查单调区间的求解。需要先求导数，找到导数为零的点，然后分析导数在各区间的符号，从而确定函数的单调递增和递减区间。",
       explanation: `本题考查单调区间的求解。
 第一步：求导数 $f'(x) = 3x^2 - 12 = 3(x^2 - 4) = 3(x-2)(x+2)$
@@ -273,7 +273,7 @@ $f'(x_0) = 0$ 只是极值点的必要条件，不是充分条件。
       id: 7,
       type: "填空题",
       title: "最大值",
-      question: "7. 函数 $f(x) = -x^2 + 4x - 3$ 在区间 $[0,3]$ 上的最大值是 ______",
+      question: "函数 $f(x) = -x^2 + 4x - 3$ 在区间 $[0,3]$ 上的最大值是 ______",
       essence: "这道题考查闭区间上的最值问题。需要比较驻点和端点的函数值，找出最大值和最小值。先求导数找驻点，然后计算驻点和端点的函数值进行比较。",
       explanation: `本题考查闭区间上的最值。
 第一步：求导数和驻点。$f'(x) = -2x + 4$，令 $f'(x) = 0$，得 $x = 2$
@@ -288,7 +288,7 @@ $f'(x_0) = 0$ 只是极值点的必要条件，不是充分条件。
       id: 8,
       type: "计算题",
       title: "求单调区间",
-      question: "8. 求函数 $f(x) = x^3 - 3x^2 + 2$ 的单调区间",
+      question: "求函数 $f(x) = x^3 - 3x^2 + 2$ 的单调区间",
       essence: "这道题考查用导数求函数的单调区间。需要先求导数，找到导数为零的点，然后分析导数在各区间的符号，从而确定函数的单调递增和递减区间。",
       explanation: `第一步：求导数 $f'(x) = 3x^2 - 6x = 3x(x - 2)$
 第二步：求驻点。令 $f'(x) = 0$：$3x(x - 2) = 0$，得 $x = 0$ 或 $x = 2$
@@ -306,7 +306,7 @@ $f'(x_0) = 0$ 只是极值点的必要条件，不是充分条件。
       id: 9,
       type: "计算题",
       title: "求极值",
-      question: "9. 求函数 $f(x) = x^3 - 6x^2 + 9x + 1$ 的极值",
+      question: "求函数 $f(x) = x^3 - 6x^2 + 9x + 1$ 的极值",
       essence: "这道题考查用导数求函数的极值。需要先求导数找驻点，然后通过分析导数在驻点两侧的符号变化来判断是极大值点还是极小值点，最后计算极值。",
       explanation: `第一步：求导数 $f'(x) = 3x^2 - 12x + 9 = 3(x^2 - 4x + 3) = 3(x-1)(x-3)$
 第二步：求驻点。令 $f'(x) = 0$：$(x-1)(x-3) = 0$，得 $x = 1$ 或 $x = 3$
@@ -326,7 +326,7 @@ $x > 3$：选 $x = 4$，$f'(4) = 3(3)(1) = 9 > 0$，函数递增
       id: 10,
       type: "计算题",
       title: "最值问题",
-      question: "10. 求函数 $f(x) = x^3 - 3x + 1$ 在区间 $[-2, 2]$ 上的最大值和最小值",
+      question: "求函数 $f(x) = x^3 - 3x + 1$ 在区间 $[-2, 2]$ 上的最大值和最小值",
       essence: "这道题考查闭区间上的最值问题。需要比较驻点和端点的函数值，找出最大值和最小值。先求导数找驻点，然后计算驻点和端点的函数值进行比较。",
       explanation: `第一步：求导数和驻点 $f'(x) = 3x^2 - 3 = 3(x^2 - 1) = 3(x-1)(x+1)$
 令 $f'(x) = 0$，得 $x = 1$ 或 $x = -1$，两个驻点都在区间 $[-2, 2]$ 内
@@ -346,7 +346,7 @@ $x > 3$：选 $x = 4$，$f'(4) = 3(3)(1) = 9 > 0$，函数递增
       id: 11,
       type: "计算题",
       title: "洛必达法则",
-      question: "11. 用洛必达法则求极限 $\\lim\\limits_{x \\to 0} \\frac{e^x - 1}{x}$",
+      question: "用洛必达法则求极限 $\\lim\\limits_{x \\to 0} \\frac{e^x - 1}{x}$",
       essence: "这道题考查洛必达法则求极限。当极限为 $\\frac{0}{0}$ 型时，可以对分子分母同时求导，然后代入极限值计算。需要先判断极限类型，再应用洛必达法则。",
       explanation: `第一步：判断极限类型。当 $x \\to 0$ 时：分子：$e^x - 1 \\to e^0 - 1 = 1 - 1 = 0$；分母：$x \\to 0$
 这是 $\\frac{0}{0}$ 型，可以用洛必达法则
@@ -364,7 +364,7 @@ $$\\frac{e^x - 1}{x} = \\frac{x + \\frac{x^2}{2!} + ...}{x} = 1 + \\frac{x}{2!} 
       id: 12,
       type: "计算题",
       title: "简单求导",
-      question: "12. 求函数 $f(x) = 3x^2 - 6x + 1$ 的导数",
+      question: "求函数 $f(x) = 3x^2 - 6x + 1$ 的导数",
       essence: "这道题考查多项式函数的求导。每一项分别求导即可，运算简单。",
       explanation: `求多项式的导数，逐项求导：$f(x) = 3x^2 - 6x + 1$
 各项求导：$(3x^2)' = 6x$，$(-6x)' = -6$，$(1)' = 0$
@@ -378,7 +378,7 @@ $$\\frac{e^x - 1}{x} = \\frac{x + \\frac{x^2}{2!} + ...}{x} = 1 + \\frac{x}{2!} 
       id: 13,
       type: "计算题",
       title: "利用导数判断函数单调性",
-      question: "13. 讨论函数 $f(x) = 3x^2 - x^3$ 的单调性",
+      question: "讨论函数 $f(x) = 3x^2 - x^3$ 的单调性",
       essence: "这道题考查利用导数判断函数单调性的方法。导数大于0则单调递增，导数小于0则单调递减。",
       explanation: `<strong>第一步：求导数</strong>
 
@@ -434,7 +434,7 @@ $$\\frac{e^x - 1}{x} = \\frac{x + \\frac{x^2}{2!} + ...}{x} = 1 + \\frac{x}{2!} 
       id: 14,
       type: "计算题",
       title: "函数极值-二次函数",
-      question: "14. 求函数 $y=1-x^2$ 的极值",
+      question: "求函数 $y=1-x^2$ 的极值",
       essence: "这道题考查利用一阶导数判断函数极值的方法。当导数变号时取得极值。",
       explanation: `<strong>第一步：求导数</strong>
 
@@ -490,7 +490,7 @@ $$\\frac{e^x - 1}{x} = \\frac{x + \\frac{x^2}{2!} + ...}{x} = 1 + \\frac{x}{2!} 
       id: 15,
       type: "计算题",
       title: "函数极值-三次函数",
-      question: "15. 求函数 $f(x) = x^3 - 6x^2 + 9x$ 的极值",
+      question: "求函数 $f(x) = x^3 - 6x^2 + 9x$ 的极值",
       essence: "这道题考查函数极值的两种求法：一阶导数法和二阶导数法。可以任选一种方法求解。",
       explanation: `<strong>方法一：一阶导数法</strong>
 
@@ -556,7 +556,7 @@ $$\\frac{e^x - 1}{x} = \\frac{x + \\frac{x^2}{2!} + ...}{x} = 1 + \\frac{x}{2!} 
       id: 16,
       type: "计算题",
       title: "切线与法线方程",
-      question: "16. 求曲线 $y=\\dfrac{1}{x}$ 在点 $(2,\\tfrac{1}{2})$ 处的切线与法线方程",
+      question: "求曲线 $y=\\dfrac{1}{x}$ 在点 $(2,\\tfrac{1}{2})$ 处的切线与法线方程",
       essence: "导数的几何应用：切线斜率 $k = y'(x_0)$，法线斜率 $k_n = -\\tfrac{1}{k}$",
       explanation: `<strong>第一步：求导并求斜率</strong>\\n\\n$y=\\dfrac{1}{x}$，$y'=-\\dfrac{1}{x^2}$，故在 $x=2$ 处切线斜率 $k=-\\dfrac{1}{4}$。\\n\\n<strong>第二步：切线方程（点斜式）</strong>\\n\\n$y-\\tfrac{1}{2}=-\\dfrac{1}{4}(x-2)$，化简得：$x+4y-4=0$。\\n\\n<strong>第三步：法线方程</strong>\\n\\n法线斜率 $k_n=4$，$y-\\tfrac{1}{2}=4(x-2)$，化简得：$8x-2y-15=0$。`,
       answer: "切线：$x+4y-4=0$；法线：$8x-2y-15=0$",
@@ -568,7 +568,7 @@ $$\\frac{e^x - 1}{x} = \\frac{x + \\frac{x^2}{2!} + ...}{x} = 1 + \\frac{x}{2!} 
       id: 17,
       type: "计算题",
       title: "闭区间最值",
-      question: "17. 求函数$f(x) = 2x^3 + 3x^2 - 12x$在区间$[-3, 4]$上的最大值和最小值",
+      question: "求函数$f(x) = 2x^3 + 3x^2 - 12x$在区间$[-3, 4]$上的最大值和最小值",
       essence: "这道题考查闭区间上的最值求法。比较端点值和驻点值",
       explanation: `$f'(x) = 6x^2 + 6x - 12 = 6(x+2)(x-1)$；令$f'(x) = 0$，得驻点$x_1 = -2$，$x_2 = 1$；计算各点函数值：$f(-3) = 9$，$f(-2) = 20$，$f(1) = -7$，$f(4) = 128$；比较得：最大值$f(4) = 128$，最小值$f(1) = -7$`,
       answer: "最大值$128$，最小值$-7$",
@@ -580,7 +580,7 @@ $$\\frac{e^x - 1}{x} = \\frac{x + \\frac{x^2}{2!} + ...}{x} = 1 + \\frac{x}{2!} 
       id: 18,
       type: "计算题",
       title: "闭区间上求最值",
-      question: "18. 求函数 $f(x) = 2x^3 + 3x^2 - 12x$ 在区间 $[-3, 4]$ 上的最大值和最小值",
+      question: "求函数 $f(x) = 2x^3 + 3x^2 - 12x$ 在区间 $[-3, 4]$ 上的最大值和最小值",
       essence: "比较驻点和端点的函数值",
       explanation: `$f'(x) = 6x^2 + 6x - 12 = 6(x+2)(x-1)$
 
@@ -602,7 +602,7 @@ $f(4) = 128$（右端点）
       id: 19,
       type: "计算题",
       title: "求函数的极值点和极值",
-      question: "19. 求下列函数的极值点和极值：\n(1) $f(x) = \\frac{1}{3}x^3 - x^2 - 3x + 3$\n(2) $f(x) = x - \\ln(1+x)$\n(3) $f(x) = \\frac{2x}{1+x^2}$\n(4) $f(x) = 3x^{2/3} - x$",
+      question: "求下列函数的极值点和极值：\n(1) $f(x) = \\frac{1}{3}x^3 - x^2 - 3x + 3$\n(2) $f(x) = x - \\ln(1+x)$\n(3) $f(x) = \\frac{2x}{1+x^2}$\n(4) $f(x) = 3x^{2/3} - x$",
       essence: "求驻点，用一阶或二阶导数判别法确定极值",
       explanation: `<strong>(1) $f(x) = \\frac{1}{3}x^3 - x^2 - 3x + 3$</strong>
 
@@ -654,7 +654,7 @@ $x < 8$ 时 $f' > 0$，$x > 8$ 时 $f' < 0$
       id: 20,
       type: "计算题",
       title: "求函数在闭区间上的最值",
-      question: "20. 求下列函数在指定区间上的最值：\n(1) $y = 2x^3 - 3x^2 - 80$，$[-1, 4]$\n(2) $y = x^4 - 8x$，$[-1, 3]$\n(3) $y = x + \\sqrt{1-x}$，$[-5, 1]$\n(4) $y = \\ln(x^2 + 1)$，$[-1, 2]$",
+      question: "求下列函数在指定区间上的最值：\n(1) $y = 2x^3 - 3x^2 - 80$，$[-1, 4]$\n(2) $y = x^4 - 8x$，$[-1, 3]$\n(3) $y = x + \\sqrt{1-x}$，$[-5, 1]$\n(4) $y = \\ln(x^2 + 1)$，$[-1, 2]$",
       essence: "闭区间上连续函数的最值：比较驻点和端点的函数值",
       explanation: `<strong>(1) $y = 2x^3 - 3x^2 - 80$，$[-1, 4]$</strong>
 
@@ -714,7 +714,7 @@ $y(2) = \\ln 5$
       id: 21,
       type: "选择题",
       title: "洛必达法则基础",
-      question: "21. 求极限 $\\lim\\limits_{x \\to 0} \\frac{\\sin x}{x} = $ （）\nA. 0 \nB. 1 \nC. $\\infty$ \nD. 不存在",
+      question: "求极限 $\\lim\\limits_{x \\to 0} \\frac{\\sin x}{x} = $ （）\nA. 0 \nB. 1 \nC. $\\infty$ \nD. 不存在",
       essence: "这是洛必达法则最基础的应用，分子分母都趋于0，可以用洛必达法则",
       explanation: `当 $x \\to 0$ 时，分子 $\\sin x \\to 0$，分母 $x \\to 0$，为 $\\frac{0}{0}$ 型
 
@@ -731,7 +731,7 @@ $$\\lim_{x \\to 0} \\frac{\\sin x}{x} = \\lim_{x \\to 0} \\frac{(\\sin x)'}{(x)'
       id: 22,
       type: "选择题",
       title: "洛必达法则-三角函数",
-      question: "22. 求极限 $\\lim\\limits_{x \\to 0} \\frac{1-\\cos x}{x^2} = $ （）\nA. 0 \nB. $\\frac{1}{2}$ \nC. 1 \nD. 2",
+      question: "求极限 $\\lim\\limits_{x \\to 0} \\frac{1-\\cos x}{x^2} = $ （）\nA. 0 \nB. $\\frac{1}{2}$ \nC. 1 \nD. 2",
       essence: "分子分母都趋于0，用洛必达法则，需要求导两次",
       explanation: `当 $x \\to 0$ 时，$1-\\cos x \\to 0$，$x^2 \\to 0$，为 $\\frac{0}{0}$ 型
 
@@ -749,7 +749,7 @@ $$= \\lim_{x \\to 0} \\frac{\\cos x}{2} = \\frac{1}{2}$$`,
       id: 23,
       type: "填空题",
       title: "洛必达法则-指数函数",
-      question: "23. $\\lim\\limits_{x \\to 0} \\frac{e^{2x}-1}{x} = $ ______",
+      question: "$\\lim\\limits_{x \\to 0} \\frac{e^{2x}-1}{x} = $ ______",
       essence: "0/0型，用洛必达法则",
       explanation: `当 $x \\to 0$ 时，$e^{2x}-1 \\to 0$，$x \\to 0$，为 $\\frac{0}{0}$ 型
 
@@ -764,7 +764,7 @@ $$\\lim_{x \\to 0} \\frac{e^{2x}-1}{x} = \\lim_{x \\to 0} \\frac{(e^{2x}-1)'}{(x
       id: 24,
       type: "填空题",
       title: "洛必达法则-对数函数",
-      question: "24. $\\lim\\limits_{x \\to 0} \\frac{\\ln(1+x)}{x} = $ ______",
+      question: "$\\lim\\limits_{x \\to 0} \\frac{\\ln(1+x)}{x} = $ ______",
       essence: "0/0型，用洛必达法则",
       explanation: `当 $x \\to 0$ 时，$\\ln(1+x) \\to 0$，$x \\to 0$，为 $\\frac{0}{0}$ 型
 
@@ -779,7 +779,7 @@ $$\\lim_{x \\to 0} \\frac{\\ln(1+x)}{x} = \\lim_{x \\to 0} \\frac{\\frac{1}{1+x}
       id: 25,
       type: "计算题",
       title: "洛必达法则-多项式",
-      question: "25. 用洛必达法则求极限 $\\lim\\limits_{x \\to 1} \\frac{x^3-1}{x^2-1}$",
+      question: "用洛必达法则求极限 $\\lim\\limits_{x \\to 1} \\frac{x^3-1}{x^2-1}$",
       essence: "0/0型，用洛必达法则",
       explanation: `第一步：判断极限类型
 当 $x \\to 1$ 时，$x^3-1 \\to 0$，$x^2-1 \\to 0$，为 $\\frac{0}{0}$ 型
@@ -798,7 +798,7 @@ $$= \\lim_{x \\to 1} \\frac{3x}{2} = \\frac{3 \\times 1}{2} = \\frac{3}{2}$$`,
       id: 26,
       type: "计算题",
       title: "洛必达法则-三角与多项式",
-      question: "26. 用洛必达法则求极限 $\\lim\\limits_{x \\to 0} \\frac{\\sin 3x}{2x}$",
+      question: "用洛必达法则求极限 $\\lim\\limits_{x \\to 0} \\frac{\\sin 3x}{2x}$",
       essence: "0/0型，用洛必达法则",
       explanation: `第一步：判断极限类型
 当 $x \\to 0$ 时，$\\sin 3x \\to 0$，$2x \\to 0$，为 $\\frac{0}{0}$ 型
@@ -817,7 +817,7 @@ $$= \\frac{3\\cos 0}{2} = \\frac{3 \\times 1}{2} = \\frac{3}{2}$$`,
       id: 27,
       type: "计算题",
       title: "洛必达法则-指数差",
-      question: "27. 用洛必达法则求极限 $\\lim\\limits_{x \\to 0} \\frac{e^x - e^{-x}}{x}$",
+      question: "用洛必达法则求极限 $\\lim\\limits_{x \\to 0} \\frac{e^x - e^{-x}}{x}$",
       essence: "0/0型，用洛必达法则",
       explanation: `第一步：判断极限类型
 当 $x \\to 0$ 时，$e^x - e^{-x} \\to 1-1 = 0$，$x \\to 0$，为 $\\frac{0}{0}$ 型
@@ -836,7 +836,7 @@ $$= e^0 + e^0 = 1 + 1 = 2$$`,
       id: 28,
       type: "计算题",
       title: "洛必达法则-对数差",
-      question: "28. 用洛必达法则求极限 $\\lim\\limits_{x \\to 1} \\frac{\\ln x}{x-1}$",
+      question: "用洛必达法则求极限 $\\lim\\limits_{x \\to 1} \\frac{\\ln x}{x-1}$",
       essence: "0/0型，用洛必达法则",
       explanation: `第一步：判断极限类型
 当 $x \\to 1$ 时，$\\ln x \\to \\ln 1 = 0$，$x-1 \\to 0$，为 $\\frac{0}{0}$ 型
@@ -848,6 +848,212 @@ $$\\lim_{x \\to 1} \\frac{\\ln x}{x-1} = \\lim_{x \\to 1} \\frac{\\frac{1}{x}}{1
 $$= \\frac{1}{1} = 1$$`,
       answer: "1",
       difficulty: "easy",
+      category: "洛必达法则",
+      method: "洛必达法则"
+    },
+    {
+      id: 29,
+      type: "选择题",
+      title: "洛必达法则",
+      question: "用洛必达法则求极限 $\\lim\\limits_{x \\to 0} \\frac{\\arcsin x}{x} = $ （）\nA. 0 \nB. 1 \nC. $\\frac{\\pi}{2}$ \nD. 不存在",
+      essence: "这道题考查反三角函数的洛必达法则应用。当极限为 $\\frac{0}{0}$ 型时，必须使用洛必达法则，不能用等价无穷小。",
+      explanation: `第一步：判断极限类型
+当 $x \\to 0$ 时，$\\arcsin x \\to 0$，$x \\to 0$，为 $\\frac{0}{0}$ 型
+
+第二步：应用洛必达法则
+$$\\lim_{x \\to 0} \\frac{\\arcsin x}{x} = \\lim_{x \\to 0} \\frac{\\frac{1}{\\sqrt{1-x^2}}}{1} = \\lim_{x \\to 0} \\frac{1}{\\sqrt{1-x^2}}$$
+
+第三步：代入求值
+$$= \\frac{1}{\\sqrt{1-0^2}} = \\frac{1}{1} = 1$$`,
+      answer: "B",
+      difficulty: "medium",
+      category: "洛必达法则",
+      method: "洛必达法则"
+    },
+    {
+      id: 30,
+      type: "填空题",
+      title: "洛必达法则",
+      question: "用洛必达法则求极限 $\\lim\\limits_{x \\to 0} \\frac{\\sqrt{1+x} - 1}{x} = $ ______",
+      essence: "这道题考查根式函数的洛必达法则应用。必须使用洛必达法则，不能用等价无穷小。",
+      explanation: `第一步：判断极限类型
+当 $x \\to 0$ 时，$\\sqrt{1+x} - 1 \\to 0$，$x \\to 0$，为 $\\frac{0}{0}$ 型
+
+第二步：应用洛必达法则
+$$\\lim_{x \\to 0} \\frac{\\sqrt{1+x} - 1}{x} = \\lim_{x \\to 0} \\frac{\\frac{1}{2\\sqrt{1+x}}}{1} = \\lim_{x \\to 0} \\frac{1}{2\\sqrt{1+x}}$$
+
+第三步：代入求值
+$$= \\frac{1}{2\\sqrt{1+0}} = \\frac{1}{2}$$`,
+      answer: "$\\frac{1}{2}$",
+      difficulty: "medium",
+      category: "洛必达法则",
+      method: "洛必达法则"
+    },
+    {
+      id: 31,
+      type: "计算题",
+      title: "洛必达法则",
+      question: "用洛必达法则求极限 $\\lim\\limits_{x \\to 0} \\frac{x - \\sin x}{x^3}$",
+      essence: "这道题需要多次使用洛必达法则。必须使用洛必达法则，不能用等价无穷小。",
+      explanation: `第一步：判断极限类型
+当 $x \\to 0$ 时，$x - \\sin x \\to 0$，$x^3 \\to 0$，为 $\\frac{0}{0}$ 型
+
+第二步：第一次应用洛必达法则
+$$\\lim_{x \\to 0} \\frac{x - \\sin x}{x^3} = \\lim_{x \\to 0} \\frac{1 - \\cos x}{3x^2}$$
+
+仍为 $\\frac{0}{0}$ 型
+
+第三步：第二次应用洛必达法则
+$$= \\lim_{x \\to 0} \\frac{\\sin x}{6x}$$
+
+仍为 $\\frac{0}{0}$ 型
+
+第四步：第三次应用洛必达法则
+$$= \\lim_{x \\to 0} \\frac{\\cos x}{6} = \\frac{1}{6}$$`,
+      answer: "$\\frac{1}{6}$",
+      difficulty: "hard",
+      category: "洛必达法则",
+      method: "洛必达法则"
+    },
+    {
+      id: 32,
+      type: "计算题",
+      title: "洛必达法则",
+      question: "用洛必达法则求极限 $\\lim\\limits_{x \\to 0} \\frac{x^2}{1 - \\cos x}$",
+      essence: "这道题考查洛必达法则的应用。必须使用洛必达法则，不能用等价无穷小。",
+      explanation: `第一步：判断极限类型
+当 $x \\to 0$ 时，$x^2 \\to 0$，$1 - \\cos x \\to 0$，为 $\\frac{0}{0}$ 型
+
+第二步：应用洛必达法则
+$$\\lim_{x \\to 0} \\frac{x^2}{1 - \\cos x} = \\lim_{x \\to 0} \\frac{2x}{\\sin x}$$
+
+仍为 $\\frac{0}{0}$ 型
+
+第三步：再次应用洛必达法则
+$$= \\lim_{x \\to 0} \\frac{2}{\\cos x} = \\frac{2}{1} = 2$$`,
+      answer: "2",
+      difficulty: "medium",
+      category: "洛必达法则",
+      method: "洛必达法则"
+    },
+    {
+      id: 33,
+      type: "计算题",
+      title: "洛必达法则",
+      question: "用洛必达法则求极限 $\\lim\\limits_{x \\to 0} \\frac{e^{x^2} - 1}{x^2}$",
+      essence: "这道题考查复合指数函数的洛必达法则应用。必须使用洛必达法则，不能用等价无穷小。",
+      explanation: `第一步：判断极限类型
+当 $x \\to 0$ 时，$e^{x^2} - 1 \\to 0$，$x^2 \\to 0$，为 $\\frac{0}{0}$ 型
+
+第二步：应用洛必达法则
+$$\\lim_{x \\to 0} \\frac{e^{x^2} - 1}{x^2} = \\lim_{x \\to 0} \\frac{2xe^{x^2}}{2x} = \\lim_{x \\to 0} \\frac{e^{x^2}}{1}$$
+
+第三步：代入求值
+$$= e^{0^2} = e^0 = 1$$`,
+      answer: "1",
+      difficulty: "medium",
+      category: "洛必达法则",
+      method: "洛必达法则"
+    },
+    {
+      id: 34,
+      type: "计算题",
+      title: "洛必达法则",
+      question: "用洛必达法则求极限 $\\lim\\limits_{x \\to 0} \\frac{\\ln(1 + x^2)}{x^2}$",
+      essence: "这道题考查对数复合函数的洛必达法则应用。必须使用洛必达法则，不能用等价无穷小。",
+      explanation: `第一步：判断极限类型
+当 $x \\to 0$ 时，$\\ln(1 + x^2) \\to 0$，$x^2 \\to 0$，为 $\\frac{0}{0}$ 型
+
+第二步：应用洛必达法则
+$$\\lim_{x \\to 0} \\frac{\\ln(1 + x^2)}{x^2} = \\lim_{x \\to 0} \\frac{\\frac{2x}{1 + x^2}}{2x} = \\lim_{x \\to 0} \\frac{1}{1 + x^2}$$
+
+第三步：代入求值
+$$= \\frac{1}{1 + 0^2} = 1$$`,
+      answer: "1",
+      difficulty: "medium",
+      category: "洛必达法则",
+      method: "洛必达法则"
+    },
+    {
+      id: 35,
+      type: "计算题",
+      title: "洛必达法则",
+      question: "用洛必达法则求极限 $\\lim\\limits_{x \\to 0} \\frac{\\arctan x}{x}$",
+      essence: "这道题考查反三角函数的洛必达法则应用。必须使用洛必达法则，不能用等价无穷小。",
+      explanation: `第一步：判断极限类型
+当 $x \\to 0$ 时，$\\arctan x \\to 0$，$x \\to 0$，为 $\\frac{0}{0}$ 型
+
+第二步：应用洛必达法则
+$$\\lim_{x \\to 0} \\frac{\\arctan x}{x} = \\lim_{x \\to 0} \\frac{\\frac{1}{1 + x^2}}{1} = \\lim_{x \\to 0} \\frac{1}{1 + x^2}$$
+
+第三步：代入求值
+$$= \\frac{1}{1 + 0^2} = 1$$`,
+      answer: "1",
+      difficulty: "medium",
+      category: "洛必达法则",
+      method: "洛必达法则"
+    },
+    {
+      id: 36,
+      type: "计算题",
+      title: "洛必达法则",
+      question: "用洛必达法则求极限 $\\lim\\limits_{x \\to 0} \\frac{\\sin x - x}{x^3}$",
+      essence: "这道题需要多次使用洛必达法则。必须使用洛必达法则，不能用等价无穷小。",
+      explanation: `第一步：判断极限类型
+当 $x \\to 0$ 时，$\\sin x - x \\to 0$，$x^3 \\to 0$，为 $\\frac{0}{0}$ 型
+
+第二步：第一次应用洛必达法则
+$$\\lim_{x \\to 0} \\frac{\\sin x - x}{x^3} = \\lim_{x \\to 0} \\frac{\\cos x - 1}{3x^2}$$
+
+仍为 $\\frac{0}{0}$ 型
+
+第三步：第二次应用洛必达法则
+$$= \\lim_{x \\to 0} \\frac{-\\sin x}{6x}$$
+
+仍为 $\\frac{0}{0}$ 型
+
+第四步：第三次应用洛必达法则
+$$= \\lim_{x \\to 0} \\frac{-\\cos x}{6} = -\\frac{1}{6}$$`,
+      answer: "$-\\frac{1}{6}$",
+      difficulty: "hard",
+      category: "洛必达法则",
+      method: "洛必达法则"
+    },
+    {
+      id: 37,
+      type: "计算题",
+      title: "洛必达法则",
+      question: "用洛必达法则求极限 $\\lim\\limits_{x \\to 0} \\frac{e^{3x} - e^x}{x}$",
+      essence: "这道题考查指数函数差的洛必达法则应用。必须使用洛必达法则，不能用等价无穷小。",
+      explanation: `第一步：判断极限类型
+当 $x \\to 0$ 时，$e^{3x} - e^x \\to 1 - 1 = 0$，$x \\to 0$，为 $\\frac{0}{0}$ 型
+
+第二步：应用洛必达法则
+$$\\lim_{x \\to 0} \\frac{e^{3x} - e^x}{x} = \\lim_{x \\to 0} \\frac{3e^{3x} - e^x}{1}$$
+
+第三步：代入求值
+$$= 3e^0 - e^0 = 3 - 1 = 2$$`,
+      answer: "2",
+      difficulty: "medium",
+      category: "洛必达法则",
+      method: "洛必达法则"
+    },
+    {
+      id: 38,
+      type: "计算题",
+      title: "洛必达法则",
+      question: "用洛必达法则求极限 $\\lim\\limits_{x \\to 0} \\frac{\\sqrt{1 + \\sin x} - 1}{x}$",
+      essence: "这道题考查根式与三角函数复合的洛必达法则应用。必须使用洛必达法则，不能用等价无穷小。",
+      explanation: `第一步：判断极限类型
+当 $x \\to 0$ 时，$\\sqrt{1 + \\sin x} - 1 \\to 0$，$x \\to 0$，为 $\\frac{0}{0}$ 型
+
+第二步：应用洛必达法则
+$$\\lim_{x \\to 0} \\frac{\\sqrt{1 + \\sin x} - 1}{x} = \\lim_{x \\to 0} \\frac{\\frac{\\cos x}{2\\sqrt{1 + \\sin x}}}{1} = \\lim_{x \\to 0} \\frac{\\cos x}{2\\sqrt{1 + \\sin x}}$$
+
+第三步：代入求值
+$$= \\frac{\\cos 0}{2\\sqrt{1 + \\sin 0}} = \\frac{1}{2\\sqrt{1 + 0}} = \\frac{1}{2}$$`,
+      answer: "$\\frac{1}{2}$",
+      difficulty: "hard",
       category: "洛必达法则",
       method: "洛必达法则"
     }
