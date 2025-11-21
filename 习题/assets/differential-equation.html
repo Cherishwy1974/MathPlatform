@@ -138,8 +138,7 @@
         }
 
         .section-title i {
-            margin-right: 8px;
-            color: #555;
+            display: none;
         }
 
         /* 知识点幻灯片样式 - 简化版 */
@@ -313,7 +312,7 @@
         }
 
         .locator-title i {
-            margin-right: 8px;
+            display: none;
         }
 
         .locator-input-container {
@@ -551,7 +550,7 @@
 
         .explanation h4 i,
         .answer h4 i {
-            margin-right: 8px;
+            display: none;
         }
 
         .explanation-content {
@@ -580,7 +579,7 @@
         }
 
         .global-deepseek-title i {
-            margin-right: 10px;
+            display: none;
         }
 
         .api-key-section {
@@ -1507,9 +1506,9 @@
                 }
             },
             startup: {
-                ready: function() {
+                ready: function () {
                     MathJax.startup.defaultReady();
-                    MathJax.startup.promise.then(function() {
+                    MathJax.startup.promise.then(function () {
                         console.log('MathJax 已完全加载');
                     });
                 }
@@ -1527,6 +1526,7 @@
             z-index: 9999;
             flex-wrap: wrap;
         }
+
         .return-home-panel .return-link {
             padding: 8px 14px;
             border-radius: 999px;
@@ -1539,13 +1539,16 @@
             -webkit-backdrop-filter: blur(8px);
             transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
+
         .return-home-panel .return-link:hover {
             transform: translateY(-2px);
             box-shadow: 0 12px 24px rgba(15, 23, 42, 0.35);
         }
+
         .return-home-panel .return-link.return-main {
             background: rgba(79, 70, 229, 0.85);
         }
+
         @media (max-width: 640px) {
             .return-home-panel {
                 top: 12px;
@@ -1553,6 +1556,7 @@
                 right: 12px;
                 justify-content: center;
             }
+
             .return-home-panel .return-link {
                 width: 100%;
                 text-align: center;
@@ -1563,14 +1567,15 @@
 
 <body>
     <div class="return-home-panel">
-         <a class="return-link return-sub" href="../index.html"><i class="fa-solid fa-arrow-left"></i> 返回目录</a>
-        <a class="return-link return-main" href="../../index.html"><i class="fa-solid fa-house"></i> 返回主站</a>    </div>
+        <a class="return-link return-sub" href="../index.html">返回目录</a>
+        <a class="return-link return-main" href="../../index.html">返回主站</a>
+    </div>
     <!-- 简化的导航栏 -->
     <nav class="navbar">
         <div class="navbar-container">
             <a href="#" class="navbar-brand">微分方程知识点整理</a>
             <button class="export-pdf-nav-btn" onclick="exportPDF()">
-                <i class="fas fa-file-pdf"></i> 导出PDF
+                导出PDF
             </button>
         </div>
     </nav>
@@ -1580,7 +1585,6 @@
         <!-- 全局 DeepSeek AI 查询 -->
         <section id="global-ai" class="section global-deepseek-container">
             <div class="global-deepseek-title">
-                <i class="fas fa-robot"></i>
                 <h3>DeepSeek AI 助手</h3>
             </div>
 
@@ -1590,14 +1594,13 @@
                     <input type="password" id="deepseek-api-key" class="deepseek-api-key"
                         placeholder="请输入您的DeepSeek API密钥...">
                     <button id="save-api-key-btn" class="global-deepseek-btn">
-                        <i class="fas fa-key"></i>
                         保存密钥
                     </button>
                 </div>
                 <div class="api-key-status">
                     <small id="api-key-status-text">API密钥未设置</small>
                     <button id="clear-api-key-btn" class="text-button" style="display:none;">
-                        <i class="fas fa-trash-alt"></i> 清除密钥
+                        清除密钥
                     </button>
                 </div>
             </div>
@@ -1606,7 +1609,6 @@
                 <input type="text" id="global-deepseek-input" class="global-deepseek-input"
                     placeholder="输入您的关于微分方程的问题...">
                 <button id="global-deepseek-btn" class="global-deepseek-btn">
-                    <i class="fas fa-paper-plane"></i>
                     提问
                 </button>
             </div>
@@ -1616,9 +1618,9 @@
         <section id="knowledge" class="section">
             <h2 class="section-title">
                 <div>
-                    <i class="fas fa-book"></i> 重要知识点
+                    重要知识点
                     <span style="font-size: 0.7em; color: #999; margin-left: 10px;">
-                        <i class="fas fa-hand-pointer"></i> 点击卡片切换
+                        点击卡片切换
                     </span>
                 </div>
                 <div class="circle-nav">
@@ -1636,28 +1638,28 @@
 
         <!-- 习题部分 -->
         <section id="exercises" class="section">
-            <h2 class="section-title"><i class="fas fa-pencil-alt"></i> 练习题</h2>
+            <h2 class="section-title">练习题</h2>
 
             <!-- 分类筛选 -->
             <div class="filter-section">
                 <div class="filter-container">
                     <button class="filter-btn active" data-filter="all">
-                        <i class="fas fa-list"></i> 全部题目 <span class="count">0</span>
+                        全部题目 <span class="count">0</span>
                     </button>
                     <button class="filter-btn" data-filter="concepts">
-                        <i class="fas fa-book"></i> 基本概念 <span class="count">0</span>
+                        基本概念 <span class="count">0</span>
                     </button>
                     <button class="filter-btn" data-filter="separable">
-                        <i class="fas fa-calculator"></i> 可分离变量 <span class="count">0</span>
+                        可分离变量 <span class="count">0</span>
                     </button>
                     <button class="filter-btn" data-filter="homogeneous">
-                        <i class="fas fa-equals"></i> 齐次方程 <span class="count">0</span>
+                        齐次方程 <span class="count">0</span>
                     </button>
                     <button class="filter-btn" data-filter="linear-first">
-                        <i class="fas fa-superscript"></i> 一阶线性 <span class="count">0</span>
+                        一阶线性 <span class="count">0</span>
                     </button>
                     <button class="filter-btn" data-filter="linear-second">
-                        <i class="fas fa-square-root-alt"></i> 二阶常系数 <span class="count">0</span>
+                        二阶常系数 <span class="count">0</span>
                     </button>
                 </div>
             </div>
@@ -1665,14 +1667,13 @@
             <!-- 题目定位器 -->
             <div class="locator-section">
                 <div class="locator-title">
-                    <i class="fas fa-search"></i>
                     <h4>题目定位</h4>
                 </div>
                 <div class="locator-input-container">
                     <input type="number" id="problem-number-input" min="1" placeholder="输入题号..."
                         class="problem-number-input">
                     <button id="locate-problem-btn" class="locate-problem-btn">
-                        <i class="fas fa-arrow-right"></i> 定位
+                        定位
                     </button>
                 </div>
             </div>
@@ -1685,7 +1686,7 @@
 
     <!-- 返回顶部按钮 -->
     <button class="scroll-to-top">
-        <i class="fas fa-chevron-up"></i>
+        TOP
     </button>
 
     <!-- DeepSeek AI 对话模态框 -->
@@ -1702,7 +1703,7 @@
             <div class="deepseek-chat-input-container">
                 <input type="text" id="deepseek-chat-input" class="deepseek-chat-input" placeholder="输入您的问题...">
                 <button id="deepseek-chat-send" class="deepseek-chat-send">
-                    <i class="fas fa-paper-plane"></i> 发送
+                    发送
                 </button>
             </div>
         </div>
@@ -1714,10 +1715,10 @@
             <div class="fullscreen-title">微分方程习题 - 全屏展示</div>
             <div class="fullscreen-controls">
                 <button id="fullscreen-solution-btn" class="fullscreen-control-btn">
-                    <i class="fas fa-lightbulb"></i> 显示解析
+                    显示解析
                 </button>
                 <button id="fullscreen-close-btn" class="fullscreen-control-btn">
-                    <i class="fas fa-times"></i> 关闭全屏
+                    关闭全屏
                 </button>
             </div>
         </div>
@@ -1727,13 +1728,13 @@
             </div>
             <div class="fullscreen-nav">
                 <button id="fullscreen-prev" class="fullscreen-nav-btn">
-                    <i class="fas fa-chevron-left"></i> 上一题
+                    上一题
                 </button>
                 <span class="fullscreen-counter">
                     第 <span id="current-exercise">1</span> 题 / 共 <span id="total-exercises">0</span> 题
                 </span>
                 <button id="fullscreen-next" class="fullscreen-nav-btn">
-                    下一题 <i class="fas fa-chevron-right"></i>
+                    下一题
                 </button>
             </div>
         </div>
@@ -1876,7 +1877,7 @@
                         <div class="slide-header">
                             <h2 class="slide-title">${point.title}</h2>
                             <button class="ai-analysis-btn btn" data-knowledge-id="${index}">
-                                <i class="fas fa-robot"></i> AI分析
+                                AI分析
                             </button>
                         </div>
                         <div class="slide-content">
@@ -2019,33 +2020,33 @@
                         <h3 class="exercise-title">${exercise.title}</h3>
                     </div>
                     <div class="exercise-meta">
-                        <div class="exercise-type"><i class="fas fa-tag"></i> ${exercise.type}</div>
-                        <div class="exercise-difficulty ${exercise.difficulty}"><i class="fas fa-signal"></i> ${getDifficultyText(exercise.difficulty)}</div>
-                        <div class="exercise-category"><i class="fas fa-folder"></i> ${exercise.category}</div>
-                        ${exercise.method ? `<div class="exercise-method"><i class="fas fa-cogs"></i> ${exercise.method}</div>` : ''}
+                        <div class="exercise-type">${exercise.type}</div>
+                        <div class="exercise-difficulty ${exercise.difficulty}">${getDifficultyText(exercise.difficulty)}</div>
+                        <div class="exercise-category">${exercise.category}</div>
+                        ${exercise.method ? `<div class="exercise-method">${exercise.method}</div>` : ''}
                     </div>
                 </div>
                 <div class="exercise-content">
                     <div class="exercise-question">${exercise.question}</div>
                     <div class="exercise-actions">
                         <button class="solution-toggle btn" data-exercise-id="${exercise.id}">
-                            <i class="fas fa-lightbulb"></i> 查看解析
+                            查看解析
                         </button>
                         <button class="ai-analysis-btn btn" data-exercise-id="${exercise.id}">
-                            <i class="fas fa-robot"></i> AI分析
+                            AI分析
                         </button>
                         <button class="fullscreen-btn btn" data-exercise-id="${exercise.id}">
-                            <i class="fas fa-expand"></i> 全屏模式
+                            全屏模式
                         </button>
                     </div>
                     <div id="solution-${exercise.id}" class="solution-content">
                         <div class="solution-section">
                             <div class="explanation">
-                                <h4><i class="fas fa-chalkboard-teacher"></i> 解析</h4>
+                                <h4>解析</h4>
                                 <div class="explanation-content">${exercise.explanation}</div>
                             </div>
                             <div class="answer">
-                                <h4><i class="fas fa-check-circle"></i> 答案</h4>
+                                <h4>答案</h4>
                                 <div class="explanation-content">${exercise.answer}</div>
                             </div>
                         </div>
@@ -2337,10 +2338,10 @@
 
             if (solution.classList.contains('show')) {
                 solution.classList.remove('show');
-                button.innerHTML = '<i class="fas fa-lightbulb"></i> 查看解析';
+                button.innerHTML = '查看解析';
             } else {
                 solution.classList.add('show');
-                button.innerHTML = '<i class="fas fa-eye-slash"></i> 隐藏解析';
+                button.innerHTML = '隐藏解析';
 
                 // 渲染公式
                 if (window.MathJax && window.MathJax.typesetPromise) {
@@ -2470,10 +2471,10 @@
                         <h3 class="exercise-title">${exercise.title}</h3>
                     </div>
                     <div class="exercise-meta">
-                        <div class="exercise-type"><i class="fas fa-tag"></i> ${exercise.type}</div>
-                        <div class="exercise-difficulty ${exercise.difficulty}"><i class="fas fa-signal"></i> ${getDifficultyText(exercise.difficulty)}</div>
-                        <div class="exercise-category"><i class="fas fa-folder"></i> ${exercise.category}</div>
-                        ${exercise.method ? `<div class="exercise-method"><i class="fas fa-cogs"></i> ${exercise.method}</div>` : ''}
+                        <div class="exercise-type">${exercise.type}</div>
+                        <div class="exercise-difficulty ${exercise.difficulty}">${getDifficultyText(exercise.difficulty)}</div>
+                        <div class="exercise-category">${exercise.category}</div>
+                        ${exercise.method ? `<div class="exercise-method">${exercise.method}</div>` : ''}
                     </div>
                 </div>
                 <div class="exercise-question">${exercise.question}</div>
@@ -2522,184 +2523,184 @@
             document.querySelector('.fullscreen-content').scrollTop = 0;
         }
 
-  // 准备全屏解析内容
-    function prepareFullscreenSolution(solutionHtml) {
-        // 解析数学公式块和段落内容
-        const lines = [];
+        // 准备全屏解析内容
+        function prepareFullscreenSolution(solutionHtml) {
+            // 解析数学公式块和段落内容
+            const lines = [];
 
-        // 首先按段落分割
-        const paragraphs = solutionHtml
-            .replace(/<\/p>/g, '</p>\n')
-            .replace(/<br\s*\/?>/g, '\n')
-            .split(/\n+/)
-            .filter(p => p.trim());
+            // 首先按段落分割
+            const paragraphs = solutionHtml
+                .replace(/<\/p>/g, '</p>\n')
+                .replace(/<br\s*\/?>/g, '\n')
+                .split(/\n+/)
+                .filter(p => p.trim());
 
-        paragraphs.forEach(para => {
-            // 移除HTML标签获取纯文本用于判断
-            const plainText = para.replace(/<[^>]*>/g, '').trim();
+            paragraphs.forEach(para => {
+                // 移除HTML标签获取纯文本用于判断
+                const plainText = para.replace(/<[^>]*>/g, '').trim();
 
-            // 处理数学公式块 - 按$$分割但保持完整性
-            if (para.includes('$$')) {
-                const parts = para.split(/(\$\$[^$]+\$\$)/);
-                let currentLine = '';
+                // 处理数学公式块 - 按$$分割但保持完整性
+                if (para.includes('$$')) {
+                    const parts = para.split(/(\$\$[^$]+\$\$)/);
+                    let currentLine = '';
 
-                parts.forEach(part => {
-                    if (part.trim()) {
-                        if (part.startsWith('$$') && part.endsWith('$$')) {
-                            // 数学公式块
-                            if (currentLine.trim()) {
-                                // 如果当前行有内容，先保存
-                                lines.push(currentLine.trim());
-                                currentLine = '';
-                            }
-
-                            // 检查公式是否应该与前面的内容合并
-                            const formulaText = part.replace(/\$\$/g, '').trim();
-                            if (formulaText.match(/^[式解答步骤其中因此所以故]/)) {
-                                // 这类开头的公式单独成行
-                                lines.push(part);
-                            } else if (lines.length > 0 &&
-                                lines[lines.length - 1].length < 50 &&
-                                !lines[lines.length - 1].endsWith('$$')) {
-                                // 如果上一行很短且不是公式，考虑合并
-                                lines[lines.length - 1] += ' ' + part;
-                            } else {
-                                lines.push(part);
-                            }
-                        } else {
-                            // 普通文本
-                            currentLine += part;
-
-                            // 检查是否应该在此处分行
-                            const sentences = currentLine.split(/(?<=[。！？])\s*/);
-                            if (sentences.length > 1) {
-                                // 保留完整的句子组合，避免过度分割
-                                for (let i = 0; i < sentences.length - 1; i++) {
-                                    const sentence = sentences[i].trim();
-                                    if (sentence.length > 20 || // 足够长
-                                        sentence.match(/^\d+[.、]/) || // 包含序号
-                                        i === sentences.length - 2) { // 最后一句
-                                        lines.push(sentence);
-                                    } else if (i < sentences.length - 2) {
-                                        // 短句合并到下一句
-                                        sentences[i + 1] = sentence + sentences[i + 1];
-                                    }
+                    parts.forEach(part => {
+                        if (part.trim()) {
+                            if (part.startsWith('$$') && part.endsWith('$$')) {
+                                // 数学公式块
+                                if (currentLine.trim()) {
+                                    // 如果当前行有内容，先保存
+                                    lines.push(currentLine.trim());
+                                    currentLine = '';
                                 }
-                                currentLine = sentences[sentences.length - 1];
+
+                                // 检查公式是否应该与前面的内容合并
+                                const formulaText = part.replace(/\$\$/g, '').trim();
+                                if (formulaText.match(/^[式解答步骤其中因此所以故]/)) {
+                                    // 这类开头的公式单独成行
+                                    lines.push(part);
+                                } else if (lines.length > 0 &&
+                                    lines[lines.length - 1].length < 50 &&
+                                    !lines[lines.length - 1].endsWith('$$')) {
+                                    // 如果上一行很短且不是公式，考虑合并
+                                    lines[lines.length - 1] += ' ' + part;
+                                } else {
+                                    lines.push(part);
+                                }
+                            } else {
+                                // 普通文本
+                                currentLine += part;
+
+                                // 检查是否应该在此处分行
+                                const sentences = currentLine.split(/(?<=[。！？])\s*/);
+                                if (sentences.length > 1) {
+                                    // 保留完整的句子组合，避免过度分割
+                                    for (let i = 0; i < sentences.length - 1; i++) {
+                                        const sentence = sentences[i].trim();
+                                        if (sentence.length > 20 || // 足够长
+                                            sentence.match(/^\d+[.、]/) || // 包含序号
+                                            i === sentences.length - 2) { // 最后一句
+                                            lines.push(sentence);
+                                        } else if (i < sentences.length - 2) {
+                                            // 短句合并到下一句
+                                            sentences[i + 1] = sentence + sentences[i + 1];
+                                        }
+                                    }
+                                    currentLine = sentences[sentences.length - 1];
+                                }
                             }
                         }
+                    });
+
+                    if (currentLine.trim()) {
+                        lines.push(currentLine.trim());
                     }
-                });
+                } else {
+                    // 非公式段落的处理
+                    const sentences = para.split(/(?<=[。！？])\s*/);
+                    let buffer = '';
 
-                if (currentLine.trim()) {
-                    lines.push(currentLine.trim());
-                }
-            } else {
-                // 非公式段落的处理
-                const sentences = para.split(/(?<=[。！？])\s*/);
-                let buffer = '';
+                    sentences.forEach((sentence, idx) => {
+                        const trimmed = sentence.trim();
+                        if (!trimmed) return;
 
-                sentences.forEach((sentence, idx) => {
-                    const trimmed = sentence.trim();
-                    if (!trimmed) return;
+                        // 检查是否是序号开头
+                        const isNumbered = /^\d+[.、)]/.test(trimmed);
+                        const isShort = trimmed.length < 30;
 
-                    // 检查是否是序号开头
-                    const isNumbered = /^\d+[.、)]/.test(trimmed);
-                    const isShort = trimmed.length < 30;
+                        if (isNumbered && isShort && idx < sentences.length - 1) {
+                            // 序号行且内容较短，与下一句合并
+                            buffer = trimmed + ' ';
+                        } else if (buffer) {
+                            // 有缓存内容，合并后推入
+                            lines.push(buffer + trimmed);
+                            buffer = '';
+                        } else if (isShort && idx < sentences.length - 1 &&
+                            !trimmed.match(/[：:。！？]$/)) {
+                            // 短句且不是结尾，缓存
+                            buffer = trimmed + ' ';
+                        } else {
+                            // 正常推入
+                            lines.push(trimmed);
+                        }
+                    });
 
-                    if (isNumbered && isShort && idx < sentences.length - 1) {
-                        // 序号行且内容较短，与下一句合并
-                        buffer = trimmed + ' ';
-                    } else if (buffer) {
-                        // 有缓存内容，合并后推入
-                        lines.push(buffer + trimmed);
-                        buffer = '';
-                    } else if (isShort && idx < sentences.length - 1 &&
-                        !trimmed.match(/[：:。！？]$/)) {
-                        // 短句且不是结尾，缓存
-                        buffer = trimmed + ' ';
-                    } else {
-                        // 正常推入
-                        lines.push(trimmed);
+                    if (buffer) {
+                        lines.push(buffer.trim());
                     }
-                });
-
-                if (buffer) {
-                    lines.push(buffer.trim());
                 }
+            });
+
+            // 过滤掉过短的行（除非是独立的公式）
+            const filteredLines = lines.filter(line => {
+                const plainText = line.replace(/<[^>]*>/g, '').replace(/\$\$/g, '').trim();
+                return plainText.length > 5 || line.includes('$$');
+            });
+
+            // 确保有内容
+            if (filteredLines.length === 0 && solutionHtml.trim()) {
+                filteredLines.push(solutionHtml);
             }
-        });
 
-        // 过滤掉过短的行（除非是独立的公式）
-        const filteredLines = lines.filter(line => {
-            const plainText = line.replace(/<[^>]*>/g, '').replace(/\$\$/g, '').trim();
-            return plainText.length > 5 || line.includes('$$');
-        });
+            fullscreenState.solutionLines = filteredLines;
+            fullscreenState.totalLines = filteredLines.length;
 
-        // 确保有内容
-        if (filteredLines.length === 0 && solutionHtml.trim()) {
-            filteredLines.push(solutionHtml);
-        }
+            // 创建解析行元素
+            const linesContainer = document.getElementById('fullscreen-solution-lines');
+            if (!linesContainer) return;
 
-        fullscreenState.solutionLines = filteredLines;
-        fullscreenState.totalLines = filteredLines.length;
+            linesContainer.innerHTML = '';
+            filteredLines.forEach((line, index) => {
+                const lineDiv = document.createElement('div');
+                lineDiv.className = 'fullscreen-solution-line';
+                lineDiv.innerHTML = line;
+                lineDiv.setAttribute('data-line', index);
+                lineDiv.style.display = 'none';
+                // 添加样式以防止溢出
+                lineDiv.style.wordWrap = 'break-word';
+                lineDiv.style.overflowWrap = 'break-word';
+                lineDiv.style.maxWidth = '100%';
+                linesContainer.appendChild(lineDiv);
+            });
 
-        // 创建解析行元素
-        const linesContainer = document.getElementById('fullscreen-solution-lines');
-        if (!linesContainer) return;
-
-        linesContainer.innerHTML = '';
-        filteredLines.forEach((line, index) => {
-            const lineDiv = document.createElement('div');
-            lineDiv.className = 'fullscreen-solution-line';
-            lineDiv.innerHTML = line;
-            lineDiv.setAttribute('data-line', index);
-            lineDiv.style.display = 'none';
-            // 添加样式以防止溢出
-            lineDiv.style.wordWrap = 'break-word';
-            lineDiv.style.overflowWrap = 'break-word';
-            lineDiv.style.maxWidth = '100%';
-            linesContainer.appendChild(lineDiv);
-        });
-
-        updateFullscreenProgress();
-    }
-
-    // 显示下一行解析（保持原有逻辑不变）
-    function showNextFullscreenLine(event) {
-        if (!fullscreenState.solutionVisible) return;
-
-        if (fullscreenState.visibleLines >= fullscreenState.totalLines) {
-            const answerDiv = document.getElementById('fullscreen-answer');
-            if (answerDiv && answerDiv.style.display === 'none') {
-                answerDiv.style.display = 'block';
-                answerDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                updateFullscreenClickHint('解析和答案已全部显示');
-            }
-            return;
-        }
-
-        const line = document.querySelector(`.fullscreen-solution-line[data-line="${fullscreenState.visibleLines}"]`);
-        if (line) {
-            line.style.display = 'block';
-            fullscreenState.visibleLines++;
             updateFullscreenProgress();
+        }
 
-            if (window.MathJax && window.MathJax.typesetPromise) {
-                window.MathJax.typesetPromise([line]).catch(err => {
-                    console.warn('MathJax渲染错误:', err);
-                });
+        // 显示下一行解析（保持原有逻辑不变）
+        function showNextFullscreenLine(event) {
+            if (!fullscreenState.solutionVisible) return;
+
+            if (fullscreenState.visibleLines >= fullscreenState.totalLines) {
+                const answerDiv = document.getElementById('fullscreen-answer');
+                if (answerDiv && answerDiv.style.display === 'none') {
+                    answerDiv.style.display = 'block';
+                    answerDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    updateFullscreenClickHint('解析和答案已全部显示');
+                }
+                return;
             }
 
-            setTimeout(() => {
-                line.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-            }, 100);
+            const line = document.querySelector(`.fullscreen-solution-line[data-line="${fullscreenState.visibleLines}"]`);
+            if (line) {
+                line.style.display = 'block';
+                fullscreenState.visibleLines++;
+                updateFullscreenProgress();
 
-            if (event && event.clientX && event.clientY) {
-                addRippleEffect(event);
+                if (window.MathJax && window.MathJax.typesetPromise) {
+                    window.MathJax.typesetPromise([line]).catch(err => {
+                        console.warn('MathJax渲染错误:', err);
+                    });
+                }
+
+                setTimeout(() => {
+                    line.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }, 100);
+
+                if (event && event.clientX && event.clientY) {
+                    addRippleEffect(event);
+                }
             }
         }
-    }
 
         // 更新全屏进度
         function updateFullscreenProgress() {
@@ -2766,7 +2767,7 @@
                 const container = document.getElementById('fullscreen-solution-container');
                 if (!fullscreenState.solutionVisible) {
                     container.style.display = 'block';
-                    this.innerHTML = '<i class="fas fa-eye-slash"></i> 隐藏解析';
+                    this.innerHTML = '隐藏解析';
                     fullscreenState.solutionVisible = true;
 
                     fullscreenState.visibleLines = 0;
@@ -2779,7 +2780,7 @@
                     updateFullscreenClickHint('点击此区域或按下方向键显示第一行');
                 } else {
                     container.style.display = 'none';
-                    this.innerHTML = '<i class="fas fa-lightbulb"></i> 显示解析';
+                    this.innerHTML = '显示解析';
                     fullscreenState.solutionVisible = false;
                 }
             };
