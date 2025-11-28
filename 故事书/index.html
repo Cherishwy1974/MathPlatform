@@ -4,1608 +4,680 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>数学画廊 - 高等应用数学在线课堂</title>
+    
     <style>
-        /* 主题变量 */
         :root {
-            /* 炉火主题 */
-            --fire-primary: #ea580c;
-            --fire-primary-dark: #c2410c;
-            --fire-accent: #f59e0b;
-            --fire-background-dark: #422006;
-            --fire-surface: #7f1d1d;
-            --fire-text-primary: #fff7ed;
-            --fire-text-secondary: #fed7aa;
-            --fire-glass-bg: rgba(127, 29, 29, 0.2);
-            --fire-glass-border: rgba(253, 186, 116, 0.3);
+            /* === 白色画廊主题变量 === */
+            --bg-base: #ffffff;
+            --bg-subtle: #f8fafc; /* 极淡的灰蓝，用于区分层次 */
+            --bg-glass: rgba(255, 255, 255, 0.9);
             
-            /* 星空主题 */
-            --space-primary: #4f46e5;
-            --space-primary-dark: #4338ca;
-            --space-primary-light: #6366f1;
-            --space-secondary: #7c3aed;
-            --space-accent: #06ffa5;
-            --space-accent-warm: #ff6b6b;
-            --space-dark: #0f172a;
-            --space-dark-surface: #1e293b;
-            --space-light: #ffffff;
-            --space-border: #334155;
-            --space-text: #e2e8f0;
-            --space-text-muted: #94a3b8;
-            --space-glass: rgba(255, 255, 255, 0.1);
-            --space-glass-border: rgba(255, 255, 255, 0.2);
+            --text-primary: #1e293b;   /* 深蓝灰，比纯黑更优雅 */
+            --text-secondary: #64748b; /* 辅助文字颜色 */
+            --text-accent: #2563eb;    /* 皇家蓝，用于强调 */
             
-            /* 共享阴影 */
-            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3), 0 2px 4px -2px rgb(0 0 0 / 0.3);
-            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4), 0 4px 6px -4px rgb(0 0 0 / 0.4);
-            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.5), 0 8px 10px -6px rgb(0 0 0 / 0.5);
-            --glow: 0 0 20px rgba(6, 255, 165, 0.3);
+            --border-color: #e2e8f0;
+            
+            /* 阴影系统：轻盈、悬浮 */
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
+            --shadow-float: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+            
+            --transition-smooth: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        /* 统一字体 */
+        /* 字体加载 */
         @font-face {
             font-family: 'WDXLubrifontSC';
             src: url('../common-assets/fonts/WD-XLLubrifontSC-Regular.otf') format('opentype');
-            font-weight: 400;
-            font-style: normal;
-            font-display: swap;
-        }
-        @font-face {
-            font-family: 'JfOpenHuninn';
-            src: url('../common-assets/fonts/jf-openhuninn-2.1.ttf') format('truetype');
-            font-weight: 400;
-            font-style: normal;
             font-display: swap;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        @font-face {
-            font-family: 'Iansui-Regular';
-            src: url('../common-assets/fonts/WD-XLLubrifontSC-Regular.otf') format('opentype');
-            font-weight: 400;
-            font-style: normal;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: 'WDXLubrifontSC', 'JfOpenHuninn', 'Noto Serif SC', 'Microsoft YaHei', 'PingFang SC', Arial, sans-serif;
-            font-size: 18px;
+            font-family: 'WDXLubrifontSC', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-primary);
             width: 100vw;
-            min-height: 100vh;
-            margin: 0;
-            padding: 0;
-            position: relative;
+            height: 100vh;
             overflow: hidden;
-            transition: background 0.5s ease, color 0.3s ease;
-            background: #faf9f7;
-            color: #2c3e50;
+            -webkit-font-smoothing: antialiased;
         }
 
-        /* 炉火主题样式 */
-        body.fire-theme {
-            background: radial-gradient(ellipse at bottom, #7f1d1d 0%, #422006 100%);
-            color: var(--fire-text-primary);
-        }
-
-        /* 星空主题样式 */
-        body.space-theme {
-            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%);
-            color: var(--space-text);
-        }
-
-        /* 简化顶部导航栏 */
-        .unified-top-nav {
+        /* === 1. 顶部导航栏 (磨砂白) === */
+        .top-nav {
             position: fixed;
             top: 0;
             left: 0;
-            right: 0;
-            z-index: 1000;
-            background: rgba(15, 23, 42, 0.95);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid var(--space-border);
-            padding: 15px 30px;
+            width: 100%;
+            height: 70px;
+            background: var(--bg-glass);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+            z-index: 100;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            padding: 0 30px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .nav-brand {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
 
         .nav-brand h1 {
-            font-family: 'WDLubrifont', sans-serif;
-            font-size: 24px;
-            font-weight: 600;
-            color: var(--space-text);
-            margin: 0;
-            background: linear-gradient(135deg, #ffffff 0%, #06ffa5 100%);
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            background: linear-gradient(120deg, #2563eb, #0891b2);
             -webkit-background-clip: text;
             background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: transparent; /* 渐变文字 */
         }
 
-        .nav-brand p {
-            font-size: 12px;
-            color: var(--space-text-muted);
-            margin: 0;
+        .nav-brand span {
+            font-size: 10px;
+            color: var(--text-secondary);
             text-transform: uppercase;
-            letter-spacing: 0.1em;
+            letter-spacing: 2px;
         }
 
-        .nav-actions {
+        .nav-controls {
             display: flex;
-            gap: 15px;
-            align-items: center;
-        }
-
-        .nav-action-btn {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 10px 20px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--space-border);
-            border-radius: 8px;
-            color: var(--space-text);
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .nav-action-btn:hover {
-            background: rgba(6, 255, 165, 0.1);
-            border-color: var(--space-accent);
-            color: var(--space-accent);
-            transform: translateY(-2px);
-        }
-
-        .nav-action-btn svg {
-            width: 16px;
-            height: 16px;
-        }
-
-        /* 主题切换按钮 */
-        .theme-switch-btn {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 10000;
-            padding: 12px 24px;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 30px;
-            color: white;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
             gap: 10px;
         }
 
-        body.fire-theme .theme-switch-btn {
-            background: rgba(234, 88, 12, 0.1);
-            border-color: rgba(234, 88, 12, 0.3);
-            color: var(--fire-text-primary);
+        .nav-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border: 1px solid var(--border-color);
+            background: #fff;
+            color: var(--text-secondary);
+            border-radius: 8px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: var(--transition-smooth);
         }
 
-        .theme-switch-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-            box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+        .nav-btn:hover {
+            border-color: var(--text-accent);
+            color: var(--text-accent);
+            background: #eff6ff;
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-sm);
         }
 
-        body.fire-theme .theme-switch-btn:hover {
-            background: rgba(234, 88, 12, 0.2);
-            box-shadow: 0 0 20px rgba(234, 88, 12, 0.3);
+        .nav-btn svg { width: 14px; height: 14px; fill: currentColor; }
+
+        .btn-primary {
+            background: var(--text-accent);
+            color: white;
+            border-color: var(--text-accent);
+        }
+        .btn-primary:hover {
+            background: #1d4ed8;
+            color: white;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
         }
 
-        /* 炉火背景 Canvas - 仅在炉火主题显示 */
-        #fire-canvas { display: none !important; }
-
-        body.fire-theme #fire-canvas {
-            display: block;
+        /* === 2. 背景动画层 === */
+        #geo-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.6; /* 淡淡的背景 */
         }
 
-        /* 星空背景 - 仅在星空主题显示 */
-        #starry-sky { display: none !important; }
-
-        body.space-theme #starry-sky {
-            display: block;
-        }
-
-        /* 数字碎片背景动效 - 仅在星空主题显示 */
-        #glitchCanvas { display: block; }
-
-
-        body.space-theme #glitchCanvas {
-            display: block;
-        }
-
-        /* 主内容区 */
-        .main-content {
-            width: 100vw;
-            min-height: 100vh;
+        /* === 3. 主容器 === */
+        .main-container {
             position: relative;
             z-index: 1;
-        }
-
-        /* 欢迎页 */
-        .welcome-page {
-            width: 100%;
-            min-height: 100vh;
-            display: flex;
-            align-items: flex-start;
-            justify-content: center;
-            padding: 40px 20px;
-            box-sizing: border-box;
-            overflow-y: auto;
-            position: relative;
-        }
-
-        .welcome-content {
+            height: 100%;
+            padding-top: 70px; /* 避开导航 */
             display: flex;
             flex-direction: column;
-            width: 100%;
-            max-width: 1400px;
-            gap: 20px;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            position: relative;
-            z-index: 2;
-            padding: 0;
         }
 
-        .welcome-title-section {
+        /* === 4. 欢迎/封面页 === */
+        .welcome-screen {
+            flex: 1;
             display: flex;
             flex-direction: column;
-            align-items: center;
             justify-content: center;
-            gap: 10px;
-            width: 100%;
-            margin-bottom: 25px;
+            align-items: center;
             text-align: center;
-        }
-
-        .welcome-items-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            width: 100%;
-            max-width: 1200px;
+            padding: 20px;
+            transition: opacity 0.5s ease;
         }
 
         .welcome-title {
-            font-family: 'Iansui-Regular', serif;
-            font-size: 48px;
-            font-weight: 400;
-            margin: 0;
-            letter-spacing: 3px;
-            line-height: 1.2;
-            transition: all 0.3s ease;
-        }
-
-        body.fire-theme .welcome-title {
-            background: linear-gradient(135deg, #f59e0b, #fbbf24, #fff7ed);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 20px rgba(234, 88, 12, 0.5);
-        }
-
-        body.space-theme .welcome-title {
-            background: linear-gradient(135deg, var(--space-accent), #67e8f9, var(--space-accent-warm));
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 0 10px rgba(6, 255, 165, 0.3));
+            font-size: 64px;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 10px;
+            letter-spacing: -2px;
+            position: relative;
         }
 
         .welcome-subtitle {
-            font-family: 'Iansui-Regular', serif;
-            font-size: 20px;
-            margin: 0;
+            font-size: 18px;
+            color: var(--text-secondary);
+            font-weight: 300;
+            max-width: 600px;
             line-height: 1.6;
-            font-weight: 400;
-            transition: color 0.3s ease;
+            margin-bottom: 40px;
         }
 
-        body.fire-theme .welcome-subtitle {
-            color: var(--fire-text-secondary);
-        }
-
-        body.space-theme .welcome-subtitle {
-            color: var(--space-text);
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
-        }
-
-        .welcome-item {
-            display: flex;
-            align-items: center;
-            gap: 18px;
-            padding: 20px 25px;
-            border-radius: 20px;
-            transition: all 0.3s ease;
+        .start-btn {
+            padding: 16px 48px;
+            font-size: 18px;
+            background: var(--text-primary);
+            color: white;
+            border: none;
+            border-radius: 50px;
             cursor: pointer;
-            position: relative;
-        }
-
-        body.fire-theme .welcome-item {
-            background: var(--fire-glass-bg);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            border: 1px solid var(--fire-glass-border);
+            transition: var(--transition-smooth);
             box-shadow: var(--shadow-lg);
-        }
-
-        body.fire-theme .welcome-item:hover {
-            transform: translateY(-5px) scale(1.02);
-            box-shadow: var(--shadow-xl);
-            border-color: rgba(253, 230, 138, 0.5);
-            background: rgba(127, 29, 29, 0.5);
-        }
-
-        body.space-theme .welcome-item {
-            background: transparent;
-        }
-
-        body.space-theme .welcome-item:hover {
-            transform: translateX(8px) translateY(-3px);
-        }
-
-        .welcome-item-icon {
-            width: 50px;
-            height: 50px;
-            flex-shrink: 0;
             display: flex;
             align-items: center;
-            justify-content: center;
-            transition: transform 0.3s ease, color 0.3s ease;
+            gap: 10px;
         }
 
-        body.fire-theme .welcome-item-icon {
-            color: var(--fire-accent);
+        .start-btn:hover {
+            transform: scale(1.05);
+            background: var(--text-accent);
+            box-shadow: var(--shadow-float);
         }
 
-        body.space-theme .welcome-item-icon {
-            color: var(--space-accent);
-        }
-
-        .welcome-item-icon svg {
-            width: 28px;
-            height: 28px;
-        }
-
-        .welcome-item:hover .welcome-item-icon {
-            transform: scale(1.1) rotate(5deg);
-        }
-
-        body.fire-theme .welcome-item:hover .welcome-item-icon {
-            color: #fef08a;
-        }
-
-        .welcome-item-text {
-            font-family: 'Iansui-Regular', serif;
-            font-size: 16px;
-            font-weight: 400;
-            letter-spacing: 0.5px;
-            transition: color 0.3s ease;
-        }
-
-        body.fire-theme .welcome-item-text {
-            color: var(--fire-text-primary);
-        }
-
-        body.space-theme .welcome-item-text {
-            color: var(--space-text);
-        }
-
-        body.space-theme .welcome-item:hover .welcome-item-text {
-            color: #ffffff;
-        }
-
-        /* 内容显示区域 */
-        .content-display {
+        /* === 5. 目录覆盖层 (Overlay) === */
+        .chapter-overlay {
+            position: fixed;
+            top: 70px;
+            left: 0;
             width: 100%;
-            height: 100vh;
-            display: none;
+            height: calc(100% - 70px);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(5px);
+            z-index: 50;
+            overflow-y: auto;
+            padding: 40px 20px;
+            
+            /* 默认隐藏状态 */
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(10px);
+            transition: var(--transition-smooth);
+        }
+
+        .chapter-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+
+        .grid-wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+        .section-header h2 { font-size: 24px; color: var(--text-primary); }
+        .section-header span { color: var(--text-secondary); font-size: 14px; }
+
+        .chapter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            padding-bottom: 60px;
+        }
+
+        .chapter-card {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 25px;
+            cursor: pointer;
+            transition: var(--transition-smooth);
             position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 160px;
         }
 
-        body.fire-theme .content-display {
-            background: var(--fire-surface);
+        .chapter-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-float);
+            border-color: var(--text-accent);
         }
 
-        body.space-theme .content-display {
-            background: var(--space-dark);
+        .chapter-idx {
+            font-size: 12px;
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
         }
 
-        .content-display.active {
+        .chapter-card:hover .chapter-idx { color: var(--text-accent); }
+
+        .chapter-title-text {
+            font-size: 18px;
+            font-weight: 600;
+            line-height: 1.4;
+            color: var(--text-primary);
+        }
+
+        .card-icon {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            opacity: 0.1;
+            transition: var(--transition-smooth);
+            transform: scale(1);
+        }
+
+        .chapter-card:hover .card-icon {
+            opacity: 0.2;
+            transform: scale(1.2) rotate(-10deg);
+            color: var(--text-accent);
+        }
+
+        /* === 6. 内容 iframe 容器 === */
+        .iframe-container {
+            position: fixed;
+            top: 70px;
+            left: 0;
+            width: 100%;
+            height: calc(100% - 70px);
+            background: white;
+            z-index: 40;
+            
+            /* 划入动画 */
+            transform: translateX(100%);
+            transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .iframe-container.active {
+            transform: translateX(0);
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
             display: block;
         }
 
-        .content-iframe {
-            width: 100% !important;
-            height: calc(100% - 60px) !important; /* 为顶部导航留出空间 */
-            border: none;
-            position: absolute;
-            top: 60px; /* 从顶部导航下方开始 */
-            left: 0;
-            z-index: 1;
-            opacity: 1 !important;
-        }
-        
-        .preview-controls {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            z-index: 10001; /* 确保在顶部导航之上 */
-        }
-        
-        .close-preview-btn {
-            background: rgba(0, 0, 0, 0.7);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            color: white;
-            transition: all 0.3s ease;
-        }
-        
-        .close-preview-btn:hover {
-            background: rgba(255, 0, 0, 0.8);
-            border-color: rgba(255, 255, 255, 0.8);
-        }
-        
-        .close-preview-btn svg {
-            width: 20px;
-            height: 20px;
-        }
-
-        /* 导航栏 */
-        .floating-nav-sidebar {
-            position: fixed;
-            right: 25px;
-            bottom: 25px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 15px;
-            z-index: 1000;
-        }
-
-        .nav-btn, .sidebar-action-btn, .nav-collapse-btn {
-            width: 55px;
-            height: 55px;
-            border-radius: 20px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            font-weight: 700;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-            position: relative;
-            will-change: transform;
-        }
-
-        body.fire-theme .nav-btn,
-        body.fire-theme .sidebar-action-btn,
-        body.fire-theme .nav-collapse-btn {
-            background: var(--fire-glass-bg);
-            border: 1px solid var(--fire-glass-border);
-            color: var(--fire-text-secondary);
-            box-shadow: var(--shadow-lg);
-        }
-
-        body.fire-theme .nav-btn:hover,
-        body.fire-theme .sidebar-action-btn:hover,
-        body.fire-theme .nav-collapse-btn:hover {
-            transform: translateY(-3px) scale(1.05);
-            box-shadow: 0 0 15px rgba(245, 158, 11, 0.5), var(--shadow-xl);
-            color: var(--fire-accent);
-            border-color: var(--fire-accent);
-        }
-
-        body.space-theme .nav-btn,
-        body.space-theme .sidebar-action-btn,
-        body.space-theme .nav-collapse-btn {
-            background: linear-gradient(135deg, 
-                rgba(15, 23, 42, 0.8) 0%, 
-                rgba(30, 41, 59, 0.7) 100%);
-            border: 2px solid var(--space-glass-border);
-            color: var(--space-text-muted);
-            box-shadow: var(--shadow-lg);
-        }
-
-        body.space-theme .nav-btn:hover,
-        body.space-theme .sidebar-action-btn:hover,
-        body.space-theme .nav-collapse-btn:hover {
-            transform: translateY(-3px) scale(1.05);
-            box-shadow: var(--glow), var(--shadow-xl);
-            border-color: var(--space-accent);
-            color: var(--space-accent);
-        }
-
-        .nav-btn svg {
-            width: 24px;
-            height: 24px;
-        }
-
-        .nav-collapse-btn {
-            font-size: 18px;
-            transition: transform 0.3s ease;
-        }
-
-        .nav-collapse-btn svg {
-            width: 20px;
-            height: 20px;
-        }
-
+        /* === 7. 辅助元素 === */
         .keyboard-hint {
-            font-size: 11px;
-            padding: 8px 15px;
-            border-radius: 15px;
-            white-space: nowrap;
-            text-align: center;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-        }
-
-        body.fire-theme .keyboard-hint {
-            color: var(--fire-text-secondary);
-            background: var(--fire-glass-bg);
-            border: 1px solid var(--fire-glass-border);
-            box-shadow: var(--shadow);
-        }
-
-        body.space-theme .keyboard-hint {
-            color: var(--space-text-muted);
-            background: linear-gradient(135deg, 
-                rgba(0, 0, 0, 0.8) 0%, 
-                rgba(30, 41, 59, 0.9) 100%);
-            border: 1px solid var(--space-glass-border);
-            box-shadow: var(--shadow);
-        }
-
-        .keyboard-hint.hidden {
-            opacity: 0;
-            transform: translateY(10px);
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255,255,255,0.8);
+            border: 1px solid var(--border-color);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            backdrop-filter: blur(4px);
+            z-index: 200;
             pointer-events: none;
+            box-shadow: var(--shadow-sm);
         }
 
-        .floating-nav-sidebar.collapsed > *:not(.nav-collapse-btn) {
-            opacity: 0;
-            transform: scale(0.1) translateY(20px);
-            pointer-events: none;
+        .loading-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: var(--text-accent);
+            width: 0%;
+            transition: width 0.3s ease;
+            z-index: 101;
         }
 
-        .floating-nav-sidebar.collapsed .nav-collapse-btn {
-            transform: rotate(180deg);
-        }
-
-        .nav-divider {
-            width: 35px;
-            height: 2px;
-            background: linear-gradient(90deg, 
-                transparent, 
-                var(--space-glass-border), 
-                transparent);
-            margin: 8px 0;
-            border-radius: 1px;
-        }
-
-        /* 响应式设计 */
-        @media (max-width: 1024px) and (min-width: 769px) {
-            .welcome-content {
-                max-width: 100%;
-                padding: 0;
-            }
-            
-            .welcome-items-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 20px;
-                max-width: 100%;
-            }
-            
-            .welcome-title {
-                font-size: 42px;
-            }
-        }
-
+        /* 响应式 */
         @media (max-width: 768px) {
-            .theme-switch-btn {
-                top: 10px;
-                right: 10px;
-                padding: 10px 20px;
-                font-size: 12px;
-            }
-            
-            .welcome-page {
-                padding: 20px 15px 40px 15px;
-                min-height: 100vh;
-                overflow-y: auto;
-            }
-            
-            .welcome-content {
-                gap: 15px;
-                max-width: 100%;
-                padding: 0;
-                min-height: auto;
-            }
-            
-            .welcome-items-grid {
-                grid-template-columns: 1fr;
-                gap: 12px;
-                max-width: 100%;
-            }
-            
-            .welcome-title {
-                font-size: 36px;
-                letter-spacing: 2px;
-            }
-            
-            .welcome-title-section {
-                flex-direction: column;
-                gap: 10px;
-            }
-            
-            .welcome-subtitle {
-                font-size: 16px;
-            }
-            
-            .welcome-item {
-                padding: 18px 20px;
-            }
-            
-            .welcome-item:hover {
-                transform: translateX(5px) scale(1.02);
-            }
-            
-            .welcome-item-text {
-                font-size: 15px;
-            }
-            
-            .floating-nav-sidebar {
-                right: 15px;
-                bottom: 15px;
-                gap: 12px;
-            }
-            
-            .nav-btn, .sidebar-action-btn, .nav-collapse-btn {
-                width: 50px;
-                height: 50px;
-            }
-        }
-
-        /* 滚动条样式 */
-        * {
-            scroll-behavior: smooth;
-        }
-        
-        *::-webkit-scrollbar {
-            width: 8px;
-        }
-        
-        body.fire-theme *::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 4px;
-        }
-        
-        body.fire-theme *::-webkit-scrollbar-thumb {
-            background: rgba(234, 88, 12, 0.6);
-            border-radius: 4px;
-        }
-        
-        body.fire-theme *::-webkit-scrollbar-thumb:hover {
-            background: rgba(234, 88, 12, 0.8);
-        }
-        
-        body.space-theme *::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 4px;
-        }
-        
-        body.space-theme *::-webkit-scrollbar-thumb {
-            background: rgba(6, 255, 165, 0.6);
-            border-radius: 4px;
-        }
-        
-        body.space-theme *::-webkit-scrollbar-thumb:hover {
-            background: rgba(6, 255, 165, 0.8);
-        }
-
-        /* 加载动画 */
-        .welcome-item {
-            opacity: 0;
-            transform: translateY(20px);
-            animation: fadeInUp 0.6s ease-out forwards;
-        }
-        
-        @keyframes fadeInUp {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .welcome-item:nth-child(1) { animation-delay: 0.05s; }
-        .welcome-item:nth-child(2) { animation-delay: 0.1s; }
-        .welcome-item:nth-child(3) { animation-delay: 0.15s; }
-        .welcome-item:nth-child(4) { animation-delay: 0.2s; }
-        .welcome-item:nth-child(5) { animation-delay: 0.25s; }
-        .welcome-item:nth-child(6) { animation-delay: 0.3s; }
-        .welcome-item:nth-child(7) { animation-delay: 0.35s; }
-        .welcome-item:nth-child(8) { animation-delay: 0.4s; }
-        .welcome-item:nth-child(9) { animation-delay: 0.45s; }
-        .welcome-item:nth-child(10) { animation-delay: 0.5s; }
-        .welcome-item:nth-child(11) { animation-delay: 0.55s; }
-        .welcome-item:nth-child(12) { animation-delay: 0.6s; }
-        .welcome-item:nth-child(13) { animation-delay: 0.65s; }
-        
-        @keyframes fadeInOut {
-            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
-            20% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-            80% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-            100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+            .nav-brand span { display: none; }
+            .nav-controls span { display: none; }
+            .welcome-title { font-size: 42px; }
+            .chapter-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
-
 <body>
-<!-- 简化顶部导航栏 -->
-<div class="unified-top-nav">
-    <div class="nav-brand">
-        <h1>数学画廊</h1>
-        <p>Math Gallery</p>
-    </div>
-    <div class="nav-actions">
-        <button class="nav-action-btn" onclick="goPrev()" title="上一页">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-                <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
-            </svg>
-            上一页
-        </button>
-        <button class="nav-action-btn" onclick="goNext()" title="下一页">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-                <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
-            </svg>
-            下一页
-        </button>
-        <button class="nav-action-btn" onclick="showChapterList()" title="目录">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-                <path d="M4 6h16v2H4V6zm0 5h16v2H4v-2zm0 5h16v2H4v-2z"/>
-            </svg>
-            目录
-        </button>
-        <button class="nav-action-btn" onclick="showQuickNav()" title="快速跳转">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-            </svg>
-            跳转
-        </button>
-        <button class="nav-action-btn" onclick="switchTheme()" title="切换主题">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
-            </svg>
-            <span id="theme-switch-text">炉火主题</span>
-        </button>
-        <button class="nav-action-btn" onclick="goMainSite()" title="返回主页">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-                <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8h5z"/>
-            </svg>
-            主页
-        </button>
-    </div>
-</div>
 
-<!-- 背景动效：淡粒子画布（白底上低不透明度）-->
-<canvas id="glitchCanvas" style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;opacity:0.05;pointer-events:none;"></canvas>
+    <!-- 加载条 -->
+    <div class="loading-bar" id="loadingBar"></div>
 
+    <!-- 1. 顶部导航 -->
+    <nav class="top-nav">
+        <div class="nav-brand">
+            <h1>数学画廊</h1>
+            <span>Math Gallery / Digital Lab</span>
+        </div>
+        <div class="nav-controls">
+            <button class="nav-btn" onclick="toggleChapterList()" title="目录/首页">
+                <svg viewBox="0 0 24 24"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg>
+                <span>目录</span>
+            </button>
+            <div style="width:1px; height:20px; background:var(--border-color); margin:0 5px;"></div>
+            <button class="nav-btn" onclick="goPrev()" title="上一章">
+                <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+                <span>上一章</span>
+            </button>
+            <button class="nav-btn" onclick="goNext()" title="下一章">
+                <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+                <span>下一章</span>
+            </button>
+            <button class="nav-btn btn-primary" onclick="goMainSite()" title="退出">
+                <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8h5z"/></svg>
+                <span>主站</span>
+            </button>
+        </div>
+    </nav>
 
-<!-- 主内容区 -->
-<div class="main-content">
-    <div class="welcome-page" id="welcomePage">
-        <div class="welcome-content">
-            <div class="welcome-title-section">
-                <div class="welcome-title">Math to Be</div>
-                <div class="welcome-subtitle" id="subtitle">
-                    <span class="space-subtitle">Mathematical Laboratory</span>
+    <!-- 2. 背景动画 -->
+    <canvas id="geo-canvas"></canvas>
+
+    <!-- 3. 主界面 -->
+    <div class="main-container">
+        
+        <!-- 欢迎页 -->
+        <div class="welcome-screen" id="welcomeScreen">
+            <h1 class="welcome-title">Math to Be</h1>
+            <p class="welcome-subtitle">
+                探索数学的优雅与秩序。<br>
+                Exploring the elegance and order of mathematics.
+            </p>
+            <button class="start-btn" onclick="toggleChapterList()">
+                <span>开始探索</span>
+                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </button>
+        </div>
+
+        <!-- 目录层 -->
+        <div class="chapter-overlay" id="chapterOverlay">
+            <div class="grid-wrapper">
+                <div class="section-header">
+                    <h2>课程目录</h2>
+                    <span>共 13 章节</span>
+                </div>
+                <div class="chapter-grid" id="chapterGrid">
+                    <!-- JS动态生成卡片 -->
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- 内容显示区域 -->
-    <div class="content-display" id="contentDisplay">
-        <div class="preview-controls">
-            <button class="close-preview-btn" onclick="closePreview()" title="关闭预览">
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-                </svg>
-            </button>
-        </div>
-        <iframe class="content-iframe" id="contentFrame"></iframe>
+    <!-- 4. 内容 Iframe -->
+    <div class="iframe-container" id="iframeContainer">
+        <iframe id="contentFrame" src="about:blank"></iframe>
     </div>
-</div>
 
-<!-- 键盘提示 -->
-<div class="keyboard-hint hidden" id="keyboardHint">
-    使用 <i class="fa-solid fa-arrow-left"></i> → 键导航，Home 键返回目录，End 键回主站
-</div>
-
-<!-- 移除右下角侧边栏，避免遮挡内容 -->
+    <div class="keyboard-hint">
+        按 <strong>← →</strong> 翻页，<strong>Home</strong> 返回目录
+    </div>
 
 <script>
-    // 章节数据
-    const chapters = {
-        0: { title: '第1章 代数故事', url: '第一章/代数故事.html' },
-        1: { title: '第2章 与幽灵共舞', url: '第二章/与幽灵共舞.html' },
-        2: { title: '第3章 双子星的诞生', url: '第三章/双子星的诞生.html' },
-        3: { title: '第4章 侯爵的交易', url: '第四章/侯爵的交易.html' },
-        4: { title: '第5章 酒桶里的秘密宇宙', url: '第五章/酒桶里的秘密宇宙.html' },
-        5: { title: '第6章 尼莫的海洋', url: '第六章/尼莫的海洋.html' },
-        6: { title: '第7章 猎物与捕食者的舞蹈', url: '第7章/猎物与捕食者的舞蹈.html' },
-        7: { title: '第8章 通往产量山巅的路径', url: '第8章/通往产量山巅的路径.html' },
-        8: { title: '第9章 上帝的语言', url: '第9章/上帝的语言.html' },
-        9: { title: '第10章 看透人心的特征脸', url: '第10章/看透人心的特征脸.html' },
-        10: { title: '第11章 聆听宇宙的谐波', url: '第11章/聆听宇宙的谐波.html' },
-        11: { title: '第12章 游戏世界的光影魔法师', url: '第12章/游戏世界的光影魔法师.html' },
-        12: { title: '第13章 幽灵地图与死亡水泵', url: '第13章/幽灵地图与死亡水泵.html' }
-    };
+    // === 1. 数据配置 (整合了您的原始数据) ===
+    const chapters = [
+        { title: '代数故事', url: '第一章/代数故事.html', icon: 'M4 6h16M4 12h16M4 18h7' },
+        { title: '与幽灵共舞', url: '第二章/与幽灵共舞.html', icon: 'M12 2a9 9 0 0 0-9 9v7c0 1.66 1.34 3 3 3h3v-8H5v-2c0-3.87 3.13-7 7-7s7 3.13 7 7v2h-4v8h3c1.66 0 3-1.34 3-3v-7a9 9 0 0 0-9-9z' },
+        { title: '双子星的诞生', url: '第三章/双子星的诞生.html', icon: 'M6.76 4.84l-1.8-1.79-1.41 1.41 1.79 1.79 1.42-1.41zM4 10.5H1v2h3v-2zm9-9.95h-2V3.5h2V.55zm7.45 3.91l-1.41-1.41-1.79 1.79 1.41 1.41 1.79-1.79zm-3.21 13.7l1.79 1.8 1.41-1.41-1.8-1.79-1.4 1.4zM20 10.5v2h3v-2h-3zm-8-5c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm-1 16.95h2V19.5h-2v2.95zm-7.45-3.91l1.41 1.41 1.79-1.8-1.41-1.41-1.79 1.8z' },
+        { title: '侯爵的交易', url: '第四章/侯爵的交易.html', icon: 'M7 18h2V6H7v12zm4 4h2V2h-2v20zm-8-8h2v-4H3v4zm12 4h2V6h-2v12zm4-8v4h2v-4h-2z' },
+        { title: '酒桶里的秘密宇宙', url: '第五章/酒桶里的秘密宇宙.html', icon: 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z' },
+        { title: '尼莫的海洋', url: '第六章/尼莫的海洋.html', icon: 'M12 2L2 7l10 5 10-5-10-5zm0 9l2.5-1.25L12 8.5l-2.5 1.25L12 11zm0 2.5l-5-2.5-5 2.5L12 22l10-8.5-5-2.5-5 2.5z' },
+        { title: '猎物与捕食者的舞蹈', url: '第7章/猎物与捕食者的舞蹈.html', icon: 'M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z' },
+        { title: '通往产量山巅的路径', url: '第8章/通往产量山巅的路径.html', icon: 'M14 6l-3.75 5 2.85 3.8-1.6 1.2C9.81 13.75 7 10 7 10l-6 8h22L14 6z' },
+        { title: '上帝的语言', url: '第9章/上帝的语言.html', icon: 'M4 4h16v16H4z' }, // 简化图标
+        { title: '看透人心的特征脸', url: '第10章/看透人心的特征脸.html', icon: 'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z' },
+        { title: '聆听宇宙的谐波', url: '第11章/聆听宇宙的谐波.html', icon: 'M12 3v9.28c-.47-.17-.97-.28-1.5-.28C8.01 12 6 14.01 6 16.5S8.01 21 10.5 21c2.31 0 4.2-1.75 4.45-4H15V6h4V3h-7z' },
+        { title: '游戏世界的光影魔法师', url: '第12章/游戏世界的光影魔法师.html', icon: 'M21 6H3c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-10 7H8v3H6v-3H3v-2h3V8h2v3h3v2zm4.5 2c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm4 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z' },
+        { title: '幽灵地图与死亡水泵', url: '第13章/幽灵地图与死亡水泵.html', icon: 'M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z' }
+    ];
 
-    // 全局变量
-    let currentUrl = '';
     let currentIndex = -1;
-    let currentOpenChapter = -1;
-    let currentTheme = 'space'; // 默认星空主题
 
-    // 主题切换功能
-    function switchTheme() {
-        const body = document.body;
-        const switchText = document.getElementById('theme-switch-text');
+    // === 2. 初始化 UI ===
+    function initGallery() {
+        const grid = document.getElementById('chapterGrid');
+        grid.innerHTML = '';
         
-        if (currentTheme === 'fire') {
-            // 切换到星空主题
-            body.classList.remove('fire-theme');
-            body.classList.add('space-theme');
-            switchText.textContent = '切换到炉火主题';
-            currentTheme = 'space';
-            
-            // 初始化星空背景动画
-            if (!window.starryInitialized) {
-                initStarryBackground();
-                initGlitchAnimation();
-                window.starryInitialized = true;
-            }
-        } else {
-            // 切换到炉火主题
-            body.classList.remove('space-theme');
-            body.classList.add('fire-theme');
-            switchText.textContent = '切换到星空主题';
-            currentTheme = 'fire';
-            
-            // 初始化炉火背景动画
-            if (!window.fireInitialized) {
-                initFireAnimation();
-                window.fireInitialized = true;
-            }
-        }
-    }
-
-    function showChapter(categoryId) {
-        const chapter = chapters[categoryId];
-        if (!chapter) return;
-
-        // 目录点击：直接跳转
-        currentIndex = categoryId;
-        loadContent(chapter.url, chapter.title);
-    }
-
-    function loadContent(url, title) {
-        // 直接跳转到页面
-        window.location.href = url;
-    }
-
-    function previewContent(url, title) {
-        console.log('previewContent 被调用:', url, title);
-        
-        const frame = document.getElementById('contentFrame');
-        const welcome = document.getElementById('welcomePage');
-        const contentDisplay = document.getElementById('contentDisplay');
-        const keyboardHint = document.getElementById('keyboardHint');
-
-        console.log('DOM元素检查:', {
-            frame: !!frame,
-            welcome: !!welcome,
-            contentDisplay: !!contentDisplay,
-            keyboardHint: !!keyboardHint
+        chapters.forEach((chapter, index) => {
+            const card = document.createElement('div');
+            card.className = 'chapter-card';
+            card.onclick = () => openChapter(index);
+            card.innerHTML = `
+                <div>
+                    <div class="chapter-idx">CHAPTER ${index + 1}</div>
+                    <div class="chapter-title-text">${chapter.title}</div>
+                </div>
+                <!-- 装饰性SVG图标 -->
+                <svg class="card-icon" width="60" height="60" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="${chapter.icon}"/>
+                </svg>
+            `;
+            grid.appendChild(card);
         });
-
-        if (!frame || !welcome || !contentDisplay || !keyboardHint) {
-            console.error('缺少必要的DOM元素');
-            return;
-        }
-
-        // 先显示内容区域（全屏预览）
-        contentDisplay.classList.add('active');
-        welcome.style.display = 'none';
-        keyboardHint.classList.add('hidden'); // 全屏时隐藏键盘提示
-        
-        // 然后加载iframe内容
-        frame.src = url;
-        console.log('iframe src 设置为:', url);
-
-        currentUrl = url;
-        const displayTitle = title || getChineseTitle(url);
-        
-        // 更新顶部导航栏标题
-        const navBrandH1 = document.querySelector('.nav-brand h1');
-        if (navBrandH1) {
-            navBrandH1.textContent = displayTitle;
-        }
-        
-        console.log('预览内容已加载:', displayTitle);
-        
-        // 检查iframe是否加载完成
-        frame.onload = function() {
-            console.log('iframe 加载完成');
-        };
-        
-        frame.onerror = function() {
-            console.error('iframe 加载失败');
-        };
-
-        // 更新currentIndex
-        currentIndex = Object.values(chapters).findIndex(ch => ch.url === url);
     }
 
-    // 关闭预览
-    function closePreview() {
-        console.log('关闭预览');
-        const contentDisplay = document.getElementById('contentDisplay');
-        const welcome = document.getElementById('welcomePage');
-        const keyboardHint = document.getElementById('keyboardHint');
+    // === 3. 导航逻辑 ===
+    function toggleChapterList() {
+        const overlay = document.getElementById('chapterOverlay');
+        const iframeContainer = document.getElementById('iframeContainer');
+        const welcome = document.getElementById('welcomeScreen');
         
-        if (contentDisplay && welcome && keyboardHint) {
-            contentDisplay.classList.remove('active');
-            welcome.style.display = 'flex';
-            keyboardHint.classList.remove('hidden');
-            
-            // 恢复原始标题
-            const navBrandH1 = document.querySelector('.nav-brand h1');
-            if (navBrandH1) {
-                navBrandH1.textContent = '数学画廊';
-            }
+        // 逻辑：如果正在看内容 -> 回到目录
+        // 如果在目录 -> 回到欢迎页
+        // 如果在欢迎页 -> 去目录
+        
+        if (iframeContainer.classList.contains('active')) {
+            // 从内容返回目录
+            iframeContainer.classList.remove('active');
+            document.querySelector('.nav-brand h1').textContent = '数学画廊';
+            overlay.classList.add('active');
+            // 重置 iframe
+            setTimeout(() => { document.getElementById('contentFrame').src = 'about:blank'; }, 500);
+        } else if (overlay.classList.contains('active')) {
+             // 从目录返回欢迎
+            overlay.classList.remove('active');
+            welcome.style.opacity = '1';
+        } else {
+             // 从欢迎进入目录
+            welcome.style.opacity = '0'; // 隐藏欢迎页内容
+            setTimeout(() => { overlay.classList.add('active'); }, 100);
         }
     }
 
-    // 显示章节列表
-    function showChapterList() {
-        console.log('显示章节列表');
-        const welcome = document.getElementById('welcomePage');
-        const contentDisplay = document.getElementById('contentDisplay');
-        const keyboardHint = document.getElementById('keyboardHint');
+    function openChapter(index) {
+        if(index < 0 || index >= chapters.length) return;
         
-        // 检查是否已经在显示目录
-        if (contentDisplay.classList.contains('active')) {
-            // 如果已经在显示目录，则收回（回到欢迎页面）
-            console.log('收回目录，回到欢迎页面');
-            welcome.style.display = 'flex';
-            contentDisplay.classList.remove('active');
-            keyboardHint.classList.add('hidden');
-            
-            // 恢复原始标题
-            const navBrandH1 = document.querySelector('.nav-brand h1');
-            if (navBrandH1) {
-                navBrandH1.textContent = '数学画廊';
-            }
-            return;
-        }
+        currentIndex = index;
+        const chapter = chapters[index];
+        const overlay = document.getElementById('chapterOverlay');
+        const iframeContainer = document.getElementById('iframeContainer');
+        const frame = document.getElementById('contentFrame');
+        const loadingBar = document.getElementById('loadingBar');
+
+        // UI 更新
+        overlay.classList.remove('active');
+        iframeContainer.classList.add('active');
         
-        if (welcome && contentDisplay && keyboardHint) {
-            // 显示目录：进入内容区域，在 iframe 内渲染目录
-            welcome.style.display = 'none';
-            contentDisplay.classList.add('active');
-            keyboardHint.classList.remove('hidden');
-            
-            // 创建章节列表内容
-            const frame = document.getElementById('contentFrame');
-            if (frame) {
-                frame.src = 'about:blank'; // 清空iframe
-                
-                // 创建章节列表HTML
-                const chapterListHTML = `
-                    <!DOCTYPE html>
-                    <html lang="zh-CN">
-                    <head>
-                        <meta charset="UTF-8">
-                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                        <title>数学画廊 - 故事列表</title>
-                        <style>
-                            body {
-                                font-family: 'Microsoft YaHei', sans-serif;
-                                background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-                                color: #e2e8f0;
-                                margin: 0;
-                                padding: 40px;
-                                min-height: 100vh;
-                            }
-                            .container {
-                                max-width: 900px;
-                                margin: 0 auto;
-                            }
-                            h1 {
-                                text-align: center;
-                                color: #06ffa5;
-                                margin-bottom: 40px;
-                                font-size: 2.5em;
-                            }
-                            .chapter-grid {
-                                display: grid;
-                                grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-                                gap: 25px;
-                            }
-                            .chapter-item {
-                                background: rgba(255, 255, 255, 0.1);
-                                border: 1px solid rgba(255, 255, 255, 0.2);
-                                border-radius: 15px;
-                                padding: 25px;
-                                cursor: pointer;
-                                transition: all 0.3s ease;
-                                backdrop-filter: blur(10px);
-                            }
-                            .chapter-item:hover {
-                                background: rgba(6, 255, 165, 0.2);
-                                border-color: #06ffa5;
-                                transform: translateY(-3px);
-                                box-shadow: 0 10px 25px rgba(6, 255, 165, 0.3);
-                            }
-                            .chapter-title {
-                                font-size: 1.3em;
-                                font-weight: 600;
-                                margin-bottom: 15px;
-                                color: #ffffff;
-                                line-height: 1.4;
-                            }
-                            .chapter-desc {
-                                color: #94a3b8;
-                                font-size: 0.95em;
-                                line-height: 1.5;
-                            }
-                            .chapter-number {
-                                display: inline-block;
-                                background: rgba(6, 255, 165, 0.2);
-                                color: #06ffa5;
-                                padding: 4px 12px;
-                                border-radius: 20px;
-                                font-size: 0.8em;
-                                font-weight: 600;
-                                margin-bottom: 10px;
-                            }
-                        </style>
-                    </head>
-                    <body>
-                        <div class="container">
-                            <h1>数学画廊 - 故事列表</h1>
-                            <div class="chapter-grid">
-                                ${Object.values(chapters).map((chapter, index) => `
-                                    <div class="chapter-item" onclick="parent.loadContent('${chapter.url}', '${chapter.title}'); parent.currentIndex = ${index};">
-                                        <div class="chapter-number">第${index + 1}章</div>
-                                        <div class="chapter-title">${chapter.title}</div>
-                                        <div class="chapter-desc">点击阅读数学故事</div>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </div>
-                    </body>
-                    </html>
-                `;
-                
-                // 将HTML写入iframe
-                frame.srcdoc = chapterListHTML;
-            }
-            
-            // 更新顶部标题
-            const navBrandH1 = document.querySelector('.nav-brand h1');
-            if (navBrandH1) {
-                navBrandH1.textContent = '故事列表';
-            }
-        }
+        // 模拟加载条
+        loadingBar.style.width = '60%';
+        
+        // 设置内容
+        frame.src = chapter.url;
+        document.querySelector('.nav-brand h1').textContent = `第${index+1}章 ${chapter.title}`;
+        
+        frame.onload = () => {
+            loadingBar.style.width = '100%';
+            setTimeout(() => { loadingBar.style.width = '0%'; }, 300);
+        };
     }
 
     function goPrev() {
-        console.log('goPrev 被调用, currentIndex:', currentIndex);
-        if (currentIndex > 0) {
-            currentIndex--;
-            const chapter = Object.values(chapters)[currentIndex];
-            console.log('上一页:', chapter);
-            loadContent(chapter.url, chapter.title);
-        } else {
-            showNavigationHint('已经是第一章了');
-        }
+        if(currentIndex > 0) openChapter(currentIndex - 1);
     }
 
     function goNext() {
-        console.log('goNext 被调用, currentIndex:', currentIndex);
-        if (currentIndex < Object.keys(chapters).length - 1) {
-            currentIndex++;
-            const chapter = Object.values(chapters)[currentIndex];
-            console.log('下一页:', chapter);
-            loadContent(chapter.url, chapter.title);
-        } else {
-            showNavigationHint('已经是最后一章了');
-        }
-    }
-
-    function goHome() {
-        const welcome = document.getElementById('welcomePage');
-        const contentDisplay = document.getElementById('contentDisplay');
-        const keyboardHint = document.getElementById('keyboardHint');
-        
-        welcome.style.display = 'flex';
-        contentDisplay.classList.remove('active');
-        keyboardHint.classList.add('hidden');
-        
-        currentIndex = -1;
-        currentUrl = '';
+        if(currentIndex < chapters.length - 1) openChapter(currentIndex + 1);
     }
 
     function goMainSite() {
         window.location.href = '../index.html';
     }
 
-    function showNavigationHint(message) {
-        // 创建临时提示
-        const hint = document.createElement('div');
-        hint.style.cssText = `
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.8);
-            color: var(--space-accent);
-            padding: 15px 25px;
-            border-radius: 10px;
-            border: 1px solid var(--space-accent);
-            z-index: 1002;
-            font-size: 14px;
-            animation: fadeInOut 2s ease forwards;
-        `;
-        hint.textContent = message;
-        document.body.appendChild(hint);
-        
-        setTimeout(() => {
-            if (hint.parentNode) {
-                hint.parentNode.removeChild(hint);
-            }
-        }, 2000);
-    }
+    // 键盘监听
+    document.addEventListener('keydown', (e) => {
+        if(e.key === 'ArrowLeft') goPrev();
+        if(e.key === 'ArrowRight') goNext();
+        if(e.key === 'Home') toggleChapterList();
+    });
 
-    function showQuickNav() {
-        if (currentUrl) window.open(currentUrl, '_blank');
-    }
-
-    function toggleNavSidebar() {
-        const navSidebar = document.getElementById('navSidebar');
-        navSidebar.classList.toggle('collapsed');
-    }
-
-    function initKeyboardNavigation() {
-        document.addEventListener('keydown', function(event) {
-            const activeElement = document.activeElement;
-            if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA' || activeElement.isContentEditable)) return;
-
-            switch(event.key) {
-                case 'ArrowLeft':
-                    event.preventDefault();
-                    goPrev();
-                    break;
-                case 'ArrowRight':
-                    event.preventDefault();
-                    goNext();
-                    break;
-                case 'Home':
-                    event.preventDefault();
-                    goHome();
-                    break;
-                case 'End':
-                    event.preventDefault();
-                    goMainSite();
-                    break;
-            }
-        });
-    }
-
-    // --- 炉火动画逻辑（完整保留原始代码）---
-    function initFireAnimation() {
-        const canvas = document.getElementById('fire-canvas');
+    // === 4. “几何浮游”背景动画 (学术白风格) ===
+    function initGeoAnimation() {
+        const canvas = document.getElementById('geo-canvas');
         const ctx = canvas.getContext('2d');
-        let particles = [];
-        const particleCount = 150;
-        const mouse = { x: undefined, y: undefined, radius: 150 };
+        let w, h;
+        let shapes = [];
 
-        window.addEventListener('mousemove', (event) => { 
-            mouse.x = event.x; 
-            mouse.y = event.y; 
-        });
-        window.addEventListener('mouseout', () => { 
-            mouse.x = undefined; 
-            mouse.y = undefined; 
-        });
-        window.addEventListener('resize', () => { 
-            setCanvasSize(); 
-            initFireParticles(); 
-        });
+        // 配置：淡灰色、淡蓝色几何体
+        const config = {
+            count: 15,
+            colors: ['rgba(37, 99, 235, 0.05)', 'rgba(100, 116, 139, 0.05)', 'rgba(13, 148, 136, 0.05)'], 
+            strokeColor: 'rgba(203, 213, 225, 0.4)'
+        };
 
-        function setCanvasSize() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
+        function resize() {
+            w = canvas.width = window.innerWidth;
+            h = canvas.height = window.innerHeight;
         }
 
-        class Particle {
-            constructor(x, y) {
-                this.x = x || Math.random() * canvas.width;
-                this.y = y || canvas.height + Math.random() * 100;
-                this.size = Math.random() * 3 + 1;
-                this.baseSpeedY = (Math.random() * 1 + 1.5) * -1;
-                this.speedY = this.baseSpeedY;
-                this.speedX = Math.random() * 2 - 1;
-                this.life = Math.random() * 150 + 50;
-                this.maxLife = this.life;
-                this.hue = Math.random() * 20 + 25; // Orange-Yellow range
-                this.opacity = 1;
+        class Shape {
+            constructor() {
+                this.init();
+            }
+
+            init() {
+                this.x = Math.random() * w;
+                this.y = Math.random() * h;
+                this.vx = (Math.random() - 0.5) * 0.5;
+                this.vy = (Math.random() - 0.5) * 0.5;
+                this.size = Math.random() * 40 + 20;
+                this.type = Math.floor(Math.random() * 3); // 0:Circle, 1:Rect, 2:Triangle
+                this.color = config.colors[Math.floor(Math.random() * config.colors.length)];
+                this.angle = Math.random() * Math.PI * 2;
+                this.vAngle = (Math.random() - 0.5) * 0.01;
             }
 
             update() {
-                this.life -= 1;
-                if (this.life <= 0) {
-                    this.reset();
-                }
+                this.x += this.vx;
+                this.y += this.vy;
+                this.angle += this.vAngle;
 
-                // Mouse interaction
-                if (mouse.x !== undefined && mouse.y !== undefined) {
-                    const dx = this.x - mouse.x;
-                    const dy = this.y - mouse.y;
-                    const distance = Math.sqrt(dx * dx + dy * dy);
-                    if (distance < mouse.radius) {
-                        const force = (mouse.radius - distance) / mouse.radius;
-                        this.x += dx / distance * force * 2;
-                        this.y += dy / distance * force * 2;
-                        this.speedY *= 0.95;
-                    }
-                } else {
-                     this.speedY = this.baseSpeedY;
+                if(this.x < -100 || this.x > w + 100 || this.y < -100 || this.y > h + 100) {
+                    this.init(); // 重置出界的形状
                 }
-
-                this.y += this.speedY;
-                this.x += this.speedX + (Math.sin(this.life * 0.1)); // Wobble
-                
-                this.opacity = (this.life / this.maxLife) * 0.8;
             }
 
             draw() {
-                ctx.beginPath();
-                ctx.fillStyle = `hsla(${this.hue}, 100%, 50%, ${this.opacity})`;
-                ctx.shadowColor = `hsla(${this.hue}, 100%, 50%, 1)`;
-                ctx.shadowBlur = this.size * 2;
-                
-                const r = this.size * (this.life / this.maxLife);
-                ctx.moveTo(this.x, this.y - r);
-                ctx.quadraticCurveTo(this.x - r, this.y, this.x, this.y + r);
-                ctx.quadraticCurveTo(this.x + r, this.y, this.x, this.y - r);
-
-                ctx.fill();
-            }
-            
-            reset() {
-                this.x = Math.random() * canvas.width;
-                this.y = canvas.height + Math.random() * 50;
-                this.life = Math.random() * 150 + 50;
-                this.maxLife = this.life;
-                this.opacity = 1;
-            }
-        }
-
-        function initFireParticles() {
-            particles = [];
-            for (let i = 0; i < particleCount; i++) {
-                particles.push(new Particle());
-            }
-        }
-
-        function animateFire() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            particles.forEach(p => {
-                p.update();
-                p.draw();
-            });
-            requestAnimationFrame(animateFire);
-        }
-
-        setCanvasSize();
-        initFireParticles();
-        animateFire();
-    }
-
-    // --- 优化版星空背景（完整保留原始代码）---
-    function initStarryBackground() {
-        let canvas = document.getElementById('starry-sky');
-        let ctx = canvas.getContext('2d');
-        let stars = [], animationId;
-
-        function setCanvasSize() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-
-        function createStars() {
-            stars = [];
-            // 减少星星数量以提高性能
-            const numStars = Math.min(150, Math.floor((canvas.width * canvas.height) / 12000));
-            for (let i = 0; i < numStars; i++) {
-                stars.push({
-                    x: Math.random() * canvas.width,
-                    y: Math.random() * canvas.height,
-                    radius: Math.random() * 1.5 + 0.5,
-                    vx: (Math.random() - 0.5) * 0.2,
-                    vy: (Math.random() - 0.5) * 0.2,
-                    opacity: Math.random() * 0.8 + 0.2,
-                    twinkle: Math.random() * 0.01 + 0.005
-                });
-            }
-        }
-
-        function draw() {
-            // 简化背景渐变
-            const gradient = ctx.createRadialGradient(
-                canvas.width/2, canvas.height/2, 0,
-                canvas.width/2, canvas.height/2, Math.max(canvas.width, canvas.height)/2
-            );
-            gradient.addColorStop(0, 'rgba(30, 27, 75, 0.6)');
-            gradient.addColorStop(1, 'rgba(15, 23, 42, 0.9)');
-            
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            // 绘制星星（移除复杂光晕效果）
-            stars.forEach(star => {
-                ctx.beginPath();
-                ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(255, 255, 255, ${star.opacity})`;
-                ctx.fill();
-            });
-        }
-
-        function update() {
-            // 简化星星更新逻辑
-            stars.forEach(star => {
-                star.x += star.vx;
-                star.y += star.vy;
-                
-                // 简化闪烁效果
-                star.opacity += star.twinkle * (Math.random() - 0.5);
-                star.opacity = Math.max(0.2, Math.min(1, star.opacity));
-                
-                // 边界检查
-                if (star.x < 0) star.x = canvas.width;
-                if (star.x > canvas.width) star.x = 0;
-                if (star.y < 0) star.y = canvas.height;
-                if (star.y > canvas.height) star.y = 0;
-            });
-        }
-
-        function tick() {
-            update();
-            draw();
-            animationId = requestAnimationFrame(tick);
-        }
-
-        setCanvasSize();
-        createStars();
-        tick();
-        
-        // 窗口大小改变时重新设置画布
-        window.addEventListener('resize', function() {
-            setCanvasSize();
-            createStars();
-        });
-    }
-
-    // --- 数字碎片动画配置（完整保留原始代码）---
-    function initGlitchAnimation() {
-        const CONFIG = {
-            PARTICLE_COUNT: 1500,    // 碎片数量（增加以更激烈）
-            PARTICLE_SIZE: 1.5,      // 碎片大小（增大）
-            GLOW_CHANCE: 0.08,       // 发光几率（增加）
-            GLITCH_CHANCE: 0.15,     // 故障效果几率（增加）
-            
-            // 颜色配置 (与主题协调)
-            COLORS: ['#06ffa5', '#7c3aed', '#4f46e5', '#ff6b6b', '#ffffff'],
-            
-            // 动画阶段时长 (帧) - 更快更激烈
-            DURATION_SCATTER: 80,    // 混沌散乱（更快）
-            DURATION_ASSEMBLE: 30,   // 汇集重组（更快）
-            DURATION_HOLD: 20,       // 完美瞬间（更短）
-            DURATION_GLITCH: 40,     // 故障崩溃（更快）
-        };
-
-        const glitchCanvas = document.getElementById('glitchCanvas');
-        const glitchCtx = glitchCanvas.getContext('2d');
-
-        let glitchWidth, glitchHeight, glitchCenterX, glitchCenterY;
-        let glitchParticles = [];
-        let glitchShapeIndex = 0;
-        let glitchFrame = 0;
-
-        // --- 数学函数定义的形状 ---
-        const SHAPES = [
-            { name: "心形线", scale: 100, func: t => ({ x: (1 - Math.sin(t)) * Math.cos(t), y: -(1 - Math.sin(t)) * Math.sin(t) }) },
-            { name: "四叶玫瑰线", scale: 180, func: t => ({ x: Math.sin(2 * t) * Math.cos(t), y: -Math.sin(2 * t) * Math.sin(t) }) },
-            { name: "蝴蝶曲线", scale: 50, func: t => { const r = Math.exp(Math.sin(t)) - 2 * Math.cos(4 * t) + Math.pow(Math.sin((2 * t - Math.PI) / 24), 5); return { x: r * Math.cos(t), y: -r * Math.sin(t) }; } },
-            { name: "螺旋线", scale: 15, func: t => ({ x: (0.5 * t) * Math.cos(t), y: -(0.5 * t) * Math.sin(t) }) }
-        ];
-
-        // --- 碎片类 ---
-        class GlitchParticle {
-            constructor() {
-                this.reset();
-            }
-
-            reset() {
-                this.x = (Math.random() - 0.5) * glitchWidth * 1.5;
-                this.y = (Math.random() - 0.5) * glitchHeight * 1.5;
-                this.vx = (Math.random() - 0.5) * 0.8;  // 增加速度
-                this.vy = (Math.random() - 0.5) * 0.8;  // 增加速度
-                
-                this.targetX = 0;
-                this.targetY = 0;
-
-                this.color = CONFIG.COLORS[Math.floor(Math.random() * CONFIG.COLORS.length)];
-                this.size = CONFIG.PARTICLE_SIZE + Math.random() * 0.8;  // 增大尺寸变化
-            }
-            
-            setTarget(shape) {
-                const angle = Math.random() * Math.PI * (shape.name === "螺旋线" ? 6 : 2);
-                const targetPos = shape.func(angle);
-                this.targetX = targetPos.x * shape.scale;
-                this.targetY = targetPos.y * shape.scale;
-            }
-
-            update(phase) {
-                if (phase === 'scatter') {
-                    this.x += this.vx;
-                    this.y += this.vy;
-                    if (this.x > glitchWidth / 2 || this.x < -glitchWidth / 2) this.vx *= -1;
-                    if (this.y > glitchHeight / 2 || this.y < -glitchHeight / 2) this.vy *= -1;
-                } else if (phase === 'assemble') {
-                    const ax = (this.targetX - this.x) * 0.15;  // 增加汇集速度
-                    const ay = (this.targetY - this.y) * 0.15;  // 增加汇集速度
-                    this.x += ax;
-                    this.y += ay;
-                } else if (phase === 'glitch') {
-                    if (Math.random() < CONFIG.GLITCH_CHANCE) {
-                        this.x += (Math.random() - 0.5) * 20;  // 增加故障位移
-                        this.y += (Math.random() - 0.5) * 20;  // 增加故障位移
-                    }
-                }
-            }
-
-            draw(ctx, phase) {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.angle);
                 ctx.fillStyle = this.color;
+                ctx.strokeStyle = config.strokeColor;
+                ctx.lineWidth = 1;
 
-                const drawX = this.x + glitchCenterX;
-                const drawY = this.y + glitchCenterY;
-
-                // 故障效果：色彩分离
-                if (phase === 'glitch' && Math.random() < CONFIG.GLITCH_CHANCE / 8) {
-                    ctx.fillStyle = '#FF0000';
-                    ctx.fillRect(drawX - 2, drawY, this.size, this.size);
-                    ctx.fillStyle = '#00FF00';
-                    ctx.fillRect(drawX, drawY - 2, this.size, this.size);
-                    ctx.fillStyle = '#0000FF';
-                    ctx.fillRect(drawX + 2, drawY, this.size, this.size);
-                } else {
-                    ctx.fillRect(drawX, drawY, this.size, this.size);
+                ctx.beginPath();
+                if(this.type === 0) { // Circle
+                    ctx.arc(0, 0, this.size, 0, Math.PI*2);
+                } else if (this.type === 1) { // Rect (Golden Ratio)
+                    ctx.rect(-this.size, -this.size*0.618, this.size*2, this.size*1.236);
+                } else { // Triangle
+                    ctx.moveTo(0, -this.size);
+                    ctx.lineTo(this.size, this.size);
+                    ctx.lineTo(-this.size, this.size);
+                    ctx.closePath();
                 }
-
-                // 发光效果
-                if (phase === 'hold' || (phase === 'assemble' && Math.random() < CONFIG.GLOW_CHANCE)) {
-                    ctx.shadowColor = this.color;
-                    ctx.shadowBlur = 12;  // 增加发光强度
-                    ctx.fillRect(drawX, drawY, this.size, this.size);
-                    ctx.shadowBlur = 0;
-                }
+                ctx.fill();
+                ctx.stroke();
+                ctx.restore();
             }
         }
-        
-        // --- 数字碎片动画控制函数 ---
-        function setupGlitchAnimation() {
-            const dpr = window.devicePixelRatio || 1;
-            glitchWidth = window.innerWidth;
-            glitchHeight = window.innerHeight;
-            glitchCanvas.width = glitchWidth * dpr;
-            glitchCanvas.height = glitchHeight * dpr;
-            glitchCanvas.style.width = `${glitchWidth}px`;
-            glitchCanvas.style.height = `${glitchHeight}px`;
-            glitchCtx.scale(dpr, dpr);
-            glitchCenterX = glitchWidth / 2;
-            glitchCenterY = glitchHeight / 2;
 
-            glitchParticles = [];
-            for (let i = 0; i < CONFIG.PARTICLE_COUNT; i++) {
-                glitchParticles.push(new GlitchParticle());
+        // 正弦波路径 (数学元素)
+        let waveOffset = 0;
+        function drawWave() {
+            ctx.beginPath();
+            ctx.strokeStyle = 'rgba(37, 99, 235, 0.03)';
+            ctx.lineWidth = 2;
+            for(let x = 0; x < w; x+=5) {
+                const y = h/2 + Math.sin(x * 0.005 + waveOffset) * 100 + Math.sin(x * 0.01 + waveOffset*0.5) * 50;
+                x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
             }
-            startNewGlitchCycle();
+            ctx.stroke();
+            waveOffset += 0.01;
         }
 
-        function startNewGlitchCycle() {
-            glitchShapeIndex = (glitchShapeIndex + 1) % SHAPES.length;
-            const currentShape = SHAPES[glitchShapeIndex];
-            glitchParticles.forEach(p => p.setTarget(currentShape));
+        function init() {
+            shapes = [];
+            for(let i=0; i<config.count; i++) shapes.push(new Shape());
         }
 
-        // --- 数字碎片动画循环 ---
-        function animateGlitch() {
-            glitchFrame++;
-            
-            glitchCtx.fillStyle = 'rgba(0, 0, 0, 0.02)'; // 更淡的背景制造拖尾效果
-            glitchCtx.fillRect(0, 0, glitchWidth, glitchHeight);
-
-            const totalCycle = CONFIG.DURATION_SCATTER + CONFIG.DURATION_ASSEMBLE + CONFIG.DURATION_HOLD + CONFIG.DURATION_GLITCH;
-            const currentPhaseTime = glitchFrame % totalCycle;
-            
-            let phase = 'scatter';
-            if (currentPhaseTime < CONFIG.DURATION_SCATTER) {
-                phase = 'scatter';
-            } else if (currentPhaseTime < CONFIG.DURATION_SCATTER + CONFIG.DURATION_ASSEMBLE) {
-                phase = 'assemble';
-            } else if (currentPhaseTime < CONFIG.DURATION_SCATTER + CONFIG.DURATION_ASSEMBLE + CONFIG.DURATION_HOLD) {
-                phase = 'hold';
-            } else {
-                phase = 'glitch';
-            }
-
-            glitchParticles.forEach(p => {
-                p.update(phase);
-                p.draw(glitchCtx, phase);
+        function animate() {
+            ctx.clearRect(0, 0, w, h);
+            drawWave(); // 绘制背景数学波形
+            shapes.forEach(s => {
+                s.update();
+                s.draw();
             });
-            
-            if (currentPhaseTime === 0 && glitchFrame > 0) {
-                glitchParticles.forEach(p => p.reset());
-                startNewGlitchCycle();
-            }
-
-            requestAnimationFrame(animateGlitch);
+            requestAnimationFrame(animate);
         }
 
-        // 初始化数字碎片动画
-        window.addEventListener('resize', setupGlitchAnimation);
-        setupGlitchAnimation();
-        animateGlitch();
+        window.addEventListener('resize', resize);
+        resize();
+        init();
+        animate();
     }
 
-    // 初始化
-    document.addEventListener('DOMContentLoaded', function() {
-        initKeyboardNavigation();
-        
-        // 初始化星空主题背景（默认主题）
-        initStarryBackground();
-        initGlitchAnimation();
-        window.starryInitialized = true;
-        window.fireInitialized = false;
-        
-        // 自动弹出目录
+    // === 启动 ===
+    window.addEventListener('DOMContentLoaded', () => {
+        initGallery();
+        initGeoAnimation();
+        // 自动展示目录
         setTimeout(() => {
-            showChapterList();
-        }, 500);
+            const welcome = document.getElementById('welcomeScreen');
+            welcome.style.opacity = '0'; 
+            setTimeout(() => { document.getElementById('chapterOverlay').classList.add('active'); }, 300);
+        }, 800);
     });
+
 </script>
 </body>
 </html>

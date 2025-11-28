@@ -1,2294 +1,761 @@
 ﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>仿真实验平台 - 高等应用数学在线课堂</title>
-
-<!-- FontAwesome Icons -->
-<link rel="stylesheet" href="../common-assets/css/fontawesome.min.css">
-<script src="../common-assets/js/three-0.160.0.min.js"></script>
-<script src="../common-assets/js/OrbitControls.legacy.js"></script>
-<script>window.OrbitControls = window.OrbitControls || (window.THREE && window.THREE.OrbitControls);</script>
-
-<style>
-/* 极简性能优化设计 */
-:root {
-    --primary: #4f46e5;
-    --primary-dark: #4338ca;
-    --primary-light: #6366f1;
-    --secondary: #7c3aed;
-    --accent: #06ffa5;
-    --accent-warm: #ff6b6b;
-    --dark: #0f172a;
-    --dark-surface: #1e293b;
-    --light: #ffffff;
-    --border: #334155;
-    --text: #e2e8f0;
-    --text-muted: #94a3b8;
-    --glass: rgba(255, 255, 255, 0.1);
-    --glass-border: rgba(255, 255, 255, 0.2);
-    --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3), 0 2px 4px -2px rgb(0 0 0 / 0.3);
-    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4), 0 4px 6px -4px rgb(0 0 0 / 0.4);
-    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.5), 0 8px 10px -6px rgb(0 0 0 / 0.5);
-    --glow: 0 0 20px rgba(6, 255, 165, 0.3);
-}
-
-/* 统一字体引入 */
-@font-face {
-    font-family: 'WDXLubrifontSC';
-    src: url('../common-assets/fonts/WD-XLLubrifontSC-Regular.otf') format('opentype');
-    font-weight: 400;
-    font-style: normal;
-    font-display: swap;
-}
-@font-face {
-    font-family: 'JfOpenHuninn';
-    src: url('../common-assets/fonts/jf-openhuninn-2.1.ttf') format('truetype');
-    font-weight: 400;
-    font-style: normal;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: 'SourceHanSans';
-    src: url('../common-assets/fonts/WD-XLLubrifontSC-Regular.otf') format('opentype');
-    font-weight: 400;
-    font-style: normal;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: 'jf open 粉圆';
-    src: url('../common-assets/fonts/jf-openhuninn-2.1.ttf') format('truetype');
-    font-weight: 400;
-    font-style: normal;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: 'NotoSerif';
-    src: url('../common-assets/fonts/WD-XLLubrifontSC-Regular.otf') format('opentype');
-    font-weight: 400;
-    font-style: normal;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: 'NotoSerif';
-    src: url('../common-assets/fonts/WD-XLLubrifontSC-Regular.otf') format('opentype');
-    font-weight: 700;
-    font-style: normal;
-    font-display: swap;
-}
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    font-family: 'WDXLubrifontSC', 'JfOpenHuninn', 'Noto Serif SC', 'Microsoft YaHei', 'PingFang SC', Arial, sans-serif;
-    font-size: 18px;
-    background-color: #faf9f7;
-    width: 100vw;
-    height: 100vh;
-    margin: 0;
-    padding: 0;
-    position: relative;
-    overflow: hidden;
-    color: #2c3e50;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-}
-
-/* 轻量网格/噪声覆盖层 */
-.subtle-overlay {
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 1;
-    opacity: 0.06;
-    background-image:
-        radial-gradient(rgba(52,73,94,0.35) 1px, transparent 1px),
-        radial-gradient(rgba(52,73,94,0.25) 1px, transparent 1px);
-    background-size: 28px 28px, 14px 14px;
-    background-position: 0 0, 7px 7px;
-    animation: overlayPan 30s linear infinite;
-}
-
-@keyframes overlayPan {
-    0% { transform: translate3d(0,0,0); }
-    50% { transform: translate3d(7px,7px,0); }
-    100% { transform: translate3d(0,0,0); }
-}
-
-/* 3D背景画布 */
-#background3d {
-    position: fixed;
-    inset: 0;
-    width: 100vw;
-    height: 100vh;
-    display: block;
-    pointer-events: none;
-    z-index: 0;
-    background: transparent;
-}
-
-/* 数字雕塑背景 */
-#digitalSculpture {
-    position: fixed;
-    inset: 0;
-    z-index: 0;
-    pointer-events: none;
-    overflow: hidden;
-}
-
-#sculptureInfo {
-    position: absolute;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    text-align: center;
-    padding: 10px 20px;
-    background-color: rgba(0, 0, 0, 0.3);
-    border-radius: 15px;
-    backdrop-filter: blur(5px);
-    -webkit-backdrop-filter: blur(5px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: white;
-    font-family: 'Helvetica Neue', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
-    pointer-events: none;
-}
-
-#sculptureInfo h1 {
-    font-size: 1.5em;
-    margin: 0 0 5px 0;
-    font-weight: 300;
-    letter-spacing: 2px;
-}
-
-#sculptureInfo p {
-    font-size: 0.9em;
-    margin: 0;
-    font-weight: 200;
-}
-
-#sculptureCanvas {
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    will-change: transform;
-    display: block;
-}
-
-/* 主内容区 - 全屏iframe */
-.main-content {
-    width: 100vw;
-    height: 100vh;
-    position: relative;
-    z-index: 10;
-}
-
-#contentFrame {
-    width: 100%;
-    height: 100%;
-    border: none;
-    background: #faf9f7;
-}
-
-/* 欢迎页 */
-.welcome-page {
-    width: 100%;
-    height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    padding: 20px;
-    box-sizing: border-box;
-    overflow: hidden;
-    position: relative;
-    background: transparent;
-}
-
-.welcome-content {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    max-width: 1000px;
-    gap: 30px;
-    align-items: center;
-    height: auto;
-    position: relative;
-    overflow: hidden;
-    z-index: 2;
-    background: transparent;
-    padding: 30px;
-}
-
-.welcome-title-section {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 20px;
-    width: 100%;
-    margin-bottom: 40px;
-    position: relative;
-}
-
-.welcome-title {
-    font-family: 'NotoSerif', 'jf open 粉圆', serif;
-    font-size: 64px;
-    font-weight: 700;
-    margin: 0;
-    letter-spacing: 1px;
-    background: linear-gradient(135deg, #ffffff 0%, #06ffa5 50%, #67e8f9 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    line-height: 1.1;
-    filter: drop-shadow(0 0 30px rgba(6, 255, 165, 0.4));
-}
-
-.welcome-subtitle {
-    font-family: 'SourceHanSans', -apple-system, BlinkMacSystemFont, sans-serif;
-    font-size: 22px;
-    opacity: 0.9;
-    margin: 0;
-    line-height: 1.4;
-    font-weight: 300;
-    color: var(--text-muted);
-    text-align: center;
-    letter-spacing: 0.5px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    text-transform: uppercase;
-}
-
-
-/* 重构的目录面板 - 更大更完整 */
-.front-directory-panel {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 2000;
-    width: 90%;
-    max-width: 1200px;
-    max-height: 85vh;
-    background: rgba(15, 23, 42, 0.95);
-    backdrop-filter: blur(20px);
-    border-radius: 20px;
-    border: 1px solid var(--border);
-    box-shadow: var(--shadow-xl);
-    display: none;
-    flex-direction: column;
-    overflow: hidden;
-    animation: slideInCenter 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-    will-change: transform, opacity;
-}
-
-/* 悬浮章节面板 - 二级目录 */
-.floating-chapter-panel {
-    position: fixed;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    width: 400px;
-    max-height: 70vh;
-    background: rgba(15, 23, 42, 0.95);
-    backdrop-filter: blur(20px);
-    border-radius: 20px;
-    box-shadow: var(--shadow-xl);
-    padding: 20px;
-    display: none;
-    overflow-y: auto;
-    z-index: 2100;
-    border: 1px solid var(--border);
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    will-change: transform, opacity;
-}
-
-.floating-chapter-panel::-webkit-scrollbar {
-    display: none;
-}
-
-.floating-chapter-panel.active {
-    display: block;
-    animation: slideIn 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-}
-
-.chapter-panel-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    padding-bottom: 15px;
-    border-bottom: 1px solid var(--border);
-}
-
-.chapter-panel-title {
-    font-family: 'DingLieCiWei', 'WDLubrifont', sans-serif;
-    font-size: 20px;
-    font-weight: 600;
-    color: var(--accent);
-}
-
-.chapter-panel-close {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid var(--border);
-    color: var(--text);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-    transition: all 0.3s ease;
-}
-
-.chapter-panel-close:hover {
-    background: rgba(255, 255, 255, 0.2);
-    transform: scale(1.1);
-}
-
-.front-directory-panel.show {
-    display: flex;
-}
-
-.directory-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px 25px;
-    border-bottom: 1px solid var(--border);
-    background: rgba(6, 255, 165, 0.1);
-}
-
-.directory-header h3 {
-    font-family: 'DingLieCiWei', 'WDLubrifont', sans-serif;
-    font-size: 24px;
-    font-weight: 600;
-    margin: 0;
-    background: linear-gradient(135deg, var(--accent), #67e8f9);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-.directory-close-btn {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid var(--border);
-    color: var(--text);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-    transition: all 0.3s ease;
-}
-
-.directory-close-btn:hover {
-    background: rgba(255, 255, 255, 0.2);
-    transform: scale(1.1);
-}
-
-.directory-content {
-    flex: 1;
-    overflow-y: auto;
-    padding: 20px 25px;
-}
-
-/* 章节导航栏 */
-.chapter-nav {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 25px;
-    flex-wrap: wrap;
-    justify-content: center;
-}
-
-.chapter-nav-btn {
-    padding: 12px 20px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid var(--border);
-    border-radius: 25px;
-    color: var(--text);
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-family: 'DingLieCiWei', 'WDLubrifont', sans-serif;
-    font-size: 14px;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    position: relative;
-    overflow: hidden;
-    will-change: transform;
-}
-
-.chapter-nav-btn::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(6, 255, 165, 0.1), transparent);
-    transition: left 0.5s ease;
-}
-
-.chapter-nav-btn:hover::before {
-    left: 100%;
-}
-
-.chapter-nav-btn:hover {
-    background: rgba(6, 255, 165, 0.1);
-    border-color: var(--accent);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow);
-}
-
-.chapter-nav-btn.active {
-    background: var(--primary);
-    border-color: var(--primary);
-    color: white;
-    box-shadow: 0 0 20px var(--primary);
-}
-
-.chapter-nav-btn svg {
-    width: 16px;
-    height: 16px;
-}
-
-.directory-section {
-    margin-bottom: 25px;
-}
-
-.directory-section h4 {
-    font-family: 'DingLieCiWei', 'WDLubrifont', sans-serif;
-    font-size: 20px;
-    font-weight: 600;
-    margin: 0 0 15px 0;
-    color: var(--accent);
-    border-left: 3px solid var(--accent);
-    padding-left: 12px;
-}
-
-.directory-items {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-    gap: 12px;
-}
-
-.directory-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 15px 18px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-    position: relative;
-    overflow: hidden;
-    will-change: transform;
-}
-
-.directory-item::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(6, 255, 165, 0.1), transparent);
-    transition: left 0.5s ease;
-}
-
-.directory-item:hover::before {
-    left: 100%;
-}
-
-.directory-item:hover {
-    background: rgba(6, 255, 165, 0.1);
-    border-color: var(--accent);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow);
-}
-
-.directory-item.coming-soon {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
-
-.directory-item.coming-soon:hover {
-    transform: none;
-    background: rgba(255, 255, 255, 0.05);
-    border-color: var(--border);
-}
-
-.directory-item-icon {
-    font-size: 20px;
-    width: 24px;
-    text-align: center;
-}
-
-.directory-item-text {
-    font-family: 'DingLieCiWei', 'WDLubrifont', sans-serif;
-    font-size: 16px;
-    font-weight: 500;
-    color: var(--text);
-    flex: 1;
-}
-
-.directory-item-count {
-    font-size: 12px;
-    color: var(--text-muted);
-    background: rgba(255, 255, 255, 0.1);
-    padding: 2px 8px;
-    border-radius: 10px;
-}
-
-/* 目录按钮 */
-.directory-toggle-btn {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 1500;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px 18px;
-    background: rgba(15, 23, 42, 0.8);
-    backdrop-filter: blur(10px);
-    border: 1px solid var(--border);
-    border-radius: 25px;
-    color: var(--text);
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-    box-shadow: var(--shadow);
-    will-change: transform;
-}
-
-.directory-toggle-btn:hover {
-    background: rgba(6, 255, 165, 0.1);
-    border-color: var(--accent);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-lg);
-}
-
-.directory-toggle-btn svg {
-    width: 20px;
-    height: 20px;
-}
-
-.directory-toggle-btn span {
-    font-family: 'DingLieCiWei', 'WDLubrifont', sans-serif;
-    font-size: 14px;
-    font-weight: 500;
-}
-
-@keyframes slideInCenter {
-    from {
-        opacity: 0;
-        transform: translate(-50%, -50%) scale(0.8);
-    }
-    to {
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(1);
-    }
-}
-
-@keyframes slideIn {
-    from { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
-    to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-}
-
-.chapter-item {
-    padding: 12px;
-    margin: 8px 0;
-    border-radius: 12px;
-    cursor: pointer;
-    transition: all 0.3s;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid var(--border);
-    will-change: transform;
-    color: #ffffff;
-}
-
-.chapter-item:hover {
-    background: rgba(129, 140, 248, 0.2);
-    transform: translateX(8px);
-    box-shadow: 0 0 10px rgba(129, 140, 248, 0.3);
-    border-color: var(--primary);
-}
-
-.chapter-item.coming-soon {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
-
-.chapter-item.coming-soon:hover {
-    transform: none;
-    background: rgba(255, 255, 255, 0.05);
-    border-color: var(--border);
-    box-shadow: none;
-}
-
-.chapter-icon {
-    width: 26px;
-    height: 26px;
-    border-radius: 10px;
-    background: var(--primary-dark);
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-}
-
-.chapter-icon:empty { display: none; }
-
-/* 美化的顶部标题栏 */
-.floating-topbar {
-    position: fixed;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(15, 23, 42, 0.6);
-    backdrop-filter: blur(10px);
-    padding: 14px 35px;
-    border-radius: 50px;
-    box-shadow: var(--shadow-xl);
-    z-index: 998;
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--text);
-    max-width: 600px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    border: 1px solid var(--border);
-    will-change: transform;
-}
-
-/* 统一顶部导航栏 */
-.unified-top-nav {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 1000;
-    background: rgba(15, 23, 42, 0.95);
-    backdrop-filter: blur(10px);
-    border-bottom: 1px solid var(--border);
-    padding: 15px 30px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.nav-brand h1 {
-    font-family: 'NotoSerif', 'jf open 粉圆', serif;
-    font-size: 28px;
-    font-weight: 700;
-    color: #ffffff;
-    margin: 0;
-    letter-spacing: 0.5px;
-    background: linear-gradient(135deg, #ffffff 0%, #06ffa5 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-.nav-brand p {
-    font-family: 'SourceHanSans', -apple-system, BlinkMacSystemFont, sans-serif;
-    font-size: 12px;
-    color: var(--text-muted);
-    margin: 0;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    font-weight: 300;
-}
-
-.nav-actions {
-    display: flex;
-    gap: 15px;
-    align-items: center;
-}
-
-.nav-action-btn {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 20px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    color: var(--text);
-    font-size: 14px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.nav-action-btn:hover {
-    background: rgba(6, 255, 165, 0.1);
-    border-color: var(--accent);
-    color: var(--accent);
-    transform: translateY(-2px);
-}
-
-.nav-action-btn svg {
-    width: 16px;
-    height: 16px;
-}
-
-/* 极简右下角导航栏 */
-.floating-nav-sidebar {
-    position: fixed;
-    right: 20px;
-    bottom: 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
-    z-index: 1000;
-    transition: all 0.3s ease;
-}
-
-.nav-btn, .sidebar-action-btn, .nav-collapse-btn {
-    width: 48px;
-    height: 48px;
-    border-radius: 16px;
-    border: 1px solid var(--border);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 11px;
-    font-weight: 600;
-    box-shadow: var(--shadow);
-    transition: all 0.3s ease;
-    background: rgba(15, 23, 42, 0.6);
-    backdrop-filter: blur(5px);
-    color: var(--text-muted);
-    will-change: transform;
-}
-
-.nav-btn:hover, .sidebar-action-btn:hover, .nav-collapse-btn:hover {
-    transform: translateY(-3px);
-    box-shadow: var(--shadow-lg);
-    border-color: var(--primary);
-    color: var(--primary-light);
-}
-
-.nav-btn svg {
-    width: 20px;
-    height: 20px;
-}
-
-#quickNavBtn {
-    font-size: 11px;
-}
-
-#feedbackBtn {
-    font-size: 11px;
-    position: relative;
-}
-
-.nav-collapse-btn {
-    font-size: 16px;
-    transition: transform 0.3s ease;
-}
-.nav-collapse-btn svg {
-    width: 16px;
-    height: 16px;
-}
-
-.keyboard-hint {
-    font-size: 10px;
-    color: var(--text-muted);
-    background: rgba(0, 0, 0, 0.7);
-    padding: 2px 8px;
-    border-radius: 10px;
-    white-space: nowrap;
-    text-align: center;
-    box-shadow: var(--shadow);
-    transition: opacity 0.3s;
-}
-
-.keyboard-hint.hidden {
-    opacity: 0;
-    pointer-events: none;
-}
-
-.feedback-badge {
-    position: absolute;
-    top: -5px;
-    right: -5px;
-    background: #ef4444;
-    color: white;
-    font-size: 10px;
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-}
-
-.floating-nav-sidebar.collapsed > *:not(.nav-collapse-btn) {
-    opacity: 0;
-    transform: scale(0.1);
-    pointer-events: none;
-}
-
-.floating-nav-sidebar.collapsed .nav-collapse-btn {
-    transform: rotate(180deg);
-}
-
-.nav-divider {
-    width: 30px;
-    height: 1px;
-    background: var(--border);
-    margin: 4px 0;
-}
-
-/* 快速菜单样式 */
-.quick-menu {
-    position: fixed;
-    background: rgba(15, 23, 42, 0.8);
-    backdrop-filter: blur(10px);
-    border-radius: 12px;
-    box-shadow: var(--shadow-xl);
-    padding: 8px;
-    display: none;
-    z-index: 2001;
-    border: 1px solid var(--border);
-    min-width: 140px;
-    will-change: transform, opacity;
-}
-
-.quick-menu.active {
-    display: block;
-    animation: menuPop 0.2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-}
-
-@keyframes menuPop {
-    from { opacity: 0; transform: scale(0.8) translateY(10px); }
-    to { opacity: 1; transform: scale(1) translateY(0); }
-}
-
-.menu-item {
-    padding: 10px 14px;
-    margin: 4px 0;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    font-size: 13px;
-    color: var(--text);
-    text-align: center;
-    will-change: transform;
-}
-
-.menu-item:hover {
-    background: var(--primary);
-    color: white;
-    transform: translateX(3px);
-}
-
-/* 移动端优化 */
-@media (max-width: 768px) {
-    .welcome-page { padding: 20px; height: 100vh; overflow-y: auto; }
-    .welcome-content { gap: 20px; height: auto; max-height: none; max-width: 100%; padding: 20px; }
-    .welcome-title-section { flex-direction: column; gap: 15px; }
-    .welcome-title { font-size: 32px; text-align: center; margin-bottom: 0; letter-spacing: 1px; }
-    .welcome-subtitle { font-size: 18px; letter-spacing: 1px; }
-    .front-directory-panel { width: 95%; max-height: 85vh; }
-    .directory-items { grid-template-columns: 1fr; }
-    .chapter-nav { flex-direction: column; }
-    .directory-toggle-btn { top: 10px; right: 10px; padding: 10px 15px; }
-    .directory-toggle-btn span { display: none; }
-    .floating-topbar { top: 10px; font-size: 14px; padding: 10px 25px; width: 90%; }
-    .floating-nav-sidebar { right: 10px; bottom: 10px; gap: 8px; }
-    .nav-btn, .sidebar-action-btn, .nav-collapse-btn { width: 44px; height: 44px; }
-}
-
-/* 禁用动画优化性能 */
-@media (prefers-reduced-motion: reduce) {
-    * { animation: none !important; transition: none !important; }
-    .nav-btn, .sidebar-action-btn, .nav-collapse-btn, .directory-item, .chapter-item, .chapter-nav-btn { will-change: auto !important; }
-}
-
-/* 隐藏滚动条但保持滚动功能 */
-* {
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    scroll-behavior: smooth;
-}
-*::-webkit-scrollbar {
-    display: none;
-}
-
-/* 低端设备优化 */
-@media (max-resolution: 1dppx) {
-    #background3d, #sculptureCanvas {
-        image-rendering: pixelated;
-    }
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>仿真实验平台 - 高等应用数学在线课堂</title>
+    
+    <style>
+        :root {
+            /* === 白色学术主题变量 === */
+            --bg-base: #ffffff;
+            --bg-subtle: #f8fafc;
+            --bg-glass: rgba(255, 255, 255, 0.95);
+            
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --text-accent: #2563eb;    /* 皇家蓝 */
+            --text-accent-hover: #1d4ed8;
+            
+            --border-color: #e2e8f0;
+            
+            /* 阴影系统 */
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-float: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
+            
+            --transition-smooth: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @font-face {
+            font-family: 'WDXLubrifontSC';
+            src: url('../common-assets/fonts/WD-XLLubrifontSC-Regular.otf') format('opentype');
+            font-display: swap;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'WDXLubrifontSC', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-primary);
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* === 1. 顶部导航 (Glassmorphism) === */
+        .top-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 70px;
+            background: var(--bg-glass);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 30px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .nav-brand {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .nav-brand h1 {
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            background: linear-gradient(120deg, #2563eb, #0891b2);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .nav-brand span {
+            font-size: 10px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .nav-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .nav-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border: 1px solid var(--border-color);
+            background: #fff;
+            color: var(--text-secondary);
+            border-radius: 8px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+
+        .nav-btn:hover {
+            border-color: var(--text-accent);
+            color: var(--text-accent);
+            background: #eff6ff;
+            transform: translateY(-1px);
+        }
+
+        .nav-btn svg { width: 14px; height: 14px; fill: currentColor; }
+
+        .btn-primary {
+            background: var(--text-accent);
+            color: white;
+            border-color: var(--text-accent);
+        }
+        .btn-primary:hover {
+            background: var(--text-accent-hover);
+            color: white;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+        }
+
+        /* === 2. 背景层 === */
+        #geo-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.5;
+        }
+
+        /* === 3. 欢迎封面 === */
+        .welcome-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            z-index: 10;
+            transition: opacity 0.4s ease;
+        }
+
+        .welcome-title {
+            font-size: 64px;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 10px;
+            letter-spacing: -2px;
+        }
+
+        .welcome-subtitle {
+            font-size: 18px;
+            color: var(--text-secondary);
+            font-weight: 300;
+            margin-bottom: 40px;
+        }
+
+        .start-btn {
+            padding: 16px 48px;
+            font-size: 18px;
+            background: var(--text-primary);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            box-shadow: var(--shadow-float);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .start-btn:hover {
+            transform: scale(1.05);
+            background: var(--text-accent);
+        }
+
+        /* === 4. 目录覆盖层 (Split View) === */
+        .directory-overlay {
+            position: fixed;
+            top: 70px;
+            left: 0;
+            width: 100%;
+            height: calc(100% - 70px);
+            background: var(--bg-glass);
+            backdrop-filter: blur(8px);
+            z-index: 50;
+            display: flex;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition-smooth);
+        }
+
+        .directory-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* 左侧：章节导航 */
+        .dir-sidebar {
+            width: 300px;
+            border-right: 1px solid var(--border-color);
+            padding: 20px;
+            overflow-y: auto;
+            background: rgba(255,255,255,0.5);
+        }
+
+        .chapter-btn {
+            width: 100%;
+            text-align: left;
+            padding: 15px 20px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            border: 1px solid transparent;
+            background: transparent;
+            color: var(--text-secondary);
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chapter-btn:hover {
+            background: white;
+            color: var(--text-primary);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .chapter-btn.active {
+            background: white;
+            color: var(--text-accent);
+            border-color: var(--border-color);
+            font-weight: 600;
+            box-shadow: var(--shadow-sm);
+            border-left: 3px solid var(--text-accent);
+        }
+
+        .chapter-count {
+            font-size: 11px;
+            background: var(--bg-subtle);
+            padding: 2px 8px;
+            border-radius: 10px;
+            color: var(--text-secondary);
+        }
+
+        /* 右侧：实验网格 */
+        .dir-content {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+            background: linear-gradient(to bottom right, #fff, #f8fafc);
+        }
+
+        .dir-header {
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .dir-header h2 { font-size: 24px; color: var(--text-primary); }
+        .dir-header p { font-size: 14px; color: var(--text-secondary); margin-top: 5px; }
+
+        .lab-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .lab-card {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .lab-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-float);
+            border-color: var(--text-accent);
+        }
+
+        .lab-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--bg-subtle);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-accent);
+            flex-shrink: 0;
+            font-size: 18px;
+        }
+        
+        .lab-card:hover .lab-icon {
+            background: var(--text-accent);
+            color: white;
+        }
+
+        .lab-info h3 {
+            font-size: 15px;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .lab-info span {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        /* === 5. 内容 Iframe === */
+        .iframe-container {
+            position: fixed;
+            top: 70px;
+            left: 0;
+            width: 100%;
+            height: calc(100% - 70px);
+            background: white;
+            z-index: 40;
+            transform: translateX(100%);
+            transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .iframe-container.active {
+            transform: translateX(0);
+        }
+
+        iframe { width: 100%; height: 100%; border: none; }
+
+        /* 加载条 */
+        .loading-bar {
+            position: fixed;
+            top: 69px;
+            left: 0;
+            height: 2px;
+            background: var(--text-accent);
+            width: 0%;
+            z-index: 200;
+            transition: width 0.3s ease;
+        }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .directory-overlay { flex-direction: column; }
+            .dir-sidebar { width: 100%; height: 35%; border-right: none; border-bottom: 1px solid var(--border-color); }
+            .dir-content { height: 65%; padding: 20px; }
+            .nav-brand span, .nav-controls span { display: none; }
+        }
+    </style>
+    <!-- 引入 FontAwesome 用于图标 (本地化) -->
+    <link rel="stylesheet" href="../common-assets/css/fontawesome.min.css">
+    <link rel="stylesheet" href="../common-assets/css/solid.min.css">
 </head>
 <body>
 
-<!-- 3D背景画布 -->
-<canvas id="background3d" aria-hidden="true"></canvas>
+    <div class="loading-bar" id="loadingBar"></div>
 
-<!-- 3D数字雕塑背景 -->
-<div id="digitalSculpture" aria-hidden="true">
-    <canvas id="sculptureCanvas"></canvas>
-    
-</div>
+    <!-- 1. 顶部导航 -->
+    <nav class="top-nav">
+        <div class="nav-brand">
+            <h1>仿真实验平台</h1>
+            <span>Simulation Lab / Digital Classroom</span>
+        </div>
+        <div class="nav-controls">
+            <button class="nav-btn" onclick="toggleDirectory()" title="目录">
+                <i class="fas fa-list"></i>
+                <span>实验目录</span>
+            </button>
+            <div style="width:1px; height:20px; background:var(--border-color); margin:0 5px;"></div>
+            <button class="nav-btn" onclick="goPrev()" title="上一个实验">
+                <i class="fas fa-chevron-left"></i>
+                <span>上一个</span>
+            </button>
+            <button class="nav-btn" onclick="goNext()" title="下一个实验">
+                <span>下一个</span>
+                <i class="fas fa-chevron-right"></i>
+            </button>
+            <button class="nav-btn btn-primary" onclick="goMainSite()" title="返回主站">
+                <i class="fas fa-home"></i>
+                <span>主页</span>
+            </button>
+        </div>
+    </nav>
 
-<!-- 轻量网格/噪声覆盖层 -->
-<div class="subtle-overlay"></div>
+    <!-- 2. 背景动画 -->
+    <canvas id="geo-canvas"></canvas>
 
+    <!-- 3. 欢迎页 -->
+    <div class="welcome-screen" id="welcomeScreen">
+        <h1 class="welcome-title">Simulation Lab</h1>
+        <p class="welcome-subtitle">
+            高等应用数学 · 数字化仿真实验室<br>
+            Explore mathematics through interactive experiments
+        </p>
+        <button class="start-btn" onclick="toggleDirectory()">
+            <span>选择实验</span>
+            <i class="fas fa-arrow-right"></i>
+        </button>
+    </div>
 
-
-<!-- 主内容区 -->
-<div class="main-content">
-    <!-- 欢迎页 -->
-    <div class="welcome-page" id="welcomePage">
-        <div class="welcome-content">
-            <div class="welcome-title-section">
-                 <div class="welcome-title">Math to Be</div>
-                 <div class="welcome-subtitle">Mathematical Laboratory</div>
+    <!-- 4. 目录覆盖层 (双栏布局) -->
+    <div class="directory-overlay" id="directoryOverlay">
+        <!-- 左侧章节列表 -->
+        <div class="dir-sidebar" id="chapterList">
+            <!-- JS 生成 -->
+        </div>
+        <!-- 右侧实验网格 -->
+        <div class="dir-content">
+            <div class="dir-header">
+                <h2 id="currentChapterTitle">请选择章节</h2>
+                <p id="currentChapterDesc">Select a chapter to view experiments</p>
+            </div>
+            <div class="lab-grid" id="labGrid">
+                <!-- JS 生成 -->
             </div>
         </div>
     </div>
-    <!-- 内容iframe -->
-    <iframe id="contentFrame" style="display: none;"></iframe>
-</div>
 
-<!-- 移除悬浮标题，避免与顶部导航重复 -->
-
-<!-- 简化顶部导航栏 -->
-<div class="unified-top-nav">
-    <div class="nav-brand">
-        <h1>仿真实验平台</h1>
-        <p>Simulation Lab</p>
+    <!-- 5. 内容区域 -->
+    <div class="iframe-container" id="iframeContainer">
+        <iframe id="contentFrame" src="about:blank"></iframe>
     </div>
-    <div class="nav-actions">
-        <button class="nav-action-btn" onclick="goPrev()" title="上一页">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-                <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
-            </svg>
-            上一页
-        </button>
-        <button class="nav-action-btn" onclick="goNext()" title="下一页">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-                <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
-            </svg>
-            下一页
-        </button>
-        <button class="nav-action-btn" onclick="showChapterList()" title="目录">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-                <path d="M4 6h16v2H4V6zm0 5h16v2H4v-2zm0 5h16v2H4v-2z"/>
-            </svg>
-            目录
-        </button>
-        <button class="nav-action-btn" onclick="showQuickNav()" title="快速跳转">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-            </svg>
-            跳转
-        </button>
-        <button class="nav-action-btn" onclick="goMainSite()" title="返回主页">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-                <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8h5z"/>
-            </svg>
-            主页
-        </button>
-    </div>
-</div>
-
-<!-- 键盘提示 -->
-<div class="keyboard-hint hidden" id="keyboardHint">
-    使用 <i class="fa-solid fa-arrow-left"></i> → 键导航，Home 键返回目录，End 键回主站
-</div>
-
-<!-- 重构的目录面板 -->
-<div class="front-directory-panel" id="frontDirectoryPanel">
-    <div class="directory-header">
-        <h3>数学实验目录</h3>
-        <button class="directory-close-btn" onclick="toggleDirectory()">×</button>
-    </div>
-    <div class="directory-content">
-        <!-- 章节导航栏 -->
-        <div class="chapter-nav" id="chapterNav">
-            <button class="chapter-nav-btn" data-category="0" onclick="showChapter(0)">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg>
-                函数基础 (9个实验)
-            </button>
-            <button class="chapter-nav-btn" data-category="1" onclick="showChapter(1)">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.94-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
-                函数与极限 (14个实验)
-            </button>
-            <button class="chapter-nav-btn" data-category="2" onclick="showChapter(2)">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
-                导数与微分 (6个实验)
-            </button>
-            <button class="chapter-nav-btn" data-category="3" onclick="showChapter(3)">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                导数应用 (3个实验)
-            </button>
-            <button class="chapter-nav-btn" data-category="4" onclick="showChapter(4)">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-                不定积分 (5个实验)
-            </button>
-            <button class="chapter-nav-btn" data-category="5" onclick="showChapter(5)">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                定积分 (5个实验)
-            </button>
-            <button class="chapter-nav-btn" data-category="6" onclick="showChapter(6)">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.94-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
-                常微分方程 (5个实验)
-            </button>
-            <button class="chapter-nav-btn" data-category="7" onclick="showChapter(7)">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M3 3h18v2H3V3zm0 4h18v2H3V7zm0 4h18v2H3v-2zm0 4h18v2H3v-2zm0 4h18v2H3v-2z"/></svg>
-                多元函数微分学 (6个实验)
-            </button>
-            <button class="chapter-nav-btn" data-category="8" onclick="showChapter(8)">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                多元函数积分学 (3个实验)
-            </button>
-            <button class="chapter-nav-btn" data-category="9" onclick="showChapter(9)">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M3 3h18v2H3V3zm0 4h18v2H3V7zm0 4h18v2H3v-2zm0 4h18v2H3v-2zm0 4h18v2H3v-2z"/></svg>
-                线性代数 (7个实验)
-            </button>
-            <button class="chapter-nav-btn" data-category="10" onclick="showChapter(10)">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-                无穷级数 (5个实验)
-            </button>
-            <button class="chapter-nav-btn" data-category="11" onclick="showChapter(11)">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                向量与空间解析几何 (6个实验)
-            </button>
-            <button class="chapter-nav-btn" data-category="12" onclick="showChapter(12)">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
-                概率与统计 (6个实验)
-            </button>
-        </div>
-        
-        <div style="text-align: center; color: var(--text-muted); margin-top: 30px; font-size: 16px;">
-            请点击上方章节按钮查看具体实验内容
-        </div>
-    </div>
-</div>
-
-<!-- 悬浮章节面板 - 二级目录 -->
-<div class="floating-chapter-panel" id="chapterPanel">
-    <div class="chapter-panel-header">
-        <div class="chapter-panel-title" id="chapterPanelTitle">章节标题</div>
-        <button class="chapter-panel-close" onclick="closeChapterPanel()">×</button>
-    </div>
-    <div id="chapterList"></div>
-</div>
-
-<!-- 目录按钮已移至顶部导航栏 -->
-
-<!-- 移除右下角侧边栏，避免遮挡内容 -->
-
-<!-- 快速菜单 -->
-<div class="quick-menu" id="quickMenu">
-    <div class="menu-item" onclick="showQuickNav()">在新窗口打开</div>
-</div>
-
-<!-- 反馈菜单 -->
-<div class="quick-menu" id="feedbackMenu">
-    <div class="menu-item" onclick="reportIssue('performance')">性能问题</div>
-    <div class="menu-item" onclick="reportIssue('display')">显示问题</div>
-    <div class="menu-item" onclick="reportIssue('function')">功能问题</div>
-    <div class="menu-item" onclick="exportIssues()">导出反馈(JSON)</div>
-    <div class="menu-item" onclick="clearIssues()">清空记录</div>
-</div>
 
 <script>
-// 预览功能 - 放在模块脚本之前确保全局可用
-
-// 性能检测函数 - 全局定义
-window.isLowPerformanceDevice = function() {
-    return navigator.hardwareConcurrency <= 2 || 
-           /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-};
-
-// 预览功能 - 立即定义以确保按钮可用
-window.goPrev = function() {
-    console.log('goPrev 被调用');
-    console.log('当前状态 - pageSequence:', window.pageSequence);
-    console.log('当前状态 - currentIndex:', window.currentIndex);
-    
-    // 等待模块脚本加载完成
-    if (typeof window.pageSequence === 'undefined') {
-        console.log('等待模块脚本加载...');
-        setTimeout(() => {
-            if (window.pageSequence && window.pageSequence.length > 0) {
-                window.goPrev();
-            } else {
-                alert('页面序列未初始化，请稍后再试');
-            }
-        }, 100);
-        return;
-    }
-    
-    let pageSeq = window.pageSequence || [];
-    let currentIdx = window.currentIndex;
-    
-    // 如果currentIndex是undefined，说明还没有加载任何内容
-    if (currentIdx === undefined) {
-        currentIdx = -1;
-    }
-    
-    if (pageSeq.length === 0) {
-        if (window.initSequence) {
-            window.initSequence();
-            pageSeq = window.pageSequence || [];
-            if (pageSeq.length === 0) {
-                alert('暂无可用内容');
-                return;
-            }
-        } else {
-            alert('页面序列未初始化');
-            return;
-        }
-    }
-    
-    console.log('页面序列长度:', pageSeq.length);
-    console.log('当前索引:', currentIdx);
-    
-    // 如果当前没有加载任何内容，从第一个开始
-    if (currentIdx === -1) {
-        currentIdx = 0;
-    } else {
-        currentIdx = (currentIdx > 0) ? currentIdx - 1 : pageSeq.length - 1;
-    }
-    
-    console.log('计算后的索引:', currentIdx);
-    console.log('目标页面:', pageSeq[currentIdx]);
-    
-    // 更新全局索引
-    window.currentIndex = currentIdx;
-    
-    if (window.loadContent) {
-        window.loadContent(pageSeq[currentIdx], window.getChineseTitle ? window.getChineseTitle(pageSeq[currentIdx]) : '');
-    } else {
-        alert('loadContent函数未找到');
-    }
-};
-
-window.goNext = function() {
-    console.log('goNext 被调用');
-    console.log('当前状态 - pageSequence:', window.pageSequence);
-    console.log('当前状态 - currentIndex:', window.currentIndex);
-    
-    // 等待模块脚本加载完成
-    if (typeof window.pageSequence === 'undefined') {
-        console.log('等待模块脚本加载...');
-        setTimeout(() => {
-            if (window.pageSequence && window.pageSequence.length > 0) {
-                window.goNext();
-            } else {
-                alert('页面序列未初始化，请稍后再试');
-            }
-        }, 100);
-        return;
-    }
-    
-    let pageSeq = window.pageSequence || [];
-    let currentIdx = window.currentIndex;
-    
-    // 如果currentIndex是undefined，说明还没有加载任何内容
-    if (currentIdx === undefined) {
-        currentIdx = -1;
-    }
-    
-    if (pageSeq.length === 0) {
-        if (window.initSequence) {
-            window.initSequence();
-            pageSeq = window.pageSequence || [];
-            if (pageSeq.length === 0) {
-                alert('暂无可用内容');
-                return;
-            }
-        } else {
-            alert('页面序列未初始化');
-            return;
-        }
-    }
-    
-    console.log('页面序列长度:', pageSeq.length);
-    console.log('当前索引:', currentIdx);
-    
-    // 如果当前没有加载任何内容，从第一个开始
-    if (currentIdx === -1) {
-        currentIdx = 0;
-    } else {
-        currentIdx = (currentIdx < pageSeq.length - 1) ? currentIdx + 1 : 0;
-    }
-    
-    console.log('计算后的索引:', currentIdx);
-    console.log('目标页面:', pageSeq[currentIdx]);
-    
-    // 更新全局索引
-    window.currentIndex = currentIdx;
-    
-    if (window.loadContent) {
-        window.loadContent(pageSeq[currentIdx], window.getChineseTitle ? window.getChineseTitle(pageSeq[currentIdx]) : '');
-    } else {
-        alert('loadContent函数未找到');
-    }
-};
-
-
-// 全局变量将在模块脚本中设置
-</script>
-
-<script>
-// 性能优化的3D背景
-
-// 性能检测和配置
-const isLowPerformanceDevice = () => {
-    return navigator.hardwareConcurrency <= 2 || 
-           /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-};
-
-const performanceConfig = {
-    lowEnd: {
-        particleCount: 3000,
-        antialias: false,
-        pixelRatio: Math.min(window.devicePixelRatio, 1.5),
-        shadowMap: false
-    },
-    highEnd: {
-        particleCount: 6000,
-        antialias: true,
-        pixelRatio: window.devicePixelRatio,
-        shadowMap: true
-    }
-};
-
-const config = isLowPerformanceDevice() ? performanceConfig.lowEnd : performanceConfig.highEnd;
-
-let scene, camera, renderer;
-let particles;
-const mouse = new THREE.Vector2();
-let isMouseDown = false;
-let lastMousePosition = { x: 0, y: 0 };
-
-// 缓存的DOM元素
-const canvas = document.getElementById('background3d');
-
-// 节流函数
-function throttle(func, limit) {
-    let inThrottle;
-    return function() {
-        const args = arguments;
-        const context = this;
-        if (!inThrottle) {
-            func.apply(context, args);
-            inThrottle = true;
-            setTimeout(() => inThrottle = false, limit);
-        }
-    }
-}
-
-function init3D() {
-    // 场景
-    scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x000000, 0.0005);
-
-    // 相机
-    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.z = 120;
-
-    // 渲染器优化
-    renderer = new THREE.WebGLRenderer({ 
-        canvas: canvas, 
-        antialias: config.antialias, 
-        alpha: true,
-        powerPreference: "high-performance"
-    });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(config.pixelRatio);
-    renderer.setClearColor(0x000000, 0.8);
-
-    // 性能优化设置
-    renderer.shadowMap.enabled = config.shadowMap;
-    if (config.shadowMap) {
-        renderer.shadowMap.type = THREE.PCFShadowMap;
-    }
-
-    // 简化灯光系统
-    const ambientLight = new THREE.AmbientLight(0x404040, 1.2);
-    scene.add(ambientLight);
-    
-    const pointLight = new THREE.PointLight(0x6366f1, 0.8);
-    pointLight.position.set(50, 50, 50);
-    scene.add(pointLight);
-
-    // 增强粒子系统
-    const particlesGeometry = new THREE.BufferGeometry();
-    const particlesCount = config.particleCount;
-    const posArray = new Float32Array(particlesCount * 3);
-    const colorArray = new Float32Array(particlesCount * 3);
-    const velocityArray = new Float32Array(particlesCount * 3);
-
-    for (let i = 0; i < particlesCount; i++) {
-        const i3 = i * 3;
-        const radius = 20 + Math.random() * 180;
-        const theta = Math.random() * Math.PI * 2;
-        const phi = Math.acos((Math.random() * 2) - 1);
-        
-        posArray[i3] = radius * Math.sin(phi) * Math.cos(theta);
-        posArray[i3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
-        posArray[i3 + 2] = radius * Math.cos(phi);
-        
-        // 多彩粒子
-        const color = new THREE.Color();
-        color.setHSL(0.5 + Math.random() * 0.3, 0.8, 0.6 + Math.random() * 0.4);
-        colorArray[i3] = color.r;
-        colorArray[i3 + 1] = color.g;
-        colorArray[i3 + 2] = color.b;
-        
-        // 随机速度
-        velocityArray[i3] = (Math.random() - 0.5) * 0.02;
-        velocityArray[i3 + 1] = (Math.random() - 0.5) * 0.02;
-        velocityArray[i3 + 2] = (Math.random() - 0.5) * 0.02;
-    }
-
-    particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
-    particlesGeometry.setAttribute('color', new THREE.BufferAttribute(colorArray, 3));
-    particlesGeometry.setAttribute('velocity', new THREE.BufferAttribute(velocityArray, 3));
-    
-    const particlesMaterial = new THREE.PointsMaterial({
-        size: 0.15,
-        vertexColors: true,
-        transparent: true,
-        opacity: 0.7,
-        blending: THREE.AdditiveBlending,
-        depthWrite: false,
-        sizeAttenuation: true
-    });
-
-    particles = new THREE.Points(particlesGeometry, particlesMaterial);
-    scene.add(particles);
-
-    // 使用节流的事件监听器
-    window.addEventListener('resize', throttle(onWindowResize3D, 100), false);
-    document.addEventListener('mousemove', throttle(onMouseMove3D, 16), false);
-    document.addEventListener('mousedown', onMouseDown3D, false);
-    document.addEventListener('mouseup', onMouseUp3D, false);
-}
-
-function onWindowResize3D() {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-}
-
-function onMouseMove3D(event) {
-    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-    mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
-    
-    if (isMouseDown) {
-        const deltaX = event.clientX - lastMousePosition.x;
-        const deltaY = event.clientY - lastMousePosition.y;
-        
-        particles.rotation.y += deltaX * 0.001;
-        particles.rotation.x += deltaY * 0.001;
-
-        lastMousePosition = { x: event.clientX, y: event.clientY };
-    }
-}
-
-function onMouseDown3D(event) {
-    isMouseDown = true;
-    lastMousePosition = { x: event.clientX, y: event.clientY };
-}
-
-function onMouseUp3D() {
-    isMouseDown = false;
-}
-
-// 帧率限制器
-let lastTime = 0;
-const targetFPS = isLowPerformanceDevice() ? 30 : 60;
-const frameInterval = 1000 / targetFPS;
-
-function animate3D(currentTime) {
-    requestAnimationFrame(animate3D);
-
-    if (currentTime - lastTime < frameInterval) {
-        return;
-    }
-    lastTime = currentTime;
-
-    const time = currentTime * 0.0003;
-
-    if (!isMouseDown) {
-        particles.rotation.y -= 0.0008;
-        particles.rotation.x += 0.0003;
-    }
-    
-    particles.rotation.z = time * 0.05;
-
-    // 增强粒子动态效果
-    const positions = particles.geometry.attributes.position.array;
-    const velocities = particles.geometry.attributes.velocity.array;
-    const colors = particles.geometry.attributes.color.array;
-    
-    for (let i = 0; i < positions.length / 3; i++) {
-        const i3 = i * 3;
-        
-        // 向中心引力
-        const p = new THREE.Vector3(positions[i3], positions[i3+1], positions[i3+2]);
-        const directionToCenter = p.clone().negate().normalize();
-        velocities[i3] += directionToCenter.x * 0.005;
-        velocities[i3+1] += directionToCenter.y * 0.005;
-        velocities[i3+2] += directionToCenter.z * 0.005;
-        
-        // 鼠标交互
-        const dx = positions[i3] - (mouse.x * camera.position.z * 0.3);
-        const dy = positions[i3+1] - (mouse.y * camera.position.z * 0.3);
-        const distSq = dx * dx + dy * dy;
-        if (distSq < 2500) {
-            const force = (50 - Math.sqrt(distSq)) / 50;
-            velocities[i3] += (dx / Math.sqrt(distSq)) * force * 0.1;
-            velocities[i3+1] += (dy / Math.sqrt(distSq)) * force * 0.1;
-        }
-        
-        // 流动效果
-        positions[i3] += Math.sin(time * 2 + i * 0.1) * 0.05 + velocities[i3];
-        positions[i3+1] += Math.cos(time * 1.5 + i * 0.1) * 0.05 + velocities[i3+1];
-        positions[i3+2] += Math.sin(time * 1.2 + i * 0.1) * 0.05 + velocities[i3+2];
-        
-        // 速度衰减
-        velocities[i3] *= 0.99;
-        velocities[i3+1] *= 0.99;
-        velocities[i3+2] *= 0.99;
-        
-        // 颜色变化
-        const color = new THREE.Color();
-        color.setHSL(0.5 + Math.sin(time + i * 0.01) * 0.2, 0.8, 0.6 + Math.sin(time * 2 + i * 0.01) * 0.2);
-        colors[i3] = color.r;
-        colors[i3+1] = color.g;
-        colors[i3+2] = color.b;
-    }
-    
-    particles.geometry.attributes.position.needsUpdate = true;
-    particles.geometry.attributes.color.needsUpdate = true;
-
-    // 相机跟随
-    camera.position.x += (mouse.x * 15 - camera.position.x) * 0.03;
-    camera.position.y += (mouse.y * 15 - camera.position.y) * 0.03;
-    camera.lookAt(scene.position);
-
-    renderer.render(scene, camera);
-}
-
-// 检查是否需要禁用动画
-if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    init3D();
-    animate3D(0);
-}
-</script>
-
-<!-- import map removed for file:// compatibility -->
-
-<script>
-// 性能优化的3D数字雕塑
-
-// 数字雕塑性能配置
-const sculptureConfig = {
-    lowEnd: {
-        particleCount: 4000,
-        antialias: false,
-        pixelRatio: Math.min(window.devicePixelRatio, 1.5)
-    },
-    highEnd: {
-        particleCount: 8000,
-        antialias: true,
-        pixelRatio: window.devicePixelRatio
-    }
-};
-
-const sculpturePerfConfig = isLowPerformanceDevice() ? sculptureConfig.lowEnd : sculptureConfig.highEnd;
-
-let sculptureScene, sculptureCamera, sculptureRenderer, sculptureControls;
-let sculptureParticles;
-const sculptureMouse = new THREE.Vector2();
-const sculptureClock = new THREE.Clock();
-
-// 缓存的DOM元素
-const sculptureCanvas = document.getElementById('sculptureCanvas');
-
-// 节流函数
-function throttle(func, limit) {
-    let inThrottle;
-    return function() {
-        const args = arguments;
-        const context = this;
-        if (!inThrottle) {
-            func.apply(context, args);
-            inThrottle = true;
-            setTimeout(() => inThrottle = false, limit);
-        }
-    }
-}
-
-function initDigitalSculpture() {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        return; // 跳过动画初始化
-    }
-
-    // 场景
-    sculptureScene = new THREE.Scene();
-    sculptureScene.fog = new THREE.FogExp2(0x000000, 0.002);
-    
-    // 简化环境光
-    sculptureScene.add(new THREE.AmbientLight(0x404040, 0.8));
-
-    // 渲染器优化
-    sculptureRenderer = new THREE.WebGLRenderer({ 
-        canvas: sculptureCanvas, 
-        antialias: sculpturePerfConfig.antialias, 
-        alpha: true,
-        powerPreference: "high-performance"
-    });
-    sculptureRenderer.setPixelRatio(sculpturePerfConfig.pixelRatio);
-    sculptureRenderer.setSize(window.innerWidth, window.innerHeight);
-    sculptureRenderer.setClearColor(0x000000, 0.0);
-
-    // 相机
-    sculptureCamera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    sculptureCamera.position.z = 100;
-
-    // 优化控制器
-    sculptureControls = new OrbitControls(sculptureCamera, sculptureCanvas);
-    sculptureControls.enableDamping = true;
-    sculptureControls.dampingFactor = 0.05;
-    sculptureControls.enablePan = false;
-    sculptureControls.minDistance = 30;
-    sculptureControls.maxDistance = 150;
-    sculptureControls.autoRotate = true;
-    sculptureControls.autoRotateSpeed = 0.1; // 减慢自动旋转速度
-
-    createSculptureParticles();
-
-    // 节流的事件监听器
-    window.addEventListener('resize', throttle(onSculptureWindowResize, 100));
-    document.addEventListener('mousemove', throttle(onSculptureMouseMove, 16));
-
-    animateSculpture();
-}
-
-function createSculptureParticles() {
-    const particleCount = sculpturePerfConfig.particleCount;
-    const positions = new Float32Array(particleCount * 3);
-    const colors = new Float32Array(particleCount * 3);
-
-    for (let i = 0; i < particleCount; i++) {
-        const i3 = i * 3;
-        let radius;
-        
-        // 分层粒子分布
-        if (i < particleCount * 0.6) {
-            radius = 50 + Math.random() * 30;
-        } else {
-            radius = 15 + Math.random() * 25;
-        }
-        
-        const theta = Math.random() * Math.PI * 2;
-        const phi = Math.acos((Math.random() * 2) - 1);
-        
-        positions[i3] = radius * Math.sin(phi) * Math.cos(theta);
-        positions[i3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
-        positions[i3 + 2] = radius * Math.cos(phi);
-        
-        const color = new THREE.Color();
-        if (i < particleCount * 0.6) {
-            color.setHSL(0.5 + Math.random() * 0.2, 0.8, 0.6 + Math.random() * 0.2);
-        } else {
-            color.setHSL(0.8 + Math.random() * 0.2, 0.9, 0.7 + Math.random() * 0.3);
-        }
-        colors[i3] = color.r;
-        colors[i3 + 1] = color.g;
-        colors[i3 + 2] = color.b;
-    }
-
-    const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-
-    const material = new THREE.PointsMaterial({
-        size: 0.4,
-        vertexColors: true,
-        blending: THREE.AdditiveBlending,
-        transparent: true,
-        opacity: 0.7,
-        sizeAttenuation: false // 性能优化
-    });
-    
-    sculptureParticles = new THREE.Points(geometry, material);
-    sculptureScene.add(sculptureParticles);
-}
-
-function onSculptureWindowResize() {
-    sculptureCamera.aspect = window.innerWidth / window.innerHeight;
-    sculptureCamera.updateProjectionMatrix();
-    sculptureRenderer.setSize(window.innerWidth, window.innerHeight);
-}
-
-function onSculptureMouseMove(event) {
-    sculptureMouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-    sculptureMouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-}
-
-// 帧率限制器
-let sculptureLastTime = 0;
-const sculptureTargetFPS = isLowPerformanceDevice() ? 24 : 45;
-const sculptureFrameInterval = 1000 / sculptureTargetFPS;
-
-function animateSculpture(currentTime) {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        return;
-    }
-
-    requestAnimationFrame(animateSculpture);
-
-    if (currentTime - sculptureLastTime < sculptureFrameInterval) {
-        return;
-    }
-    sculptureLastTime = currentTime;
-
-    const elapsedTime = sculptureClock.getElapsedTime();
-    
-    // 增强粒子动态效果
-    const positions = sculptureParticles.geometry.attributes.position.array;
-    const colors = sculptureParticles.geometry.attributes.color.array;
-    const step = isLowPerformanceDevice() ? 3 : 1; // 减少跳步以增加效果
-    
-    for (let i = 0; i < positions.length / 3; i += step) {
-        const i3 = i * 3;
-        
-        // 复杂的波动效果
-        const waveStrength = 0.08;
-        const time1 = elapsedTime * 0.5 + i * 0.01;
-        const time2 = elapsedTime * 0.3 + i * 0.015;
-        const time3 = elapsedTime * 0.4 + i * 0.008;
-        
-        positions[i3] += Math.sin(time1) * waveStrength + Math.cos(time2) * waveStrength * 0.5;
-        positions[i3 + 1] += Math.cos(time1) * waveStrength + Math.sin(time3) * waveStrength * 0.5;
-        positions[i3 + 2] += Math.sin(time2) * waveStrength + Math.cos(time3) * waveStrength * 0.5;
-        
-        // 颜色动态变化
-        const color = new THREE.Color();
-        const hue = 0.5 + Math.sin(elapsedTime * 0.5 + i * 0.01) * 0.3;
-        const saturation = 0.8 + Math.sin(elapsedTime * 0.3 + i * 0.02) * 0.2;
-        const lightness = 0.6 + Math.sin(elapsedTime * 0.4 + i * 0.015) * 0.3;
-        color.setHSL(hue, saturation, lightness);
-        
-        colors[i3] = color.r;
-        colors[i3 + 1] = color.g;
-        colors[i3 + 2] = color.b;
-    }
-    
-    sculptureParticles.geometry.attributes.position.needsUpdate = true;
-    sculptureParticles.geometry.attributes.color.needsUpdate = true;
-    
-    sculptureControls.update();
-    sculptureRenderer.render(sculptureScene, sculptureCamera);
-}
-
-// 启动数字雕塑
-initDigitalSculpture();
-</script>
-
-<script>
-// 章节数据 - 按正确顺序排列
-const chapters = {
-    0: {
-        title: "函数基础",
-        items: [
-            { name: "指数运算实验室", url: "lab 1-1.html", type: "single" },
-            { name: "对数运算实验室", url: "lab 1-2.html", type: "single" },
-            { name: "区间分类实验室", url: "lab 1-3.html", type: "single" },
-            { name: "函数概念实验室", url: "lab 1-4.html", type: "single" },
-            { name: "函数性质实验室", url: "lab 1-5.html", type: "single" },
-            { name: "基本初等函数实验室", url: "lab 1-6.html", type: "single" },
-            { name: "复合函数实验室", url: "lab 1-7.html", type: "single" },
-            { name: "函数艺术与运动", url: "lab 1-8.html", type: "single" },
-            { name: "第一章游戏实验室", url: "lab 1-9.html", type: "single" }
-        ]
-    },
-    1: {
-        title: "函数与极限",
-        items: [
-            { name: "图像压缩与数列极限实验室", url: "lab 2-1.html", type: "single" },
-            { name: "数列极限案例探索实验室", url: "lab 2-2.html", type: "single" },
-            { name: "函数极限与自变量变化实验室", url: "lab 2-3.html", type: "single" },
-            { name: "左右极限与存在性判定实验室", url: "lab 2-4.html", type: "single" },
-            { name: "无穷大与无穷小倒数关系实验室", url: "lab 2-5.html", type: "single" },
-            { name: "重要极限实验室", url: "lab 2-6.html", type: "single" },
-            { name: "无穷小比较实验室", url: "lab 2-7.html", type: "single" },
-            { name: "函数增量实验室", url: "lab 2-8.html", type: "single" },
-            { name: "等价无穷小倒水游戏", url: "lab 2-9.html", type: "single" },
-            { name: "连续与间断游戏", url: "lab 2-10.html", type: "single" },
-            { name: "函数连续性实验室", url: "lab 2-11.html", type: "single" },
-            { name: "函数间断点实验室", url: "lab 2-12.html", type: "single" },
-            { name: "极限与连续游戏", url: "lab 2-13.html", type: "single" },
-            { name: "直接代入法求极限游戏", url: "lab 2-14.html", type: "single" },
-            { name: "极限求解方法知识图谱", url: "lab 2-15.html", type: "single" }
-        ]
-    },
-    2: {
-        title: "导数与微分",
-        items: [
-            { name: "导数概念实验室", url: "lab 3-1.html", type: "single" },
-            { name: "导数几何意义实验室", url: "lab 3-2.html", type: "single" },
-            { name: "导数运算法则实验室", url: "lab 3-3.html", type: "single" },
-            { name: "复合函数求导实验室", url: "lab 3-4.html", type: "single" },
-            { name: "微分实验室", url: "lab 3-5.html", type: "single" },
-            { name: "求导练习游戏", url: "lab 3-6.html", type: "single" }
-        ]
-    },
-    3: {
-        title: "导数应用",
-        items: [
-            { name: "中值定理实验室", url: "lab 4-1.html", type: "single" },
-            { name: "洛必达法则实验室", url: "lab 4-2.html", type: "single" },
-            { name: "单调性与极值分析实验室", url: "lab 4-3.html", type: "single" }
-        ]
-    },
-    4: {
-        title: "不定积分",
-        items: [
-            { name: "原函数概念实验室", url: "lab 5-1.html", type: "single" },
-            { name: "换元法技巧实验室", url: "lab 5-2.html", type: "single" },
-            { name: "三角换元实验室", url: "lab 5-3.html", type: "single" },
-            { name: "部分分式分解实验室", url: "lab 5-4.html", type: "single" },
-            { name: "分部积分法实验室", url: "lab 5-5.html", type: "single" }
-        ]
-    },
-    5: {
-        title: "定积分",
-        items: [
-            { name: "定积分概念实验室", url: "lab 6-1.html", type: "single" },
-            { name: "牛顿-莱布尼茨实验室", url: "lab 6-2.html", type: "single" },
-            { name: "定积分换元与分部积分实验室", url: "lab 6-3.html", type: "single" },
-            { name: "微元面积实验室", url: "lab 6-4.html", type: "single" },
-            { name: "旋转体体积实验室", url: "lab 6-5.html", type: "single" }
-        ]
-    },
-    6: {
-        title: "常微分方程",
-        items: [
-            { name: "微分方程概念实验室", url: "lab 7-1.html", type: "single" },
-            { name: "可分离变量方程实验室", url: "lab 7-2.html", type: "single" },
-            { name: "齐次方程实验室", url: "lab 7-3.html", type: "single" },
-            { name: "一阶线性方程实验室", url: "lab 7-4.html", type: "single" },
-            { name: "二阶常系数方程实验室", url: "lab 7-5.html", type: "single" }
-        ]
-    },
-    7: {
-        title: "多元函数微分学",
-        items: [
-            { name: "二元函数概念实验室", url: "lab 8-1.html", type: "single" },
-            { name: "二元函数极限实验室", url: "lab 8-2.html", type: "single" },
-            { name: "偏导数实验室", url: "lab 8-3.html", type: "single" },
-            { name: "全微分实验室", url: "lab 8-4.html", type: "single" },
-            { name: "复合函数求导实验室", url: "lab 8-5.html", type: "single" },
-            { name: "隐函数求导实验室", url: "lab 8-6.html", type: "single" }
-        ]
-    },
-    8: {
-        title: "多元函数积分学",
-        items: [
-            { name: "二重积分概念实验室", url: "lab 9-1.html", type: "single" },
-            { name: "二重积分计算实验室", url: "lab 9-2.html", type: "single" },
-            { name: "三重积分实验室", url: "lab 9-3.html", type: "single" }
-        ]
-    },
-    9: {
-        title: "线性代数",
-        items: [
-            { name: "行列式实验室", url: "lab 10-1.html", type: "single" },
-            { name: "矩阵运算实验室", url: "lab 10-2.html", type: "single" },
-            { name: "矩阵逆实验室", url: "lab 10-3.html", type: "single" },
-            { name: "线性方程组实验室", url: "lab 10-4.html", type: "single" },
-            { name: "向量空间实验室", url: "lab 10-5.html", type: "single" },
-            { name: "特征值实验室", url: "lab 10-6.html", type: "single" },
-            { name: "二次型实验室", url: "lab 10-7.html", type: "single" }
-        ]
-    },
-    10: {
-        title: "无穷级数",
-        items: [
-            { name: "数项级数实验室", url: "lab 11-1.html", type: "single" },
-            { name: "正项级数实验室", url: "lab 11-2.html", type: "single" },
-            { name: "幂级数实验室", url: "lab 11-3.html", type: "single" },
-            { name: "泰勒级数实验室", url: "lab 11-4.html", type: "single" },
-            { name: "傅里叶级数实验室", url: "lab 11-5.html", type: "single" }
-        ]
-    },
-    11: {
-        title: "向量代数与空间解析几何",
-        items: [
-            { name: "向量概念实验室", url: "lab 12-1.html", type: "single" },
-            { name: "向量运算实验室", url: "lab 12-2.html", type: "single" },
-            { name: "空间直线实验室", url: "lab 12-3.html", type: "single" },
-            { name: "空间平面实验室", url: "lab 12-4.html", type: "single" },
-            { name: "二次曲面实验室", url: "lab 12-5.html", type: "single" },
-            { name: "空间曲线实验室", url: "lab 12-6.html", type: "single" }
-        ]
-    },
-    12: {
-        title: "概率与统计",
-        items: [
-            { name: "随机事件实验室", url: "lab 13-1.html", type: "single" },
-            { name: "概率计算实验室", url: "lab 13-2.html", type: "single" },
-            { name: "随机变量实验室", url: "lab 13-3.html", type: "single" },
-            { name: "分布函数实验室", url: "lab 13-4.html", type: "single" },
-            { name: "数字特征实验室", url: "lab 13-5.html", type: "single" },
-            { name: "抽样分布实验室", url: "lab 13-6.html", type: "single" }
-        ]
-    }
-};
-
-// 缓存DOM元素以提升性能
-const domCache = {
-    frontDirectoryPanel: null,
-    chapterPanel: null,
-    contentFrame: null,
-    welcomePage: null,
-    topbar: null,
-    keyboardHint: null,
-    chapterPanelTitle: null,
-    chapterList: null,
-    quickMenu: null,
-    feedbackMenu: null,
-    feedbackBadge: null
-};
-
-// 初始化DOM缓存
-function initDOMCache() {
-    domCache.frontDirectoryPanel = document.getElementById('frontDirectoryPanel');
-    domCache.chapterPanel = document.getElementById('chapterPanel');
-    domCache.contentFrame = document.getElementById('contentFrame');
-    domCache.welcomePage = document.getElementById('welcomePage');
-    domCache.topbar = document.getElementById('topbar');
-    domCache.keyboardHint = document.getElementById('keyboardHint');
-    domCache.chapterPanelTitle = document.getElementById('chapterPanelTitle');
-    domCache.chapterList = document.getElementById('chapterList');
-    domCache.quickMenu = document.getElementById('quickMenu');
-    domCache.feedbackMenu = document.getElementById('feedbackMenu');
-    domCache.feedbackBadge = document.getElementById('feedbackBadge');
-}
-
-// 全局变量
-let currentUrl = '';
-let pageSequence = window.pageSequence || [];
-let currentIndex = window.currentIndex || -1;
-let pageIssues = {};
-let currentOpenChapter = -1;
-
-// 更新全局变量
-window.pageSequence = pageSequence;
-window.currentIndex = currentIndex;
-
-// 暴露必要的函数到全局作用域
-window.initSequence = initSequence;
-window.loadContent = loadContent;
-window.getChineseTitle = getChineseTitle;
-window.chapters = chapters;
-window.domCache = domCache;
-
-function initSequence() {
-    if (pageSequence.length > 0) return; // 避免重复初始化
-    
-    pageSequence = [];
-    Object.values(chapters).forEach(chapter => {
-        chapter.items.forEach(item => {
-            if (item.type !== 'coming-soon') {
-                pageSequence.push(item.url);
-            }
-        });
-    });
-    
-    // 更新全局变量
-    window.pageSequence = pageSequence;
-    
-    console.log('页面序列初始化完成，共', pageSequence.length, '个页面');
-}
-
-function showChapter(categoryId) {
-    const chapter = chapters[categoryId];
-    if (!chapter) return;
-
-    if (currentOpenChapter === categoryId && domCache.chapterPanel.classList.contains('active')) {
-        domCache.chapterPanel.classList.remove('active');
-        document.querySelectorAll('.chapter-nav-btn').forEach(btn => btn.classList.remove('active'));
-        currentOpenChapter = -1;
-        return;
-    }
-
-    document.querySelectorAll('.chapter-nav-btn').forEach(btn => btn.classList.remove('active'));
-    const clickedBtn = document.querySelector(`[data-category="${categoryId}"]`);
-    if (clickedBtn) clickedBtn.classList.add('active');
-
-    domCache.chapterPanelTitle.textContent = chapter.title;
-
-    // 使用DocumentFragment优化DOM操作
-    const fragment = document.createDocumentFragment();
-    
-    chapter.items.forEach((item, index) => {
-        const div = document.createElement('div');
-        div.className = `chapter-item ${item.type === 'coming-soon' ? 'coming-soon' : ''}`;
-        
-        const icon = getItemIcon(item, categoryId, index);
-        div.innerHTML = `<div class="chapter-icon">${icon}</div><span>${item.name}</span>`;
-        
-        if (item.type === 'coming-soon') {
-            div.onclick = () => {
-                alert('该章节正在开发中，敬请期待！');
-            };
-        } else {
-            // 目录点击：整页跳转
-            div.onclick = () => { window.location.href = item.url; };
-        }
-        
-        fragment.appendChild(div);
-    });
-
-    domCache.chapterList.innerHTML = '';
-    domCache.chapterList.appendChild(fragment);
-
-    domCache.chapterPanel.classList.add('active');
-    currentOpenChapter = categoryId;
-}
-
-function closeChapterPanel() {
-    domCache.chapterPanel.classList.remove('active');
-    document.querySelectorAll('.chapter-nav-btn').forEach(btn => btn.classList.remove('active'));
-    currentOpenChapter = -1;
-}
-
-function getItemIcon(item, categoryId, itemIndex) {
-    if (item.type === 'coming-soon') return '🔒';
-    
-    const icons = {
-        0: ['<i class="fas fa-calculator"></i>', '<i class="fas fa-chart-bar"></i>', '<i class="fas fa-drafting-compass"></i>', '<i class="fas fa-hashtag"></i>', '<i class="fas fa-chart-line"></i>', '<i class="fas fa-bullseye"></i>', '<i class="fas fa-sync"></i>', '<i class="fas fa-link"></i>', '<i class="fas fa-palette"></i>'],
-        1: ['<i class="fas fa-image"></i>', '<i class="fas fa-search"></i>', '<i class="fas fa-chart-bar"></i>', '<i class="fas fa-balance-scale"></i>', '<i class="fas fa-infinity"></i>', '<i class="fas fa-star"></i>', '<i class="fas fa-search"></i>', '<i class="fas fa-ruler"></i>', '<i class="fas fa-tint"></i>', '<i class="fas fa-gamepad"></i>', '<i class="fas fa-chart-bar"></i>', '<i class="fas fa-search"></i>', '<i class="fas fa-bullseye"></i>', '<i class="fas fa-calculator"></i>'],
-        2: ['<i class="fas fa-chart-line"></i>', '<i class="fas fa-drafting-compass"></i>', '<i class="fas fa-cog"></i>', '<i class="fas fa-link"></i>', '<i class="fas fa-ruler"></i>', '<i class="fas fa-bullseye"></i>'],
-        3: ['<i class="fas fa-chart-bar"></i>', '<i class="fas fa-balance-scale"></i>', '<i class="fas fa-chart-line"></i>', '<i class="fas fa-search"></i>'],
-        4: ['<i class="fas fa-hashtag"></i>', '<i class="fas fa-sync"></i>', '<i class="fas fa-drafting-compass"></i>', '<i class="fas fa-chart-bar"></i>', '<i class="fas fa-cog"></i>'],
-        5: ['<i class="fas fa-chart-bar"></i>', '<i class="fas fa-chart-line"></i>', '<i class="fas fa-sync"></i>', '<i class="fas fa-drafting-compass"></i>', '<i class="fas fa-search"></i>'],
-        6: ['<i class="fas fa-chart-bar"></i>', '<i class="fas fa-search"></i>', '<i class="fas fa-drafting-compass"></i>', '<i class="fas fa-ruler"></i>', '<i class="fas fa-link"></i>', '<i class="fas fa-search"></i>'],
-        7: ['<i class="fas fa-arrow-right"></i>', '<i class="fas fa-plus"></i>', '<i class="fas fa-ruler"></i>', '<i class="fas fa-drafting-compass"></i>', '<i class="fas fa-globe"></i>', '<i class="fas fa-sync"></i>'],
-        8: ['<i class="fas fa-chart-bar"></i>', '<i class="fas fa-cog"></i>', '<i class="fas fa-sync"></i>', '<i class="fas fa-drafting-compass"></i>', '<i class="fas fa-bullseye"></i>', '<i class="fas fa-star"></i>', '<i class="fas fa-clipboard"></i>'],
-        9: ['<i class="fas fa-dice"></i>', '<i class="fas fa-chart-bar"></i>', '<i class="fas fa-chart-line"></i>', '<i class="fas fa-clipboard"></i>', '<i class="fas fa-chart-bar"></i>', '<i class="fas fa-ruler"></i>'],
-        10: ['<i class="fas fa-chart-bar"></i>', '<i class="fas fa-search"></i>', '<i class="fas fa-balance-scale"></i>', '<i class="fas fa-drafting-compass"></i>', '<i class="fas fa-bullseye"></i>'],
-        11: ['<i class="fas fa-chart-bar"></i>', '<i class="fas fa-search"></i>', '<i class="fas fa-drafting-compass"></i>', '<i class="fas fa-sync"></i>', '<i class="fas fa-globe"></i>'],
-        12: ['<i class="fas fa-infinity"></i>', '<i class="fas fa-chart-bar"></i>', '<i class="fas fa-star"></i>', '<i class="fas fa-chart-line"></i>', '<i class="fas fa-clipboard"></i>']
+    // === 1. 实验数据 (完整保留) ===
+    const chapters = {
+        0: {
+            title: "函数基础",
+            desc: "指数、对数、函数性质与基本概念",
+            items: [
+                { name: "指数运算实验室", url: "lab 1-1.html", icon: "fa-superscript" },
+                { name: "对数运算实验室", url: "lab 1-2.html", icon: "fa-calculator" },
+                { name: "区间分类实验室", url: "lab 1-3.html", icon: "fa-brackets-curly" },
+                { name: "函数概念实验室", url: "lab 1-4.html", icon: "fa-cube" },
+                { name: "函数性质实验室", url: "lab 1-5.html", icon: "fa-wave-square" },
+                { name: "基本初等函数", url: "lab 1-6.html", icon: "fa-shapes" },
+                { name: "复合函数实验室", url: "lab 1-7.html", icon: "fa-link" },
+                { name: "函数艺术与运动", url: "lab 1-8.html", icon: "fa-palette" },
+                { name: "第一章游戏实验室", url: "lab 1-9.html", icon: "fa-gamepad" }
+            ]
+        },
+        1: {
+            title: "函数与极限",
+            desc: "数列极限、函数极限与连续性",
+            items: [
+                { name: "图像压缩与极限", url: "lab 2-1.html", icon: "fa-compress-arrows-alt" },
+                { name: "数列极限探索", url: "lab 2-2.html", icon: "fa-search" },
+                { name: "函数极限与变化", url: "lab 2-3.html", icon: "fa-chart-line" },
+                { name: "左右极限判定", url: "lab 2-4.html", icon: "fa-arrows-alt-h" },
+                { name: "无穷大与无穷小", url: "lab 2-5.html", icon: "fa-infinity" },
+                { name: "重要极限实验室", url: "lab 2-6.html", icon: "fa-star" },
+                { name: "无穷小比较", url: "lab 2-7.html", icon: "fa-balance-scale" },
+                { name: "函数增量实验室", url: "lab 2-8.html", icon: "fa-plus-circle" },
+                { name: "等价无穷小倒水", url: "lab 2-9.html", icon: "fa-glass-whiskey" },
+                { name: "连续与间断游戏", url: "lab 2-10.html", icon: "fa-puzzle-piece" },
+                { name: "函数连续性", url: "lab 2-11.html", icon: "fa-smooth-curve" }, // Note: fa-smooth-curve might not be free, fallback to fa-bezier-curve
+                { name: "函数间断点", url: "lab 2-12.html", icon: "fa-cut" },
+                { name: "极限与连续游戏", url: "lab 2-13.html", icon: "fa-gamepad" },
+                { name: "代入法求极限", url: "lab 2-14.html", icon: "fa-calculator" },
+                { name: "知识图谱", url: "lab 2-15.html", icon: "fa-project-diagram" }
+            ]
+        },
+        2: { title: "导数与微分", desc: "导数概念、几何意义与运算法则", items: [
+            { name: "导数概念实验室", url: "lab 3-1.html", icon: "fa-drafting-compass" },
+            { name: "导数几何意义", url: "lab 3-2.html", icon: "fa-chart-area" },
+            { name: "导数运算法则", url: "lab 3-3.html", icon: "fa-calculator" },
+            { name: "复合函数求导", url: "lab 3-4.html", icon: "fa-link" },
+            { name: "微分实验室", url: "lab 3-5.html", icon: "fa-microchip" },
+            { name: "求导练习游戏", url: "lab 3-6.html", icon: "fa-gamepad" }
+        ]},
+        3: { title: "导数应用", desc: "中值定理、洛必达法则与极值", items: [
+            { name: "中值定理实验室", url: "lab 4-1.html", icon: "fa-ruler-horizontal" },
+            { name: "洛必达法则", url: "lab 4-2.html", icon: "fa-divide" },
+            { name: "单调性与极值", url: "lab 4-3.html", icon: "fa-mountain" }
+        ]},
+        4: { title: "不定积分", desc: "原函数、换元法与分部积分", items: [
+            { name: "原函数概念", url: "lab 5-1.html", icon: "fa-integral" },
+            { name: "换元法技巧", url: "lab 5-2.html", icon: "fa-exchange-alt" },
+            { name: "三角换元", url: "lab 5-3.html", icon: "fa-circle-notch" },
+            { name: "部分分式分解", url: "lab 5-4.html", icon: "fa-th-large" },
+            { name: "分部积分法", url: "lab 5-5.html", icon: "fa-cut" }
+        ]},
+        5: { title: "定积分", desc: "定积分概念、微元法与体积", items: [
+            { name: "定积分概念", url: "lab 6-1.html", icon: "fa-chart-bar" },
+            { name: "牛顿-莱布尼茨", url: "lab 6-2.html", icon: "fa-subscript" },
+            { name: "定积分换元", url: "lab 6-3.html", icon: "fa-random" },
+            { name: "微元面积", url: "lab 6-4.html", icon: "fa-vector-square" },
+            { name: "旋转体体积", url: "lab 6-5.html", icon: "fa-globe" }
+        ]},
+        6: { title: "常微分方程", desc: "各类微分方程求解", items: [
+            { name: "微分方程概念", url: "lab 7-1.html", icon: "fa-question-circle" },
+            { name: "可分离变量", url: "lab 7-2.html", icon: "fa-columns" },
+            { name: "齐次方程", url: "lab 7-3.html", icon: "fa-equals" },
+            { name: "一阶线性方程", url: "lab 7-4.html", icon: "fa-arrow-right" },
+            { name: "二阶常系数", url: "lab 7-5.html", icon: "fa-superscript" }
+        ]},
+        7: { title: "多元函数微分", desc: "偏导数、全微分与极值", items: [
+            { name: "二元函数概念", url: "lab 8-1.html", icon: "fa-layer-group" },
+            { name: "二元函数极限", url: "lab 8-2.html", icon: "fa-compress" },
+            { name: "偏导数实验室", url: "lab 8-3.html", icon: "fa-share-alt" },
+            { name: "全微分实验室", url: "lab 8-4.html", icon: "fa-expand-arrows-alt" },
+            { name: "复合函数求导", url: "lab 8-5.html", icon: "fa-link" },
+            { name: "隐函数求导", url: "lab 8-6.html", icon: "fa-mask" }
+        ]},
+        8: { title: "多元函数积分", desc: "二重积分与三重积分", items: [
+            { name: "二重积分概念", url: "lab 9-1.html", icon: "fa-th" },
+            { name: "二重积分计算", url: "lab 9-2.html", icon: "fa-calculator" },
+            { name: "三重积分", url: "lab 9-3.html", icon: "fa-cube" }
+        ]},
+        9: { title: "线性代数", desc: "矩阵、行列式与线性方程组", items: [
+            { name: "行列式实验室", url: "lab 10-1.html", icon: "fa-border-all" },
+            { name: "矩阵运算", url: "lab 10-2.html", icon: "fa-th-list" },
+            { name: "矩阵逆", url: "lab 10-3.html", icon: "fa-undo" },
+            { name: "线性方程组", url: "lab 10-4.html", icon: "fa-list-ol" },
+            { name: "向量空间", url: "lab 10-5.html", icon: "fa-arrows-alt" },
+            { name: "特征值", url: "lab 10-6.html", icon: "fa-fingerprint" },
+            { name: "二次型", url: "lab 10-7.html", icon: "fa-circle" }
+        ]},
+        10: { title: "无穷级数", desc: "数项级数与幂级数", items: [
+            { name: "数项级数", url: "lab 11-1.html", icon: "fa-plus" },
+            { name: "正项级数", url: "lab 11-2.html", icon: "fa-plus-square" },
+            { name: "幂级数", url: "lab 11-3.html", icon: "fa-power-off" },
+            { name: "泰勒级数", url: "lab 11-4.html", icon: "fa-wave-square" },
+            { name: "傅里叶级数", url: "lab 11-5.html", icon: "fa-water" }
+        ]},
+        11: { title: "向量与几何", desc: "空间几何与向量代数", items: [
+            { name: "向量概念", url: "lab 12-1.html", icon: "fa-location-arrow" },
+            { name: "向量运算", url: "lab 12-2.html", icon: "fa-calculator" },
+            { name: "空间直线", url: "lab 12-3.html", icon: "fa-minus" },
+            { name: "空间平面", url: "lab 12-4.html", icon: "fa-square" },
+            { name: "二次曲面", url: "lab 12-5.html", icon: "fa-globe" },
+            { name: "空间曲线", url: "lab 12-6.html", icon: "fa-bezier-curve" }
+        ]},
+        12: { title: "概率与统计", desc: "随机事件与分布", items: [
+            { name: "随机事件", url: "lab 13-1.html", icon: "fa-dice" },
+            { name: "概率计算", url: "lab 13-2.html", icon: "fa-percentage" },
+            { name: "随机变量", url: "lab 13-3.html", icon: "fa-chart-bar" },
+            { name: "分布函数", url: "lab 13-4.html", icon: "fa-bell" },
+            { name: "数字特征", url: "lab 13-5.html", icon: "fa-calculator" },
+            { name: "抽样分布", url: "lab 13-6.html", icon: "fa-users" }
+        ]}
     };
-    
-    const chapterIcons = icons[categoryId] || ['<i class="fas fa-flask"></i>'];
-    return chapterIcons[itemIndex] || '<i class="fas fa-flask"></i>';
-}
 
-function loadContent(url, title) {
-    if (pageSequence.length === 0) {
-        initSequence();
-    }
+    // 线性化所有实验列表以便上一页/下一页导航
+    let allLabs = [];
+    Object.values(chapters).forEach(ch => {
+        ch.items.forEach(item => allLabs.push(item));
+    });
 
-    domCache.contentFrame.style.display = 'block';
-    domCache.welcomePage.style.display = 'none';
-    domCache.keyboardHint.classList.remove('hidden');
+    let currentIndex = -1;
+    let currentChapterId = 0;
 
-    currentUrl = url;
-    const displayTitle = getChineseTitle(url);
-    // 更新页面标题
-    document.title = `${displayTitle} - 仿真实验平台`;
-    
-    // 如果有顶部标题元素，更新它
-    const titleElement = document.querySelector('.nav-brand h1');
-    if (titleElement) {
-        titleElement.textContent = displayTitle;
-    }
-
-    currentIndex = pageSequence.indexOf(url);
-    // 更新全局变量
-    window.currentIndex = currentIndex;
-    
-    domCache.contentFrame.src = url;
-    closeAllPanels();
-}
-
-// 直接跳转函数
-function directLoadContent(url, title) {
-    window.location.href = url;
-}
-
-function getChineseTitle(url) {
-    // 缓存正则表达式
-    if (!getChineseTitle.regex) {
-        getChineseTitle.regex = /lab\s*[-_]?\s*(\d+)[-_]\s*(\d+)\.html/i;
-    }
-    
-    const match = url.match(getChineseTitle.regex);
-    if (match) {
-        const chapterNum = match[1];
-        const labNum = match[2];
+    // === 2. 初始化与交互 ===
+    function init() {
+        renderChapters();
+        renderLabs(0); // 默认显示第一章
+        initGeoAnimation();
         
-        // 快速查找对应的实验名称
-        for (let chapter of Object.values(chapters)) {
-            for (let item of chapter.items) {
-                if (item.url === url) {
-                    return `lab ${chapterNum}-${labNum} ${item.name}`;
-                }
+        // 自动打开目录
+        setTimeout(toggleDirectory, 500);
+    }
+
+    function renderChapters() {
+        const list = document.getElementById('chapterList');
+        list.innerHTML = '';
+        Object.keys(chapters).forEach(key => {
+            const ch = chapters[key];
+            const btn = document.createElement('button');
+            btn.className = `chapter-btn ${key == 0 ? 'active' : ''}`;
+            btn.onclick = () => renderLabs(key);
+            btn.innerHTML = `
+                <span>第${parseInt(key)+1}章 ${ch.title}</span>
+                <span class="chapter-count">${ch.items.length}</span>
+            `;
+            list.appendChild(btn);
+        });
+    }
+
+    function renderLabs(key) {
+        currentChapterId = key;
+        const ch = chapters[key];
+        
+        // 更新高亮
+        document.querySelectorAll('.chapter-btn').forEach((btn, idx) => {
+            if(idx == key) btn.classList.add('active');
+            else btn.classList.remove('active');
+        });
+
+        // 更新标题
+        document.getElementById('currentChapterTitle').textContent = `第${parseInt(key)+1}章 ${ch.title}`;
+        document.getElementById('currentChapterDesc').textContent = ch.desc;
+
+        // 生成网格
+        const grid = document.getElementById('labGrid');
+        grid.innerHTML = '';
+        ch.items.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'lab-card';
+            card.onclick = () => loadContent(item.url, item.name);
+            card.innerHTML = `
+                <div class="lab-icon"><i class="fas ${item.icon || 'fa-flask'}"></i></div>
+                <div class="lab-info">
+                    <h3>${item.name}</h3>
+                    <span>点击进入实验</span>
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+    }
+
+    // === 3. 核心功能 ===
+    function toggleDirectory() {
+        const overlay = document.getElementById('directoryOverlay');
+        const iframeContainer = document.getElementById('iframeContainer');
+        const welcome = document.getElementById('welcomeScreen');
+
+        if(iframeContainer.classList.contains('active')) {
+            // 从内容返回
+            iframeContainer.classList.remove('active');
+            document.querySelector('.nav-brand h1').textContent = '仿真实验平台';
+            overlay.classList.add('active');
+            // 重置 iframe
+            setTimeout(() => { document.getElementById('contentFrame').src = 'about:blank'; }, 500);
+        } else if (overlay.classList.contains('active')) {
+            // 从目录关闭 (去欢迎页)
+            overlay.classList.remove('active');
+            welcome.style.opacity = '1';
+        } else {
+            // 打开目录
+            welcome.style.opacity = '0';
+            setTimeout(() => { overlay.classList.add('active'); }, 200);
+        }
+    }
+
+    function loadContent(url, title) {
+        const overlay = document.getElementById('directoryOverlay');
+        const iframeContainer = document.getElementById('iframeContainer');
+        const frame = document.getElementById('contentFrame');
+        const loadingBar = document.getElementById('loadingBar');
+
+        // 更新索引
+        currentIndex = allLabs.findIndex(l => l.url === url);
+
+        // UI 更新
+        overlay.classList.remove('active');
+        iframeContainer.classList.add('active');
+        document.querySelector('.nav-brand h1').textContent = title || "实验进行中";
+
+        // 加载
+        loadingBar.style.width = '60%';
+        frame.src = url;
+        frame.onload = () => {
+            loadingBar.style.width = '100%';
+            setTimeout(() => { loadingBar.style.width = '0%'; }, 300);
+        };
+    }
+
+    function goPrev() {
+        if(currentIndex > 0) {
+            const prev = allLabs[currentIndex - 1];
+            loadContent(prev.url, prev.name);
+        } else {
+            alert('已经是第一个实验了');
+        }
+    }
+
+    function goNext() {
+        if(currentIndex < allLabs.length - 1) {
+            const next = allLabs[currentIndex + 1];
+            loadContent(next.url, next.name);
+        } else {
+            alert('已经是最后一个实验了');
+        }
+    }
+
+    function goMainSite() {
+        window.location.href = '../index.html';
+    }
+
+    // === 4. 背景动画 (极简几何) ===
+    function initGeoAnimation() {
+        const canvas = document.getElementById('geo-canvas');
+        const ctx = canvas.getContext('2d');
+        let w, h;
+        const shapes = [];
+        const colors = ['rgba(37, 99, 235, 0.05)', 'rgba(100, 116, 139, 0.05)', 'rgba(13, 148, 136, 0.05)'];
+
+        function resize() {
+            w = canvas.width = window.innerWidth;
+            h = canvas.height = window.innerHeight;
+        }
+
+        class Shape {
+            constructor() { this.init(); }
+            init() {
+                this.x = Math.random() * w;
+                this.y = Math.random() * h;
+                this.vx = (Math.random() - 0.5) * 0.5;
+                this.vy = (Math.random() - 0.5) * 0.5;
+                this.size = Math.random() * 40 + 20;
+                this.type = Math.floor(Math.random() * 3);
+                this.color = colors[Math.floor(Math.random() * colors.length)];
+                this.angle = Math.random() * Math.PI * 2;
+                this.vAngle = (Math.random() - 0.5) * 0.01;
+            }
+            update() {
+                this.x += this.vx; this.y += this.vy; this.angle += this.vAngle;
+                if(this.x<-100||this.x>w+100||this.y<-100||this.y>h+100) this.init();
+            }
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.angle);
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                if(this.type===0) ctx.arc(0,0,this.size,0,Math.PI*2);
+                else if(this.type===1) ctx.rect(-this.size,-this.size,this.size*2,this.size*2);
+                else { ctx.moveTo(0,-this.size); ctx.lineTo(this.size,this.size); ctx.lineTo(-this.size,this.size); }
+                ctx.fill();
+                ctx.restore();
             }
         }
-        return `lab ${chapterNum}-${labNum}`;
-    }
-    
-    // 查找原始名称
-    for (let chapter of Object.values(chapters)) {
-        for (let item of chapter.items) {
-            if (item.url === url) {
-                return item.name;
-            }
+
+        for(let i=0; i<15; i++) shapes.push(new Shape());
+        
+        function animate() {
+            ctx.clearRect(0,0,w,h);
+            shapes.forEach(s => { s.update(); s.draw(); });
+            requestAnimationFrame(animate);
         }
+
+        window.addEventListener('resize', resize);
+        resize();
+        animate();
     }
-    return url;
-}
 
-function toggleDirectory() {
-    domCache.frontDirectoryPanel.classList.toggle('show');
-}
+    window.addEventListener('DOMContentLoaded', init);
 
-// 函数已移至全局作用域定义
-
-// 预览函数已在模块脚本之前定义
-
-function goHome() {
-    domCache.contentFrame.style.display = 'none';
-    domCache.welcomePage.style.display = 'flex';
-    
-    // 恢复原始标题
-    document.title = '仿真实验平台 - 高等应用数学在线课堂';
-    const titleElement = document.querySelector('.nav-brand h1');
-    if (titleElement) {
-        titleElement.textContent = '仿真实验平台';
-    }
-    
-    domCache.keyboardHint.classList.add('hidden');
-    currentUrl = '';
-    currentIndex = -1;
-    closeAllPanels();
-}
-
-function goMainSite() {
-    window.location.href = '../index.html';
-}
-
-function toggleNavSidebar() {
-    document.getElementById('navSidebar').classList.toggle('collapsed');
-}
-
-function showFeedback() {
-    const btn = document.getElementById('feedbackBtn');
-    const btnRect = btn.getBoundingClientRect();
-    
-    domCache.feedbackMenu.style.bottom = (window.innerHeight - btnRect.bottom) + 'px';
-    domCache.feedbackMenu.style.right = (window.innerWidth - btnRect.left + 10) + 'px';
-    domCache.feedbackMenu.style.left = 'auto';
-    domCache.feedbackMenu.style.top = 'auto';
-
-    domCache.feedbackMenu.classList.toggle('active');
-}
-
-function reportIssue(type) {
-    if (!currentUrl) return;
-    if (!pageIssues[currentUrl]) pageIssues[currentUrl] = [];
-    pageIssues[currentUrl].push({ type: type, time: new Date().toLocaleString() });
-    localStorage.setItem('mathLabIssues', JSON.stringify(pageIssues));
-    updateFeedbackBadge();
-    closeAllPanels();
-}
-
-function clearIssues() {
-    pageIssues = {};
-    localStorage.removeItem('mathLabIssues');
-    updateFeedbackBadge();
-    closeAllPanels();
-}
-
-function exportIssues() {
-    try {
-        let data = (pageIssues && Object.keys(pageIssues).length > 0)
-            ? pageIssues
-            : JSON.parse(localStorage.getItem('mathLabIssues') || '{}');
-        if (!data || Object.keys(data).length === 0) {
-            closeAllPanels();
-            return;
-        }
-        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json;charset=utf-8' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        const ts = new Date();
-        const pad = n => String(n).padStart(2, '0');
-        const filename = `math-lab-feedback-${ts.getFullYear()}${pad(ts.getMonth()+1)}${pad(ts.getDate())}-${pad(ts.getHours())}${pad(ts.getMinutes())}${pad(ts.getSeconds())}.json`;
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        closeAllPanels();
-    } catch (e) {
-        console.error('导出失败:', e);
-    }
-}
-
-function updateFeedbackBadge() {
-    const count = Object.values(pageIssues).reduce((acc, val) => acc + val.length, 0);
-    domCache.feedbackBadge.textContent = count;
-    domCache.feedbackBadge.style.display = count > 0 ? 'flex' : 'none';
-}
-
-function showQuickNav() {
-    if (currentUrl) window.open(currentUrl, '_blank');
-}
-
-function showChapterList() {
-    toggleDirectory();
-}
-
-function closeAllPanels() {
-    domCache.chapterPanel?.classList.remove('active');
-    domCache.quickMenu?.classList.remove('active');
-    domCache.feedbackMenu?.classList.remove('active');
-    
-    currentOpenChapter = -1;
-    document.querySelectorAll('.chapter-nav-btn').forEach(btn => btn.classList.remove('active'));
-}
-
-// 优化的事件处理
-const clickHandler = (e) => {
-    if (!e.target.closest('.quick-menu, .sidebar-action-btn, .front-directory-panel, .directory-toggle-btn, .floating-chapter-panel, .chapter-nav-btn')) {
-        closeAllPanels();
-    }
-};
-
-// 节流的键盘事件处理
-const throttledKeyHandler = throttle(function(event) {
-    const activeElement = document.activeElement;
-    if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA' || activeElement.isContentEditable)) return;
-    
-    const contentFrameVisible = domCache.contentFrame.style.display !== 'none';
-    if (!contentFrameVisible) return;
-
-    switch(event.key) {
-        case 'ArrowLeft':
-            event.preventDefault();
-            goPrev();
-            break;
-        case 'ArrowRight':
-            event.preventDefault();
-            goNext();
-            break;
-        case 'Home':
-        case 'Escape':
-            event.preventDefault();
-            goHome();
-            break;
-        case 'End':
-            event.preventDefault();
-            goMainSite();
-            break;
-    }
-}, 100);
-
-function initKeyboardNavigation() {
-    document.addEventListener('keydown', throttledKeyHandler);
-}
-
-// 通用节流函数
-function throttle(func, limit) {
-    let inThrottle;
-    return function() {
-        const args = arguments;
-        const context = this;
-        if (!inThrottle) {
-            func.apply(context, args);
-            inThrottle = true;
-            setTimeout(() => inThrottle = false, limit);
-        }
-    }
-}
-
-// 初始化
-window.addEventListener('DOMContentLoaded', () => {
-    initDOMCache();
-    initSequence();
-    initKeyboardNavigation();
-    
-    // 添加点击事件监听器
-    document.addEventListener('click', clickHandler);
-
-    // 加载保存的问题反馈
-    const saved = localStorage.getItem('mathLabIssues');
-    if (saved) {
-        try {
-            pageIssues = JSON.parse(saved);
-            updateFeedbackBadge();
-        } catch (e) { 
-            console.error('加载反馈数据失败:', e); 
-        }
-    }
-    
-    // 自动弹出目录
-    setTimeout(() => {
-        toggleDirectory();
-    }, 500);
-});
 </script>
-
 </body>
 </html>
-
-
-
-
-
-
-
-
-

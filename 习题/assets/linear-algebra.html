@@ -1,0 +1,2101 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>线性代数知识点整理</title>
+    <!-- 字体样式 -->
+    <link rel="stylesheet" href="../../common-assets/css/fonts.css">
+    <!-- 主要样式 -->
+    <style>:root {
+            /* 优化的配色方案 */
+            --primary-color: #5B6CFF;
+            --primary-dark: #4A5BEE;
+            --primary-light: #7B8BFF;
+            --secondary-color: #00D4FF;
+            --accent-color: #FF6B9D;
+            --success-color: #00C896;
+            --warning-color: #FFB800;
+            --danger-color: #FF5E5B;
+            --info-color: #8B5CF6;
+            /* 背景和文字颜色 */
+            --bg-primary: #FAFBFF;
+            --bg-secondary: #F3F4F9;
+            --bg-white: #FFFFFF;
+            --text-primary: #1A1D3A;
+            --text-secondary: #6B7290;
+            --text-muted: #9CA3B7;
+            /* 边框和阴影 */
+            --border-color: #E8EAEF;
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
+            --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
+            --shadow-colored: 0 8px 24px rgba(91, 108, 255, 0.15);
+            /* 其他 */
+            --border-radius: 12px;
+            --transition-speed: 0.3s;
+            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        /* 暗色主题变量 */
+        [data-theme="dark"] {
+            --bg-primary: #1A1D3A;
+            --bg-secondary: #252849;
+            --bg-white: #2D3057;
+            --text-primary: #FFFFFF;
+            --text-secondary: #B8BCC8;
+            --text-muted: #7B8097;
+            --border-color: #3A3D5C;
+        }
+        /* 暗色主题全屏背景 */
+        [data-theme="dark"] .fullscreen-overlay {
+            background: linear-gradient(135deg, #ffffff 0%, #252849 100%);
+        }
+        [data-theme="dark"] .fullscreen-content::before {
+            background:
+                radial-gradient(circle at 20% 20%, rgba(91, 108, 255, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(0, 212, 255, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 40% 60%, rgba(255, 107, 157, 0.08) 0%, transparent 50%);
+        }
+        /* 基础样式优化 */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', Arial, sans-serif;
+            line-height: 1.5;
+            color: var(--text-primary);
+            background: var(--bg-primary);
+            transition: background-color var(--transition-speed);
+        }
+        /* 添加背景装饰 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(circle at 20% 50%, rgba(91, 108, 255, 0.02) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(0, 212, 255, 0.02) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(255, 107, 157, 0.02) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        /* 容器样式优化 */
+        .container {
+            width: 100vw;
+            margin: 0;
+            padding: 8px;
+            position: relative;
+            z-index: 1;
+        }
+        /* 导航栏美化 */
+        .navbar {
+            background: var(--bg-white);
+            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow-sm);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            transition: all var(--transition-speed);
+        }
+        .navbar-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 0;
+            padding: 8px 16px;
+        }
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .navbar-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        /* 主题切换按钮 */
+        .theme-toggle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--bg-secondary);
+            border: none;
+            color: var(--text-primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--transition-speed);
+        }
+        .theme-toggle:hover {
+            background: var(--primary-light);
+            color: white;
+            transform: rotate(180deg);
+        }
+        /* 导出PDF按钮优化 */
+        .export-pdf-nav-btn {
+            padding: 10px 24px;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            border: none;
+            border-radius: 24px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all var(--transition-speed);
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .export-pdf-nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-colored);
+        }
+        /* 节段样式优化 */
+        .section {
+            background: var(--bg-white);
+            min-height: 50vh;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-md);
+            padding: 16px;
+            margin-bottom: 8px;
+            transition: all var(--transition-speed);
+            position: relative;
+            overflow: visible;
+        }
+        .section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--accent-color));
+            opacity: 0.8;
+        }
+        .section:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+        .section-title {
+            color: var(--text-primary);
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin: 0 0 12px 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .section-title i {
+            margin-right: 12px;
+            color: var(--primary-color);
+        }
+        /* 知识点幻灯片优化 */
+        .slides-container {
+            position: relative;
+            min-height: 400px;
+            margin-bottom: 0;
+            padding: 0;
+        }
+        .slide {
+            position: absolute;
+            width: 100%;
+            min-height: 400px;
+            opacity: 0;
+            transform: translateX(20px);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: none;
+        }
+        .slide.active {
+            opacity: 1;
+            transform: translateX(0);
+            pointer-events: auto;
+        }
+        .slide-card {
+            padding: 0;
+            min-height: 400px;
+            position: relative;
+            cursor: pointer;
+            transition: all var(--transition-speed);
+        }
+        .slide-card:hover {
+            transform: translateY(-4px) scale(1.01);
+            box-shadow: var(--shadow-colored);
+        }
+        .slide-number {
+            position: absolute;
+            top: -12px;
+            left: 12px;
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1rem;
+            box-shadow: var(--shadow-sm);
+            border: 2px solid var(--bg-white);
+        }
+        .slide-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .slide-title {
+            font-size: 1.6rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 0;
+        }
+        .slide-content {
+            font-size: 1rem;
+            min-height: 400px;
+            line-height: 1.6;
+            color: var(--text-secondary);
+        }
+        .slide-content ul,
+        .slide-content ol {
+            margin: 4px 0;
+            padding-left: 20px;
+        }
+        .slide-content li {
+            margin: 4px 0;
+        }
+        /* 圆形导航优化 */
+        .circle-nav {
+            display: flex;
+            gap: 10px;
+            background: var(--bg-white);
+            padding: 10px 18px;
+            border-radius: 30px;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-color);
+        }
+        .circle-num {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-speed);
+            font-size: 0.9rem;
+            border: 2px solid transparent;
+        }
+        .circle-num:hover {
+            transform: scale(1.1);
+            background: var(--primary-light);
+            color: white;
+        }
+        .circle-num.active {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            transform: scale(1.15);
+            box-shadow: 0 4px 12px rgba(91, 108, 255, 0.3);
+            border-color: var(--primary-light);
+        }
+        /* 筛选器优化 */
+        .filter-section {
+            margin-bottom: 12px;
+            padding: 12px;
+            background: var(--bg-secondary);
+            border-radius: var(--border-radius);
+        }
+        .filter-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .filter-btn {
+            padding: 10px 20px;
+            background: var(--bg-white);
+            border: 2px solid var(--border-color);
+            border-radius: 24px;
+            cursor: pointer;
+            transition: all var(--transition-speed);
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-secondary);
+        }
+        .filter-btn:hover {
+            background: var(--primary-light);
+            color: white;
+            border-color: var(--primary-light);
+            transform: translateY(-2px);
+        }
+        .filter-btn.active {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            border-color: var(--primary-color);
+            box-shadow: 0 4px 12px rgba(91, 108, 255, 0.3);
+        }
+        .filter-btn .count {
+            background: rgba(255, 255, 255, 0.3);
+            padding: 2px 6px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+        }
+        /* 题目定位器优化 */
+        .locator-section {
+            margin-bottom: 12px;
+            padding: 12px;
+            background: linear-gradient(135deg, var(--bg-white), var(--bg-secondary));
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+        }
+        .locator-title {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        .locator-title i {
+            margin-right: 10px;
+            color: var(--primary-color);
+        }
+        .locator-input-container {
+            display: flex;
+            gap: 12px;
+        }
+        .problem-number-input {
+            flex: 1;
+            padding: 12px 18px;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all var(--transition-speed);
+            background: var(--bg-white);
+            color: var(--text-primary);
+        }
+        .problem-number-input:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(91, 108, 255, 0.1);
+        }
+        .locate-problem-btn {
+            padding: 12px 28px;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all var(--transition-speed);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .locate-problem-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-colored);
+        }
+        /* 习题项目优化 */
+        .exercise-item {
+            margin-bottom: 2em;
+            border-radius: var(--border-radius);
+            background: var(--bg-white);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            transition: all var(--transition-speed);
+            overflow: hidden;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            position: relative;
+        }
+        .exercise-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(180deg, rgba(91, 108, 255, 0.3), rgba(0, 212, 255, 0.3));
+            opacity: 0;
+            transition: opacity var(--transition-speed);
+        }
+        .exercise-item:hover {
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+            transform: translateX(2px);
+        }
+        .exercise-item:hover::before {
+            opacity: 1;
+        }
+        /* 习题头部样式 */
+        .exercise-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px dashed var(--border-color);
+        }
+        .exercise-title-wrapper {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            flex: 1;
+        }
+        .exercise-number {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            min-width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+            flex-shrink: 0;
+            margin-top: 2px;
+            box-shadow: var(--shadow-sm);
+        }
+        .exercise-title {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            line-height: 1.5;
+        }
+        .exercise-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            margin-left: 16px;
+        }
+        .exercise-type,
+        .exercise-difficulty,
+        .exercise-category,
+        .exercise-method {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+        }
+        .exercise-difficulty.easy {
+            background: rgba(0, 200, 150, 0.1);
+            color: var(--success-color);
+            border-color: rgba(0, 200, 150, 0.2);
+        }
+        .exercise-difficulty.medium {
+            background: rgba(255, 184, 0, 0.1);
+            color: var(--warning-color);
+            border-color: rgba(255, 184, 0, 0.2);
+        }
+        .exercise-difficulty.hard {
+            background: rgba(255, 94, 91, 0.1);
+            color: var(--danger-color);
+            border-color: rgba(255, 94, 91, 0.2);
+        }
+        .exercise-essence {
+            margin: 12px 0;
+            padding: 12px 16px;
+            background: rgba(255, 184, 0, 0.05);
+            border-radius: 8px;
+            border-left: 3px solid var(--warning-color);
+        }
+        .exercise-essence h4 {
+            margin: 0 0 8px 0;
+            font-size: 14px;
+            color: var(--warning-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        /* 按钮样式优化 */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 24px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all var(--transition-speed);
+            gap: 8px;
+            text-decoration: none;
+            outline: none;
+            box-shadow: var(--shadow-sm);
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        .exercise-actions {
+            margin: 12px 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .solution-toggle {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+        }
+        .solution-toggle:hover {
+            box-shadow: var(--shadow-colored);
+        }
+        .fullscreen-btn {
+            background: linear-gradient(135deg, var(--info-color), #7C3AED);
+            color: white;
+        }
+        /* 解析内容优化 */
+        .solution-content {
+            display: none;
+            margin-top: 1.5em;
+            padding: 1.5em 2em;
+            background: rgba(247, 249, 255, 0.5);
+            border-radius: var(--border-radius);
+            border-left: 3px solid rgba(91, 108, 255, 0.3);
+            animation: slideDown 0.3s ease-out;
+        }
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .solution-content.show {
+            display: block;
+        }
+        .solution-section {
+            margin-top: 12px;
+        }
+        .explanation,
+        .answer {
+            margin: 1.5em 0;
+            border-top: 2px solid rgba(0, 0, 0, 0.06);
+            padding-top: 1.5em;
+        }
+        .explanation h4,
+        .answer h4 {
+            color: var(--primary-color);
+            margin: 0 0 8px 0;
+            display: flex;
+            align-items: center;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        .explanation h4 i,
+        .answer h4 i {
+            margin-right: 10px;
+            font-size: 0.85em;
+            opacity: 0.65;
+            color: #6b7280;
+        }
+        .explanation-content {
+            line-height: 1.6;
+            padding: 1.5em 2em;
+            background: var(--bg-white);
+            border-radius: var(--border-radius);
+            white-space: pre-wrap;
+            box-shadow: var(--shadow-sm);
+            font-size: 16px;
+            color: #2d2d2d;
+            margin-top: 1em;
+        }
+        .answer-content {
+            padding: 1.5em 2em;
+            background: linear-gradient(135deg, rgba(0, 200, 150, 0.05), rgba(0, 229, 160, 0.05));
+            border-radius: var(--border-radius);
+            font-size: 16px;
+            border: 1px solid rgba(0, 200, 150, 0.2);
+            color: #2d2d2d;
+            font-weight: 500;
+            line-height: 1.6;
+            margin-top: 1em;
+        }
+        /* 全屏模式优化 */
+        .fullscreen-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            z-index: 9999;
+            overflow-y: auto;
+            flex-direction: column;
+        }
+        .fullscreen-overlay.show {
+            display: flex;
+            animation: fadeIn 0.3s ease-out;
+        }
+        .fullscreen-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            box-shadow: var(--shadow-lg);
+        }
+        .fullscreen-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+        .fullscreen-controls {
+            display: flex;
+            gap: 12px;
+        }
+        .fullscreen-control-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all var(--transition-speed);
+            backdrop-filter: blur(10px);
+        }
+        .fullscreen-control-btn:hover {
+            background: rgba(255, 255, 255, 0);
+            transform: scale(1.05);
+        }
+        .fullscreen-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px;
+            background: transparent;
+        }
+        .fullscreen-exercise {
+            background: var(--bg-white);
+            border-radius: 12px;
+            padding: 16px;
+            max-width: 100%;
+            margin: 0;
+            box-shadow: var(--shadow-md);
+        }
+        .fullscreen-exercise .exercise-header {
+            background: none;
+            padding: 0 0 8px 0;
+            margin-bottom: 8px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .fullscreen-exercise .exercise-question {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            padding: 12px;
+            background: var(--bg-secondary);
+            margin: 8px 0;
+            border-radius: 8px;
+        }
+        .fullscreen-solution-container {
+            display: none;
+            margin-top: 8px;
+            padding: 12px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            border-left: 3px solid var(--primary-color);
+            position: relative;
+            min-height: 100px;
+            user-select: none;
+        }
+        .fullscreen-solution-container:hover {
+            background: var(--bg-white);
+        }
+        .fullscreen-click-hint {
+            text-align: center;
+            color: var(--text-secondary);
+            font-style: italic;
+            margin: 8px 0;
+            padding: 8px 12px;
+            background: var(--bg-white);
+            border-radius: 8px;
+            animation: pulse 2s infinite;
+            border: 1px dashed var(--border-color);
+        }
+        @keyframes pulse {
+            0%,
+            100% {
+                opacity: 0.7;
+            }
+            50% {
+                opacity: 1;
+            }
+        }
+        /* 逐行显示动画 */
+        .step-by-step-line {
+            opacity: 0;
+            transform: translateY(10px);
+            animation: fadeInUp 0.5s ease-out forwards;
+        }
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .step-title {
+            color: var(--primary-color);
+            font-weight: bold;
+            margin: 8px 0 4px 0;
+            padding: 8px 12px;
+            background: linear-gradient(135deg, rgba(91, 108, 255, 0.1), rgba(124, 139, 255, 0.1));
+            border-left: 4px solid var(--primary-color);
+            border-radius: 8px;
+        }
+        .step-content {
+            margin: 4px 0;
+            padding: 4px 0;
+            line-height: 1.6;
+            color: var(--text-primary);
+        }
+        /* 键盘提示样式 */
+        .keyboard-hint {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.8));
+            color: white;
+            padding: 16px 20px;
+            border-radius: 12px;
+            font-size: 14px;
+            z-index: 10001;
+            display: none;
+            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow-lg);
+        }
+        .keyboard-hint.show {
+            display: block;
+            animation: slideInRight 0.3s ease-out;
+        }
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        .key {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 13px;
+            margin: 0 4px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        .fullscreen-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 16px;
+            background: var(--bg-white);
+            border-top: 1px solid var(--border-color);
+        }
+        .fullscreen-nav-btn {
+            padding: 6px 12px;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            border: none;
+            border-radius: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all var(--transition-speed);
+            font-weight: 500;
+            box-shadow: var(--shadow-sm);
+        }
+        .fullscreen-nav-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-colored);
+        }
+        .fullscreen-nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: var(--text-muted);
+        }
+        .fullscreen-counter {
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            font-weight: 600;
+            padding: 6px 12px;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+        }
+        /* 进度条 */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--accent-color));
+            transition: width 0.3s ease;
+            z-index: 10001;
+        }
+        /* 统计面板 */
+        .stats-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .stat-card {
+            background: var(--bg-white);
+            padding: 12px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all var(--transition-speed);
+        }
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        .stat-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: white;
+        }
+        .stat-icon.total {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+        }
+        .stat-icon.easy {
+            background: linear-gradient(135deg, var(--success-color), #00E5A0);
+        }
+        .stat-icon.medium {
+            background: linear-gradient(135deg, var(--warning-color), #FFC947);
+        }
+        .stat-icon.hard {
+            background: linear-gradient(135deg, var(--danger-color), #FF7875);
+        }
+        .stat-info {
+            flex: 1;
+        }
+        .stat-value {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            line-height: 1;
+        }
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+        /* 快速操作按钮 */
+        .quick-action-btn {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            color: white;
+            border: none;
+            cursor: pointer;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            transition: all var(--transition-speed);
+            z-index: 100;
+        }
+        .quick-action-btn:hover {
+            transform: scale(1.1) rotate(90deg);
+            box-shadow: var(--shadow-colored);
+        }
+        /* 响应式设计优化 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 4px;
+            }
+            .navbar-container {
+                flex-direction: column;
+                gap: 8px;
+                padding: 8px 12px;
+            }
+            .navbar-brand {
+                font-size: 1.1rem;
+            }
+            .navbar-controls {
+                width: 100%;
+                justify-content: center;
+            }
+            .section {
+                padding: 12px;
+            }
+            .slide-card {
+                padding: 0;
+            }
+            .filter-container {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+            }
+            .filter-btn {
+                justify-content: center;
+            }
+            .locator-input-container {
+                flex-direction: column;
+            }
+            .exercise-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .stats-panel {
+                grid-template-columns: 1fr;
+            }
+            .deepseek-modal-content {
+                width: 95%;
+                height: 90%;
+            }
+            .fullscreen-exercise {
+                padding: 12px;
+                margin: 0;
+            }
+            .fullscreen-content {
+                padding: 4px;
+            }
+            .fullscreen-header {
+                padding: 8px 12px;
+            }
+        }
+        @media (max-width: 480px) {
+            .slide-card {
+                padding: 8px;
+            }
+            .filter-container {
+                grid-template-columns: 1fr;
+            }
+            .circle-nav {
+                gap: 6px;
+                padding: 6px 8px;
+            }
+            .circle-num {
+                width: 28px;
+                height: 28px;
+                font-size: 0.7rem;
+            }
+        }
+        /* 打印样式 */
+        @media print {
+            body {
+                background: white;
+            }
+            .navbar,
+            .filter-section,
+            .locator-section,
+            .quick-action-btn,
+            .theme-toggle {
+                display: none !important;
+            }
+            .exercise-actions {
+                display: none !important;
+            }
+            .exercise-solution {
+                display: block !important;
+            }
+            .solution-content {
+                display: block !important;
+            }
+            .section {
+                box-shadow: none;
+                border: 1px solid #ddd;
+                page-break-inside: avoid;
+            }
+            .exercise-item {
+                page-break-inside: avoid;
+            }
+            .slide {
+                position: static !important;
+                opacity: 1 !important;
+                transform: none !important;
+                margin-bottom: 20px;
+            }
+            .slides-container {
+                min-height: auto !important;
+            }
+            .slide-card {
+                min-height: auto !important;
+            }
+            .slide-content {
+                min-height: auto !important;
+            }
+        }
+        /* 加载动画 */
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--border-color);
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        /* 提示工具 */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            text-align: center;
+            border-radius: 8px;
+            padding: 8px 12px;
+            position: absolute;
+            z-index: 1001;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+            font-size: 13px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
+    <!-- MathJax配置 -->
+    <script>window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true,
+                processEnvironments: true,
+                processRefs: true,
+                tags: 'ams'
+            },
+            chtml: {
+                fontURL: '../../common-assets/fonts'
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+                renderActions: {
+                    addMenu: [],
+                    checkLoading: [200]
+                }
+            },
+            startup: {
+                ready: function () {
+                    MathJax.startup.defaultReady();
+                    MathJax.startup.promise.then(function () {
+                        console.log('MathJax 已完全加载');
+                    });
+                }
+            }
+        };
+        // 全局变量
+        let currentSlide = 0;
+        let totalSlides = 0;
+        let fullscreenExercises = [];
+        let currentFullscreenIndex = 0;
+        let fullscreenState = {
+            solutionVisible: false,
+            visibleLines: 0,
+            totalLines: 0,
+            solutionLines: []
+        };
+        let darkMode = localStorage.getItem('darkMode') === 'true';
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function () {
+            console.log('DOM完全加载');
+            // 应用主题
+            applyTheme();
+            // 添加进度条
+            addProgressBar();
+            // 初始化各个模块
+            initializeKnowledgeSlides();
+            initializeExercises();
+            initializeEventListeners();
+            initializeStats();
+            // 添加快速操作按钮
+            addQuickActionButton();
+        });
+        // 应用主题
+        function applyTheme() {
+            if (darkMode) {
+                document.body.setAttribute('data-theme', 'dark');
+            } else {
+                document.body.removeAttribute('data-theme');
+            }
+        }
+        // 切换主题
+        function toggleTheme() {
+            darkMode = !darkMode;
+            localStorage.setItem('darkMode', darkMode);
+            applyTheme();
+        }
+        // 添加进度条
+        function addProgressBar() {
+            const progressBar = document.createElement('div');
+            progressBar.className = 'progress-bar';
+            progressBar.id = 'progress-bar';
+            document.body.appendChild(progressBar);
+        }
+        // 更新进度条
+        function updateProgressBar(current, total) {
+            const progressBar = document.getElementById('progress-bar');
+            if (progressBar) {
+                const percentage = (current / total) * 100;
+                progressBar.style.width = `${percentage}%`;
+            }
+        }
+        // 添加快速操作按钮
+        function addQuickActionButton() {
+            const btn = document.createElement('button');
+            btn.className = 'quick-action-btn';
+            btn.innerHTML = '';
+            btn.onclick = () =>window.scrollTo({ top: 0, behavior: 'smooth' });
+            document.body.appendChild(btn);
+            // 滚动时显示/隐藏
+            window.addEventListener('scroll', () =>{
+                if (window.scrollY >200) {
+                    btn.style.display = 'flex';
+                } else {
+                    btn.style.display = 'none';
+                }
+            });
+        }
+        // 初始化统计面板
+        function initializeStats() {
+            if (!window.exerciseData || !window.exerciseData.exercises) return;
+            const exercises = window.exerciseData.exercises;
+            const total = exercises.length;
+            const easy = exercises.filter(e =>e.difficulty === 'easy').length;
+            const medium = exercises.filter(e =>e.difficulty === 'medium').length;
+            const hard = exercises.filter(e =>e.difficulty === 'hard').length;
+            const statsHTML = `
+                <div class="stats-panel">
+                    <div class="stat-card">
+                        <div class="stat-icon total">
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-value">${total}</div>
+                            <div class="stat-label">总题数</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon easy">
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-value">${easy}</div>
+                            <div class="stat-label">简单题</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon medium">
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-value">${medium}</div>
+                            <div class="stat-label">中等题</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon hard">
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-value">${hard}</div>
+                            <div class="stat-label">困难题</div>
+                        </div>
+                    </div>
+                </div>`;
+            const exercisesSection = document.getElementById('exercises');
+            if (exercisesSection) {
+                const firstChild = exercisesSection.firstElementChild;
+                if (firstChild) {
+                    firstChild.insertAdjacentHTML('afterend', statsHTML);
+                }
+            }
+        }
+        // 初始化知识点幻灯片
+        function initializeKnowledgeSlides() {
+            const slidesContainer = document.querySelector('.slides-container');
+            if (!slidesContainer || !window.exerciseData || !window.exerciseData.knowledgePoints) return;
+            totalSlides = window.exerciseData.knowledgePoints.length;
+            // 创建幻灯片
+            window.exerciseData.knowledgePoints.forEach((point, index) =>{
+                const slide = document.createElement('div');
+                slide.className = 'slide';
+                slide.id = `slide-${index}`;
+                slide.innerHTML = `
+                    <div class="slide-card">
+                        <div class="slide-number">${index + 1}</div>
+                        <div class="slide-header">
+                            <h2 class="slide-title">${point.title}</h2>
+                        </div>
+                        <div class="slide-content">${point.content}
+                        </div>
+                    </div>`;
+                slidesContainer.appendChild(slide);
+            });
+            // 设置第一张幻灯片为活动状态
+            if (document.getElementById('slide-0')) {
+                document.getElementById('slide-0').classList.add('active');
+            }
+            // 设置导航
+            setupSlideNavigation();
+            // 渲染公式
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                window.MathJax.typesetPromise([slidesContainer]).then(() =>{
+                    console.log('初始幻灯片MathJax渲染完成');
+                }).catch(err =>{
+                    console.warn('初始幻灯片MathJax渲染错误:', err);
+                });
+            }
+        }
+        // 设置幻灯片导航
+        function setupSlideNavigation() {
+            // 圆形导航点击事件
+            document.querySelectorAll('.circle-num').forEach(nav =>{
+                nav.addEventListener('click', function () {
+                    const slideIndex = parseInt(this.getAttribute('data-slide'));
+                    goToSlide(slideIndex);
+                });
+            });
+            // 幻灯片卡片点击事件
+            document.querySelectorAll('.slide-card').forEach((card, index) =>{
+                card.addEventListener('click', function () {
+                    goToSlide((currentSlide + 1) % totalSlides);
+                });
+            });
+            // 添加键盘控制
+            document.addEventListener('keydown', function (e) {
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+                if (e.key === 'ArrowLeft' && currentSlide >0) {
+                    goToSlide(currentSlide - 1);
+                } else if (e.key === 'ArrowRight' && currentSlide < totalSlides - 1) {
+                    goToSlide(currentSlide + 1);
+                }
+            });
+        }
+        // 跳转到指定幻灯片
+        function goToSlide(index) {
+            if (index < 0 || index >= totalSlides) return;
+            // 移除当前活动状态
+            document.querySelectorAll('.slide').forEach(slide =>slide.classList.remove('active'));
+            document.querySelectorAll('.circle-num').forEach(nav =>nav.classList.remove('active'));
+            // 设置新的活动状态
+            currentSlide = index;
+            document.getElementById(`slide-${index}`).classList.add('active');
+            document.querySelector(`.circle-num[data-slide="${index}"]`).classList.add('active');
+            // 更新进度条
+            updateProgressBar(currentSlide + 1, totalSlides);
+            // 渲染公式
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                window.MathJax.typesetPromise([document.getElementById(`slide-${index}`)]).then(() =>{
+                    console.log('幻灯片MathJax渲染完成');
+                }).catch(err =>{
+                    console.warn('幻灯片MathJax渲染错误:', err);
+                });
+            }
+        }
+        // 初始化习题
+        function initializeExercises() {
+            if (!window.exerciseData || !window.exerciseData.exercises) {
+                console.error('习题数据未加载');
+                return;
+            }
+            renderExercises('all');
+            updateFilterCounts();
+        }
+        // 更新筛选器计数
+        function updateFilterCounts() {
+            const exercises = window.exerciseData.exercises;
+            document.querySelectorAll('.filter-btn').forEach(btn =>{
+                const filter = btn.getAttribute('data-filter');
+                let count = 0;
+                if (filter === 'all') {
+                    count = exercises.length;
+                } else {
+                    count = exercises.filter(e =>e.category === filter).length;
+                }
+                const countEl = btn.querySelector('.count');
+                if (countEl) {
+                    countEl.textContent = count;
+                }
+            });
+        }
+        // 当前筛选状态和筛选后的题目列表
+        let currentFilter = 'all';
+        let currentFilteredExercises = [];
+        // 渲染习题
+        function renderExercises(filter) {
+            const container = document.getElementById('exercise-container');
+            if (!container) return;
+            // 保存当前筛选状态
+            currentFilter = filter;
+            // 添加加载动画
+            container.innerHTML = '<div class="loading-spinner"></div>';
+            setTimeout(() =>{
+                container.innerHTML = '';
+                const filteredExercises = window.exerciseData.exercises.filter(exercise =>{
+                    if (filter === 'all') return true;
+                    return exercise.category === filter;
+                });
+                // 保存筛选后的题目列表
+                currentFilteredExercises = filteredExercises;
+                filteredExercises.forEach((exercise, index) =>{
+                    const exerciseItem = createExerciseItem(exercise, index + 1);
+                    container.appendChild(exerciseItem);
+                });
+                // 渲染公式
+                if (window.MathJax && window.MathJax.typesetPromise) {
+                    window.MathJax.typesetPromise([container]).then(() =>{
+                        console.log('习题MathJax渲染完成');
+                    }).catch(err =>{
+                        console.warn('习题MathJax渲染错误:', err);
+                    });
+                }
+            }, 300);
+        }
+        // 创建习题项目
+        function createExerciseItem(exercise, displayNumber) {
+            const div = document.createElement('div');
+            div.className = 'exercise-item';
+            div.id = `exercise-${exercise.id}`;
+            // 使用筛选后的序号，如果没有提供则使用原始ID
+            const number = displayNumber !== undefined ? displayNumber : exercise.id;
+            div.innerHTML = `
+                <div class="exercise-header">
+                    <div class="exercise-title-wrapper">
+                        <div class="exercise-number">${number}</div>
+                        <h3 class="exercise-title">${exercise.title}</h3>
+                    </div>
+                    <div class="exercise-meta">
+                        <span class="exercise-type">${exercise.type}</span>
+                        <span class="exercise-difficulty ${exercise.difficulty}">${getDifficultyText(exercise.difficulty)}</span>
+                        <span class="exercise-category">${exercise.category}</span>
+                        <span class="exercise-method">${exercise.method}</span>
+                    </div>
+                </div>
+                <div class="exercise-content">
+                    <div class="exercise-question">${exercise.question}</div>${exercise.essence ? `<div class="exercise-essence">
+                        <h4>题目本质</h4>
+                        <div class="essence-content">${exercise.essence}</div>
+                    </div>` : ''}
+                    <div class="exercise-actions">
+                        <button class="btn solution-toggle" data-exercise-id="${exercise.id}">查看解析
+                        </button>
+                        <button class="btn fullscreen-btn" data-exercise-id="${exercise.id}">全屏模式
+                        </button>
+                    </div>
+                    <div class="exercise-solution" id="solution-${exercise.id}" style="display: none;">
+                        <div class="solution-content">
+                            <div class="explanation">
+                                <h4>解题思路</h4>
+                                <div class="explanation-content">${exercise.explanation}</div>
+                            </div>
+                            <div class="answer">
+                                <h4>答案</h4>
+                                <div class="answer-content">${exercise.answer}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            return div;
+        }
+        // 获取难度文本
+        function getDifficultyText(difficulty) {
+            const difficultyMap = {
+                'easy': '简单',
+                'medium': '中等',
+                'hard': '困难'
+            };
+            return difficultyMap[difficulty] || difficulty;
+        }
+        // 初始化事件监听器
+        function initializeEventListeners() {
+            // 事件委托处理所有按钮点击
+            document.addEventListener('click', function (e) {
+                // 显示解析按钮事件
+                if (e.target.closest('.solution-toggle')) {
+                    const button = e.target.closest('.solution-toggle');
+                    const exerciseId = button.getAttribute('data-exercise-id');
+                    toggleSolution(exerciseId, button);
+                }
+                // 全屏按钮事件
+                if (e.target.closest('.fullscreen-btn')) {
+                    const button = e.target.closest('.fullscreen-btn');
+                    const exerciseId = button.getAttribute('data-exercise-id');
+                    enterFullscreen(exerciseId);
+                }
+                // 筛选按钮事件
+                if (e.target.closest('.filter-btn')) {
+                    const button = e.target.closest('.filter-btn');
+                    const filter = button.getAttribute('data-filter');
+                    document.querySelectorAll('.filter-btn').forEach(btn =>btn.classList.remove('active'));
+                    button.classList.add('active');
+                    renderExercises(filter);
+                }
+                // 主题切换按钮
+                if (e.target.closest('.theme-toggle')) {
+                    toggleTheme();
+                }
+                // 定位题目按钮
+                if (e.target.closest('#locate-problem-btn')) {
+                    locateProblem();
+                }
+                // 全屏关闭按钮
+                if (e.target.closest('#fullscreen-close-btn')) {
+                    closeFullscreen();
+                }
+                // 全屏解析按钮
+                if (e.target.closest('#fullscreen-solution-btn')) {
+                    toggleFullscreenSolution();
+                }
+                // 全屏导航按钮
+                if (e.target.closest('#fullscreen-prev')) {
+                    navigateFullscreenExercise(-1);
+                }
+                if (e.target.closest('#fullscreen-next')) {
+                    navigateFullscreenExercise(1);
+                }
+            });
+            // 输入框回车事件
+            document.getElementById('problem-number-input')?.addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    locateProblem();
+                }
+            });
+        }
+        // 定位题目
+        function locateProblem() {
+            const input = document.getElementById('problem-number-input');
+            const problemNumber = parseInt(input.value);
+            if (isNaN(problemNumber) || problemNumber < 1) return;
+            const exerciseElement = document.getElementById(`exercise-${problemNumber}`);
+            if (exerciseElement) {
+                exerciseElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                exerciseElement.classList.add('highlight');
+                setTimeout(() =>{
+                    exerciseElement.classList.remove('highlight');
+                }, 2000);
+                input.value = '';
+            }
+        }
+        // 切换解析显示
+        function toggleSolution(exerciseId, button) {
+            const solution = document.getElementById(`solution-${exerciseId}`);
+            const solutionContent = solution?.querySelector('.solution-content');
+            if (!solution || !solutionContent) return;
+            if (solution.style.display === 'none') {
+                solution.style.display = 'block';
+                solutionContent.classList.add('show');
+                button.innerHTML = ' 隐藏解析';
+                // 渲染公式
+                if (window.MathJax && window.MathJax.typesetPromise) {
+                    window.MathJax.typesetPromise([solution]).catch(err =>{
+                        console.warn('MathJax渲染错误:', err);
+                    });
+                }
+            } else {
+                solutionContent.classList.remove('show');
+                setTimeout(() =>{
+                    solution.style.display = 'none';
+                }, 300);
+                button.innerHTML = ' 查看解析';
+            }
+        }
+        // 全屏模式
+        function enterFullscreen(exerciseId) {
+            const overlay = document.getElementById('fullscreen-overlay');
+            // 使用筛选后的题目列表，如果没有筛选则使用全部题目
+            const exercises = currentFilteredExercises.length >0 ? currentFilteredExercises : window.exerciseData.exercises;
+            // 找到当前习题
+            const exercise = exercises.find(ex =>ex.id == exerciseId);
+            if (!exercise) return;
+            // 重置解析步骤
+            fullscreenSolutionStep = 0;
+            // 设置当前习题ID
+            const container = document.getElementById('fullscreen-exercise');
+            container.dataset.exerciseId = exerciseId;
+            // 初始化题目计数器（使用筛选后的序号）
+            const currentIndex = exercises.findIndex(ex =>ex.id == exerciseId);
+            const currentExerciseSpan = document.getElementById('current-exercise');
+            const totalExercisesSpan = document.getElementById('total-exercises');
+            if (currentExerciseSpan) currentExerciseSpan.textContent = currentIndex + 1;
+            if (totalExercisesSpan) totalExercisesSpan.textContent = exercises.length;
+            // 显示全屏模式
+            overlay.classList.add('show');
+            document.body.style.overflow = 'hidden';
+            // 更新全屏内容（传入筛选后的序号）
+            updateFullscreenContent(exercise, currentIndex + 1);
+            // 添加键盘事件监听器
+            document.addEventListener('keydown', handleFullscreenKeydown);
+        }
+        // 更新全屏内容
+        function updateFullscreenContent(exercise, displayNumber) {
+            const container = document.getElementById('fullscreen-exercise');
+            // 使用筛选后的序号，如果没有提供则使用原始ID
+            const number = displayNumber !== undefined ? displayNumber : exercise.id;
+            container.innerHTML = `
+                <div class="exercise-header">
+                    <div class="exercise-title-wrapper">
+                        <div class="exercise-number">${number}</div>
+                        <h3 class="exercise-title">${exercise.title}</h3>
+                    </div>
+                    <div class="exercise-meta">
+                        <span class="exercise-type">${exercise.type}</span>
+                        <span class="exercise-difficulty ${exercise.difficulty}">${getDifficultyText(exercise.difficulty)}</span>
+                        <span class="exercise-category">${exercise.category}</span>
+                        <span class="exercise-method">${exercise.method}</span>
+                    </div>
+                </div>
+                <div class="exercise-question">${exercise.question}</div>${exercise.essence ? `<div class="exercise-essence">
+                    <h4>题目本质</h4>
+                    <div class="essence-content">${exercise.essence}</div>
+                </div>` : ''}
+                <div id="fullscreen-solution-container" class="fullscreen-solution-container" style="display: none;">
+                    <div class="fullscreen-click-hint">点击"显示解析"按钮查看解题过程</div>
+                    <div id="fullscreen-explanation" class="explanation" style="display: none;">
+                        <div class="explanation-content">${exercise.explanation}</div>
+                    </div>
+                    <div id="fullscreen-answer" class="answer" style="display: none;">
+                        <h4>答案</h4>
+                        <div class="answer-content">${exercise.answer}</div>
+                    </div>
+                </div>`;
+            // 重新渲染数学公式
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                MathJax.typesetPromise([container]).catch(console.error);
+            }
+        }
+        // 全屏解析显示变量
+        let fullscreenSolutionStep = 0;
+        let currentLineIndex = 0;
+        let solutionLines = [];
+        // 切换全屏解析显示
+        function toggleFullscreenSolution() {
+            const container = document.getElementById('fullscreen-solution-container');
+            const explanation = document.getElementById('fullscreen-explanation');
+            const answer = document.getElementById('fullscreen-answer');
+            const button = document.getElementById('fullscreen-solution-btn');
+            const hint = container.querySelector('.fullscreen-click-hint');
+            if (!container) return;
+            if (fullscreenSolutionStep === 0) {
+                // 第一步：显示容器和提示
+                container.style.display = 'block';
+                hint.style.display = 'block';
+                hint.innerHTML = '按下方向键 <span class="key">↓</span>开始逐行显示解析';
+                button.innerHTML = ' 使用键盘控制';
+                fullscreenSolutionStep = 1;
+                // 显示键盘提示
+                const keyboardHint = document.getElementById('keyboard-hint');
+                if (keyboardHint) {
+                    keyboardHint.classList.add('show');
+                }
+                // 准备解析内容的行
+                prepareStepByStepContent();
+            } else {
+                // 隐藏所有内容并重置
+                container.style.display = 'none';
+                explanation.style.display = 'none';
+                answer.style.display = 'none';
+                hint.style.display = 'block';
+                button.innerHTML = ' 显示解析';
+                fullscreenSolutionStep = 0;
+                currentLineIndex = 0;
+                // 隐藏键盘提示
+                const keyboardHint = document.getElementById('keyboard-hint');
+                if (keyboardHint) {
+                    keyboardHint.classList.remove('show');
+                }
+            }
+        }
+        // 准备逐步显示的内容
+        function prepareStepByStepContent() {
+            const explanation = document.getElementById('fullscreen-explanation');
+            const answer = document.getElementById('fullscreen-answer');
+            if (!explanation || !answer) return;
+            // 获取解析内容并分解成行
+            const explanationContent = explanation.querySelector('.explanation-content');
+            const answerContent = answer.querySelector('.answer-content');
+            if (!explanationContent || !answerContent) return;
+            // 将内容分解成步骤
+            solutionLines = [];
+            // 添加解题思路标题
+            solutionLines.push({
+                type: 'title',
+                content: '<h4>解题思路</h4>',
+                target: 'explanation'
+            });
+            // 分解解题思路内容
+            const explanationHTML = explanationContent.innerHTML;
+            const stepPattern = /<strong>第[一二三四五六七八九十\d]+步[:：]?([^<]*)<\/strong>/g;
+            const steps = [];
+            let match;
+            while ((match = stepPattern.exec(explanationHTML)) !== null) {
+                steps.push({
+                    type: 'step-title',
+                    content: match[0],
+                    target: 'explanation'
+                });
+                const stepStart = match.index + match[0].length;
+                const nextMatch = stepPattern.exec(explanationHTML);
+                const stepEnd = nextMatch ? nextMatch.index : explanationHTML.length;
+                stepPattern.lastIndex = stepStart;
+                const stepContent = explanationHTML.substring(stepStart, stepEnd).trim();
+                if (stepContent) {
+                    const contentParts = stepContent.split(/(\$\$[^$]*\$\$|\$[^$]*\$)/).filter(part =>part.trim());
+                    contentParts.forEach(part =>{
+                        if (part.trim()) {
+                            steps.push({
+                                type: 'step-content',
+                                content: part,
+                                target: 'explanation'
+                            });
+                        }
+                    });
+                }
+            }
+            if (steps.length === 0) {
+                const paragraphs = explanationHTML.split(/<\/p>|<br\s*\/?>|\n/).filter(p =>p.trim());
+                paragraphs.forEach(paragraph =>{
+                    if (paragraph.trim()) {
+                        solutionLines.push({
+                            type: 'content',
+                            content: paragraph.replace(/<p[^>]*>/g, '').trim(),
+                            target: 'explanation'
+                        });
+                    }
+                });
+            } else {
+                solutionLines.push(...steps);
+            }
+            // 添加答案标题
+            solutionLines.push({
+                type: 'title',
+                content: '<h4>答案</h4>',
+                target: 'answer'
+            });
+            // 添加答案内容
+            solutionLines.push({
+                type: 'content',
+                content: answerContent.innerHTML,
+                target: 'answer'
+            });
+            // 清空内容容器
+            explanationContent.innerHTML = '';
+            answerContent.innerHTML = '';
+            currentLineIndex = 0;
+        }
+        // 显示下一行
+        function showNextLine() {
+            if (currentLineIndex >= solutionLines.length) return;
+            const hint = document.querySelector('.fullscreen-click-hint');
+            const explanation = document.getElementById('fullscreen-explanation');
+            const answer = document.getElementById('fullscreen-answer');
+            // 隐藏提示
+            if (currentLineIndex === 0) {
+                hint.style.display = 'none';
+            }
+            const currentLine = solutionLines[currentLineIndex];
+            // 显示对应的容器
+            if (currentLine.target === 'explanation') {
+                explanation.style.display = 'block';
+                const content = explanation.querySelector('.explanation-content');
+                // 创建新的行元素
+                const lineElement = document.createElement('div');
+                lineElement.className = 'step-by-step-line';
+                if (currentLine.type === 'step-title') {
+                    lineElement.className += ' step-title';
+                } else {
+                    lineElement.className += ' step-content';
+                }
+                lineElement.innerHTML = currentLine.content;
+                content.appendChild(lineElement);
+            } else if (currentLine.target === 'answer') {
+                answer.style.display = 'block';
+                const content = answer.querySelector('.answer-content');
+                // 创建新的行元素
+                const lineElement = document.createElement('div');
+                lineElement.className = 'step-by-step-line step-content';
+                lineElement.innerHTML = currentLine.content;
+                content.appendChild(lineElement);
+            }
+            currentLineIndex++;
+            // 重新渲染数学公式
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                MathJax.typesetPromise([explanation, answer]).catch(console.error);
+            }
+            // 更新提示信息
+            updateNavigationHint();
+        }
+        // 显示上一行
+        function showPreviousLine() {
+            if (currentLineIndex <= 0) return;
+            currentLineIndex--;
+            // 重新构建内容
+            rebuildContent();
+            // 更新提示信息
+            updateNavigationHint();
+        }
+        // 重新构建内容
+        function rebuildContent() {
+            const explanation = document.getElementById('fullscreen-explanation');
+            const answer = document.getElementById('fullscreen-answer');
+            const hint = document.querySelector('.fullscreen-click-hint');
+            // 清空内容
+            explanation.querySelector('.explanation-content').innerHTML = '';
+            answer.querySelector('.answer-content').innerHTML = '';
+            explanation.style.display = 'none';
+            answer.style.display = 'none';
+            if (currentLineIndex === 0) {
+                hint.style.display = 'block';
+                return;
+            } else {
+                hint.style.display = 'none';
+            }
+            // 重新显示到当前行
+            for (let i = 0; i < currentLineIndex; i++) {
+                const line = solutionLines[i];
+                if (line.target === 'explanation') {
+                    explanation.style.display = 'block';
+                    const content = explanation.querySelector('.explanation-content');
+                    const lineElement = document.createElement('div');
+                    lineElement.className = 'step-by-step-line';
+                    if (line.type === 'step-title') {
+                        lineElement.className += ' step-title';
+                    } else {
+                        lineElement.className += ' step-content';
+                    }
+                    lineElement.innerHTML = line.content;
+                    content.appendChild(lineElement);
+                } else if (line.target === 'answer') {
+                    answer.style.display = 'block';
+                    const content = answer.querySelector('.answer-content');
+                    const lineElement = document.createElement('div');
+                    lineElement.className = 'step-by-step-line step-content';
+                    lineElement.innerHTML = line.content;
+                    content.appendChild(lineElement);
+                }
+            }
+            // 重新渲染数学公式
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                MathJax.typesetPromise([explanation, answer]).catch(console.error);
+            }
+        }
+        // 更新导航提示
+        function updateNavigationHint() {
+            const button = document.getElementById('fullscreen-solution-btn');
+            const progress = `${currentLineIndex}/${solutionLines.length}`;
+            if (currentLineIndex >= solutionLines.length) {
+                button.innerHTML = ` 解析完成 (${progress}) - 按ESC退出`;
+            } else {
+                button.innerHTML = ` 继续 (${progress}) - ↓下一行 ↑上一行 ESC退出`;
+            }
+        }
+        // 全屏导航
+        function navigateFullscreenExercise(direction) {
+            if (!window.exerciseData || !window.exerciseData.exercises) return;
+            // 使用筛选后的题目列表
+            const exercises = currentFilteredExercises.length >0 ? currentFilteredExercises : window.exerciseData.exercises;
+            const currentId = parseInt(document.getElementById('fullscreen-exercise').dataset.exerciseId);
+            const currentIndex = exercises.findIndex(ex =>ex.id === currentId);
+            if (currentIndex === -1) return;
+            const newIndex = currentIndex + direction;
+            if (newIndex >= 0 && newIndex < exercises.length) {
+                const newExercise = exercises[newIndex];
+                // 更新计数器（使用筛选后的序号）
+                document.getElementById('current-exercise').textContent = newIndex + 1;
+                document.getElementById('total-exercises').textContent = exercises.length;
+                // 重置状态
+                fullscreenSolutionStep = 0;
+                // 更新内容（传入筛选后的序号）
+                updateFullscreenContent(newExercise, newIndex + 1);
+                // 设置新的习题ID
+                document.getElementById('fullscreen-exercise').dataset.exerciseId = newExercise.id;
+                // 更新导航按钮状态
+                document.getElementById('fullscreen-prev').disabled = newIndex === 0;
+                document.getElementById('fullscreen-next').disabled = newIndex === exercises.length - 1;
+            }
+        }
+        // 关闭全屏模式
+        function closeFullscreen() {
+            const overlay = document.getElementById('fullscreen-overlay');
+            overlay.classList.remove('show');
+            document.body.style.overflow = '';
+            // 移除键盘事件监听
+            document.removeEventListener('keydown', handleFullscreenKeydown);
+            // 隐藏键盘提示
+            const keyboardHint = document.getElementById('keyboard-hint');
+            if (keyboardHint) {
+                keyboardHint.classList.remove('show');
+            }
+        }
+        // 处理全屏键盘事件
+        function handleFullscreenKeydown(event) {
+            // 左右键切换题目
+            if (event.key === 'ArrowLeft') {
+                event.preventDefault();
+                navigateFullscreenExercise(-1);
+                return;
+            } else if (event.key === 'ArrowRight') {
+                event.preventDefault();
+                navigateFullscreenExercise(1);
+                return;
+            }
+            // 空格键和↓键显示答案/解析
+            if (event.key === ' ' || event.key === 'ArrowDown') {
+                event.preventDefault();
+                if (fullscreenSolutionStep === 0) {
+                    toggleFullscreenSolution();
+                } else {
+                    showNextLine();
+                }
+                return;
+            }
+            // 其他键盘操作只在逐行显示模式下有效
+            if (fullscreenSolutionStep !== 1) return;
+            if (event.key === 'ArrowUp') {
+                event.preventDefault();
+                showPreviousLine();
+            } else if (event.key === 'Escape') {
+                event.preventDefault();
+                toggleFullscreenSolution();
+            }
+        }
+        // 导出PDF功能
+        function exportPDF() {
+            // 在打印前显示所有解析内容
+            const allSolutions = document.querySelectorAll('.exercise-solution');
+            allSolutions.forEach(solution =>{
+                solution.style.display = 'block';
+                const solutionContent = solution.querySelector('.solution-content');
+                if (solutionContent) {
+                    solutionContent.classList.add('show');
+                }
+            });
+            // 显示所有幻灯片内容
+            const allSlides = document.querySelectorAll('.slide');
+            allSlides.forEach(slide =>{
+                slide.classList.add('active');
+            });
+            // 延迟打印以确保内容完全显示
+            setTimeout(() =>{
+                window.print();
+            }, 100);
+        }
+    </script>
+    <style>.return-home-panel {
+            position: fixed;
+            top: 16px;
+            left: 16px;
+            display: flex;
+            gap: 10px;
+            z-index: 9999;
+            flex-wrap: wrap;
+        }
+        .return-home-panel .return-link {
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: rgba(15, 23, 42, 0.8);
+            color: #f8fafc;
+            font-size: 14px;
+            text-decoration: none;
+            box-shadow: 0 6px 20px rgba(15, 23, 42, 0.25);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .return-home-panel .return-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(15, 23, 42, 0.35);
+        }
+        .return-home-panel .return-link.return-main {
+            background: rgba(79, 70, 229, 0.85);
+        }
+        @media (max-width: 640px) {
+            .return-home-panel {
+                top: 12px;
+                left: 12px;
+                right: 12px;
+                justify-content: center;
+            }
+            .return-home-panel .return-link {
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="return-home-panel">
+        <a class="return-link return-sub" href="../index.html">返回目录</a>
+        <a class="return-link return-main" href="../../index.html">返回主站</a>
+    </div>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="#" class="navbar-brand">线性代数知识点整理
+            </a>
+            <div class="navbar-controls">
+                <div class="tooltip">
+                    <button class="theme-toggle" onclick="toggleTheme()">
+                    </button>
+                    <span class="tooltiptext">切换主题</span>
+                </div>
+                <button class="export-pdf-nav-btn" onclick="exportPDF()">导出PDF
+                </button>
+            </div>
+        </div>
+    </nav>
+    <!-- 主要内容 -->
+    <div class="container">
+        <!-- 知识点部分 -->
+        <section id="knowledge" class="section">
+            <h2 class="section-title">
+                <div>重要知识点
+                    <span style="font-size: 0.6em; color: var(--text-muted); margin-left: 12px;">点击卡片或使用方向键切换
+                    </span>
+                </div>
+                <div class="circle-nav">
+                    <span class="circle-num active" data-slide="0">矩</span>
+                </div>
+            </h2>
+            <!-- 幻灯片容器 -->
+            <div class="slides-container">
+                <!-- 幻灯片内容将由JavaScript动态生成 -->
+            </div>
+        </section>
+        <!-- 习题部分 -->
+        <section id="exercises" class="section">
+            <h2 class="section-title">练习题</h2>
+            <!-- 分类筛选 -->
+            <div class="filter-section">
+                <div class="filter-container">
+                    <button class="filter-btn active" data-filter="all">全部题目 <span class="count">0</span>
+                    </button>
+                    <button class="filter-btn" data-filter="行列式">行列式 <span class="count">0</span>
+                    </button>
+                    <button class="filter-btn" data-filter="矩阵运算">矩阵运算 <span class="count">0</span>
+                    </button>
+                    <button class="filter-btn" data-filter="矩阵的秩">矩阵的秩 <span class="count">0</span>
+                    </button>
+                    <button class="filter-btn" data-filter="逆矩阵">逆矩阵 <span class="count">0</span>
+                    </button>
+                    <button class="filter-btn" data-filter="线性方程组">线性方程组 <span class="count">0</span>
+                    </button>
+                    <button class="filter-btn" data-filter="向量空间">向量空间 <span class="count">0</span>
+                    </button>
+                </div>
+            </div>
+            <!-- 题目定位器 -->
+            <div class="locator-section">
+                <div class="locator-title">题目定位
+                </div>
+                <div class="locator-input-container">
+                    <input type="number" id="problem-number-input" min="1" placeholder="输入题号..."
+                        class="problem-number-input">
+                    <button id="locate-problem-btn" class="locate-problem-btn">定位
+                    </button>
+                </div>
+            </div>
+            <div id="exercise-container">
+                <!-- 习题内容将由JavaScript动态生成 -->
+            </div>
+        </section>
+    </div>
+    <!-- 全屏模式容器 -->
+    <div id="fullscreen-overlay" class="fullscreen-overlay">
+        <div class="fullscreen-header">
+            <div class="fullscreen-title">线性代数习题 - 全屏展示</div>
+            <div class="fullscreen-controls">
+                <button id="fullscreen-solution-btn" class="fullscreen-control-btn">显示解析
+                </button>
+                <button id="fullscreen-close-btn" class="fullscreen-control-btn">关闭全屏
+                </button>
+            </div>
+        </div>
+        <div class="fullscreen-content">
+            <div id="fullscreen-exercise" class="fullscreen-exercise">
+                <!-- 习题内容将动态加载 -->
+            </div>
+            <div class="fullscreen-nav">
+                <button id="fullscreen-prev" class="fullscreen-nav-btn">上一题
+                </button>
+                <span class="fullscreen-counter">第 <span id="current-exercise">1</span>题 / 共 <span id="total-exercises">0</span>题
+                </span>
+                <button id="fullscreen-next" class="fullscreen-nav-btn">下一题 
+                </button>
+            </div>
+        </div>
+    </div>
+    <!-- 键盘提示 -->
+    <div id="keyboard-hint" class="keyboard-hint">
+        <div>键盘控制：</div>
+        <div><span class="key">↓</span>下一行 <span class="key">↑</span>上一行</div>
+        <div><span class="key"></span>上一题 <span class="key">→</span>下一题</div>
+        <div><span class="key">ESC</span>退出</div>
+    </div>
+    <!-- 引入数据文件 -->
+    <script src="js/linear-algebra.js" charset="UTF-8"></script>
+    <!-- 延迟加载MathJax -->
+    <script src="../../common-assets/js/mathjax-3.2.2-tex-svg.min.js" id="MathJax-script" async></script>
+</body>
+</html>

@@ -60,9 +60,16 @@
         }
 
         /* === SLIDE LAYOUT === */
-        .slide-container {
-            width: 100%;
+        .app {
             height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: #fafafa;
+        }
+
+        .slide-container {
+            width: 100vw;
+            height: calc(100vh - 60px);
             display: flex;
             position: relative;
             gap: 0;
@@ -102,6 +109,8 @@
         .slide {
             display: none;
             animation: slideIn 0.5s ease-out;
+            width: 100vw;
+            height: calc(100vh - 60px);
         }
 
         .slide.active {
@@ -182,6 +191,42 @@
             padding: 16px;
             margin: 20px 0;
             border-radius: 4px;
+        }
+
+        /* 底部导航 */
+        .nav-controls {
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            border-top: 1px solid #e5e7eb;
+            background: #ffffff;
+            padding: 0 16px;
+        }
+
+        .nav-btn {
+            padding: 10px 16px;
+            border-radius: 10px;
+            border: 1px solid #d1d5db;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: #fff;
+            cursor: pointer;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 14px rgba(37, 99, 235, 0.25);
+        }
+
+        .slide-indicator {
+            font-size: 14px;
+            color: #6b7280;
+            min-width: 110px;
+            text-align: center;
         }
 
         /* 图形容器 */
@@ -488,6 +533,7 @@
     </style>
 </head>
 <body>
+    <div class="app">
     <!-- 幻灯片 1: 凹向上 -->
     <div class="slide active">
         <div class="slide-container">
@@ -750,6 +796,9 @@
             
             slides.forEach(slide => slide.classList.remove('active'));
             slides[currentSlide - 1].classList.add('active');
+
+            const indicator = document.getElementById('slide-current');
+            if (indicator) indicator.textContent = currentSlide;
             
             // 重绘当前幻灯片的图形
             setTimeout(() => {
@@ -1080,6 +1129,7 @@
 
         // 初始化
         window.addEventListener('load', () => {
+            document.getElementById('slide-total').textContent = totalSlides;
             showSlide(1);
             setupInteractions();
         });
@@ -1090,6 +1140,19 @@
             if (currentSlide === 2) drawSlide2();
             if (currentSlide === 3) drawSlide3();
         });
+
+        // 初始化指示器
+        document.addEventListener('DOMContentLoaded', () => {
+            const indicator = document.getElementById('slide-current');
+            if (indicator) indicator.textContent = currentSlide;
+        });
     </script>
+
+    <div class="nav-controls" aria-label="内部导航">
+        <button class="nav-btn" onclick="prevSlide()">上一页</button>
+        <div class="slide-indicator">第 <span id="slide-current">1</span> / <span id="slide-total">3</span> 页</div>
+        <button class="nav-btn" onclick="nextSlide()">下一页</button>
+    </div>
+    </div>
 </body>
 </html>

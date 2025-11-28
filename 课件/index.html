@@ -4,1627 +4,583 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>课程中心 - 高等应用数学在线课堂</title>
+    
     <style>
-        /* 极简性能优化设计 */
         :root {
-            --primary: #00ff00;
-            --primary-dark: #00cc00;
-            --primary-light: #33ff33;
-            --secondary: #00ffff;
-            --accent: #0080ff;
-            --dark: #000000;
-            --dark-surface: #0a0f19;
-            --light: #ffffff;
-            --border: #003366;
-            --text: #00ff00;
-            --text-muted: #00cc99;
-            --glass: rgba(0, 255, 0, 0.05);
-            --glass-border: rgba(0, 255, 0, 0.2);
-            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.8), 0 2px 4px -2px rgb(0 0 0 / 0.8);
-            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.9), 0 4px 6px -4px rgb(0 0 0 / 0.9);
-            --glow: 0 0 15px rgba(0, 255, 0, 0.4);
-            --glow-hover: 0 0 25px rgba(0, 255, 0, 0.7);
+            /* === 白色学术主题变量 === */
+            --bg-base: #ffffff;
+            --bg-subtle: #f8fafc;
+            --bg-glass: rgba(255, 255, 255, 0.95);
+            
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --text-accent: #2563eb;    /* 皇家蓝 */
+            --text-accent-hover: #1d4ed8;
+            
+            --border-color: #e2e8f0;
+            
+            /* 阴影系统 */
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-float: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
+            
+            --transition-smooth: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        /* 统一字体引入 */
+        /* 字体加载 */
         @font-face {
             font-family: 'WDXLubrifontSC';
             src: url('../common-assets/fonts/WD-XLLubrifontSC-Regular.otf') format('opentype');
-            font-weight: 400;
-            font-style: normal;
             font-display: swap;
         }
-        @font-face {
-            font-family: 'JfOpenHuninn';
-            src: url('../common-assets/fonts/jf-openhuninn-2.1.ttf') format('truetype');
-            font-weight: 400;
-            font-style: normal;
-            font-display: swap;
-        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: 'WDXLubrifontSC', 'JfOpenHuninn', 'Noto Serif SC', 'Microsoft YaHei', 'PingFang SC', Arial, sans-serif;
-            font-size: 18px;
-            background: #faf9f7;
-            background-image:
-                radial-gradient(rgba(44, 62, 80, 0.07) 1px, transparent 1px),
-                radial-gradient(rgba(44, 62, 80, 0.04) 1px, transparent 1px);
-            background-size: 24px 24px, 12px 12px;
-            background-position: 0 0, 6px 6px;
+            font-family: 'WDXLubrifontSC', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-primary);
             width: 100vw;
-            min-height: 100vh;
-            margin: 0;
-            padding: 0;
-            position: relative;
-            color: #2c3e50;
+            height: 100vh;
             overflow: hidden;
+            -webkit-font-smoothing: antialiased;
         }
 
-        /* 暖色主题时的body样式 */
-        body.warm-theme {
-            --text: #ffd700;
-            --text-muted: #ffb347;
-            --primary: #ffd700;
-            --primary-dark: #ffb347;
-            --primary-light: #ffe55c;
-            --glass: rgba(255, 215, 0, 0.05);
-            --glass-border: rgba(255, 215, 0, 0.2);
-            --glow: 0 0 15px rgba(255, 215, 0, 0.4);
-            --glow-hover: 0 0 25px rgba(255, 215, 0, 0.7);
-            background: radial-gradient(ellipse at center, #1a0a00, #000000);
-        }
-
-        /* 背景画布 */
-        #starry-sky { display: none; }
-
-        /* 背景切换按钮 */
-        .bg-switch-btn {
+        /* === 1. 顶部导航 (Glassmorphism) === */
+        .top-nav {
             position: fixed;
-            top: 20px;
-            left: 20px;
-            z-index: 10000;
-            padding: 10px 20px;
-            background: var(--glass);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            color: var(--text);
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 70px;
+            background: var(--bg-glass);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 30px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .nav-brand {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .nav-brand h1 {
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            background: linear-gradient(120deg, #2563eb, #0891b2);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .nav-brand span {
+            font-size: 10px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .nav-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .nav-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border: 1px solid var(--border-color);
+            background: #fff;
+            color: var(--text-secondary);
+            border-radius: 8px;
+            font-size: 13px;
             cursor: pointer;
-            font-size: 14px;
-            transition: all 0.3s ease;
+            transition: var(--transition-smooth);
+        }
+
+        .nav-btn:hover {
+            border-color: var(--text-accent);
+            color: var(--text-accent);
+            background: #eff6ff;
+            transform: translateY(-1px);
+        }
+
+        .nav-btn svg { width: 14px; height: 14px; fill: currentColor; }
+
+        .btn-primary {
+            background: var(--text-accent);
+            color: white;
+            border-color: var(--text-accent);
+        }
+        .btn-primary:hover {
+            background: var(--text-accent-hover);
+            color: white;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+        }
+
+        /* === 2. 背景层 === */
+        #geo-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.5;
+        }
+
+        /* === 3. 欢迎封面 === */
+        .welcome-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            z-index: 10;
+            transition: opacity 0.4s ease;
+        }
+
+        .welcome-title {
+            font-size: 64px;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 10px;
+            letter-spacing: -2px;
+        }
+
+        .welcome-subtitle {
+            font-size: 18px;
+            color: var(--text-secondary);
+            font-weight: 300;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        .start-btn {
+            padding: 16px 48px;
+            font-size: 18px;
+            background: var(--text-primary);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            box-shadow: var(--shadow-float);
             display: flex;
             align-items: center;
             gap: 10px;
         }
 
-        .bg-switch-btn:hover {
-            background: rgba(255, 255, 255, 0.1);
-            box-shadow: var(--glow);
+        .start-btn:hover {
+            transform: scale(1.05);
+            background: var(--text-accent);
         }
 
-        /* 统一顶部导航栏 */
-        .unified-top-nav {
+        /* === 4. 目录覆盖层 (Grid View) === */
+        .chapter-overlay {
             position: fixed;
-            top: 0;
+            top: 70px;
             left: 0;
-            right: 0;
-            z-index: 10000; /* 确保在iframe之上 */
-            background: rgba(0, 0, 0, 0.95);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid var(--border);
-            padding: 15px 30px;
+            width: 100%;
+            height: calc(100% - 70px);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(5px);
+            z-index: 50;
+            overflow-y: auto;
+            padding: 40px 20px;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(10px);
+            transition: var(--transition-smooth);
+        }
+
+        .chapter-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+
+        .grid-wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 15px;
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: flex-end;
         }
 
-        .nav-brand h1 {
-            font-family: 'Courier New', 'Microsoft YaHei', 'SimHei', monospace;
-            font-size: 24px;
-            font-weight: 600;
-            color: var(--text);
-            margin: 0;
-            background: linear-gradient(135deg, #ffffff 0%, #00ff00 100%);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
+        .section-header h2 { font-size: 24px; color: var(--text-primary); }
+        .section-header span { color: var(--text-secondary); font-size: 14px; }
+
+        .chapter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            padding-bottom: 60px;
         }
 
-        .nav-brand p {
-            font-size: 12px;
-            color: var(--text-muted);
-            margin: 0;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-        }
-
-        .nav-actions {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-        }
-
-        .nav-action-btn {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 10px 20px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            color: var(--text);
-            font-size: 14px;
+        .chapter-card {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 25px;
             cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .nav-action-btn:hover {
-            background: rgba(0, 255, 0, 0.1);
-            border-color: var(--primary);
-            color: var(--primary);
-            transform: translateY(-2px);
-        }
-
-        .nav-action-btn svg {
-            width: 16px;
-            height: 16px;
-        }
-
-        /* 扫描线 */
-        .scan-line {
-            position: fixed;
-            width: 100%;
-            height: 2px;
-            background: linear-gradient(to bottom, transparent, rgba(0, 255, 0, 0.2), transparent);
-            animation: scan 10s linear infinite;
-            pointer-events: none;
-            z-index: 2;
-        }
-
-        body.warm-theme .scan-line {
-            background: linear-gradient(to bottom, transparent, rgba(255, 215, 0, 0.2), transparent);
-        }
-        
-        @keyframes scan {
-            0% { top: -10px; }
-            100% { top: 100vh; }
-        }
-
-        /* 主内容区 */
-        .main-content {
-            width: 100vw;
-            height: 100vh;
+            transition: var(--transition-smooth);
             position: relative;
-        }
-
-        /* 欢迎页 */
-        .welcome-page {
-            width: 100%;
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            overflow-y: auto;
-            position: relative;
-        }
-
-        .welcome-content {
+            overflow: hidden;
             display: flex;
             flex-direction: column;
-            width: 100%;
-            max-width: 1200px;
-            gap: 20px;
-            align-items: center;
-            position: relative;
-            z-index: 2;
-            text-align: center;
+            justify-content: space-between;
+            min-height: 160px;
         }
-        
-        .welcome-title {
-            font-size: 48px;
+
+        .chapter-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-float);
+            border-color: var(--text-accent);
+        }
+
+        .chapter-idx {
+            font-size: 12px;
             font-weight: 700;
-            color: var(--primary-light);
-            text-shadow: var(--glow);
-            letter-spacing: 4px;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
             margin-bottom: 10px;
-            animation: flicker 3s infinite alternate;
         }
 
-        @keyframes flicker {
-            0%, 18%, 22%, 25%, 53%, 57%, 100% { text-shadow: var(--glow); opacity: 1; }
-            20%, 24%, 55% { text-shadow: none; opacity: 0.8; }
+        .chapter-card:hover .chapter-idx { color: var(--text-accent); }
+
+        .chapter-title-text {
+            font-size: 18px;
+            font-weight: 600;
+            line-height: 1.4;
+            color: var(--text-primary);
         }
 
-        .welcome-subtitle {
-            font-size: 20px;
-            color: var(--text-muted);
-            margin-bottom: 40px;
-        }
-
-        /* 内容显示区域 - 全屏预览 */
-        .content-display {
-            width: 100vw;
-            height: 100vh;
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            background: #faf9f7;
-            padding: 0;
-            overflow: hidden;
-            z-index: 9999;
-        }
-
-        .content-display.active {
-            display: block !important;
-        }
-
-        .content-iframe {
-            width: 100% !important;
-            height: calc(100% - 60px) !important; /* 为顶部导航留出空间 */
-            border: none;
-            background: #faf9f7;
+        .card-icon {
             position: absolute;
-            top: 60px; /* 从顶部导航下方开始 */
-            left: 0;
-            z-index: 1;
-            opacity: 1 !important;
-        }
-        
-        .preview-controls {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            z-index: 10001; /* 确保在顶部导航之上 */
-        }
-        
-        .close-preview-btn {
-            background: rgba(0, 0, 0, 0.7);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
+            bottom: 15px;
+            right: 15px;
             width: 40px;
             height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            color: white;
-            transition: all 0.3s ease;
-        }
-        
-        .close-preview-btn:hover {
-            background: rgba(255, 0, 0, 0.8);
-            border-color: rgba(255, 255, 255, 0.8);
-        }
-        
-        .close-preview-btn svg {
-            width: 20px;
-            height: 20px;
-        }
-        
-        .chapter-content {
-             display: none; /* Hidden by default */
-             max-width: 900px;
-             margin: 0 auto;
-             background: rgba(0,0,0,0.3);
-             padding: 30px;
-             border-radius: 15px;
-             border: 1px solid var(--border);
-             color: var(--text);
-        }
-
-        .chapter-content.active {
-            display: block;
-        }
-
-        .chapter-content h1 {
-            color: var(--primary-light);
-            margin-bottom: 20px;
-            border-bottom: 2px solid var(--primary);
-            padding-bottom: 10px;
-        }
-        .chapter-content h2 {
-            color: var(--secondary);
-            margin-top: 30px;
-            margin-bottom: 15px;
-        }
-        .chapter-content p {
-            line-height: 1.8;
-            margin-bottom: 15px;
-            color: #ccc;
-        }
-        .chapter-content .formula {
-            display: block;
-            text-align: center;
-            margin: 20px 0;
-            padding: 15px;
-            background: rgba(0, 255, 0, 0.05);
-            border-radius: 8px;
-            overflow-x: auto;
-        }
-
-        /* 悬浮章节面板 */
-        .floating-chapter-panel {
-            position: fixed;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            width: 90%;
-            max-width: 1000px;
-            max-height: 80vh;
-            background: rgba(0, 0, 0, 0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 15px;
-            box-shadow: 0 0 50px rgba(0, 255, 0, 0.5);
-            padding: 0;
-            display: none;
-            overflow: visible;
-            z-index: 99999;
-            opacity: 0;
-            transition: all 0.3s ease;
-            border: 3px solid var(--primary);
-        }
-
-        .floating-chapter-panel.active {
-            display: block !important;
-            opacity: 1;
-            transform: translate(-50%, -50%);
-        }
-
-        .panel-content {
-            padding: 20px;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-        
-        #chapterList {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 15px;
-            padding: 10px 0;
-        }
-
-        .chapter-item {
-            padding: 20px;
-            border-radius: 15px;
-            cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            display: flex;
-            align-items: center;
-            gap: 18px;
-            background: linear-gradient(135deg, var(--glass), rgba(0, 255, 255, 0.05));
-            border: 1px solid var(--glass-border);
-            font-size: 16px;
-            position: relative;
-            overflow: hidden;
-            backdrop-filter: blur(10px);
-            color: var(--text);
-        }
-
-        .chapter-item::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, var(--glass), transparent);
-            transition: left 0.6s ease;
-        }
-
-        .chapter-item:hover::before {
-            left: 100%;
-        }
-
-        .chapter-item:hover {
-            background: linear-gradient(135deg, rgba(0, 255, 0, 0.15), rgba(0, 255, 255, 0.1));
-            transform: translateY(-8px) scale(1.02);
-            border-color: var(--primary);
-            box-shadow: 
-                0 20px 40px rgba(0, 0, 0, 0.3),
-                0 0 20px var(--glow),
-                inset 0 1px 0 rgba(255, 255, 255, 0.2);
-        }
-
-        body.warm-theme .chapter-item:hover {
-            background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 179, 71, 0.1));
-        }
-
-        .chapter-item:active {
-            transform: translateY(-4px) scale(0.98);
-        }
-        
-        .chapter-item-num {
-            width: 24px;
-            height: 24px;
-            flex-shrink: 0;
-            border-radius: 6px;
-            background: var(--primary-dark);
-            color: black;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-        }
-
-        .chapter-icon {
-            width: 50px;
-            height: 50px;
-            flex-shrink: 0;
-            border-radius: 12px;
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: black;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            position: relative;
-            box-shadow: 
-                0 8px 16px rgba(0, 255, 0, 0.3),
-                inset 0 1px 0 rgba(255, 255, 255, 0.3);
-            transition: all 0.3s ease;
-        }
-
-        .chapter-icon::before {
-            content: '';
-            position: absolute;
-            top: -2px;
-            left: -2px;
-            right: -2px;
-            bottom: -2px;
-            background: linear-gradient(45deg, var(--primary), var(--secondary), var(--accent));
-            border-radius: 14px;
-            z-index: -1;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .chapter-item:hover .chapter-icon::before {
-            opacity: 1;
-        }
-
-        .chapter-item:hover .chapter-icon {
-            transform: scale(1.1) rotate(5deg);
-            box-shadow: 
-                0 12px 24px rgba(0, 255, 0, 0.4),
-                inset 0 1px 0 rgba(255, 255, 255, 0.4);
-        }
-
-        .chapter-text {
-            flex: 1;
-            font-weight: 500;
-            color: var(--text);
-            transition: color 0.3s ease;
-        }
-
-        .chapter-item:hover .chapter-text {
-            color: var(--primary-light);
-        }
-
-
-        /* 美化的右下角标题栏 */
-        .floating-topbar {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(15, 23, 42, 0.6);
-            backdrop-filter: blur(10px);
-            padding: 10px 30px;
-            border-radius: 50px;
-            box-shadow: var(--shadow-lg);
-            z-index: 998;
-            font-size: 16px;
-            font-weight: 600;
-            color: var(--text);
-            max-width: 600px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            border: 1px solid var(--border);
-        }
-
-        /* 极简右下角导航栏 */
-        .floating-nav-sidebar {
-            position: fixed;
-            right: 20px;
-            bottom: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 12px;
-            z-index: 1000;
-        }
-
-        .nav-btn, .sidebar-action-btn, .nav-collapse-btn {
-            width: 48px;
-            height: 48px;
-            border-radius: 16px;
-            border: 1px solid var(--border);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 11px;
-            font-weight: 600;
-            box-shadow: var(--shadow);
-            transition: all 0.3s ease;
-            background: rgba(15, 23, 42, 0.6);
-            backdrop-filter: blur(5px);
-            color: var(--text-muted);
-            position: relative;
-        }
-
-        .nav-btn:hover, .sidebar-action-btn:hover, .nav-collapse-btn:hover {
-            transform: translateY(-3px) scale(1.05);
-            box-shadow: var(--shadow-lg);
-            border-color: var(--primary);
-            color: var(--primary-light);
-        }
-
-        .nav-btn svg {
-            width: 22px;
-            height: 22px;
-        }
-
-        .nav-btn:disabled {
-            opacity: 0.3;
-            cursor: not-allowed;
-            transform: none !important;
-        }
-
-        .nav-btn:disabled:hover {
-            transform: none !important;
-            box-shadow: var(--shadow);
-            border-color: var(--border);
-            color: var(--text-muted);
-        }
-
-        #quickNavBtn {
-            font-size: 11px;
-        }
-
-        #feedbackBtn {
-            font-size: 11px;
-            position: relative;
-        }
-
-        .nav-collapse-btn {
-            font-size: 16px;
-            transition: transform 0.3s ease;
-        }
-        .nav-collapse-btn svg {
-            width: 16px;
-            height: 16px;
-        }
-
-        .keyboard-hint {
-            font-size: 10px;
-            color: var(--text-muted);
-            background: rgba(0, 0, 0, 0.7);
-            padding: 2px 8px;
-            border-radius: 10px;
-            white-space: nowrap;
-            text-align: center;
-            box-shadow: var(--shadow);
-            transition: opacity 0.3s;
-        }
-
-        .keyboard-hint.hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        .feedback-badge {
-            position: absolute;
-            top: -5px;
-            right: -5px;
-            background: #ef4444;
-            color: white;
-            font-size: 10px;
-            width: 18px;
-            height: 18px;
+            background: var(--bg-subtle);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: bold;
+            color: var(--text-secondary);
+            transition: var(--transition-smooth);
         }
 
-        .floating-nav-sidebar.collapsed > *:not(.nav-collapse-btn) {
-            opacity: 0;
-            transform: scale(0.1);
-            pointer-events: none;
-        }
-
-        .floating-nav-sidebar.collapsed .nav-collapse-btn {
-            transform: rotate(180deg);
-        }
-
-        /* 章节面板进入动画 */
-        @keyframes panelSlideIn {
-            0% {
-                opacity: 0;
-                transform: translate(-50%, -50%) scale(0.8) translateY(50px);
-            }
-            100% {
-                opacity: 1;
-                transform: translate(-50%, -50%) scale(1) translateY(0);
-            }
-        }
-
-        .floating-chapter-panel.active {
-            animation: panelSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-
-        /* 章节项目进入动画 */
-        .chapter-item {
-            animation: itemFadeIn 0.6s ease forwards;
-            opacity: 0;
-            transform: translateY(20px);
-        }
-
-        .chapter-item:nth-child(1) { animation-delay: 0.1s; }
-        .chapter-item:nth-child(2) { animation-delay: 0.15s; }
-        .chapter-item:nth-child(3) { animation-delay: 0.2s; }
-        .chapter-item:nth-child(4) { animation-delay: 0.25s; }
-        .chapter-item:nth-child(5) { animation-delay: 0.3s; }
-        .chapter-item:nth-child(6) { animation-delay: 0.35s; }
-        .chapter-item:nth-child(7) { animation-delay: 0.4s; }
-        .chapter-item:nth-child(8) { animation-delay: 0.45s; }
-        .chapter-item:nth-child(9) { animation-delay: 0.5s; }
-        .chapter-item:nth-child(10) { animation-delay: 0.55s; }
-        .chapter-item:nth-child(11) { animation-delay: 0.6s; }
-        .chapter-item:nth-child(12) { animation-delay: 0.65s; }
-        .chapter-item:nth-child(13) { animation-delay: 0.7s; }
-
-        @keyframes itemFadeIn {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes fadeInOut {
-            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
-            20% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-            80% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-            100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
-        }
-
-        /* 移动端优化 */
-        @media (max-width: 768px) {
-            .welcome-page { padding: 60px 10px 10px 10px; }
-            .welcome-title { font-size: 32px; }
-            .welcome-subtitle { font-size: 16px; margin-bottom: 20px;}
-            .content-display { padding: 80px 15px 100px 15px; }
-            .chapter-content { padding: 20px; }
-            .floating-topbar { width: calc(100% - 40px); }
-            .floating-nav-sidebar { right: 10px; bottom: 10px; gap: 8px; }
-            #chapterList { grid-template-columns: 1fr; }
-            .floating-chapter-panel { width: 98%; max-width: none; }
-            .panel-content { padding: 20px; }
-            .chapter-item { padding: 15px; }
-            .chapter-icon { width: 40px; height: 40px; font-size: 16px; }
-        }
-
-        /* 隐藏滚动条但保持滚动功能 */
-        * {
-            scrollbar-width: none;
-            -ms-overflow-style: none;
-            scroll-behavior: smooth;
-        }
-        *::-webkit-scrollbar {
-            display: none;
-        }
-
-        /* 键盘提示样式 */
-        .keyboard-hint {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.8);
-            color: var(--text-muted);
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 12px;
-            z-index: 999;
-            border: 1px solid var(--border);
-        }
-
-        .keyboard-hint.hidden {
-            display: none;
-        }
-
-        /* 导航分隔线 */
-        .nav-divider {
-            width: 1px;
-            height: 20px;
-            background: var(--border);
-            margin: 4px 0;
-        }
-
-        /* 快速菜单样式 */
-        .quick-menu {
-            position: fixed;
-            background: rgba(15, 23, 42, 0.8);
-            backdrop-filter: blur(10px);
-            border-radius: 12px;
-            box-shadow: var(--shadow-xl);
-            padding: 8px;
-            display: none;
-            z-index: 2001;
-            border: 1px solid var(--border);
-            min-width: 140px;
-            will-change: transform, opacity;
-        }
-
-        .quick-menu.active {
-            display: block;
-            animation: menuPop 0.2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-        }
-
-        @keyframes menuPop {
-            from { opacity: 0; transform: scale(0.8) translateY(10px); }
-            to { opacity: 1; transform: scale(1) translateY(0); }
-        }
-
-        .menu-item {
-            padding: 10px 14px;
-            margin: 4px 0;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-size: 13px;
-            color: var(--text);
-            text-align: center;
-            will-change: transform;
-        }
-
-        .menu-item:hover {
-            background: var(--primary);
+        .chapter-card:hover .card-icon {
+            background: var(--text-accent);
             color: white;
-            transform: translateX(3px);
+            transform: scale(1.1);
+        }
+
+        /* === 5. 内容 Iframe === */
+        .iframe-container {
+            position: fixed;
+            top: 70px;
+            left: 0;
+            width: 100%;
+            height: calc(100% - 70px);
+            background: white;
+            z-index: 40;
+            transform: translateX(100%);
+            transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .iframe-container.active {
+            transform: translateX(0);
+        }
+
+        iframe { width: 100%; height: 100%; border: none; }
+
+        /* 加载条 */
+        .loading-bar {
+            position: fixed;
+            top: 69px;
+            left: 0;
+            height: 2px;
+            background: var(--text-accent);
+            width: 0%;
+            z-index: 200;
+            transition: width 0.3s ease;
+        }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .nav-brand span, .nav-controls span { display: none; }
+            .chapter-grid { grid-template-columns: 1fr; }
+            .welcome-title { font-size: 42px; }
         }
     </style>
+    <!-- 引入 FontAwesome 用于图标 (本地化) -->
+    <link rel="stylesheet" href="../common-assets/css/fontawesome.min.css">
+    <link rel="stylesheet" href="../common-assets/css/solid.min.css">
 </head>
 <body>
-<!-- 简化顶部导航栏 -->
-<div class="unified-top-nav">
-    <div class="nav-brand">
-        <h1>课程中心</h1>
-        <p>Course Center</p>
+
+    <div class="loading-bar" id="loadingBar"></div>
+
+    <!-- 1. 顶部导航 -->
+    <nav class="top-nav">
+        <div class="nav-brand">
+            <h1>课程中心</h1>
+            <span>Course Center / Digital Classroom</span>
+        </div>
+        <div class="nav-controls">
+            <button class="nav-btn" onclick="toggleChapterList()" title="目录">
+                <i class="fas fa-th-large"></i>
+                <span>课程目录</span>
+            </button>
+            <div style="width:1px; height:20px; background:var(--border-color); margin:0 5px;"></div>
+            <button class="nav-btn" onclick="goPrev()" title="上一章">
+                <i class="fas fa-chevron-left"></i>
+                <span>上一章</span>
+            </button>
+            <button class="nav-btn" onclick="goNext()" title="下一章">
+                <span>下一章</span>
+                <i class="fas fa-chevron-right"></i>
+            </button>
+            <button class="nav-btn btn-primary" onclick="goMainSite()" title="返回主站">
+                <i class="fas fa-home"></i>
+                <span>主页</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- 2. 背景动画 -->
+    <canvas id="geo-canvas"></canvas>
+
+    <!-- 3. 欢迎页 -->
+    <div class="welcome-screen" id="welcomeScreen">
+        <h1 class="welcome-title">Course Center</h1>
+        <p class="welcome-subtitle">
+            高等应用数学 · 核心课程资源<br>
+            Systematic learning path for higher mathematics
+        </p>
+        <button class="start-btn" onclick="toggleChapterList()">
+            <span>开始学习</span>
+            <i class="fas fa-arrow-right"></i>
+        </button>
     </div>
-    <div class="nav-actions">
-        <button class="nav-action-btn" onclick="goPrev()" title="上一页">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-                <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
-            </svg>
-            上一页
-        </button>
-        <button class="nav-action-btn" onclick="goNext()" title="下一页">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-                <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
-            </svg>
-            下一页
-        </button>
-        <button class="nav-action-btn" onclick="showChapterList()" title="目录">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-                <path d="M4 6h16v2H4V6zm0 5h16v2H4v-2zm0 5h16v2H4v-2z"/>
-            </svg>
-            目录
-        </button>
-        <button class="nav-action-btn" onclick="showQuickNav()" title="快速跳转">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-            </svg>
-            跳转
-        </button>
-        <button class="nav-action-btn" onclick="switchBackground()" title="切换背景">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-                <path d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
-            </svg>
-            <span id="bg-switch-text">背景</span>
-        </button>
-        <button class="nav-action-btn" onclick="goMainSite()" title="返回主页">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-                <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8h5z"/>
-            </svg>
-            主页
-        </button>
-    </div>
-</div>
 
-<!-- 背景画布 -->
-<canvas id="starry-sky"></canvas>
-
-<!-- 扫描线 -->
-<div class="scan-line"></div>
-
-<!-- 主内容区 -->
-<div class="main-content">
-    <!-- 欢迎页 -->
-    <div class="welcome-page" id="welcomePage">
-        <div class="welcome-content">
-            <!-- 章节目录按钮 - 移到右上角 -->
-            <div style="position: fixed; top: 20px; right: 20px; z-index: 999999; background: var(--glass); border: 1px solid var(--glass-border); border-radius: 15px; padding: 15px 25px; cursor: pointer; backdrop-filter: blur(5px); transition: all 0.3s ease;" onclick="showChapterList()" onmouseover="this.style.background='rgba(0, 255, 0, 0.1)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.background='var(--glass)'; this.style.transform='translateY(0)'">
-                <span style="display: flex; align-items: center; gap: 10px; color: var(--text); font-size: 16px; font-weight: 500;">
-                    <span style="width: 30px; height: 30px; background: rgba(0, 255, 255, 0.1); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--accent);">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width: 18px; height: 18px;"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg>
-                    </span>
-                    目录
-                </span>
+    <!-- 4. 目录层 -->
+    <div class="chapter-overlay" id="chapterOverlay">
+        <div class="grid-wrapper">
+            <div class="section-header">
+                <h2>课程目录</h2>
+                <span>共 13 章节</span>
+            </div>
+            <div class="chapter-grid" id="chapterGrid">
+                <!-- JS 生成 -->
             </div>
         </div>
     </div>
 
-    <!-- 内容显示区域 - 全屏预览 -->
-    <div class="content-display" id="contentDisplay">
-        <div class="preview-controls">
-            <button class="close-preview-btn" onclick="closePreview()" title="关闭预览">
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-                </svg>
-            </button>
-        </div>
-        <iframe class="content-iframe" id="contentFrame"></iframe>
+    <!-- 5. 内容区域 -->
+    <div class="iframe-container" id="iframeContainer">
+        <iframe id="contentFrame" src="about:blank"></iframe>
     </div>
-</div>
-
-<!-- 悬浮右上角标题 -->
-<div class="floating-topbar" id="topbar">
-    高等应用数学课件
-</div>
-
-<!-- 键盘提示 -->
-<div class="keyboard-hint hidden" id="keyboardHint">
-    使用 <i class="fa-solid fa-arrow-left"></i> → 键导航，Home 键返回目录，End 键回主站
-</div>
-
-<!-- 悬浮章节面板 -->
-<div class="floating-chapter-panel" id="chapterPanel">
-    <div class="panel-content">
-        <div id="chapterList"></div>
-    </div>
-</div>
-
-<!-- 移除右下角侧边栏，避免遮挡内容 -->
 
 <script>
-// 背景相关变量
-let canvas, ctx, animationId;
-let currentBg = 'matrix'; // 'matrix' 或 'warm'
+    // === 1. 章节数据 ===
+    const chapters = [
+        { title: "第1章 代数基础", url: "第1章代数.html", icon: "fa-superscript" },
+        { title: "第2章 极限与连续", url: "第2章极限与连续.html", icon: "fa-infinity" },
+        { title: "第3章 导数与微分", url: "第3章导数与微分.html", icon: "fa-chart-line" },
+        { title: "第4章 导数应用", url: "第4章导数应用.html", icon: "fa-mountain" },
+        { title: "第5章 不定积分", url: "第5章不定积分.html", icon: "fa-integral" },
+        { title: "第6章 定积分", url: "第6章定积分.html", icon: "fa-chart-area" },
+        { title: "第7章 常微分方程", url: "第7章常微分方程.html", icon: "fa-subscript" },
+        { title: "第8章 多元函数微分学", url: "第8章多元函数微分学.html", icon: "fa-layer-group" },
+        { title: "第9章 多元函数积分学初步", url: "第9章多元函数积分学初步.html", icon: "fa-cube" },
+        { title: "第10章 无穷级数", url: "第11章无穷级数.html", icon: "fa-plus-square" }, // 注意：原数据url是第11章
+        { title: "第11章 线性代数", url: "第10章线性代数.html", icon: "fa-border-all" }, // 注意：原数据url是第10章
+        { title: "第12章 向量代数与空间解析几何", url: "第12章向量代数与空间解析几何.html", icon: "fa-globe" },
+        { title: "第13章 概率与统计", url: "第13章概率与统计.html", icon: "fa-dice" }
+    ];
 
-// 矩阵背景变量
-let matrixWidth, matrixHeight;
-const fontSize = 18;
-let columns, drops;
+    let currentIndex = -1;
 
-// 暖色背景变量
-let warmParticles = [];
-
-function setCanvasSize() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    
-    if (currentBg === 'matrix') {
-        initMatrixBackground();
-    } else {
-        initWarmBackground();
+    // === 2. 初始化与交互 ===
+    function init() {
+        renderChapters();
+        initGeoAnimation();
+        
+        // 自动打开目录
+        setTimeout(toggleChapterList, 500);
     }
-}
 
-// 初始化矩阵背景
-function initMatrixBackground() {
-    matrixWidth = canvas.width;
-    matrixHeight = canvas.height;
-    columns = Math.floor(matrixWidth / fontSize);
-    
-    drops = [];
-    for (let i = 0; i < columns; i++) {
-        drops[i] = Math.floor(Math.random() * -100);
-    }
-}
-
-// 初始化暖色背景
-function initWarmBackground() {
-    warmParticles = [];
-    const particleCount = 100;
-    
-    for (let i = 0; i < particleCount; i++) {
-        warmParticles.push({
-            x: Math.random() * canvas.width,
-            y: Math.random() * canvas.height,
-            radius: Math.random() * 3 + 1,
-            vx: (Math.random() - 0.5) * 0.5,
-            vy: Math.random() * 2 + 0.5,
-            opacity: Math.random() * 0.5 + 0.3,
-            hue: Math.random() * 60 + 15 // 15-75度，橙色到黄色范围
+    function renderChapters() {
+        const grid = document.getElementById('chapterGrid');
+        grid.innerHTML = '';
+        chapters.forEach((chapter, index) => {
+            const card = document.createElement('div');
+            card.className = 'chapter-card';
+            card.onclick = () => loadContent(index);
+            
+            card.innerHTML = `
+                <div>
+                    <div class="chapter-idx">CHAPTER ${index + 1}</div>
+                    <div class="chapter-title-text">${chapter.title}</div>
+                </div>
+                <div class="card-icon">
+                    <i class="fas ${chapter.icon}"></i>
+                </div>
+            `;
+            grid.appendChild(card);
         });
     }
-}
 
-// 绘制矩阵背景
-function drawMatrix() {
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
-    ctx.fillRect(0, 0, matrixWidth, matrixHeight);
+    // === 3. 核心功能 ===
+    function toggleChapterList() {
+        const overlay = document.getElementById('chapterOverlay');
+        const iframeContainer = document.getElementById('iframeContainer');
+        const welcome = document.getElementById('welcomeScreen');
 
-    ctx.fillStyle = '#00ff00';
-    ctx.font = `${fontSize}px monospace`;
-
-    for (let i = 0; i < drops.length; i++) {
-        const text = Math.random() > 0.5 ? '1' : '0';
-        const x = i * fontSize;
-        const y = drops[i] * fontSize;
-
-        ctx.fillText(text, x, y);
-
-        if (y > matrixHeight && Math.random() > 0.975) {
-            drops[i] = 0;
-        }
-        drops[i]++;
-    }
-}
-
-// 绘制暖色背景
-function drawWarmBackground() {
-    // 创建渐变背景
-    const gradient = ctx.createRadialGradient(
-        canvas.width / 2, canvas.height / 2, 0,
-        canvas.width / 2, canvas.height / 2, Math.max(canvas.width, canvas.height)
-    );
-    gradient.addColorStop(0, 'rgba(26, 10, 0, 0.95)');
-    gradient.addColorStop(1, 'rgba(0, 0, 0, 0.98)');
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // 绘制流光粒子
-    warmParticles.forEach(p => {
-        // 更新粒子位置
-        p.y -= p.vy;
-        p.x += p.vx;
-        
-        // 边界处理
-        if (p.y < -10) {
-            p.y = canvas.height + 10;
-            p.x = Math.random() * canvas.width;
-        }
-        if (p.x < 0) p.x = canvas.width;
-        if (p.x > canvas.width) p.x = 0;
-        
-        // 绘制粒子
-        ctx.save();
-        ctx.globalAlpha = p.opacity;
-        
-        // 创建发光效果
-        const gradient = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.radius * 3);
-        gradient.addColorStop(0, `hsla(${p.hue}, 100%, 60%, 1)`);
-        gradient.addColorStop(0.5, `hsla(${p.hue}, 100%, 50%, 0.5)`);
-        gradient.addColorStop(1, `hsla(${p.hue}, 100%, 40%, 0)`);
-        
-        ctx.fillStyle = gradient;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.radius * 3, 0, Math.PI * 2);
-        ctx.fill();
-        
-        // 中心亮点
-        ctx.fillStyle = `hsla(${p.hue}, 100%, 80%, 1)`;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-        ctx.fill();
-        
-        ctx.restore();
-        
-        // 随机改变透明度，创建闪烁效果
-        p.opacity += (Math.random() - 0.5) * 0.02;
-        p.opacity = Math.max(0.3, Math.min(0.8, p.opacity));
-    });
-}
-
-// 主动画循环
-function animate() {
-    if (currentBg === 'matrix') {
-        drawMatrix();
-    } else {
-        drawWarmBackground();
-    }
-    animationId = requestAnimationFrame(animate);
-}
-
-// 切换背景
-function switchBackground() {
-    if (animationId) {
-        cancelAnimationFrame(animationId);
-    }
-    
-    const body = document.body;
-    const switchText = document.getElementById('bg-switch-text');
-    
-    if (currentBg === 'matrix') {
-        currentBg = 'warm';
-        body.classList.add('warm-theme');
-        switchText.textContent = '切换到矩阵';
-        initWarmBackground();
-    } else {
-        currentBg = 'matrix';
-        body.classList.remove('warm-theme');
-        switchText.textContent = '切换到流光';
-        initMatrixBackground();
-    }
-    
-    animate();
-}
-
-// 初始化
-canvas = document.getElementById('starry-sky');
-ctx = canvas.getContext('2d');
-
-setCanvasSize();
-animate();
-
-window.addEventListener('resize', () => {
-    setCanvasSize();
-});
-
-// 章节数据
-const chapters = {
-    0: { title: "第1章 代数基础", url: "第1章代数.html" },
-    1: { title: "第2章 极限与连续", url: "第2章极限与连续.html" },
-    2: { title: "第3章 导数与微分", url: "第3章导数与微分.html" },
-    3: { title: "第4章 导数应用", url: "第4章导数应用.html" },
-    4: { title: "第5章 不定积分", url: "第5章不定积分.html" },
-    5: { title: "第6章 定积分", url: "第6章定积分.html" },
-    6: { title: "第7章 常微分方程", url: "第7章常微分方程.html" },
-    7: { title: "第8章 多元函数微分学", url: "第8章多元函数微分学.html" },
-    8: { title: "第9章 多元函数积分学初步", url: "第9章多元函数积分学初步.html" },
-    9: { title: "第10章 无穷级数", url: "第11章无穷级数.html" },
-    10: { title: "第11章 线性代数", url: "第10章线性代数.html" },
-    11: { title: "第12章 向量代数与空间解析几何", url: "第12章向量代数与空间解析几何.html" },
-    12: { title: "第13章 概率与统计", url: "第13章概率与统计.html" }
-};
-
-// 全局变量
-let currentUrl = '';
-let currentIndex = -1;
-let currentOpenChapter = -1;
-let pageIssues = {};
-
-function loadContent(url, title) {
-    // 直接跳转到页面
-    window.location.href = url;
-}
-
-function previewContent(url, title) {
-    console.log('previewContent 被调用:', url, title);
-    
-    const frame = document.getElementById('contentFrame');
-    const welcome = document.getElementById('welcomePage');
-    const contentDisplay = document.getElementById('contentDisplay');
-    const topbar = document.getElementById('topbar');
-    const keyboardHint = document.getElementById('keyboardHint');
-
-    console.log('DOM元素检查:', {
-        frame: !!frame,
-        welcome: !!welcome,
-        contentDisplay: !!contentDisplay,
-        topbar: !!topbar,
-        keyboardHint: !!keyboardHint
-    });
-
-    if (!frame || !welcome || !contentDisplay || !topbar || !keyboardHint) {
-        console.error('缺少必要的DOM元素');
-        return;
-    }
-
-    // 先显示内容区域（全屏预览）
-    contentDisplay.classList.add('active');
-    welcome.style.display = 'none';
-    keyboardHint.classList.add('hidden'); // 全屏时隐藏键盘提示
-    
-    console.log('contentDisplay.classList:', contentDisplay.classList.toString());
-    console.log('contentDisplay.style.display:', contentDisplay.style.display);
-    console.log('contentDisplay.offsetWidth:', contentDisplay.offsetWidth);
-    console.log('contentDisplay.offsetHeight:', contentDisplay.offsetHeight);
-    
-    // 然后加载iframe内容
-    frame.src = url;
-    console.log('iframe src 设置为:', url);
-
-    currentUrl = url;
-    const displayTitle = title || getChineseTitle(url);
-    
-    // 更新顶部导航栏标题
-    const navBrandH1 = document.querySelector('.nav-brand h1');
-    if (navBrandH1) {
-        navBrandH1.textContent = displayTitle;
-    }
-    
-    console.log('预览内容已加载:', displayTitle);
-    
-    // 检查iframe是否加载完成
-    frame.onload = function() {
-        console.log('iframe 加载完成');
-        console.log('iframe contentWindow:', frame.contentWindow);
-        console.log('iframe contentDocument:', frame.contentDocument);
-        console.log('iframe src:', frame.src);
-    };
-    
-    frame.onerror = function() {
-        console.error('iframe 加载失败');
-    };
-    
-    // 添加超时检查
-    setTimeout(() => {
-        console.log('iframe 超时检查 - src:', frame.src);
-        console.log('iframe 超时检查 - contentWindow:', frame.contentWindow);
-        if (frame.contentWindow) {
-            try {
-                console.log('iframe 内容标题:', frame.contentWindow.document.title);
-            } catch (e) {
-                console.log('无法访问iframe内容（跨域限制）:', e.message);
-            }
-        }
-    }, 2000);
-
-    // 如果currentIndex还没有设置，通过URL查找
-    if (currentIndex === -1) {
-        currentIndex = Object.values(chapters).findIndex(ch => ch.url === url);
-    }
-}
-
-// 关闭预览
-function closePreview() {
-    console.log('关闭预览');
-    const contentDisplay = document.getElementById('contentDisplay');
-    const welcome = document.getElementById('welcomePage');
-    const keyboardHint = document.getElementById('keyboardHint');
-    
-    if (contentDisplay && welcome && keyboardHint) {
-        contentDisplay.classList.remove('active');
-        welcome.style.display = 'block';
-        keyboardHint.classList.remove('hidden');
-        
-        // 恢复原始标题
-        const navBrandH1 = document.querySelector('.nav-brand h1');
-        if (navBrandH1) {
-            navBrandH1.textContent = '课程中心';
+        if(iframeContainer.classList.contains('active')) {
+            // 从内容返回
+            iframeContainer.classList.remove('active');
+            document.querySelector('.nav-brand h1').textContent = '课程中心';
+            overlay.classList.add('active');
+            // 重置 iframe
+            setTimeout(() => { document.getElementById('contentFrame').src = 'about:blank'; }, 500);
+        } else if (overlay.classList.contains('active')) {
+            // 从目录关闭 (去欢迎页)
+            overlay.classList.remove('active');
+            welcome.style.opacity = '1';
+        } else {
+            // 打开目录
+            welcome.style.opacity = '0';
+            setTimeout(() => { overlay.classList.add('active'); }, 200);
         }
     }
-}
 
-function exitFullscreen() {
-    const contentDisplay = document.getElementById('contentDisplay');
-    const welcome = document.getElementById('welcomePage');
-    const keyboardHint = document.getElementById('keyboardHint');
-    
-    contentDisplay.classList.remove('active');
-    welcome.style.display = 'flex';
-    keyboardHint.classList.remove('hidden');
-    
-    currentUrl = '';
-    currentIndex = -1;
-    
-    // 重置导航按钮状态
-    updateNavigationButtons();
-    
-    closeAllPanels();
-}
+    function loadContent(index) {
+        if(index < 0 || index >= chapters.length) return;
+        
+        currentIndex = index;
+        const chapter = chapters[index];
+        const overlay = document.getElementById('chapterOverlay');
+        const iframeContainer = document.getElementById('iframeContainer');
+        const frame = document.getElementById('contentFrame');
+        const loadingBar = document.getElementById('loadingBar');
 
-function updateNavigationButtons() {
-    const prevBtn = document.querySelector('.nav-action-btn[onclick="goPrev()"]');
-    const nextBtn = document.querySelector('.nav-action-btn[onclick="goNext()"]');
-    
-    if (prevBtn) {
-        prevBtn.disabled = (currentIndex <= 0);
-    }
-    if (nextBtn) {
-        nextBtn.disabled = (currentIndex >= Object.keys(chapters).length - 1);
-    }
-}
+        // UI 更新
+        overlay.classList.remove('active');
+        iframeContainer.classList.add('active');
+        document.querySelector('.nav-brand h1').textContent = chapter.title;
 
-function getChineseTitle(url) {
-    for (let chapter of Object.values(chapters)) {
-        if (chapter.url === url) {
-            return chapter.title;
-        }
-    }
-    return url;
-}
-
-function showChapter(categoryId) {
-    const chapter = chapters[categoryId];
-    if (!chapter) return;
-
-    // 目录点击：直接跳转
-    currentIndex = categoryId;
-    loadContent(chapter.url, chapter.title);
-}
-
-function showChapterList() {
-    
-    // 直接创建一个新的目录面板，确保不被遮挡
-    let chapterMenu = document.getElementById('chapterMenu');
-    if (chapterMenu) {
-        chapterMenu.remove();
-        return;
-    }
-    
-    chapterMenu = document.createElement('div');
-    chapterMenu.id = 'chapterMenu';
-    chapterMenu.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background: rgba(0, 0, 0, 0.9);
-        z-index: 999999;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        backdrop-filter: blur(10px);
-    `;
-    
-    // 创建内容容器
-    const content = document.createElement('div');
-    const primaryColor = currentBg === 'warm' ? '#ffd700' : '#00ff00';
-    content.style.cssText = `
-        background: linear-gradient(135deg, rgba(0, 0, 0, 0.8), rgba(30, 30, 30, 0.6));
-        border: 2px solid ${primaryColor};
-        border-radius: 20px;
-        padding: 30px;
-        max-width: 90%;
-        max-height: 80%;
-        overflow-y: auto;
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 20px;
-    `;
-    
-    // 添加关闭按钮
-    const closeBtn = document.createElement('div');
-    closeBtn.style.cssText = `
-        position: absolute;
-        top: 20px;
-        right: 20px;
-        width: 40px;
-        height: 40px;
-        background: rgba(255, 0, 0, 0.8);
-        color: white;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        font-size: 20px;
-        font-weight: bold;
-        transition: all 0.3s ease;
-    `;
-    closeBtn.innerHTML = '×';
-    closeBtn.onclick = () => chapterMenu.remove();
-    closeBtn.onmouseover = () => {
-        closeBtn.style.background = 'rgba(255, 0, 0, 1)';
-        closeBtn.style.transform = 'scale(1.1)';
-    };
-    closeBtn.onmouseout = () => {
-        closeBtn.style.background = 'rgba(255, 0, 0, 0.8)';
-        closeBtn.style.transform = 'scale(1)';
-    };
-    
-    // 添加章节标题
-    const title = document.createElement('div');
-    title.style.cssText = `
-        grid-column: 1 / -1;
-        text-align: center;
-        color: ${primaryColor};
-        font-size: 24px;
-        font-weight: bold;
-        margin-bottom: 20px;
-        padding-bottom: 15px;
-        border-bottom: 2px solid rgba(255, 255, 255, 0.2);
-    `;
-    title.innerHTML = '';
-    
-    // 添加章节项目
-    Object.entries(chapters).forEach(([id, chapter]) => {
-        const item = document.createElement('div');
-        item.style.cssText = `
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 15px;
-            padding: 20px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            color: ${primaryColor};
-            font-size: 16px;
-        `;
-        item.innerHTML = `
-            <div style="width: 30px; height: 30px; background: ${primaryColor}; color: black; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold;">${parseInt(id) + 1}</div>
-            <span>${chapter.title}</span>
-        `;
-        item.onclick = () => {
-            currentIndex = parseInt(id);
-            loadContent(chapter.url, chapter.title); // 直接跳转而不是预览
-            chapterMenu.remove(); // 关闭目录面板
+        // 加载
+        loadingBar.style.width = '60%';
+        frame.src = chapter.url;
+        frame.onload = () => {
+            loadingBar.style.width = '100%';
+            setTimeout(() => { loadingBar.style.width = '0%'; }, 300);
         };
-        item.onmouseover = () => {
-            item.style.background = 'rgba(255, 255, 255, 0.1)';
-            item.style.transform = 'translateY(-5px)';
-            item.style.boxShadow = `0 10px 20px rgba(${currentBg === 'warm' ? '255, 215, 0' : '0, 255, 0'}, 0.3)`;
-        };
-        item.onmouseout = () => {
-            item.style.background = 'rgba(255, 255, 255, 0.05)';
-            item.style.transform = 'translateY(0)';
-            item.style.boxShadow = 'none';
-        };
-        content.appendChild(item);
-    });
-    
-    chapterMenu.appendChild(closeBtn);
-    chapterMenu.appendChild(title);
-    chapterMenu.appendChild(content);
-    document.body.appendChild(chapterMenu);
-    
-    currentOpenChapter = -1;
-}
-
-function closeAllPanels() {
-    document.getElementById('chapterPanel')?.classList.remove('active');
-    document.getElementById('feedbackMenu')?.classList.remove('active');
-    document.getElementById('chapterMenu')?.remove();
-    currentOpenChapter = -1;
-}
-
-function toggleSidebar() {
-    const sidebar = document.getElementById('navSidebar');
-    sidebar.classList.toggle('collapsed');
-    // 不自动关闭面板，让用户可以继续使用导航
-}
-
-function goPrev() {
-    console.log('goPrev 被调用, currentIndex:', currentIndex);
-    if (currentIndex > 0) {
-        currentIndex--;
-        const chapter = Object.values(chapters)[currentIndex];
-        console.log('上一页:', chapter);
-        loadContent(chapter.url, chapter.title);
-    } else {
-        showNavigationHint('已经是第一章了');
     }
-}
 
-function goNext() {
-    console.log('goNext 被调用, currentIndex:', currentIndex);
-    if (currentIndex < Object.keys(chapters).length - 1) {
-        currentIndex++;
-        const chapter = Object.values(chapters)[currentIndex];
-        console.log('下一页:', chapter);
-        loadContent(chapter.url, chapter.title);
-    } else {
-        showNavigationHint('已经是最后一章了');
-    }
-}
-
-function showNavigationHint(message) {
-    // 创建临时提示
-    const hint = document.createElement('div');
-    hint.style.cssText = `
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background: rgba(0, 0, 0, 0.8);
-        color: var(--primary-light);
-        padding: 15px 25px;
-        border-radius: 10px;
-        border: 1px solid var(--primary);
-        z-index: 1002;
-        font-size: 14px;
-        animation: fadeInOut 2s ease forwards;
-    `;
-    hint.textContent = message;
-    document.body.appendChild(hint);
-    
-    setTimeout(() => {
-        if (hint.parentNode) {
-            hint.parentNode.removeChild(hint);
-        }
-    }, 2000);
-}
-
-function goHome() {
-    exitFullscreen();
-    document.getElementById('topbar').textContent = '高等应用数学课件';
-}
-
-function goMainSite() {
-    window.location.href = '../index.html';
-}
-
-function toggleNavSidebar() {
-    const sidebar = document.getElementById('navSidebar');
-    sidebar.classList.toggle('collapsed');
-}
-
-function showQuickNav() {
-    if (currentUrl) window.open(currentUrl, '_blank');
-}
-
-function showFeedback() {
-    const btn = document.getElementById('feedbackBtn');
-    const btnRect = btn.getBoundingClientRect();
-    
-    // 创建反馈菜单
-    let feedbackMenu = document.getElementById('feedbackMenu');
-    if (!feedbackMenu) {
-        feedbackMenu = document.createElement('div');
-        feedbackMenu.id = 'feedbackMenu';
-        feedbackMenu.className = 'quick-menu';
-        feedbackMenu.innerHTML = `
-            <div class="menu-item" onclick="reportIssue('performance')">性能问题</div>
-            <div class="menu-item" onclick="reportIssue('display')">显示问题</div>
-            <div class="menu-item" onclick="reportIssue('function')">功能问题</div>
-            <div class="menu-item" onclick="exportIssues()">导出反馈(JSON)</div>
-            <div class="menu-item" onclick="clearIssues()">清空记录</div>
-        `;
-        document.body.appendChild(feedbackMenu);
-    }
-    
-    feedbackMenu.style.bottom = (window.innerHeight - btnRect.bottom) + 'px';
-    feedbackMenu.style.right = (window.innerWidth - btnRect.left + 10) + 'px';
-    feedbackMenu.style.left = 'auto';
-    feedbackMenu.style.top = 'auto';
-
-    feedbackMenu.classList.toggle('active');
-}
-
-function reportIssue(type) {
-    if (!currentUrl) return;
-    if (!pageIssues) pageIssues = {};
-    if (!pageIssues[currentUrl]) pageIssues[currentUrl] = [];
-    pageIssues[currentUrl].push({ type: type, time: new Date().toLocaleString() });
-    localStorage.setItem('mathLabIssues', JSON.stringify(pageIssues));
-    updateFeedbackBadge();
-    closeAllPanels();
-}
-
-function clearIssues() {
-    pageIssues = {};
-    localStorage.removeItem('mathLabIssues');
-    updateFeedbackBadge();
-    closeAllPanels();
-}
-
-function exportIssues() {
-    try {
-        let data = (pageIssues && Object.keys(pageIssues).length > 0)
-            ? pageIssues
-            : JSON.parse(localStorage.getItem('mathLabIssues') || '{}');
-        if (!data || Object.keys(data).length === 0) {
-            closeAllPanels();
-            return;
-        }
-        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json;charset=utf-8' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        const ts = new Date();
-        const pad = n => String(n).padStart(2, '0');
-        const filename = `math-lab-feedback-${ts.getFullYear()}${pad(ts.getMonth()+1)}${pad(ts.getDate())}-${pad(ts.getHours())}${pad(ts.getMinutes())}${pad(ts.getSeconds())}.json`;
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        closeAllPanels();
-    } catch (e) {
-        console.error('导出失败:', e);
-    }
-}
-
-function updateFeedbackBadge() {
-    const badge = document.getElementById('feedbackBadge');
-    if (!badge) return;
-    const count = Object.values(pageIssues || {}).reduce((acc, val) => acc + val.length, 0);
-    badge.textContent = count;
-    badge.style.display = count > 0 ? 'flex' : 'none';
-}
-
-document.addEventListener('click', (e) => {
-    // 只有在点击面板外部时才关闭面板，但保持侧边栏按钮可用
-    if (!e.target.closest('.floating-chapter-panel, .sidebar-action-btn, .quick-menu')) {
-        const panel = document.getElementById('chapterPanel');
-        const feedbackMenu = document.getElementById('feedbackMenu');
-        if (panel && panel.classList.contains('active')) {
-            panel.classList.remove('active');
-            currentOpenChapter = -1;
-        }
-        if (feedbackMenu && feedbackMenu.classList.contains('active')) {
-            feedbackMenu.classList.remove('active');
+    function goPrev() {
+        if(currentIndex > 0) {
+            loadContent(currentIndex - 1);
+        } else {
+            alert('已经是第一章了');
         }
     }
-});
 
-function initKeyboardNavigation() {
-    document.addEventListener('keydown', function(event) {
-        const activeElement = document.activeElement;
-        if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA' || activeElement.isContentEditable)) return;
+    function goNext() {
+        if(currentIndex < chapters.length - 1) {
+            loadContent(currentIndex + 1);
+        } else {
+            alert('已经是最后一章了');
+        }
+    }
+
+    function goMainSite() {
+        window.location.href = '../index.html';
+    }
+
+    // === 4. 背景动画 (极简几何) ===
+    function initGeoAnimation() {
+        const canvas = document.getElementById('geo-canvas');
+        const ctx = canvas.getContext('2d');
+        let w, h;
+        const shapes = [];
+        const colors = ['rgba(37, 99, 235, 0.05)', 'rgba(100, 116, 139, 0.05)', 'rgba(13, 148, 136, 0.05)'];
+
+        function resize() {
+            w = canvas.width = window.innerWidth;
+            h = canvas.height = window.innerHeight;
+        }
+
+        class Shape {
+            constructor() { this.init(); }
+            init() {
+                this.x = Math.random() * w;
+                this.y = Math.random() * h;
+                this.vx = (Math.random() - 0.5) * 0.5;
+                this.vy = (Math.random() - 0.5) * 0.5;
+                this.size = Math.random() * 40 + 20;
+                this.type = Math.floor(Math.random() * 3);
+                this.color = colors[Math.floor(Math.random() * colors.length)];
+                this.angle = Math.random() * Math.PI * 2;
+                this.vAngle = (Math.random() - 0.5) * 0.01;
+            }
+            update() {
+                this.x += this.vx; this.y += this.vy; this.angle += this.vAngle;
+                if(this.x<-100||this.x>w+100||this.y<-100||this.y>h+100) this.init();
+            }
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.angle);
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                if(this.type===0) ctx.arc(0,0,this.size,0,Math.PI*2);
+                else if(this.type===1) ctx.rect(-this.size,-this.size,this.size*2,this.size*2);
+                else { ctx.moveTo(0,-this.size); ctx.lineTo(this.size,this.size); ctx.lineTo(-this.size,this.size); }
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        for(let i=0; i<15; i++) shapes.push(new Shape());
         
-        switch(event.key) {
-        case 'ArrowLeft':
-            event.preventDefault();
-            if (currentIndex === -1) {
-                // 在主页时，从最后一章开始预览
-                currentIndex = Object.keys(chapters).length - 1;
-            }
-            goPrev();
-            break;
-        case 'ArrowRight':
-            event.preventDefault();
-            if (currentIndex === -1) {
-                // 在主页时，从第一章开始预览
-                currentIndex = -1;
-            }
-            goNext();
-            break;
-        case 'Home':
-            event.preventDefault();
-            goHome();
-            break;
-        case 'Escape':
-            event.preventDefault();
-            // ESC键退出全屏预览
-            if (document.getElementById('contentDisplay').classList.contains('active')) {
-                exitFullscreen();
-            } else {
-                goHome();
-            }
-            break;
-        case 'End':
-            event.preventDefault();
-            goMainSite();
-            break;
-        case 'b':
-        case 'B':
-            event.preventDefault();
-            switchBackground();
-            break;
+        function animate() {
+            ctx.clearRect(0,0,w,h);
+            shapes.forEach(s => { s.update(); s.draw(); });
+            requestAnimationFrame(animate);
         }
-    });
-}
 
-window.addEventListener('DOMContentLoaded', () => {
-    initKeyboardNavigation();
-    
-    // 加载保存的问题反馈
-    const saved = localStorage.getItem('mathLabIssues');
-    if (saved) {
-        try {
-            pageIssues = JSON.parse(saved);
-            updateFeedbackBadge();
-        } catch (e) { 
-            console.error('加载反馈数据失败:', e); 
-        }
+        window.addEventListener('resize', resize);
+        resize();
+        animate();
     }
-    
-    // 自动弹出目录
-    setTimeout(() => {
-        showChapterList();
-    }, 500);
-});
+
+    window.addEventListener('DOMContentLoaded', init);
+
 </script>
 </body>
 </html>

@@ -4,51 +4,32 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>智能题库 - 高等应用数学在线课堂</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
-        /* 共享样式变量 */
         :root {
-            /* 秋天主题色彩 */
-            --autumn-primary: #d97706;
-            --autumn-primary-dark: #b45309;
-            --autumn-accent: #16a34a;
-            --autumn-background: #fffbeb;
-            --autumn-surface: #ffffff;
-            --autumn-text-primary: #451a03;
-            --autumn-text-secondary: #78350f;
-            --autumn-glass-bg: rgba(255, 251, 235, 0.6);
-            --autumn-glass-border: rgba(180, 83, 9, 0.15);
+            /* === 核心色彩变量 (白色科技主题) === */
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc; /* 极浅灰，用于交替背景 */
+            --bg-glass: rgba(255, 255, 255, 0.85);
             
-            /* 星空主题色彩 */
-            --space-primary: #4f46e5;
-            --space-primary-dark: #4338ca;
-            --space-accent: #06ffa5;
-            --space-dark: #0f172a;
-            --space-dark-surface: #1e293b;
-            --space-text: #e2e8f0;
-            --space-text-muted: #94a3b8;
-            --space-glass: rgba(255, 255, 255, 0.1);
-            --space-glass-border: rgba(255, 255, 255, 0.2);
+            --text-main: #1e293b;   /* 深蓝灰，阅读舒适 */
+            --text-sub: #64748b;    /* 浅灰，用于说明文字 */
             
-            /* 阴影 */
-            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3), 0 2px 4px -2px rgb(0 0 0 / 0.3);
-            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4), 0 4px 6px -4px rgb(0 0 0 / 0.4);
-            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.5), 0 8px 10px -6px rgb(0 0 0 / 0.5);
-            --glow: 0 0 20px rgba(6, 255, 165, 0.3);
+            --brand-blue: #2563eb;  /* 科技蓝 */
+            --brand-teal: #0d9488;  /* 沉稳的青色 */
+            
+            --border-light: #e2e8f0;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -2px rgba(0,0,0,0.04);
+            --shadow-hover: 0 20px 25px -5px rgba(37, 99, 235, 0.1), 0 10px 10px -5px rgba(37, 99, 235, 0.04);
         }
 
-        /* 统一字体与颜色 */
+        /* 字体定义 */
         @font-face {
             font-family: 'WDXLubrifontSC';
             src: url('../common-assets/fonts/WD-XLLubrifontSC-Regular.otf') format('opentype');
-            font-weight: 400;
-            font-style: normal;
-            font-display: swap;
-        }
-        @font-face {
-            font-family: 'JfOpenHuninn';
-            src: url('../common-assets/fonts/jf-openhuninn-2.1.ttf') format('truetype');
-            font-weight: 400;
-            font-style: normal;
             font-display: swap;
         }
 
@@ -56,1366 +37,606 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-        }
-
-        @font-face {
-            font-family: 'WDLubrifont';
-            src: url('../common-assets/fonts/WD-XLLubrifontSC-Regular.otf') format('opentype');
-            font-weight: 400;
-            font-style: normal;
-        }
-        
-        @font-face {
-            font-family: 'DingLieCiWei';
-            src: url('../common-assets/fonts/jf-openhuninn-2.1.ttf') format('truetype');
-            font-weight: 400;
-            font-style: normal;
+            -webkit-font-smoothing: antialiased;
         }
 
         body {
-            font-family: 'WDXLubrifontSC', 'JfOpenHuninn', 'Noto Serif SC', 'Microsoft YaHei', 'PingFang SC', Arial, sans-serif;
-            font-size: 18px;
+            font-family: 'WDXLubrifontSC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            overflow: hidden; /* 防止出现双滚动条 */
+            height: 100vh;
             width: 100vw;
-            min-height: 100vh;
-            margin: 0;
-            padding: 0;
-            position: relative;
-            overflow: hidden;
-            transition: background 0.5s ease, color 0.3s ease;
-            background: #faf9f7;
-            color: #2c3e50;
+            transition: background 0.3s ease;
         }
 
-        /* 秋天主题 body 样式 */
-        body.autumn-theme {
-            background: linear-gradient(120deg, #fffbeb 0%, #fef3c7 50%, #fde68a 100%);
-            color: var(--autumn-text-primary);
-        }
-
-        /* 星空主题 body 样式 */
-        body.space-theme {
-            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%);
-            color: var(--space-text);
-        }
-
-        /* 统一顶部导航栏 */
-        .unified-top-nav {
+        /* === 顶部导航栏 (白色磨砂) === */
+        .top-nav {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
+            height: 70px;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-light);
             z-index: 1000;
-            background: rgba(15, 23, 42, 0.95);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid var(--space-border);
-            padding: 15px 30px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            padding: 0 40px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .nav-brand {
+            display: flex;
+            flex-direction: column;
         }
 
         .nav-brand h1 {
-            font-family: 'WDLubrifont', sans-serif;
-            font-size: 24px;
-            font-weight: 600;
-            color: var(--space-text);
-            margin: 0;
-            background: linear-gradient(135deg, #ffffff 0%, #06ffa5 100%);
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-main);
+            letter-spacing: 1px;
+            background: linear-gradient(135deg, var(--brand-blue), var(--brand-teal));
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
         .nav-brand p {
-            font-size: 12px;
-            color: var(--space-text-muted);
-            margin: 0;
-            text-transform: uppercase;
+            font-size: 11px;
+            color: var(--text-sub);
             letter-spacing: 0.1em;
+            text-transform: uppercase;
+            font-weight: 500;
         }
 
         .nav-actions {
             display: flex;
-            gap: 15px;
-            align-items: center;
+            gap: 12px;
         }
 
-        .nav-action-btn {
+        .btn-nav {
             display: flex;
             align-items: center;
             gap: 8px;
-            padding: 10px 20px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--space-border);
+            padding: 8px 16px;
             border-radius: 8px;
-            color: var(--space-text);
+            border: 1px solid var(--border-light);
+            background: #fff;
+            color: var(--text-sub);
             font-size: 14px;
+            font-weight: 500;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
         }
 
-        .nav-action-btn:hover {
-            background: rgba(6, 255, 165, 0.1);
-            border-color: var(--space-accent);
-            color: var(--space-accent);
-            transform: translateY(-2px);
-        }
-
-        .nav-action-btn svg {
+        .btn-nav svg {
             width: 16px;
             height: 16px;
+            fill: currentColor;
         }
 
-        /* 主题切换按钮 */
-        .theme-switch-btn {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 10000;
-            padding: 12px 24px;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 30px;
+        .btn-nav:hover {
+            border-color: var(--brand-blue);
+            color: var(--brand-blue);
+            background: #eff6ff;
+            transform: translateY(-1px);
+        }
+
+        .btn-primary {
+            background: var(--brand-blue);
             color: white;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            border: none;
+        }
+        
+        .btn-primary:hover {
+            background: #1d4ed8;
+            color: white;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
         }
 
-        body.autumn-theme .theme-switch-btn {
-            background: rgba(217, 119, 6, 0.1);
-            border-color: rgba(217, 119, 6, 0.3);
-            color: var(--autumn-text-primary);
-        }
-
-        .theme-switch-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-            box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
-        }
-
-        body.autumn-theme .theme-switch-btn:hover {
-            background: rgba(217, 119, 6, 0.2);
-            box-shadow: 0 0 20px rgba(217, 119, 6, 0.3);
-        }
-
-        /* 背景画布（禁用第二背景） */
-        #bg-canvas { display: none !important; }
-
-        #particle-canvas {
+        /* === 动态背景层 === */
+        #network-canvas {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: 1;
+            z-index: 0;
             pointer-events: none;
-            opacity: 0.15;
-            display: block !important;
+            opacity: 0.6; /* 淡化背景动画，不抢眼 */
         }
 
-        body.space-theme #particle-canvas { display: none; }
-
-        /* 主内容区 */
-        .main-content {
-            width: 100vw;
+        /* === 主内容区 === */
+        .main-container {
+            position: relative;
+            z-index: 1;
             height: 100vh;
-            position: relative;
-        }
-
-        /* 欢迎页 */
-        .welcome-page {
-            width: 100%;
-            min-height: 100vh;
-            display: flex;
-            align-items: flex-start;
-            justify-content: center;
-            padding: 40px 20px;
-            box-sizing: border-box;
-            overflow-y: auto;
-            position: relative;
-        }
-
-        .welcome-content {
+            padding-top: 70px; /* 避开导航栏 */
             display: flex;
             flex-direction: column;
-            width: 100%;
-            max-width: 1400px;
-            gap: 20px;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            position: relative;
-            z-index: 2;
-            padding: 0;
+            overflow: hidden;
         }
 
-        .welcome-title-section {
+        /* 欢迎/封面页 */
+        .welcome-section {
+            flex: 1;
             display: flex;
             flex-direction: column;
-            align-items: center;
             justify-content: center;
-            gap: 10px;
-            width: 100%;
-            margin-bottom: 25px;
+            align-items: center;
             text-align: center;
-        }
-
-        .welcome-items-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 25px;
-            width: 100%;
-            max-width: 1200px;
+            padding: 20px;
+            transition: all 0.5s ease;
         }
 
         .welcome-title {
-            font-family: 'DingLieCiWei', 'WDLubrifont', sans-serif;
-            font-size: 48px;
-            font-weight: 400;
-            margin: 0;
-            letter-spacing: 3px;
-            line-height: 1.2;
-            transition: all 0.3s ease;
+            font-size: 56px;
+            font-weight: 800;
+            margin-bottom: 10px;
+            color: var(--text-main);
+            letter-spacing: -1px;
         }
-
-        body.autumn-theme .welcome-title {
-            background: linear-gradient(135deg, var(--autumn-primary), var(--autumn-accent));
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        body.space-theme .welcome-title {
-            background: linear-gradient(135deg, var(--space-accent), #67e8f9, #ff6b6b);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 0 10px rgba(6, 255, 165, 0.3));
-        }
-
+        
         .welcome-subtitle {
-            font-family: 'WDLubrifont', 'DingLieCiWei', sans-serif;
+            font-size: 20px;
+            color: var(--text-sub);
+            margin-bottom: 50px;
+            font-weight: 300;
+        }
+
+        .welcome-actions {
+            display: flex;
+            gap: 20px;
+        }
+
+        .btn-lg {
+            padding: 15px 40px;
             font-size: 18px;
-            margin: 0;
-            line-height: 1.6;
-            font-weight: 400;
-            transition: color 0.3s ease;
-        }
-
-        body.autumn-theme .welcome-subtitle {
-            color: var(--autumn-text-secondary);
-        }
-
-        body.space-theme .welcome-subtitle {
-            color: var(--space-text);
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-        }
-
-        .welcome-item {
-            display: flex;
-            align-items: center;
-            gap: 18px;
-            padding: 20px 25px;
-            border-radius: 20px;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            position: relative;
-        }
-
-        body.autumn-theme .welcome-item {
-            background: var(--autumn-glass-bg);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--autumn-glass-border);
-            box-shadow: var(--shadow-lg);
-        }
-
-        body.autumn-theme .welcome-item:hover {
-            transform: translateY(-5px) scale(1.02);
-            box-shadow: var(--shadow-xl);
-            border-color: rgba(120, 53, 15, 0.2);
-            background: rgba(255, 255, 255, 0.8);
-        }
-
-        body.space-theme .welcome-item {
-            background: transparent;
-        }
-
-        body.space-theme .welcome-item:hover {
-            transform: translateX(8px) translateY(-3px);
-        }
-
-        .welcome-item-icon {
-            width: 50px;
-            height: 50px;
-            flex-shrink: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.3s ease, color 0.3s ease;
-        }
-
-        body.autumn-theme .welcome-item-icon {
-            color: var(--autumn-primary);
-        }
-
-        body.space-theme .welcome-item-icon {
-            color: var(--space-accent);
-        }
-
-        .welcome-item-icon svg {
-            width: 28px;
-            height: 28px;
-        }
-
-        .welcome-item:hover .welcome-item-icon {
-            transform: scale(1.1) rotate(5deg);
-        }
-
-        body.autumn-theme .welcome-item:hover .welcome-item-icon {
-            color: var(--autumn-primary-dark);
-        }
-
-        .welcome-item-text {
-            font-family: 'WDLubrifont', 'DingLieCiWei', sans-serif;
-            font-size: 24px;
-            font-weight: 400;
-            letter-spacing: 0.5px;
-            transition: color 0.3s ease;
-        }
-
-        body.autumn-theme .welcome-item-text {
-            color: var(--autumn-text-primary);
-        }
-
-        body.space-theme .welcome-item-text {
-            color: var(--space-text);
-        }
-
-        body.space-theme .welcome-item:hover .welcome-item-text {
-            color: #ffffff;
-        }
-
-        /* 内容显示区域 */
-        .content-display {
-            width: 100%;
-            height: 100vh;
-            display: none;
-            position: relative;
-        }
-
-        body.autumn-theme .content-display {
-            background: var(--autumn-background);
-        }
-
-        body.space-theme .content-display {
-            background: var(--space-dark);
-        }
-
-        .content-display.active {
-            display: block;
-        }
-
-        .content-iframe {
-            width: 100% !important;
-            height: calc(100% - 60px) !important; /* 为顶部导航留出空间 */
+            border-radius: 50px;
             border: none;
-            position: absolute;
-            top: 60px; /* 从顶部导航下方开始 */
-            left: 0;
-            z-index: 1;
-            opacity: 1 !important;
-        }
-        
-        .preview-controls {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            z-index: 10001; /* 确保在顶部导航之上 */
-        }
-        
-        .close-preview-btn {
-            background: rgba(0, 0, 0, 0.7);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             cursor: pointer;
-            color: white;
             transition: all 0.3s ease;
-        }
-        
-        .close-preview-btn:hover {
-            background: rgba(255, 0, 0, 0.8);
-            border-color: rgba(255, 255, 255, 0.8);
-        }
-        
-        .close-preview-btn svg {
-            width: 20px;
-            height: 20px;
+            box-shadow: var(--shadow-lg);
+            font-weight: 600;
         }
 
-        /* 导航栏 */
-        .floating-nav-sidebar {
+        .btn-start {
+            background: linear-gradient(135deg, var(--brand-blue), #3b82f6);
+            color: white;
+        }
+
+        .btn-start:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-hover);
+            filter: brightness(1.1);
+        }
+
+        /* 章节列表层（全屏覆盖） */
+        .chapter-overlay {
             position: fixed;
-            right: 25px;
-            bottom: 25px;
+            top: 70px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(248, 250, 252, 0.95); /* 几乎不透明的白背景 */
+            backdrop-filter: blur(5px);
+            z-index: 10;
+            padding: 40px;
+            overflow-y: auto;
+            display: none; /* 默认隐藏 */
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .chapter-overlay.active {
+            display: block;
+            opacity: 1;
+        }
+
+        .grid-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            padding-bottom: 50px;
+        }
+
+        .chapter-card {
+            background: white;
+            border: 1px solid var(--border-light);
+            border-radius: 16px;
+            padding: 25px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
             display: flex;
             flex-direction: column;
-            align-items: center;
-            gap: 15px;
-            z-index: 1000;
+            justify-content: space-between;
+            height: 180px;
         }
 
-        .nav-btn, .sidebar-action-btn, .nav-collapse-btn {
-            width: 55px;
-            height: 55px;
-            border-radius: 20px;
-            cursor: pointer;
+        .chapter-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--border-light);
+            transition: background 0.3s ease;
+        }
+
+        .chapter-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
+            border-color: rgba(37, 99, 235, 0.2);
+        }
+
+        .chapter-card:hover::before {
+            background: var(--brand-blue);
+        }
+
+        .chapter-num {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--brand-blue);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .chapter-name {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-main);
+            line-height: 1.4;
+        }
+
+        .chapter-icon {
+            align-self: flex-end;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #eff6ff;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 12px;
-            font-weight: 700;
+            color: var(--brand-blue);
             transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
         }
 
-        body.autumn-theme .nav-btn, 
-        body.autumn-theme .sidebar-action-btn, 
-        body.autumn-theme .nav-collapse-btn {
-            background: linear-gradient(135deg, 
-                rgba(255, 251, 235, 0.8) 0%, 
-                rgba(254, 243, 199, 0.7) 100%);
-            border: 2px solid var(--autumn-glass-border);
-            color: var(--autumn-text-secondary);
-            box-shadow: var(--shadow-lg);
+        .chapter-card:hover .chapter-icon {
+            background: var(--brand-blue);
+            color: white;
         }
 
-        body.autumn-theme .nav-btn:hover, 
-        body.autumn-theme .sidebar-action-btn:hover, 
-        body.autumn-theme .nav-collapse-btn:hover {
-            transform: translateY(-3px) scale(1.05);
-            box-shadow: var(--shadow-xl);
-            border-color: var(--autumn-primary);
-            color: var(--autumn-primary);
+        /* iframe 内容显示区 */
+        .content-frame-container {
+            position: fixed;
+            top: 70px;
+            left: 0;
+            width: 100%;
+            height: calc(100% - 70px);
+            z-index: 20;
+            background: white;
+            transform: translateX(100%);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        body.space-theme .nav-btn, 
-        body.space-theme .sidebar-action-btn, 
-        body.space-theme .nav-collapse-btn {
-            background: linear-gradient(135deg, 
-                rgba(15, 23, 42, 0.8) 0%, 
-                rgba(30, 41, 59, 0.7) 100%);
-            border: 2px solid var(--space-glass-border);
-            color: var(--space-text-muted);
-            box-shadow: var(--shadow-lg);
+        .content-frame-container.active {
+            transform: translateX(0);
         }
 
-        body.space-theme .nav-btn:hover, 
-        body.space-theme .sidebar-action-btn:hover, 
-        body.space-theme .nav-collapse-btn:hover {
-            transform: translateY(-3px) scale(1.05);
-            box-shadow: var(--glow), var(--shadow-xl);
-            border-color: var(--space-accent);
-            color: var(--space-accent);
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
         }
 
-        .nav-btn svg {
-            width: 24px;
-            height: 24px;
-        }
-
-        .nav-collapse-btn svg {
-            width: 20px;
-            height: 20px;
-        }
-
-        .nav-divider {
-            width: 35px;
-            height: 2px;
-            background: linear-gradient(90deg, 
-                transparent, 
-                rgba(255, 255, 255, 0.2), 
-                transparent);
-            margin: 8px 0;
-            border-radius: 1px;
-        }
-
+        /* 键盘提示 */
         .keyboard-hint {
             position: fixed;
-            bottom: 100px;
+            bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
-            font-size: 11px;
-            padding: 8px 15px;
-            border-radius: 15px;
-            white-space: nowrap;
-            text-align: center;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-        }
-
-        body.autumn-theme .keyboard-hint {
-            color: var(--autumn-text-secondary);
-            background: linear-gradient(135deg, 
-                rgba(255, 251, 235, 0.9) 0%, 
-                rgba(254, 243, 199, 0.9) 100%);
-            border: 1px solid var(--autumn-glass-border);
-            box-shadow: var(--shadow);
-        }
-
-        body.space-theme .keyboard-hint {
-            color: var(--space-text-muted);
-            background: linear-gradient(135deg, 
-                rgba(0, 0, 0, 0.8) 0%, 
-                rgba(30, 41, 59, 0.9) 100%);
-            border: 1px solid var(--space-glass-border);
-            box-shadow: var(--shadow);
-        }
-
-        .keyboard-hint.hidden {
-            opacity: 0;
-            transform: translateX(-50%) translateY(10px);
+            font-size: 12px;
+            color: var(--text-sub);
+            background: rgba(255, 255, 255, 0.8);
+            padding: 8px 20px;
+            border-radius: 20px;
+            border: 1px solid var(--border-light);
+            backdrop-filter: blur(5px);
+            z-index: 5;
             pointer-events: none;
+            opacity: 0.8;
         }
 
-        .floating-nav-sidebar.collapsed > *:not(.nav-collapse-btn) {
-            opacity: 0;
-            transform: scale(0.1) translateY(20px);
-            pointer-events: none;
-        }
-
-        .floating-nav-sidebar.collapsed .nav-collapse-btn {
-            transform: rotate(180deg);
-        }
-
-        /* 响应式设计 */
+        /* 响应式调整 */
         @media (max-width: 768px) {
-            .theme-switch-btn {
-                top: 10px;
-                right: 10px;
-                padding: 10px 20px;
-                font-size: 12px;
-            }
-            
-            .welcome-page {
-                padding: 20px 15px;
-            }
-            
-            .welcome-content {
-                padding: 0;
-            }
-            
-            .welcome-items-grid {
-                grid-template-columns: 1fr;
-                gap: 20px;
-            }
-            
-            .welcome-title {
-                font-size: 36px;
-            }
-            
-            .welcome-subtitle {
-                font-size: 16px;
-            }
-            
-            .welcome-item-text {
-                font-size: 20px;
-            }
-            
-            .floating-nav-sidebar {
-                right: 15px;
-                bottom: 15px;
-                gap: 12px;
-            }
-            
-            .nav-btn, .sidebar-action-btn, .nav-collapse-btn {
-                width: 50px;
-                height: 50px;
-            }
-        }
-
-        /* 滚动条样式 */
-        *::-webkit-scrollbar {
-            width: 8px;
-        }
-        
-        body.autumn-theme *::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.05);
-            border-radius: 4px;
-        }
-        
-        body.autumn-theme *::-webkit-scrollbar-thumb {
-            background: rgba(217, 119, 6, 0.5);
-            border-radius: 4px;
-        }
-        
-        body.autumn-theme *::-webkit-scrollbar-thumb:hover {
-            background: rgba(217, 119, 6, 0.7);
-        }
-        
-        body.space-theme *::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 4px;
-        }
-        
-        body.space-theme *::-webkit-scrollbar-thumb {
-            background: rgba(6, 255, 165, 0.6);
-            border-radius: 4px;
-        }
-        
-        body.space-theme *::-webkit-scrollbar-thumb:hover {
-            background: rgba(6, 255, 165, 0.8);
-        }
-
-        /* 加载动画 */
-        .welcome-item {
-            opacity: 0;
-            transform: translateY(20px);
-            animation: fadeInUp 0.6s ease-out forwards;
-        }
-        
-        @keyframes fadeInUp {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .welcome-item:nth-child(1) { animation-delay: 0.05s; }
-        .welcome-item:nth-child(2) { animation-delay: 0.1s; }
-        .welcome-item:nth-child(3) { animation-delay: 0.15s; }
-        .welcome-item:nth-child(4) { animation-delay: 0.2s; }
-        .welcome-item:nth-child(5) { animation-delay: 0.25s; }
-        .welcome-item:nth-child(6) { animation-delay: 0.3s; }
-        .welcome-item:nth-child(7) { animation-delay: 0.35s; }
-        
-        @keyframes fadeInOut {
-            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
-            20% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-            80% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-            100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+            .top-nav { padding: 0 15px; }
+            .nav-actions span { display: none; } /* 隐藏按钮文字，只留图标 */
+            .welcome-title { font-size: 36px; }
+            .grid-container { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 
 <body>
-<!-- 简化顶部导航栏 -->
-<div class="unified-top-nav">
+
+<nav class="top-nav">
     <div class="nav-brand">
         <h1>智能题库</h1>
         <p>Smart Question Bank</p>
     </div>
+    
     <div class="nav-actions">
-        <button class="nav-action-btn" onclick="goPrev()" title="上一页">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-                <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
-            </svg>
-            上一页
+        <button class="btn-nav" onclick="toggleChapterList()" title="目录">
+            <svg viewBox="0 0 24 24"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg>
+            <span>目录</span>
         </button>
-        <button class="nav-action-btn" onclick="goNext()" title="下一页">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-                <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
-            </svg>
-            下一页
+        <div style="width: 1px; height: 20px; background: #e2e8f0; margin: 0 5px;"></div>
+        <button class="btn-nav" onclick="goPrev()" title="上一章">
+            <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
         </button>
-        <button class="nav-action-btn" onclick="showChapterList()" title="目录">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-                <path d="M4 6h16v2H4V6zm0 5h16v2H4v-2zm0 5h16v2H4v-2z"/>
-            </svg>
-            目录
+        <button class="btn-nav" onclick="goNext()" title="下一章">
+            <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
         </button>
-        <button class="nav-action-btn" onclick="showQuickNav()" title="快速跳转">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-            </svg>
-            跳转
-        </button>
-        <button class="nav-action-btn" onclick="switchTheme()" title="切换主题">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-            </svg>
-            <span id="theme-switch-text">金秋主题</span>
-        </button>
-        <button class="nav-action-btn" onclick="goMainSite()" title="返回主页">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-                <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8h5z"/>
-            </svg>
-            主页
+        <button class="btn-nav btn-primary" onclick="goMainSite()" title="返回主站">
+            <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8h5z"/></svg>
+            <span>主页</span>
         </button>
     </div>
-</div>
+</nav>
 
-<!-- 背景画布 -->
-<canvas id="bg-canvas"></canvas>
-<canvas id="particle-canvas"></canvas>
+<canvas id="network-canvas"></canvas>
 
-<!-- 主内容区 -->
-<div class="main-content">
-    <div class="welcome-page" id="welcomePage">
-        <div class="welcome-content">
-            <div class="welcome-title-section">
-                <div class="welcome-title">Math to Be</div>
-                <div class="welcome-subtitle" id="subtitle">
-                    <span class="space-subtitle">Mathematical Laboratory</span>
-                </div>
+<div class="main-container">
+    
+    <div class="welcome-section" id="welcomeSection">
+        <h1 class="welcome-title">Math to Be</h1>
+        <p class="welcome-subtitle">高等应用数学 · 数字化教学实验室</p>
+        <div class="welcome-actions">
+            <button class="btn-lg btn-start" onclick="toggleChapterList()">开始练习</button>
+        </div>
+    </div>
+
+    <div class="chapter-overlay" id="chapterOverlay">
+        <h2 style="text-align:center; margin-bottom: 40px; color: var(--text-main);">课程目录</h2>
+        <div class="grid-container" id="chapterGrid">
             </div>
-        </div>
     </div>
 
-    <!-- 内容显示区域 -->
-    <div class="content-display" id="contentDisplay">
-        <div class="preview-controls">
-            <button class="close-preview-btn" onclick="closePreview()" title="关闭预览">
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-                </svg>
-            </button>
-        </div>
-        <iframe class="content-iframe" id="contentFrame"></iframe>
-    </div>
 </div>
 
-<!-- 键盘提示 -->
-<div class="keyboard-hint hidden" id="keyboardHint">
-    使用 <i class="fa-solid fa-arrow-left"></i> → 键导航，Home 键返回目录，End 键回主站，T 键切换主题
+<div class="content-frame-container" id="frameContainer">
+    <iframe id="contentFrame" src=""></iframe>
 </div>
 
-<!-- 移除右下角侧边栏，避免遮挡内容 -->
+<div class="keyboard-hint">
+    提示：使用 <span style="font-family: monospace;">← →</span> 键切换章节，<span style="font-family: monospace;">Home</span> 键返回目录
+</div>
 
 <script>
-    // 章节数据
-    const chapters = {
-        0: { title: '第1章 代数与函数', url: 'assets/function.html' },
-        1: { title: '第2章 极限与连续', url: 'assets/limit.html' },
-        2: { title: '第3章 导数与微分', url: 'assets/derivative.html' },
-        3: { title: '第4章 导数的应用', url: 'assets/derivative-application.html' },
-        4: { title: '第5章 不定积分', url: 'assets/indefinite-integral.html' },
-        5: { title: '第6章 定积分及其应用', url: 'assets/definite-integral.html' },
-        6: { title: '第7章 常微分方程', url: 'assets/differential-equation.html' }
-    };
+    // === 数据配置 ===
+    const chapters = [
+        { title: '函数与初等函数', url: 'assets/function.html' },
+        { title: '极限与连续', url: 'assets/limit.html' },
+        { title: '导数与微分', url: 'assets/derivative.html' },
+        { title: '导数的应用', url: 'assets/derivative-application.html' },
+        { title: '不定积分', url: 'assets/indefinite-integral.html' },
+        { title: '定积分及其应用', url: 'assets/definite-integral.html' },
+        { title: '常微分方程', url: 'assets/differential-equation.html' },
+        { title: '多元函数微分学', url: 'assets/multivariable-differentiation.html' },
+        { title: '多元函数积分学', url: 'assets/multivariable-integration.html' },
+        { title: '线性代数', url: 'assets/linear-algebra.html' },
+        { title: '无穷级数', url: 'assets/infinite-series.html' },
+        { title: '向量代数与空间解析几何', url: 'assets/vector-algebra.html' },
+        { title: '概率与统计', url: 'assets/probability-statistics.html' }
+    ];
 
-    // 全局变量
-    let currentUrl = '';
     let currentIndex = -1;
-    let currentTheme = 'space'; // 默认星空主题
-    let animationId;
-    let particleAnimationId;
 
-    // 主题切换功能
-    function switchTheme() {
-        const body = document.body;
-        const switchText = document.getElementById('theme-switch-text');
-        if (currentTheme === 'autumn') {
-            // 切换到星空主题
-            body.classList.remove('autumn-theme');
-            body.classList.add('space-theme');
-            switchText.textContent = '切换到金秋主题';
-            currentTheme = 'space';
+    // === 初始化章节列表 ===
+    function initChapters() {
+        const grid = document.getElementById('chapterGrid');
+        chapters.forEach((chapter, index) => {
+            const card = document.createElement('div');
+            card.className = 'chapter-card';
+            card.onclick = () => loadChapter(index);
             
-            // 停止树叶动画，启动星空动画
-            if (animationId) {
-                cancelAnimationFrame(animationId);
-            }
-            initSpaceBackground();
-            initParticleField();
+            card.innerHTML = `
+                <div>
+                    <div class="chapter-num">CHAPTER ${index + 1}</div>
+                    <div class="chapter-name">${chapter.title}</div>
+                </div>
+                <div class="chapter-icon">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                        <path d="M8 5v14l11-7z"/>
+                    </svg>
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+    }
+
+    // === 核心功能函数 ===
+    function toggleChapterList() {
+        const overlay = document.getElementById('chapterOverlay');
+        const frameContainer = document.getElementById('frameContainer');
+        const welcome = document.getElementById('welcomeSection');
+        
+        // 如果内容正在显示，先关闭内容
+        if (frameContainer.classList.contains('active')) {
+            frameContainer.classList.remove('active');
+            document.querySelector('.nav-brand h1').textContent = '智能题库';
+            // 短暂延迟后显示目录
+            setTimeout(() => {
+                overlay.classList.add('active');
+            }, 300);
         } else {
-            // 切换到秋天主题
-            body.classList.remove('space-theme');
-            body.classList.add('autumn-theme');
-            switchText.textContent = '切换到星空主题';
-            currentTheme = 'autumn';
-            
-            // 停止星空动画，启动树叶动画
-            if (animationId) {
-                cancelAnimationFrame(animationId);
+            // 在欢迎页和目录页之间切换
+            if (overlay.classList.contains('active')) {
+                overlay.classList.remove('active');
+            } else {
+                overlay.classList.add('active');
             }
-            if (particleAnimationId) {
-                cancelAnimationFrame(particleAnimationId);
-            }
-            initAutumnBackground();
         }
     }
 
-    // 秋天主题 - 树叶动画
-    function initAutumnBackground() {
-        const canvas = document.getElementById('bg-canvas');
-        const ctx = canvas.getContext('2d');
+    function loadChapter(index) {
+        if (index < 0 || index >= chapters.length) return;
         
-        let leaves = [];
-        const leafCount = 50;
-        const mouse = { x: undefined, y: undefined, radius: 120 };
+        currentIndex = index;
+        const chapter = chapters[index];
+        const frame = document.getElementById('contentFrame');
+        const container = document.getElementById('frameContainer');
+        const overlay = document.getElementById('chapterOverlay');
         
-        // 创建叶子SVG路径
-        const leafPath = new Path2D("M25.2,2.8C25.2,2.8,18,1.9,13.4,6.5s-5,11.3-5,11.3s-0.2,0.5,0.2,0.7s0.7-0.2,0.7-0.2S12,15.1,15.3,12s6.6-5.2,6.6-5.2s0.4-0.4,0.2-0.8S21.3,5.6,21.3,5.6s-3.5,3.9-6,6.9c-0.6,0.7,0.3,1.6,0.3,1.6s2.9-3.2,6.9-6.3c0,0,0,0,0,0c0.1,0,0.2-0.1,0.2-0.2c0,0,0,0,0,0c0-0.1,0-0.1-0.1-0.2c0,0-0.1,0-0.1,0c-0.5-0.1-1.8-0.2-3.2-0.3c0,0,0,0,0,0c-0.1,0-0.1,0-0.2-0.1c0,0,0-0.1-0.1-0.1c0,0,0,0,0,0c-1.3-1.2-2.2-2.7-2.7-4.3c-0.1-0.2,0.1-0.4,0.1-0.4s3.3,0.4,6.2-2.3C24.4,3.1,24.8,2.9,25.2,2.8z");
+        // 设置内容
+        frame.src = chapter.url;
         
-        window.addEventListener('mousemove', (event) => {
-            mouse.x = event.x;
-            mouse.y = event.y;
-        });
+        // UI 状态变更
+        overlay.classList.remove('active');
+        container.classList.add('active');
         
-        window.addEventListener('mouseout', () => {
-            mouse.x = undefined;
-            mouse.y = undefined;
-        });
-        
-        function setCanvasSize() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-        
-        class Leaf {
-            constructor() {
-                this.size = Math.random() * 15 + 10;
-                const colorPalettes = [
-                    { h: 35, s: 85, l: 60 },
-                    { h: 45, s: 90, l: 55 },
-                    { h: 20, s: 80, l: 50 },
-                ];
-                const color = colorPalettes[Math.floor(Math.random() * colorPalettes.length)];
-                this.hue = color.h + Math.random() * 10 - 5;
-                this.saturation = color.s;
-                this.lightness = color.l;
-                this.opacity = Math.random() * 0.7 + 0.3;
-                
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height - canvas.height;
-                
-                this.vx = Math.random() * 1 - 0.5;
-                this.vy = Math.random() * 0.8 + 0.4;
-                this.density = Math.random() * 5 + 2;
-                
-                this.angle = Math.random() * Math.PI * 2;
-                this.rotationSpeed = (Math.random() - 0.5) * 0.02;
-                this.sway = Math.random() * Math.PI;
-            }
-            
-            draw() {
-                ctx.save();
-                ctx.translate(this.x, this.y);
-                ctx.rotate(this.angle);
-                ctx.scale(this.size / 25, this.size / 25);
-                
-                ctx.fillStyle = `hsla(${this.hue}, ${this.saturation}%, ${this.lightness}%, ${this.opacity})`;
-                ctx.fill(leafPath);
-                
-                ctx.restore();
-            }
-            
-            update() {
-                this.angle += this.rotationSpeed;
-                this.sway += 0.03;
-                
-                this.y += this.vy;
-                this.x += this.vx + Math.sin(this.sway) * 0.5;
-                
-                if (mouse.x !== undefined && mouse.y !== undefined) {
-                    const dx = this.x - mouse.x;
-                    const dy = this.y - mouse.y;
-                    const distance = Math.sqrt(dx * dx + dy * dy);
-                    if (distance < mouse.radius + this.size) {
-                        const forceDirectionX = dx / distance;
-                        const forceDirectionY = dy / distance;
-                        const force = (mouse.radius - distance) / mouse.radius;
-                        this.x += forceDirectionX * force * this.density;
-                        this.y += forceDirectionY * force * this.density;
-                    }
-                }
-                
-                if (this.y > canvas.height + this.size) {
-                    this.y = -this.size;
-                    this.x = Math.random() * canvas.width;
-                }
-                if (this.x > canvas.width + this.size) this.x = -this.size;
-                if (this.x < -this.size) this.x = canvas.width + this.size;
-            }
-        }
-        
-        function initLeaves() {
-            leaves = [];
-            for (let i = 0; i < leafCount; i++) {
-                leaves.push(new Leaf());
-            }
-        }
-        
-        function animateLeaves() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            leaves.forEach(leaf => {
-                leaf.update();
-                leaf.draw();
-            });
-            animationId = requestAnimationFrame(animateLeaves);
-        }
-        
-        setCanvasSize();
-        initLeaves();
-        animateLeaves();
-        
-        window.addEventListener('resize', () => {
-            setCanvasSize();
-            initLeaves();
-        });
-    }
-
-    // 星空主题 - 星星动画
-    function initSpaceBackground() {
-        const canvas = document.getElementById('bg-canvas');
-        const ctx = canvas.getContext('2d');
-        let stars = [];
-        
-        function setCanvasSize() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-        
-        function createStars() {
-            stars = [];
-            const numStars = Math.min(80, Math.floor((canvas.width * canvas.height) / 20000));
-            for (let i = 0; i < numStars; i++) {
-                stars.push({
-                    x: Math.random() * canvas.width,
-                    y: Math.random() * canvas.height,
-                    radius: Math.random() * 1.2 + 0.3,
-                    vx: (Math.random() - 0.5) * 0.05,
-                    vy: (Math.random() - 0.5) * 0.05,
-                    opacity: Math.random() * 0.8 + 0.2,
-                    twinkle: Math.random() * 0.005 + 0.002
-                });
-            }
-        }
-        
-        function draw() {
-            const gradient = ctx.createRadialGradient(
-                canvas.width/2, canvas.height/2, 0,
-                canvas.width/2, canvas.height/2, Math.max(canvas.width, canvas.height)/2
-            );
-            gradient.addColorStop(0, 'rgba(30, 27, 75, 0.6)');
-            gradient.addColorStop(1, 'rgba(15, 23, 42, 0.9)');
-            
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            stars.forEach(star => {
-                ctx.beginPath();
-                ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(255, 255, 255, ${star.opacity})`;
-                ctx.fill();
-            });
-        }
-        
-        function update() {
-            stars.forEach(star => {
-                star.x += star.vx;
-                star.y += star.vy;
-                
-                star.opacity += star.twinkle * (Math.random() - 0.5);
-                star.opacity = Math.max(0.2, Math.min(1, star.opacity));
-                
-                if (star.x < 0) star.x = canvas.width;
-                if (star.x > canvas.width) star.x = 0;
-                if (star.y < 0) star.y = canvas.height;
-                if (star.y > canvas.height) star.y = 0;
-            });
-        }
-        
-        function tick() {
-            update();
-            draw();
-            animationId = requestAnimationFrame(tick);
-        }
-        
-        setCanvasSize();
-        createStars();
-        tick();
-        
-        window.addEventListener('resize', () => {
-            setCanvasSize();
-            createStars();
-        });
-    }
-
-    // 星空主题 - 粒子场动画（简化版）
-    function initParticleField() {
-        const canvas = document.getElementById('particle-canvas');
-        const ctx = canvas.getContext('2d');
-        
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-        
-        let particles = [];
-        const particleCount = 50;
-        
-        for (let i = 0; i < particleCount; i++) {
-            particles.push({
-                x: Math.random() * canvas.width,
-                y: Math.random() * canvas.height,
-                vx: (Math.random() - 0.5) * 0.5,
-                vy: (Math.random() - 0.5) * 0.5,
-                radius: Math.random() * 2 + 1
-            });
-        }
-        
-        function animateParticles() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            particles.forEach(p => {
-                p.x += p.vx;
-                p.y += p.vy;
-                
-                if (p.x < 0) p.x = canvas.width;
-                if (p.x > canvas.width) p.x = 0;
-                if (p.y < 0) p.y = canvas.height;
-                if (p.y > canvas.height) p.y = 0;
-                
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-                ctx.fillStyle = 'rgba(6, 255, 165, 0.5)';
-                ctx.fill();
-            });
-            
-            particleAnimationId = requestAnimationFrame(animateParticles);
-        }
-        
-        animateParticles();
-    }
-
-    // 导航功能
-    function showChapter(categoryId) {
-        const chapter = chapters[categoryId];
-        if (!chapter) return;
-        
-        // 目录点击：直接跳转
-        currentIndex = categoryId;
-        loadContent(chapter.url, chapter.title);
+        // 更新顶部标题
+        document.querySelector('.nav-brand h1').textContent = `第${index+1}章 ${chapter.title}`;
     }
 
     function goPrev() {
-        console.log('goPrev 被调用, currentIndex:', currentIndex);
         if (currentIndex > 0) {
-            currentIndex--;
-            const chapter = Object.values(chapters)[currentIndex];
-            console.log('上一页:', chapter);
-            loadContent(chapter.url, chapter.title);
+            loadChapter(currentIndex - 1);
         } else {
-            showNavigationHint('已经是第一章了');
+            alert('已经是第一章了');
         }
     }
 
     function goNext() {
-        console.log('goNext 被调用, currentIndex:', currentIndex);
-        if (currentIndex < Object.keys(chapters).length - 1) {
-            currentIndex++;
-            const chapter = Object.values(chapters)[currentIndex];
-            console.log('下一页:', chapter);
-            loadContent(chapter.url, chapter.title);
+        if (currentIndex < chapters.length - 1) {
+            loadChapter(currentIndex + 1);
+        } else if (currentIndex === -1) {
+            loadChapter(0);
         } else {
-            showNavigationHint('已经是最后一章了');
+            alert('已经是最后一章了');
         }
-    }
-
-    function goHome() {
-        const welcome = document.getElementById('welcomePage');
-        const contentDisplay = document.getElementById('contentDisplay');
-        const keyboardHint = document.getElementById('keyboardHint');
-        
-        welcome.style.display = 'flex';
-        contentDisplay.classList.remove('active');
-        keyboardHint.classList.add('hidden');
-        
-        currentIndex = -1;
-        currentUrl = '';
     }
 
     function goMainSite() {
         window.location.href = '../index.html';
     }
 
-    function showNavigationHint(message) {
-        // 创建临时提示
-        const hint = document.createElement('div');
-        hint.style.cssText = `
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.8);
-            color: var(--space-accent);
-            padding: 15px 25px;
-            border-radius: 10px;
-            border: 1px solid var(--space-accent);
-            z-index: 1002;
-            font-size: 14px;
-            animation: fadeInOut 2s ease forwards;
-        `;
-        hint.textContent = message;
-        document.body.appendChild(hint);
-        
-        setTimeout(() => {
-            if (hint.parentNode) {
-                hint.parentNode.removeChild(hint);
-            }
-        }, 2000);
-    }
-
-    function showQuickNav() {
-        if (currentUrl) window.open(currentUrl, '_blank');
-    }
-
-    function toggleNavSidebar() {
-        const navSidebar = document.getElementById('navSidebar');
-        navSidebar.classList.toggle('collapsed');
-    }
-
-    function loadContent(url, title) {
-        // 直接跳转到页面
-        window.location.href = url;
-    }
-
-    function previewContent(url, title) {
-        console.log('previewContent 被调用:', url, title);
-        
-        const frame = document.getElementById('contentFrame');
-        const welcome = document.getElementById('welcomePage');
-        const contentDisplay = document.getElementById('contentDisplay');
-        const keyboardHint = document.getElementById('keyboardHint');
-
-        console.log('DOM元素检查:', {
-            frame: !!frame,
-            welcome: !!welcome,
-            contentDisplay: !!contentDisplay,
-            keyboardHint: !!keyboardHint
-        });
-
-        if (!frame || !welcome || !contentDisplay || !keyboardHint) {
-            console.error('缺少必要的DOM元素');
-            return;
-        }
-
-        // 先显示内容区域（全屏预览）
-        contentDisplay.classList.add('active');
-        welcome.style.display = 'none';
-        keyboardHint.classList.add('hidden'); // 全屏时隐藏键盘提示
-        
-        // 然后加载iframe内容
-        frame.src = url;
-        console.log('iframe src 设置为:', url);
-
-        currentUrl = url;
-        const displayTitle = title || getChineseTitle(url);
-        
-        // 更新顶部导航栏标题
-        const navBrandH1 = document.querySelector('.nav-brand h1');
-        if (navBrandH1) {
-            navBrandH1.textContent = displayTitle;
-        }
-        
-        console.log('预览内容已加载:', displayTitle);
-        
-        // 检查iframe是否加载完成
-        frame.onload = function() {
-            console.log('iframe 加载完成');
-        };
-        
-        frame.onerror = function() {
-            console.error('iframe 加载失败');
-        };
-
-        // 更新currentIndex
-        currentIndex = Object.values(chapters).findIndex(ch => ch.url === url);
-    }
-
-    // 关闭预览
-    function closePreview() {
-        console.log('关闭预览');
-        const contentDisplay = document.getElementById('contentDisplay');
-        const welcome = document.getElementById('welcomePage');
-        const keyboardHint = document.getElementById('keyboardHint');
-        
-        if (contentDisplay && welcome && keyboardHint) {
-            contentDisplay.classList.remove('active');
-            welcome.style.display = 'flex';
-            keyboardHint.classList.remove('hidden');
-            
-            // 恢复原始标题
-            const navBrandH1 = document.querySelector('.nav-brand h1');
-            if (navBrandH1) {
-                navBrandH1.textContent = '智能题库';
-            }
-        }
-    }
-
-    // 显示章节列表
-    function showChapterList() {
-        console.log('显示章节列表');
-        const welcome = document.getElementById('welcomePage');
-        const contentDisplay = document.getElementById('contentDisplay');
-        const keyboardHint = document.getElementById('keyboardHint');
-        
-        // 检查是否已经在显示目录
-        if (contentDisplay.classList.contains('active')) {
-            // 如果已经在显示目录，则收回（回到欢迎页面）
-            console.log('收回目录，回到欢迎页面');
-            welcome.style.display = 'flex';
-            contentDisplay.classList.remove('active');
-            keyboardHint.classList.add('hidden');
-            
-            // 恢复原始标题
-            const navBrandH1 = document.querySelector('.nav-brand h1');
-            if (navBrandH1) {
-                navBrandH1.textContent = '智能题库';
-            }
-            return;
-        }
-        
-        if (welcome && contentDisplay && keyboardHint) {
-            // 隐藏欢迎页面，显示内容区域
-            welcome.style.display = 'none';
-            contentDisplay.classList.add('active');
-            keyboardHint.classList.remove('hidden');
-            
-            // 创建章节列表内容
-            const frame = document.getElementById('contentFrame');
-            if (frame) {
-                frame.src = 'about:blank'; // 清空iframe
-                
-                // 创建章节列表HTML
-                const chapterListHTML = `
-                    <!DOCTYPE html>
-                    <html lang="zh-CN">
-                    <head>
-                        <meta charset="UTF-8">
-                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                        <title>智能题库 - 章节列表</title>
-                        <style>
-                            body {
-                                font-family: 'Microsoft YaHei', sans-serif;
-                                background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-                                color: #e2e8f0;
-                                margin: 0;
-                                padding: 40px;
-                                min-height: 100vh;
-                            }
-                            .container {
-                                max-width: 800px;
-                                margin: 0 auto;
-                            }
-                            h1 {
-                                text-align: center;
-                                color: #06ffa5;
-                                margin-bottom: 40px;
-                                font-size: 2.5em;
-                            }
-                            .chapter-grid {
-                                display: grid;
-                                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-                                gap: 20px;
-                            }
-                            .chapter-item {
-                                background: rgba(255, 255, 255, 0.1);
-                                border: 1px solid rgba(255, 255, 255, 0.2);
-                                border-radius: 12px;
-                                padding: 20px;
-                                cursor: pointer;
-                                transition: all 0.3s ease;
-                                backdrop-filter: blur(10px);
-                            }
-                            .chapter-item:hover {
-                                background: rgba(6, 255, 165, 0.2);
-                                border-color: #06ffa5;
-                                transform: translateY(-2px);
-                            }
-                            .chapter-title {
-                                font-size: 1.2em;
-                                font-weight: 600;
-                                margin-bottom: 10px;
-                                color: #ffffff;
-                            }
-                            .chapter-desc {
-                                color: #94a3b8;
-                                font-size: 0.9em;
-                            }
-                        </style>
-                    </head>
-                    <body>
-                        <div class="container">
-                            <h1>智能题库 - 章节列表</h1>
-                            <div class="chapter-grid">
-                                ${Object.values(chapters).map((chapter, index) => `
-                                    <div class="chapter-item" onclick="parent.loadContent('${chapter.url}', '${chapter.title}'); parent.currentIndex = ${index};">
-                                        <div class="chapter-title">${chapter.title}</div>
-                                        <div class="chapter-desc">点击开始练习</div>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </div>
-                    </body>
-                    </html>
-                `;
-                
-                // 将HTML写入iframe
-                frame.srcdoc = chapterListHTML;
-            }
-            
-            // 更新顶部标题
-            const navBrandH1 = document.querySelector('.nav-brand h1');
-            if (navBrandH1) {
-                navBrandH1.textContent = '章节列表';
-            }
-        }
-    }
-
-    // 键盘导航
-    function initKeyboardNavigation() {
-        document.addEventListener('keydown', function(event) {
-            const activeElement = document.activeElement;
-            if (activeElement && (activeElement.tagName === 'INPUT' || 
-                activeElement.tagName === 'TEXTAREA' || 
-                activeElement.isContentEditable)) return;
-            
-            switch(event.key) {
-                case 'ArrowLeft':
-                    event.preventDefault();
-                    goPrev();
-                    break;
-                case 'ArrowRight':
-                    event.preventDefault();
-                    goNext();
-                    break;
-                case 'Home':
-                    event.preventDefault();
-                    goHome();
-                    break;
-                case 'End':
-                    event.preventDefault();
-                    goMainSite();
-                    break;
-                case 't':
-                case 'T':
-                    event.preventDefault();
-                    switchTheme();
-                    break;
-            }
-        });
-    }
-
-    // 初始化
-    document.addEventListener('DOMContentLoaded', function() {
-        initSpaceBackground(); // 默认启动星空主题
-        initParticleField(); // 启动粒子场动画
-        initKeyboardNavigation();
-        
-        // 自动弹出目录
-        setTimeout(() => {
-            showChapterList();
-        }, 500);
+    // === 键盘监听 ===
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowLeft') goPrev();
+        if (e.key === 'ArrowRight') goNext();
+        if (e.key === 'Home') toggleChapterList();
     });
+
+    // === 智慧网络背景动画 (Light Version) ===
+    function initNetworkBackground() {
+        const canvas = document.getElementById('network-canvas');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+        let particles = [];
+
+        // 配置：灰色粒子，浅灰色连线
+        const config = {
+            particleColor: 'rgba(148, 163, 184, 0.5)', // 浅灰蓝
+            lineColor: 'rgba(203, 213, 225, 0.4)',     // 非常淡的线
+            particleAmount: 60,
+            defaultSpeed: 0.5,
+            variantSpeed: 0.5,
+            defaultRadius: 2,
+            variantRadius: 2,
+            linkRadius: 150 // 连线距离
+        };
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.vx = (Math.random() * config.defaultSpeed) - (config.defaultSpeed / 2);
+                this.vy = (Math.random() * config.defaultSpeed) - (config.defaultSpeed / 2);
+                this.size = Math.random() * config.variantRadius + config.defaultRadius;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+
+                if (this.x > width) this.x = 0;
+                else if (this.x < 0) this.x = width;
+                if (this.y > height) this.y = 0;
+                else if (this.y < 0) this.y = height;
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = config.particleColor;
+                ctx.fill();
+            }
+        }
+
+        function init() {
+            particles = [];
+            for (let i = 0; i < config.particleAmount; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+            
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update();
+                particles[i].draw();
+                
+                // 绘制连线
+                for (let j = i; j < particles.length; j++) {
+                    let distance = Math.sqrt(
+                        Math.pow((particles[i].x - particles[j].x), 2) + 
+                        Math.pow((particles[i].y - particles[j].y), 2)
+                    );
+                    
+                    if (distance < config.linkRadius) {
+                        ctx.beginPath();
+                        ctx.strokeStyle = config.lineColor;
+                        ctx.lineWidth = 1;
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+            requestAnimationFrame(animate);
+        }
+
+        window.addEventListener('resize', resize);
+        resize();
+        init();
+        animate();
+    }
+
+    // === 启动 ===
+    document.addEventListener('DOMContentLoaded', () => {
+        initChapters();
+        initNetworkBackground();
+        // 自动打开目录，方便用户直接看到内容
+        setTimeout(toggleChapterList, 500);
+    });
+
 </script>
 </body>
 </html>
