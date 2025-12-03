@@ -1,0 +1,191 @@
+/**
+ * 对数运算实验室 - 样式文件
+ * lab1-2.css
+ */
+
+/* ========== 滚动条隐藏但保持功能 ========== */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* ========== 面板切换动画 ========== */
+.panel-content {
+    display: none;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.panel-content.active {
+    display: grid;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ========== 滑块自定义样式 ========== */
+input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    height: 16px;
+    width: 16px;
+    border-radius: 50%;
+    background: #4f46e5;
+    margin-top: -6px;
+    cursor: pointer;
+    box-shadow: 0 0 0 2px white, 0 0 0 4px #4f46e5;
+    transition: transform 0.15s ease;
+}
+
+input[type=range]::-webkit-slider-thumb:hover {
+    transform: scale(1.1);
+}
+
+input[type=range]::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 4px;
+    cursor: pointer;
+    background: #e5e7eb;
+    border-radius: 2px;
+}
+
+input[type=range]::-moz-range-thumb {
+    height: 16px;
+    width: 16px;
+    border-radius: 50%;
+    background: #4f46e5;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 0 0 2px white, 0 0 0 4px #4f46e5;
+}
+
+input[type=range]::-moz-range-track {
+    width: 100%;
+    height: 4px;
+    cursor: pointer;
+    background: #e5e7eb;
+    border-radius: 2px;
+}
+
+/* ========== 拆塔游戏积木块样式 ========== */
+.tower-block {
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tower-block.removing {
+    opacity: 0;
+    transform: translateX(50px) scale(0.8);
+}
+
+/* ========== 导航按钮交互 ========== */
+.nav-btn {
+    position: relative;
+    overflow: hidden;
+}
+
+.nav-btn::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 0;
+    height: 2px;
+    background: #4f46e5;
+    transition: width 0.3s ease;
+}
+
+.nav-btn:hover::after {
+    width: 100%;
+}
+
+/* ========== 卡片悬浮效果 ========== */
+.card-hover {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+/* ========== 输入框聚焦效果 ========== */
+input[type="number"]:focus,
+select:focus {
+    outline: none;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+/* ========== 按钮点击波纹效果 ========== */
+.btn-ripple {
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-ripple::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.4s ease, height 0.4s ease;
+}
+
+.btn-ripple:active::before {
+    width: 200%;
+    height: 200%;
+}
+
+/* ========== MathJax 容器样式优化 ========== */
+mjx-container {
+    display: inline-block !important;
+    vertical-align: middle;
+}
+
+mjx-container[display="true"] {
+    display: block !important;
+    text-align: center;
+    margin: 1em 0;
+}
+
+/* ========== 箭头动画 ========== */
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.animate-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* ========== 响应式调整 ========== */
+@media (max-width: 768px) {
+    .panel-content.active {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (min-width: 1024px) {
+    .panel-content.active {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+

@@ -1,6 +1,6 @@
 window.exerciseData = {
     exercises: [
-        {
+{
             id: 1,
             type: "选择题",
             title: "向量数量积",
@@ -20,7 +20,7 @@ $= 0 + 0 + 1 = 1$
             category: "向量代数",
             method: "坐标运算"
         },
-        {
+{
             id: 2,
             type: "选择题",
             title: "空间直线方程",
@@ -35,7 +35,7 @@ $$\\frac{x-2}{1} = \\frac{y+1}{2} = \\frac{z-3}{-1}$$`,
             category: "空间直线",
             method: "点向式方程"
         },
-        {
+{
             id: 3,
             type: "选择题",
             title: "空间平面方程",
@@ -50,7 +50,7 @@ $$2x - y + 3z + 3 = 0$$`,
             category: "空间平面",
             method: "点法式方程"
         },
-        {
+{
             id: 4,
             type: "选择题",
             title: "两向量夹角",
@@ -71,7 +71,7 @@ $$\\theta = 60°$$`,
             category: "向量代数",
             method: "夹角公式"
         },
-        {
+{
             id: 5,
             type: "选择题",
             title: "两平面平行条件",
@@ -89,7 +89,7 @@ $$\\frac{4}{2} = \\frac{-6}{-3} = \\frac{2}{1} = 2$$
             category: "空间平面",
             method: "法向量法"
         },
-        {
+{
             id: 6,
             type: "选择题",
             title: "点到平面距离",
@@ -106,7 +106,7 @@ $$d = \\frac{|1 + 0 + 4 - 3|}{3} = \\frac{2}{3}$$`,
             category: "距离问题",
             method: "距离公式"
         },
-        {
+{
             id: 7,
             type: "选择题",
             title: "直线与平面位置关系",
@@ -124,7 +124,7 @@ $\\vec{s} = \\vec{n}$，方向向量与法向量平行
             category: "空间直线与平面",
             method: "向量法"
         },
-        {
+{
             id: 8,
             type: "选择题",
             title: "球面方程",
@@ -139,7 +139,7 @@ $$(x-1)^2 + (y+2)^2 + (z-3)^2 = 4$$`,
             category: "曲面方程",
             method: "标准方程"
         },
-        {
+{
             id: 9,
             type: "选择题",
             title: "柱面方程",
@@ -154,7 +154,7 @@ $$(x-1)^2 + (y+2)^2 + (z-3)^2 = 4$$`,
             category: "曲面方程",
             method: "方程分析"
         },
-        {
+{
             id: 10,
             type: "选择题",
             title: "旋转曲面",
@@ -169,7 +169,7 @@ $$y = (\\sqrt{x^2 + z^2})^2 = x^2 + z^2$$`,
             category: "曲面方程",
             method: "旋转法"
         },
-        {
+{
             id: 11,
             type: "选择题",
             title: "椭圆锥面",
@@ -184,7 +184,7 @@ $$y = (\\sqrt{x^2 + z^2})^2 = x^2 + z^2$$`,
             category: "曲面方程",
             method: "方程识别"
         },
-        {
+{
             id: 12,
             type: "选择题",
             title: "椭球面方程",
@@ -199,7 +199,7 @@ $$y = (\\sqrt{x^2 + z^2})^2 = x^2 + z^2$$`,
             category: "曲面方程",
             method: "标准方程识别"
         },
-        {
+{
             id: 13,
             type: "选择题",
             title: "双曲面方程",
@@ -214,7 +214,7 @@ $$y = (\\sqrt{x^2 + z^2})^2 = x^2 + z^2$$`,
             category: "曲面方程",
             method: "方程分析"
         },
-        {
+{
             id: 14,
             type: "选择题",
             title: "抛物面方程",
@@ -229,7 +229,7 @@ $z = x^2 + y^2$，两项系数同号
             category: "曲面方程",
             method: "方程识别"
         },
-        {
+{
             id: 15,
             type: "选择题",
             title: "马鞍面",
@@ -244,7 +244,7 @@ $z = x^2 - y^2$，两项系数异号
             category: "曲面方程",
             method: "方程识别"
         },
-        {
+{
             id: 16,
             type: "选择题",
             title: "空间曲线",
@@ -259,7 +259,7 @@ $z = 0$ 表示$xOy$平面
             category: "空间曲线",
             method: "方程组分析"
         },
-        {
+{
             id: 17,
             type: "选择题",
             title: "参数方程",
@@ -274,7 +274,7 @@ $z = t$ 随$t$线性增长
             category: "空间曲线",
             method: "参数方程分析"
         },
-        {
+{
             id: 18,
             type: "选择题",
             title: "向量的混合积",
@@ -289,7 +289,7 @@ $$= 1 \\cdot 0 + 1 \\cdot (-1) = -1$$`,
             category: "向量代数",
             method: "行列式法"
         },
-        {
+{
             id: 19,
             type: "选择题",
             title: "平面束方程",
@@ -304,7 +304,7 @@ $\\lambda$为参数`,
             category: "空间平面",
             method: "平面束方程"
         },
-        {
+{
             id: 20,
             type: "选择题",
             title: "两直线夹角",
@@ -321,7 +321,7 @@ $$\\theta = 60°$$`,
             category: "空间直线",
             method: "向量法"
         },
-        {
+{
             id: 21,
             type: "选择题",
             title: "曲面的切平面",
@@ -343,7 +343,7 @@ $$2x + 2y - z - 2 = 0$$`,
             category: "曲面切平面",
             method: "偏导数法"
         },
-        {
+{
             id: 22,
             type: "选择题",
             title: "空间曲线的切线",
@@ -359,7 +359,7 @@ $$\\frac{dx}{dt} = 1, \\quad \\frac{dy}{dt} = 2t, \\quad \\frac{dz}{dt} = 3t^2$$
             category: "空间曲线",
             method: "求导法"
         },
-        {
+{
             id: 23,
             type: "选择题",
             title: "直线到直线的距离",
@@ -376,7 +376,7 @@ $L_2$过$(0,0,1)$，方向$(0,1,0)$（平行$y$轴）
             category: "距离问题",
             method: "公式法"
         },
-        {
+{
             id: 24,
             type: "选择题",
             title: "向量共面条件",
@@ -391,7 +391,7 @@ $$[\\vec{a} \\vec{b} \\vec{c}] = \\begin{vmatrix} 1 & 2 & 3 \\\\ 2 & 4 & 6 \\\\ 
             category: "向量代数",
             method: "行列式法"
         },
-        {
+{
             id: 25,
             type: "选择题",
             title: "二次曲面类型判别",
@@ -406,7 +406,7 @@ $$z^2 - x^2 - y^2 = 1$$
             category: "曲面方程",
             method: "方程分析"
         },
-        {
+{
             id: 26,
             type: "选择题",
             title: "空间距离综合",
@@ -428,7 +428,7 @@ $$d = \\frac{\\sqrt{6}}{\\sqrt{3}} = \\sqrt{2}$$`,
             category: "距离问题",
             method: "向量叉积法"
         },
-        {
+{
             id: 27,
             type: "选择题",
             title: "柱坐标系",
@@ -444,7 +444,7 @@ $$z = 5$$
             category: "坐标变换",
             method: "转换公式"
         },
-        {
+{
             id: 28,
             type: "选择题",
             title: "球坐标系",
@@ -457,7 +457,7 @@ $$z = \\rho\\cos\\varphi = 2\\cos\\frac{\\pi}{4} = 2 \\cdot \\frac{\\sqrt{2}}{2}
             category: "坐标变换",
             method: "转换公式"
         },
-        {
+{
             id: 29,
             type: "选择题",
             title: "直纹面",
@@ -472,7 +472,7 @@ $x^2 + y^2 = z^2$
             category: "曲面方程",
             method: "方程识别"
         },
-        {
+{
             id: 30,
             type: "选择题",
             title: "空间平面系",
@@ -487,7 +487,7 @@ $$x + y + z = 1$$`,
             category: "空间平面",
             method: "点法式方程"
         }
-    ],
+],
     knowledgePoints: [
         {
             title: "平面与直线方程",

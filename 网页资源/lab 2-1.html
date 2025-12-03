@@ -1,1231 +1,294 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <title>图像压缩与数列极限实验室</title>
     
-    <!-- MathJax配置 - 使用本地资源 -->
-    <script>
-        window.MathJax = {
-            tex: {
-                inlineMath: [['$', '$'], ['\\(', '\\)']],
-                displayMath: [['$$', '$$'], ['\\[', '\\]']],
-                processEscapes: true
-            },
-            startup: {
-                pageReady: () => {
-                    return MathJax.startup.defaultPageReady().then(() => {
-                        console.log('MathJax加载完成');
-                    });
-                }
-            },
-            options: {
-                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
-            }
-        };
-    </script>
-    <script src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js" id="MathJax-script"></script>
+    <!-- 页面专用样式 -->
+    <link rel="stylesheet" href="assets/lab2-1.css">
     
-    <style>
-        /* 用户要求：字号统一 */
-        :root {
-            --h1-size: 22px;      
-            --h2-size: 20px;      
-            --h3-size: 18px;      
-            --btn-size: 16px;     
-            --formula-size: 20px; 
-            --text-size: 16px;
-            
-            --primary: #4f46e5;
-            --primary-light: #6366f1;
-            --primary-dark: #3730a3;
-            --light: #ffffff;
-            --gray-50: #f9fafb;
-            --gray-100: #f3f4f6;
-            --gray-200: #e5e7eb;
-            --gray-600: #4b5563;
-            --gray-800: #1f2937;
-            --border: #e5e7eb;
-            --success: #10b981;
-            --warning: #f59e0b;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        /* 滚动条生效但不显示 */
-        *::-webkit-scrollbar {
-            width: 0;
-            background: transparent;
-        }
-        
-        * {
-            scrollbar-width: none;
-            -ms-overflow-style: none;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
-            font-size: var(--text-size);
-            line-height: 1.5;
-            background: var(--gray-50);
-            color: var(--gray-800);
-        }
-
-        /* 横向布局（宽是高的2倍），压缩高度 */
-        .container {
-            width: 100%;
-            max-width: 1400px;
-            height: 100vh;
-            max-height: 700px;
-            margin: 0 auto;
-            display: flex;
-            flex-direction: column;
-            background: var(--light);
-        }
-
-        .header {
-            background: var(--primary);
-            color: var(--light);
-            padding: 8px 20px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-        }
-
-        .header h1 {
-            font-size: var(--h2-size);
-            margin: 0;
-        }
-
-        .main {
-            display: flex;
-            flex: 1;
-            overflow: hidden;
-        }
-
-        /* 侧边栏不动 */
-        .sidebar {
-            width: 120px;
-            background: var(--gray-50);
-            border-right: 1px solid var(--border);
-            padding: 10px 8px;
-        }
-
-        .nav-btn {
-            width: 100%;
-            padding: 8px;
-            margin-bottom: 4px;
-            background: transparent;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: var(--text-size);
-            color: var(--gray-600);
-            text-align: left;
-            transition: all 0.2s;
-        }
-
-        .nav-btn:hover {
-            background: var(--gray-100);
-        }
-
-        .nav-btn.active {
-            background: var(--primary);
-            color: var(--light);
-        }
-
-        /* 最多左右两栏，必须有可视化 */
-        .content {
-            flex: 1;
-            display: none;
-            padding: 16px;
-            overflow-y: auto;
-        }
-
-        .content.active {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-
-        .column {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            overflow-y: auto;
-        }
-
-        .card {
-            background: var(--light);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 16px;
-        }
-
-        .card h3 {
-            font-size: var(--h3-size);
-            color: var(--primary);
-            margin-bottom: 12px;
-        }
-
-        .input-group {
-            margin-bottom: 12px;
-        }
-
-        .input-group label {
-            display: block;
-            margin-bottom: 4px;
-            font-size: var(--text-size);
-            font-weight: 500;
-        }
-
-        .input-group input,
-        .input-group select {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            font-size: var(--text-size);
-            background: var(--gray-50);
-        }
-
-        .input-group input:focus,
-        .input-group select:focus {
-            outline: none;
-            border-color: var(--primary);
-            background: var(--light);
-        }
-
-        .btn {
-            padding: 8px 16px;
-            background: var(--primary);
-            color: var(--light);
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: var(--btn-size);
-            transition: all 0.2s;
-        }
-
-        .btn:hover {
-            background: var(--primary-dark);
-        }
-
-        .btn-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            margin-top: 12px;
-        }
-
-        .result {
-            background: var(--gray-50);
-            padding: 12px;
-            border-radius: 4px;
-            border: 1px solid var(--primary);
-            text-align: center;
-            font-size: var(--text-size);
-            margin: 12px 0;
-            min-height: 48px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .formula-box {
-            background: #f0f7ff;
-            padding: 12px;
-            border-radius: 4px;
-            border-left: 3px solid var(--primary);
-            margin: 12px 0;
-            text-align: center;
-            font-size: var(--formula-size);
-        }
-
-        .info-box {
-            background: var(--gray-50);
-            padding: 10px;
-            border-radius: 4px;
-            margin: 8px 0;
-            font-size: var(--text-size);
-            text-align: center;
-        }
-
-        .steps {
-            background: #fff9e6;
-            padding: 12px;
-            border-radius: 4px;
-            border-left: 3px solid #f59e0b;
-            line-height: 1.8;
-            font-size: var(--text-size);
-        }
-
-        .canvas-container {
-            border: 1px solid var(--gray-200);
-            border-radius: 4px;
-            background: #fafafa;
-            padding: 10px;
-            min-height: 200px;
-            max-height: 500px;
-            overflow: hidden;
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .canvas-container canvas {
-            max-width: 100%;
-            max-height: 100%;
-            display: block;
-            margin: 0 auto;
-        }
-
-        .slider-group {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px;
-            background: var(--gray-50);
-            border-radius: 4px;
-            margin-top: 12px;
-        }
-
-        .slider-group label {
-            min-width: 60px;
-            font-size: var(--text-size);
-        }
-
-        .slider {
-            flex: 1;
-            height: 4px;
-            -webkit-appearance: none;
-            appearance: none;
-            background: var(--gray-200);
-            outline: none;
-        }
-
-        .slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            background: var(--primary);
-            cursor: pointer;
-        }
-
-        .slider-value {
-            min-width: 40px;
-            text-align: center;
-            font-weight: 600;
-            color: var(--primary);
-        }
-
-        .image-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            padding: 12px;
-            background: var(--gray-50);
-            border-radius: 4px;
-        }
-
-        .image-item {
-            text-align: center;
-        }
-
-        .image-item canvas {
-            width: 100%;
-            height: auto;
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            background: white;
-        }
-
-        .image-label {
-            margin-top: 6px;
-            font-size: 14px;
-            color: var(--gray-600);
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 20px;
-            background: var(--gray-200);
-            border-radius: 10px;
-            overflow: hidden;
-            margin: 12px 0;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--primary), var(--primary-light));
-            transition: width 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 12px;
-        }
-
-        .sequence-display {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            padding: 12px;
-            background: var(--gray-50);
-            border-radius: 4px;
-            max-height: 150px;
-            overflow-y: auto;
-        }
-
-        .sequence-item {
-            padding: 4px 8px;
-            background: var(--primary);
-            color: white;
-            border-radius: 4px;
-            font-size: 14px;
-            min-width: 50px;
-            text-align: center;
-        }
-
-        /* 响应式设计 */
-        @media (max-width: 768px) {
-            .main {
-                flex-direction: column;
-            }
-
-            .sidebar {
-                width: 100%;
-                height: auto;
-                border-right: none;
-                border-bottom: 1px solid var(--border);
-                padding: 8px 16px;
-                display: flex;
-                flex-direction: row;
-                gap: 8px;
-                overflow-x: auto;
-                flex-shrink: 0;
-                justify-content: center;
-                flex-wrap: nowrap;
-            }
-
-            .nav-btn {
-                min-width: 90px;
-                text-align: center;
-                margin-bottom: 0;
-                white-space: nowrap;
-                flex-shrink: 0;
-                padding: 8px 12px;
-                font-size: 14px;
-            }
-
-            .content.active {
-                grid-template-columns: 1fr;
-                gap: 16px;
-            }
-
-            .container {
-                max-height: none;
-                height: 100vh;
-            }
-
-            .image-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-    .return-home-panel { position: fixed; bottom: 12px; right: 12px; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; z-index: 40; }
-        .return-toggle { width: 40px; height: 40px; border-radius: 50%; border: none; background: linear-gradient(135deg, rgba(79,70,229,0.96), rgba(99,102,241,0.9)); color: #fff; font-size: 20px; cursor: pointer; box-shadow: 0 10px 18px rgba(79,70,229,0.28); transition: transform 0.2s, box-shadow 0.2s; }
-        .return-toggle:hover { transform: translateY(-1px) scale(1.03); box-shadow: 0 14px 26px rgba(79,70,229,0.35); }
-        .return-links { display: none; flex-direction: column; gap: 6px; padding: 10px; border-radius: 10px; background: rgba(255,255,255,0.96); border: 1px solid rgba(79,70,229,0.18); box-shadow: 0 10px 30px rgba(15,23,42,0.14); opacity: 0; transition: opacity 0.16s; }
-        .return-link { text-decoration: none; font-size: 15px; color: var(--primary-dark); padding: 6px 12px; border-radius: 8px; background: rgba(99,102,241,0.12); transition: background 0.2s; }
-        .return-link:hover { background: rgba(79,70,229,0.18); }
-    </style>
-
+    <!-- Material Symbols 图标字体 -->
+    <link rel="stylesheet" href="../common-assets/css/lab1-material-symbols.css">
+    
+    <!-- MathJax 配置 -->
+    <script src="../common-assets/js/mathjax-config.js"></script>
+    <script defer src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js"></script>
 </head>
+
 <body>
-    <div class="return-home-panel"><button class="return-toggle" onclick="toggleReturnLinks()"><i class="fa-solid fa-house"></i></button><div class="return-links"><a class="return-link" href="index.html"><i class="fa-solid fa-arrow-left"></i> 返回目录</a><a class="return-link" href="../index.html"><i class="fa-solid fa-house"></i> 返回主站</a></div></div>
-    <div class="container">
-        <header class="header">
-            <h1>图像压缩与数列极限实验室</h1>
-        </header>
-
-        <div class="main">
-            <!-- 侧边栏 -->
-            <nav class="sidebar">
-                <button class="nav-btn active" onclick="switchPanel('concept')">基础概念</button>
-                <button class="nav-btn" onclick="switchPanel('compress')">压缩模拟</button>
-                <button class="nav-btn" onclick="switchPanel('limit')">极限逼近</button>
-            </nav>
-
-            <!-- 基础概念页面 -->
-            <div class="content active" id="concept">
-                <div class="column">
-                    <div class="card">
-                        <h3>数列与极限</h3>
-                        <div class="formula-box">
-                            $\{a_n\} = a_1, a_2, a_3, ..., a_n, ...$
-                        </div>
-                        <div class="info-box">
-                            <strong>简单理解：</strong>数列就是一串有规律的数字，就像排队一样，每个数字都有自己的位置
-                        </div>
-                        <div class="input-group">
-                            <label>选择数列类型</label>
-                            <select id="seqType" onchange="updateSequence()">
-                                <option value="arithmetic">等差数列（每次增加相同的数）</option>
-                                <option value="geometric">等比数列（每次乘以相同的数）</option>
-                                <option value="harmonic">调和数列（1, 1/2, 1/3, 1/4...）</option>
-                                <option value="converge">收敛数列（越来越接近某个数）</option>
-                            </select>
-                        </div>
-                        <div class="sequence-display" id="seqDisplay"></div>
-                        <div class="result" id="seqFormula">
-                            $a_n = a_1 + (n-1)d$
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <h3>极限概念</h3>
-                        <div class="formula-box">
-                            $\lim\limits_{n \to \infty} a_n = L$
-                        </div>
-                        <div class="steps">
-                            <strong>通俗理解：</strong><br>
-                            想象你站在一个目标前面，每次只能走一半的距离<br>
-                            第一次走一半，第二次走剩下的一半，第三次再走剩下的一半...<br>
-                            虽然永远走不到目标，但会越来越接近！<br>
-                            这个"越来越接近"就是极限的概念
-                        </div>
-                        <div class="info-box">
-                            <strong>在图像压缩中：</strong><br>
-                            $\lim\limits_{n \to \infty} d_n = 0$<br>
-                            压缩次数越多，图像差异越小，最终几乎看不出差别
-                        </div>
-                        <div class="steps">
-                            <strong>实际应用：</strong><br>
-                            • 手机拍照自动压缩<br>
-                            • 网页图片优化<br>
-                            • 视频流媒体传输<br>
-                            • 云存储空间节省
-                        </div>
-                    </div>
-                </div>
-
-                <div class="column">
-                    <div class="card">
-                        <h3>数列可视化</h3>
-                        <div class="canvas-container">
-                            <canvas id="seqGraph" width="600" height="300"></canvas>
-                        </div>
-                        <div class="slider-group">
-                            <label>项数 n</label>
-                            <input type="range" class="slider" id="nSlider" 
-                                   min="5" max="50" step="1" value="20">
-                            <span class="slider-value" id="nValue">20</span>
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <h3>图像压缩原理</h3>
-                        <div class="steps">
-                            <strong>图像压缩就像整理房间：</strong><br>
-                            1. <strong>分类整理</strong> - 把相似的颜色放在一起<br>
-                            2. <strong>简化细节</strong> - 去掉不重要的细节（人眼看不出的）<br>
-                            3. <strong>打包存储</strong> - 用更少的地方存放相同的信息<br>
-                            4. <strong>节省空间</strong> - 文件变小了，但看起来差不多
-                        </div>
-                        <div class="formula-box">
-                            压缩率 = $\frac{\text{原始大小} - \text{压缩后大小}}{\text{原始大小}} \times 100\%$
-                        </div>
-                        <div class="info-box">
-                            <strong>生活例子：</strong>就像把衣服压缩袋里，体积变小了，但衣服还是那些衣服
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 压缩模拟页面 -->
-            <div class="content" id="compress">
-                <div class="column">
-                    <div class="card">
-                        <h3>压缩控制</h3>
-                        <div class="input-group">
-                            <label>选择图像类型</label>
-                            <select id="imageSelect" onchange="loadImage()">
-                                <option value="landscape">风景照片（适合压缩）</option>
-                                <option value="portrait">人物照片（中等压缩）</option>
-                                <option value="abstract">抽象图案（难压缩）</option>
-                            </select>
-                        </div>
-                        <div class="info-box">
-                            <strong>压缩效果对比：</strong><br>
-                            风景照：颜色渐变多，压缩效果好<br>
-                            人物照：细节丰富，需要平衡<br>
-                            抽象图：线条复杂，压缩困难
-                        </div>
-                        <div class="slider-group">
-                            <label>质量</label>
-                            <input type="range" class="slider" id="qualitySlider" 
-                                   min="1" max="100" step="1" value="50">
-                            <span class="slider-value" id="qualityValue">50%</span>
-                        </div>
-                        <div class="btn-row">
-                            <button class="btn" onclick="compressImage()">立即压缩</button>
-                            <button class="btn" onclick="animateCompression()">观看压缩过程</button>
-                        </div>
-                        <div class="info-box">
-                            <strong>操作提示：</strong><br>
-                            • 拖动质量滑块看压缩效果<br>
-                            • 点击"观看压缩过程"看动画<br>
-                            • 对比不同图像类型的压缩效果
-                        </div>
-                        <div class="result" id="compressionInfo">
-                            压缩率: 0% | 文件大小: 0KB
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <h3>压缩差异变化</h3>
-                        <div class="formula-box">
-                            $d_n = \|I_{original} - I_n\|$
-                        </div>
-                        <div class="info-box">
-                            <strong>简单理解：</strong>每次压缩后，图像和原图的差别有多大<br>
-                            数字越小 = 差别越小 = 压缩效果越好
-                        </div>
-                        <div class="sequence-display" id="diffSequence"></div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" id="progressBar" style="width: 0%">
-                                0%
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="column">
-                    <div class="card">
-                        <h3>图像对比</h3>
-                        <div class="image-grid">
-                            <div class="image-item">
-                                <canvas id="originalImage" width="200" height="200"></canvas>
-                                <div class="image-label">原始图像</div>
-                            </div>
-                            <div class="image-item">
-                                <canvas id="compressedImage" width="200" height="200"></canvas>
-                                <div class="image-label">压缩后 (Q=<span id="qLabel">50</span>)</div>
-                            </div>
-                            <div class="image-item">
-                                <canvas id="diffImage" width="200" height="200"></canvas>
-                                <div class="image-label">差异图</div>
-                            </div>
-                            <div class="image-item">
-                                <canvas id="dctImage" width="200" height="200"></canvas>
-                                <div class="image-label">频域表示</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 极限逼近页面 -->
-            <div class="content" id="limit">
-                <div class="column">
-                    <div class="card">
-                        <h3>逐步逼近控制</h3>
-                        <div class="input-group">
-                            <label>迭代次数</label>
-                            <input type="number" id="iterations" value="10" min="1" max="100">
-                        </div>
-                        <div class="slider-group">
-                            <label>速度</label>
-                            <input type="range" class="slider" id="speedSlider" 
-                                   min="100" max="2000" step="100" value="500">
-                            <span class="slider-value" id="speedValue">500ms</span>
-                        </div>
-                        <div class="btn-row">
-                            <button class="btn" onclick="startApproximation()">开始演示</button>
-                            <button class="btn" onclick="pauseApproximation()">暂停/继续</button>
-                        </div>
-                        <div class="info-box">
-                            <strong>演示说明：</strong><br>
-                            • 观看图像如何逐步逼近原图<br>
-                            • 调整速度看不同效果<br>
-                            • 观察误差如何逐渐减小
-                        </div>
-                        <div class="result" id="approxInfo">
-                            当前迭代: 0 | 误差: 100%
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <h3>逼近效果分析</h3>
-                        <div class="formula-box">
-                            $\epsilon_n = \frac{d_n}{d_1} \times 100\%$
-                        </div>
-                        <div class="info-box">
-                            <strong>简单理解：</strong>看看压缩效果如何变化<br>
-                            曲线下降越快 = 逼近效果越好
-                        </div>
-                        <div class="canvas-container" style="min-height: 150px;">
-                            <canvas id="convergenceGraph" width="400" height="150"></canvas>
-                        </div>
-                        <div class="info-box" id="convergenceInfo">
-                            逼近效果: 计算中...
-                        </div>
-                    </div>
-                </div>
-
-                <div class="column">
-                    <div class="card">
-                        <h3>逼近过程可视化</h3>
-                        <div class="canvas-container">
-                            <canvas id="approxCanvas" width="400" height="400"></canvas>
-                        </div>
-                        <div class="info-box">
-                            <strong>当前状态：</strong>
-                            <span id="approxStatus">等待开始</span>
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <h3>极限的直观理解</h3>
-                        <div class="formula-box">
-                            当 $n$ 越来越大时，$a_n$ 越来越接近 $L$
-                        </div>
-                        <div class="steps">
-                            <strong>简单理解：</strong><br>
-                            数列的极限就是数列"想去"的那个数<br>
-                            虽然可能永远达不到，但会越来越接近<br>
-                            就像追着影子跑，永远追不上但越来越近
-                        </div>
-                        <div class="info-box">
-                            <strong>生活例子：</strong><br>
-                            • 温度逐渐接近室温<br>
-                            • 房价逐渐稳定<br>
-                            • 学习效果越来越好
-                        </div>
-                        <div class="steps">
-                            <strong>图像压缩中的极限：</strong><br>
-                            压缩次数越多，图像越接近原图<br>
-                            但永远不可能完全一样<br>
-                            这就是极限的完美体现！
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <!-- 返回主页浮动面板 -->
+    <div class="return-home-panel">
+        <button class="return-toggle" onclick="toggleReturnLinks()">
+            <span class="material-symbols-outlined">home</span>
+        </button>
+        <div class="return-links">
+            <a class="return-link" href="index.html">
+                <span class="material-symbols-outlined" style="font-size: 16px;">arrow_back</span> 返回目录
+            </a>
+            <a class="return-link" href="../index.html">
+                <span class="material-symbols-outlined" style="font-size: 16px;">home</span> 返回主站
+            </a>
         </div>
     </div>
 
-    <script>
-        // 渲染数学公式
-        function renderMath() {
-            if (window.MathJax && MathJax.typesetPromise) {
-                MathJax.typesetPromise().catch(err => console.log('渲染错误:', err));
-            }
-        }
+    <div class="container">
+    <header class="header">
+    <h1>图像压缩与数列极限实验室</h1>
+    </header>
+        
+    <div class="main">
+    <!-- 侧边栏 -->
+    <nav class="sidebar">
+    <button class="nav-btn active" onclick="switchPanel('concept')">基础概念</button>
+    <button class="nav-btn" onclick="switchPanel('compress')">压缩模拟</button>
+    <button class="nav-btn" onclick="switchPanel('limit')">极限逼近</button>
+    </nav>
 
-        // 页面切换
-        function switchPanel(panel) {
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
-            
-            event.target.classList.add('active');
-            document.getElementById(panel).classList.add('active');
-            
-            setTimeout(() => {
-                renderMath();
-                if (panel === 'concept') {
-                    updateSequence();
-                    drawSequenceGraph();
-                } else if (panel === 'compress') {
-                    loadImage();
-                } else if (panel === 'limit') {
-                    initApproximation();
-                }
-            }, 50);
-        }
+    <!-- 基础概念页面 -->
+    <div class="content active" id="concept">
+    <div class="column">
+    <div class="card">
+    <h3>数列与极限</h3>
+    <div class="formula-box">
+                            $\{a_n\} = a_1, a_2, a_3, \ldots, a_n, \ldots$
+                            </div>
+    <div class="info-box">
+    <strong>简单理解：</strong>数列就是一串有规律的数字，就像排队一样，每个数字都有自己的位置
+                            </div>
+    <div class="input-group">
+    <label>选择数列类型</label>
+    <select id="seqType" onchange="updateSequence()">
+    <option value="arithmetic">等差数列（每次增加相同的数）</option>
+    <option value="geometric">等比数列（每次乘以相同的数）</option>
+                                <option value="harmonic">调和数列（$1, \frac{1}{2}, \frac{1}{3}, \frac{1}{4}, \ldots$）</option>
+    <option value="converge">收敛数列（越来越接近某个数）</option>
+    </select>
+    </div>
+                        <div class="sequence-display" id="seqDisplay"></div>
+    <div class="result" id="seqFormula">$a_n = 2 + 3(n-1) = 3n - 1$</div>
+    </div>
+    <div class="card">
+    <h3>极限概念</h3>
+    <div class="formula-box">
+                            $\displaystyle\lim_{n \to \infty} a_n = L$
+                            </div>
+    <div class="steps">
+    <strong>通俗理解：</strong><br>
+                                想象你站在一个目标前面，每次只能走一半的距离<br>
+                                第一次走一半，第二次走剩下的一半，第三次再走剩下的一半...<br>
+                                虽然永远走不到目标，但会越来越接近！<br>
+                                这个"越来越接近"就是极限的概念
+                            </div>
+    <div class="info-box">
+    <strong>在图像压缩中：</strong><br>
+                            $\displaystyle\lim_{n \to \infty} d_n = 0$<br>
+                                压缩次数越多，图像差异越小，最终几乎看不出差别
+                            </div>
+    <div class="steps">
+    <strong>实际应用：</strong><br>
+                                • 手机拍照自动压缩<br>
+                                • 网页图片优化<br>
+                                • 视频流媒体传输<br>
+                                • 云存储空间节省
+                            </div>
+    </div>
+    </div>
+    <div class="column">
+    <div class="card">
+    <h3>数列可视化</h3>
+    <div class="canvas-container">
+    <canvas height="300" id="seqGraph" width="600"></canvas>
+    </div>
+    <div class="slider-group">
+                            <label>项数 $n$</label>
+    <input class="slider" id="nSlider" max="50" min="5" step="1" type="range" value="20">
+    <span class="slider-value" id="nValue">20</span>
+    </div>
+    </div>
+    <div class="card">
+    <h3>图像压缩原理</h3>
+    <div class="steps">
+    <strong>图像压缩就像整理房间：</strong><br>
+                                1. <strong>分类整理</strong> - 把相似的颜色放在一起<br>
+                                2. <strong>简化细节</strong> - 去掉不重要的细节（人眼看不出的）<br>
+                                3. <strong>打包存储</strong> - 用更少的地方存放相同的信息<br>
+                                4. <strong>节省空间</strong> - 文件变小了，但看起来差不多
+                            </div>
+    <div class="formula-box">
+                            压缩率 $= \dfrac{\text{原始大小} - \text{压缩后大小}}{\text{原始大小}} \times 100\%$
+                            </div>
+    <div class="info-box">
+    <strong>生活例子：</strong>就像把衣服压缩袋里，体积变小了，但衣服还是那些衣服
+                            </div>
+    </div>
+    </div>
+    </div>
 
-        // 更新数列显示
-        function updateSequence() {
-            const type = document.getElementById('seqType').value;
-            const display = document.getElementById('seqDisplay');
-            const formula = document.getElementById('seqFormula');
-            
-            display.innerHTML = '';
-            let items = [];
-            let formulaText = '';
-            
-            switch(type) {
-                case 'arithmetic':
-                    formulaText = '$a_n = 2 + 3(n-1) = 3n - 1$';
-                    for(let i = 1; i <= 10; i++) {
-                        items.push(2 + 3 * (i - 1));
-                    }
-                    break;
-                case 'geometric':
-                    formulaText = '$a_n = 2 \\cdot 3^{n-1}$';
-                    for(let i = 1; i <= 8; i++) {
-                        items.push(2 * Math.pow(3, i - 1));
-                    }
-                    break;
-                case 'harmonic':
-                    formulaText = '$a_n = \\frac{1}{n}$';
-                    for(let i = 1; i <= 10; i++) {
-                        items.push((1/i).toFixed(3));
-                    }
-                    break;
-                case 'converge':
-                    formulaText = '$a_n = 1 + \\frac{1}{2^n}$';
-                    for(let i = 1; i <= 10; i++) {
-                        items.push((1 + 1/Math.pow(2, i)).toFixed(4));
-                    }
-                    break;
-            }
-            
-            items.forEach(item => {
-                const div = document.createElement('div');
-                div.className = 'sequence-item';
-                div.textContent = item;
-                display.appendChild(div);
-            });
-            
-            formula.innerHTML = formulaText;
-            renderMath();
-            drawSequenceGraph();
-        }
+    <!-- 压缩模拟页面 -->
+    <div class="content" id="compress">
+    <div class="column">
+    <div class="card">
+    <h3>压缩控制</h3>
+    <div class="input-group">
+    <label>选择图像类型</label>
+    <select id="imageSelect" onchange="loadImage()">
+    <option value="landscape">风景照片（适合压缩）</option>
+    <option value="portrait">人物照片（中等压缩）</option>
+    <option value="abstract">抽象图案（难压缩）</option>
+    </select>
+    </div>
+    <div class="info-box">
+    <strong>压缩效果对比：</strong><br>
+                                风景照：颜色渐变多，压缩效果好<br>
+                                人物照：细节丰富，需要平衡<br>
+                                抽象图：线条复杂，压缩困难
+                            </div>
+    <div class="slider-group">
+    <label>质量</label>
+    <input class="slider" id="qualitySlider" max="100" min="1" step="1" type="range" value="50">
+    <span class="slider-value" id="qualityValue">50%</span>
+    </div>
+    <div class="btn-row">
+    <button class="btn" onclick="compressImage()">立即压缩</button>
+    <button class="btn" onclick="animateCompression()">观看压缩过程</button>
+    </div>
+    <div class="info-box">
+    <strong>操作提示：</strong><br>
+                                • 拖动质量滑块看压缩效果<br>
+                                • 点击"观看压缩过程"看动画<br>
+                                • 对比不同图像类型的压缩效果
+                            </div>
+    <div class="result" id="compressionInfo">
+                                压缩率: 0% | 文件大小: 0KB
+                            </div>
+    </div>
+    <div class="card">
+    <h3>压缩差异变化</h3>
+    <div class="formula-box">
+                            $d_n = \|I_{\text{original}} - I_n\|$
+                            </div>
+    <div class="info-box">
+    <strong>简单理解：</strong>每次压缩后，图像和原图的差别有多大<br>
+                                数字越小 = 差别越小 = 压缩效果越好
+                            </div>
+    <div class="sequence-display" id="diffSequence"></div>
+    <div class="progress-bar">
+                            <div class="progress-fill" id="progressBar" style="width: 0%">0%</div>
+    </div>
+    </div>
+    </div>
+    <div class="column">
+    <div class="card">
+    <h3>图像对比</h3>
+    <div class="image-grid">
+    <div class="image-item">
+    <canvas height="200" id="originalImage" width="200"></canvas>
+    <div class="image-label">原始图像</div>
+    </div>
+    <div class="image-item">
+    <canvas height="200" id="compressedImage" width="200"></canvas>
+                                <div class="image-label">压缩后 ($Q=$<span id="qLabel">50</span>)</div>
+    </div>
+    <div class="image-item">
+    <canvas height="200" id="diffImage" width="200"></canvas>
+    <div class="image-label">差异图</div>
+    </div>
+    <div class="image-item">
+    <canvas height="200" id="dctImage" width="200"></canvas>
+    <div class="image-label">频域表示</div>
+    </div>
+    </div>
+    </div>
+    </div>
+    </div>
 
-        // 绘制数列图像
-        function drawSequenceGraph() {
-            const canvas = document.getElementById('seqGraph');
-            if (!canvas) return;
-            
-            const ctx = canvas.getContext('2d');
-            const width = canvas.width;
-            const height = canvas.height;
-            const n = parseInt(document.getElementById('nSlider').value);
-            const type = document.getElementById('seqType').value;
-            
-            ctx.clearRect(0, 0, width, height);
-            
-            // 绘制坐标轴
-            ctx.strokeStyle = '#374151';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(40, height - 30);
-            ctx.lineTo(width - 20, height - 30);
-            ctx.moveTo(40, 20);
-            ctx.lineTo(40, height - 30);
-            ctx.stroke();
-            
-            // 计算数列值
-            let values = [];
-            let maxVal = 0;
-            for(let i = 1; i <= n; i++) {
-                let val = 0;
-                switch(type) {
-                    case 'arithmetic':
-                        val = 3 * i - 1;
-                        break;
-                    case 'geometric':
-                        val = 2 * Math.pow(1.5, i - 1);
-                        break;
-                    case 'harmonic':
-                        val = 1 / i;
-                        break;
-                    case 'converge':
-                        val = 1 + 1 / Math.pow(2, i);
-                        break;
-                }
-                values.push(val);
-                maxVal = Math.max(maxVal, val);
-            }
-            
-            // 绘制数列点和线
-            ctx.strokeStyle = '#4f46e5';
-            ctx.fillStyle = '#4f46e5';
-            ctx.lineWidth = 2;
-            
-            const xStep = (width - 80) / n;
-            const yScale = (height - 60) / (maxVal * 1.1);
-            
-            ctx.beginPath();
-            values.forEach((val, i) => {
-                const x = 40 + (i + 1) * xStep;
-                const y = height - 30 - val * yScale;
-                
-                if (i === 0) ctx.moveTo(x, y);
-                else ctx.lineTo(x, y);
-                
-                // 画点
-                ctx.fillRect(x - 3, y - 3, 6, 6);
-            });
-            ctx.stroke();
-            
-            // 如果是收敛数列，画极限线
-            if (type === 'converge') {
-                ctx.strokeStyle = '#ef4444';
-                ctx.setLineDash([5, 5]);
-                ctx.beginPath();
-                ctx.moveTo(40, height - 30 - yScale);
-                ctx.lineTo(width - 20, height - 30 - yScale);
-                ctx.stroke();
-                ctx.setLineDash([]);
-            }
-        }
+    <!-- 极限逼近页面 -->
+    <div class="content" id="limit">
+    <div class="column">
+    <div class="card">
+    <h3>逐步逼近控制</h3>
+    <div class="input-group">
+    <label>迭代次数</label>
+    <input id="iterations" max="100" min="1" type="number" value="10">
+    </div>
+    <div class="slider-group">
+    <label>速度</label>
+    <input class="slider" id="speedSlider" max="2000" min="100" step="100" type="range" value="500">
+    <span class="slider-value" id="speedValue">500ms</span>
+    </div>
+    <div class="btn-row">
+    <button class="btn" onclick="startApproximation()">开始演示</button>
+    <button class="btn" onclick="pauseApproximation()">暂停/继续</button>
+    </div>
+    <div class="info-box">
+    <strong>演示说明：</strong><br>
+                                • 观看图像如何逐步逼近原图<br>
+                                • 调整速度看不同效果<br>
+                                • 观察误差如何逐渐减小
+                            </div>
+    <div class="result" id="approxInfo">
+                                当前迭代: 0 | 误差: 100%
+                            </div>
+    </div>
+    <div class="card">
+    <h3>逼近效果分析</h3>
+    <div class="formula-box">
+                            $\varepsilon_n = \dfrac{d_n}{d_1} \times 100\%$
+                            </div>
+    <div class="info-box">
+    <strong>简单理解：</strong>看看压缩效果如何变化<br>
+                                曲线下降越快 = 逼近效果越好
+                            </div>
+    <div class="canvas-container" style="min-height: 150px;">
+    <canvas height="150" id="convergenceGraph" width="400"></canvas>
+    </div>
+    <div class="info-box" id="convergenceInfo">
+                                逼近效果: 计算中...
+                            </div>
+    </div>
+    </div>
+    <div class="column">
+    <div class="card">
+    <h3>逼近过程可视化</h3>
+    <div class="canvas-container">
+    <canvas height="400" id="approxCanvas" width="400"></canvas>
+    </div>
+    <div class="info-box">
+    <strong>当前状态：</strong>
+    <span id="approxStatus">等待开始</span>
+    </div>
+    </div>
+    <div class="card">
+    <h3>极限的直观理解</h3>
+    <div class="formula-box">
+                            当 $n \to \infty$ 时，$a_n \to L$
+                            </div>
+    <div class="steps">
+    <strong>简单理解：</strong><br>
+                                数列的极限就是数列"想去"的那个数<br>
+                                虽然可能永远达不到，但会越来越接近<br>
+                                就像追着影子跑，永远追不上但越来越近
+                            </div>
+    <div class="info-box">
+    <strong>生活例子：</strong><br>
+                                • 温度逐渐接近室温<br>
+                                • 房价逐渐稳定<br>
+                                • 学习效果越来越好
+                            </div>
+    <div class="steps">
+    <strong>图像压缩中的极限：</strong><br>
+                                压缩次数越多，图像越接近原图<br>
+                                但永远不可能完全一样<br>
+                                这就是极限的完美体现！
+                            </div>
+    </div>
+    </div>
+    </div>
+    </div>
+    </div>
 
-        // 加载图像
-        function loadImage() {
-            const originalCanvas = document.getElementById('originalImage');
-            const compressedCanvas = document.getElementById('compressedImage');
-            const diffCanvas = document.getElementById('diffImage');
-            const dctCanvas = document.getElementById('dctImage');
-            
-            if (!originalCanvas) return;
-            
-            // 模拟不同类型的图像
-            const imageType = document.getElementById('imageSelect').value;
-            
-            [originalCanvas, compressedCanvas, diffCanvas, dctCanvas].forEach(canvas => {
-                const ctx = canvas.getContext('2d');
-                ctx.clearRect(0, 0, 200, 200);
-            });
-            
-            // 绘制原始图像（简化表示）
-            const ctx = originalCanvas.getContext('2d');
-            
-            switch(imageType) {
-                case 'landscape':
-                    // 绘制简单风景
-                    ctx.fillStyle = '#87CEEB';
-                    ctx.fillRect(0, 0, 200, 100);
-                    ctx.fillStyle = '#228B22';
-                    ctx.fillRect(0, 100, 200, 100);
-                    ctx.fillStyle = '#FFD700';
-                    ctx.beginPath();
-                    ctx.arc(150, 50, 30, 0, Math.PI * 2);
-                    ctx.fill();
-                    break;
-                case 'portrait':
-                    // 绘制简单人像
-                    ctx.fillStyle = '#FDB5A6';
-                    ctx.beginPath();
-                    ctx.arc(100, 80, 40, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.fillStyle = '#4169E1';
-                    ctx.fillRect(60, 120, 80, 80);
-                    break;
-                case 'abstract':
-                    // 绘制抽象图案
-                    for(let i = 0; i < 5; i++) {
-                        ctx.fillStyle = `hsl(${i * 72}, 70%, 50%)`;
-                        ctx.fillRect(i * 40, i * 40, 40, 40);
-                    }
-                    break;
-            }
-            
-            compressImage();
-        }
-
-        // 压缩图像
-        function compressImage() {
-            const quality = parseInt(document.getElementById('qualitySlider').value);
-            const originalCanvas = document.getElementById('originalImage');
-            const compressedCanvas = document.getElementById('compressedImage');
-            const diffCanvas = document.getElementById('diffImage');
-            const dctCanvas = document.getElementById('dctImage');
-            
-            if (!originalCanvas) return;
-            
-            // 复制原始图像
-            const ctxComp = compressedCanvas.getContext('2d');
-            ctxComp.drawImage(originalCanvas, 0, 0);
-            
-            // 模拟压缩效果（简化）
-            const imageData = ctxComp.getImageData(0, 0, 200, 200);
-            const data = imageData.data;
-            const blockSize = Math.floor(10 - quality / 12);
-            
-            if (blockSize > 1) {
-                for(let y = 0; y < 200; y += blockSize) {
-                    for(let x = 0; x < 200; x += blockSize) {
-                        let r = 0, g = 0, b = 0, count = 0;
-                        
-                        for(let dy = 0; dy < blockSize && y + dy < 200; dy++) {
-                            for(let dx = 0; dx < blockSize && x + dx < 200; dx++) {
-                                const idx = ((y + dy) * 200 + (x + dx)) * 4;
-                                r += data[idx];
-                                g += data[idx + 1];
-                                b += data[idx + 2];
-                                count++;
-                            }
-                        }
-                        
-                        r = Math.floor(r / count);
-                        g = Math.floor(g / count);
-                        b = Math.floor(b / count);
-                        
-                        for(let dy = 0; dy < blockSize && y + dy < 200; dy++) {
-                            for(let dx = 0; dx < blockSize && x + dx < 200; dx++) {
-                                const idx = ((y + dy) * 200 + (x + dx)) * 4;
-                                data[idx] = r;
-                                data[idx + 1] = g;
-                                data[idx + 2] = b;
-                            }
-                        }
-                    }
-                }
-            }
-            
-            ctxComp.putImageData(imageData, 0, 0);
-            
-            // 更新质量标签
-            document.getElementById('qLabel').textContent = quality;
-            
-            // 计算差异图
-            const ctxDiff = diffCanvas.getContext('2d');
-            const origData = originalCanvas.getContext('2d').getImageData(0, 0, 200, 200);
-            const diffData = ctxDiff.createImageData(200, 200);
-            
-            for(let i = 0; i < data.length; i += 4) {
-                const diff = Math.abs(origData.data[i] - data[i]) + 
-                             Math.abs(origData.data[i+1] - data[i+1]) + 
-                             Math.abs(origData.data[i+2] - data[i+2]);
-                diffData.data[i] = diff;
-                diffData.data[i+1] = diff;
-                diffData.data[i+2] = diff;
-                diffData.data[i+3] = 255;
-            }
-            
-            ctxDiff.putImageData(diffData, 0, 0);
-            
-            // 模拟DCT频域
-            const ctxDCT = dctCanvas.getContext('2d');
-            ctxDCT.fillStyle = '#000';
-            ctxDCT.fillRect(0, 0, 200, 200);
-            
-            // 绘制频率分量（简化表示）
-            for(let i = 0; i < 20; i++) {
-                for(let j = 0; j < 20; j++) {
-                    const intensity = Math.max(0, 255 - (i + j) * 10 * (100 - quality) / 100);
-                    ctxDCT.fillStyle = `rgb(${intensity}, ${intensity}, ${intensity})`;
-                    ctxDCT.fillRect(i * 10, j * 10, 10, 10);
-                }
-            }
-            
-            // 更新压缩信息
-            const compressionRate = (100 - quality) * 0.8;
-            const fileSize = Math.floor(100 - compressionRate);
-            document.getElementById('compressionInfo').textContent = 
-                `压缩率: ${compressionRate.toFixed(1)}% | 文件大小: ${fileSize}KB`;
-            
-            // 更新差异值数列
-            updateDiffSequence(quality);
-        }
-
-        // 更新差异值数列
-        function updateDiffSequence(quality) {
-            const display = document.getElementById('diffSequence');
-            if (!display) return;
-            
-            display.innerHTML = '';
-            for(let i = 1; i <= 10; i++) {
-                const diff = (100 - quality) * Math.pow(0.9, i);
-                const div = document.createElement('div');
-                div.className = 'sequence-item';
-                div.textContent = diff.toFixed(2);
-                display.appendChild(div);
-            }
-            
-            // 更新进度条
-            const progress = document.getElementById('progressBar');
-            progress.style.width = quality + '%';
-            progress.textContent = quality + '%';
-        }
-
-        // 动画演示压缩
-        function animateCompression() {
-            let quality = 100;
-            const interval = setInterval(() => {
-                quality -= 5;
-                if (quality < 10) {
-                    quality = 100;
-                }
-                document.getElementById('qualitySlider').value = quality;
-                document.getElementById('qualityValue').textContent = quality + '%';
-                compressImage();
-                
-                if (quality === 100) {
-                    clearInterval(interval);
-                }
-            }, 200);
-        }
-
-        // 初始化逼近
-        function initApproximation() {
-            const canvas = document.getElementById('approxCanvas');
-            if (!canvas) return;
-            
-            const ctx = canvas.getContext('2d');
-            ctx.clearRect(0, 0, 400, 400);
-            
-            // 绘制目标图像（简化）
-            ctx.strokeStyle = '#e5e7eb';
-            ctx.lineWidth = 2;
-            ctx.strokeRect(50, 50, 300, 300);
-            
-            ctx.fillStyle = '#f3f4f6';
-            ctx.font = '16px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText('目标图像', 200, 200);
-            
-            drawConvergenceGraph();
-        }
-
-        // 绘制收敛图
-        function drawConvergenceGraph() {
-            const canvas = document.getElementById('convergenceGraph');
-            if (!canvas) return;
-            
-            const ctx = canvas.getContext('2d');
-            ctx.clearRect(0, 0, 400, 150);
-            
-            // 绘制坐标轴
-            ctx.strokeStyle = '#374151';
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.moveTo(30, 120);
-            ctx.lineTo(380, 120);
-            ctx.moveTo(30, 10);
-            ctx.lineTo(30, 120);
-            ctx.stroke();
-            
-            // 绘制收敛曲线
-            ctx.strokeStyle = '#4f46e5';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            
-            for(let i = 0; i <= 20; i++) {
-                const x = 30 + i * 17;
-                const y = 120 - 100 * Math.exp(-i * 0.3);
-                
-                if (i === 0) ctx.moveTo(x, y);
-                else ctx.lineTo(x, y);
-            }
-            ctx.stroke();
-        }
-
-        let approxInterval;
-        let currentIteration = 0;
-        let isPaused = false;
-
-        // 开始逼近
-        function startApproximation() {
-            currentIteration = 0;
-            isPaused = false;
-            const iterations = parseInt(document.getElementById('iterations').value);
-            const speed = parseInt(document.getElementById('speedSlider').value);
-            
-            clearInterval(approxInterval);
-            
-            approxInterval = setInterval(() => {
-                if (!isPaused && currentIteration < iterations) {
-                    currentIteration++;
-                    updateApproximation(currentIteration, iterations);
-                } else if (currentIteration >= iterations) {
-                    clearInterval(approxInterval);
-                    document.getElementById('approxStatus').textContent = '逼近完成';
-                }
-            }, speed);
-        }
-
-        // 暂停/继续逼近
-        function pauseApproximation() {
-            isPaused = !isPaused;
-            document.getElementById('approxStatus').textContent = 
-                isPaused ? '已暂停' : '逼近中...';
-        }
-
-        // 更新逼近显示
-        function updateApproximation(current, total) {
-            const canvas = document.getElementById('approxCanvas');
-            if (!canvas) return;
-            
-            const ctx = canvas.getContext('2d');
-            const progress = current / total;
-            
-            // 清除并重绘
-            ctx.clearRect(0, 0, 400, 400);
-            
-            // 绘制逐步清晰的图像
-            const blockSize = Math.max(2, Math.floor(20 * (1 - progress)));
-            
-            for(let y = 50; y < 350; y += blockSize) {
-                for(let x = 50; x < 350; x += blockSize) {
-                    const intensity = Math.floor(255 * progress);
-                    const hue = (x + y) / 5;
-                    ctx.fillStyle = `hsl(${hue}, 70%, ${50 + intensity/10}%)`;
-                    ctx.fillRect(x, y, blockSize - 1, blockSize - 1);
-                }
-            }
-            
-            // 更新信息
-            const error = ((1 - progress) * 100).toFixed(1);
-            document.getElementById('approxInfo').textContent = 
-                `当前迭代: ${current} | 误差: ${error}%`;
-            document.getElementById('approxStatus').textContent = 
-                `逼近中... (${current}/${total})`;
-            document.getElementById('convergenceInfo').textContent = 
-                `逼近效果: ${(progress * 100).toFixed(1)}%`;
-        }
-
-        // 滑块事件
-        document.getElementById('nSlider')?.addEventListener('input', function() {
-            document.getElementById('nValue').textContent = this.value;
-            drawSequenceGraph();
-        });
-
-        document.getElementById('qualitySlider')?.addEventListener('input', function() {
-            document.getElementById('qualityValue').textContent = this.value + '%';
-            compressImage();
-        });
-
-        document.getElementById('speedSlider')?.addEventListener('input', function() {
-            document.getElementById('speedValue').textContent = this.value + 'ms';
-        });
-
-        // 窗口大小变化时重绘
-        let resizeTimeout;
-        window.addEventListener('resize', function() {
-            clearTimeout(resizeTimeout);
-            resizeTimeout = setTimeout(() => {
-                const activePanel = document.querySelector('.content.active');
-                if (activePanel) {
-                    const panelId = activePanel.id;
-                    if (panelId === 'concept') {
-                        drawSequenceGraph();
-                    } else if (panelId === 'compress') {
-                        loadImage();
-                    } else if (panelId === 'limit') {
-                        initApproximation();
-                    }
-                }
-            }, 150);
-        });
-
-        // 初始化
-        window.addEventListener('DOMContentLoaded', function() {
-            setTimeout(() => {
-                updateSequence();
-                drawSequenceGraph();
-                renderMath();
-            }, 100);
-        });
-        function toggleReturnLinks() { const p = document.querySelector('.return-links'); if (!p) return; if (p.style.display === 'flex') { p.style.opacity = '0'; setTimeout(() => p.style.display = 'none', 160); } else { p.style.display = 'flex'; requestAnimationFrame(() => p.style.opacity = '1'); } }
-    </script>
+    <!-- 页面专用脚本 -->
+    <script src="assets/lab2-1.js"></script>
 </body>
 </html>

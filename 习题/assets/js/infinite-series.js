@@ -1,6 +1,6 @@
 window.exerciseData = {
     exercises: [
-        {
+{
             id: 1,
             type: "选择题",
             title: "级数收敛必要条件",
@@ -19,7 +19,7 @@ window.exerciseData = {
             category: "数项级数",
             method: "性质法"
         },
-        {
+{
             id: 2,
             type: "选择题",
             title: "几何级数",
@@ -42,7 +42,7 @@ $$S = \\frac{q}{1-q} = \\frac{1/2}{1-1/2} = \\frac{1/2}{1/2} = 1$$
             category: "数项级数",
             method: "几何级数判别法"
         },
-        {
+{
             id: 3,
             type: "选择题",
             title: "p-级数",
@@ -66,7 +66,7 @@ p-级数：
             category: "数项级数",
             method: "p-级数判别法"
         },
-        {
+{
             id: 4,
             type: "选择题",
             title: "调和级数",
@@ -90,7 +90,7 @@ $$\\int_1^{\\infty} \\frac{1}{x} dx = \\ln x \\Big|_1^{\\infty} = \\infty$$
             category: "数项级数",
             method: "p-级数判别法"
         },
-        {
+{
             id: 5,
             type: "选择题",
             title: "比值判别法",
@@ -112,7 +112,7 @@ $$\\lim_{n \\to \\infty} \\frac{u_{n+1}}{u_n} = \\lim_{n \\to \\infty} \\frac{2}
             category: "数项级数",
             method: "比值判别法"
         },
-        {
+{
             id: 6,
             type: "选择题",
             title: "交错级数",
@@ -138,7 +138,7 @@ $$\\sum_{n=1}^{\\infty} \\left|\\frac{(-1)^{n+1}}{n}\\right| = \\sum_{n=1}^{\\in
             category: "数项级数",
             method: "莱布尼茨判别法"
         },
-        {
+{
             id: 7,
             type: "解答题",
             title: "幂级数收敛半径",
@@ -163,7 +163,7 @@ $$\\sum_{n=1}^{\\infty} \\frac{1}{n}$$
             category: "幂级数",
             method: "比值法+端点判别"
         },
-        {
+{
             id: 8,
             type: "选择题",
             title: "傅里叶级数",
@@ -188,7 +188,7 @@ $$S(\\pi) = \\frac{\\pi + (-\\pi)}{2} = 0$$
             category: "傅里叶级数",
             method: "狄利克雷定理"
         }
-    ],
+],
     knowledgePoints: [
         {
             title: "常见级数敛散性",

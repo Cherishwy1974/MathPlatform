@@ -1,0 +1,130 @@
+/* lab2-9.css - 等价无穷小倒水游戏样式 */
+
+/* 基础样式 */
+body {
+    font-family: 'Noto Serif SC', serif;
+    background: linear-gradient(135deg, #fdfbf7 0%, #f0f4f8 100%);
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* 玻璃态效果 */
+.glass {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+}
+
+.bottle-glass {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.1) 100%);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 
+        inset 0 4px 6px rgba(255,255,255,0.4),
+        0 4px 15px rgba(0,0,0,0.1);
+}
+
+/* 瓶子样式 */
+.bottle {
+    position: relative;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    cursor: pointer;
+}
+
+.bottle.selected {
+    transform: translateY(-15px) scale(1.05);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+    border-color: rgba(99, 102, 241, 0.6);
+}
+
+/* 液体动画 */
+.liquid {
+    transition: height 0.3s ease, background-color 0.3s ease;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.7rem;
+    font-weight: bold;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+/* 函数组颜色 */
+.bg-func-1 { background: linear-gradient(135deg, #3b82f6, #2563eb); } /* 蓝色 */
+.bg-func-2 { background: linear-gradient(135deg, #ef4444, #dc2626); } /* 红色 */
+.bg-func-3 { background: linear-gradient(135deg, #10b981, #059669); } /* 绿色 */
+.bg-func-4 { background: linear-gradient(135deg, #8b5cf6, #7c3aed); } /* 紫色 */
+.bg-func-5 { background: linear-gradient(135deg, #f59e0b, #d97706); } /* 琥珀色 */
+
+/* 液体表面效果 */
+.liquid::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: rgba(255,255,255,0.3);
+    border-radius: 50%;
+    transform: scaleX(1.2);
+}
+
+/* 隐藏滚动条 */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* MathJax容器修复 */
+mjx-container { font-size: 110% !important; }
+
+.math-tex {
+    pointer-events: none;
+}
+
+/* 返回主页面板 */
+.return-links {
+    position: fixed;
+    top: 5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 50;
+    display: none;
+    flex-direction: column;
+    gap: 0.5rem;
+    background: white;
+    padding: 1rem;
+    border-radius: 1rem;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    border: 1px solid #e5e7eb;
+    opacity: 0;
+    transition: opacity 0.16s ease;
+}
+
+.return-links a {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    color: #4f46e5;
+    text-decoration: none;
+    font-weight: 500;
+    transition: background 0.15s ease;
+}
+
+.return-links a:hover {
+    background: #eef2ff;
+}
+
+/* Toast提示 */
+#toast {
+    transition: opacity 0.3s ease;
+}
+
+/* 模态框动画 */
+#modal .modal-content {
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+

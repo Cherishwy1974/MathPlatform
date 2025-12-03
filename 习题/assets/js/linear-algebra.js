@@ -1,6 +1,6 @@
 window.exerciseData = {
     exercises: [
-        {
+{
             id: 1,
             type: "选择题",
             title: "行列式性质",
@@ -19,7 +19,7 @@ window.exerciseData = {
             category: "行列式",
             method: "性质法"
         },
-        {
+{
             id: 2,
             type: "选择题",
             title: "二阶行列式计算",
@@ -38,7 +38,7 @@ $$= 8 - 3 = 5$$
             category: "行列式",
             method: "公式法"
         },
-        {
+{
             id: 3,
             type: "选择题",
             title: "矩阵加法",
@@ -57,7 +57,7 @@ $$= \\begin{pmatrix} 6 & 8 \\\\ 10 & 12 \\end{pmatrix}$$
             category: "矩阵运算",
             method: "直接计算"
         },
-        {
+{
             id: 4,
             type: "解答题",
             title: "矩阵乘法",
@@ -82,7 +82,7 @@ $$\\begin{pmatrix} 4 & 6 \\\\ 10 & 12 \\end{pmatrix}$$`,
             category: "矩阵运算",
             method: "矩阵乘法法则"
         },
-        {
+{
             id: 5,
             type: "选择题",
             title: "矩阵的秩",
@@ -102,7 +102,7 @@ $$\\begin{pmatrix} 1 & 2 & 3 \\\\ 2 & 4 & 6 \\\\ 0 & 1 & 2 \\end{pmatrix} \\righ
             category: "矩阵的秩",
             method: "行化简法"
         },
-        {
+{
             id: 6,
             type: "解答题",
             title: "逆矩阵",
@@ -121,7 +121,7 @@ $$A^{-1} = \\begin{pmatrix} 1 & -1 \\\\ -1 & 2 \\end{pmatrix}$$`,
             category: "逆矩阵",
             method: "伴随矩阵法"
         },
-        {
+{
             id: 7,
             type: "选择题",
             title: "线性方程组解的判定",
@@ -146,7 +146,7 @@ A和D都正确，但A更直接
             category: "线性方程组",
             method: "判别法"
         },
-        {
+{
             id: 8,
             type: "选择题",
             title: "向量线性相关性",
@@ -167,7 +167,7 @@ $$k_1\\alpha_1 + k_2\\alpha_2 + k_3\\alpha_3 = \\vec{0}$$
             category: "向量空间",
             method: "定义法"
         },
-        {
+{
             id: 9,
             type: "选择题",
             title: "特征值与特征向量",
@@ -181,7 +181,7 @@ $$k_1\\alpha_1 + k_2\\alpha_2 + k_3\\alpha_3 = \\vec{0}$$
             category: "特征值",
             method: "对角矩阵性质"
         },
-        {
+{
             id: 10,
             type: "选择题",
             title: "单位矩阵",
@@ -195,7 +195,7 @@ $E\\vec{x} = 1 \\cdot \\vec{x}$
             category: "特征值",
             method: "定义"
         },
-        {
+{
             id: 11,
             type: "选择题",
             title: "矩阵的迹",
@@ -209,7 +209,7 @@ $tr(A) = \\sum \\lambda_i$ (特征值之和)`,
             category: "矩阵的迹",
             method: "定义"
         },
-        {
+{
             id: 12,
             type: "选择题",
             title: "相似矩阵",
@@ -226,7 +226,7 @@ $tr(A) = \\sum \\lambda_i$ (特征值之和)`,
             category: "相似矩阵",
             method: "性质"
         },
-        {
+{
             id: 13,
             type: "选择题",
             title: "对角化条件",
@@ -240,7 +240,7 @@ $n$阶矩阵可对角化 ⟺ 有$n$个线性无关的特征向量
             category: "对角化",
             method: "定理"
         },
-        {
+{
             id: 14,
             type: "选择题",
             title: "实对称矩阵",
@@ -254,7 +254,7 @@ $n$阶矩阵可对角化 ⟺ 有$n$个线性无关的特征向量
             category: "对称矩阵",
             method: "性质"
         },
-        {
+{
             id: 15,
             type: "选择题",
             title: "正交矩阵",
@@ -269,7 +269,7 @@ $Q^{-1} = Q^T$`,
             category: "正交矩阵",
             method: "定义"
         },
-        {
+{
             id: 16,
             type: "选择题",
             title: "二次型标准形",
@@ -283,7 +283,7 @@ $Q^{-1} = Q^T$`,
             category: "二次型",
             method: "定义"
         },
-        {
+{
             id: 17,
             type: "选择题",
             title: "正定二次型",
@@ -298,7 +298,7 @@ $Q^{-1} = Q^T$`,
             category: "二次型",
             method: "定义"
         },
-        {
+{
             id: 18,
             type: "选择题",
             title: "向量组的秩",
@@ -312,7 +312,7 @@ $Q^{-1} = Q^T$`,
             category: "向量空间",
             method: "定义"
         },
-        {
+{
             id: 19,
             type: "选择题",
             title: "克拉默法则",
@@ -326,7 +326,7 @@ $$x_i = \\frac{|A_i|}{|A|}$$`,
             category: "线性方程组",
             method: "定理"
         },
-        {
+{
             id: 20,
             type: "选择题",
             title: "矩阵的秩与方程组",
@@ -341,7 +341,7 @@ $$x_i = \\frac{|A_i|}{|A|}$$`,
             category: "线性方程组",
             method: "秩判定法"
         },
-        {
+{
             id: 21,
             type: "选择题",
             title: "向量空间的基",
@@ -355,7 +355,7 @@ $\\mathbb{R}^3$的基包含3个向量`,
             category: "向量空间",
             method: "定义"
         },
-        {
+{
             id: 22,
             type: "选择题",
             title: "伴随矩阵",
@@ -369,7 +369,7 @@ $$A^{-1} = \\frac{1}{|A|}A^*$$`,
             category: "伴随矩阵",
             method: "公式"
         },
-        {
+{
             id: 23,
             type: "选择题",
             title: "矩阵的幂",
@@ -384,7 +384,7 @@ $$A^{-1} = \\frac{1}{|A|}A^*$$`,
             category: "特殊矩阵",
             method: "定义"
         },
-        {
+{
             id: 24,
             type: "选择题",
             title: "矩阵分块",
@@ -400,7 +400,7 @@ $$A^{-1} = \\frac{1}{|A|}A^*$$`,
             category: "分块矩阵",
             method: "性质"
         },
-        {
+{
             id: 25,
             type: "选择题",
             title: "初等变换",
@@ -416,7 +416,7 @@ $$A^{-1} = \\frac{1}{|A|}A^*$$`,
             category: "初等变换",
             method: "性质"
         },
-        {
+{
             id: 26,
             type: "选择题",
             title: "齐次方程组基础解系",
@@ -430,7 +430,7 @@ $$A^{-1} = \\frac{1}{|A|}A^*$$`,
             category: "线性方程组",
             method: "定理"
         },
-        {
+{
             id: 27,
             type: "选择题",
             title: "正交变换",
@@ -447,7 +447,7 @@ $Y = QX$，其中$Q$是正交矩阵
             category: "正交变换",
             method: "性质"
         },
-        {
+{
             id: 28,
             type: "选择题",
             title: "惯性指数",
@@ -462,7 +462,7 @@ $Y = QX$，其中$Q$是正交矩阵
             category: "二次型",
             method: "定义"
         },
-        {
+{
             id: 29,
             type: "选择题",
             title: "相似对角化",
@@ -476,7 +476,7 @@ $$P^{-1}AP = \\Lambda = \\begin{pmatrix} \\lambda_1 & & \\\\ & \\ddots & \\\\ & 
             category: "对角化",
             method: "定理"
         },
-        {
+{
             id: 30,
             type: "选择题",
             title: "线性空间维数",
@@ -491,7 +491,7 @@ $$\\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix}$$
             category: "线性空间",
             method: "定义"
         }
-    ],
+],
     knowledgePoints: [
         {
             title: "矩阵运算",

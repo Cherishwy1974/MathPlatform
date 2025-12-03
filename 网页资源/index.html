@@ -653,26 +653,8 @@
     }
 
     function loadContent(url, title) {
-        const overlay = document.getElementById('directoryOverlay');
-        const iframeContainer = document.getElementById('iframeContainer');
-        const frame = document.getElementById('contentFrame');
-        const loadingBar = document.getElementById('loadingBar');
-
-        // 更新索引
-        currentIndex = allLabs.findIndex(l => l.url === url);
-
-        // UI 更新
-        overlay.classList.remove('active');
-        iframeContainer.classList.add('active');
-        document.querySelector('.nav-brand h1').textContent = title || "实验进行中";
-
-        // 加载
-        loadingBar.style.width = '60%';
-        frame.src = url;
-        frame.onload = () => {
-            loadingBar.style.width = '100%';
-            setTimeout(() => { loadingBar.style.width = '0%'; }, 300);
-        };
+        // 在新标签页打开
+        window.open(url, '_blank');
     }
 
     function goPrev() {

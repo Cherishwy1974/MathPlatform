@@ -143,9 +143,7 @@ window.exerciseData = {
 };
 
 window.exerciseData.exercises = [
-    // ==================== 选择题部分 ====================
- 
-    {
+{
       id: 1,
       type: "选择题",
       title: "可微与可导的关系",
@@ -174,9 +172,7 @@ window.exerciseData.exercises = [
       category: "可微与可导",
       method: "概念判断"
     },
- 
-
-    {
+{
       id: 2,
       type: "选择题",
       title: "函数的微分",
@@ -199,7 +195,7 @@ $$dy = y'dx = \\left(\\frac{1}{3\\sqrt[3]{x^2}} + \\frac{1}{2\\sqrt{x}}\\right)d
       category: "微分",
       method: "微分公式"
     },
-    {
+{
       id: 3,
       type: "选择题",
       title: "复合函数的微分",
@@ -225,8 +221,7 @@ $$df(\\sin^2 x) = g(\\sin^2 x) \\sin 2x dx$$`,
       category: "复合函数微分",
       method: "链式法则"
     },
- 
-    {
+{
       id: 4,
       type: "选择题",
       title: "复合函数导数",
@@ -259,8 +254,8 @@ $$f'(x) = 0 - 1 = -1$$
       category: "复合函数",
       method: "换元法"
     },
-    {
-      id: 6,
+{
+      id: 5,
       type: "选择题",
       title: "指数函数切线",
       question: "曲线 $y = xe^x$ 在 $x = 0$ 处的切线方程是（）\nA. $y - 2x - 1 = 0$ \nB. $y - 2x - 2 = 0$ \nC. $y - x - 2 = 0$ \nD. $y - x = 0$",
@@ -286,8 +281,8 @@ $$y = x$$
       category: "切线方程",
       method: "点斜式"
     },
-    {
-      id: 7,
+{
+      id: 6,
       type: "选择题",
       title: "复合函数求导",
       question: "设函数 $y = \\cos^2 x$，则 $dy = $ （） $dx$\nA. $-2\\sin^2 x$ \nB. $2\\cos^2 x$ \nC. $-2\\sin x \\cos x$ \nD. $2\\sin x \\cos x$",
@@ -306,9 +301,8 @@ $$dy = -2\\sin x \\cos x dx$$`,
       category: "复合函数求导",
       method: "链式法则"
     },
-
-    {
-      id: 8,
+{
+      id: 7,
       type: "选择题",
       title: "导数四则运算",
       question: "$y = x\\ln x$，则 $y''' = $ （）\nA. $\\ln x$ \nB. $x$ \nC. $\\frac{1}{x^2}$ \nD. $-\\frac{1}{x^2}$",
@@ -326,9 +320,8 @@ $$y''' = -\\frac{1}{x^2}$$`,
       category: "导数四则运算",
       method: "乘积法则与高阶导数"
     },
-
-    {
-      id: 9,
+{
+      id: 8,
       type: "选择题",
       title: "复合函数求导",
       question: "函数 $f(x) = \\arcsin(2x)$ 的导数是（）\nA. $\\frac{1}{\\sqrt{1-4x^2}}$ \nB. $\\frac{2}{\\sqrt{1-4x^2}}$ \nC. $\\frac{1}{\\sqrt{1-x^2}}$ \nD. $\\frac{2}{\\sqrt{1-x^2}}$",
@@ -348,9 +341,8 @@ $f'(x) = \\frac{1}{\\sqrt{1-u^2}} \\cdot 2 = \\frac{2}{\\sqrt{1-4x^2}}$`,
       category: "复合函数求导",
       method: "链式法则"
     },
-
-    {
-      id: 10,
+{
+      id: 9,
       type: "选择题",
       title: "复合函数求导",
       question: "函数 $f(x) = \\arccos(x^2)$ 的导数是（）\nA. $\\frac{2x}{\\sqrt{1-x^4}}$ \nB. $-\\frac{2x}{\\sqrt{1-x^4}}$ \nC. $\\frac{1}{\\sqrt{1-x^4}}$ \nD. $-\\frac{1}{\\sqrt{1-x^4}}$",
@@ -370,9 +362,8 @@ $f'(x) = -\\frac{1}{\\sqrt{1-u^2}} \\cdot 2x = -\\frac{2x}{\\sqrt{1-x^4}}$`,
       category: "复合函数求导",
       method: "链式法则"
     },
-
-    {
-      id: 11,
+{
+      id: 10,
       type: "选择题",
       title: "复合函数求导",
       question: "函数 $f(x) = \\ln(\\sin(e^x))$ 的导数是（）\nA. $\\frac{e^x \\cos(e^x)}{\\sin(e^x)}$ \nB. $\\frac{\\cos(e^x)}{\\sin(e^x)}$ \nC. $\\frac{e^x}{\\sin(e^x)}$ \nD. $\\frac{\\cos(e^x)}{e^x \\sin(e^x)}$",
@@ -390,12 +381,8 @@ $u' = \\cos v \\cdot v' = \\cos(e^x) \\cdot e^x = e^x \\cos(e^x)$
       category: "复合函数求导",
       method: "链式法则"
     },
-
-
-    // ==================== 填空题部分 ====================
-
-    {
-      id: 12,
+{
+      id: 11,
       type: "填空题",
       title: "高阶导数运算",
       question: "（福建2020年）若函数 $f(x) = x + \\sin x$，则 $f''(x) = $ ____________",
@@ -410,9 +397,8 @@ $$f''(x) = -\\sin x$$`,
       category: "高阶导数运算",
       method: "直接求导"
     },
-
-    {
-      id: 13,
+{
+      id: 12,
       type: "填空题",
       title: "复合函数求导",
       question: "函数 $f(x) = \\arctan(3x)$ 的导数是 ______",
@@ -427,9 +413,8 @@ $$f''(x) = -\\sin x$$`,
       category: "复合函数求导",
       method: "链式法则"
     },
-
-    {
-      id: 14,
+{
+      id: 13,
       type: "填空题",
       title: "复合函数求导",
       question: "函数 $f(x) = \\cos(x^2)$ 的导数是 ______",
@@ -444,9 +429,8 @@ $$f''(x) = -\\sin x$$`,
       category: "复合函数求导",
       method: "链式法则"
     },
-
-    {
-      id: 15,
+{
+      id: 14,
       type: "填空题",
       title: "复合函数求导",
       question: "函数 $f(x) = \\sqrt{\\sin(2x)}$ 的导数是 ______",
@@ -465,9 +449,8 @@ $u' = \\cos v \\cdot v' = \\cos(2x) \\cdot 2 = 2\\cos(2x)$
       category: "复合函数求导",
       method: "链式法则"
     },
-
-    {
-      id: 16,
+{
+      id: 15,
       type: "填空题",
       title: "复合函数求导",
       question: "函数 $f(x) = \\arcsin(\\sqrt{x})$ 的导数是 ______",
@@ -484,11 +467,8 @@ $u' = \\cos v \\cdot v' = \\cos(2x) \\cdot 2 = 2\\cos(2x)$
       category: "复合函数求导",
       method: "链式法则"
     },
-
-    // ==================== 计算题部分 ====================
- 
-    {
-      id: 17,
+{
+      id: 16,
       type: "计算题",
       title: "复合函数求导",
       question: "求函数 $y = \\ln(3-2x)$ 的导数",
@@ -510,9 +490,8 @@ $\\frac{dy}{dx} = \\frac{1}{u} \\cdot (-2) = \\frac{-2}{3-2x}$`,
       category: "复合函数求导",
       method: "链式法则"
     },
-
-    {
-      id: 19,
+{
+      id: 17,
       type: "计算题",
       title: "复合函数求导",
       question: "求函数 $y = \\arcsin\\sqrt{1-4x^2}$ 的导数",
@@ -538,9 +517,8 @@ $y' = \\frac{1}{\\sqrt{4x^2}} \\cdot \\frac{-4x}{\\sqrt{1-4x^2}} = \\frac{1}{2x}
       category: "反三角函数",
       method: "链式法则"
     },
-    
-    {
-      id: 21,
+{
+      id: 18,
       type: "计算题",
       title: "微分计算",
       question: "设函数 $y = x^4\\sin x$，求 $dy$",
@@ -566,9 +544,8 @@ $dy = y'dx = x^3(4\\sin x + x\\cos x)dx$`,
       category: "微分",
       method: "微分公式"
     },
-
-    {
-      id: 22,
+{
+      id: 19,
       type: "计算题",
       title: "复合函数求导",
       question: "设函数 $y = \\sin 2x$，求 $\\frac{dy}{dx}$",
@@ -590,9 +567,8 @@ $dy = y'dx = x^3(4\\sin x + x\\cos x)dx$`,
       category: "复合函数求导",
       method: "链式法则"
     },
-
-    {
-      id: 23,
+{
+      id: 20,
       type: "计算题",
       title: "复合函数求导",
       question: "设函数 $y = \\sqrt{x^2 + 1}$，求 $\\frac{dy}{dx}$",
@@ -616,9 +592,8 @@ $dy = y'dx = x^3(4\\sin x + x\\cos x)dx$`,
       category: "复合函数求导",
       method: "链式法则"
     },
-
-    {
-      id: 24,
+{
+      id: 21,
       type: "计算题",
       title: "复合函数求导",
       question: "设函数 $y = \\cos(3x+1)$，求 $y'$",
@@ -630,9 +605,8 @@ $dy = y'dx = x^3(4\\sin x + x\\cos x)dx$`,
       category: "复合函数求导",
       method: "链式法则"
     },
-
-    {
-      id: 25,
+{
+      id: 22,
       type: "计算题",
       title: "复合函数求导",
       question: "设函数 $y = \\ln(x^2 - 1)$，求 $y'$",
@@ -644,10 +618,8 @@ $dy = y'dx = x^3(4\\sin x + x\\cos x)dx$`,
       category: "复合函数求导",
       method: "链式法则"
     },
-
-
-    {
-      id: 26,
+{
+      id: 23,
       type: "计算题",
       title: "导数四则运算",
       question: "设函数 $y = x\\sqrt{1-x}$，求 $y'$",
@@ -669,9 +641,8 @@ $dy = y'dx = x^3(4\\sin x + x\\cos x)dx$`,
       category: "导数四则运算",
       method: "乘积法则与链式法则"
     },
-
-    {
-      id: 27,
+{
+      id: 24,
       type: "计算题",
       title: "高阶导数运算",
       question: "求函数 $y = 2x^4 - 3x^5 + \\sqrt{2}x^3 + 8$ 的二阶导数",
@@ -686,9 +657,8 @@ $$y'' = 24x^2 - 60x^3 + 6\\sqrt{2}x$$`,
       category: "高阶导数运算",
       method: "逐阶求导法"
     },
-
-    {
-      id: 28,
+{
+      id: 25,
       type: "计算题",
       title: "特定点的导数值",
       question: "求下列函数在指定点的导数：(1) $y = \\cos x$，$x = \\frac{\\pi}{2}$；(2) $y = 2^x$，$x = 1$",
@@ -703,9 +673,8 @@ $$y'|_{x=1} = 2^1 \\ln 2 = 2\\ln 2$$`,
       category: "导数计算",
       method: "基本求导公式"
     },
-
-    {
-      id: 29,
+{
+      id: 26,
       type: "应用题",
       title: "切线和法线方程",
       question: "求曲线 $y = x^3$ 在点 (2,8) 处的切线斜率，并写出切线方程和法线方程",
@@ -723,9 +692,8 @@ $$y'|_{x=1} = 2^1 \\ln 2 = 2\\ln 2$$`,
       category: "导数几何意义",
       method: "点斜式"
     },
-
-    {
-      id: 30,
+{
+      id: 27,
       type: "应用题",
       title: "正弦曲线的切线斜率",
       question: "求曲线 $y = \\sin x$ 在点 $\\left(\\frac{\\pi}{6}, \\frac{1}{2}\\right)$ 处的切线斜率",
@@ -738,9 +706,8 @@ $$y'|_{x=1} = 2^1 \\ln 2 = 2\\ln 2$$`,
       category: "导数几何意义",
       method: "基本求导公式"
     },
-
-    {
-      id: 31,
+{
+      id: 28,
       type: "应用题",
       title: "双曲线上的切线",
       question: "求双曲线 $y = \\frac{1}{x}$ 上哪一点的切线与直线 $y = -x + 3$ 平行",
@@ -759,9 +726,8 @@ $y' = \\left(\\frac{1}{x}\\right)' = -\\frac{1}{x^2}$
       category: "导数几何意义",
       method: "切线斜率相等"
     },
-
-    {
-      id: 32,
+{
+      id: 29,
       type: "计算题",
       title: "导数四则运算",
       question: "求下列函数的导数：(1) $y = 3x^2 - 2x + 1$；(2) $y = \\frac{2}{x} + 3\\cos x - e^x$；(3) $y = \\frac{x - 1}{x + 1}$",
@@ -776,9 +742,8 @@ $y' = \\left(\\frac{1}{x}\\right)' = -\\frac{1}{x^2}$
       category: "导数四则运算",
       method: "四则运算法则"
     },
-
-    {
-      id: 33,
+{
+      id: 30,
       type: "计算题",
       title: "导数四则运算",
       question: "设函数 $y = \\tan x$，求 $y'$",
@@ -798,9 +763,8 @@ $(\\csc x)' = -\\csc x \\cot x$`,
       category: "导数四则运算",
       method: "商法则"
     },
-
-    {
-      id: 34,
+{
+      id: 31,
       type: "计算题",
       title: "导数四则运算",
       question: "设函数 $y = x \\tan x - 2 \\sec x$，求 $y'$",
@@ -815,9 +779,8 @@ $= \\tan x + x\\sec^2 x - 2\\sec x \\tan x$`,
       category: "导数四则运算",
       method: "积法则"
     },
-
-    {
-      id: 35,
+{
+      id: 32,
       type: "计算题",
       title: "导数四则运算",
       question: "求下列函数的导数：(1) $y = x^5 + 2\\sqrt{x} - \\sin\\frac{1}{\\pi}$；(2) $y = 2x^3 - 5x^2 + 7x - 9$；(3) $y = 2^x - \\frac{1}{x} + 2^{10}$；(4) $y = \\sqrt{x\\sqrt{x}}$；(5) $y = (e^x + 1) \\tan x$；(6) $y = \\frac{\\sin x}{x}$；(7) $y = \\frac{x}{x^2 + 1}$",
@@ -840,9 +803,8 @@ $= \\tan x + x\\sec^2 x - 2\\sec x \\tan x$`,
       category: "导数四则运算",
       method: "综合运算"
     },
-
-    {
-      id: 36,
+{
+      id: 33,
       type: "计算题",
       title: "高阶导数运算",
       question: "设函数 $y = x^4 + x^3 - x^2 + 1$，求 $y''$",
@@ -855,9 +817,8 @@ $y'' = 12x^2 + 6x - 2$`,
       category: "高阶导数运算",
       method: "逐次求导"
     },
-
-    {
-      id: 37,
+{
+      id: 34,
       type: "计算题",
       title: "高阶导数运算",
       question: "设函数 $y = \\sin^2 x$，求 $y''$",

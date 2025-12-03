@@ -3,854 +3,304 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>无穷小比较实验室</title>
-    
-    <!-- MathJax配置 -->
-    <script>
-        window.MathJax = {
-            tex: {
-                inlineMath: [['$', '$'], ['\\(', '\\)']],
-                displayMath: [['$$', '$$'], ['\\[', '\\]']],
-                processEscapes: true
-            },
-            startup: {
-                pageReady: () => {
-                    return MathJax.startup.defaultPageReady().then(() => {
-                        console.log('MathJax加载完成');
-                    });
-                }
-            },
-            options: {
-                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
-            }
-        };
-    </script>
+    <title>无穷小比较可视化实验室</title>
+    <!-- Tailwind CSS 本地化 -->
+    <script src="../common-assets/js/tailwind.min.js"></script>
+    <!-- Google Material Symbols 本地化 -->
+    <link rel="stylesheet" href="../common-assets/css/lab1-material-symbols.css">
+    <!-- MathJax 本地化配置 -->
+    <script src="../common-assets/js/mathjax-config.js"></script>
     <script defer src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js"></script>
-    
-    <style>
-        :root {
-            --h1-size: 22px;      
-            --h2-size: 20px;      
-            --h3-size: 18px;      
-            --btn-size: 16px;     
-            --formula-size: 20px; 
-            --text-size: 16px;
-            
-            --primary: #4f46e5;
-            --primary-light: #6366f1;
-            --primary-dark: #3730a3;
-            --light: #ffffff;
-            --gray-50: #f9fafb;
-            --gray-100: #f3f4f6;
-            --gray-200: #e5e7eb;
-            --gray-600: #4b5563;
-            --gray-800: #1f2937;
-            --border: #e5e7eb;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --info: #3b82f6;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        *::-webkit-scrollbar {
-            width: 0;
-            background: transparent;
-        }
-        
-        * {
-            scrollbar-width: none;
-            -ms-overflow-style: none;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
-            font-size: var(--text-size);
-            line-height: 1.5;
-            background: var(--gray-50);
-            color: var(--gray-800);
-        }
-
-        .container {
-            width: 100%;
-            max-width: 1400px;
-            height: 100vh;
-            max-height: 700px;
-            margin: 0 auto;
-            display: flex;
-            flex-direction: column;
-            background: var(--light);
-        }
-
-        .header {
-            background: var(--primary);
-            color: var(--light);
-            padding: 8px 20px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-        }
-
-        .header h1 {
-            font-size: var(--h2-size);
-            margin: 0;
-        }
-
-        .main {
-            display: flex;
-            flex: 1;
-            overflow: hidden;
-        }
-
-        .sidebar {
-            width: 120px;
-            background: var(--gray-50);
-            border-right: 1px solid var(--border);
-            padding: 10px 8px;
-        }
-
-        .nav-btn {
-            width: 100%;
-            padding: 8px;
-            margin-bottom: 4px;
-            background: transparent;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: var(--text-size);
-            color: var(--gray-600);
-            text-align: left;
-            transition: all 0.2s;
-        }
-
-        .nav-btn:hover {
-            background: var(--gray-100);
-        }
-
-        .nav-btn.active {
-            background: var(--primary);
-            color: var(--light);
-        }
-
-        .content {
-            flex: 1;
-            display: none;
-            padding: 16px;
-            overflow-y: auto;
-        }
-
-        .content.active {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-        }
-
-        .column {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            overflow-y: auto;
-        }
-
-        .card {
-            background: var(--light);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 12px;
-        }
-
-        .card h3 {
-            font-size: var(--h3-size);
-            color: var(--primary);
-            margin-bottom: 8px;
-        }
-
-        .input-group {
-            margin-bottom: 8px;
-        }
-
-        .input-group label {
-            display: block;
-            margin-bottom: 4px;
-            font-size: var(--text-size);
-            font-weight: 500;
-        }
-
-        .input-group input,
-        .input-group select {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            font-size: var(--text-size);
-            background: var(--gray-50);
-        }
-
-        .btn {
-            padding: 8px 16px;
-            background: var(--primary);
-            color: var(--light);
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: var(--btn-size);
-            transition: all 0.2s;
-        }
-
-        .btn:hover {
-            background: var(--primary-dark);
-        }
-
-        .btn-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            margin-top: 8px;
-        }
-
-        .result {
-            background: var(--gray-50);
-            padding: 8px;
-            border-radius: 4px;
-            border: 1px solid var(--primary);
-            text-align: center;
-            font-size: var(--text-size);
-            margin: 8px 0;
-            min-height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .formula-box {
-            background: #f0f7ff;
-            padding: 8px 12px;
-            border-radius: 4px;
-            border-left: 3px solid var(--primary);
-            margin: 8px 0;
-            text-align: center;
-            font-size: var(--formula-size);
-        }
-
-        .info-box {
-            background: var(--gray-50);
-            padding: 8px;
-            border-radius: 4px;
-            margin: 6px 0;
-            font-size: var(--text-size);
-            text-align: center;
-        }
-
-        .steps {
-            background: #fff9e6;
-            padding: 10px;
-            border-radius: 4px;
-            border-left: 3px solid #f59e0b;
-            line-height: 1.6;
-            font-size: var(--text-size);
-        }
-
-        .canvas-container {
-            border: 1px solid var(--gray-200);
-            border-radius: 4px;
-            background: #fafafa;
-            padding: 10px;
-            min-height: 200px;
-            max-height: 400px;
-            overflow: hidden;
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .canvas-container canvas {
-            max-width: 100%;
-            max-height: 100%;
-            display: block;
-            margin: 0 auto;
-        }
-
-        .order-display {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
-            margin: 8px 0;
-        }
-
-        .order-item {
-            padding: 10px;
-            border-radius: 4px;
-            text-align: center;
-            font-weight: 500;
-        }
-
-        .order-higher {
-            background: rgba(239, 68, 68, 0.1);
-            border: 2px solid var(--danger);
-            color: var(--danger);
-        }
-
-        .order-lower {
-            background: rgba(59, 130, 246, 0.1);
-            border: 2px solid var(--info);
-            color: var(--info);
-        }
-
-        .order-same {
-            background: rgba(245, 158, 11, 0.1);
-            border: 2px solid var(--warning);
-            color: var(--warning);
-        }
-
-        .order-equivalent {
-            background: rgba(16, 185, 129, 0.1);
-            border: 2px solid var(--success);
-            color: var(--success);
-        }
-
-        .value-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 8px 0;
-        }
-
-        .value-table th,
-        .value-table td {
-            padding: 6px;
-            text-align: center;
-            border: 1px solid var(--border);
-        }
-
-        .value-table th {
-            background: var(--gray-100);
-            font-weight: 600;
-        }
-
-        @media (max-width: 768px) {
-            .main {
-                flex-direction: column;
-            }
-
-            .sidebar {
-                width: 100%;
-                height: auto;
-                border-right: none;
-                border-bottom: 1px solid var(--border);
-                padding: 8px 16px;
-                display: flex;
-                flex-direction: row;
-                gap: 8px;
-                overflow-x: auto;
-                flex-shrink: 0;
-                justify-content: center;
-            }
-
-            .nav-btn {
-                min-width: 90px;
-                text-align: center;
-                margin-bottom: 0;
-                white-space: nowrap;
-                flex-shrink: 0;
-            }
-
-            .content.active {
-                grid-template-columns: 1fr;
-                gap: 16px;
-            }
-        }
-
-        .return-home-panel { position: fixed; bottom: 12px; right: 12px; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; z-index: 40; }
-        .return-toggle { width: 40px; height: 40px; border-radius: 50%; border: none; background: linear-gradient(135deg, rgba(79,70,229,0.96), rgba(99,102,241,0.9)); color: #fff; font-size: 20px; cursor: pointer; box-shadow: 0 10px 18px rgba(79,70,229,0.28); transition: transform 0.2s, box-shadow 0.2s; }
-        .return-toggle:hover { transform: translateY(-1px) scale(1.03); box-shadow: 0 14px 26px rgba(79,70,229,0.35); }
-        .return-links { display: none; flex-direction: column; gap: 6px; padding: 10px; border-radius: 10px; background: rgba(255,255,255,0.96); border: 1px solid rgba(79,70,229,0.18); box-shadow: 0 10px 30px rgba(15,23,42,0.14); opacity: 0; transition: opacity 0.16s; }
-        .return-link { text-decoration: none; font-size: 15px; color: var(--primary-dark); padding: 6px 12px; border-radius: 8px; background: rgba(99,102,241,0.12); transition: background 0.2s; }
-        .return-link:hover { background: rgba(79,70,229,0.18); }
-    </style>
-
+    <!-- 页面样式 -->
+    <link rel="stylesheet" href="assets/lab2-7.css">
 </head>
-<body>
-    <div class="return-home-panel"><button class="return-toggle" onclick="toggleReturnLinks()"><i class="fa-solid fa-house"></i></button><div class="return-links"><a class="return-link" href="index.html"><i class="fa-solid fa-arrow-left"></i> 返回目录</a><a class="return-link" href="../index.html"><i class="fa-solid fa-house"></i> 返回主站</a></div></div>
-    <div class="container">
-        <header class="header">
-            <h1>无穷小比较实验室</h1>
-        </header>
+<body class="bg-gray-50 text-slate-800 h-screen flex flex-col overflow-hidden">
 
-        <div class="main">
-            <nav class="sidebar">
-                <button class="nav-btn active" onclick="switchPanel('concept')">基本概念</button>
-                <button class="nav-btn" onclick="switchPanel('compare')">阶的比较</button>
-                <button class="nav-btn" onclick="switchPanel('equivalent')">等价替换</button>
-            </nav>
+<!-- 返回主页面板 -->
+<div class="return-links">
+    <a href="index.html"><span class="material-symbols-outlined">home</span> 返回主页</a>
+</div>
 
-            <!-- 基本概念页面 -->
-            <div class="content active" id="concept">
-                <div class="column">
-                    <div class="card">
-                        <h3>无穷小的阶</h3>
-                        <div class="formula-box">
-                            设 α、β 是无穷小，比值 $\lim\limits \frac{\beta}{\alpha}$ 决定阶的关系
-                        </div>
-                        <div class="order-display">
-                            <div class="order-item order-higher">
-                                高阶：比值 = 0
-                            </div>
-                            <div class="order-item order-lower">
-                                低阶：比值 = ∞
-                            </div>
-                            <div class="order-item order-same">
-                                同阶：比值 = k≠0
-                            </div>
-                            <div class="order-item order-equivalent">
-                                等价：比值 = 1
-                            </div>
+<!-- Header -->
+<header class="bg-white border-b border-gray-200 h-16 flex-none flex items-center justify-between px-6 shadow-sm z-20">
+    <div class="flex items-center gap-3">
+        <div class="bg-indigo-600 p-2 rounded-lg text-white cursor-pointer" onclick="toggleReturnLinks()">
+            <span class="material-symbols-outlined text-2xl">compare</span>
+        </div>
+        <h1 class="text-xl font-bold text-gray-800 tracking-tight">无穷小比较实验室</h1>
+    </div>
+    <div class="text-sm text-gray-500 hidden sm:block font-medium">
+        $\displaystyle\lim_{x \to 0} \frac{\beta(x)}{\alpha(x)}$
+    </div>
+</header>
+
+<div class="flex flex-1 overflow-hidden">
+    <!-- Sidebar -->
+    <nav class="w-64 bg-white border-r border-gray-200 flex-none flex flex-col z-10 hidden md:flex">
+        <div class="p-4 space-y-2">
+            <button class="nav-btn w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 bg-indigo-50 text-indigo-700" id="btn-concept" onclick="switchTab('concept')">
+                <span class="material-symbols-outlined">school</span>
+                基本概念
+            </button>
+            <button class="nav-btn w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 text-gray-600 hover:bg-gray-50" id="btn-compare" onclick="switchTab('compare')">
+                <span class="material-symbols-outlined">experiment</span>
+                比较实验
+            </button>
+            <button class="nav-btn w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 text-gray-600 hover:bg-gray-50" id="btn-equivalent" onclick="switchTab('equivalent')">
+                <span class="material-symbols-outlined">swap_horiz</span>
+                等价替换
+            </button>
+        </div>
+        <div class="mt-auto p-4 border-t border-gray-100">
+            <div class="bg-indigo-50/50 rounded-lg p-4 border border-indigo-50">
+                <h4 class="text-xs font-bold text-indigo-800 uppercase tracking-wider mb-2">核心定义</h4>
+                <p class="text-xs text-indigo-600 leading-relaxed">
+                    若 $\displaystyle\lim \frac{\beta}{\alpha} = 0$，则 $\beta$ 是 $\alpha$ 的高阶无穷小，记作 $\beta = o(\alpha)$。
+                </p>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-1 overflow-y-auto bg-gray-50/50 p-4 md:p-8 relative scroll-smooth no-scrollbar">
+        
+        <!-- Tab 1: Concept -->
+        <div id="tab-concept" class="tab-content space-y-6 max-w-6xl mx-auto">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Left: Definitions -->
+                <div class="space-y-6">
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                        <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-indigo-600">menu_book</span>
+                            无穷小的比较
+                        </h2>
+                        <div class="space-y-4 text-sm text-gray-700">
+                            <p class="leading-relaxed">设 $\alpha(x)$ 和 $\beta(x)$ 都是 $x \to x_0$ 时的无穷小，考察其比值 $\dfrac{\beta(x)}{\alpha(x)}$ 的极限：</p>
+                            <ul class="space-y-3 pb-2">
+                                <li class="flex items-start gap-2 p-3 bg-emerald-50 rounded-xl border border-emerald-100">
+                                    <span class="text-emerald-600 font-bold">高阶：</span>
+                                    <span>若 $\displaystyle\lim \frac{\beta}{\alpha} = 0$，则 $\beta$ 是 $\alpha$ 的<b>高阶无穷小</b>。</span>
+                                </li>
+                                <li class="flex items-start gap-2 p-3 bg-amber-50 rounded-xl border border-amber-100">
+                                    <span class="text-amber-600 font-bold">低阶：</span>
+                                    <span>若 $\displaystyle\lim \frac{\beta}{\alpha} = \infty$，则 $\beta$ 是 $\alpha$ 的<b>低阶无穷小</b>。</span>
+                                </li>
+                                <li class="flex items-start gap-2 p-3 bg-blue-50 rounded-xl border border-blue-100">
+                                    <span class="text-blue-600 font-bold">同阶：</span>
+                                    <span>若 $\displaystyle\lim \frac{\beta}{\alpha} = C \neq 0$，则 $\beta$ 与 $\alpha$ 是<b>同阶无穷小</b>。</span>
+                                </li>
+                                <li class="flex items-start gap-2 p-3 bg-indigo-50 rounded-xl border border-indigo-100">
+                                    <span class="text-indigo-600 font-bold">等价：</span>
+                                    <span>若 $\displaystyle\lim \frac{\beta}{\alpha} = 1$，则 $\beta$ 与 $\alpha$ 是<b>等价无穷小</b>，记作 $\alpha \sim \beta$。</span>
+                                </li>
+                            </ul>
                         </div>
                     </div>
 
-                    <div class="card">
-                        <h3>理解要点</h3>
-                        <div class="steps">
-                            <strong>通俗解释：</strong><br>
-                            • 高阶 = β 趋向 0 比 α 更快<br>
-                            • 低阶 = β 趋向 0 比 α 更慢<br>
-                            • 同阶 = 两者速度相当<br>
-                            • 等价 = 两者几乎一样
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-rose-600">lightbulb</span>
+                            直观理解
+                        </h3>
+                        <p class="text-sm text-gray-600 leading-relaxed mb-4">
+                            当 $x \to 0$ 时，$x$、$x^2$、$x^3$ 都趋近于 $0$。但它们趋近的"速度"不同：$x^3$ 比 $x^2$ 更快，$x^2$ 比 $x$ 更快。因此 $x^3$ 是 $x^2$ 的高阶无穷小，$x^2$ 是 $x$ 的高阶无穷小。
+                        </p>
+                        <div class="flex justify-around items-center text-center py-4 border-t border-gray-100">
+                            <div>
+                                <div class="w-3 h-3 rounded-full bg-blue-500 mx-auto mb-1"></div>
+                                <span class="text-xs text-gray-500">$y = x$</span>
+                            </div>
+                            <span class="material-symbols-outlined text-gray-400">arrow_forward</span>
+                            <div>
+                                <div class="w-3 h-3 rounded-full bg-red-500 mx-auto mb-1"></div>
+                                <span class="text-xs text-gray-500">$y = x^2$</span>
+                            </div>
+                            <span class="material-symbols-outlined text-gray-400">arrow_forward</span>
+                            <div>
+                                <div class="w-3 h-3 rounded-full bg-purple-500 mx-auto mb-1"></div>
+                                <span class="text-xs text-gray-500">$y = x^3$</span>
+                            </div>
                         </div>
                     </div>
                 </div>
-
-                <div class="column">
-                    <div class="card">
-                        <h3>典型例子</h3>
-                        <table class="value-table">
-                            <thead>
-                                <tr>
-                                    <th>α</th>
-                                    <th>β</th>
-                                    <th>关系</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>x</td>
-                                    <td>x²</td>
-                                    <td style="color: var(--danger);">β是α的高阶</td>
-                                </tr>
-                                <tr>
-                                    <td>x²</td>
-                                    <td>x</td>
-                                    <td style="color: var(--info);">β是α的低阶</td>
-                                </tr>
-                                <tr>
-                                    <td>x</td>
-                                    <td>2x</td>
-                                    <td style="color: var(--warning);">同阶</td>
-                                </tr>
-                                <tr>
-                                    <td>x</td>
-                                    <td>sin x</td>
-                                    <td style="color: var(--success);">等价</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                
+                <!-- Right: Graph -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col">
+                    <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-indigo-600">ssid_chart</span>
+                        函数图像对比
+                    </h2>
+                    <div class="relative flex-1 min-h-[220px] w-full bg-white rounded-xl overflow-hidden border border-gray-100">
+                        <canvas id="conceptCanvas" class="w-full h-full"></canvas>
                     </div>
-
-                    <div class="card">
-                        <h3>图像理解</h3>
-                        <div class="canvas-container">
-                            <canvas id="conceptGraph" width="600" height="250"></canvas>
-                        </div>
-                        <div class="info-box">
-                            越陡的曲线趋向 0 越快（高阶）
-                        </div>
+                    <div class="mt-3 flex justify-center gap-6 text-xs font-medium text-gray-500">
+                        <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-blue-500"></span> $y = x$</span>
+                        <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-red-500"></span> $y = x^2$</span>
+                        <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-purple-500"></span> $y = x^3$</span>
                     </div>
+                    <p class="mt-1 text-xs text-gray-400 text-center">观察原点附近：$x$ 更"平缓"，$x^3$ 更"贴近"x轴</p>
                 </div>
             </div>
+        </div>
 
-            <!-- 阶的比较页面 -->
-            <div class="content" id="compare">
-                <div class="column">
-                    <div class="card">
-                        <h3>选择两个无穷小</h3>
-                        <div class="input-group">
-                            <label>α(x) =</label>
-                            <select id="alpha" onchange="compareOrder()">
-                                <option value="x">x</option>
-                                <option value="x^2">x²</option>
-                                <option value="x^3">x³</option>
-                                <option value="sin(x)">sin x</option>
-                                <option value="tan(x)">tan x</option>
-                                <option value="1-cos(x)">1 - cos x</option>
-                            </select>
-                        </div>
-                        <div class="input-group">
-                            <label>β(x) =</label>
-                            <select id="beta" onchange="compareOrder()">
-                                <option value="x">x</option>
-                                <option value="x^2">x²</option>
-                                <option value="x^3">x³</option>
-                                <option value="sin(x)">sin x</option>
-                                <option value="tan(x)">tan x</option>
-                                <option value="1-cos(x)">1 - cos x</option>
-                            </select>
-                        </div>
-                        <button class="btn" onclick="compareOrder()">比较阶</button>
-                    </div>
-
-                    <div class="card">
-                        <h3>比较结果</h3>
-                        <div class="result" id="compareResult">
-                            选择两个函数进行比较
-                        </div>
-                        <div class="steps" id="compareSteps">
-                            计算步骤将显示在这里
-                        </div>
-                    </div>
-                </div>
-
-                <div class="column">
-                    <div class="card">
-                        <h3>比值图像</h3>
-                        <div class="canvas-container">
-                            <canvas id="compareGraph" width="600" height="300"></canvas>
+        <!-- Tab 2: Compare -->
+        <div id="tab-compare" class="tab-content hidden space-y-6 max-w-6xl mx-auto">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Controls -->
+                <div class="lg:col-span-4 space-y-6">
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                        <h3 class="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-indigo-600">tune</span>
+                            选择无穷小
+                        </h3>
+                        <div class="space-y-5">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-500 uppercase mb-2 tracking-wide">无穷小 $\alpha(x)$</label>
+                                <select id="alphaSelect" onchange="updateComparison()" class="w-full p-3 border border-gray-300 rounded-lg text-gray-700 bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none">
+                                    <option value="x" selected>$x$</option>
+                                    <option value="x2">$x^2$</option>
+                                    <option value="x3">$x^3$</option>
+                                    <option value="sin">$\sin x$</option>
+                                    <option value="tan">$\tan x$</option>
+                                    <option value="1-cos">$1 - \cos x$</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-500 uppercase mb-2 tracking-wide">无穷小 $\beta(x)$</label>
+                                <select id="betaSelect" onchange="updateComparison()" class="w-full p-3 border border-gray-300 rounded-lg text-gray-700 bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none">
+                                    <option value="x">$x$</option>
+                                    <option value="x2" selected>$x^2$</option>
+                                    <option value="x3">$x^3$</option>
+                                    <option value="sin">$\sin x$</option>
+                                    <option value="tan">$\tan x$</option>
+                                    <option value="1-cos">$1 - \cos x$</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="card">
-                        <h3>数值验证</h3>
-                        <table class="value-table" id="compareTable">
-                            <thead>
-                                <tr>
-                                    <th>x</th>
-                                    <th>α(x)</th>
-                                    <th>β(x)</th>
-                                    <th>β/α</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr><td colspan="4">等待计算...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 等价替换页面 -->
-            <div class="content" id="equivalent">
-                <div class="column">
-                    <div class="card">
-                        <h3>等价无穷小定理</h3>
-                        <div class="formula-box">
-                            若 α ~ α' 且 β ~ β'，则 $\lim\limits \frac{\alpha}{\beta} = \lim\limits \frac{\alpha'}{\beta'}$
+                    <!-- Result Card -->
+                    <div id="resultCard" class="rounded-2xl shadow-sm border p-6 transition-all duration-500 transform translate-y-4 opacity-0 border-emerald-200 bg-emerald-50">
+                        <h4 class="text-xs font-bold text-gray-500 uppercase mb-3 tracking-wider">比较结果</h4>
+                        <div id="comparisonResult" class="text-lg font-bold mb-3">
+                            <span class="text-emerald-600">$\beta$ 是 $\alpha$ 的高阶无穷小</span>
                         </div>
-                        <div class="steps">
-                            <strong>意义：</strong><br>
-                            计算极限时可以用等价的更简单的式子替换
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <h3>常用等价无穷小</h3>
-                        <div class="info-box">当 x → 0 时</div>
-                        <div class="steps">
-                            • sin x ~ x<br>
-                            • tan x ~ x<br>
-                            • arcsin x ~ x<br>
-                            • arctan x ~ x<br>
-                            • 1 - cos x ~ x²/2<br>
-                            • e^x - 1 ~ x<br>
-                            • ln(1 + x) ~ x
-                        </div>
+                        <div id="limitValue" class="text-sm text-gray-700 font-mono">$\displaystyle\lim_{x \to 0} \frac{x^2}{x} = 0$</div>
                     </div>
                 </div>
 
-                <div class="column">
-                    <div class="card">
-                        <h3>替换练习</h3>
-                        <div class="input-group">
-                            <label>选择题目</label>
-                            <select id="limitProblem" onchange="showSolution()">
-                                <option value="1">题目1：sin 2x / tan 3x</option>
-                                <option value="2">题目2：1-cos x / x²</option>
-                                <option value="3">题目3：e^x - 1 / sin x</option>
-                                <option value="4">题目4：ln(1+x) / x</option>
-                            </select>
-                        </div>
-                        <div class="formula-box" id="selectedProblem">
-                            $\lim\limits_{x \to 0} \frac{\sin 2x}{\tan 3x}$
-                        </div>
-                        <button class="btn" onclick="showSolution()">查看解答</button>
-                        <div class="result" id="solutionResult">
-                            选择题目查看解答
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <h3>解题步骤</h3>
-                        <div class="steps" id="solutionSteps">
-                            1. 识别无穷小<br>
-                            2. 找到等价替换<br>
-                            3. 代入计算<br>
-                            4. 得出结果
+                <!-- Graph -->
+                <div class="lg:col-span-8">
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 h-full flex flex-col">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4 border-b border-gray-100 pb-3">
+                            比值函数 $y = \dfrac{\beta(x)}{\alpha(x)}$ 图像
+                        </h3>
+                        <div class="relative flex-1 min-h-[220px] w-full bg-white rounded-xl overflow-hidden border border-gray-100 cursor-crosshair">
+                            <canvas id="compareCanvas" class="w-full h-full"></canvas>
+                            <!-- Overlay Info -->
+                            <div class="absolute top-4 right-4 bg-white/90 backdrop-blur-sm p-3 rounded-lg shadow-sm border border-gray-100 text-xs font-mono pointer-events-none z-10">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
+                                    <span class="font-bold">x:</span> <span id="overlayX">0.00</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="w-2 h-2 rounded-full bg-transparent"></span>
+                                    <span class="font-bold">Ratio:</span> <span id="overlayY">0.00</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <script>
-        function renderMath() {
-            if (window.MathJax && MathJax.typesetPromise) {
-                MathJax.typesetPromise().catch(err => console.log('渲染错误:', err));
-            }
-        }
-
-        function switchPanel(panel) {
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
-            
-            event.target.classList.add('active');
-            document.getElementById(panel).classList.add('active');
-            
-            setTimeout(() => {
-                renderMath();
-                if (panel === 'concept') {
-                    drawConceptGraph();
-                } else if (panel === 'compare') {
-                    compareOrder();
-                }
-            }, 50);
-        }
-
-        function drawConceptGraph() {
-            const canvas = document.getElementById('conceptGraph');
-            if (!canvas) return;
-            
-            const ctx = canvas.getContext('2d');
-            const width = canvas.width;
-            const height = canvas.height;
-            
-            ctx.clearRect(0, 0, width, height);
-            
-            // 坐标轴
-            ctx.strokeStyle = '#374151';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(50, height - 30);
-            ctx.lineTo(width - 30, height - 30);
-            ctx.moveTo(50, 30);
-            ctx.lineTo(50, height - 30);
-            ctx.stroke();
-            
-            // 绘制不同阶的函数
-            const functions = [
-                { fn: x => x, color: '#f59e0b', label: 'x' },
-                { fn: x => x * x, color: '#ef4444', label: 'x²' },
-                { fn: x => x * x * x, color: '#8b5cf6', label: 'x³' },
-                { fn: x => Math.sin(x), color: '#10b981', label: 'sin x' }
-            ];
-            
-            functions.forEach(({ fn, color, label }) => {
-                ctx.strokeStyle = color;
-                ctx.lineWidth = 2;
-                ctx.beginPath();
+        <!-- Tab 3: Equivalent -->
+        <div id="tab-equivalent" class="tab-content hidden max-w-6xl mx-auto space-y-6">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 text-center">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">常用等价无穷小替换</h2>
+                <p class="text-gray-600 mb-8 max-w-2xl mx-auto">
+                    当 $x \to 0$ 时，复杂的函数可以用简单的幂函数（如 $x, x^2$）来代替，这在求极限时非常有用。
+                    <br><span class="text-xs text-gray-400">定理：若 $\alpha \sim \alpha'$，$\beta \sim \beta'$，则 $\displaystyle\lim \frac{\beta}{\alpha} = \lim \frac{\beta'}{\alpha'}$</span>
+                </p>
                 
-                for(let px = 50; px < width - 30; px++) {
-                    const x = (px - 50) / 300;
-                    const y = fn(x);
-                    const py = height - 30 - y * 150;
-                    
-                    if(px === 50) ctx.moveTo(px, py);
-                    else ctx.lineTo(px, py);
-                }
-                ctx.stroke();
-                
-                // 标签
-                ctx.fillStyle = color;
-                ctx.font = '12px Arial';
-                ctx.fillText(label, width - 60, 40 + functions.indexOf({ fn, color, label }) * 20);
-            });
-        }
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- Flashcards -->
+                    <div class="bg-emerald-50 border border-emerald-100 rounded-xl p-6 hover:shadow-md transition-shadow cursor-pointer group">
+                        <div class="text-sm text-emerald-600 font-bold mb-2 uppercase tracking-wide">三角函数</div>
+                        <div class="text-2xl font-bold text-gray-800 mb-2 group-hover:text-emerald-700 transition-colors">$\sin x \sim x$</div>
+                        <div class="text-2xl font-bold text-gray-800 group-hover:text-emerald-700 transition-colors">$\tan x \sim x$</div>
+                    </div>
+                    <div class="bg-blue-50 border border-blue-100 rounded-xl p-6 hover:shadow-md transition-shadow cursor-pointer group">
+                        <div class="text-sm text-blue-600 font-bold mb-2 uppercase tracking-wide">反三角函数</div>
+                        <div class="text-xl font-bold text-gray-800 mb-2 group-hover:text-blue-700 transition-colors">$\arcsin x \sim x$</div>
+                        <div class="text-xl font-bold text-gray-800 group-hover:text-blue-700 transition-colors">$\arctan x \sim x$</div>
+                    </div>
+                    <div class="bg-amber-50 border border-amber-100 rounded-xl p-6 hover:shadow-md transition-shadow cursor-pointer group">
+                        <div class="text-sm text-amber-600 font-bold mb-2 uppercase tracking-wide">指数与对数</div>
+                        <div class="text-xl font-bold text-gray-800 mb-2 group-hover:text-amber-700 transition-colors">$e^x - 1 \sim x$</div>
+                        <div class="text-xl font-bold text-gray-800 group-hover:text-amber-700 transition-colors">$\ln(1+x) \sim x$</div>
+                    </div>
+                    <div class="bg-rose-50 border border-rose-100 rounded-xl p-6 hover:shadow-md transition-shadow cursor-pointer group">
+                        <div class="text-sm text-rose-600 font-bold mb-2 uppercase tracking-wide">二项式与余弦</div>
+                        <div class="text-xl font-bold text-gray-800 mb-2 group-hover:text-rose-700 transition-colors">$(1+x)^a - 1 \sim ax$</div>
+                        <div class="text-xl font-bold text-gray-800 group-hover:text-rose-700 transition-colors">$1 - \cos x \sim \dfrac{1}{2}x^2$</div>
+                    </div>
+                </div>
+            </div>
 
-        function compareOrder() {
-            const alpha = document.getElementById('alpha').value;
-            const beta = document.getElementById('beta').value;
-            
-            // 计算比值的极限
-            let result = '';
-            let steps = '';
-            let orderClass = '';
-            
-            // 简化的比较逻辑
-            const orderMap = {
-                'x': 1,
-                'x^2': 2,
-                'x^3': 3,
-                'sin(x)': 1,
-                'tan(x)': 1,
-                '1-cos(x)': 2
-            };
-            
-            const alphaOrder = orderMap[alpha];
-            const betaOrder = orderMap[beta];
-            
-            if (betaOrder > alphaOrder) {
-                result = 'β 是 α 的高阶无穷小';
-                orderClass = 'order-higher';
-                steps = `当 x→0 时，${beta} 趋向 0 的速度比 ${alpha} 更快`;
-            } else if (betaOrder < alphaOrder) {
-                result = 'β 是 α 的低阶无穷小';
-                orderClass = 'order-lower';
-                steps = `当 x→0 时，${beta} 趋向 0 的速度比 ${alpha} 更慢`;
-            } else if ((alpha === 'sin(x)' && beta === 'x') || (alpha === 'x' && beta === 'sin(x)')) {
-                result = 'α 与 β 是等价无穷小';
-                orderClass = 'order-equivalent';
-                steps = '当 x→0 时，sin x ~ x，比值趋向 1';
-            } else {
-                result = 'α 与 β 是同阶无穷小';
-                orderClass = 'order-same';
-                steps = `当 x→0 时，比值趋向非零常数`;
-            }
-            
-            document.getElementById('compareResult').innerHTML = `<div class="${orderClass}" style="padding: 10px;">${result}</div>`;
-            document.getElementById('compareSteps').innerHTML = steps;
-            
-            updateCompareTable(alpha, beta);
-            drawCompareGraph(alpha, beta);
-        }
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                <h3 class="text-lg font-bold text-gray-800 mb-4 border-b border-gray-100 pb-2">替换练习</h3>
+                <div class="space-y-4">
+                    <div class="flex flex-col md:flex-row gap-4 items-center justify-between bg-gray-50 p-4 rounded-xl border border-gray-200">
+                        <div class="text-lg font-mono text-gray-800">
+                            $\displaystyle\lim_{x \to 0} \frac{\sin(2x)}{\tan(3x)}$
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="toggleAnswer('ans1')" class="px-4 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors">显示解析</button>
+                        </div>
+                    </div>
+                    <div id="ans1" class="hidden bg-emerald-50 border border-emerald-100 p-4 rounded-xl text-emerald-900 text-sm">
+                        <strong>解析：</strong> 当 $x \to 0$ 时，$\sin(2x) \sim 2x$，$\tan(3x) \sim 3x$。<br>
+                        原式 $= \displaystyle\lim_{x \to 0} \frac{2x}{3x} = \frac{2}{3}$。
+                    </div>
 
-        function updateCompareTable(alpha, beta) {
-            const tbody = document.querySelector('#compareTable tbody');
-            const xValues = [0.1, 0.01, 0.001];
-            
-            let html = '';
-            xValues.forEach(x => {
-                const alphaVal = evalFunction(alpha, x);
-                const betaVal = evalFunction(beta, x);
-                const ratio = betaVal / alphaVal;
-                
-                html += `
-                    <tr>
-                        <td>${x}</td>
-                        <td>${alphaVal.toExponential(2)}</td>
-                        <td>${betaVal.toExponential(2)}</td>
-                        <td>${ratio.toFixed(4)}</td>
-                    </tr>
-                `;
-            });
-            
-            tbody.innerHTML = html;
-        }
+                    <div class="flex flex-col md:flex-row gap-4 items-center justify-between bg-gray-50 p-4 rounded-xl border border-gray-200">
+                        <div class="text-lg font-mono text-gray-800">
+                            $\displaystyle\lim_{x \to 0} \frac{1 - \cos x}{x \sin x}$
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="toggleAnswer('ans2')" class="px-4 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors">显示解析</button>
+                        </div>
+                    </div>
+                    <div id="ans2" class="hidden bg-emerald-50 border border-emerald-100 p-4 rounded-xl text-emerald-900 text-sm">
+                        <strong>解析：</strong> 当 $x \to 0$ 时，$1 - \cos x \sim \dfrac{1}{2}x^2$，$\sin x \sim x$。<br>
+                        原式 $= \displaystyle\lim_{x \to 0} \frac{\frac{1}{2}x^2}{x \cdot x} = \lim_{x \to 0} \frac{\frac{1}{2}x^2}{x^2} = \frac{1}{2}$。
+                    </div>
+                </div>
+            </div>
+        </div>
 
-        function evalFunction(func, x) {
-            switch(func) {
-                case 'x': return x;
-                case 'x^2': return x * x;
-                case 'x^3': return x * x * x;
-                case 'sin(x)': return Math.sin(x);
-                case 'tan(x)': return Math.tan(x);
-                case '1-cos(x)': return 1 - Math.cos(x);
-                default: return x;
-            }
-        }
+    </main>
+</div>
 
-        function drawCompareGraph(alpha, beta) {
-            const canvas = document.getElementById('compareGraph');
-            if (!canvas) return;
-            
-            const ctx = canvas.getContext('2d');
-            const width = canvas.width;
-            const height = canvas.height;
-            
-            ctx.clearRect(0, 0, width, height);
-            
-            // 坐标轴
-            ctx.strokeStyle = '#374151';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(50, height - 30);
-            ctx.lineTo(width - 30, height - 30);
-            ctx.moveTo(width/2, 30);
-            ctx.lineTo(width/2, height - 30);
-            ctx.stroke();
-            
-            // 绘制比值函数
-            ctx.strokeStyle = '#4f46e5';
-            ctx.lineWidth = 2.5;
-            ctx.beginPath();
-            
-            for(let px = 50; px < width - 30; px++) {
-                const x = (px - width/2) / 200;
-                if(Math.abs(x) > 0.001) {
-                    const alphaVal = evalFunction(alpha, x);
-                    const betaVal = evalFunction(beta, x);
-                    if(alphaVal !== 0) {
-                        const ratio = betaVal / alphaVal;
-                        const py = height - 30 - (ratio - 1) * 50 - height/2 + 30;
-                        
-                        if(px === 50 || Math.abs(x) < 0.002) {
-                            ctx.moveTo(px, py);
-                        } else {
-                            ctx.lineTo(px, py);
-                        }
-                    }
-                }
-            }
-            ctx.stroke();
-        }
+<!-- Mobile Nav (Bottom) -->
+<div class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around p-2 z-50 safe-pb">
+    <button onclick="switchTab('concept')" class="mobile-nav-btn flex flex-col items-center p-2 text-indigo-600" data-target="concept">
+        <span class="material-symbols-outlined">school</span>
+        <span class="text-[10px] mt-1">概念</span>
+    </button>
+    <button onclick="switchTab('compare')" class="mobile-nav-btn flex flex-col items-center p-2 text-gray-400" data-target="compare">
+        <span class="material-symbols-outlined">experiment</span>
+        <span class="text-[10px] mt-1">比较</span>
+    </button>
+    <button onclick="switchTab('equivalent')" class="mobile-nav-btn flex flex-col items-center p-2 text-gray-400" data-target="equivalent">
+        <span class="material-symbols-outlined">swap_horiz</span>
+        <span class="text-[10px] mt-1">替换</span>
+    </button>
+</div>
 
-        function showSolution() {
-            const problem = document.getElementById('limitProblem').value;
-            
-            // 更新显示的公式
-            const formulas = {
-                '1': '$\\lim\\limits_{x \\to 0} \\frac{\\sin 2x}{\\tan 3x}$',
-                '2': '$\\lim\\limits_{x \\to 0} \\frac{1-\\cos x}{x^2}$',
-                '3': '$\\lim\\limits_{x \\to 0} \\frac{e^x - 1}{\\sin x}$',
-                '4': '$\\lim\\limits_{x \\to 0} \\frac{\\ln(1+x)}{x}$'
-            };
-            
-            document.getElementById('selectedProblem').innerHTML = formulas[problem];
-            
-            const solutions = {
-                '1': {
-                    result: '答案：2/3',
-                    steps: '解：sin 2x ~ 2x，tan 3x ~ 3x<br>原式 = $\\lim\\limits_{x \\to 0} \\frac{2x}{3x} = \\frac{2}{3}$'
-                },
-                '2': {
-                    result: '答案：1/2',
-                    steps: '解：1 - cos x ~ x²/2<br>原式 = $\\lim\\limits_{x \\to 0} \\frac{x^2/2}{x^2} = \\frac{1}{2}$'
-                },
-                '3': {
-                    result: '答案：1',
-                    steps: '解：e^x - 1 ~ x，sin x ~ x<br>原式 = $\\lim\\limits_{x \\to 0} \\frac{x}{x} = 1$'
-                },
-                '4': {
-                    result: '答案：1',
-                    steps: '解：ln(1+x) ~ x<br>原式 = $\\lim\\limits_{x \\to 0} \\frac{x}{x} = 1$'
-                }
-            };
-            
-            const sol = solutions[problem];
-            document.getElementById('solutionResult').innerHTML = sol.result;
-            document.getElementById('solutionSteps').innerHTML = sol.steps;
-            renderMath();
-        }
+<!-- 页面脚本 -->
+<script src="assets/lab2-7.js"></script>
 
-        window.addEventListener('DOMContentLoaded', function() {
-            setTimeout(() => {
-                drawConceptGraph();
-                renderMath();
-            }, 100);
-        });
-
-        function toggleReturnLinks() { const p = document.querySelector('.return-links'); if (!p) return; if (p.style.display === 'flex') { p.style.opacity = '0'; setTimeout(() => p.style.display = 'none', 160); } else { p.style.display = 'flex'; requestAnimationFrame(() => p.style.opacity = '1'); } }
-    </script>
 </body>
 </html>

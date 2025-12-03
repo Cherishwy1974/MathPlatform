@@ -1,7 +1,6 @@
 window.exerciseData = {
   exercises: [
-    // 二重积分类题目
-    {
+{
       id: 1,
       type: "选择题",
       title: "二重积分基础",
@@ -23,7 +22,7 @@ $$\\int_0^1 \\frac{x}{2} \\, dx = \\frac{1}{2} \\cdot \\frac{x^2}{2}\\Big|_0^1 =
       category: "二重积分",
       method: "累次积分"
     },
-    {
+{
       id: 2,
       type: "选择题",
       title: "极坐标积分",
@@ -49,7 +48,7 @@ $$\\int_0^{2\\pi} \\frac{1}{3} \\, d\\theta = \\frac{1}{3} \\cdot 2\\pi = \\frac
       category: "极坐标积分",
       method: "坐标变换"
     },
-    {
+{
       id: 3,
       type: "选择题",
       title: "积分换序",
@@ -74,7 +73,7 @@ $$\\int_0^1 \\int_0^y f(x,y) \\, dx \\, dy$$
       category: "积分换序",
       method: "区域分析法"
     },
-    {
+{
       id: 4,
       type: "选择题",
       title: "三重积分",
@@ -101,7 +100,7 @@ $$= 2\\pi \\cdot 2 \\cdot \\frac{R^3}{3} = \\frac{4\\pi R^3}{3}$$
       category: "三重积分",
       method: "球坐标法"
     },
-    {
+{
       id: 5,
       type: "选择题",
       title: "曲线积分",
@@ -126,7 +125,7 @@ $$= \\sqrt{2} \\cdot \\frac{t^2}{2}\\Big|_0^1 = \\frac{\\sqrt{2}}{2}$$
       category: "曲线积分",
       method: "参数化法"
     },
-    {
+{
       id: 6,
       type: "选择题",
       title: "格林公式",
@@ -151,7 +150,7 @@ $$= -2 \\cdot \\pi = -2\\pi$$
       category: "格林公式",
       method: "格林公式"
     }
-  ],
+],
   knowledgePoints: [
     {
       title: "二重积分",

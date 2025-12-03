@@ -751,7 +751,7 @@
             margin-top: 1em;
         }
 
-        /* 全屏模式优化 */
+        /* ========== 全屏模式 - 题目解析随浏览器放大，其他固定小尺寸 ========== */
         .fullscreen-overlay {
             display: none;
             position: fixed;
@@ -759,7 +759,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            background: #f8f9fa;
             z-index: 9999;
             overflow-y: auto;
             flex-direction: column;
@@ -770,120 +770,209 @@
             animation: fadeIn 0.3s ease-out;
         }
 
+        /* 全屏头部 - 固定小尺寸 */
         .fullscreen-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 16px 20px;
-            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            padding: 4px 10px;
+            background: var(--primary-color);
             color: white;
-            box-shadow: var(--shadow-lg);
+            flex-shrink: 0;
+            height: 36px;
         }
 
         .fullscreen-title {
-            font-size: 1.4rem;
-            font-weight: 600;
+            font-size: 12px;
+            font-weight: 500;
+            opacity: 0.9;
         }
 
         .fullscreen-controls {
             display: flex;
-            gap: 12px;
+            gap: 6px;
         }
 
         .fullscreen-control-btn {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.15);
             border: none;
             color: white;
-            padding: 10px 20px;
-            border-radius: 24px;
+            padding: 3px 10px;
+            border-radius: 12px;
             cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 8px;
-            font-size: 14px;
+            gap: 4px;
+            font-size: 11px;
             font-weight: 500;
-            transition: all var(--transition-speed);
-            backdrop-filter: blur(10px);
+            transition: all 0.2s;
         }
 
         .fullscreen-control-btn:hover {
-            background: rgba(255, 255, 255, 0);
-            transform: scale(1.05);
+            background: rgba(255, 255, 255, 0.25);
         }
 
+        /* 全屏内容区 */
         .fullscreen-content {
             flex: 1;
             overflow-y: auto;
-            padding: 8px;
-            background: transparent;
+            padding: 2vw 3vw;
+            background: #fff;
+            display: flex;
+            flex-direction: column;
         }
 
+        /* 全屏习题容器 */
         .fullscreen-exercise {
-            background: var(--bg-white);
-            border-radius: 12px;
-            padding: 16px;
-            max-width: 100%;
-            margin: 0;
-            box-shadow: var(--shadow-md);
+            background: transparent;
+            border-radius: 0;
+            padding: 0;
+            max-width: 95%;
+            width: 100%;
+            margin: 0 auto;
+            box-shadow: none;
+            flex: 1;
         }
 
+        /* 全屏模式下的题目头部 - 固定小尺寸 */
         .fullscreen-exercise .exercise-header {
             background: none;
-            padding: 0 0 8px 0;
-            margin-bottom: 8px;
-            border-bottom: 1px solid var(--border-color);
+            padding: 0 0 6px 0;
+            margin-bottom: 1vw;
+            border-bottom: 1px solid #eee;
         }
 
+        .fullscreen-exercise .exercise-title-wrapper {
+            gap: 8px;
+        }
+
+        /* 全屏模式下的题号 - 固定小尺寸 */
+        .fullscreen-exercise .exercise-number {
+            min-width: 22px;
+            height: 22px;
+            font-size: 11px;
+        }
+
+        /* 全屏模式下的标题 - 固定小尺寸 */
+        .fullscreen-exercise .exercise-title {
+            font-size: 13px;
+            color: #555;
+        }
+
+        /* 全屏模式下的标签 - 固定小尺寸 */
+        .fullscreen-exercise .exercise-meta {
+            gap: 3px;
+            margin-left: 6px;
+        }
+
+        .fullscreen-exercise .exercise-type,
+        .fullscreen-exercise .exercise-difficulty,
+        .fullscreen-exercise .exercise-category,
+        .fullscreen-exercise .exercise-method {
+            padding: 1px 5px;
+            font-size: 9px;
+            border-radius: 6px;
+        }
+
+        /* ★★★ 全屏模式下的题目 - 随浏览器尺寸放大 ★★★ */
         .fullscreen-exercise .exercise-question {
-            font-size: 1.1rem;
-            line-height: 1.6;
-            padding: 12px;
-            background: var(--bg-secondary);
-            margin: 8px 0;
+            /* clamp(最小值, 首选值, 最大值) */
+            font-size: clamp(18px, 2.5vw, 42px) !important;
+            line-height: 1.9 !important;
+            padding: clamp(12px, 2vw, 40px);
+            background: #fafbfc;
+            margin: 1.5vw 0;
             border-radius: 8px;
+            border-left: 4px solid var(--primary-color);
+            color: #1a1a1a;
+            font-weight: 400;
         }
 
+        /* 全屏模式下的本质 - 固定较小 */
+        .fullscreen-exercise .exercise-essence {
+            margin: 8px 0;
+            padding: 8px 12px;
+            font-size: 12px;
+        }
+
+        .fullscreen-exercise .exercise-essence h4 {
+            font-size: 10px;
+            margin-bottom: 4px;
+        }
+
+        /* 全屏解析容器 */
         .fullscreen-solution-container {
             display: none;
-            margin-top: 8px;
-            padding: 12px;
-            background: var(--bg-secondary);
-            border-radius: 8px;
-            border-left: 3px solid var(--primary-color);
+            margin-top: 1.5vw;
+            padding: 0;
+            background: transparent;
+            border-radius: 0;
+            border-left: none;
             position: relative;
-            min-height: 100px;
+            min-height: auto;
             user-select: none;
-        }
-
-        .fullscreen-solution-container:hover {
-            background: var(--bg-white);
         }
 
         .fullscreen-click-hint {
             text-align: center;
-            color: var(--text-secondary);
+            color: #888;
             font-style: italic;
-            margin: 8px 0;
-            padding: 8px 12px;
-            background: var(--bg-white);
-            border-radius: 8px;
+            margin: 10px 0;
+            padding: 6px 10px;
+            background: #f5f5f5;
+            border-radius: 6px;
             animation: pulse 2s infinite;
-            border: 1px dashed var(--border-color);
+            border: 1px dashed #ddd;
+            font-size: 11px;
         }
 
         @keyframes pulse {
-
-            0%,
-            100% {
-                opacity: 0.7;
-            }
-
-            50% {
-                opacity: 1;
-            }
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
         }
 
-        /* 逐行显示动画 */
+        /* ★★★ 全屏模式下的解析内容 - 随浏览器尺寸放大 ★★★ */
+        .fullscreen-exercise .explanation,
+        .fullscreen-exercise .answer {
+            margin: 1.5vw 0;
+            border-top: none;
+            padding-top: 0;
+        }
+
+        .fullscreen-exercise .explanation h4,
+        .fullscreen-exercise .answer h4 {
+            font-size: 13px;
+            color: var(--primary-color);
+            margin-bottom: 8px;
+            padding-bottom: 4px;
+            border-bottom: 2px solid var(--primary-light);
+        }
+
+        .fullscreen-exercise .explanation-content {
+            /* 随浏览器尺寸放大 */
+            font-size: clamp(16px, 2.2vw, 38px) !important;
+            line-height: 1.9 !important;
+            padding: clamp(10px, 1.5vw, 30px);
+            background: #fafbfc;
+            border-radius: 8px;
+            color: #222;
+            box-shadow: none;
+            border: 1px solid #eee;
+        }
+
+        .fullscreen-exercise .answer-content {
+            /* 随浏览器尺寸放大 */
+            font-size: clamp(18px, 2.4vw, 40px) !important;
+            line-height: 1.8 !important;
+            padding: clamp(12px, 1.8vw, 35px);
+            background: linear-gradient(135deg, rgba(0, 200, 150, 0.08), rgba(0, 229, 160, 0.08));
+            border-radius: 8px;
+            border: 1px solid rgba(0, 200, 150, 0.25);
+            color: #1a1a1a;
+            font-weight: 500;
+        }
+
+        /* 逐行显示动画 - 字体也随尺寸放大 */
         .step-by-step-line {
             opacity: 0;
             transform: translateY(10px);
@@ -900,34 +989,85 @@
         .step-title {
             color: var(--primary-color);
             font-weight: bold;
-            margin: 8px 0 4px 0;
-            padding: 8px 12px;
-            background: linear-gradient(135deg, rgba(91, 108, 255, 0.1), rgba(124, 139, 255, 0.1));
+            margin: 1vw 0 0.5vw 0;
+            padding: clamp(8px, 1vw, 20px);
+            background: linear-gradient(135deg, rgba(91, 108, 255, 0.08), rgba(124, 139, 255, 0.08));
             border-left: 4px solid var(--primary-color);
-            border-radius: 8px;
+            border-radius: 6px;
+            font-size: clamp(15px, 2vw, 32px);
         }
 
         .step-content {
-            margin: 4px 0;
-            padding: 4px 0;
-            line-height: 1.6;
-            color: var(--text-primary);
+            margin: 0.5vw 0;
+            padding: 0.5vw 0;
+            line-height: 1.9;
+            color: #222;
+            font-size: clamp(16px, 2.2vw, 38px);
         }
 
-        /* 键盘提示样式 */
+        /* 全屏底部导航 - 固定小尺寸 */
+        .fullscreen-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4px 10px;
+            background: #f0f0f0;
+            border-top: 1px solid #e0e0e0;
+            flex-shrink: 0;
+            height: 32px;
+        }
+
+        .fullscreen-nav-btn {
+            padding: 3px 10px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            transition: all 0.2s;
+            font-weight: 500;
+            font-size: 11px;
+            box-shadow: none;
+        }
+
+        .fullscreen-nav-btn:hover:not(:disabled) {
+            background: var(--primary-dark);
+        }
+
+        .fullscreen-nav-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            background: #999;
+        }
+
+        .fullscreen-counter {
+            font-size: 11px;
+            color: #666;
+            font-weight: 500;
+            padding: 2px 8px;
+            background: #fff;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+
+        /* 键盘提示样式 - 固定小尺寸 */
         .keyboard-hint {
             position: fixed;
-            bottom: 24px;
-            right: 24px;
-            background: linear-gradient(135deg, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.8));
+            bottom: 40px;
+            right: 12px;
+            background: rgba(0, 0, 0, 0.85);
             color: white;
-            padding: 16px 20px;
-            border-radius: 12px;
-            font-size: 14px;
+            padding: 8px 10px;
+            border-radius: 6px;
+            font-size: 10px;
             z-index: 10001;
             display: none;
             backdrop-filter: blur(10px);
-            box-shadow: var(--shadow-lg);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            line-height: 1.5;
         }
 
         .keyboard-hint.show {
@@ -940,7 +1080,6 @@
                 transform: translateX(100%);
                 opacity: 0;
             }
-
             to {
                 transform: translateX(0);
                 opacity: 1;
@@ -951,57 +1090,12 @@
             display: inline-block;
             background: rgba(255, 255, 255, 0.2);
             color: white;
-            padding: 4px 8px;
-            border-radius: 6px;
+            padding: 1px 4px;
+            border-radius: 3px;
             font-family: monospace;
-            font-size: 13px;
-            margin: 0 4px;
+            font-size: 9px;
+            margin: 0 2px;
             border: 1px solid rgba(255, 255, 255, 0.3);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        }
-
-        .fullscreen-nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 16px;
-            background: var(--bg-white);
-            border-top: 1px solid var(--border-color);
-        }
-
-        .fullscreen-nav-btn {
-            padding: 6px 12px;
-            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
-            color: white;
-            border: none;
-            border-radius: 16px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            transition: all var(--transition-speed);
-            font-weight: 500;
-            box-shadow: var(--shadow-sm);
-        }
-
-        .fullscreen-nav-btn:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-colored);
-        }
-
-        .fullscreen-nav-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            background: var(--text-muted);
-        }
-
-        .fullscreen-counter {
-            font-size: 0.9rem;
-            color: var(--text-primary);
-            font-weight: 600;
-            padding: 6px 12px;
-            background: var(--bg-secondary);
-            border-radius: 12px;
         }
 
         /* 进度条 */
@@ -1167,17 +1261,9 @@
                 height: 90%;
             }
 
-            .fullscreen-exercise {
-                padding: 12px;
-                margin: 0;
-            }
-
+            /* 移动端全屏 */
             .fullscreen-content {
-                padding: 4px;
-            }
-
-            .fullscreen-header {
-                padding: 8px 12px;
+                padding: 3vw;
             }
         }
 
@@ -1825,8 +1911,8 @@
                 // 第一步：显示容器和提示
                 container.style.display = 'block';
                 hint.style.display = 'block';
-                hint.innerHTML = '按下方向键 <span class="key">↓</span>开始逐行显示解析';
-                button.innerHTML = ' 使用键盘控制';
+                hint.innerHTML = '按 <span class="key">↓</span> 开始逐行显示';
+                button.innerHTML = '键盘控制';
                 fullscreenSolutionStep = 1;
                 // 显示键盘提示
                 const keyboardHint = document.getElementById('keyboard-hint');
@@ -1841,7 +1927,7 @@
                 explanation.style.display = 'none';
                 answer.style.display = 'none';
                 hint.style.display = 'block';
-                button.innerHTML = ' 显示解析';
+                button.innerHTML = '显示解析';
                 fullscreenSolutionStep = 0;
                 currentLineIndex = 0;
                 // 隐藏键盘提示
@@ -2029,9 +2115,9 @@
             const button = document.getElementById('fullscreen-solution-btn');
             const progress = `${currentLineIndex}/${solutionLines.length}`;
             if (currentLineIndex >= solutionLines.length) {
-                button.innerHTML = ` 解析完成 (${progress}) - 按ESC退出`;
+                button.innerHTML = `完成 (${progress})`;
             } else {
-                button.innerHTML = ` 继续 (${progress}) - ↓下一行 ↑上一行 ESC退出`;
+                button.innerHTML = `${progress}`;
             }
         }
         // 全屏导航
@@ -2258,40 +2344,61 @@
     <!-- 全屏模式容器 -->
     <div id="fullscreen-overlay" class="fullscreen-overlay">
         <div class="fullscreen-header">
-            <div class="fullscreen-title">极限与连续性习题 - 全屏展示</div>
+            <div class="fullscreen-title">全屏习题</div>
             <div class="fullscreen-controls">
-                <button id="fullscreen-solution-btn" class="fullscreen-control-btn">显示解析
-                </button>
-                <button id="fullscreen-close-btn" class="fullscreen-control-btn">关闭全屏
-                </button>
+                <button id="fullscreen-solution-btn" class="fullscreen-control-btn">显示解析</button>
+                <button id="fullscreen-close-btn" class="fullscreen-control-btn">关闭</button>
             </div>
         </div>
         <div class="fullscreen-content">
             <div id="fullscreen-exercise" class="fullscreen-exercise">
                 <!-- 习题内容将动态加载 -->
             </div>
-            <div class="fullscreen-nav">
-                <button id="fullscreen-prev" class="fullscreen-nav-btn">上一题
-                </button>
-                <span class="fullscreen-counter">第 <span id="current-exercise">1</span>题 / 共 <span
-                        id="total-exercises">0</span>题
-                </span>
-                <button id="fullscreen-next" class="fullscreen-nav-btn">下一题
-                </button>
-            </div>
+        </div>
+        <div class="fullscreen-nav">
+            <button id="fullscreen-prev" class="fullscreen-nav-btn">上一题</button>
+            <span class="fullscreen-counter"><span id="current-exercise">1</span> / <span id="total-exercises">0</span></span>
+            <button id="fullscreen-next" class="fullscreen-nav-btn">下一题</button>
         </div>
     </div>
     <!-- 键盘提示 -->
     <div id="keyboard-hint" class="keyboard-hint">
-        <div>键盘控制：</div>
         <div><span class="key">↓</span>下一行 <span class="key">↑</span>上一行</div>
-        <div><span class="key"></span>上一题 <span class="key">→</span>下一题</div>
+        <div><span class="key">←</span>上题 <span class="key">→</span>下题</div>
         <div><span class="key">ESC</span>退出</div>
     </div>
     <!-- 引入数据文件 -->
     <script src="js/limit.js" charset="UTF-8"></script>
     <!-- 延迟加载MathJax -->
     <script src="../../common-assets/js/mathjax-3.2.2-tex-svg.min.js" id="MathJax-script" async></script>
+
+    <!-- Fullscreen MathJax Fix -->
+    <script>
+        (function() {
+            const originalEnterFullscreen = window.enterFullscreen;
+            window.enterFullscreen = function(exerciseId) {
+                if (originalEnterFullscreen) originalEnterFullscreen(exerciseId);
+                setTimeout(() => {
+                    const container = document.getElementById('fullscreen-exercise');
+                    if (window.MathJax && window.MathJax.typesetPromise && container) {
+                        window.MathJax.typesetPromise([container]).catch(e => console.warn('MathJax Fix Error:', e));
+                    }
+                }, 200);
+            };
+            
+            const originalUpdate = window.updateFullscreenContent;
+            window.updateFullscreenContent = function() {
+                if (originalUpdate) originalUpdate.apply(this, arguments);
+                setTimeout(() => {
+                    const container = document.getElementById('fullscreen-exercise');
+                    if (window.MathJax && window.MathJax.typesetPromise && container) {
+                        window.MathJax.typesetPromise([container]).catch(e => console.warn('MathJax Fix Error:', e));
+                    }
+                }, 200);
+            };
+        })();
+    </script>
+    
 </body>
 
 </html>

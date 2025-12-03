@@ -1,1339 +1,233 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <title>函数极限与自变量变化实验室</title>
     
-    <!-- MathJax配置 -->
-    <script>
-        window.MathJax = {
-            tex: {
-                inlineMath: [['$', '$'], ['\\(', '\\)']],
-                displayMath: [['$$', '$$'], ['\\[', '\\]']],
-                processEscapes: true
-            },
-            startup: {
-                pageReady: () => {
-                    return MathJax.startup.defaultPageReady().then(() => {
-                        console.log('MathJax加载完成');
-                    });
-                }
-            },
-            options: {
-                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
-            }
-        };
-    </script>
-    <script src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js" id="MathJax-script"></script>
+    <!-- 页面专用样式 -->
+    <link rel="stylesheet" href="assets/lab2-3.css">
     
-    <style>
-        /* 用户要求：字号统一 */
-        :root {
-            --h1-size: 22px;      
-            --h2-size: 20px;      
-            --h3-size: 18px;      
-            --btn-size: 16px;     
-            --formula-size: 20px; 
-            --text-size: 16px;
-            
-            --primary: #4f46e5;
-            --primary-light: #6366f1;
-            --primary-dark: #3730a3;
-            --light: #ffffff;
-            --gray-50: #f9fafb;
-            --gray-100: #f3f4f6;
-            --gray-200: #e5e7eb;
-            --gray-600: #4b5563;
-            --gray-800: #1f2937;
-            --border: #e5e7eb;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --info: #3b82f6;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        /* 滚动条生效但不显示 */
-        *::-webkit-scrollbar {
-            width: 0;
-            background: transparent;
-        }
-        
-        * {
-            scrollbar-width: none;
-            -ms-overflow-style: none;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
-            font-size: var(--text-size);
-            line-height: 1.5;
-            background: var(--gray-50);
-            color: var(--gray-800);
-        }
-
-        /* 横向布局（宽是高的2倍），压缩高度 */
-        .container {
-            width: 100%;
-            max-width: 1400px;
-            height: 100vh;
-            max-height: 700px;
-            margin: 0 auto;
-            display: flex;
-            flex-direction: column;
-            background: var(--light);
-        }
-
-        .header {
-            background: var(--primary);
-            color: var(--light);
-            padding: 8px 20px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-        }
-
-        .header h1 {
-            font-size: var(--h2-size);
-            margin: 0;
-        }
-
-        .main {
-            display: flex;
-            flex: 1;
-            overflow: hidden;
-        }
-
-        /* 侧边栏不动 */
-        .sidebar {
-            width: 120px;
-            background: var(--gray-50);
-            border-right: 1px solid var(--border);
-            padding: 10px 8px;
-        }
-
-        .nav-btn {
-            width: 100%;
-            padding: 8px;
-            margin-bottom: 4px;
-            background: transparent;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: var(--text-size);
-            color: var(--gray-600);
-            text-align: left;
-            transition: all 0.2s;
-        }
-
-        .nav-btn:hover {
-            background: var(--gray-100);
-        }
-
-        .nav-btn.active {
-            background: var(--primary);
-            color: var(--light);
-        }
-
-        /* 最多左右两栏，必须有可视化 */
-        .content {
-            flex: 1;
-            display: none;
-            padding: 16px;
-            overflow-y: auto;
-        }
-
-        .content.active {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-
-        .column {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            overflow-y: auto;
-        }
-
-        .card {
-            background: var(--light);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 16px;
-        }
-
-        .card h3 {
-            font-size: var(--h3-size);
-            color: var(--primary);
-            margin-bottom: 12px;
-        }
-
-        .input-group {
-            margin-bottom: 12px;
-        }
-
-        .input-group label {
-            display: block;
-            margin-bottom: 4px;
-            font-size: var(--text-size);
-            font-weight: 500;
-        }
-
-        .input-group input,
-        .input-group select {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            font-size: var(--text-size);
-            background: var(--gray-50);
-        }
-
-        .input-group input:focus,
-        .input-group select:focus {
-            outline: none;
-            border-color: var(--primary);
-            background: var(--light);
-        }
-
-        .btn {
-            padding: 8px 16px;
-            background: var(--primary);
-            color: var(--light);
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: var(--btn-size);
-            transition: all 0.2s;
-        }
-
-        .btn:hover {
-            background: var(--primary-dark);
-        }
-
-        .btn-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            margin-top: 12px;
-        }
-
-        .result {
-            background: var(--gray-50);
-            padding: 12px;
-            border-radius: 4px;
-            border: 1px solid var(--primary);
-            text-align: center;
-            font-size: var(--text-size);
-            margin: 12px 0;
-            min-height: 48px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .formula-box {
-            background: #f0f7ff;
-            padding: 12px;
-            border-radius: 4px;
-            border-left: 3px solid var(--primary);
-            margin: 12px 0;
-            text-align: center;
-            font-size: var(--formula-size);
-        }
-
-        .info-box {
-            background: var(--gray-50);
-            padding: 10px;
-            border-radius: 4px;
-            margin: 8px 0;
-            font-size: var(--text-size);
-            text-align: center;
-        }
-
-        .steps {
-            background: #fff9e6;
-            padding: 12px;
-            border-radius: 4px;
-            border-left: 3px solid #f59e0b;
-            line-height: 1.8;
-            font-size: var(--text-size);
-        }
-
-        .canvas-container {
-            border: 1px solid var(--gray-200);
-            border-radius: 4px;
-            background: #fafafa;
-            padding: 10px;
-            min-height: 200px;
-            max-height: 500px;
-            overflow: hidden;
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .canvas-container canvas {
-            max-width: 100%;
-            max-height: 100%;
-            display: block;
-            margin: 0 auto;
-        }
-
-        .slider-group {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px;
-            background: var(--gray-50);
-            border-radius: 4px;
-            margin-top: 12px;
-        }
-
-        .slider-group label {
-            min-width: 60px;
-            font-size: var(--text-size);
-        }
-
-        .slider {
-            flex: 1;
-            height: 4px;
-            -webkit-appearance: none;
-            appearance: none;
-            background: var(--gray-200);
-            outline: none;
-        }
-
-        .slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            background: var(--primary);
-            cursor: pointer;
-        }
-
-        .slider-value {
-            min-width: 40px;
-            text-align: center;
-            font-weight: 600;
-            color: var(--primary);
-        }
-
-        .approach-buttons {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-            margin: 12px 0;
-        }
-
-        .approach-btn {
-            padding: 8px;
-            background: var(--gray-50);
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.2s;
-        }
-
-        .approach-btn:hover {
-            background: var(--primary-light);
-            color: white;
-        }
-
-        .approach-btn.active {
-            background: var(--primary);
-            color: white;
-            border-color: var(--primary);
-        }
-
-        .number-line {
-            width: 100%;
-            height: 80px;
-            background: var(--gray-50);
-            border-radius: 4px;
-            position: relative;
-            margin: 12px 0;
-            overflow: hidden;
-        }
-
-        .point-marker {
-            position: absolute;
-            width: 10px;
-            height: 10px;
-            background: var(--danger);
-            border-radius: 50%;
-            top: 35px;
-            transform: translateX(-50%);
-            transition: left 0.3s ease;
-        }
-
-        .moving-point {
-            position: absolute;
-            width: 8px;
-            height: 8px;
-            background: var(--info);
-            border-radius: 50%;
-            top: 36px;
-            transform: translateX(-50%);
-            z-index: 2;
-        }
-
-        .limit-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 12px 0;
-        }
-
-        .limit-table th,
-        .limit-table td {
-            padding: 8px;
-            text-align: center;
-            border: 1px solid var(--border);
-        }
-
-        .limit-table th {
-            background: var(--gray-100);
-            font-weight: 600;
-        }
-
-        .limit-table td {
-            background: white;
-        }
-
-        .limit-indicator {
-            display: inline-block;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 14px;
-            font-weight: 500;
-        }
-
-        .limit-exists {
-            background: #f0fdf4;
-            color: var(--success);
-            border: 1px solid var(--success);
-        }
-
-        .limit-not-exists {
-            background: #fef2f2;
-            color: var(--danger);
-            border: 1px solid var(--danger);
-        }
-
-        .function-selector {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
-            margin-bottom: 12px;
-        }
-
-        .func-btn {
-            padding: 10px;
-            background: var(--gray-50);
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.2s;
-            text-align: center;
-        }
-
-        .func-btn:hover {
-            background: var(--gray-100);
-        }
-
-        .func-btn.active {
-            background: var(--primary);
-            color: white;
-            border-color: var(--primary);
-        }
-
-        /* 响应式设计 */
-        @media (max-width: 768px) {
-            .main {
-                flex-direction: column;
-            }
-
-            .sidebar {
-                width: 100%;
-                height: auto;
-                border-right: none;
-                border-bottom: 1px solid var(--border);
-                padding: 8px 16px;
-                display: flex;
-                flex-direction: row;
-                gap: 8px;
-                overflow-x: auto;
-                flex-shrink: 0;
-                justify-content: center;
-                flex-wrap: nowrap;
-            }
-
-            .nav-btn {
-                min-width: 90px;
-                text-align: center;
-                margin-bottom: 0;
-                white-space: nowrap;
-                flex-shrink: 0;
-                padding: 8px 12px;
-                font-size: 14px;
-            }
-
-            .content.active {
-                grid-template-columns: 1fr;
-                gap: 16px;
-            }
-
-            .approach-buttons {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .function-selector {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .return-home-panel { position: fixed; bottom: 12px; right: 12px; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; z-index: 40; }
-        .return-toggle { width: 40px; height: 40px; border-radius: 50%; border: none; background: linear-gradient(135deg, rgba(79,70,229,0.96), rgba(99,102,241,0.9)); color: #fff; font-size: 20px; cursor: pointer; box-shadow: 0 10px 18px rgba(79,70,229,0.28); transition: transform 0.2s, box-shadow 0.2s; }
-        .return-toggle:hover { transform: translateY(-1px) scale(1.03); box-shadow: 0 14px 26px rgba(79,70,229,0.35); }
-        .return-links { display: none; flex-direction: column; gap: 6px; padding: 10px; border-radius: 10px; background: rgba(255,255,255,0.96); border: 1px solid rgba(79,70,229,0.18); box-shadow: 0 10px 30px rgba(15,23,42,0.14); opacity: 0; transition: opacity 0.16s; }
-        .return-link { text-decoration: none; font-size: 15px; color: var(--primary-dark); padding: 6px 12px; border-radius: 8px; background: rgba(99,102,241,0.12); transition: background 0.2s; }
-        .return-link:hover { background: rgba(79,70,229,0.18); }
-    </style>
-
+    <!-- Material Symbols 图标字体 -->
+    <link rel="stylesheet" href="../common-assets/css/lab1-material-symbols.css">
+    
+    <!-- MathJax 配置 -->
+    <script src="../common-assets/js/mathjax-config.js"></script>
+    <script defer src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js"></script>
 </head>
+
 <body>
-    <div class="return-home-panel"><button class="return-toggle" onclick="toggleReturnLinks()"><i class="fa-solid fa-house"></i></button><div class="return-links"><a class="return-link" href="index.html"><i class="fa-solid fa-arrow-left"></i> 返回目录</a><a class="return-link" href="../index.html"><i class="fa-solid fa-house"></i> 返回主站</a></div></div>
-    <div class="container">
-        <header class="header">
-            <h1>函数极限与自变量变化实验室</h1>
-        </header>
-
-        <div class="main">
-            <!-- 侧边栏 -->
-            <nav class="sidebar">
-                <button class="nav-btn active" onclick="switchPanel('movement')">自变量移动</button>
-                <button class="nav-btn" onclick="switchPanel('approach')">趋近方式</button>
-                <button class="nav-btn" onclick="switchPanel('types')">极限类型</button>
-            </nav>
-
-            <!-- 自变量移动页面 -->
-            <div class="content active" id="movement">
-                <div class="column">
-                    <div class="card">
-                        <h3>数列与函数的关系</h3>
-                        <div class="formula-box">
-                            数列：$x_n = f(n)$，n 是正整数<br>
-                            函数：$y = f(x)$，x 是实数
-                        </div>
-                        <div class="steps">
-                            数列是特殊的函数（只在整数点有值）<br>
-                            • 数列：只能取 n = 1, 2, 3, ...<br>
-                            • 函数：x 可以取任意实数<br>
-                            • 研究重点：当变量越来越大时的趋势
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <h3>x在数轴上的移动</h3>
-                        <div class="number-line" id="numberLine">
-                            <canvas id="numberLineCanvas" width="400" height="80"></canvas>
-                            <div class="moving-point" id="movingPoint"></div>
-                        </div>
-                        <div class="approach-buttons">
-                            <button class="approach-btn active" onclick="setMovement('right')">x → a⁺</button>
-                            <button class="approach-btn" onclick="setMovement('left')">x → a⁻</button>
-                            <button class="approach-btn" onclick="setMovement('both')">x → a</button>
-                            <button class="approach-btn" onclick="setMovement('infinity')">x → +∞</button>
-                            <button class="approach-btn" onclick="setMovement('negInfinity')">x → -∞</button>
-                            <button class="approach-btn" onclick="setMovement('oscillate')">振荡</button>
-                        </div>
-                        <div class="result" id="movementDesc">
-                            x 从右侧趋近于 a
-                        </div>
-                    </div>
-                </div>
-
-                <div class="column">
-                    <div class="card">
-                        <h3>函数图像演示</h3>
-                        <div class="canvas-container">
-                            <canvas id="movementGraph" width="600" height="350"></canvas>
-                        </div>
-                        <div class="slider-group">
-                            <label>速度</label>
-                            <input type="range" class="slider" id="speedSlider" 
-                                   min="1" max="10" step="1" value="5">
-                            <span class="slider-value" id="speedValue">5</span>
-                        </div>
-                        <div class="btn-row">
-                            <button class="btn" onclick="startAnimation()">开始动画</button>
-                            <button class="btn" onclick="pauseAnimation()">暂停/继续</button>
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <h3>当前状态</h3>
-                        <div class="info-box" id="currentStatus">
-                            x = <span id="xValue">2.0</span><br>
-                            f(x) = <span id="fxValue">4.0</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 趋近方式页面 -->
-            <div class="content" id="approach">
-                <div class="column">
-                    <div class="card">
-                        <h3>选择函数</h3>
-                        <div class="function-selector">
-                            <button class="func-btn active" onclick="selectFunction(1)">
-                                $f(x) = \frac{1}{x}$
-                            </button>
-                            <button class="func-btn" onclick="selectFunction(2)">
-                                $f(x) = \frac{x^2-1}{x-1}$
-                            </button>
-                            <button class="func-btn" onclick="selectFunction(3)">
-                                $f(x) = \sin(\frac{1}{x})$
-                            </button>
-                            <button class="func-btn" onclick="selectFunction(4)">
-                                $f(x) = e^{-x^2}$
-                            </button>
-                        </div>
-                        <div class="formula-box" id="selectedFunc">
-                            $f(x) = \frac{1}{x}$
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <h3>趋近值表</h3>
-                        <table class="limit-table">
-                            <thead>
-                                <tr>
-                                    <th>x</th>
-                                    <th>f(x)</th>
-                                    <th>趋势</th>
-                                </tr>
-                            </thead>
-                            <tbody id="approachTable">
-                                <tr><td>0.1</td><td>10</td><td>↑</td></tr>
-                                <tr><td>0.01</td><td>100</td><td>↑</td></tr>
-                                <tr><td>0.001</td><td>1000</td><td>↑</td></tr>
-                            </tbody>
-                        </table>
-                        <div class="result" id="limitConclusion">
-                            <span class="limit-indicator limit-not-exists">
-                                极限不存在（趋向无穷）
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="column">
-                    <div class="card">
-                        <h3>左右极限对比</h3>
-                        <div class="canvas-container">
-                            <canvas id="approachGraph" width="600" height="300"></canvas>
-                        </div>
-                        <div class="info-box">
-                            <strong>左极限：</strong> $\lim\limits_{x \to a^-} f(x) = $ <span id="leftLimit">-∞</span><br>
-                            <strong>右极限：</strong> $\lim\limits_{x \to a^+} f(x) = $ <span id="rightLimit">+∞</span>
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <h3>极限存在条件</h3>
-                        <div class="formula-box">
-                            $\lim\limits_{x \to a} f(x) = L$ 存在 $\Leftrightarrow$<br>
-                            $\lim\limits_{x \to a^-} f(x) = \lim\limits_{x \to a^+} f(x) = L$
-                        </div>
-                        <div class="steps">
-                            <strong>判定步骤：</strong><br>
-                            1. 计算左极限 $\lim\limits_{x \to a^-} f(x)$<br>
-                            2. 计算右极限 $\lim\limits_{x \to a^+} f(x)$<br>
-                            3. 比较左右极限是否相等且有限
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 极限类型页面 -->
-            <div class="content" id="types">
-                <div class="column">
-                    <div class="card">
-                        <h3>有限极限</h3>
-                        <div class="formula-box">
-                            $\lim\limits_{x \to a} f(x) = L$ （L为有限值）
-                        </div>
-                        <div class="canvas-container" style="min-height: 150px;">
-                            <canvas id="finiteCanvas" width="350" height="150"></canvas>
-                        </div>
-                        <div class="info-box">
-                            例：$\lim\limits_{x \to 2} (x^2) = 4$
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <h3>无穷极限</h3>
-                        <div class="formula-box">
-                            $\lim\limits_{x \to a} f(x) = \pm\infty$
-                        </div>
-                        <div class="canvas-container" style="min-height: 150px;">
-                            <canvas id="infiniteCanvas" width="350" height="150"></canvas>
-                        </div>
-                        <div class="info-box">
-                            例：$\lim\limits_{x \to 0^+} \frac{1}{x} = +\infty$
-                        </div>
-                    </div>
-                </div>
-
-                <div class="column">
-                    <div class="card">
-                        <h3>极限不存在</h3>
-                        <div class="formula-box">
-                            左右极限不相等或振荡
-                        </div>
-                        <div class="canvas-container" style="min-height: 150px;">
-                            <canvas id="notExistCanvas" width="350" height="150"></canvas>
-                        </div>
-                        <div class="info-box">
-                            例：$\lim\limits_{x \to 0} \sin(\frac{1}{x})$ 不存在
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <h3>特殊极限</h3>
-                        <div class="formula-box">
-                            重要极限公式
-                        </div>
-                        <div class="steps">
-                            1. $\lim\limits_{x \to 0} \frac{\sin x}{x} = 1$<br>
-                            2. $\lim\limits_{x \to \infty} (1 + \frac{1}{x})^x = e$<br>
-                            3. $\lim\limits_{x \to 0} \frac{e^x - 1}{x} = 1$<br>
-                            4. $\lim\limits_{x \to 0} \frac{\ln(1+x)}{x} = 1$
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <h3>计算练习</h3>
-                        <div class="input-group">
-                            <label>输入 x 值</label>
-                            <input type="number" id="xInput" value="0.1" step="0.01">
-                        </div>
-                        <div class="input-group">
-                            <label>选择函数</label>
-                            <select id="funcSelect">
-                                <option value="1/x">1/x</option>
-                                <option value="sin(x)/x">sin(x)/x</option>
-                                <option value="(x^2-1)/(x-1)">(x²-1)/(x-1)</option>
-                                <option value="e^x">e^x</option>
-                            </select>
-                        </div>
-                        <button class="btn" onclick="calculateLimit()">计算函数值</button>
-                        <div class="result" id="calcResult">
-                            f(0.1) = 10
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <!-- 返回主页浮动面板 -->
+    <div class="return-home-panel">
+        <button class="return-toggle" onclick="toggleReturnLinks()">
+            <span class="material-symbols-outlined">home</span>
+        </button>
+        <div class="return-links">
+            <a class="return-link" href="index.html">
+                <span class="material-symbols-outlined" style="font-size: 16px;">arrow_back</span> 返回目录
+            </a>
+            <a class="return-link" href="../index.html">
+                <span class="material-symbols-outlined" style="font-size: 16px;">home</span> 返回主站
+            </a>
         </div>
     </div>
 
-    <script>
-        // 渲染数学公式
-        function renderMath() {
-            if (window.MathJax && MathJax.typesetPromise) {
-                MathJax.typesetPromise().catch(err => console.log('渲染错误:', err));
-            }
-        }
+    <div class="container">
+    <header class="header">
+    <h1>函数极限与自变量变化实验室</h1>
+    </header>
+        
+    <div class="main">
+    <!-- 侧边栏 -->
+    <nav class="sidebar">
+    <button class="nav-btn active" onclick="switchPanel('movement')">自变量移动</button>
+    <button class="nav-btn" onclick="switchPanel('approach')">趋近方式</button>
+    <button class="nav-btn" onclick="switchPanel('types')">极限类型</button>
+    </nav>
 
-        // 全局变量
-        let currentMovement = 'right';
-        let currentFunction = 1;
-        let animationId = null;
-        let isPaused = false;
-        let xPosition = 2;
+    <!-- 自变量移动页面 -->
+    <div class="content active" id="movement">
+    <div class="column">
+    <div class="card">
+    <h3>数列与函数的关系</h3>
+    <div class="formula-box">
+                            数列：$x_n = f(n)$，$n$ 是正整数<br>
+                            函数：$y = f(x)$，$x$ 是实数
+                            </div>
+    <div class="steps">
+                                数列是特殊的函数（只在整数点有值）<br>
+                            • 数列：只能取 $n = 1, 2, 3, \ldots$<br>
+                            • 函数：$x$ 可以取任意实数<br>
+                                • 研究重点：当变量越来越大时的趋势
+                            </div>
+    </div>
+    <div class="card">
+    <h3>x在数轴上的移动</h3>
+    <div class="number-line" id="numberLine">
+    <canvas height="80" id="numberLineCanvas" width="400"></canvas>
+    <div class="moving-point" id="movingPoint"></div>
+    </div>
+    <div class="approach-buttons">
+    <button class="approach-btn active" onclick="setMovement('right')">x → a⁺</button>
+    <button class="approach-btn" onclick="setMovement('left')">x → a⁻</button>
+    <button class="approach-btn" onclick="setMovement('both')">x → a</button>
+    <button class="approach-btn" onclick="setMovement('infinity')">x → +∞</button>
+    <button class="approach-btn" onclick="setMovement('negInfinity')">x → -∞</button>
+    <button class="approach-btn" onclick="setMovement('oscillate')">振荡</button>
+    </div>
+                        <div class="result" id="movementDesc">x 从右侧趋近于 a</div>
+    </div>
+    </div>
+    <div class="column">
+    <div class="card">
+    <h3>函数图像演示</h3>
+    <div class="canvas-container">
+    <canvas height="350" id="movementGraph" width="600"></canvas>
+    </div>
+    <div class="slider-group">
+    <label>速度</label>
+    <input class="slider" id="speedSlider" max="10" min="1" step="1" type="range" value="5">
+    <span class="slider-value" id="speedValue">5</span>
+    </div>
+    <div class="btn-row">
+    <button class="btn" onclick="startAnimation()">开始动画</button>
+    <button class="btn" onclick="pauseAnimation()">暂停/继续</button>
+    </div>
+    </div>
+    <div class="card">
+    <h3>当前状态</h3>
+    <div class="info-box" id="currentStatus">
+                            $x = $ <span id="xValue">2.00</span><br>
+                            $f(x) = $ <span id="fxValue">2.30</span>
+    </div>
+    </div>
+    </div>
+    </div>
 
-        // 页面切换
-        function switchPanel(panel) {
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
-            
-            event.target.classList.add('active');
-            document.getElementById(panel).classList.add('active');
-            
-            setTimeout(() => {
-                renderMath();
-                if (panel === 'movement') {
-                    drawNumberLine();
-                    drawMovementGraph();
-                } else if (panel === 'approach') {
-                    drawApproachGraph();
-                    updateApproachTable();
-                } else if (panel === 'types') {
-                    drawTypeGraphs();
-                }
-            }, 50);
-        }
+    <!-- 趋近方式页面 -->
+    <div class="content" id="approach">
+    <div class="column">
+    <div class="card">
+    <h3>选择函数</h3>
+    <div class="function-selector">
+                            <button class="func-btn active" onclick="selectFunction(1)">$f(x) = \dfrac{1}{x}$</button>
+                            <button class="func-btn" onclick="selectFunction(2)">$f(x) = \dfrac{x^2-1}{x-1}$</button>
+                            <button class="func-btn" onclick="selectFunction(3)">$f(x) = \sin\left(\dfrac{1}{x}\right)$</button>
+                            <button class="func-btn" onclick="selectFunction(4)">$f(x) = e^{-x^2}$</button>
+    </div>
+                        <div class="formula-box" id="selectedFunc">$f(x) = \dfrac{1}{x}$</div>
+    </div>
+    <div class="card">
+    <h3>趋近值表</h3>
+    <table class="limit-table">
+    <thead>
+    <tr>
+                                    <th>$x$</th>
+                                    <th>$f(x)$</th>
+    <th>趋势</th>
+    </tr>
+    </thead>
+    <tbody id="approachTable">
+    <tr><td>0.1</td><td>10</td><td>↑</td></tr>
+    <tr><td>0.01</td><td>100</td><td>↑</td></tr>
+    <tr><td>0.001</td><td>1000</td><td>↑</td></tr>
+    </tbody>
+    </table>
+    <div class="result" id="limitConclusion">
+                            <span class="limit-indicator limit-not-exists">极限不存在（趋向无穷）</span>
+    </div>
+    </div>
+    </div>
+    <div class="column">
+    <div class="card">
+    <h3>左右极限对比</h3>
+    <div class="canvas-container">
+    <canvas height="300" id="approachGraph" width="600"></canvas>
+    </div>
+    <div class="info-box">
+                            <strong>左极限：</strong> $\displaystyle\lim_{x \to a^-} f(x) = $ <span id="leftLimit">-∞</span><br>
+                            <strong>右极限：</strong> $\displaystyle\lim_{x \to a^+} f(x) = $ <span id="rightLimit">+∞</span>
+    </div>
+    </div>
+    <div class="card">
+    <h3>极限存在条件</h3>
+    <div class="formula-box">
+                            $\displaystyle\lim_{x \to a} f(x) = L$ 存在 $\Leftrightarrow$<br>
+                            $\displaystyle\lim_{x \to a^-} f(x) = \displaystyle\lim_{x \to a^+} f(x) = L$
+                            </div>
+    <div class="steps">
+    <strong>判定步骤：</strong><br>
+                            1. 计算左极限 $\displaystyle\lim_{x \to a^-} f(x)$<br>
+                            2. 计算右极限 $\displaystyle\lim_{x \to a^+} f(x)$<br>
+                                3. 比较左右极限是否相等且有限
+                            </div>
+    </div>
+    </div>
+    </div>
 
-        // 绘制数轴
-        function drawNumberLine() {
-            const canvas = document.getElementById('numberLineCanvas');
-            if (!canvas) return;
-            
-            const ctx = canvas.getContext('2d');
-            const width = canvas.width;
-            const height = canvas.height;
-            
-            ctx.clearRect(0, 0, width, height);
-            
-            // 绘制主轴
-            ctx.strokeStyle = '#374151';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(20, height/2);
-            ctx.lineTo(width - 20, height/2);
-            ctx.stroke();
-            
-            // 绘制刻度
-            for(let i = 0; i <= 10; i++) {
-                const x = 20 + i * (width - 40) / 10;
-                ctx.beginPath();
-                ctx.moveTo(x, height/2 - 5);
-                ctx.lineTo(x, height/2 + 5);
-                ctx.stroke();
-                
-                // 标记重要点
-                if(i === 5) {
-                    ctx.fillStyle = '#ef4444';
-                    ctx.beginPath();
-                    ctx.arc(x, height/2, 5, 0, Math.PI * 2);
-                    ctx.fill();
-                    
-                    ctx.fillStyle = '#374151';
-                    ctx.font = '12px Arial';
-                    ctx.textAlign = 'center';
-                    ctx.fillText('a', x, height/2 + 20);
-                }
-            }
-            
-            // 绘制箭头
-            ctx.beginPath();
-            ctx.moveTo(width - 20, height/2);
-            ctx.lineTo(width - 25, height/2 - 3);
-            ctx.lineTo(width - 25, height/2 + 3);
-            ctx.closePath();
-            ctx.fill();
-        }
+    <!-- 极限类型页面 -->
+    <div class="content" id="types">
+    <div class="column">
+    <div class="card">
+    <h3>有限极限</h3>
+                        <div class="formula-box">$\displaystyle\lim_{x \to a} f(x) = L$（$L$为有限值）</div>
+    <div class="canvas-container" style="min-height: 150px;">
+    <canvas height="150" id="finiteCanvas" width="350"></canvas>
+    </div>
+                        <div class="info-box">例：$\displaystyle\lim_{x \to 2} x^2 = 4$</div>
+    </div>
+    <div class="card">
+    <h3>无穷极限</h3>
+                        <div class="formula-box">$\displaystyle\lim_{x \to a} f(x) = \pm\infty$</div>
+    <div class="canvas-container" style="min-height: 150px;">
+    <canvas height="150" id="infiniteCanvas" width="350"></canvas>
+    </div>
+                        <div class="info-box">例：$\displaystyle\lim_{x \to 0^+} \dfrac{1}{x} = +\infty$</div>
+    </div>
+    </div>
+    <div class="column">
+    <div class="card">
+    <h3>极限不存在</h3>
+                        <div class="formula-box">左右极限不相等或振荡</div>
+    <div class="canvas-container" style="min-height: 150px;">
+    <canvas height="150" id="notExistCanvas" width="350"></canvas>
+    </div>
+                        <div class="info-box">例：$\displaystyle\lim_{x \to 0} \sin\left(\dfrac{1}{x}\right)$ 不存在</div>
+    </div>
+    <div class="card">
+    <h3>特殊极限</h3>
+                        <div class="formula-box">重要极限公式</div>
+    <div class="steps">
+                            1. $\displaystyle\lim_{x \to 0} \dfrac{\sin x}{x} = 1$<br>
+                            2. $\displaystyle\lim_{x \to \infty} \left(1 + \dfrac{1}{x}\right)^x = e$<br>
+                            3. $\displaystyle\lim_{x \to 0} \dfrac{e^x - 1}{x} = 1$<br>
+                            4. $\displaystyle\lim_{x \to 0} \dfrac{\ln(1+x)}{x} = 1$
+                            </div>
+    </div>
+    <div class="card">
+    <h3>计算练习</h3>
+    <div class="input-group">
+                            <label>输入 $x$ 值</label>
+    <input id="xInput" step="0.01" type="number" value="0.1">
+    </div>
+    <div class="input-group">
+    <label>选择函数</label>
+    <select id="funcSelect">
+    <option value="1/x">1/x</option>
+    <option value="sin(x)/x">sin(x)/x</option>
+    <option value="(x^2-1)/(x-1)">(x²-1)/(x-1)</option>
+    <option value="e^x">e^x</option>
+    </select>
+    </div>
+    <button class="btn" onclick="calculateLimit()">计算函数值</button>
+                        <div class="result" id="calcResult">f(0.1) = 10</div>
+    </div>
+    </div>
+    </div>
+    </div>
+    </div>
 
-        // 设置移动方式
-        function setMovement(type) {
-            currentMovement = type;
-            document.querySelectorAll('.approach-btn').forEach(b => b.classList.remove('active'));
-            event.target.classList.add('active');
-            
-            const descriptions = {
-                'right': 'x 从右侧趋近于 a',
-                'left': 'x 从左侧趋近于 a',
-                'both': 'x 从两侧趋近于 a',
-                'infinity': 'x 趋向正无穷',
-                'negInfinity': 'x 趋向负无穷',
-                'oscillate': 'x 在 a 附近振荡'
-            };
-            
-            document.getElementById('movementDesc').textContent = descriptions[type];
-            drawMovementGraph();
-        }
-
-        // 绘制移动图像
-        function drawMovementGraph() {
-            const canvas = document.getElementById('movementGraph');
-            if (!canvas) return;
-            
-            const ctx = canvas.getContext('2d');
-            const width = canvas.width;
-            const height = canvas.height;
-            
-            ctx.clearRect(0, 0, width, height);
-            
-            // 绘制坐标系
-            ctx.strokeStyle = '#374151';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(50, height - 40);
-            ctx.lineTo(width - 30, height - 40);
-            ctx.moveTo(50, 30);
-            ctx.lineTo(50, height - 40);
-            ctx.stroke();
-            
-            // 绘制网格
-            ctx.strokeStyle = '#e5e7eb';
-            ctx.lineWidth = 0.5;
-            for(let i = 1; i < 10; i++) {
-                const x = 50 + i * (width - 80) / 10;
-                const y = 30 + i * (height - 70) / 10;
-                ctx.beginPath();
-                ctx.moveTo(x, 30);
-                ctx.lineTo(x, height - 40);
-                ctx.moveTo(50, y);
-                ctx.lineTo(width - 30, y);
-                ctx.stroke();
-            }
-            
-            // 绘制函数曲线
-            ctx.strokeStyle = '#4f46e5';
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            
-            const func = (x) => {
-                switch(currentMovement) {
-                    case 'infinity':
-                    case 'negInfinity':
-                        return 2 / (1 + Math.exp(-x * 0.5)) - 1;
-                    case 'oscillate':
-                        return 2 + Math.sin(10 / (x - 3 + 0.01)) * 0.5;
-                    default:
-                        return (x - 3) * (x - 3) * 0.3 + 2;
-                }
-            };
-            
-            // 绘制函数曲线，确保与动画点使用相同的坐标变换
-            let firstPoint = true;
-            for(let px = 0; px < width - 80; px++) {
-                const x = px / 50 - 1;  // 将像素坐标转换为函数坐标
-                const y = func(x);
-                const py = height - 40 - y * 30;  // 将函数坐标转换为像素坐标
-                
-                if(firstPoint) {
-                    ctx.moveTo(px + 50, py);
-                    firstPoint = false;
-                } else {
-                    ctx.lineTo(px + 50, py);
-                }
-            }
-            ctx.stroke();
-            
-            // 标记目标点（极限点）
-            if(currentMovement !== 'infinity' && currentMovement !== 'negInfinity' && currentMovement !== 'oscillate') {
-                // 目标点是 x = 3 对应的函数值
-                const targetX = 50 + (3 + 1) * 50;  // 使用相同的坐标变换
-                const targetY = height - 40 - func(3) * 30;
-                
-                // 绘制垂直虚线到目标点
-                ctx.strokeStyle = '#ef4444';
-                ctx.setLineDash([5, 5]);
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.moveTo(targetX, 30);
-                ctx.lineTo(targetX, height - 40);
-                ctx.stroke();
-                
-                // 绘制水平虚线到目标点
-                ctx.beginPath();
-                ctx.moveTo(50, targetY);
-                ctx.lineTo(width - 30, targetY);
-                ctx.stroke();
-                ctx.setLineDash([]);
-                
-                // 标记目标点
-                ctx.fillStyle = '#ef4444';
-                ctx.beginPath();
-                ctx.arc(targetX, targetY, 6, 0, Math.PI * 2);
-                ctx.fill();
-                
-                // 添加目标点标签
-                ctx.fillStyle = '#ef4444';
-                ctx.font = '12px Arial';
-                ctx.textAlign = 'center';
-                ctx.fillText('目标点', targetX, targetY - 15);
-            }
-            
-            // 动画点（确保在函数曲线上）
-            if(xPosition !== undefined) {
-                // 使用与函数图像完全相同的坐标变换
-                // 函数图像：px = 0 对应 x = -1, px = width-80 对应 x = (width-80)/50 - 1
-                // 动画点：xPosition 直接对应函数坐标
-                const funcValue = func(xPosition);
-                
-                // 将函数坐标转换为像素坐标（与函数图像绘制使用相同变换）
-                const animX = 50 + (xPosition + 1) * 50;  // (xPosition + 1) * 50 对应像素位置
-                const animY = height - 40 - funcValue * 30;
-                
-                // 绘制从x轴到动画点的垂直线
-                ctx.strokeStyle = '#3b82f6';
-                ctx.setLineDash([3, 3]);
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.moveTo(animX, height - 40);
-                ctx.lineTo(animX, animY);
-                ctx.stroke();
-                
-                // 绘制从y轴到动画点的水平线
-                ctx.beginPath();
-                ctx.moveTo(50, animY);
-                ctx.lineTo(animX, animY);
-                ctx.stroke();
-                ctx.setLineDash([]);
-                
-                // 绘制动画点（确保在函数曲线上）
-                ctx.fillStyle = '#3b82f6';
-                ctx.beginPath();
-                ctx.arc(animX, animY, 8, 0, Math.PI * 2);
-                ctx.fill();
-                
-                // 绘制白色边框
-                ctx.strokeStyle = '#ffffff';
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.arc(animX, animY, 8, 0, Math.PI * 2);
-                ctx.stroke();
-                
-                // 绘制一个小的验证点（红色），显示函数曲线上的精确位置
-                ctx.fillStyle = '#ef4444';
-                ctx.beginPath();
-                ctx.arc(animX, animY, 3, 0, Math.PI * 2);
-                ctx.fill();
-                
-                // 添加坐标标签
-                ctx.fillStyle = '#3b82f6';
-                ctx.font = 'bold 12px Arial';
-                ctx.textAlign = 'center';
-                ctx.fillText(`x=${xPosition.toFixed(2)}`, animX, height - 25);
-                ctx.textAlign = 'left';
-                ctx.fillText(`y=${funcValue.toFixed(2)}`, 55, animY - 5);
-                
-                // 更新状态显示
-                document.getElementById('xValue').textContent = xPosition.toFixed(2);
-                document.getElementById('fxValue').textContent = funcValue.toFixed(2);
-            }
-            
-            // 添加坐标轴标签
-            ctx.fillStyle = '#374151';
-            ctx.font = '14px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText('x', width - 15, height - 25);
-            ctx.textAlign = 'right';
-            ctx.fillText('f(x)', 40, 25);
-        }
-
-        // 选择函数
-        function selectFunction(num) {
-            currentFunction = num;
-            document.querySelectorAll('.func-btn').forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('.func-btn')[num - 1].classList.add('active');
-            
-            const formulas = [
-                '$f(x) = \\frac{1}{x}$',
-                '$f(x) = \\frac{x^2-1}{x-1}$',
-                '$f(x) = \\sin(\\frac{1}{x})$',
-                '$f(x) = e^{-x^2}$'
-            ];
-            
-            document.getElementById('selectedFunc').innerHTML = formulas[num - 1];
-            renderMath();
-            updateApproachTable();
-            drawApproachGraph();
-        }
-
-        // 更新趋近表
-        function updateApproachTable() {
-            const tbody = document.getElementById('approachTable');
-            if (!tbody) return;
-            
-            const values = [0.1, 0.01, 0.001];
-            let html = '';
-            
-            values.forEach(x => {
-                let fx;
-                switch(currentFunction) {
-                    case 1:
-                        fx = 1 / x;
-                        break;
-                    case 2:
-                        fx = x !== 1 ? (x * x - 1) / (x - 1) : 'undefined';
-                        break;
-                    case 3:
-                        fx = Math.sin(1 / x);
-                        break;
-                    case 4:
-                        fx = Math.exp(-x * x);
-                        break;
-                }
-                
-                const trend = fx > 10 ? '↑' : fx < -10 ? '↓' : '→';
-                html += `<tr><td>${x}</td><td>${typeof fx === 'number' ? fx.toFixed(3) : fx}</td><td>${trend}</td></tr>`;
-            });
-            
-            tbody.innerHTML = html;
-            
-            // 更新极限结论
-            const conclusion = document.getElementById('limitConclusion');
-            if(currentFunction === 1) {
-                conclusion.innerHTML = '<span class="limit-indicator limit-not-exists">极限不存在（趋向无穷）</span>';
-            } else if(currentFunction === 2) {
-                conclusion.innerHTML = '<span class="limit-indicator limit-exists">极限存在：2</span>';
-            } else if(currentFunction === 3) {
-                conclusion.innerHTML = '<span class="limit-indicator limit-not-exists">极限不存在（振荡）</span>';
-            } else {
-                conclusion.innerHTML = '<span class="limit-indicator limit-exists">极限存在：1</span>';
-            }
-        }
-
-        // 绘制趋近图
-        function drawApproachGraph() {
-            const canvas = document.getElementById('approachGraph');
-            if (!canvas) return;
-            
-            const ctx = canvas.getContext('2d');
-            const width = canvas.width;
-            const height = canvas.height;
-            
-            ctx.clearRect(0, 0, width, height);
-            
-            // 绘制坐标系
-            ctx.strokeStyle = '#374151';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(width/2, 30);
-            ctx.lineTo(width/2, height - 30);
-            ctx.moveTo(30, height/2);
-            ctx.lineTo(width - 30, height/2);
-            ctx.stroke();
-            
-            // 绘制函数
-            const funcs = [
-                x => 1 / x,
-                x => x !== 1 ? (x * x - 1) / (x - 1) : NaN,
-                x => Math.sin(1 / x),
-                x => Math.exp(-x * x)
-            ];
-            
-            const func = funcs[currentFunction - 1];
-            
-            // 左侧曲线（蓝色）
-            ctx.strokeStyle = '#3b82f6';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            for(let px = 30; px < width/2 - 2; px++) {
-                const x = (px - width/2) / 100;
-                const y = func(x);
-                if(!isNaN(y) && Math.abs(y) < 10) {
-                    const py = height/2 - y * 20;
-                    if(px === 30) ctx.moveTo(px, py);
-                    else ctx.lineTo(px, py);
-                }
-            }
-            ctx.stroke();
-            
-            // 右侧曲线（红色）
-            ctx.strokeStyle = '#ef4444';
-            ctx.beginPath();
-            for(let px = width/2 + 2; px < width - 30; px++) {
-                const x = (px - width/2) / 100;
-                const y = func(x);
-                if(!isNaN(y) && Math.abs(y) < 10) {
-                    const py = height/2 - y * 20;
-                    if(px === width/2 + 2) ctx.moveTo(px, py);
-                    else ctx.lineTo(px, py);
-                }
-            }
-            ctx.stroke();
-            
-            // 更新左右极限值
-            if(currentFunction === 1) {
-                document.getElementById('leftLimit').textContent = '-∞';
-                document.getElementById('rightLimit').textContent = '+∞';
-            } else if(currentFunction === 2) {
-                document.getElementById('leftLimit').textContent = '2';
-                document.getElementById('rightLimit').textContent = '2';
-            } else if(currentFunction === 3) {
-                document.getElementById('leftLimit').textContent = '不存在';
-                document.getElementById('rightLimit').textContent = '不存在';
-            } else {
-                document.getElementById('leftLimit').textContent = '1';
-                document.getElementById('rightLimit').textContent = '1';
-            }
-        }
-
-        // 绘制类型图
-        function drawTypeGraphs() {
-            // 有限极限
-            drawTypeGraph('finiteCanvas', (x) => x * x, 'finite');
-            // 无穷极限
-            drawTypeGraph('infiniteCanvas', (x) => 1 / (x * x), 'infinite');
-            // 不存在
-            drawTypeGraph('notExistCanvas', (x) => Math.sin(10 / x), 'notexist');
-        }
-
-        // 绘制单个类型图
-        function drawTypeGraph(canvasId, func, type) {
-            const canvas = document.getElementById(canvasId);
-            if (!canvas) return;
-            
-            const ctx = canvas.getContext('2d');
-            const width = canvas.width;
-            const height = canvas.height;
-            
-            ctx.clearRect(0, 0, width, height);
-            
-            // 绘制坐标轴
-            ctx.strokeStyle = '#d1d5db';
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.moveTo(30, height - 20);
-            ctx.lineTo(width - 20, height - 20);
-            ctx.moveTo(width/2, 10);
-            ctx.lineTo(width/2, height - 20);
-            ctx.stroke();
-            
-            // 绘制函数
-            ctx.strokeStyle = '#4f46e5';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            
-            for(let px = 30; px < width - 20; px++) {
-                const x = (px - width/2) / 50;
-                const y = func(x);
-                
-                if(!isNaN(y) && Math.abs(y) < 10) {
-                    const py = height - 20 - (y + 2) * 15;
-                    if(px === 30) ctx.moveTo(px, py);
-                    else ctx.lineTo(px, py);
-                }
-            }
-            ctx.stroke();
-            
-            // 标记特殊点
-            if(type === 'finite') {
-                ctx.fillStyle = '#10b981';
-                ctx.beginPath();
-                ctx.arc(width/2, height - 20 - 2 * 15, 4, 0, Math.PI * 2);
-                ctx.fill();
-            }
-        }
-
-        // 计算极限
-        function calculateLimit() {
-            const x = parseFloat(document.getElementById('xInput').value);
-            const funcType = document.getElementById('funcSelect').value;
-            
-            let result;
-            switch(funcType) {
-                case '1/x':
-                    result = 1 / x;
-                    break;
-                case 'sin(x)/x':
-                    result = x !== 0 ? Math.sin(x) / x : 1;
-                    break;
-                case '(x^2-1)/(x-1)':
-                    result = x !== 1 ? (x * x - 1) / (x - 1) : 2;
-                    break;
-                case 'e^x':
-                    result = Math.exp(x);
-                    break;
-            }
-            
-            document.getElementById('calcResult').textContent = 
-                `f(${x}) = ${result.toFixed(6)}`;
-        }
-
-        // 开始动画
-        function startAnimation() {
-            isPaused = false;
-            xPosition = currentMovement === 'right' ? 5 : 
-                       currentMovement === 'left' ? 1 :
-                       currentMovement === 'infinity' ? -2 : 2;
-            
-            function animate() {
-                if (!isPaused) {
-                    const speed = parseInt(document.getElementById('speedSlider').value) / 200;
-                    
-                    switch(currentMovement) {
-                        case 'right':
-                            xPosition -= speed;
-                            if(xPosition < 3.1) xPosition = 5;
-                            break;
-                        case 'left':
-                            xPosition += speed;
-                            if(xPosition > 2.9) xPosition = 1;
-                            break;
-                        case 'both':
-                            xPosition = 3 + Math.sin(Date.now() / 500) * 1.5;
-                            break;
-                        case 'infinity':
-                            xPosition += speed;
-                            if(xPosition > 8) xPosition = -2;
-                            break;
-                        case 'negInfinity':
-                            xPosition -= speed;
-                            if(xPosition < -8) xPosition = 2;
-                            break;
-                        case 'oscillate':
-                            xPosition = 3 + Math.sin(Date.now() / 200) * 0.3;
-                            break;
-                    }
-                    
-                    drawMovementGraph();
-                }
-                
-                animationId = requestAnimationFrame(animate);
-            }
-            
-            if(animationId) cancelAnimationFrame(animationId);
-            animate();
-        }
-
-        // 暂停动画
-        function pauseAnimation() {
-            isPaused = !isPaused;
-        }
-
-        // 滑块事件
-        document.getElementById('speedSlider')?.addEventListener('input', function() {
-            document.getElementById('speedValue').textContent = this.value;
-        });
-
-        // 窗口大小变化时重绘
-        let resizeTimeout;
-        window.addEventListener('resize', function() {
-            clearTimeout(resizeTimeout);
-            resizeTimeout = setTimeout(() => {
-                const activePanel = document.querySelector('.content.active');
-                if (activePanel) {
-                    const panelId = activePanel.id;
-                    if (panelId === 'movement') {
-                        drawNumberLine();
-                        drawMovementGraph();
-                    } else if (panelId === 'approach') {
-                        drawApproachGraph();
-                    } else if (panelId === 'types') {
-                        drawTypeGraphs();
-                    }
-                }
-            }, 150);
-        });
-
-        // 初始化
-        window.addEventListener('DOMContentLoaded', function() {
-            setTimeout(() => {
-                drawNumberLine();
-                drawMovementGraph();
-                renderMath();
-            }, 100);
-        });
-
-        function toggleReturnLinks() { const p = document.querySelector('.return-links'); if (!p) return; if (p.style.display === 'flex') { p.style.opacity = '0'; setTimeout(() => p.style.display = 'none', 160); } else { p.style.display = 'flex'; requestAnimationFrame(() => p.style.opacity = '1'); } }
-    </script>
+    <!-- 页面专用脚本 -->
+    <script src="assets/lab2-3.js"></script>
 </body>
 </html>

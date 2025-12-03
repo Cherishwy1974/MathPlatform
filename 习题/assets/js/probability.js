@@ -1,6 +1,6 @@
 window.exerciseData = {
     exercises: [
-        {
+{
             id: 1,
             type: "选择题",
             title: "互斥事件概率",
@@ -19,7 +19,7 @@ $P(A \\cup B) = 0.3 + 0.4 = 0.7$
             category: "随机事件",
             method: "公式法"
         },
-        {
+{
             id: 2,
             type: "选择题",
             title: "独立事件概率",
@@ -38,7 +38,7 @@ $$P(AB) = 0.6 \\times 0.5 = 0.3$$
             category: "概率计算",
             method: "乘法公式"
         },
-        {
+{
             id: 3,
             type: "选择题",
             title: "条件概率",
@@ -57,7 +57,7 @@ $$P(A|B) = \\frac{0.3}{0.6} = 0.5$$
             category: "概率计算",
             method: "条件概率公式"
         },
-        {
+{
             id: 4,
             type: "解答题",
             title: "全概率公式",
@@ -76,7 +76,7 @@ $$P(A) = 0.06 + 0.15 + 0.08 = 0.29$$`,
             category: "概率计算",
             method: "全概率公式"
         },
-        {
+{
             id: 5,
             type: "选择题",
             title: "二项分布期望",
@@ -95,7 +95,7 @@ $$E(X) = 10 \\times 0.3 = 3$$
             category: "数字特征",
             method: "公式法"
         },
-        {
+{
             id: 6,
             type: "选择题",
             title: "正态分布概率",
@@ -118,7 +118,7 @@ $$= 2\\Phi(1.96) - 1 = 2 \\times 0.975 - 1 = 0.95$$
             category: "随机变量",
             method: "分布函数法"
         },
-        {
+{
             id: 7,
             type: "解答题",
             title: "样本均值与方差",
@@ -138,7 +138,7 @@ $$D(\\bar{X}) = D\\left(\\frac{1}{n}\\sum_{i=1}^{n}X_i\\right) = \\frac{1}{n^2}\
             category: "统计推断",
             method: "期望与方差性质"
         },
-        {
+{
             id: 8,
             type: "选择题",
             title: "泊松分布",
@@ -157,7 +157,7 @@ $$P(X=2) = \\frac{2^2}{2!}e^{-2} = \\frac{4}{2}e^{-2} = 2e^{-2} = \\frac{2}{e^2}
             category: "随机变量",
             method: "公式法"
         },
-        {
+{
             id: 9,
             type: "选择题",
             title: "贝叶斯公式",
@@ -174,7 +174,7 @@ $$P(A|B) = \\frac{P(A)P(B|A)}{P(B)} = \\frac{0.3 \\times 0.8}{0.66} = \\frac{0.2
             category: "概率计算",
             method: "贝叶斯公式"
         },
-        {
+{
             id: 10,
             type: "选择题",
             title: "二项分布方差",
@@ -187,7 +187,7 @@ $$D(X) = np(1-p) = 10 \\times 0.4 \\times 0.6 = 2.4$$`,
             category: "数字特征",
             method: "公式法"
         },
-        {
+{
             id: 11,
             type: "选择题",
             title: "几何分布",
@@ -201,7 +201,7 @@ $$P(X=3) = (1-0.2)^{3-1} \\times 0.2 = 0.8^2 \\times 0.2 = 0.64 \\times 0.2 = 0.
             category: "随机变量",
             method: "几何分布"
         },
-        {
+{
             id: 12,
             type: "选择题",
             title: "均匀分布",
@@ -214,7 +214,7 @@ $$P(1 < X < 3) = \\frac{3-1}{4-0} = \\frac{2}{4} = 0.5$$`,
             category: "随机变量",
             method: "几何概率"
         },
-        {
+{
             id: 13,
             type: "选择题",
             title: "指数分布",
@@ -227,7 +227,7 @@ $$E(X) = \\frac{1}{\\lambda} = \\frac{1}{2} = 0.5$$`,
             category: "数字特征",
             method: "公式法"
         },
-        {
+{
             id: 14,
             type: "选择题",
             title: "协方差",
@@ -240,7 +240,7 @@ $$E(X) = \\frac{1}{\\lambda} = \\frac{1}{2} = 0.5$$`,
             category: "数字特征",
             method: "独立性"
         },
-        {
+{
             id: 15,
             type: "选择题",
             title: "相关系数",
@@ -254,7 +254,7 @@ $\\rho_{XY} = 1$ 表示$Y$与$X$完全正线性相关
             category: "数字特征",
             method: "相关性"
         },
-        {
+{
             id: 16,
             type: "选择题",
             title: "切比雪夫不等式",
@@ -267,7 +267,7 @@ $$P(|X-10| \\geq 4) \\leq \\frac{D(X)}{4^2} = \\frac{4}{16} = 0.25$$`,
             category: "概率不等式",
             method: "切比雪夫不等式"
         },
-        {
+{
             id: 17,
             type: "选择题",
             title: "中心极限定理",
@@ -282,7 +282,7 @@ $$\\sum X_i \\sim N(500, 400)$$`,
             category: "极限定理",
             method: "中心极限定理"
         },
-        {
+{
             id: 18,
             type: "选择题",
             title: "大数定律",
@@ -296,7 +296,7 @@ $$\\sum X_i \\sim N(500, 400)$$`,
             category: "极限定理",
             method: "大数定律"
         },
-        {
+{
             id: 19,
             type: "选择题",
             title: "点估计",
@@ -310,7 +310,7 @@ $\\bar{X}$是$\\mu$的无偏估计`,
             category: "统计推断",
             method: "无偏性"
         },
-        {
+{
             id: 20,
             type: "选择题",
             title: "样本方差",
@@ -324,7 +324,7 @@ $$E(S^2) = \\sigma^2$$
             category: "统计推断",
             method: "无偏估计"
         },
-        {
+{
             id: 21,
             type: "选择题",
             title: "假设检验类型",
@@ -338,7 +338,7 @@ $$E(S^2) = \\sigma^2$$
             category: "假设检验",
             method: "概念"
         },
-        {
+{
             id: 22,
             type: "选择题",
             title: "置信区间",
@@ -352,7 +352,7 @@ $$E(S^2) = \\sigma^2$$
             category: "区间估计",
             method: "概念"
         },
-        {
+{
             id: 23,
             type: "选择题",
             title: "$t$分布",
@@ -365,7 +365,7 @@ $$\\frac{\\bar{X} - \\mu}{S/\\sqrt{n}} \\sim t(n-1) = t(15)$$`,
             category: "统计分布",
             method: "$t$分布"
         },
-        {
+{
             id: 24,
             type: "选择题",
             title: "$\\chi^2$分布",
@@ -379,7 +379,7 @@ $$\\sum_{i=1}^{n}X_i^2 \\sim \\chi^2(n)$$`,
             category: "统计分布",
             method: "$\\chi^2$分布"
         },
-        {
+{
             id: 25,
             type: "选择题",
             title: "显著性水平",
@@ -392,7 +392,7 @@ $$\\alpha = P(\\text{拒绝}H_0 | H_0\\text{为真}) = P(\\text{第一类错误}
             category: "假设检验",
             method: "概念"
         },
-        {
+{
             id: 26,
             type: "选择题",
             title: "最大似然估计",
@@ -406,7 +406,7 @@ $$\\alpha = P(\\text{拒绝}H_0 | H_0\\text{为真}) = P(\\text{第一类错误}
             category: "参数估计",
             method: "最大似然法"
         },
-        {
+{
             id: 27,
             type: "选择题",
             title: "矩估计",
@@ -420,7 +420,7 @@ $$A_k = \\frac{1}{n}\\sum X_i^k \\to \\mu_k = E(X^k)$$`,
             category: "参数估计",
             method: "矩估计"
         },
-        {
+{
             id: 28,
             type: "选择题",
             title: "正态总体检验",
@@ -434,7 +434,7 @@ $$A_k = \\frac{1}{n}\\sum X_i^k \\to \\mu_k = E(X^k)$$`,
             category: "假设检验",
             method: "检验选择"
         },
-        {
+{
             id: 29,
             type: "选择题",
             title: "方差齐性检验",
@@ -448,7 +448,7 @@ $$F = \\frac{S_1^2}{S_2^2} \\sim F(n_1-1, n_2-1)$$
             category: "假设检验",
             method: "$F$检验"
         },
-        {
+{
             id: 30,
             type: "选择题",
             title: "抽样分布",
@@ -462,7 +462,7 @@ $$\\bar{X} \\sim N(\\mu, \\frac{\\sigma^2}{n})$$
             category: "抽样分布",
             method: "正态分布性质"
         }
-    ],
+],
     knowledgePoints: [
         {
             title: "概率基础",

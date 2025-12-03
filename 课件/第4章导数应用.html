@@ -7,9 +7,12 @@
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>第四章：导数应用 (交互式课件)</title>
 <script src="../common-assets/js/d3-7.8.5.min.js"></script>
-<!-- 使用统一的MathJax配置文件，避免配置冲突 -->
-<script src="../common-assets/js/mathjax-config.js"></script>
-<script>
+    <!-- MathJax 配置 - 只保留内联配置，避免冲突 -->
+    <script>
+        window.onerror = function(msg, url, line, col, error) {
+            console.error('页面错误:', msg, 'at', line + ':' + col);
+            return true;
+        };
         window.MathJax = {
             tex: {
                 inlineMath: [['$', '$'], ['\\(', '\\)']],
@@ -2951,190 +2954,13 @@
 <p>即边际收益等于边际成本时，利润达到最大</p>
 </div>
 </div><div class="right-visual"><div id="vis-marginal-analysis"></div></div></div></div>
-<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
-<h2>需求弹性</h2>
-<p>衡量需求量对价格变化的<span class="highlight">敏感程度</span>。</p>
-<div class="formula-highlight">
-<p><strong>点弹性公式：</strong></p>
-$E_d = -\frac{dQ}{dP} \cdot \frac{P}{Q}$
-<p>其中 $Q$ 是需求量，$P$ 是价格</p>
-</div>
-<h3>弹性计算步骤</h3>
-<div class="example">
-<p><strong>第一步：</strong>写出需求函数 $Q = f(P)$</p>
-<p><strong>第二步：</strong>求导数 $\frac{dQ}{dP}$</p>
-<p><strong>第三步：</strong>代入具体的 $P$ 值，计算对应的 $Q$ 值</p>
-<p><strong>第四步：</strong>代入弹性公式计算 $E_d$</p>
-</div>
-<h3>弹性分类</h3>
-<ul>
-<li>$|E_d| &gt; 1$：<span class="highlight">富有弹性</span> - 需求对价格敏感</li>
-<li>$|E_d| = 1$：<span class="highlight">单位弹性</span> - 收益最大化点</li>
-<li>$|E_d| &lt; 1$：<span class="highlight">缺乏弹性</span> - 需求对价格不敏感</li>
-</ul>
-</div><div class="right-visual"><div id="vis-elasticity"></div></div></div></div>
-<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
-<h2>函数图像描绘步骤</h2>
-<ol>
-<li><strong>定义域</strong>：确定函数存在的范围</li>
-<li><strong>关键点</strong>：
-                    <ul>
-<li>与坐标轴的交点</li>
-<li>$f'(x) = 0$ 的点（可能极值）</li>
-<li>$f''(x) = 0$ 的点（可能拐点）</li>
-</ul>
-</li>
-<li><strong>单调性</strong>：根据 $f'(x)$ 的符号</li>
-<li><strong>凹凸性</strong>：根据 $f''(x)$ 的符号</li>
-<li><strong>渐近线</strong>：水平、垂直渐近线</li>
-</ol>
-</div><div class="right-visual"><div id="vis-curve-sketching"></div></div></div></div>
-<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
-<h2>练习1：洛必达法则</h2>
-<h3>题目</h3>
-<p>求极限：$\lim\limits_{x \to 0} \frac{e^x - 1 - x}{x^2}$</p>
-<h3>解题步骤</h3>
-<div class="example">
-<p><strong>第1步：验证未定式类型</strong>当 $x \to 0$ 时：分子：$e^0 - 1 - 0 = 1 - 1 - 0 = 0$；分母：$0^2 = 0$。确认为 $\frac{0}{0}$ 型，可以使用洛必达法则。</p>
-<p><strong>第2步：第一次应用洛必达法则</strong>对分子分母分别求导：$\lim_{x \to 0} \frac{e^x - 1 - x}{x^2} = \lim_{x \to 0} \frac{(e^x - 1 - x)'}{(x^2)'} = \lim_{x \to 0} \frac{e^x - 1}{2x}$</p>
-<p><strong>第3步：再次验证</strong>当 $x \to 0$ 时：$e^0 - 1 = 0$，$2 \cdot 0 = 0$。仍为 $\frac{0}{0}$ 型，继续应用洛必达法则。</p>
-<p><strong>第4步：第二次应用洛必达法则</strong>$\lim_{x \to 0} \frac{e^x - 1}{2x} = \lim_{x \to 0} \frac{(e^x - 1)'}{(2x)'} = \lim_{x \to 0} \frac{e^x}{2} = \frac{e^0}{2} = \frac{1}{2}$</p>
-</div>
-<div class="formula-highlight">
-<p><strong>答案：</strong>$\lim\limits_{x \to 0} \frac{e^x - 1 - x}{x^2} = \frac{1}{2}$</p>
-</div>
-</div><div class="right-visual"><div id="vis-practice-1"></div></div></div></div>
-<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
-<h2>练习2：优化问题</h2>
-<h3>题目</h3>
-<p>某工厂要制造一个容积为 $V$ 的圆柱形容器，使表面积最小。求最优的高与底面半径之比。</p>
-<h3>解题步骤</h3>
-<div class="example">
-<p><strong>第1步：</strong>建立数学模型</p>
-<p>设圆柱体底面半径为 $r$，高为 $h$</p>
-<ul>
-<li>约束条件：$V = \pi r^2 h$（容积固定）</li>
-<li>目标函数：$S = 2\pi r^2 + 2\pi rh$（表面积最小）</li>
-</ul>
-</div>
-<div class="example">
-<p><strong>第2步：</strong>消除变量</p>
-<p>由约束条件得：$h = \frac{V}{\pi r^2}$</p>
-<p>代入目标函数：</p>
-$S(r) = 2\pi r^2 + 2\pi r \cdot \frac{V}{\pi r^2} = 2\pi r^2 + \frac{2V}{r}$
-</div>
-<div class="example">
-<p><strong>第3步：</strong>求导并令其为零</p>
-$S'(r) = 4\pi r - \frac{2V}{r^2} = 0$
-<p>解得：$4\pi r = \frac{2V}{r^2}$</p>
-<p>即：$4\pi r^3 = 2V$，所以 $r^3 = \frac{V}{2\pi}$</p>
-</div>
-<div class="example">
-<p><strong>第4步：</strong>求最优比值</p>
-<p>由 $h = \frac{V}{\pi r^2}$ 和 $r^3 = \frac{V}{2\pi}$：</p>
-$\frac{h}{r} = \frac{V}{\pi r^3} = \frac{V}{\pi \cdot \frac{V}{2\pi}} = \frac{V \cdot 2\pi}{\pi V} = 2$
-</div>
-<div class="formula-highlight">
-<p><strong>答案：</strong>最优的高与底面半径之比为 $h : r = 2 : 1$</p>
-</div>
-</div><div class="right-visual"><div id="vis-practice-2"></div></div></div></div>
-<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
-<h2>练习3：边际分析</h2>
-<h3>题目</h3>
-<p>已知成本函数 $C(x) = 50 + 3x + 0.02x^2$，价格函数 $p = 15 - 0.01x$。</p>
-<p>求：(1) 边际成本函数；(2) 边际收益函数；(3) 最优产量。</p>
-<h3>解题步骤</h3>
-<div class="example">
-<p><strong>(1) 边际成本函数</strong></p>
-<p>边际成本 $MC = C'(x)$：</p>
-$MC(x) = \frac{d}{dx}(50 + 3x + 0.02x^2) = 3 + 0.04x$
-</div>
-<div class="example">
-<p><strong>(2) 边际收益函数</strong></p>
-<p>收益函数：$R(x) = p \cdot x = (15 - 0.01x) \cdot x = 15x - 0.01x^2$</p>
-<p>边际收益 $MR = R'(x)$：</p>
-$MR(x) = \frac{d}{dx}(15x - 0.01x^2) = 15 - 0.02x$
-</div>
-<div class="example">
-<p><strong>(3) 最优产量</strong></p>
-<p>利润最大化条件：$MR = MC$</p>
-$15 - 0.02x = 3 + 0.04x$
-$12 = 0.06x$
-$x = 200$
-</div>
-<div class="example">
-<p><strong>验证：</strong>二阶条件</p>
-<p>利润函数：$P(x) = R(x) - C(x) = 15x - 0.01x^2 - 50 - 3x - 0.02x^2$</p>
-<p>$P(x) = 12x - 0.03x^2 - 50$</p>
-<p>$P''(x) = -0.06 &lt; 0$，确认为最大值点。</p>
-</div>
-<div class="formula-highlight">
-<p><strong>答案：</strong>(1) $MC(x) = 3 + 0.04x$；(2) $MR(x) = 15 - 0.02x$；(3) 最优产量 $x = 200$ 单位</p>
-</div>
-</div><div class="right-visual"><div id="vis-practice-3"></div></div></div></div>
-<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
-<h2>练习4：相关变化率</h2>
-<h3>题目</h3>
-<p>梯子长 5m，靠在墙上。梯子底端以 1m/s 的速度离开墙根，当底端距墙根 3m 时，梯子顶端下滑的速度是多少？</p>
-<h3>解题步骤</h3>
-<div class="example">
-<p><strong>第1步：</strong>建立坐标系和变量</p>
-<p>设梯子底端距墙根距离为 $x$，顶端距地面高度为 $y$</p>
-<ul>
-<li>梯子长度：$L = 5$ m（常数）</li>
-<li>已知：$\frac{dx}{dt} = 1$ m/s</li>
-<li>求：当 $x = 3$ m 时的 $\frac{dy}{dt}$</li>
-</ul>
-</div>
-<div class="example">
-<p><strong>第2步：</strong>建立函数关系</p>
-<p>根据勾股定理：</p>
-$x^2 + y^2 = L^2 = 25$
-</div>
-<div class="example">
-<p><strong>第3步：</strong>对时间求导</p>
-<p>对等式两边关于 $t$ 求导：</p>
-$\frac{d}{dt}(x^2 + y^2) = \frac{d}{dt}(25)$
-$2x\frac{dx}{dt} + 2y\frac{dy}{dt} = 0$
-</div>
-<div class="example">
-<p><strong>第4步：</strong>求解特定时刻的值</p>
-<p>当 $x = 3$ 时，由 $x^2 + y^2 = 25$ 得：</p>
-$y = \sqrt{25 - 9} = \sqrt{16} = 4 \text{ m}$
-<p>代入导数方程：</p>
-$2 \times 3 \times 1 + 2 \times 4 \times \frac{dy}{dt} = 0$
-$6 + 8\frac{dy}{dt} = 0$
-$\frac{dy}{dt} = -\frac{6}{8} = -\frac{3}{4} \text{ m/s}$
-</div>
-<div class="formula-highlight">
-<p><strong>答案：</strong>梯子顶端下滑速度为 $\frac{3}{4}$ m/s（负号表示向下）</p>
-</div>
-</div><div class="right-visual"><div id="vis-practice-4"></div></div></div></div>
-<div class="slide"><div class="slide-container"><div class="left-content tex2jax_process">
-<h2 style="font-size: 3rem">总结</h2>
-<div style="text-align: left; max-width: 800px; margin: 0 auto">
-<h3>导数应用要点</h3>
-<ul style="font-size: 1.3rem; line-height: 2">
-<li>导数 = 变化率 = 切线斜率</li>
-<li>$f'(x) &gt; 0$ → 递增；$f'(x) &lt; 0$ → 递减</li>
-<li>极值点：$f'(x) = 0$ 且符号改变</li>
-<li>最值 = 比较极值和端点值</li>
-<li>洛必达法则：求未定式极限的利器</li>
-<li>边际分析：经济决策的数学基础</li>
-<li>实际问题：建模 → 求导 → 求极值</li>
-</ul>
-<div style="margin-top: 30px; padding: 20px">
-<p style="font-size: 1.2rem">记住：导数是理解函数变化的<span class="highlight">关键工具</span>！</p>
-</div>
-</div>
-</div><div class="right-visual"><div id="vis-summary"></div></div></div></div>
 </div>
 <!-- 翻页按钮 -->
 <!-- 全局动画控制面板 -->
 <div aria-label="幻灯片导航" class="nav-controls" role="navigation">
 <button aria-label="上一页" class="nav-btn" fa-arrow-left"="" fa-solid="" onclick="previousSlide()" title="上一页 (&lt;i class=">)"&gt;<i class="fa-solid fa-arrow-left"></i> 上一页</button>
 <div aria-live="polite" class="slide-number" role="status">
-            <input aria-label="当前页码" id="slideNumberInput" max="46" min="1" onchange="jumpToSlide(this.value)" type="number" value="1"/>/<span id="slideNumberTotal">46</span>
+            <input aria-label="当前页码" id="slideNumberInput" max="38" min="1" onchange="jumpToSlide(this.value)" type="number" value="1"/>/<span id="slideNumberTotal">38</span>
 </div>
 <button aria-label="下一页" class="nav-btn" onclick="nextSlide()" title="下一页 (→)">下一页 →</button>
 </div>

@@ -1,5 +1,7 @@
 window.exerciseData = {
-  exercises: [], // 初始化为空数组
+  exercises: [
+
+], // 初始化为空数组
   knowledgePoints: [
     {
       title: "指数运算",

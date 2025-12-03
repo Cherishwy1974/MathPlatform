@@ -34,64 +34,8 @@
 };
 
 window.exerciseData.exercises = [
-,
-
-,
-
-,
-
-,
-
-,
-
-,
-
-,
-
-,
-
-,
-
-,
-
-,
-
-,
-
-,
-
-,
-
-,
-
-,
-
-,
-
-,
-
-,
-
-,
-
-,
-
-,
-
-,
-
-,
-
-,
-
-,
-
-,
-
-,
-
 {
-    id: 77,
+    id: 1,
     type: "计算题",
     title: "反正切函数展开",
     question: "将函数 $f(x) = \\frac{1}{1+x^2}$ 展开成x的幂级数",
@@ -101,5 +45,5 @@ window.exerciseData.exercises = [
     difficulty: "medium",
     category: "函数展开",
     method: "变量替换"
-  },
+  }
 ];

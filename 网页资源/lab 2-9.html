@@ -1,1129 +1,123 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <title>等价无穷小倒水游戏</title>
-    
-    <!-- Local resource references -->
-    <script src="../common-assets/js/jquery.min.js"></script>
-    <link rel="stylesheet" href="../common-assets/css/all.min.css">
-    <link rel="stylesheet" href="../common-assets/css/fonts.css">
-    <link rel="stylesheet" href="../common-assets/css/frame.css">
+    <!-- Tailwind CSS 本地化 -->
+    <script src="../common-assets/js/tailwind.min.js"></script>
+    <!-- Google Material Symbols 本地化 -->
+    <link rel="stylesheet" href="../common-assets/css/lab1-material-symbols.css">
+    <!-- MathJax 本地化配置 -->
     <script src="../common-assets/js/mathjax-config.js"></script>
-    <script src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js"></script>
-
-    <style>
-        /* Custom global styles */
-        body {
-            font-family: 'jf open 粉圆', 'Noto Serif SC', serif;
-            -webkit-tap-highlight-color: transparent;
-            background: #faf9f7;
-            margin: 0;
-            padding: 0;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            color: #000000;
-            font-weight: 700;
-        }
-
-        /* Animated starfield background */
-        @keyframes stars {
-            from { transform: translateY(0px); }
-            to { transform: translateY(-2000px); }
-        }
-
-        @keyframes twinkle {
-            0%, 100% { opacity: 0.3; }
-            50% { opacity: 1; }
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-20px); }
-        }
-
-        @keyframes glow {
-            0%, 100% { box-shadow: 0 0 20px rgba(255, 255, 255, 0.5); }
-            50% { box-shadow: 0 0 40px rgba(255, 255, 255, 0.8); }
-        }
-
-        .stars-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 200%;
-            background: linear-gradient(to bottom, #e0f2fe 0%, #bae6fd 100%);
-            z-index: -2;
-        }
-
-        .stars {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: 
-                radial-gradient(2px 2px at 20% 30%, rgba(59, 130, 246, 0.4), transparent),
-                radial-gradient(2px 2px at 60% 70%, rgba(59, 130, 246, 0.3), transparent),
-                radial-gradient(1px 1px at 50% 50%, rgba(59, 130, 246, 0.5), transparent),
-                radial-gradient(1px 1px at 80% 10%, rgba(59, 130, 246, 0.4), transparent);
-            background-size: 200% 200%;
-            animation: stars 120s linear infinite;
-        }
-
-        .stars::after {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: 
-                radial-gradient(2px 2px at 25% 35%, rgba(59, 130, 246, 0.5), transparent),
-                radial-gradient(2px 2px at 65% 75%, rgba(59, 130, 246, 0.3), transparent),
-                radial-gradient(1px 1px at 55% 55%, rgba(59, 130, 246, 0.4), transparent);
-            background-size: 250% 250%;
-            animation: stars 180s linear infinite;
-        }
-
-        .twinkling {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: transparent;
-        }
-
-        .twinkling::after {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: 
-                radial-gradient(circle at 30% 40%, rgba(59, 130, 246, 0.6) 0%, transparent 2%),
-                radial-gradient(circle at 70% 60%, rgba(59, 130, 246, 0.4) 0%, transparent 2%),
-                radial-gradient(circle at 90% 20%, rgba(59, 130, 246, 0.5) 0%, transparent 2%);
-            animation: twinkle 5s ease-in-out infinite;
-        }
-        
-        /* Hide scrollbar but allow scrolling */
-        html, body {
-            height: 100%;
-        }
-        
-        /* Hide scrollbar for the reference view */
-        #reference-view {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-        #reference-view::-webkit-scrollbar {
-            display: none;
-        }
-
-        /* Hide scrollbar for the game view */
-        #game-view {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-        #game-view::-webkit-scrollbar {
-            display: none;
-        }
-
-        /* Utility classes for grid layouts */
-        .grid {
-            display: grid;
-        }
-        .grid-cols-2 {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-        }
-        .grid-cols-4 {
-            grid-template-columns: repeat(4, minmax(0, 1fr));
-        }
-        .grid-cols-5 {
-            grid-template-columns: repeat(5, minmax(0, 1fr));
-        }
-        .gap-1\.5 {
-            gap: 0.375rem;
-        }
-        .gap-4 {
-            gap: 0.875rem;
-        }
-
-        /* Utility classes for flexbox */
-        .flex {
-            display: flex;
-        }
-        .flex-col {
-            flex-direction: column;
-        }
-        .flex-col-reverse {
-            flex-direction: column-reverse;
-        }
-        .flex-grow {
-            flex-grow: 1;
-        }
-        .items-center {
-            align-items: center;
-        }
-        .justify-center {
-            justify-content: center;
-        }
-        .justify-around {
-            justify-content: space-around;
-        }
-        .justify-end {
-            justify-content: flex-end;
-        }
-
-        /* Utility classes for spacing */
-        .p-1 { padding: 0.25rem; }
-        .p-3 { padding: 0.625rem; }
-        .p-4 { padding: 0.875rem; }
-        .pt-2 { padding-top: 0.375rem; }
-        .pb-4 { padding-bottom: 0.875rem; }
-        .mb-2 { margin-bottom: 0.375rem; }
-        .mb-4 { margin-bottom: 0.875rem; }
-        .mt-1 { margin-top: 0.25rem; }
-        .space-x-3 > :not([hidden]) ~ :not([hidden]) {
-            margin-left: 0.625rem;
-        }
-        .space-y-4 > :not([hidden]) ~ :not([hidden]) {
-            margin-top: 0.875rem;
-        }
-
-        /* Utility classes for positioning */
-        .relative { position: relative; }
-        .absolute { position: absolute; }
-        .fixed { position: fixed; }
-        .inset-0 { top: 0; right: 0; bottom: 0; left: 0; }
-        .top-5 { top: 1.25rem; }
-        .left-1\/2 { left: 50%; }
-
-        /* Utility classes for transforms */
-        .-translate-x-1\/2 { transform: translateX(-50%); }
-
-        /* Utility classes for sizing */
-        .h-6 { height: 1.5rem; }
-        .w-6 { width: 1.5rem; }
-        .w-12 { width: 3rem; }
-        .h-6 { height: 1.5rem; }
-        .w-4 { width: 1rem; }
-        .h-4 { height: 1rem; }
-        .h-64 { height: 16rem; }
-        .h-1\/4 { height: 25%; }
-        .w-full { width: 100%; }
-        .max-w-xs { max-width: 20rem; }
-
-        /* Enhanced color classes with glass effect */
-        .bg-gray-100 { background-color: rgba(243, 244, 246, 0.1); }
-        .bg-gray-200 { background-color: rgba(229, 231, 235, 0.1); }
-        .bg-gray-300 { background-color: #d1d5db; }
-        .bg-gray-500 { background-color: #e5e7eb; }
-        .bg-gray-700 { background-color: #f3f4f6; }
-        .bg-gray-800 { background-color: #f9fafb; }
-        .bg-white { background: rgba(255, 255, 255, 0.95); }
-        .bg-blue-500 { background-color: #3b82f6; }
-        .bg-blue-600 { background-color: #2563eb; }
-        .bg-red-500 { background-color: #ef4444; }
-        .bg-red-600 { background-color: #dc2626; }
-        .bg-green-500 { background-color: #10b981; }
-        .bg-green-600 { background-color: #059669; }
-        .bg-yellow-400 { background-color: #fbbf24; }
-        .bg-purple-500 { background-color: #8b5cf6; }
-        .bg-purple-600 { background-color: #7c3aed; }
-        .bg-orange-500 { background-color: #f97316; }
-        .bg-orange-600 { background-color: #ea580c; }
-        .bg-pink-500 { background-color: #ec4899; }
-        .bg-cyan-500 { background-color: #06b6d4; }
-        .bg-amber-800 { background-color: #92400e; }
-        .bg-indigo-500 { background-color: #6366f1; }
-        .bg-indigo-600 { background-color: #4f46e5; }
-        .bg-teal-500 { background-color: #14b8a6; }
-        .bg-lime-500 { background-color: #84cc16; }
-        .bg-violet-600 { background-color: #7c3aed; }
-
-        .text-gray-500 { color: rgba(156, 163, 175, 0.9); }
-        .text-gray-700 { color: #000000; font-weight: 700; }
-        .text-gray-800 { color: #000000; font-weight: 700; }
-        .text-blue-600 { color: #000000; font-weight: 700; }
-        .text-white { color: #000000; font-weight: 700; }
-
-        /* Glass morphism for cards */
-        .glass {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .glass-dark {
-            background: rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        /* Utility classes for borders */
-        .border-b-4 { border-bottom-width: 4px; }
-        .border-x-4 { border-left-width: 4px; border-right-width: 4px; }
-        .border-gray-300 { border-color: rgba(209, 213, 219, 0.3); }
-
-        /* Utility classes for border radius */
-        .rounded-lg { border-radius: 0.5rem; }
-        .rounded-xl { border-radius: 0.75rem; }
-        .rounded-full { border-radius: 9999px; }
-        .rounded-b-3xl { border-bottom-left-radius: 1.5rem; border-bottom-right-radius: 1.5rem; }
-        .rounded-t-lg { border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem; }
-        .rounded-md { border-radius: 0.375rem; }
-
-        /* Utility classes for text */
-        .text-xs { font-size: 0.75rem; line-height: 1rem; }
-        .text-sm { font-size: 0.875rem; line-height: 1.25rem; }
-        .text-xl { font-size: 1.125rem; line-height: 1.75rem; }
-        .text-2xl { font-size: 1.25rem; line-height: 2rem; }
-        .text-lg { font-size: 1rem; line-height: 1.75rem; }
-        .text-center { text-align: center; }
-        .font-semibold { font-weight: 600; }
-        .font-bold { font-weight: 700; }
-
-        /* Enhanced shadows */
-        .shadow-sm { box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05), 0 0 20px rgba(255, 255, 255, 0.1); }
-        .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05), 0 0 30px rgba(255, 255, 255, 0.2); }
-        .shadow-inner { box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06); }
-
-        /* Utility classes for opacity */
-        .opacity-0 { opacity: 0; }
-        .opacity-50 { opacity: 0.5; }
-
-        /* Utility classes for overflow */
-        .overflow-hidden { overflow: auto; }
-        .overflow-y-auto { overflow-y: auto; }
-
-        /* Utility classes for display */
-        .hidden { display: none; }
-        .inline-block { display: inline-block; }
-
-        /* Utility classes for cursor */
-        .cursor-pointer { cursor: pointer; }
-        .cursor-not-allowed { cursor: not-allowed; }
-
-        /* Enhanced bottle styles with glass effect */
-        .bottle {
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            box-shadow: 
-                0 8px 32px 0 rgba(31, 38, 135, 0.37),
-                inset 0 2px 8px rgba(255, 255, 255, 0.2),
-                0 0 40px rgba(255, 255, 255, 0.1);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .bottle::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(
-                45deg,
-                transparent,
-                rgba(255, 255, 255, 0.1),
-                transparent
-            );
-            transform: rotate(45deg);
-            pointer-events: none;
-        }
-
-        /* Custom class for the liquid layer's top curve */
-        .liquid-top {
-            border-top-left-radius: 6px;
-            border-top-right-radius: 6px;
-            border-bottom-left-radius: 12px;
-            border-bottom-right-radius: 12px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .liquid-top::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 30%;
-            background: linear-gradient(to bottom, rgba(255, 255, 255, 0.3), transparent);
-            pointer-events: none;
-        }
-        
-        /* Animation for bottle selection */
-        .bottle.selected {
-            transform: translateY(-12px) scale(1.08);
-            box-shadow: 
-                0 0 50px rgba(100, 200, 255, 0.8),
-                0 0 100px rgba(100, 200, 255, 0.4),
-                inset 0 2px 8px rgba(255, 255, 255, 0.4);
-            animation: glow 2s ease-in-out infinite;
-        }
-
-        /* Animation for view transitions */
-        .view {
-            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
-        }
-        .view.hidden {
-            opacity: 0;
-            transform: scale(0.98);
-            pointer-events: none;
-        }
-
-        /* Enhanced gradients */
-        .bg-gradient-to-br {
-            background-image: linear-gradient(to bottom right, var(--tw-gradient-stops));
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-        }
-        .from-blue-500 { --tw-gradient-from: #3b82f6; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(59, 130, 246, 0)); }
-        .to-indigo-600 { --tw-gradient-to: #4f46e5; }
-        .from-orange-500 { --tw-gradient-from: #f97316; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(249, 115, 22, 0)); }
-        .to-red-600 { --tw-gradient-to: #dc2626; }
-        .from-lime-500 { --tw-gradient-from: #84cc16; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(132, 204, 22, 0)); }
-        .to-green-600 { --tw-gradient-to: #059669; }
-        .from-purple-500 { --tw-gradient-from: #8b5cf6; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(139, 92, 246, 0)); }
-        .to-violet-600 { --tw-gradient-to: #7c3aed; }
-
-        /* Custom styles for the toggle switch */
-        .toggle-checkbox:checked + .toggle-label {
-            background: linear-gradient(135deg, #10b981, #059669);
-            box-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
-        }
-        .toggle-checkbox:checked + .toggle-label span {
-            transform: translateX(24px);
-        }
-        
-        .toggle-label {
-            background: linear-gradient(135deg, #3b82f6, #2563eb);
-            box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
-        }
-
-        /* Enhanced button styles */
-        button {
-            position: relative;
-            overflow: hidden;
-            transition: all 0.3s ease;
-        }
-
-        button::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.3);
-            transform: translate(-50%, -50%);
-            transition: width 0.6s, height 0.6s;
-        }
-
-        button:active::after {
-            width: 300px;
-            height: 300px;
-        }
-
-        .btn-glass {
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 2px solid #000000;
-            color: #000000;
-            font-weight: 700;
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-        }
-
-        .btn-glass:hover {
-            background: rgba(255, 255, 255, 1);
-            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.15);
-        }
-
-        /* Navigation styles */
-        .nav-glass {
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-top: 1px solid rgba(0, 0, 0, 0.1);
-            box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.1);
-        }
-
-        /* Main content glass effect */
-        .content-glass {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(5px);
-            -webkit-backdrop-filter: blur(5px);
-        }
-
-        /* Enhanced header text */
-        h1 {
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            color: #000000;
-            font-weight: 700;
-            letter-spacing: 1px;
-        }
-
-        /* Status board with neon effect */
-        .status-board {
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(59, 130, 246, 0.3);
-            box-shadow: 
-                0 0 30px rgba(59, 130, 246, 0.1),
-                inset 0 0 20px rgba(59, 130, 246, 0.05);
-        }
-
-        .status-item {
-            color: #000000;
-            font-weight: 700;
-        }
-
-        .status-value {
-            color: #000000;
-            font-weight: 700;
-            text-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-        }
-
-        /* Formula cards with enhanced glass */
-        .formula-card {
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(0, 0, 0, 0.1);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
-        }
-
-        /* Message toast enhancement */
-        .toast-enhanced {
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3), 0 0 60px rgba(255, 255, 255, 0.2);
-        }
-
-        /* Transitions */
-        .transition-all { transition-property: all; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 150ms; }
-        .transition-colors { transition-property: color, background-color, border-color, text-decoration-color, fill, stroke; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 150ms; }
-        .transition-transform { transition-property: transform; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 150ms; }
-        .transition-opacity { transition-property: opacity; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 150ms; }
-        .duration-300 { transition-duration: 300ms; }
-        .duration-150 { transition-duration: 150ms; }
-        .ease-in-out { transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); }
-
-        /* Active states */
-        .active\:scale-95:active { transform: scale(0.95); }
-
-        /* Disabled states */
-        .disabled\:opacity-50:disabled { opacity: 0.5; }
-        .disabled\:cursor-not-allowed:disabled { cursor: not-allowed; }
-
-        /* Background opacity */
-        .bg-gray-200\/80 { background-color: rgba(229, 231, 235, 0.1); }
-
-        /* Flex-1 */
-        .flex-1 { flex: 1 1 0%; }
-
-        /* Grid gap utilities */
-        .gap-x-4 { column-gap: 0.875rem; }
-        .gap-y-2 { row-gap: 0.375rem; }
-
-        /* Custom shadow for navigation */
-        .shadow-nav {
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
-        }
-
-        /* Transform utilities */
-        .translate-y-\[-50px\] { transform: translateY(-50px); }
-
-        /* Left positioning */
-        .left-1 { left: 0.25rem; }
-
-        /* Top positioning */
-        .top-1 { top: 0.25rem; }
-
-        /* Scale transform */
-        .scale-95 { transform: scale(0.95); }
-        .scale-98 { transform: scale(0.98); }
-
-        /* Pointer events */
-        .pointer-events-none { pointer-events: none; }
-
-        /* 瓶子内容纵向排列的自定义样式 */
-        .bottle-content {
-            display: flex;
-            flex-direction: column-reverse;
-            justify-content: flex-end;
-            align-items: center;
-            height: 100%;
-            width: 100%;
-            position: relative;
-        }
-
-        .liquid-layer {
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.75rem;
-            color: white;
-            font-weight: 600;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-            flex-shrink: 0;
-        }
-
-        /* Pulsing animation for level complete */
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-
-        .pulse {
-            animation: pulse 0.5s ease-in-out;
-        }
-
-        .return-home-panel { position: fixed; bottom: 12px; right: 12px; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; z-index: 40; }
-        .return-toggle { width: 40px; height: 40px; border-radius: 50%; border: none; background: linear-gradient(135deg, rgba(79,70,229,0.96), rgba(99,102,241,0.9)); color: #fff; font-size: 20px; cursor: pointer; box-shadow: 0 10px 18px rgba(79,70,229,0.28); transition: transform 0.2s, box-shadow 0.2s; }
-        .return-toggle:hover { transform: translateY(-1px) scale(1.03); box-shadow: 0 14px 26px rgba(79,70,229,0.35); }
-        .return-links { display: none; flex-direction: column; gap: 6px; padding: 10px; border-radius: 10px; background: rgba(255,255,255,0.96); border: 1px solid rgba(79,70,229,0.18); box-shadow: 0 10px 30px rgba(15,23,42,0.14); opacity: 0; transition: opacity 0.16s; }
-        .return-link { text-decoration: none; font-size: 15px; color: var(--primary-dark, #3730a3); padding: 6px 12px; border-radius: 8px; background: rgba(99,102,241,0.12); transition: background 0.2s; }
-        .return-link:hover { background: rgba(79,70,229,0.18); }
-    </style>
-
+    <script defer src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js"></script>
+    <!-- 页面样式 -->
+    <link rel="stylesheet" href="assets/lab2-9.css">
 </head>
-<body class="flex flex-col h-screen">
-    <div class="return-home-panel"><button class="return-toggle" onclick="toggleReturnLinks()"><i class="fa-solid fa-house"></i></button><div class="return-links"><a class="return-link" href="index.html"><i class="fa-solid fa-arrow-left"></i> 返回目录</a><a class="return-link" href="../index.html"><i class="fa-solid fa-house"></i> 返回主站</a></div></div>
-    <!-- Animated starfield background -->
-    <div class="stars-container">
-        <div class="stars"></div>
-        <div class="twinkling"></div>
+<body class="flex flex-col h-screen overflow-hidden text-slate-800">
+
+<!-- 返回主页面板 -->
+<div class="return-links">
+    <a href="index.html"><span class="material-symbols-outlined">home</span> 返回主页</a>
+</div>
+
+<!-- Top Navigation / Header -->
+<header class="glass z-20 px-4 py-3 flex justify-between items-center shrink-0">
+    <div class="flex items-center gap-3">
+        <div class="p-2 bg-indigo-600 rounded-lg text-white shadow-lg shadow-indigo-200 cursor-pointer" onclick="toggleReturnLinks()">
+            <span class="material-symbols-outlined text-xl">science</span>
+        </div>
+        <div>
+            <h1 class="text-lg font-bold leading-tight">等价无穷小挑战</h1>
+            <p class="text-xs text-slate-500">将同阶无穷小归类</p>
+        </div>
+    </div>
+    <!-- Stats Board -->
+    <div class="flex gap-4 text-sm font-medium">
+        <div class="flex flex-col items-end">
+            <span class="text-xs text-slate-400 uppercase tracking-wider">关卡</span>
+            <span class="text-indigo-600 font-bold text-lg" id="level-display">1</span>
+        </div>
+        <div class="flex flex-col items-end">
+            <span class="text-xs text-slate-400 uppercase tracking-wider">步数</span>
+            <span class="text-slate-700 font-bold text-lg" id="moves-display">0</span>
+        </div>
+    </div>
+</header>
+
+<!-- Main Game Area -->
+<main class="flex-1 relative overflow-hidden flex flex-col">
+    <!-- Game Container (Bottles) -->
+    <div class="flex-1 overflow-y-auto no-scrollbar p-4 md:p-8 flex items-center justify-center" id="game-area">
+        <div class="grid gap-x-4 gap-y-8 w-full max-w-2xl mx-auto transition-all duration-300 grid-cols-4" id="bottles-grid">
+            <!-- 瓶子将由JavaScript动态生成 -->
+        </div>
     </div>
 
-    <!-- Main Content Area -->
-    <main class="flex-grow overflow-hidden relative">
-        <!-- Game View -->
-        <div id="game-view" class="view absolute inset-0 flex flex-col p-4 overflow-y-auto content-glass">
-            <!-- Header -->
-            <header class="pt-2 pb-4">
-                <div class="flex items-center justify-between">
-                    <!-- 左侧：模式切换器 -->
-                    <div class="flex items-center space-x-3">
-                        <span id="function-mode-label" class="font-semibold text-white">函数模式</span>
-                        <label for="mode-toggle" class="relative inline-block w-12 h-6">
-                            <input type="checkbox" id="mode-toggle" class="toggle-checkbox hidden">
-                            <div class="toggle-label absolute w-full h-full rounded-full cursor-pointer transition-colors duration-300 ease-in-out">
-                                <span class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform duration-300 ease-in-out shadow-lg"></span>
-                            </div>
-                        </label>
-                        <span id="color-mode-label" class="font-semibold text-gray-500">颜色模式</span>
-                    </div>
-                    
-                    <!-- 中间：游戏标题 -->
-                    <h1 id="game-title" class="text-2xl font-bold text-center flex-1">等价无穷小挑战</h1>
-                    
-                    <!-- 右侧：状态板 -->
-                    <div class="flex items-center space-x-4 text-center status-board rounded-xl p-3">
-                        <div>
-                            <div class="text-sm status-item">关卡</div>
-                            <div id="level" class="text-xl font-bold status-value">1</div>
-                        </div>
-                        <div>
-                            <div class="text-sm status-item">移动次数</div>
-                            <div id="moves" class="text-xl font-bold status-value">0</div>
-                        </div>
-                    </div>
-                </div>
-            </header>
-
-            <!-- Bottles Container -->
-            <div id="bottles-container" class="flex-grow grid grid-cols-4 gap-1.5 items-center justify-center pb-4">
-                <!-- Bottles will be generated here -->
-            </div>
-
-            <!-- Controls -->
-            <div class="flex justify-center pt-4 pb-4">
-                <button id="undo-btn" class="w-full max-w-xs p-3 btn-glass font-semibold rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-transform active:scale-95">撤销</button>
-            </div>
+    <!-- Formula Reference Panel (Overlay) -->
+    <div class="absolute inset-0 bg-white/95 backdrop-blur-md z-30 transform translate-y-full transition-transform duration-300 flex flex-col" id="reference-panel">
+        <div class="p-4 border-b flex justify-between items-center bg-slate-50">
+            <h2 class="font-bold text-lg flex items-center gap-2">
+                <span class="material-symbols-outlined text-indigo-600">menu_book</span>
+                公式速查表 ($x \to 0$)
+            </h2>
+            <button class="p-2 hover:bg-slate-200 rounded-full transition-colors" onclick="toggleReference()">
+                <span class="material-symbols-outlined">close</span>
+            </button>
         </div>
-
-        <!-- Reference View -->
-        <div id="reference-view" class="view absolute inset-0 p-4 hidden overflow-y-auto content-glass">
-            <header class="text-center pt-2 pb-4">
-                <h1 class="text-2xl font-bold">等价无穷小公式</h1>
-                <p class="text-gray-500 mt-1">当 $x \to 0$ 时</p>
-            </header>
-            <div id="formula-list" class="space-y-4 pb-4">
-                <!-- Formulas will be generated here -->
-            </div>
+        <div class="flex-1 overflow-y-auto p-4 space-y-4" id="formula-list">
+            <!-- 公式列表将由JavaScript动态生成 -->
         </div>
-    </main>
+    </div>
 
-    <!-- Bottom Navigation -->
-    <nav class="flex justify-around nav-glass">
-        <button id="nav-game" class="flex-1 flex flex-col items-center p-3 text-blue-600 transition-all hover:bg-white hover:bg-opacity-10">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-            <span class="text-xs font-semibold mt-1">开始游戏</span>
+    <!-- Game Complete Overlay -->
+    <div class="absolute inset-0 bg-black/50 z-40 hidden flex items-center justify-center backdrop-blur-sm" id="complete-modal">
+        <div class="bg-white rounded-2xl p-8 max-w-sm w-full mx-4 text-center shadow-2xl transform scale-95 opacity-0 transition-all duration-300" id="modal-content">
+            <div class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span class="material-symbols-outlined text-3xl">emoji_events</span>
+            </div>
+            <h2 class="text-2xl font-bold mb-2 text-slate-800">恭喜过关!</h2>
+            <p class="text-slate-500 mb-6">下一关难度将提升，准备好了吗？</p>
+            <button class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold shadow-lg shadow-indigo-200 transition-all active:scale-95" onclick="game.nextLevel()">
+                挑战下一关
+            </button>
+        </div>
+    </div>
+</main>
+
+<!-- Bottom Controls -->
+<footer class="glass px-4 py-3 shrink-0 flex justify-between items-center z-20 md:justify-center md:gap-8">
+    <button class="flex flex-col items-center gap-1 text-slate-500 hover:text-indigo-600 transition-colors" onclick="game.undo()">
+        <span class="material-symbols-outlined">undo</span>
+        <span class="text-[10px]">撤销</span>
+    </button>
+    <button class="flex flex-col items-center gap-1 text-slate-500 hover:text-indigo-600 transition-colors" onclick="game.resetLevel()">
+        <span class="material-symbols-outlined">restart_alt</span>
+        <span class="text-[10px]">重置</span>
+    </button>
+    <!-- Mode Toggle -->
+    <div class="flex items-center bg-slate-200 rounded-full p-1 relative">
+        <button class="w-20 py-1.5 rounded-full text-xs font-bold z-10 transition-colors text-slate-600" id="mode-btn-math" onclick="game.setMode('math')">
+            公式
         </button>
-        <button id="nav-ref" class="flex-1 flex flex-col items-center p-3 text-gray-500 transition-all hover:bg-white hover:bg-opacity-10">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
-            <span class="text-xs font-semibold mt-1">查看公式</span>
+        <button class="w-20 py-1.5 rounded-full text-xs font-bold z-10 transition-colors text-slate-500" id="mode-btn-color" onclick="game.setMode('color')">
+            颜色
         </button>
-    </nav>
-    
-    <!-- Message Toast -->
-    <div id="message-toast" class="fixed top-5 left-1/2 -translate-x-1/2 p-3 rounded-full text-white font-semibold toast-enhanced opacity-0 translate-y-[-50px] transition-all duration-300"></div>
+        <div class="absolute top-1 left-1 w-20 h-[calc(100%-8px)] bg-white rounded-full shadow-sm transition-transform duration-300" id="mode-indicator"></div>
+    </div>
+    <button class="flex flex-col items-center gap-1 text-slate-500 hover:text-indigo-600 transition-colors" onclick="toggleReference()">
+        <span class="material-symbols-outlined">help</span>
+        <span class="text-[10px]">公式</span>
+    </button>
+</footer>
 
+<!-- Toast Notification -->
+<div class="fixed top-20 left-1/2 -translate-x-1/2 px-4 py-2 bg-slate-800/90 text-white text-sm rounded-full shadow-xl z-50 pointer-events-none opacity-0 transition-opacity duration-300" id="toast">
+    提示信息
+</div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            
-            const renderMath = () => {
-                return new Promise((resolve) => {
-                    if (window.MathJax && window.MathJax.typesetPromise) {
-                        window.MathJax.typesetPromise().then(() => {
-                            console.log('公式渲染完成');
-                            resolve();
-                        }).catch((error) => {
-                            console.error('公式渲染错误:', error);
-                            resolve();
-                        });
-                    } else {
-                        console.log('MathJax 未加载，等待加载...');
-                        setTimeout(() => {
-                            if (window.MathJax && window.MathJax.typesetPromise) {
-                                window.MathJax.typesetPromise().then(() => {
-                                    console.log('延迟公式渲染完成');
-                                    resolve();
-                                }).catch((error) => {
-                                    console.error('延迟公式渲染错误:', error);
-                                    resolve();
-                                });
-                            } else {
-                                console.error('MathJax 仍然未加载');
-                                resolve();
-                            }
-                        }, 500);
-                    }
-                });
-            };
+<!-- 页面脚本 -->
+<script src="assets/lab2-9.js"></script>
 
-            class WaterSortGame {
-                constructor() {
-                    this.dom = {
-                        gameView: document.getElementById('game-view'),
-                        refView: document.getElementById('reference-view'),
-                        navGame: document.getElementById('nav-game'),
-                        navRef: document.getElementById('nav-ref'),
-                        modeToggle: document.getElementById('mode-toggle'),
-                        functionModeLabel: document.getElementById('function-mode-label'),
-                        colorModeLabel: document.getElementById('color-mode-label'),
-                        gameTitle: document.getElementById('game-title'),
-                        container: document.getElementById('bottles-container'),
-                        moves: document.getElementById('moves'),
-                        level: document.getElementById('level'),
-                        undoBtn: document.getElementById('undo-btn'),
-                        formulaList: document.getElementById('formula-list'),
-                        messageToast: document.getElementById('message-toast'),
-                    };
-
-                    this.state = {
-                        mode: 'function', // 'function' or 'color'
-                        bottles: [],
-                        selectedBottle: null,
-                        moves: 0,
-                        level: 1,
-                        moveHistory: [],
-                        isAnimating: false,
-                        isLevelComplete: false,
-                        activeGroups: [],
-                    };
-
-                    this.config = {
-                        functionGroups: [
-                            { name: 'x', className: 'bg-gradient-to-br from-blue-500 to-indigo-600', formulas: ['\\sin x', '\\tan x', '\\arcsin x', '\\arctan x', 'e^x - 1', '\\ln(1+x)'] },
-                            { name: '\\frac{x^2}{2}', className: 'bg-gradient-to-br from-orange-500 to-red-600', formulas: ['1 - \\cos x', 'x - \\ln(1+x)', '\\sec x - 1'] },
-                            { name: '\\frac{x^3}{6}', className: 'bg-gradient-to-br from-lime-500 to-green-600', formulas: ['x - \\sin x', '\\arcsin x - x'] },
-                            { name: '\\frac{x^3}{3}', className: 'bg-gradient-to-br from-purple-500 to-violet-600', formulas: ['\\tan x - x', 'x - \\arctan x'] }
-                        ],
-                        colorGroups: [
-                            { name: '红色', className: 'bg-red-500' }, { name: '蓝色', className: 'bg-blue-500' },
-                            { name: '绿色', className: 'bg-green-500' }, { name: '黄色', className: 'bg-yellow-400' },
-                            { name: '紫色', className: 'bg-purple-500' }, { name: '橙色', className: 'bg-orange-500' },
-                            { name: '粉色', className: 'bg-pink-500' }, { name: '青色', className: 'bg-cyan-500' },
-                            { name: '棕色', className: 'bg-amber-800' }, { name: '灰色', className: 'bg-gray-500' },
-                            { name: '靛蓝', className: 'bg-indigo-500' }, { name: '蓝绿', className: 'bg-teal-500' }
-                        ]
-                    };
-
-                    this.init();
-                }
-
-                init() {
-                    this.bindEvents();
-                    this.generateFormulaList();
-                    this.restart();
-                    // 确保初始渲染时公式正确显示
-                    if (this.state.mode === 'function') {
-                        setTimeout(() => renderMath(), 200);
-                    }
-                }
-
-                bindEvents() {
-                    this.dom.undoBtn.addEventListener('click', () => this.undo());
-                    this.dom.modeToggle.addEventListener('change', (e) => this.switchMode(e.target.checked ? 'color' : 'function'));
-                    this.dom.navGame.addEventListener('click', () => this.switchView('game'));
-                    this.dom.navRef.addEventListener('click', () => {
-                        if (this.state.mode === 'function') this.switchView('ref');
-                    });
-                }
-                
-                switchMode(newMode) {
-                    this.state.mode = newMode;
-                    const isColorMode = newMode === 'color';
-                    
-                    this.dom.gameTitle.textContent = isColorMode ? '颜色分类练习' : '等价无穷小挑战';
-                    this.dom.navRef.disabled = isColorMode;
-                    this.dom.navRef.classList.toggle('opacity-50', isColorMode);
-                    this.dom.navRef.classList.toggle('cursor-not-allowed', isColorMode);
-
-                    if (isColorMode) {
-                        this.dom.colorModeLabel.classList.replace('text-gray-500', 'text-white');
-                        this.dom.functionModeLabel.classList.replace('text-white', 'text-gray-500');
-                    } else {
-                        this.dom.functionModeLabel.classList.replace('text-gray-500', 'text-white');
-                        this.dom.colorModeLabel.classList.replace('text-white', 'text-gray-500');
-                    }
-
-                    if (isColorMode && !this.dom.refView.classList.contains('hidden')) {
-                        this.switchView('game');
-                    }
-
-                    this.restart(true);
-                }
-
-                switchView(viewName) {
-                    if (viewName === 'game') {
-                        this.dom.gameView.classList.remove('hidden');
-                        this.dom.refView.classList.add('hidden');
-                        this.dom.navGame.classList.replace('text-gray-500', 'text-blue-600');
-                        this.dom.navRef.classList.replace('text-blue-600', 'text-gray-500');
-                    } else if (this.state.mode === 'function') {
-                        this.dom.gameView.classList.add('hidden');
-                        this.dom.refView.classList.remove('hidden');
-                        this.dom.navGame.classList.replace('text-blue-600', 'text-gray-500');
-                        this.dom.navRef.classList.replace('text-gray-500', 'text-blue-600');
-                        // 等待视图切换完成后再渲染公式
-                        setTimeout(() => renderMath(), 100);
-                    }
-                }
-
-                generateFormulaList() {
-                    this.dom.formulaList.innerHTML = '';
-                    this.config.functionGroups.forEach(group => {
-                        const card = document.createElement('div');
-                        card.className = 'formula-card rounded-xl p-4 mb-4';
-                        
-                        const title = document.createElement('h2');
-                        title.className = `text-lg font-bold mb-2 p-2 rounded-md text-white ${group.className}`;
-                        title.innerHTML = `等价于 $${group.name}$`;
-                        
-                        const list = document.createElement('div');
-                        list.className = 'grid grid-cols-2 gap-x-4 gap-y-2 text-white';
-                        
-                        group.formulas.forEach(formula => {
-                            const item = document.createElement('div');
-                            item.textContent = `$${formula}$`;
-                            list.appendChild(item);
-                        });
-                        
-                        card.appendChild(title);
-                        card.appendChild(list);
-                        this.dom.formulaList.appendChild(card);
-                    });
-                }
-
-                shuffleArray(array) {
-                    for (let i = array.length - 1; i > 0; i--) {
-                        const j = Math.floor(Math.random() * (i + 1));
-                        [array[i], array[j]] = [array[j], array[i]];
-                    }
-                }
-
-                createLevel() {
-                    if (this.state.mode === 'color') this.createColorLevel();
-                    else this.createFunctionLevel();
-                }
-
-                createFunctionLevel() {
-                    const groups = [...this.config.functionGroups];
-                    this.shuffleArray(groups);
-                    this.state.activeGroups = groups;
-
-                    const numGroups = this.state.activeGroups.length;
-                    const emptyBottles = 2 + Math.floor(this.state.level / 3);
-                    const numBottles = numGroups + emptyBottles;
-                    
-                    let allLayers = [];
-                    for (const group of this.state.activeGroups) {
-                        for (let j = 0; j < 4; j++) {
-                            const formula = group.formulas[j % group.formulas.length];
-                            allLayers.push({ text: `$${formula}$`, group: group.name });
-                        }
-                    }
-                    this.distributeLayersWithEmptyBottles(allLayers, numBottles, numGroups);
-                }
-
-                createColorLevel() {
-                    const colors = [...this.config.colorGroups];
-                    this.shuffleArray(colors);
-                    
-                    const numColors = Math.min(4 + this.state.level, 10);
-                    this.state.activeGroups = colors.slice(0, numColors);
-
-                    const numBottles = this.state.activeGroups.length + 2 + Math.floor(this.state.level / 3);
-                    
-                    let allLayers = [];
-                    this.state.activeGroups.forEach(colorGroup => {
-                        for (let i = 0; i < 4; i++) {
-                            allLayers.push({ text: '', group: colorGroup.name, className: colorGroup.className });
-                        }
-                    });
-                    this.distributeLayersWithGaps(allLayers, numBottles);
-                }
-
-                distributeLayersWithEmptyBottles(layers, totalBottles, filledBottlesCount) {
-                    this.shuffleArray(layers);
-                    this.state.bottles = Array.from({ length: totalBottles }, (_, id) => ({ id, layers: [] }));
-                    
-                    let layerIndex = 0;
-                    while(layerIndex < layers.length) {
-                        for (let i = 0; i < filledBottlesCount && layerIndex < layers.length; i++) {
-                             if (this.state.bottles[i].layers.length < 4) {
-                                this.state.bottles[i].layers.push(layers[layerIndex++]);
-                             }
-                        }
-                    }
-                }
-
-                distributeLayersWithGaps(layers, totalBottles) {
-                    this.shuffleArray(layers);
-                    this.state.bottles = Array.from({ length: totalBottles }, (_, id) => ({ id, layers: [] }));
-
-                    if (layers.length < totalBottles) {
-                        for(let i=0; i < layers.length; i++) {
-                            this.state.bottles[i].layers.push(layers[i]);
-                        }
-                        return;
-                    }
-
-                    for (let i = 0; i < totalBottles; i++) {
-                        this.state.bottles[i].layers.push(layers.pop());
-                    }
-
-                    while (layers.length > 0) {
-                        const layer = layers.pop();
-                        let placed = false;
-                        let attempts = 0;
-                        while (!placed && attempts < 50) {
-                            const bottleIndex = Math.floor(Math.random() * totalBottles);
-                            if (this.state.bottles[bottleIndex].layers.length < 4) {
-                                this.state.bottles[bottleIndex].layers.push(layer);
-                                placed = true;
-                            }
-                            attempts++;
-                        }
-                        if (!placed) { // Fallback if random placement fails
-                           const availableBottle = this.state.bottles.find(b => b.layers.length < 4);
-                           if(availableBottle) availableBottle.layers.push(layer);
-                        }
-                    }
-                }
-
-                renderBottles() {
-                    const gridColsClass = this.state.bottles.length > 12 ? 'grid-cols-5' : 'grid-cols-4';
-                    this.dom.container.className = `flex-grow grid ${gridColsClass} gap-1.5 items-center justify-center pb-4`;
-
-                    this.dom.container.innerHTML = '';
-                    this.state.bottles.forEach((bottle, index) => {
-                        const bottleDiv = document.createElement('div');
-                        bottleDiv.className = 'bottle relative h-64 rounded-b-3xl rounded-t-lg flex flex-col-reverse p-1 transition-all duration-300';
-                        if (this.state.selectedBottle === index) bottleDiv.classList.add('selected');
-                        
-                        bottle.layers.forEach(layer => {
-                            const layerDiv = document.createElement('div');
-                            
-                            let layerClasses, textClasses;
-                            if (this.state.mode === 'function') {
-                                layerClasses = 'bg-white';
-                                textClasses = 'text-gray-800 text-xs font-bold';
-                            } else {
-                                layerClasses = layer.className;
-                                textClasses = '';
-                            }
-
-                            layerDiv.className = `h-1/4 w-full liquid-top flex items-center justify-center shadow-inner ${layerClasses} ${textClasses}`;
-                            layerDiv.innerHTML = layer.text;
-                            bottleDiv.appendChild(layerDiv);
-                        });
-
-                        bottleDiv.addEventListener('click', () => this.handleBottleClick(index));
-                        this.dom.container.appendChild(bottleDiv);
-                    });
-                    if (this.state.mode === 'function') {
-                        // 等待DOM更新后再渲染公式
-                        setTimeout(() => renderMath(), 50);
-                    }
-                }
-
-                handleBottleClick(index) {
-                    if (this.state.isAnimating || this.state.isLevelComplete) return;
-                    if (this.state.selectedBottle === null) {
-                        if (this.state.bottles[index].layers.length > 0) {
-                            this.state.selectedBottle = index;
-                            this.renderBottles();
-                        }
-                    } else if (this.state.selectedBottle === index) {
-                        this.state.selectedBottle = null;
-                        this.renderBottles();
-                    } else {
-                        this.pourWater(this.state.selectedBottle, index);
-                    }
-                }
-                
-                canPour(fromBottle, toBottle) {
-                    if (fromBottle.layers.length === 0) return false;
-                    if (toBottle.layers.length >= 4) return false;
-                    if (toBottle.layers.length === 0) return true;
-                    return fromBottle.layers[fromBottle.layers.length - 1].group === toBottle.layers[toBottle.layers.length - 1].group;
-                }
-
-                pourWater(fromIndex, toIndex) {
-                    const fromBottle = this.state.bottles[fromIndex];
-                    const toBottle = this.state.bottles[toIndex];
-                    if (!this.canPour(fromBottle, toBottle)) {
-                        this.showMessage('无法倒入！', 'error');
-                        this.state.selectedBottle = null;
-                        this.renderBottles();
-                        return;
-                    }
-                    this.saveMove();
-                    toBottle.layers.push(fromBottle.layers.pop());
-                    this.state.moves++;
-                    this.state.selectedBottle = null;
-                    
-                    this.renderBottles();
-                    this.updateDisplay();
-                    this.checkWinCondition(); // Check for win after every move
-                }
-                
-                checkWinCondition() {
-                    if (this.state.isLevelComplete) return;
-
-                    const isWon = this.state.bottles.every(bottle => {
-                        if (bottle.layers.length === 0) return true;
-                        if (bottle.layers.length === 4) {
-                            const firstGroup = bottle.layers[0].group;
-                            return bottle.layers.every(layer => layer.group === firstGroup);
-                        }
-                        return false;
-                    });
-
-                    if (isWon) {
-                        this.state.isLevelComplete = true;
-                        this.showMessage(`恭喜！完成第 ${this.state.level} 关`, 'success');
-                        setTimeout(() => this.nextLevel(), 1500);
-                    }
-                }
-
-                nextLevel() {
-                    this.state.level++;
-                    this.restart(true);
-                }
-
-                restart(soft = false) {
-                    if (!soft) {
-                        this.state.level = 1;
-                    }
-                    this.state.moves = 0;
-                    this.state.selectedBottle = null;
-                    this.state.moveHistory = [];
-                    this.state.isLevelComplete = false;
-                    this.createLevel();
-                    this.renderBottles();
-                    this.updateDisplay();
-                }
-                
-                saveMove() {
-                    this.state.moveHistory.push({
-                        bottles: JSON.parse(JSON.stringify(this.state.bottles)),
-                        moves: this.state.moves
-                    });
-                }
-                
-                undo() {
-                    if (this.state.moveHistory.length > 0) {
-                        const lastState = this.state.moveHistory.pop();
-                        this.state.bottles = lastState.bottles;
-                        this.state.moves = lastState.moves;
-                        this.renderBottles();
-                        this.updateDisplay();
-                    }
-                }
-
-                updateDisplay() {
-                    this.dom.level.textContent = this.state.level;
-                    this.dom.moves.textContent = this.state.moves;
-                    this.dom.undoBtn.disabled = this.state.moveHistory.length === 0;
-                }
-
-                showMessage(text, type = 'info') {
-                    const toast = this.dom.messageToast;
-                    toast.textContent = text;
-                    const colors = { success: 'bg-green-500', error: 'bg-red-500', info: 'bg-blue-500' };
-                    toast.className = `fixed top-5 left-1/2 -translate-x-1/2 p-3 rounded-full text-white font-semibold toast-enhanced transition-all duration-300 ${colors[type]}`;
-                    toast.style.opacity = '1';
-                    toast.style.transform = 'translate(-50%, 0)';
-                    setTimeout(() => {
-                        toast.style.opacity = '0';
-                        toast.style.transform = 'translate(-50%, -50px)';
-                    }, 2000);
-                }
-            }
-
-            // 等待MathJax加载完成后再初始化游戏
-            const initGame = () => {
-                if (window.MathJax && window.MathJax.startup && window.MathJax.startup.promise) {
-                    window.MathJax.startup.promise.then(() => {
-                        console.log('MathJax 已加载，初始化游戏...');
-                        new WaterSortGame();
-                    }).catch((error) => {
-                        console.error('MathJax 加载失败，但仍尝试初始化游戏:', error);
-                        new WaterSortGame();
-                    });
-                } else {
-                    console.log('MathJax 未检测到，延迟初始化游戏...');
-                    setTimeout(initGame, 500);
-                }
-            };
-            
-            initGame();
-        });
-
-        function toggleReturnLinks() { const p = document.querySelector('.return-links'); if (!p) return; if (p.style.display === 'flex') { p.style.opacity = '0'; setTimeout(() => p.style.display = 'none', 160); } else { p.style.display = 'flex'; requestAnimationFrame(() => p.style.opacity = '1'); } }
-    </script>
 </body>
 </html>

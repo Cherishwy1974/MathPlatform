@@ -49,7 +49,7 @@
 };
 
 window.exerciseData.exercises = [
-  {
+{
     id: 1,
     type: "选择题",
     title: "向量数量积",
@@ -68,7 +68,7 @@ $$= 2 - 2 + 3 = 3$$
     category: "向量运算",
     method: "公式法"
   },
-  {
+{
     id: 2,
     type: "选择题",
     title: "向量模长",
@@ -87,7 +87,7 @@ $$= \\sqrt{9 + 16} = \\sqrt{25} = 5$$
     category: "向量运算",
     method: "公式法"
   },
-  {
+{
     id: 3,
     type: "解答题",
     title: "空间直线方程",
@@ -107,7 +107,7 @@ $$\\frac{x-1}{2} = \\frac{y-2}{1} = \\frac{z-3}{-1}$$`,
     category: "空间直线",
     method: "点向式方程"
   },
-  {
+{
     id: 4,
     type: "解答题",
     title: "空间平面方程",
@@ -131,7 +131,7 @@ $$2x - y + 3z - 9 = 0$$`,
     category: "空间平面",
     method: "点法式方程"
   },
-  {
+{
     id: 5,
     type: "选择题",
     title: "向量垂直条件",
@@ -163,7 +163,7 @@ $$x = 1$$
     category: "向量运算",
     method: "数量积法"
   },
-  {
+{
     id: 6,
     type: "解答题",
     title: "向量的向量积",
@@ -186,7 +186,7 @@ $$\\vec{a} \\times \\vec{b} = (5, 5, -5)$$`,
     category: "向量运算",
     method: "行列式法"
   },
-  {
+{
     id: 7,
     type: "选择题",
     title: "点到平面距离",
@@ -209,7 +209,7 @@ $$d = \\frac{0}{\\sqrt{4 + 4 + 1}} = \\frac{0}{\\sqrt{9}} = 0$$
       category: "曲线曲面",
       method: "距离公式"
     },
-  {
+{
     id: 8,
     type: "选择题",
     title: "向量平行条件",
@@ -224,7 +224,7 @@ $$k = 3$$`,
     category: "向量运算",
     method: "比例法"
   },
-  {
+{
     id: 9,
     type: "选择题",
     title: "单位向量",
@@ -240,7 +240,7 @@ $$\\vec{e} = \\frac{\\vec{a}}{|\\vec{a}|} = (\\frac{3}{5}, \\frac{4}{5}, 0)$$`,
     category: "向量运算",
     method: "单位化"
   },
-  {
+{
     id: 10,
     type: "选择题",
     title: "向量投影",
@@ -253,7 +253,7 @@ $$Prj_b a = \\frac{\\vec{a} \\cdot \\vec{b}}{|\\vec{b}|} = \\frac{2 \\times 1 + 
     category: "向量运算",
     method: "投影公式"
   },
-  {
+{
     id: 11,
     type: "选择题",
     title: "三点共线",
@@ -271,7 +271,7 @@ $$\\vec{AC} = 2\\vec{AB}$$
     category: "向量应用",
     method: "向量法"
   },
-  {
+{
     id: 12,
     type: "选择题",
     title: "平面法向量",
@@ -286,7 +286,7 @@ $$= (-1, -1, 1)$$`,
     category: "向量运算",
     method: "叉积法"
   },
-  {
+{
     id: 13,
     type: "选择题",
     title: "两平面夹角",
@@ -302,7 +302,7 @@ $$\\cos\\theta = \\frac{|\\vec{n_1} \\cdot \\vec{n_2}|}{|\\vec{n_1}||\\vec{n_2}|
     category: "空间平面",
     method: "向量法"
   },
-  {
+{
     id: 14,
     type: "选择题",
     title: "直线参数方程",
@@ -318,7 +318,7 @@ $$\\begin{cases} x = 1 + 2t \\\\ y = -1 + t \\\\ z = -t \\end{cases}$$`,
     category: "空间直线",
     method: "参数化"
   },
-  {
+{
     id: 15,
     type: "选择题",
     title: "点到直线距离",
@@ -332,7 +332,7 @@ $$\\begin{cases} x = 1 + 2t \\\\ y = -1 + t \\\\ z = -t \\end{cases}$$`,
     category: "距离问题",
     method: "判断法"
   },
-  {
+{
     id: 16,
     type: "选择题",
     title: "向量三重积",
@@ -346,7 +346,7 @@ $$V = |[\\vec{a}\\vec{b}\\vec{c}]| = |\\vec{a} \\cdot (\\vec{b} \\times \\vec{c}
     category: "向量代数",
     method: "几何意义"
   },
-  {
+{
     id: 17,
     type: "选择题",
     title: "直线与平面平行",
@@ -360,7 +360,7 @@ $$V = |[\\vec{a}\\vec{b}\\vec{c}]| = |\\vec{a} \\cdot (\\vec{b} \\times \\vec{c}
     category: "空间位置关系",
     method: "向量法"
   },
-  {
+{
     id: 18,
     type: "选择题",
     title: "平面束方程应用",
@@ -379,7 +379,7 @@ $$\\lambda = 0$$
     category: "空间平面",
     method: "平面束法"
   },
-  {
+{
     id: 19,
     type: "选择题",
     title: "二次曲面分类",
@@ -394,7 +394,7 @@ $$z = \\frac{1}{2}(x^2 + y^2)$$
     category: "曲面方程",
     method: "方程识别"
   },
-  {
+{
     id: 20,
     type: "选择题",
     title: "空间曲线切向量",
@@ -410,7 +410,7 @@ $$\\vec{r}'(1) = (2, 3, 1)$$`,
     category: "空间曲线",
     method: "求导法"
   },
-  {
+{
     id: 21,
     type: "选择题",
     title: "平面截距式",
@@ -426,7 +426,7 @@ $$\\frac{x}{a} + \\frac{y}{b} + \\frac{z}{c} = 1$$
     category: "空间平面",
     method: "截距式"
   },
-  {
+{
     id: 22,
     type: "选择题",
     title: "两异面直线",
@@ -444,7 +444,7 @@ $L_2$: 方向$(0,1,0)$，过$(1,0,0)$
     category: "空间直线",
     method: "位置关系判定"
   },
-  {
+{
     id: 23,
     type: "选择题",
     title: "向量角平分线",
@@ -458,7 +458,7 @@ $$\\vec{v} = \\vec{e_1} + \\vec{e_2}$$`,
     category: "向量应用",
     method: "几何法"
   },
-  {
+{
     id: 24,
     type: "选择题",
     title: "向量组正交",
@@ -474,7 +474,7 @@ $$\\vec{v} = \\vec{e_1} + \\vec{e_2}$$`,
     category: "向量空间",
     method: "定义"
   },
-  {
+{
     id: 25,
     type: "选择题",
     title: "平面点法式应用",
@@ -489,7 +489,7 @@ $$x + y + z = 4$$`,
     category: "空间平面",
     method: "点法式"
   },
-  {
+{
     id: 26,
     type: "选择题",
     title: "格拉姆-施密特正交化",
@@ -503,7 +503,7 @@ $$x + y + z = 4$$`,
     category: "向量空间",
     method: "概念"
   },
-  {
+{
     id: 27,
     type: "选择题",
     title: "直线一般式",
@@ -517,7 +517,7 @@ $$\\begin{cases} A_1x + B_1y + C_1z + D_1 = 0 \\\\ A_2x + B_2y + C_2z + D_2 = 0 
     category: "空间直线",
     method: "定义"
   },
-  {
+{
     id: 28,
     type: "选择题",
     title: "空间距离综合",
@@ -530,7 +530,7 @@ $$d = \\frac{|D_1 - D_2|}{\\sqrt{A^2 + B^2 + C^2}} = \\frac{|1-3|}{\\sqrt{1+1+1}
     category: "距离问题",
     method: "公式法"
   },
-  {
+{
     id: 29,
     type: "选择题",
     title: "空间直线夹角",
@@ -544,7 +544,7 @@ $$\\theta = 90°$$`,
     category: "空间直线",
     method: "向量法"
   },
-  {
+{
     id: 30,
     type: "选择题",
     title: "空间坐标变换",

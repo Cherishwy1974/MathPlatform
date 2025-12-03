@@ -33,28 +33,8 @@
 };
 
 window.exerciseData.exercises = [
-,
-
-,
-
-,
-
-,
-
-,
-
-,
-
-,
-
-,
-
-,
-
-,
-
 {
-    id: 24,
+    id: 1,
     type: "计算题",
     title: "二重积分估值1",
     question: "估计积分 $I = \\iint_D xy(x+y+1) d\\delta$ 的值，其中 $D = \\{(x,y) | 0 \\le x \\le 1, 0 \\le y \\le 2\\}$",
@@ -64,10 +44,9 @@ window.exerciseData.exercises = [
     difficulty: "easy",
     category: "二重积分性质",
     method: "积分估值定理"
-  },,
-
+  },
 {
-    id: 25,
+    id: 2,
     type: "计算题",
     title: "二重积分估值2",
     question: "估计积分 $I = \\iint_D (x^2 + 4y^2 + 9) d\\delta$ 的值，其中 $D = \\{(x,y) | x^2 + y^2 \\le 4\\}$",
@@ -77,10 +56,9 @@ window.exerciseData.exercises = [
     difficulty: "medium",
     category: "二重积分性质",
     method: "积分估值定理"
-  },,
-
+  },
 {
-    id: 26,
+    id: 3,
     type: "计算题",
     title: "半球体积",
     question: "求二重积分 $\\iint\\limits_{x^2+y^2 \\le 1} \\sqrt{1-x^2-y^2} d\\delta$",
@@ -90,5 +68,5 @@ window.exerciseData.exercises = [
     difficulty: "easy",
     category: "二重积分应用",
     method: "几何意义"
-  },
+  }
 ];

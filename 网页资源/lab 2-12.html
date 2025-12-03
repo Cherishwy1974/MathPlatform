@@ -1,1101 +1,684 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>函数间断点实验室</title>
-    
-    <!-- MathJax配置 -->
-    <script>
+
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>函数连续性可视化实验室</title>
+<!-- 本地化资源 -->
+<link rel="stylesheet" href="../common-assets/css/tailwind.css">
+<link rel="stylesheet" href="../common-assets/css/lab1-material-symbols.css">
+<!-- MathJax 本地化 -->
+<script>
         window.MathJax = {
             tex: {
                 inlineMath: [['$', '$'], ['\\(', '\\)']],
                 displayMath: [['$$', '$$'], ['\\[', '\\]']],
                 processEscapes: true
             },
-            startup: {
-                pageReady: () => {
-                    return MathJax.startup.defaultPageReady().then(() => {
-                        console.log('MathJax加载完成');
-                    });
-                }
-            },
-            options: {
-                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+            svg: {
+                fontCache: 'global'
             }
         };
     </script>
-    <script defer src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js"></script>
-    
-    <style>
-        :root {
-            --h1-size: 22px;      
-            --h2-size: 20px;      
-            --h3-size: 18px;      
-            --btn-size: 16px;     
-            --formula-size: 20px; 
-            --text-size: 16px;
-            
-            --primary: #4f46e5;
-            --primary-light: #6366f1;
-            --primary-dark: #3730a3;
-            --light: #ffffff;
-            --gray-50: #f9fafb;
-            --gray-100: #f3f4f6;
-            --gray-200: #e5e7eb;
-            --gray-600: #4b5563;
-            --gray-800: #1f2937;
-            --border: #e5e7eb;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --info: #3b82f6;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        *::-webkit-scrollbar {
-            width: 0;
-            background: transparent;
-        }
-        
-        * {
-            scrollbar-width: none;
-            -ms-overflow-style: none;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
-            font-size: var(--text-size);
-            line-height: 1.5;
-            background: var(--gray-50);
-            color: var(--gray-800);
-        }
-
-        .container {
-            width: 100%;
-            max-width: 1400px;
-            height: 100vh;
-            max-height: 700px;
-            margin: 0 auto;
-            display: flex;
-            flex-direction: column;
-            background: var(--light);
-        }
-
-        .header {
-            background: var(--primary);
-            color: var(--light);
-            padding: 8px 20px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-        }
-
-        .header h1 {
-            font-size: var(--h2-size);
-            margin: 0;
-        }
-
-        .main {
-            display: flex;
-            flex: 1;
-            overflow: hidden;
-        }
-
-        .sidebar {
-            width: 120px;
-            background: var(--gray-50);
-            border-right: 1px solid var(--border);
-            padding: 10px 8px;
-        }
-
-        .nav-btn {
-            width: 100%;
-            padding: 8px;
-            margin-bottom: 4px;
-            background: transparent;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: var(--text-size);
-            color: var(--gray-600);
-            text-align: left;
-            transition: all 0.2s;
-        }
-
-        .nav-btn:hover {
-            background: var(--gray-100);
-        }
-
-        .nav-btn.active {
-            background: var(--primary);
-            color: var(--light);
-        }
-
-        .content {
-            flex: 1;
-            display: none;
-            padding: 16px;
-            overflow-y: auto;
-        }
-
-        .content.active {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-        }
-
-        .column {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            overflow-y: auto;
-        }
-
-        .card {
-            background: var(--light);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 12px;
-        }
-
-        .card h3 {
-            font-size: var(--h3-size);
-            color: var(--primary);
-            margin-bottom: 8px;
-        }
-
-        .input-group {
-            margin-bottom: 8px;
-        }
-
-        .input-group label {
-            display: block;
-            margin-bottom: 4px;
-            font-size: var(--text-size);
-            font-weight: 500;
-        }
-
-        .input-group input,
-        .input-group select {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            font-size: var(--text-size);
-            background: var(--gray-50);
-        }
-
-        .btn {
-            padding: 8px 16px;
-            background: var(--primary);
-            color: var(--light);
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: var(--btn-size);
-            transition: all 0.2s;
-        }
-
-        .btn:hover {
-            background: var(--primary-dark);
-        }
-
-        .btn-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            margin-top: 8px;
-        }
-
-        .result {
-            background: var(--gray-50);
-            padding: 8px;
-            border-radius: 4px;
-            border: 1px solid var(--primary);
-            text-align: center;
-            font-size: var(--text-size);
-            margin: 8px 0;
-            min-height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .formula-box {
-            background: #f0f7ff;
-            padding: 8px 12px;
-            border-radius: 4px;
-            border-left: 3px solid var(--primary);
-            margin: 8px 0;
-            text-align: center;
-            font-size: var(--formula-size);
-        }
-
-        .info-box {
-            background: var(--gray-50);
-            padding: 8px;
-            border-radius: 4px;
-            margin: 6px 0;
-            font-size: var(--text-size);
-            text-align: center;
-        }
-
-        .steps {
-            background: #fff9e6;
-            padding: 10px;
-            border-radius: 4px;
-            border-left: 3px solid #f59e0b;
-            line-height: 1.6;
-            font-size: var(--text-size);
-        }
-
-        .canvas-container {
-            border: 1px solid var(--gray-200);
-            border-radius: 4px;
-            background: #fafafa;
-            padding: 10px;
-            min-height: 200px;
-            max-height: 400px;
-            overflow: hidden;
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .canvas-container canvas {
-            max-width: 100%;
-            max-height: 100%;
-            display: block;
-            margin: 0 auto;
-        }
-
-        .discontinuity-types {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
-            margin: 8px 0;
-        }
-
-        .type-card {
-            padding: 10px;
-            background: var(--gray-50);
-            border-radius: 4px;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-align: center;
-        }
-
-        .type-card:hover {
-            background: var(--gray-100);
-        }
-
-        .type-card.active {
-            background: var(--primary);
-            color: white;
-        }
-
-        .condition-list {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            margin: 8px 0;
-        }
-
-        .condition-item {
-            padding: 8px;
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .condition-fail {
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid var(--danger);
-        }
-
-        .condition-pass {
-            background: rgba(16, 185, 129, 0.1);
-            border: 1px solid var(--success);
-        }
-
-        .icon {
-            font-size: 18px;
-            font-weight: bold;
-        }
-
-        .icon-fail {
-            color: var(--danger);
-        }
-
-        .icon-pass {
-            color: var(--success);
-        }
-
-        .slider-group {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 10px;
-            background: var(--gray-50);
-            border-radius: 4px;
-            margin-top: 8px;
-        }
-
-        .slider-group label {
-            min-width: 60px;
-            font-size: var(--text-size);
-        }
-
-        .slider {
-            flex: 1;
-            height: 4px;
-            -webkit-appearance: none;
-            appearance: none;
-            background: var(--gray-200);
-            outline: none;
-        }
-
-        .slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            background: var(--primary);
-            cursor: pointer;
-        }
-
-        .slider-value {
-            min-width: 40px;
-            text-align: center;
-            font-weight: 600;
-            color: var(--primary);
-        }
-
-        @media (max-width: 768px) {
-            .main {
-                flex-direction: column;
-            }
-
-            .sidebar {
-                width: 100%;
-                height: auto;
-                border-right: none;
-                border-bottom: 1px solid var(--border);
-                padding: 8px 16px;
-                display: flex;
-                flex-direction: row;
-                gap: 8px;
-                overflow-x: auto;
-                flex-shrink: 0;
-                justify-content: center;
-            }
-
-            .nav-btn {
-                min-width: 90px;
-                text-align: center;
-                margin-bottom: 0;
-                white-space: nowrap;
-                flex-shrink: 0;
-            }
-
-            .content.active {
-                grid-template-columns: 1fr;
-                gap: 16px;
-            }
-
-            .discontinuity-types {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .return-home-panel { position: fixed; bottom: 12px; right: 12px; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; z-index: 40; }
-        .return-toggle { width: 40px; height: 40px; border-radius: 50%; border: none; background: linear-gradient(135deg, rgba(79,70,229,0.96), rgba(99,102,241,0.9)); color: #fff; font-size: 20px; cursor: pointer; box-shadow: 0 10px 18px rgba(79,70,229,0.28); transition: transform 0.2s, box-shadow 0.2s; }
-        .return-toggle:hover { transform: translateY(-1px) scale(1.03); box-shadow: 0 14px 26px rgba(79,70,229,0.35); }
-        .return-links { display: none; flex-direction: column; gap: 6px; padding: 10px; border-radius: 10px; background: rgba(255,255,255,0.96); border: 1px solid rgba(79,70,229,0.18); box-shadow: 0 10px 30px rgba(15,23,42,0.14); opacity: 0; transition: opacity 0.16s; }
-        .return-link { text-decoration: none; font-size: 15px; color: var(--primary-dark); padding: 6px 12px; border-radius: 8px; background: rgba(99,102,241,0.12); transition: background 0.2s; }
-        .return-link:hover { background: rgba(79,70,229,0.18); }
+<script async src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js"></script>
+<style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        canvas { touch-action: none; }
+        /* Hide scrollbar for clean UI */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
-
-</head>
-<body>
-    <div class="return-home-panel"><button class="return-toggle" onclick="toggleReturnLinks()"><i class="fa-solid fa-house"></i></button><div class="return-links"><a class="return-link" href="index.html"><i class="fa-solid fa-arrow-left"></i> 返回目录</a><a class="return-link" href="../index.html"><i class="fa-solid fa-house"></i> 返回主站</a></div></div>
-    <div class="container">
-        <header class="header">
-            <h1>函数间断点实验室</h1>
-        </header>
-
-        <div class="main">
-            <nav class="sidebar">
-                <button class="nav-btn active" onclick="switchPanel('definition')">间断点定义</button>
-                <button class="nav-btn" onclick="switchPanel('types')">间断点类型</button>
-                <button class="nav-btn" onclick="switchPanel('analysis')">综合分析</button>
-            </nav>
-
-            <!-- 间断点定义页面 -->
-            <div class="content active" id="definition">
-                <div class="column">
-                    <div class="card">
-                        <h3>间断点的三种情况</h3>
-                        <div class="condition-list">
-                            <div class="condition-item condition-fail">
-                                <span class="icon icon-fail">①</span>
-                                <span>函数在 $x_0$ 处无定义</span>
-                            </div>
-                            <div class="condition-item condition-fail">
-                                <span class="icon icon-fail">②</span>
-                                <span>$\lim\limits_{x \to x_0} f(x)$ 不存在</span>
-                            </div>
-                            <div class="condition-item condition-fail">
-                                <span class="icon icon-fail">③</span>
-                                <span>$\lim\limits_{x \to x_0} f(x) \neq f(x_0)$</span>
-                            </div>
-                        </div>
-                        <div class="info-box">
-                            满足任一条件，$x_0$ 就是间断点
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <h3>理解要点</h3>
-                        <div class="steps">
-                            <strong>间断 = 不连续</strong><br>
-                            • 图像有"跳跃"<br>
-                            • 图像有"断裂"<br>
-                            • 图像有"空洞"<br>
-                            • 图像趋向无穷
-                        </div>
-                    </div>
-                </div>
-
-                <div class="column">
-                    <div class="card">
-                        <h3>间断点可视化</h3>
-                        <div class="canvas-container">
-                            <canvas id="definitionGraph" width="600" height="300"></canvas>
-                        </div>
-                        <div class="info-box">
-                            红色虚线标记间断点位置
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <h3>判断流程</h3>
-                        <div class="steps">
-                            1. 检查函数定义<br>
-                            2. 计算左右极限<br>
-                            3. 比较极限与函数值<br>
-                            4. 得出结论
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 间断点类型页面 -->
-            <div class="content" id="types">
-                <div class="column">
-                    <div class="card">
-                        <h3>选择间断类型</h3>
-                        <div class="discontinuity-types">
-                            <div class="type-card active" onclick="selectType('removable')">
-                                可去间断
-                            </div>
-                            <div class="type-card" onclick="selectType('jump')">
-                                跳跃间断
-                            </div>
-                            <div class="type-card" onclick="selectType('infinite')">
-                                无穷间断
-                            </div>
-                            <div class="type-card" onclick="selectType('oscillation')">
-                                振荡间断
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <h3>类型特征</h3>
-                        <div class="formula-box" id="typeFormula">
-                            可去间断：极限存在但不等于函数值
-                        </div>
-                        <div class="steps" id="typeDescription">
-                            <strong>特点：</strong><br>
-                            • 左右极限存在且相等<br>
-                            • 但不等于函数值（或无定义）<br>
-                            • 可以通过重新定义函数值"去除"间断
-                        </div>
-                    </div>
-                </div>
-
-                <div class="column">
-                    <div class="card">
-                        <h3>类型图像</h3>
-                        <div class="canvas-container">
-                            <canvas id="typeGraph" width="600" height="300"></canvas>
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <h3>典型例子</h3>
-                        <div class="info-box" id="typeExample">
-                            $f(x) = \frac{x^2 - 1}{x - 1}$ 在 x = 1 处
-                        </div>
-                        <div class="result" id="typeAnalysis">
-                            极限值 = 2，但函数无定义
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 综合分析页面 -->
-            <div class="content" id="analysis">
-                <div class="column">
-                    <div class="card">
-                        <h3>选择函数分析</h3>
-                        <div class="input-group">
-                            <label>函数类型</label>
-                            <select id="analyzeFunc" onchange="updateAnalysis()">
-                                <option value="rational">有理函数 (x²-4)/(x-2)</option>
-                                <option value="piecewise">分段函数</option>
-                                <option value="trig">三角函数 sin(x)/x</option>
-                                <option value="exp">指数函数 e^(1/x)</option>
-                            </select>
-                        </div>
-                        <div class="formula-box" id="selectedFunction">
-                            $f(x) = \frac{x^2-4}{x-2}$
-                        </div>
-                        <div class="slider-group">
-                            <label>检查点</label>
-                            <input type="range" class="slider" id="checkPoint" 
-                                   min="-3" max="3" step="0.1" value="0">
-                            <span class="slider-value" id="checkValue">0.0</span>
-                        </div>
-                        <button class="btn" onclick="analyzePoint()">分析间断性</button>
-                    </div>
-
-                    <div class="card">
-                        <h3>分析结果</h3>
-                        <div class="condition-list" id="analysisResult">
-                            <div class="condition-item condition-pass">
-                                <span class="icon icon-pass">✓</span>
-                                <span>有定义</span>
-                            </div>
-                            <div class="condition-item condition-pass">
-                                <span class="icon icon-pass">✓</span>
-                                <span>极限存在</span>
-                            </div>
-                            <div class="condition-item condition-pass">
-                                <span class="icon icon-pass">✓</span>
-                                <span>极限等于函数值</span>
-                            </div>
-                        </div>
-                        <div class="result" id="conclusionBox">
-                            该点连续
-                        </div>
-                    </div>
-                </div>
-
-                <div class="column">
-                    <div class="card">
-                        <h3>函数图像</h3>
-                        <div class="canvas-container">
-                            <canvas id="analysisGraph" width="600" height="300"></canvas>
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <h3>数值计算</h3>
-                        <div class="info-box" id="calculationDetails">
-                            左极限：待计算<br>
-                            右极限：待计算<br>
-                            函数值：待计算
-                        </div>
-                        <div class="steps">
-                            <strong>提示：</strong><br>
-                            移动滑块选择不同的检查点，<br>
-                            观察函数在各点的连续性
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+<style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.fixed{position:fixed}.relative{position:relative}.bottom-0{bottom:0px}.left-0{left:0px}.right-0{right:0px}.z-10{z-index:10}.z-20{z-index:20}.z-50{z-index:50}.mx-auto{margin-left:auto;margin-right:auto}.mb-1{margin-bottom:0.25rem}.mb-2{margin-bottom:0.5rem}.mb-3{margin-bottom:0.75rem}.mb-4{margin-bottom:1rem}.mb-6{margin-bottom:1.5rem}.mb-8{margin-bottom:2rem}.mt-0\.5{margin-top:0.125rem}.mt-1{margin-top:0.25rem}.mt-4{margin-top:1rem}.mt-6{margin-top:1.5rem}.mt-auto{margin-top:auto}.block{display:block}.flex{display:flex}.grid{display:grid}.hidden{display:none}.aspect-\[2\/1\]{aspect-ratio:2/1}.h-16{height:4rem}.h-2{height:0.5rem}.h-3{height:0.75rem}.h-6{height:1.5rem}.h-full{height:100%}.h-screen{height:100vh}.min-h-\[300px\]{min-height:300px}.min-h-\[400px\]{min-height:400px}.w-20{width:5rem}.w-3{width:0.75rem}.w-6{width:1.5rem}.w-64{width:16rem}.w-full{width:100%}.max-w-5xl{max-width:64rem}.max-w-6xl{max-width:72rem}.flex-1{flex:1 1 0%}.flex-none{flex:none}.shrink-0{flex-shrink:0}.cursor-pointer{cursor:pointer}.appearance-none{-webkit-appearance:none;appearance:none}.grid-cols-1{grid-template-columns:repeat(1, minmax(0, 1fr))}.flex-col{flex-direction:column}.items-start{align-items:flex-start}.items-center{align-items:center}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.justify-around{justify-content:space-around}.gap-2{gap:0.5rem}.gap-3{gap:0.75rem}.gap-4{gap:1rem}.gap-6{gap:1.5rem}.gap-8{gap:2rem}.space-y-2 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.5rem * var(--tw-space-y-reverse))}.space-y-3 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.75rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.75rem * var(--tw-space-y-reverse))}.space-y-4 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1rem * var(--tw-space-y-reverse))}.space-y-6 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.5rem * var(--tw-space-y-reverse))}.overflow-hidden{overflow:hidden}.overflow-x-auto{overflow-x:auto}.overflow-y-auto{overflow-y:auto}.scroll-smooth{scroll-behavior:smooth}.rounded{border-radius:0.25rem}.rounded-2xl{border-radius:1rem}.rounded-full{border-radius:9999px}.rounded-lg{border-radius:0.5rem}.rounded-xl{border-radius:0.75rem}.rounded-r-lg{border-top-right-radius:0.5rem;border-bottom-right-radius:0.5rem}.border{border-width:1px}.border-2{border-width:2px}.border-b{border-bottom-width:1px}.border-l-4{border-left-width:4px}.border-r{border-right-width:1px}.border-t{border-top-width:1px}.border-blue-100{--tw-border-opacity:1;border-color:rgb(219 234 254 / var(--tw-border-opacity, 1))}.border-blue-500{--tw-border-opacity:1;border-color:rgb(59 130 246 / var(--tw-border-opacity, 1))}.border-gray-100{--tw-border-opacity:1;border-color:rgb(243 244 246 / var(--tw-border-opacity, 1))}.border-gray-200{--tw-border-opacity:1;border-color:rgb(229 231 235 / var(--tw-border-opacity, 1))}.border-indigo-500{--tw-border-opacity:1;border-color:rgb(99 102 241 / var(--tw-border-opacity, 1))}.border-red-500{--tw-border-opacity:1;border-color:rgb(239 68 68 / var(--tw-border-opacity, 1))}.border-transparent{border-color:transparent}.bg-blue-100{--tw-bg-opacity:1;background-color:rgb(219 234 254 / var(--tw-bg-opacity, 1))}.bg-blue-200{--tw-bg-opacity:1;background-color:rgb(191 219 254 / var(--tw-bg-opacity, 1))}.bg-blue-50{--tw-bg-opacity:1;background-color:rgb(239 246 255 / var(--tw-bg-opacity, 1))}.bg-blue-600{--tw-bg-opacity:1;background-color:rgb(37 99 235 / var(--tw-bg-opacity, 1))}.bg-gray-100{--tw-bg-opacity:1;background-color:rgb(243 244 246 / var(--tw-bg-opacity, 1))}.bg-gray-200{--tw-bg-opacity:1;background-color:rgb(229 231 235 / var(--tw-bg-opacity, 1))}.bg-gray-300{--tw-bg-opacity:1;background-color:rgb(209 213 219 / var(--tw-bg-opacity, 1))}.bg-gray-50{--tw-bg-opacity:1;background-color:rgb(249 250 251 / var(--tw-bg-opacity, 1))}.bg-gray-50\/50{background-color:rgb(249 250 251 / 0.5)}.bg-green-500{--tw-bg-opacity:1;background-color:rgb(34 197 94 / var(--tw-bg-opacity, 1))}.bg-indigo-50{--tw-bg-opacity:1;background-color:rgb(238 242 255 / var(--tw-bg-opacity, 1))}.bg-purple-100{--tw-bg-opacity:1;background-color:rgb(243 232 255 / var(--tw-bg-opacity, 1))}.bg-purple-600{--tw-bg-opacity:1;background-color:rgb(147 51 234 / var(--tw-bg-opacity, 1))}.bg-red-500{--tw-bg-opacity:1;background-color:rgb(239 68 68 / var(--tw-bg-opacity, 1))}.bg-white{--tw-bg-opacity:1;background-color:rgb(255 255 255 / var(--tw-bg-opacity, 1))}.p-2{padding:0.5rem}.p-3{padding:0.75rem}.p-4{padding:1rem}.p-6{padding:1.5rem}.p-8{padding:2rem}.px-2{padding-left:0.5rem;padding-right:0.5rem}.px-4{padding-left:1rem;padding-right:1rem}.px-6{padding-left:1.5rem;padding-right:1.5rem}.py-0\.5{padding-top:0.125rem;padding-bottom:0.125rem}.py-3{padding-top:0.75rem;padding-bottom:0.75rem}.py-1{padding-top:0.25rem;padding-bottom:0.25rem}.pb-3{padding-bottom:0.75rem}.pb-4{padding-bottom:1rem}.pt-4{padding-top:1rem}.text-left{text-align:left}.text-center{text-align:center}.font-mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}.text-2xl{font-size:1.5rem;line-height:2rem}.text-\[10px\]{font-size:10px}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:0.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:0.75rem;line-height:1rem}.font-bold{font-weight:700}.font-medium{font-weight:500}.uppercase{text-transform:uppercase}.leading-relaxed{line-height:1.625}.tracking-tight{letter-spacing:-0.025em}.tracking-wider{letter-spacing:0.05em}.text-amber-500{--tw-text-opacity:1;color:rgb(245 158 11 / var(--tw-text-opacity, 1))}.text-blue-600{--tw-text-opacity:1;color:rgb(37 99 235 / var(--tw-text-opacity, 1))}.text-blue-700{--tw-text-opacity:1;color:rgb(29 78 216 / var(--tw-text-opacity, 1))}.text-blue-700\/80{color:rgb(29 78 216 / 0.8)}.text-blue-800{--tw-text-opacity:1;color:rgb(30 64 175 / var(--tw-text-opacity, 1))}.text-blue-900{--tw-text-opacity:1;color:rgb(30 58 138 / var(--tw-text-opacity, 1))}.text-gray-400{--tw-text-opacity:1;color:rgb(156 163 175 / var(--tw-text-opacity, 1))}.text-gray-500{--tw-text-opacity:1;color:rgb(107 114 128 / var(--tw-text-opacity, 1))}.text-gray-600{--tw-text-opacity:1;color:rgb(75 85 99 / var(--tw-text-opacity, 1))}.text-gray-700{--tw-text-opacity:1;color:rgb(55 65 81 / var(--tw-text-opacity, 1))}.text-gray-800{--tw-text-opacity:1;color:rgb(31 41 55 / var(--tw-text-opacity, 1))}.text-green-600{--tw-text-opacity:1;color:rgb(22 163 74 / var(--tw-text-opacity, 1))}.text-indigo-600{--tw-text-opacity:1;color:rgb(79 70 229 / var(--tw-text-opacity, 1))}.text-purple-500{--tw-text-opacity:1;color:rgb(168 85 247 / var(--tw-text-opacity, 1))}.text-purple-600{--tw-text-opacity:1;color:rgb(147 51 234 / var(--tw-text-opacity, 1))}.text-purple-700{--tw-text-opacity:1;color:rgb(126 34 206 / var(--tw-text-opacity, 1))}.text-slate-800{--tw-text-opacity:1;color:rgb(30 41 59 / var(--tw-text-opacity, 1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.accent-purple-600{accent-color:#9333ea}.shadow-inner{--tw-shadow:inset 0 2px 4px 0 rgb(0 0 0 / 0.05);--tw-shadow-colored:inset 0 2px 4px 0 var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-md{--tw-shadow:0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 4px 6px -1px var(--tw-shadow-color), 0 2px 4px -2px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-sm{--tw-shadow:0 1px 2px 0 rgb(0 0 0 / 0.05);--tw-shadow-colored:0 1px 2px 0 var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.outline-none{outline:2px solid transparent;outline-offset:2px}.transition-all{transition-property:all;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-colors{transition-property:color, background-color, border-color, fill, stroke, -webkit-text-decoration-color;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, -webkit-text-decoration-color;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.duration-200{transition-duration:200ms}.duration-300{transition-duration:300ms}.hover\:border-blue-100:hover{--tw-border-opacity:1;border-color:rgb(219 234 254 / var(--tw-border-opacity, 1))}.hover\:border-blue-200:hover{--tw-border-opacity:1;border-color:rgb(191 219 254 / var(--tw-border-opacity, 1))}.hover\:bg-blue-50:hover{--tw-bg-opacity:1;background-color:rgb(239 246 255 / var(--tw-bg-opacity, 1))}.hover\:bg-gray-50:hover{--tw-bg-opacity:1;background-color:rgb(249 250 251 / var(--tw-bg-opacity, 1))}.hover\:bg-purple-700:hover{--tw-bg-opacity:1;background-color:rgb(126 34 206 / var(--tw-bg-opacity, 1))}.hover\:shadow-md:hover{--tw-shadow:0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 4px 6px -1px var(--tw-shadow-color), 0 2px 4px -2px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.focus\:ring-2:focus{--tw-ring-offset-shadow:var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow:var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000)}.focus\:ring-purple-500:focus{--tw-ring-opacity:1;--tw-ring-color:rgb(168 85 247 / var(--tw-ring-opacity, 1))}.active\:scale-95:active{--tw-scale-x:.95;--tw-scale-y:.95;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.group:hover .group-hover\:bg-blue-100{--tw-bg-opacity:1;background-color:rgb(219 234 254 / var(--tw-bg-opacity, 1))}.group:hover .group-hover\:text-blue-700{--tw-text-opacity:1;color:rgb(29 78 216 / var(--tw-text-opacity, 1))}.group:hover .group-hover\:text-blue-700\/80{color:rgb(29 78 216 / 0.8)}.group:hover .group-hover\:text-blue-800{--tw-text-opacity:1;color:rgb(30 64 175 / var(--tw-text-opacity, 1))}.group:hover .group-hover\:text-blue-900{--tw-text-opacity:1;color:rgb(30 58 138 / var(--tw-text-opacity, 1))}@media (min-width: 640px){.sm\:block{display:block}}@media (min-width: 768px){.md\:flex{display:flex}.md\:hidden{display:none}.md\:grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.md\:p-8{padding:2rem}}@media (min-width: 1024px){.lg\:col-span-4{grid-column:span 4 / span 4}.lg\:col-span-8{grid-column:span 8 / span 8}.lg\:grid-cols-12{grid-template-columns:repeat(12, minmax(0, 1fr))}.lg\:grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}}</style></head>
+<body class="bg-gray-50 text-slate-800 h-screen flex flex-col overflow-hidden">
+<!-- Header -->
+<header class="bg-white border-b border-gray-200 h-16 flex-none flex items-center justify-between px-6 shadow-sm z-20">
+<div class="flex items-center gap-3">
+<div class="bg-blue-600 p-2 rounded-lg text-white">
+<span class="material-symbols-outlined text-2xl">ssid_chart</span>
+</div>
+<h1 class="text-xl font-bold text-gray-800 tracking-tight">函数连续性实验室</h1>
+</div>
+<div class="text-sm text-gray-500 hidden sm:block font-medium">
+        <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="0" style="font-size: 122.8%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-munder limits="false"><mjx-mo class="mjx-n"><mjx-c class="mjx-c6C"></mjx-c><mjx-c class="mjx-c69"></mjx-c><mjx-c class="mjx-c6D"></mjx-c></mjx-mo><mjx-script style="vertical-align: -0.15em;"><mjx-texatom size="s" texclass="ORD"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c2192"></mjx-c></mjx-mo><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c30"></mjx-c></mjx-mn></mjx-script></mjx-msub></mjx-texatom></mjx-script></mjx-munder><mjx-mi class="mjx-i" space="2"><mjx-c class="mjx-c1D453 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-mi class="mjx-i" space="4"><mjx-c class="mjx-c1D453 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c30"></mjx-c></mjx-mn></mjx-script></mjx-msub><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="18" style="font-size: 123.5%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-munder limits="false"><mjx-mo class="mjx-n"><mjx-c class="mjx-c6C"></mjx-c><mjx-c class="mjx-c69"></mjx-c><mjx-c class="mjx-c6D"></mjx-c></mjx-mo><mjx-script style="vertical-align: -0.15em;"><mjx-texatom size="s" texclass="ORD"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c2192"></mjx-c></mjx-mo><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c30"></mjx-c></mjx-mn></mjx-script></mjx-msub></mjx-texatom></mjx-script></mjx-munder><mjx-mi class="mjx-i" space="2"><mjx-c class="mjx-c1D453 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-mi class="mjx-i" space="4"><mjx-c class="mjx-c1D453 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c30"></mjx-c></mjx-mn></mjx-script></mjx-msub><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><munder><mo data-mjx-texclass="OP" movablelimits="true">lim</mo><mrow data-mjx-texclass="ORD"><mi>x</mi><mo accent="false" stretchy="false">→</mo><msub><mi>x</mi><mn>0</mn></msub></mrow></munder><mi>f</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mo>=</mo><mi>f</mi><mo stretchy="false">(</mo><msub><mi>x</mi><mn>0</mn></msub><mo stretchy="false">)</mo></math></mjx-assistive-mml></mjx-container></mjx-assistive-mml></mjx-container>
     </div>
+</header>
+<div class="flex flex-1 overflow-hidden">
+<!-- Sidebar -->
+<nav class="w-64 bg-white border-r border-gray-200 flex-none flex flex-col z-10 hidden md:flex">
+<div class="p-4 space-y-2">
+<button class="nav-btn w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 bg-blue-50 text-blue-700" id="btn-definition" onclick="switchTab('definition')">
+<span class="material-symbols-outlined">menu_book</span>
+                连续定义
+            </button>
+<button class="nav-btn w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 text-gray-600 hover:bg-gray-50" id="btn-types" onclick="switchTab('types')">
+<span class="material-symbols-outlined">broken_image</span>
+                不连续类型
+            </button>
+<button class="nav-btn w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 text-gray-600 hover:bg-gray-50" id="btn-check" onclick="switchTab('check')">
+<span class="material-symbols-outlined">fact_check</span>
+                连续性检验
+            </button>
+</div>
+<div class="mt-auto p-4 border-t border-gray-100">
+<div class="bg-blue-50 rounded-lg p-4">
+<h4 class="text-xs font-bold text-blue-800 uppercase tracking-wider mb-2">小贴士</h4>
+<p class="text-xs text-blue-600 leading-relaxed">
+                    函数连续意味着它的图像是一条连绵不断的曲线，没有断裂、跳跃或空洞。
+                </p>
+</div>
+</div>
+</nav>
+<!-- Main Content -->
+<main class="flex-1 overflow-y-auto bg-gray-50/50 p-4 md:p-8 relative scroll-smooth no-scrollbar">
+<!-- Tab 1: Definition -->
+<div class="tab-content space-y-6 max-w-5xl mx-auto" id="tab-definition">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<!-- Definition Card -->
+<div class="space-y-6">
+<div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+<h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-blue-600">functions</span>
+                            连续性定义
+                        </h2>
+<div class="bg-blue-50 border border-blue-100 rounded-xl p-6 text-center mb-6">
+<div class="text-xl text-gray-800 mb-3">
+                                <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" display="true" tabindex="0" ctxtmenu_counter="1" style="font-size: 122.7%; position: relative;"><mjx-math display="true" class="MJX-TEX" aria-hidden="true" style="margin-left: 0px; margin-right: 0px;"><mjx-munder><mjx-row><mjx-base style="padding-left: 0.218em;"><mjx-mo class="mjx-n"><mjx-c class="mjx-c6C"></mjx-c><mjx-c class="mjx-c69"></mjx-c><mjx-c class="mjx-c6D"></mjx-c></mjx-mo></mjx-base></mjx-row><mjx-row><mjx-under style="padding-top: 0.239em;"><mjx-texatom size="s" texclass="ORD"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c2192"></mjx-c></mjx-mo><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c30"></mjx-c></mjx-mn></mjx-script></mjx-msub></mjx-texatom></mjx-under></mjx-row></mjx-munder><mjx-mi class="mjx-i" space="2"><mjx-c class="mjx-c1D453 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-mi class="mjx-i" space="4"><mjx-c class="mjx-c1D453 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c30"></mjx-c></mjx-mn></mjx-script></mjx-msub><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo></mjx-math><mjx-assistive-mml unselectable="on" display="block"><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" display="true" tabindex="0" ctxtmenu_counter="19" style="font-size: 123.5%; position: relative;"><mjx-math display="true" class="MJX-TEX" aria-hidden="true" style="margin-left: 0px; margin-right: 0px;"><mjx-munder><mjx-row><mjx-base style="padding-left: 0.218em;"><mjx-mo class="mjx-n"><mjx-c class="mjx-c6C"></mjx-c><mjx-c class="mjx-c69"></mjx-c><mjx-c class="mjx-c6D"></mjx-c></mjx-mo></mjx-base></mjx-row><mjx-row><mjx-under style="padding-top: 0.239em;"><mjx-texatom size="s" texclass="ORD"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c2192"></mjx-c></mjx-mo><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c30"></mjx-c></mjx-mn></mjx-script></mjx-msub></mjx-texatom></mjx-under></mjx-row></mjx-munder><mjx-mi class="mjx-i" space="2"><mjx-c class="mjx-c1D453 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-mi class="mjx-i" space="4"><mjx-c class="mjx-c1D453 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c30"></mjx-c></mjx-mn></mjx-script></mjx-msub><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo></mjx-math><mjx-assistive-mml unselectable="on" display="block"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><munder><mo data-mjx-texclass="OP" movablelimits="true">lim</mo><mrow data-mjx-texclass="ORD"><mi>x</mi><mo accent="false" stretchy="false">→</mo><msub><mi>x</mi><mn>0</mn></msub></mrow></munder><mi>f</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mo>=</mo><mi>f</mi><mo stretchy="false">(</mo><msub><mi>x</mi><mn>0</mn></msub><mo stretchy="false">)</mo></math></mjx-assistive-mml></mjx-container></mjx-assistive-mml></mjx-container>
+                            </div>
+<p class="text-sm text-blue-700 font-medium">函数在点 <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="2" style="font-size: 122.8%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c30"></mjx-c></mjx-mn></mjx-script></mjx-msub></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="20" style="font-size: 123.5%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c30"></mjx-c></mjx-mn></mjx-script></mjx-msub></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>x</mi><mn>0</mn></msub></math></mjx-assistive-mml></mjx-container></mjx-assistive-mml></mjx-container> 处连续的充要条件</p>
+</div>
+<div class="space-y-3">
+<div class="flex items-start gap-3 p-3 rounded-lg bg-gray-50 border border-gray-100 transition-colors hover:bg-blue-50 hover:border-blue-100">
+<span class="flex items-center justify-center w-6 h-6 rounded-full bg-blue-100 text-blue-600 text-sm font-bold mt-0.5 shrink-0">1</span>
+<span class="text-sm text-gray-600">函数在 <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="3" style="font-size: 122.8%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c30"></mjx-c></mjx-mn></mjx-script></mjx-msub></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="21" style="font-size: 123.5%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c30"></mjx-c></mjx-mn></mjx-script></mjx-msub></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>x</mi><mn>0</mn></msub></math></mjx-assistive-mml></mjx-container></mjx-assistive-mml></mjx-container> 处有定义，即 <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="4" style="font-size: 122.8%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D453 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c30"></mjx-c></mjx-mn></mjx-script></mjx-msub><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="22" style="font-size: 123.5%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D453 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c30"></mjx-c></mjx-mn></mjx-script></mjx-msub><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mi>f</mi><mo stretchy="false">(</mo><msub><mi>x</mi><mn>0</mn></msub><mo stretchy="false">)</mo></math></mjx-assistive-mml></mjx-container></mjx-assistive-mml></mjx-container> 存在。</span>
+</div>
+<div class="flex items-start gap-3 p-3 rounded-lg bg-gray-50 border border-gray-100 transition-colors hover:bg-blue-50 hover:border-blue-100">
+<span class="flex items-center justify-center w-6 h-6 rounded-full bg-blue-100 text-blue-600 text-sm font-bold mt-0.5 shrink-0">2</span>
+<span class="text-sm text-gray-600">极限 <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="5" style="font-size: 122.8%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-munder limits="false"><mjx-mo class="mjx-n"><mjx-c class="mjx-c6C"></mjx-c><mjx-c class="mjx-c69"></mjx-c><mjx-c class="mjx-c6D"></mjx-c></mjx-mo><mjx-script style="vertical-align: -0.15em;"><mjx-texatom size="s" texclass="ORD"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c2192"></mjx-c></mjx-mo><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c30"></mjx-c></mjx-mn></mjx-script></mjx-msub></mjx-texatom></mjx-script></mjx-munder><mjx-mi class="mjx-i" space="2"><mjx-c class="mjx-c1D453 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="23" style="font-size: 123.5%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-munder limits="false"><mjx-mo class="mjx-n"><mjx-c class="mjx-c6C"></mjx-c><mjx-c class="mjx-c69"></mjx-c><mjx-c class="mjx-c6D"></mjx-c></mjx-mo><mjx-script style="vertical-align: -0.15em;"><mjx-texatom size="s" texclass="ORD"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c2192"></mjx-c></mjx-mo><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c30"></mjx-c></mjx-mn></mjx-script></mjx-msub></mjx-texatom></mjx-script></mjx-munder><mjx-mi class="mjx-i" space="2"><mjx-c class="mjx-c1D453 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><munder><mo data-mjx-texclass="OP" movablelimits="true">lim</mo><mrow data-mjx-texclass="ORD"><mi>x</mi><mo accent="false" stretchy="false">→</mo><msub><mi>x</mi><mn>0</mn></msub></mrow></munder><mi>f</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo></math></mjx-assistive-mml></mjx-container></mjx-assistive-mml></mjx-container> 存在。</span>
+</div>
+<div class="flex items-start gap-3 p-3 rounded-lg bg-gray-50 border border-gray-100 transition-colors hover:bg-blue-50 hover:border-blue-100">
+<span class="flex items-center justify-center w-6 h-6 rounded-full bg-blue-100 text-blue-600 text-sm font-bold mt-0.5 shrink-0">3</span>
+<span class="text-sm text-gray-600">极限值等于函数值。</span>
+</div>
+</div>
+</div>
+<div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+<h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-indigo-600">compare_arrows</span>
+                            左连续与右连续
+                        </h2>
+<div class="space-y-4 text-sm text-gray-600">
+<div class="p-3 border-l-4 border-indigo-500 bg-indigo-50 rounded-r-lg">
+<strong>右连续：</strong> <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="6" style="font-size: 122.8%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-munder limits="false"><mjx-mo class="mjx-n"><mjx-c class="mjx-c6C"></mjx-c><mjx-c class="mjx-c69"></mjx-c><mjx-c class="mjx-c6D"></mjx-c></mjx-mo><mjx-script style="vertical-align: -0.229em;"><mjx-texatom size="s" texclass="ORD"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c2192"></mjx-c></mjx-mo><mjx-msubsup><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.297em; margin-left: 0px;"><mjx-mo class="mjx-n" size="s"><mjx-c class="mjx-c2B"></mjx-c></mjx-mo><mjx-spacer style="margin-top: 0.18em;"></mjx-spacer><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c30"></mjx-c></mjx-mn></mjx-script></mjx-msubsup></mjx-texatom></mjx-script></mjx-munder><mjx-mi class="mjx-i" space="2"><mjx-c class="mjx-c1D453 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-mi class="mjx-i" space="4"><mjx-c class="mjx-c1D453 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c30"></mjx-c></mjx-mn></mjx-script></mjx-msub><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="24" style="font-size: 123.5%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-munder limits="false"><mjx-mo class="mjx-n"><mjx-c class="mjx-c6C"></mjx-c><mjx-c class="mjx-c69"></mjx-c><mjx-c class="mjx-c6D"></mjx-c></mjx-mo><mjx-script style="vertical-align: -0.229em;"><mjx-texatom size="s" texclass="ORD"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c2192"></mjx-c></mjx-mo><mjx-msubsup><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.297em; margin-left: 0px;"><mjx-mo class="mjx-n" size="s"><mjx-c class="mjx-c2B"></mjx-c></mjx-mo><mjx-spacer style="margin-top: 0.18em;"></mjx-spacer><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c30"></mjx-c></mjx-mn></mjx-script></mjx-msubsup></mjx-texatom></mjx-script></mjx-munder><mjx-mi class="mjx-i" space="2"><mjx-c class="mjx-c1D453 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-mi class="mjx-i" space="4"><mjx-c class="mjx-c1D453 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c30"></mjx-c></mjx-mn></mjx-script></mjx-msub><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><munder><mo data-mjx-texclass="OP" movablelimits="true">lim</mo><mrow data-mjx-texclass="ORD"><mi>x</mi><mo accent="false" stretchy="false">→</mo><msubsup><mi>x</mi><mn>0</mn><mo>+</mo></msubsup></mrow></munder><mi>f</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mo>=</mo><mi>f</mi><mo stretchy="false">(</mo><msub><mi>x</mi><mn>0</mn></msub><mo stretchy="false">)</mo></math></mjx-assistive-mml></mjx-container></mjx-assistive-mml></mjx-container>
+                            </div>
+<div class="p-3 border-l-4 border-indigo-500 bg-indigo-50 rounded-r-lg">
+<strong>左连续：</strong> <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="7" style="font-size: 122.8%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-munder limits="false"><mjx-mo class="mjx-n"><mjx-c class="mjx-c6C"></mjx-c><mjx-c class="mjx-c69"></mjx-c><mjx-c class="mjx-c6D"></mjx-c></mjx-mo><mjx-script style="vertical-align: -0.229em;"><mjx-texatom size="s" texclass="ORD"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c2192"></mjx-c></mjx-mo><mjx-msubsup><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.297em; margin-left: 0px;"><mjx-mo class="mjx-n" size="s"><mjx-c class="mjx-c2212"></mjx-c></mjx-mo><mjx-spacer style="margin-top: 0.18em;"></mjx-spacer><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c30"></mjx-c></mjx-mn></mjx-script></mjx-msubsup></mjx-texatom></mjx-script></mjx-munder><mjx-mi class="mjx-i" space="2"><mjx-c class="mjx-c1D453 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-mi class="mjx-i" space="4"><mjx-c class="mjx-c1D453 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c30"></mjx-c></mjx-mn></mjx-script></mjx-msub><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="25" style="font-size: 123.5%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-munder limits="false"><mjx-mo class="mjx-n"><mjx-c class="mjx-c6C"></mjx-c><mjx-c class="mjx-c69"></mjx-c><mjx-c class="mjx-c6D"></mjx-c></mjx-mo><mjx-script style="vertical-align: -0.229em;"><mjx-texatom size="s" texclass="ORD"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c2192"></mjx-c></mjx-mo><mjx-msubsup><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.297em; margin-left: 0px;"><mjx-mo class="mjx-n" size="s"><mjx-c class="mjx-c2212"></mjx-c></mjx-mo><mjx-spacer style="margin-top: 0.18em;"></mjx-spacer><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c30"></mjx-c></mjx-mn></mjx-script></mjx-msubsup></mjx-texatom></mjx-script></mjx-munder><mjx-mi class="mjx-i" space="2"><mjx-c class="mjx-c1D453 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-mi class="mjx-i" space="4"><mjx-c class="mjx-c1D453 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c30"></mjx-c></mjx-mn></mjx-script></mjx-msub><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><munder><mo data-mjx-texclass="OP" movablelimits="true">lim</mo><mrow data-mjx-texclass="ORD"><mi>x</mi><mo accent="false" stretchy="false">→</mo><msubsup><mi>x</mi><mn>0</mn><mo>−</mo></msubsup></mrow></munder><mi>f</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mo>=</mo><mi>f</mi><mo stretchy="false">(</mo><msub><mi>x</mi><mn>0</mn></msub><mo stretchy="false">)</mo></math></mjx-assistive-mml></mjx-container></mjx-assistive-mml></mjx-container>
+                            </div>
+<div class="flex items-center justify-center gap-2 mt-4 p-2 bg-gray-100 rounded text-gray-700 font-medium">
+<span class="material-symbols-outlined text-sm">link</span>
+<span>函数连续 <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="8" style="font-size: 122.8%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mstyle><mjx-mspace style="width: 0.278em;"></mjx-mspace></mjx-mstyle><mjx-mo class="mjx-n"><mjx-c class="mjx-c27FA"></mjx-c></mjx-mo><mjx-mstyle><mjx-mspace style="width: 0.278em;"></mjx-mspace></mjx-mstyle></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="26" style="font-size: 123.5%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mstyle><mjx-mspace style="width: 0.278em;"></mjx-mspace></mjx-mstyle><mjx-mo class="mjx-n"><mjx-c class="mjx-c27FA"></mjx-c></mjx-mo><mjx-mstyle><mjx-mspace style="width: 0.278em;"></mjx-mspace></mjx-mstyle></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mstyle scriptlevel="0"><mspace width="0.278em"></mspace></mstyle><mo stretchy="false">⟺</mo><mstyle scriptlevel="0"><mspace width="0.278em"></mspace></mstyle></math></mjx-assistive-mml></mjx-container></mjx-assistive-mml></mjx-container> 既左连续又右连续</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Visualization Card -->
+<div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col h-full">
+<h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2 border-b border-gray-100 pb-3">
+<span class="material-symbols-outlined text-green-600">show_chart</span>
+                        连续函数图像示例
+                    </h2>
+<div class="relative flex-1 min-h-[300px] w-full bg-white rounded-xl overflow-hidden border border-gray-100">
+<canvas class="w-full h-full block" id="continuousCanvas" width="297" height="893"></canvas>
+</div>
+<div class="mt-4 flex justify-center gap-6 text-xs font-medium text-gray-500">
+<div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-blue-600"></span> 函数曲线 <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="9" style="font-size: 122.9%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D453 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="27" style="font-size: 123.5%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D453 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mi>f</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo></math></mjx-assistive-mml></mjx-container></mjx-assistive-mml></mjx-container></div>
+<div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-green-500"></span> 连续点 <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="10" style="font-size: 122.9%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c30"></mjx-c></mjx-mn></mjx-script></mjx-msub><mjx-mo class="mjx-n"><mjx-c class="mjx-c2C"></mjx-c></mjx-mo><mjx-mi class="mjx-i" space="2"><mjx-c class="mjx-c1D453 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c30"></mjx-c></mjx-mn></mjx-script></mjx-msub><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="28" style="font-size: 123.5%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c30"></mjx-c></mjx-mn></mjx-script></mjx-msub><mjx-mo class="mjx-n"><mjx-c class="mjx-c2C"></mjx-c></mjx-mo><mjx-mi class="mjx-i" space="2"><mjx-c class="mjx-c1D453 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c30"></mjx-c></mjx-mn></mjx-script></mjx-msub><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mo stretchy="false">(</mo><msub><mi>x</mi><mn>0</mn></msub><mo>,</mo><mi>f</mi><mo stretchy="false">(</mo><msub><mi>x</mi><mn>0</mn></msub><mo stretchy="false">)</mo><mo stretchy="false">)</mo></math></mjx-assistive-mml></mjx-container></mjx-assistive-mml></mjx-container></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Tab 2: Discontinuity Types -->
+<div class="tab-content hidden space-y-6 max-w-6xl mx-auto" id="tab-types">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+<!-- Type Selector -->
+<div class="lg:col-span-4 space-y-4">
+<div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+<h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-amber-500">category</span>
+                                间断点类型
+                            </h3>
+<div class="space-y-2">
+<button class="case-btn active w-full text-left p-4 rounded-xl border-2 border-blue-500 bg-blue-50 transition-all group shadow-md" data-case="1" onclick="selectCase(1)">
+<div class="flex items-center justify-between mb-1">
+<span class="font-bold text-blue-900 group-hover:text-blue-700">跳跃间断点</span>
+<span class="text-xs bg-blue-200 text-blue-800 px-2 py-0.5 rounded-full">第一类</span>
+</div>
+<div class="text-xs text-blue-700/80">左右极限存在但不相等</div>
+</button>
+<button class="case-btn w-full text-left p-4 rounded-xl border-2 border-transparent hover:border-blue-200 bg-gray-50 transition-all hover:shadow-md group" data-case="2" onclick="selectCase(2)">
+<div class="flex items-center justify-between mb-1">
+<span class="font-bold text-gray-800 group-hover:text-blue-900">可去间断点</span>
+<span class="text-xs bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full group-hover:bg-blue-100 group-hover:text-blue-800">第一类</span>
+</div>
+<div class="text-xs text-gray-500 group-hover:text-blue-700/80">左右极限相等，但无定义或 <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="11" style="font-size: 113.1%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mo class="mjx-n"><mjx-c class="mjx-c2260"></mjx-c></mjx-mo><mjx-mi class="mjx-i" space="4"><mjx-c class="mjx-c1D453 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c30"></mjx-c></mjx-mn></mjx-script></mjx-msub><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="29" style="font-size: 113.1%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mo class="mjx-n"><mjx-c class="mjx-c2260"></mjx-c></mjx-mo><mjx-mi class="mjx-i" space="4"><mjx-c class="mjx-c1D453 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c30"></mjx-c></mjx-mn></mjx-script></mjx-msub><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mo>≠</mo><mi>f</mi><mo stretchy="false">(</mo><msub><mi>x</mi><mn>0</mn></msub><mo stretchy="false">)</mo></math></mjx-assistive-mml></mjx-container></mjx-assistive-mml></mjx-container></div>
+</button>
+<button class="case-btn w-full text-left p-4 rounded-xl border-2 border-transparent hover:border-blue-200 bg-gray-50 transition-all hover:shadow-md group" data-case="3" onclick="selectCase(3)">
+<div class="flex items-center justify-between mb-1">
+<span class="font-bold text-gray-800 group-hover:text-blue-900">无穷间断点</span>
+<span class="text-xs bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full group-hover:bg-blue-100 group-hover:text-blue-800">第二类</span>
+</div>
+<div class="text-xs text-gray-500 group-hover:text-blue-700/80">左右极限至少有一个为无穷大</div>
+</button>
+</div>
+</div>
+<div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+<h3 class="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
+<span class="material-symbols-outlined text-purple-500">analytics</span>
+                                案例分析
+                            </h3>
+<div class="bg-gray-50 p-4 rounded-lg mb-4 text-center border border-gray-100">
+<div class="text-lg text-gray-800 mb-2 overflow-x-auto" id="caseFormula"><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" display="true" tabindex="0" ctxtmenu_counter="16" style="font-size: 113.1%; position: relative;"><mjx-math display="true" class="MJX-TEX" aria-hidden="true" style="margin-left: 0px; margin-right: 0px;"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D453 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-mtext class="mjx-n" space="4"><mjx-c class="mjx-c73"></mjx-c><mjx-c class="mjx-c67"></mjx-c><mjx-c class="mjx-c6E"></mjx-c></mjx-mtext><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo></mjx-math><mjx-assistive-mml unselectable="on" display="block"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mi>f</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mo>=</mo><mtext>sgn</mtext><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo></math></mjx-assistive-mml></mjx-container></div>
+</div>
+<div class="text-sm text-gray-600 space-y-2 leading-relaxed" id="caseAnalysis"><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="17" style="font-size: 113.1%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-munder limits="false"><mjx-mo class="mjx-n"><mjx-c class="mjx-c6C"></mjx-c><mjx-c class="mjx-c69"></mjx-c><mjx-c class="mjx-c6D"></mjx-c></mjx-mo><mjx-script style="vertical-align: -0.15em;"><mjx-texatom size="s" texclass="ORD"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c2192"></mjx-c></mjx-mo><mjx-msup><mjx-mn class="mjx-n"><mjx-c class="mjx-c30"></mjx-c></mjx-mn><mjx-script style="vertical-align: 0.289em;"><mjx-mo class="mjx-n" style="font-size: 71.4%;"><mjx-c class="mjx-c2212"></mjx-c></mjx-mo></mjx-script></mjx-msup></mjx-texatom></mjx-script></mjx-munder><mjx-mi class="mjx-i" space="2"><mjx-c class="mjx-c1D453 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c2212"></mjx-c></mjx-mo><mjx-mn class="mjx-n"><mjx-c class="mjx-c31"></mjx-c></mjx-mn><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c2260"></mjx-c></mjx-mo><mjx-munder space="4" limits="false"><mjx-mo class="mjx-n"><mjx-c class="mjx-c6C"></mjx-c><mjx-c class="mjx-c69"></mjx-c><mjx-c class="mjx-c6D"></mjx-c></mjx-mo><mjx-script style="vertical-align: -0.15em;"><mjx-texatom size="s" texclass="ORD"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c2192"></mjx-c></mjx-mo><mjx-msup><mjx-mn class="mjx-n"><mjx-c class="mjx-c30"></mjx-c></mjx-mn><mjx-script style="vertical-align: 0.289em;"><mjx-mo class="mjx-n" style="font-size: 71.4%;"><mjx-c class="mjx-c2B"></mjx-c></mjx-mo></mjx-script></mjx-msup></mjx-texatom></mjx-script></mjx-munder><mjx-mi class="mjx-i" space="2"><mjx-c class="mjx-c1D453 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-mn class="mjx-n" space="4"><mjx-c class="mjx-c31"></mjx-c></mjx-mn></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><munder><mo data-mjx-texclass="OP" movablelimits="true">lim</mo><mrow data-mjx-texclass="ORD"><mi>x</mi><mo accent="false" stretchy="false">→</mo><msup><mn>0</mn><mo>−</mo></msup></mrow></munder><mi>f</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mo>=</mo><mo>−</mo><mn>1</mn><mo>≠</mo><munder><mo data-mjx-texclass="OP" movablelimits="true">lim</mo><mrow data-mjx-texclass="ORD"><mi>x</mi><mo accent="false" stretchy="false">→</mo><msup><mn>0</mn><mo>+</mo></msup></mrow></munder><mi>f</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mo>=</mo><mn>1</mn></math></mjx-assistive-mml></mjx-container><br>左右极限存在但不相等。</div>
+</div>
+</div>
+<!-- Visualization -->
+<div class="lg:col-span-8">
+<div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 h-full flex flex-col">
+<div class="flex items-center justify-between mb-4 border-b border-gray-100 pb-3">
+<h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+<span class="material-symbols-outlined text-indigo-600">monitoring</span>
+                                间断点图像演示
+                            </h3>
+<div class="flex gap-2" id="caseTags"><span class="px-2 py-1 bg-gray-100 text-gray-600 text-xs font-bold rounded border border-gray-200">左右极限不等</span><span class="px-2 py-1 bg-gray-100 text-gray-600 text-xs font-bold rounded border border-gray-200">第一类间断点</span></div>
+</div>
+<div class="relative flex-1 min-h-[400px] w-full bg-white rounded-xl overflow-hidden border border-gray-100">
+<canvas class="w-full h-full block" id="discontinuousCanvas" width="0" height="0"></canvas>
+</div>
+<div class="mt-4 flex justify-center gap-6 text-xs font-medium text-gray-500">
+<div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-purple-600"></span> 函数曲线</div>
+<div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full border border-red-500 bg-white"></span> 空心点 (极限)</div>
+<div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-red-500"></span> 实心点 (函数值)</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Tab 3: Check -->
+<div class="tab-content hidden space-y-6 max-w-5xl mx-auto" id="tab-check">
+<div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+<div class="flex items-center gap-3 mb-6 border-b border-gray-100 pb-4">
+<div class="bg-purple-100 p-2 rounded-lg text-purple-600">
+<span class="material-symbols-outlined text-2xl">science</span>
+</div>
+<h2 class="text-xl font-bold text-gray-800">连续性检验工具</h2>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+<div class="space-y-6">
+<div>
+<label class="block text-sm font-medium text-gray-700 mb-2">选择测试函数</label>
+<select class="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 focus:ring-2 focus:ring-purple-500 outline-none transition-all" id="testFunc" onchange="runTest()">
+<option value="poly"><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="12" style="font-size: 113.1%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D453 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-msup space="4"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: 0.363em;"><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c32"></mjx-c></mjx-mn></mjx-script></mjx-msup><mjx-mo class="mjx-n" space="3"><mjx-c class="mjx-c2B"></mjx-c></mjx-mo><mjx-mn class="mjx-n" space="3"><mjx-c class="mjx-c31"></mjx-c></mjx-mn></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="30" style="font-size: 113.1%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D453 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-msup space="4"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: 0.363em;"><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c32"></mjx-c></mjx-mn></mjx-script></mjx-msup><mjx-mo class="mjx-n" space="3"><mjx-c class="mjx-c2B"></mjx-c></mjx-mo><mjx-mn class="mjx-n" space="3"><mjx-c class="mjx-c31"></mjx-c></mjx-mn></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mi>f</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mo>=</mo><msup><mi>x</mi><mn>2</mn></msup><mo>+</mo><mn>1</mn></math></mjx-assistive-mml></mjx-container></mjx-assistive-mml></mjx-container> (多项式)</option>
+<option value="rational"><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="13" style="font-size: 113.1%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D453 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-mfrac space="4"><mjx-frac><mjx-num><mjx-nstrut></mjx-nstrut><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c31"></mjx-c></mjx-mn></mjx-num><mjx-dbox><mjx-dtable><mjx-line></mjx-line><mjx-row><mjx-den><mjx-dstrut></mjx-dstrut><mjx-mrow size="s"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c2212"></mjx-c></mjx-mo><mjx-mn class="mjx-n"><mjx-c class="mjx-c31"></mjx-c></mjx-mn></mjx-mrow></mjx-den></mjx-row></mjx-dtable></mjx-dbox></mjx-frac></mjx-mfrac></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="31" style="font-size: 113.1%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D453 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-mfrac space="4"><mjx-frac><mjx-num><mjx-nstrut></mjx-nstrut><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c31"></mjx-c></mjx-mn></mjx-num><mjx-dbox><mjx-dtable><mjx-line></mjx-line><mjx-row><mjx-den><mjx-dstrut></mjx-dstrut><mjx-mrow size="s"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c2212"></mjx-c></mjx-mo><mjx-mn class="mjx-n"><mjx-c class="mjx-c31"></mjx-c></mjx-mn></mjx-mrow></mjx-den></mjx-row></mjx-dtable></mjx-dbox></mjx-frac></mjx-mfrac></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mi>f</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mo>=</mo><mfrac><mn>1</mn><mrow><mi>x</mi><mo>−</mo><mn>1</mn></mrow></mfrac></math></mjx-assistive-mml></mjx-container></mjx-assistive-mml></mjx-container> (有理函数)</option>
+<option value="piecewise">分段函数 (跳跃)</option>
+<option value="abs"><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="14" style="font-size: 113.1%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D453 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-texatom space="4" texclass="ORD"><mjx-mo class="mjx-n"><mjx-c class="mjx-c7C"></mjx-c></mjx-mo></mjx-texatom><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c7C"></mjx-c></mjx-mo></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="32" style="font-size: 113.1%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D453 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-texatom space="4" texclass="ORD"><mjx-mo class="mjx-n"><mjx-c class="mjx-c7C"></mjx-c></mjx-mo></mjx-texatom><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c7C"></mjx-c></mjx-mo></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mi>f</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mo>=</mo><mrow data-mjx-texclass="ORD"><mo stretchy="false">|</mo></mrow><mi>x</mi><mo stretchy="false">|</mo></math></mjx-assistive-mml></mjx-container></mjx-assistive-mml></mjx-container> (绝对值)</option>
+</select>
+</div>
+<div>
+<label class="block text-sm font-medium text-gray-700 mb-2">检验点 <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="15" style="font-size: 113.1%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c30"></mjx-c></mjx-mn></mjx-script></mjx-msub></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="33" style="font-size: 113.1%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c30"></mjx-c></mjx-mn></mjx-script></mjx-msub></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>x</mi><mn>0</mn></msub></math></mjx-assistive-mml></mjx-container></mjx-assistive-mml></mjx-container> (拖动滑块)</label>
+<div class="flex items-center gap-4 bg-gray-50 p-3 rounded-xl border border-gray-200">
+<input class="flex-1 h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer accent-purple-600" id="testPointSlider" max="3" min="-3" oninput="updateTestPoint(this.value)" step="0.1" type="range" value="0">
+<div class="w-20 p-2 bg-white border border-gray-200 rounded-lg text-center font-mono font-bold text-purple-700" id="testPointDisplay">0.0</div>
+</div>
+</div>
+<button class="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl shadow-md transition-all active:scale-95 flex items-center justify-center gap-2" onclick="runTest()">
+<span class="material-symbols-outlined">play_arrow</span>
+                            执行检验
+                        </button>
+</div>
+<div class="bg-gray-50 rounded-xl p-6 border border-gray-100 flex flex-col justify-center">
+<h4 class="text-xs font-bold text-gray-400 uppercase mb-4 tracking-wider">检验报告</h4>
+<div class="space-y-3" id="testReport">
+<!-- Report items injected by JS -->
+</div>
+<div class="mt-6 pt-4 border-t border-gray-200 text-center font-bold text-lg transition-colors duration-300" id="testVerdict">
+<!-- Verdict injected by JS -->
+</div>
+</div>
+</div>
+<div class="relative w-full aspect-[2/1] bg-white rounded-xl overflow-hidden border border-gray-200 shadow-inner">
+<canvas class="w-full h-full block" id="testCanvas"></canvas>
+</div>
+</div>
+</div>
+</main>
+<!-- Mobile Nav -->
+<div class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around p-2 z-50 pb-safe">
+<button class="mobile-nav-btn flex flex-col items-center p-2 text-blue-600 transition-colors" data-target="definition" onclick="switchTab('definition')">
+<span class="material-symbols-outlined">menu_book</span>
+<span class="text-[10px] mt-1 font-medium">定义</span>
+</button>
+<button class="mobile-nav-btn flex flex-col items-center p-2 text-gray-400 transition-colors" data-target="types" onclick="switchTab('types')">
+<span class="material-symbols-outlined">broken_image</span>
+<span class="text-[10px] mt-1 font-medium">类型</span>
+</button>
+<button class="mobile-nav-btn flex flex-col items-center p-2 text-gray-400 transition-colors" data-target="check" onclick="switchTab('check')">
+<span class="material-symbols-outlined">fact_check</span>
+<span class="text-[10px] mt-1 font-medium">检验</span>
+</button>
+</div>
+</div>
+<script>
+    // --- Global State ---
+    let state = {
+        currentCase: 1,
+        testPoint: 0
+    };
 
-    <script>
-        function renderMath() {
-            if (window.MathJax && MathJax.typesetPromise) {
-                MathJax.typesetPromise().catch(err => console.log('渲染错误:', err));
+    // --- Tab Switching ---
+    function switchTab(tabId) {
+        // Desktop Nav
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            if (btn.id === `btn-${tabId}`) {
+                btn.classList.add('bg-blue-50', 'text-blue-700');
+                btn.classList.remove('text-gray-600', 'hover:bg-gray-50');
+            } else {
+                btn.classList.remove('bg-blue-50', 'text-blue-700');
+                btn.classList.add('text-gray-600', 'hover:bg-gray-50');
             }
+        });
+
+        // Mobile Nav
+        document.querySelectorAll('.mobile-nav-btn').forEach(btn => {
+            if (btn.dataset.target === tabId) {
+                btn.classList.add('text-blue-600');
+                btn.classList.remove('text-gray-400');
+            } else {
+                btn.classList.remove('text-blue-600');
+                btn.classList.add('text-gray-400');
+            }
+        });
+
+        // Content
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+        document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+
+        // Render Logic
+        if (tabId === 'definition') {
+            requestAnimationFrame(drawContinuousGraph);
+        } else if (tabId === 'types') {
+            selectCase(state.currentCase);
+        } else if (tabId === 'check') {
+            runTest();
         }
+    }
 
-        let currentType = 'removable';
-        let currentFunc = 'rational';
+    // --- Canvas Helpers ---
+    function setupCanvas(id) {
+        const canvas = document.getElementById(id);
+        const ctx = canvas.getContext('2d');
+        const dpr = window.devicePixelRatio || 1;
+        const rect = canvas.getBoundingClientRect();
+        
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        ctx.scale(dpr, dpr);
+        
+        return { ctx, width: rect.width, height: rect.height };
+    }
 
-        function switchPanel(panel) {
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
-            
-            event.target.classList.add('active');
-            document.getElementById(panel).classList.add('active');
-            
-            setTimeout(() => {
-                renderMath();
-                if (panel === 'definition') {
-                    drawDefinitionGraph();
-                } else if (panel === 'types') {
-                    drawTypeGraph();
-                } else if (panel === 'analysis') {
-                    updateAnalysis();
+    function drawGrid(ctx, width, height, scale, originX, originY) {
+        ctx.strokeStyle = '#f3f4f6'; // Gray-100
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        for(let x = originX; x < width; x += scale) { ctx.moveTo(x, 0); ctx.lineTo(x, height); }
+        for(let x = originX; x > 0; x -= scale) { ctx.moveTo(x, 0); ctx.lineTo(x, height); }
+        for(let y = originY; y < height; y += scale) { ctx.moveTo(0, y); ctx.lineTo(width, y); }
+        for(let y = originY; y > 0; y -= scale) { ctx.moveTo(0, y); ctx.lineTo(width, y); }
+        ctx.stroke();
+    }
+
+    function drawAxes(ctx, width, height, originX, originY) {
+        ctx.strokeStyle = '#64748b'; // Slate-500
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        
+        // X Axis
+        ctx.moveTo(0, originY);
+        ctx.lineTo(width, originY);
+        ctx.lineTo(width - 8, originY - 4);
+        ctx.moveTo(width, originY);
+        ctx.lineTo(width - 8, originY + 4);
+
+        // Y Axis
+        ctx.moveTo(originX, height);
+        ctx.lineTo(originX, 0);
+        ctx.lineTo(originX - 4, 8);
+        ctx.moveTo(originX, 0);
+        ctx.lineTo(originX + 4, 8);
+        
+        ctx.stroke();
+
+        ctx.fillStyle = '#475569'; // Slate-600
+        ctx.font = '12px Inter, sans-serif';
+        ctx.fillText('x', width - 15, originY + 20);
+        ctx.fillText('y', originX + 10, 15);
+        ctx.fillText('O', originX - 15, originY + 15);
+    }
+
+    // --- Continuous Graph ---
+    function drawContinuousGraph() {
+        const { ctx, width, height } = setupCanvas('continuousCanvas');
+        const originX = width / 2;
+        const originY = height / 2 + 20;
+        const scale = 50;
+
+        ctx.clearRect(0, 0, width, height);
+        drawGrid(ctx, width, height, scale, originX, originY);
+        drawAxes(ctx, width, height, originX, originY);
+
+        // Draw f(x) = 0.5x^2 - 1
+        ctx.beginPath();
+        ctx.strokeStyle = '#2563eb'; // Blue-600
+        ctx.lineWidth = 2.5;
+        for (let px = 0; px <= width; px += 2) {
+            const x = (px - originX) / scale;
+            const y = 0.5 * x * x - 1;
+            const py = originY - y * scale;
+            if (px === 0) ctx.moveTo(px, py);
+            else ctx.lineTo(px, py);
+        }
+        ctx.stroke();
+
+        // Draw Point at x=1
+        const x0 = 1;
+        const y0 = 0.5 * 1 * 1 - 1;
+        const px0 = originX + x0 * scale;
+        const py0 = originY - y0 * scale;
+
+        ctx.fillStyle = '#10b981'; // Green
+        ctx.beginPath(); ctx.arc(px0, py0, 5, 0, Math.PI*2); ctx.fill();
+        
+        // Label
+        ctx.fillStyle = '#1e293b'; // Slate-800
+        ctx.fillText(`(${x0}, ${y0})`, px0 + 10, py0);
+    }
+
+    // --- Discontinuous Types Logic ---
+    const CASES = {
+        1: {
+            title: '跳跃间断点',
+            formula: 'f(x) = \\text{sgn}(x)',
+            analysis: '$\\lim_{x \\to 0^-} f(x) = -1 \\neq \\lim_{x \\to 0^+} f(x) = 1$<br>左右极限存在但不相等。',
+            tags: ['左右极限不等', '第一类间断点'],
+            draw: (ctx, w, h, ox, oy, s) => {
+                // y = -1 for x < 0
+                ctx.beginPath(); ctx.strokeStyle = '#9333ea'; ctx.lineWidth = 2.5;
+                ctx.moveTo(0, oy + s); ctx.lineTo(ox, oy + s); ctx.stroke();
+                // Empty circle at (0, -1) - left limit
+                ctx.fillStyle = '#fff'; ctx.strokeStyle='#ef4444'; ctx.beginPath(); ctx.arc(ox, oy+s, 4, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+
+                // y = 1 for x > 0
+                ctx.beginPath(); ctx.strokeStyle = '#9333ea';
+                ctx.moveTo(ox, oy - s); ctx.lineTo(w, oy - s); ctx.stroke();
+                // Empty circle at (0, 1) - right limit
+                ctx.fillStyle = '#fff'; ctx.strokeStyle='#ef4444'; ctx.beginPath(); ctx.arc(ox, oy-s, 4, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+            }
+        },
+        2: {
+            title: '可去间断点',
+            formula: 'f(x) = \\frac{x^2-1}{x-1}, x \\neq 1',
+            analysis: '$\\lim_{x \\to 1} f(x) = 2$，但 $f(1)$ 无定义。<br>左右极限相等，但在该点无定义或定义值不等于极限值。',
+            tags: ['左右极限相等', '第一类间断点'],
+            draw: (ctx, w, h, ox, oy, s) => {
+                // y = x + 1, hole at x=1
+                const xHole = 1;
+                const yHole = 2;
+                const pHoleX = ox + xHole * s;
+                const pHoleY = oy - yHole * s;
+
+                ctx.beginPath(); ctx.strokeStyle = '#9333ea'; ctx.lineWidth = 2.5;
+                // Draw line
+                for(let px=0; px<=w; px+=2) {
+                    const x = (px - ox) / s;
+                    const y = x + 1;
+                    const py = oy - y * s;
+                    if(px===0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
                 }
-            }, 50);
-        }
+                ctx.stroke();
 
-        function drawDefinitionGraph() {
-            const canvas = document.getElementById('definitionGraph');
-            if (!canvas) return;
-            
-            const ctx = canvas.getContext('2d');
-            const width = canvas.width;
-            const height = canvas.height;
-            
-            ctx.clearRect(0, 0, width, height);
-            
-            // 坐标轴
-            ctx.strokeStyle = '#374151';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(50, height - 40);
-            ctx.lineTo(width - 30, height - 40);
-            ctx.moveTo(width/2, 30);
-            ctx.lineTo(width/2, height - 40);
-            ctx.stroke();
-            
-            // 绘制有间断点的函数
-            ctx.strokeStyle = '#4f46e5';
-            ctx.lineWidth = 2.5;
-            
-            // 左半部分
-            ctx.beginPath();
-            for(let px = 50; px < width/2 - 5; px++) {
-                const x = (px - width/2) / 50;
-                const y = x + 1;
-                const py = height - 40 - y * 50;
-                if(px === 50) ctx.moveTo(px, py);
-                else ctx.lineTo(px, py);
+                // Draw Hole
+                ctx.fillStyle = '#fff'; ctx.strokeStyle='#ef4444'; ctx.lineWidth = 2;
+                ctx.beginPath(); ctx.arc(pHoleX, pHoleY, 5, 0, Math.PI*2); ctx.fill(); ctx.stroke();
             }
-            ctx.stroke();
-            
-            // 右半部分（跳跃）
-            ctx.beginPath();
-            for(let px = width/2 + 5; px < width - 30; px++) {
-                const x = (px - width/2) / 50;
-                const y = x - 1;
-                const py = height - 40 - y * 50;
-                if(px === width/2 + 5) ctx.moveTo(px, py);
-                else ctx.lineTo(px, py);
+        },
+        3: {
+            title: '无穷间断点',
+            formula: 'f(x) = \\frac{1}{x}',
+            analysis: '$\\lim_{x \\to 0^+} f(x) = +\\infty, \\lim_{x \\to 0^-} f(x) = -\\infty$<br>极限为无穷大。',
+            tags: ['极限为无穷', '第二类间断点'],
+            draw: (ctx, w, h, ox, oy, s) => {
+                ctx.strokeStyle = '#9333ea'; ctx.lineWidth = 2.5;
+                
+                // Right branch
+                ctx.beginPath();
+                for(let px=ox+1; px<=w; px+=2) {
+                    const x = (px - ox) / s;
+                    const y = 1/x;
+                    if(y > 10) continue; 
+                    const py = oy - y * s;
+                    if(px === ox+1) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+                }
+                ctx.stroke();
+
+                // Left branch
+                ctx.beginPath();
+                for(let px=0; px<ox; px+=2) {
+                    const x = (px - ox) / s;
+                    const y = 1/x;
+                    if(y < -10) continue;
+                    const py = oy - y * s;
+                    if(px === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+                }
+                ctx.stroke();
+
+                // Asymptote
+                ctx.setLineDash([5,5]); ctx.strokeStyle = '#ef4444'; ctx.lineWidth=1;
+                ctx.beginPath(); ctx.moveTo(ox, 0); ctx.lineTo(ox, h); ctx.stroke();
+                ctx.setLineDash([]);
             }
-            ctx.stroke();
-            
-            // 标记间断点
-            ctx.strokeStyle = '#ef4444';
-            ctx.setLineDash([5, 5]);
-            ctx.beginPath();
-            ctx.moveTo(width/2, 30);
-            ctx.lineTo(width/2, height - 40);
-            ctx.stroke();
-            ctx.setLineDash([]);
-            
-            // 标记空心点和实心点
+        }
+    };
+
+    function selectCase(id) {
+        state.currentCase = id;
+        
+        // Update Buttons
+        document.querySelectorAll('.case-btn').forEach(btn => {
+            if(btn.dataset.case == id) {
+                btn.classList.add('border-blue-500', 'bg-blue-50', 'shadow-md');
+                btn.classList.remove('border-transparent', 'bg-gray-50', 'hover:shadow-md');
+                btn.querySelector('.font-bold').classList.replace('text-gray-800', 'text-blue-900');
+                btn.querySelector('.text-xs').classList.replace('text-gray-500', 'text-blue-700');
+            } else {
+                btn.classList.remove('border-blue-500', 'bg-blue-50', 'shadow-md');
+                btn.classList.add('border-transparent', 'bg-gray-50', 'hover:shadow-md');
+                btn.querySelector('.font-bold').classList.replace('text-blue-900', 'text-gray-800');
+                btn.querySelector('.text-xs').classList.replace('text-blue-700', 'text-gray-500');
+            }
+        });
+
+        // Update Info
+        const data = CASES[id];
+        document.getElementById('caseFormula').innerHTML = `$$ ${data.formula} $$`;
+        document.getElementById('caseAnalysis').innerHTML = data.analysis;
+        
+        const tagsContainer = document.getElementById('caseTags');
+        tagsContainer.innerHTML = data.tags.map(t => 
+            `<span class="px-2 py-1 bg-gray-100 text-gray-600 text-xs font-bold rounded border border-gray-200">${t}</span>`
+        ).join('');
+
+        if(window.MathJax) MathJax.typesetPromise();
+
+        // Draw
+        const { ctx, width, height } = setupCanvas('discontinuousCanvas');
+        const originX = width / 2;
+        const originY = height / 2;
+        const scale = 40;
+
+        ctx.clearRect(0, 0, width, height);
+        drawGrid(ctx, width, height, scale, originX, originY);
+        drawAxes(ctx, width, height, originX, originY);
+        data.draw(ctx, width, height, originX, originY, scale);
+    }
+
+    // --- Check Logic ---
+    function updateTestPoint(val) {
+        state.testPoint = parseFloat(val);
+        // document.getElementById('testPointSlider').value = state.testPoint;
+        document.getElementById('testPointDisplay').innerText = state.testPoint.toFixed(1);
+        drawTestGraph(); // Live visual update only, manual button for report
+    }
+
+    function getFuncValue(type, x) {
+        switch(type) {
+            case 'poly': return x*x + 1;
+            case 'rational': return Math.abs(x - 1) < 0.001 ? NaN : 1/(x-1);
+            case 'piecewise': return x < 0 ? x : x + 1; // Jump at 0
+            case 'abs': return Math.abs(x);
+            default: return 0;
+        }
+    }
+
+    function checkContinuity(type, x0) {
+        const epsilon = 0.001;
+        const f0 = getFuncValue(type, x0);
+        const fLeft = getFuncValue(type, x0 - epsilon);
+        const fRight = getFuncValue(type, x0 + epsilon);
+
+        const isDefined = !isNaN(f0) && isFinite(f0);
+        // Simple numeric check with tolerance
+        const limitsMatch = Math.abs(fLeft - fRight) < 0.1 && isFinite(fLeft) && isFinite(fRight);
+        
+        // Special handling for rational at x=1 (infinity)
+        let limitExists = limitsMatch;
+        if (type === 'rational' && Math.abs(x0 - 1) < 0.1) limitExists = false;
+
+        const isContinuous = isDefined && limitExists && Math.abs(fLeft - f0) < 0.1;
+
+        return { isDefined, limitExists, isContinuous, f0, fLeft, fRight };
+    }
+
+    function runTest() {
+        const type = document.getElementById('testFunc').value;
+        const x0 = state.testPoint;
+        const result = checkContinuity(type, x0);
+
+        const reportDiv = document.getElementById('testReport');
+        const verdictDiv = document.getElementById('testVerdict');
+
+        let reportHTML = '';
+        
+        // 1. Definition
+        reportHTML += `<div class="flex items-center gap-2 text-sm ${result.isDefined ? 'text-green-700' : 'text-red-700'}">
+            <span class="material-symbols-outlined text-base">${result.isDefined ? 'check_circle' : 'cancel'}</span>
+            <span>1. 函数定义: ${result.isDefined ? `f(${x0}) = ${result.f0.toFixed(2)}` : '无定义'}</span>
+        </div>`;
+
+        // 2. Limit
+        const lText = result.fLeft > 100 ? '∞' : result.fLeft < -100 ? '-∞' : result.fLeft.toFixed(2);
+        const rText = result.fRight > 100 ? '∞' : result.fRight < -100 ? '-∞' : result.fRight.toFixed(2);
+        
+        reportHTML += `<div class="flex items-center gap-2 text-sm ${result.limitExists ? 'text-green-700' : 'text-red-700'}">
+            <span class="material-symbols-outlined text-base">${result.limitExists ? 'check_circle' : 'cancel'}</span>
+            <span>2. 极限存在: 左${lText} ${result.limitExists ? '≈' : '≠'} 右${rText}</span>
+        </div>`;
+
+        // 3. Equality
+        const isEqual = result.isContinuous;
+        reportHTML += `<div class="flex items-center gap-2 text-sm ${isEqual ? 'text-green-700' : 'text-red-700'}">
+            <span class="material-symbols-outlined text-base">${isEqual ? 'check_circle' : 'cancel'}</span>
+            <span>3. 极限 = 函数值: ${isEqual ? '成立' : '不成立'}</span>
+        </div>`;
+
+        reportDiv.innerHTML = reportHTML;
+        
+        verdictDiv.className = `mt-6 pt-4 border-t border-gray-200 text-center font-bold text-lg ${result.isContinuous ? 'text-green-600' : 'text-red-600'}`;
+        verdictDiv.innerHTML = result.isContinuous ? '判定：连续' : '判定：不连续';
+        
+        drawTestGraph();
+    }
+
+    function drawTestGraph() {
+        const { ctx, width, height } = setupCanvas('testCanvas');
+        const originX = width / 2;
+        const originY = height / 2 + 40;
+        const scale = 40;
+        
+        ctx.clearRect(0, 0, width, height);
+        drawGrid(ctx, width, height, scale, originX, originY);
+        drawAxes(ctx, width, height, originX, originY);
+
+        const type = document.getElementById('testFunc').value;
+        const x0 = state.testPoint;
+
+        ctx.beginPath();
+        ctx.strokeStyle = '#9333ea'; // Purple-600
+        ctx.lineWidth = 2.5;
+
+        let start = true;
+        for(let px = 0; px <= width; px+=2) {
+            const x = (px - originX) / scale;
+            // Handle visual discontinuity manually for piecewise/rational
+            if (type === 'rational' && Math.abs(x - 1) < 0.1) { start = true; continue; }
+            if (type === 'piecewise' && Math.abs(x) < 0.05) { start = true; continue; }
+
+            const y = getFuncValue(type, x);
+            if(isNaN(y) || Math.abs(y) > 10) { start = true; continue; }
+
+            const py = originY - y * scale;
+            if(start) { ctx.moveTo(px, py); start = false; }
+            else { ctx.lineTo(px, py); }
+        }
+        ctx.stroke();
+
+        // Draw Test Point Indicator
+        const px0 = originX + x0 * scale;
+        const yVal = getFuncValue(type, x0);
+        
+        ctx.strokeStyle = '#d8b4fe'; // Purple-300
+        ctx.setLineDash([5, 5]);
+        ctx.beginPath();
+        ctx.moveTo(px0, 0); ctx.lineTo(px0, height);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Point
+        if (!isNaN(yVal) && isFinite(yVal)) {
+            const py0 = originY - yVal * scale;
+            ctx.fillStyle = '#9333ea';
+            ctx.beginPath(); ctx.arc(px0, py0, 6, 0, Math.PI*2); ctx.fill();
+        } else {
+            // Draw empty circle at limit if exists, or just visual indicator on axis
             ctx.fillStyle = '#ef4444';
-            ctx.beginPath();
-            ctx.arc(width/2 - 2, height - 40 - 50, 4, 0, Math.PI * 2);
-            ctx.stroke();
-            
-            ctx.beginPath();
-            ctx.arc(width/2 + 2, height - 40 + 50, 4, 0, Math.PI * 2);
-            ctx.fill();
-            
-            // 标注
-            ctx.fillStyle = '#374151';
-            ctx.font = '12px Arial';
-            ctx.fillText('间断点', width/2 + 10, 25);
+            ctx.font = '14px sans-serif';
+            ctx.fillText('✗', px0 - 5, height - 10);
         }
+    }
 
-        function selectType(type) {
-            currentType = type;
-            document.querySelectorAll('.type-card').forEach(c => c.classList.remove('active'));
-            
-            const typeCards = document.querySelectorAll('.type-card');
-            const typeIndex = ['removable', 'jump', 'infinite', 'oscillation'].indexOf(type);
-            typeCards[typeIndex].classList.add('active');
-            
-            const typeData = {
-                'removable': {
-                    formula: '可去间断：极限存在但不等于函数值',
-                    description: '<strong>特点：</strong><br>• 左右极限存在且相等<br>• 但不等于函数值（或无定义）<br>• 可以通过重新定义函数值"去除"间断',
-                    example: '$f(x) = \\frac{x^2 - 1}{x - 1}$ 在 x = 1 处',
-                    analysis: '极限值 = 2，但函数无定义'
-                },
-                'jump': {
-                    formula: '跳跃间断：左右极限不相等',
-                    description: '<strong>特点：</strong><br>• 左右极限都存在<br>• 但左极限 ≠ 右极限<br>• 函数图像有"跳跃"',
-                    example: '$f(x) = \\begin{cases} x, & x < 0 \\\\ x+1, & x \\geq 0 \\end{cases}$',
-                    analysis: '左极限 = 0，右极限 = 1'
-                },
-                'infinite': {
-                    formula: '无穷间断：极限为无穷大',
-                    description: '<strong>特点：</strong><br>• 函数值趋向无穷大<br>• 至少一个单侧极限不存在<br>• 图像有垂直渐近线',
-                    example: '$f(x) = \\frac{1}{x}$ 在 x = 0 处',
-                    analysis: '左极限 = -∞，右极限 = +∞'
-                },
-                'oscillation': {
-                    formula: '振荡间断：极限振荡不存在',
-                    description: '<strong>特点：</strong><br>• 函数值无限振荡<br>• 极限不存在（非无穷）<br>• 无法确定趋势',
-                    example: '$f(x) = \\sin(\\frac{1}{x})$ 在 x = 0 处',
-                    analysis: '函数值在 -1 和 1 之间振荡'
-                }
-            };
-            
-            const data = typeData[type];
-            document.getElementById('typeFormula').innerHTML = data.formula;
-            document.getElementById('typeDescription').innerHTML = data.description;
-            document.getElementById('typeExample').innerHTML = data.example;
-            document.getElementById('typeAnalysis').innerHTML = data.analysis;
-            
-            renderMath();
-            drawTypeGraph();
-        }
+    // --- Init ---
+    window.onload = function() {
+        switchTab('definition');
+        selectCase(1);
+        // MathJax initial typeset handled by config
+    };
 
-        function drawTypeGraph() {
-            const canvas = document.getElementById('typeGraph');
-            if (!canvas) return;
-            
-            const ctx = canvas.getContext('2d');
-            const width = canvas.width;
-            const height = canvas.height;
-            
-            ctx.clearRect(0, 0, width, height);
-            
-            // 坐标轴
-            ctx.strokeStyle = '#374151';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(50, height - 40);
-            ctx.lineTo(width - 30, height - 40);
-            ctx.moveTo(width/2, 30);
-            ctx.lineTo(width/2, height - 40);
-            ctx.stroke();
-            
-            ctx.strokeStyle = '#4f46e5';
-            ctx.lineWidth = 2.5;
-            
-            switch(currentType) {
-                case 'removable':
-                    // 可去间断：(x²-1)/(x-1)
-                    ctx.beginPath();
-                    for(let px = 50; px < width - 30; px++) {
-                        const x = (px - width/2) / 50;
-                        if(Math.abs(x - 1) > 0.05) {
-                            const y = x + 1;
-                            const py = height - 40 - y * 50;
-                            if(px === 50 || Math.abs(x - 1) <= 0.05) ctx.moveTo(px, py);
-                            else ctx.lineTo(px, py);
-                        }
-                    }
-                    ctx.stroke();
-                    
-                    // 空心点
-                    ctx.strokeStyle = '#ef4444';
-                    ctx.beginPath();
-                    ctx.arc(width/2 + 50, height - 40 - 100, 4, 0, Math.PI * 2);
-                    ctx.stroke();
-                    break;
-                    
-                case 'jump':
-                    // 跳跃间断
-                    ctx.beginPath();
-                    for(let px = 50; px < width/2 - 2; px++) {
-                        const x = (px - width/2) / 50;
-                        const y = x;
-                        const py = height - 40 - y * 50;
-                        if(px === 50) ctx.moveTo(px, py);
-                        else ctx.lineTo(px, py);
-                    }
-                    ctx.stroke();
-                    
-                    ctx.beginPath();
-                    for(let px = width/2 + 2; px < width - 30; px++) {
-                        const x = (px - width/2) / 50;
-                        const y = x + 1;
-                        const py = height - 40 - y * 50;
-                        if(px === width/2 + 2) ctx.moveTo(px, py);
-                        else ctx.lineTo(px, py);
-                    }
-                    ctx.stroke();
-                    break;
-                    
-                case 'infinite':
-                    // 无穷间断：1/x
-                    ctx.beginPath();
-                    for(let px = 50; px < width/2 - 5; px++) {
-                        const x = (px - width/2) / 50;
-                        if(x < -0.1) {
-                            const y = 1 / x;
-                            if(Math.abs(y) < 5) {
-                                const py = height - 40 - y * 30;
-                                if(px === 50) ctx.moveTo(px, py);
-                                else ctx.lineTo(px, py);
-                            }
-                        }
-                    }
-                    ctx.stroke();
-                    
-                    ctx.beginPath();
-                    for(let px = width/2 + 5; px < width - 30; px++) {
-                        const x = (px - width/2) / 50;
-                        if(x > 0.1) {
-                            const y = 1 / x;
-                            if(Math.abs(y) < 5) {
-                                const py = height - 40 - y * 30;
-                                if(px === width/2 + 5) ctx.moveTo(px, py);
-                                else ctx.lineTo(px, py);
-                            }
-                        }
-                    }
-                    ctx.stroke();
-                    break;
-                    
-                case 'oscillation':
-                    // 振荡间断：sin(1/x)
-                    ctx.beginPath();
-                    for(let px = 50; px < width - 30; px++) {
-                        const x = (px - width/2) / 50;
-                        if(Math.abs(x) > 0.05) {
-                            const y = Math.sin(1 / x);
-                            const py = height - 40 - y * 80;
-                            if(px === 50 || Math.abs(x) <= 0.05) ctx.moveTo(px, py);
-                            else ctx.lineTo(px, py);
-                        }
-                    }
-                    ctx.stroke();
-                    break;
-            }
-            
-            // 标记间断点
-            ctx.strokeStyle = '#ef4444';
-            ctx.setLineDash([5, 5]);
-            const discontinuityX = currentType === 'removable' ? width/2 + 50 : width/2;
-            ctx.beginPath();
-            ctx.moveTo(discontinuityX, 30);
-            ctx.lineTo(discontinuityX, height - 40);
-            ctx.stroke();
-            ctx.setLineDash([]);
-        }
+    window.addEventListener('resize', () => {
+        if (!document.getElementById('tab-definition').classList.contains('hidden')) drawContinuousGraph();
+        if (!document.getElementById('tab-types').classList.contains('hidden')) selectCase(state.currentCase);
+        if (!document.getElementById('tab-check').classList.contains('hidden')) drawTestGraph();
+    });
 
-        function updateAnalysis() {
-            const func = document.getElementById('analyzeFunc').value;
-            currentFunc = func;
-            
-            // 更新显示的公式
-            const formulas = {
-                'rational': '$f(x) = \\frac{x^2-4}{x-2}$',
-                'piecewise': '$f(x) = \\begin{cases} x+1 & \\text{if } x < 0 \\\\ x-1 & \\text{if } x \\geq 0 \\end{cases}$',
-                'trig': '$f(x) = \\frac{\\sin x}{x}$',
-                'exp': '$f(x) = e^{1/x}$'
-            };
-            
-            document.getElementById('selectedFunction').innerHTML = formulas[func];
-            drawAnalysisGraph();
-            renderMath();
-        }
+</script>
 
-        function analyzePoint() {
-            const func = document.getElementById('analyzeFunc').value;
-            const x0 = parseFloat(document.getElementById('checkPoint').value);
-            
-            let hasDefinition = true;
-            let leftLimit, rightLimit, funcValue;
-            let continuous = false;
-            
-            switch(func) {
-                case 'rational':
-                    // (x²-4)/(x-2)
-                    if(Math.abs(x0 - 2) < 0.001) {
-                        hasDefinition = false;
-                        leftLimit = rightLimit = 4;
-                    } else {
-                        funcValue = (x0*x0 - 4)/(x0 - 2);
-                        leftLimit = rightLimit = funcValue;
-                        continuous = true;
-                    }
-                    break;
-                    
-                case 'piecewise':
-                    if(x0 < 0) {
-                        funcValue = x0;
-                        leftLimit = rightLimit = x0;
-                        continuous = true;
-                    } else if(x0 > 0) {
-                        funcValue = x0 + 1;
-                        leftLimit = rightLimit = x0 + 1;
-                        continuous = true;
-                    } else {
-                        funcValue = 0.5;
-                        leftLimit = 0;
-                        rightLimit = 1;
-                        continuous = false;
-                    }
-                    break;
-                    
-                case 'trig':
-                    // sin(x)/x
-                    if(Math.abs(x0) < 0.001) {
-                        hasDefinition = false;
-                        leftLimit = rightLimit = 1;
-                    } else {
-                        funcValue = Math.sin(x0)/x0;
-                        leftLimit = rightLimit = funcValue;
-                        continuous = true;
-                    }
-                    break;
-                    
-                case 'exp':
-                    // e^(1/x)
-                    if(Math.abs(x0) < 0.001) {
-                        hasDefinition = false;
-                        leftLimit = 0;
-                        rightLimit = Infinity;
-                    } else {
-                        funcValue = Math.exp(1/x0);
-                        leftLimit = rightLimit = funcValue;
-                        continuous = true;
-                    }
-                    break;
-            }
-            
-            // 更新分析结果
-            const resultDiv = document.getElementById('analysisResult');
-            resultDiv.innerHTML = '';
-            
-            const conditions = [
-                { pass: hasDefinition, text: hasDefinition ? '有定义' : '无定义' },
-                { pass: isFinite(leftLimit) && isFinite(rightLimit) && leftLimit === rightLimit, 
-                  text: leftLimit === rightLimit ? '极限存在' : '极限不存在' },
-                { pass: hasDefinition && leftLimit === rightLimit && leftLimit === funcValue, 
-                  text: '极限等于函数值' }
-            ];
-            
-            conditions.forEach(cond => {
-                const div = document.createElement('div');
-                div.className = `condition-item ${cond.pass ? 'condition-pass' : 'condition-fail'}`;
-                div.innerHTML = `
-                    <span class="icon ${cond.pass ? 'icon-pass' : 'icon-fail'}">${cond.pass ? '✓' : '✗'}</span>
-                    <span>${cond.text}</span>
-                `;
-                resultDiv.appendChild(div);
-            });
-            
-            document.getElementById('conclusionBox').innerHTML = 
-                continuous ? 
-                '<span style="color: var(--success);">该点连续</span>' :
-                '<span style="color: var(--danger);">该点为间断点</span>';
-            
-            document.getElementById('calculationDetails').innerHTML = 
-                `左极限：${isFinite(leftLimit) ? leftLimit.toFixed(3) : leftLimit}<br>
-                右极限：${isFinite(rightLimit) ? rightLimit.toFixed(3) : rightLimit}<br>
-                函数值：${hasDefinition ? funcValue.toFixed(3) : '无定义'}`;
-        }
-
-        function drawAnalysisGraph() {
-            const canvas = document.getElementById('analysisGraph');
-            if (!canvas) return;
-            
-            const ctx = canvas.getContext('2d');
-            const width = canvas.width;
-            const height = canvas.height;
-            
-            ctx.clearRect(0, 0, width, height);
-            
-            // 坐标轴
-            ctx.strokeStyle = '#374151';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(50, height - 40);
-            ctx.lineTo(width - 30, height - 40);
-            ctx.moveTo(width/2, 30);
-            ctx.lineTo(width/2, height - 40);
-            ctx.stroke();
-            
-            const x0 = parseFloat(document.getElementById('checkPoint').value);
-            
-            // 绘制函数
-            ctx.strokeStyle = '#4f46e5';
-            ctx.lineWidth = 2.5;
-            ctx.beginPath();
-            
-            for(let px = 50; px < width - 30; px++) {
-                const x = (px - width/2) / 50 + x0;
-                let y;
-                
-                switch(currentFunc) {
-                    case 'rational':
-                        if(Math.abs(x - 2) > 0.05) {
-                            y = (x*x - 4)/(x - 2);
-                        }
-                        break;
-                    case 'piecewise':
-                        y = x < 0 ? x : x > 0 ? x + 1 : 0.5;
-                        break;
-                    case 'trig':
-                        if(Math.abs(x) > 0.05) {
-                            y = Math.sin(x)/x;
-                        }
-                        break;
-                    case 'exp':
-                        if(Math.abs(x) > 0.05) {
-                            y = Math.exp(1/x);
-                            if(y > 10) y = undefined;
-                        }
-                        break;
-                }
-                
-                if(y !== undefined && isFinite(y) && Math.abs(y) < 10) {
-                    const py = height - 40 - y * 30;
-                    if(px === 50 || y === undefined) ctx.moveTo(px, py);
-                    else ctx.lineTo(px, py);
-                }
-            }
-            ctx.stroke();
-            
-            // 标记检查点
-            ctx.strokeStyle = '#ef4444';
-            ctx.setLineDash([5, 5]);
-            ctx.beginPath();
-            ctx.moveTo(width/2, 30);
-            ctx.lineTo(width/2, height - 40);
-            ctx.stroke();
-            ctx.setLineDash([]);
-        }
-
-        document.getElementById('checkPoint')?.addEventListener('input', function() {
-            document.getElementById('checkValue').textContent = parseFloat(this.value).toFixed(1);
-            drawAnalysisGraph();
-        });
-
-        window.addEventListener('DOMContentLoaded', function() {
-            setTimeout(() => {
-                drawDefinitionGraph();
-                renderMath();
-            }, 100);
-        });
-
-        function toggleReturnLinks() { const p = document.querySelector('.return-links'); if (!p) return; if (p.style.display === 'flex') { p.style.opacity = '0'; setTimeout(() => p.style.display = 'none', 160); } else { p.style.display = 'flex'; requestAnimationFrame(() => p.style.opacity = '1'); } }
-    </script>
-</body>
-</html>
+</body></html>

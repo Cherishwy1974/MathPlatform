@@ -335,7 +335,7 @@
 };
 
 window.exerciseData.exercises = [
-  {
+{
     id: 1,
     type: "计算题",
     title: "多项式定积分基础",
@@ -349,7 +349,7 @@ $\\left[\\frac{2}{3}x^3 - \\frac{3}{2}x^2 + 4x\\right]_0^2 = \\left(\\frac{16}{3
     category: "基本定积分计算",
     method: "牛顿-莱布尼茨公式"
   },
-  {
+{
     id: 2,
     type: "计算题",
     title: "三角函数混合积分",
@@ -363,7 +363,7 @@ $\\left[-3\\cos x + 2\\sin x\\right]_0^{\\pi/2} = (-3\\cdot 0 + 2\\cdot 1) - (-3
     category: "基本定积分计算",
     method: "牛顿-莱布尼茨公式"
   },
-  {
+{
     id: 3,
     type: "计算题",
     title: "指数函数与常数",
@@ -377,7 +377,7 @@ $\\left[e^{x} + 2x\\right]_1^3 = (e^{3} + 6) - (e + 2) = e^{3} - e + 4$。`,
     category: "基本定积分计算",
     method: "牛顿-莱布尼茨公式"
   },
-  {
+{
     id: 4,
     type: "计算题",
     title: "有理函数拆分积分",
@@ -393,7 +393,7 @@ $[3x + \\ln x]_1^2 = (6 + \\ln 2) - (3 + 0) = 3 + \\ln 2$。`,
     category: "基本定积分计算",
     method: "拆分积分"
   },
-  {
+{
     id: 5,
     type: "计算题",
     title: "平方差结构积分",
@@ -409,7 +409,7 @@ $\\left[x - x^2 + \\frac{x^3}{3}\\right]_0^1 = 1 - 1 + \\frac{1}{3} = \\frac{1}{
     category: "基本定积分计算",
     method: "多项式积分"
   },
-  {
+{
     id: 6,
     type: "计算题",
     title: "含平方根的简单积分",
@@ -425,7 +425,7 @@ $\\left[\\frac{2}{3} x^{3/2}\\right]_0^4 = \\frac{2}{3} (8 - 0) = \\frac{16}{3}$
     category: "基本定积分计算",
     method: "幂函数积分"
   },
-  {
+{
     id: 7,
     type: "计算题",
     title: "对称函数积分",
@@ -441,7 +441,7 @@ $\\int_{-1}^{1} 2x dx = 0$。
     category: "定积分定义与性质",
     method: "奇偶性判断"
   },
-  {
+{
     id: 8,
     type: "计算题",
     title: "指数减多项式积分",
@@ -455,7 +455,7 @@ $\\left[e^{x} - \\frac{x^{2}}{2}\\right]_0^1 = (e - \\frac{1}{2}) - (1 - 0) = e 
     category: "基本定积分计算",
     method: "牛顿-莱布尼茨公式"
   },
-  {
+{
     id: 9,
     type: "计算题",
     title: "正弦平方积分",
@@ -471,7 +471,7 @@ $\\frac{1}{2} [x - \\frac{1}{2} \\sin 2x]_0^{\\pi} = \\frac{1}{2} (\\pi - 0) = \
     category: "基本定积分计算",
     method: "三角恒等变换"
   },
-  {
+{
     id: 10,
     type: "计算题",
     title: "余弦平方积分",
@@ -487,7 +487,7 @@ $\\frac{1}{2} \\int_{0}^{\\pi/2} (1 + \\cos 2x) dx = \\frac{1}{2} \\left[ x + \\
     category: "基本定积分计算",
     method: "三角恒等变换"
   },
-  {
+{
     id: 11,
     type: "计算题",
     title: "对称替换积分",
@@ -503,7 +503,7 @@ $\\left[x - \\frac{3}{2}x^2 + x^3\\right]_0^1 = 1 - \\frac{3}{2} + 1 = \\frac{1}
     category: "定积分定义与性质",
     method: "对称变换"
   },
-  {
+{
     id: 12,
     type: "计算题",
     title: "含指数与三角的积分",
@@ -519,7 +519,7 @@ $\\int_{1}^{2} \\cos u\\,du = \\sin u \\big|_{1}^{2} = \\sin 2 - \\sin 1$。`,
     category: "换元定积分计算",
     method: "指数换元"
   },
-  {
+{
     id: 13,
     type: "计算题",
     title: "指数衰减倍数积分",
@@ -535,7 +535,7 @@ $[-x e^{-x}]_0^1 + \\int_0^1 e^{-x} dx = (-e^{-1} - 0) + (1 - e^{-1}) = 1 - 2e^{
     category: "分部积分法",
     method: "分部积分法"
   },
-  {
+{
     id: 14,
     type: "计算题",
     title: "对数函数积分",
@@ -551,7 +551,7 @@ $[x\\ln x]_1^e - \\int_1^e x \\cdot \\frac{1}{x} dx = (e - 0) - (e - 1) = 1$。`
     category: "分部积分法",
     method: "分部积分法"
   },
-  {
+{
     id: 15,
     type: "计算题",
     title: "正弦平方加权积分",
@@ -567,7 +567,7 @@ $[-x\\cos x]_0^{\\pi} + \\int_0^{\\pi} \\cos x dx = (\\pi + 0) + (0) = \\pi$。`
     category: "分部积分法",
     method: "分部积分法"
   },
-  {
+{
     id: 16,
     type: "性质题",
     title: "奇函数判别",
@@ -581,7 +581,7 @@ $[-x\\cos x]_0^{\\pi} + \\int_0^{\\pi} \\cos x dx = (\\pi + 0) + (0) = \\pi$。`
     category: "定积分定义与性质",
     method: "奇偶性判断"
   },
-  {
+{
     id: 17,
     type: "性质题",
     title: "偶函数倍化",
@@ -597,7 +597,7 @@ $2 \\[\\frac{x^{5}}{5} + \\frac{x^{3}}{3}\\]_0^2 = 2\\left(\\frac{32}{5} + \\fra
     category: "定积分定义与性质",
     method: "奇偶性判断"
   },
-  {
+{
     id: 18,
     type: "性质题",
     title: "利用区间可加性",
@@ -611,7 +611,7 @@ $5 + (-1) = 4$。`,
     category: "定积分定义与性质",
     method: "区间可加性"
   },
-  {
+{
     id: 19,
     type: "性质题",
     title: "积分换元对称性",
@@ -629,7 +629,7 @@ $I = \\frac{1}{2}$。`,
     category: "定积分定义与性质",
     method: "对称变换"
   },
-  {
+{
     id: 20,
     type: "性质题",
     title: "比较估计积分",
@@ -645,7 +645,7 @@ $0 \\le \\int_{0}^{2} x^2 e^{-x} dx \\le 4 \\cdot 2 = 8$。
     category: "定积分定义与性质",
     method: "积分估值定理"
   },
-  {
+{
     id: 21,
     type: "性质题",
     title: "利用平均值定理",
@@ -659,7 +659,7 @@ $0 \\le \\int_{0}^{3} f(x) dx \\le 15$。`,
     category: "定积分定义与性质",
     method: "积分中值定理"
   },
-  {
+{
     id: 22,
     type: "性质题",
     title: "利用函数单调性",
@@ -675,7 +675,7 @@ $1 \\le \\int_{0}^{1} f(x) dx \\le 4$。`,
     category: "定积分定义与性质",
     method: "不等式估计"
   },
-  {
+{
     id: 23,
     type: "性质题",
     title: "变上限积分函数",
@@ -689,7 +689,7 @@ $F(2) = \\frac{8}{3} + 2 = \\frac{14}{3}$。`,
     category: "定积分定义与性质",
     method: "变上限积分"
   },
-  {
+{
     id: 24,
     type: "性质题",
     title: "积分恒等式验证",
@@ -705,7 +705,7 @@ $F(2) = \\frac{8}{3} + 2 = \\frac{14}{3}$。`,
     category: "定积分定义与性质",
     method: "分部积分法"
   },
-  {
+{
     id: 25,
     type: "计算题",
     title: "简单换元示例",
@@ -721,7 +721,7 @@ $\\int_{1}^{2} \\frac{1}{u} du = \\ln 2$。`,
     category: "换元定积分计算",
     method: "根式换元"
   },
-  {
+{
     id: 26,
     type: "计算题",
     title: "平方根换元",
@@ -737,7 +737,7 @@ $= \\frac{\\pi}{2}$。`,
     category: "换元定积分计算",
     method: "三角换元"
   },
-  {
+{
     id: 27,
     type: "计算题",
     title: "指数换元技巧",
@@ -755,7 +755,7 @@ $x=0$ 时 $u=1$，$x=\\ln 3$ 时 $u=\\frac{1}{3}$。
     category: "换元定积分计算",
     method: "指数换元"
   },
-  {
+{
     id: 28,
     type: "计算题",
     title: "反三角换元",
@@ -769,7 +769,7 @@ $\\arctan \\sqrt{3} - \\arctan 0 = \\frac{\\pi}{3}$。`,
     category: "换元定积分计算",
     method: "标准反三角"
   },
-  {
+{
     id: 29,
     type: "计算题",
     title: "对称换元应用",
@@ -785,7 +785,7 @@ $2I = \\int_0^{\\pi/2} 1 dt = \\frac{\\pi}{2}$，因此 $I = \\frac{\\pi}{4}$。
     category: "换元定积分计算",
     method: "对称变换"
   },
-  {
+{
     id: 30,
     type: "计算题",
     title: "根式换元综合",
@@ -803,7 +803,7 @@ $\\dfrac{\\pi}{2} - 1$。`,
     category: "换元定积分计算",
     method: "三角换元"
   },
-  {
+{
     id: 31,
     type: "计算题",
     title: "换元法处理绝对值",
@@ -819,7 +819,7 @@ $\\int_{-1}^{1} |x| e^{x} dx = \\int_{-1}^{0} (-x) e^{x} dx + \\int_{0}^{1} x e^
     category: "换元定积分计算",
     method: "分段换元"
   },
-  {
+{
     id: 32,
     type: "计算题",
     title: "带参数换元",
@@ -833,7 +833,7 @@ $dx = a\\cos \\theta d\\theta$。
     category: "换元定积分计算",
     method: "参数三角换元"
   },
-  {
+{
     id: 33,
     type: "计算题",
     title: "分式换元技巧",
@@ -849,7 +849,7 @@ $\\int_{0}^{1} \\frac{2}{1+t^{2}} dt = 2\\arctan t \\big|_{0}^{1} = \\frac{\\pi}
     category: "换元定积分计算",
     method: "平方换元"
   },
-  {
+{
     id: 34,
     type: "计算题",
     title: "指数对数换元",
@@ -865,7 +865,7 @@ $\\int_{1}^{2} \\frac{\\ln u}{u} du$。
     category: "换元定积分计算",
     method: "对数换元"
   },
-  {
+{
     id: 35,
     type: "计算题",
     title: "分部积分基础题",
@@ -881,7 +881,7 @@ $= \\frac{1}{4}(e^{2}+1)$。`,
     category: "分部积分法",
     method: "分部积分法"
   },
-  {
+{
     id: 36,
     type: "计算题",
     title: "高次多项式分部积分",
@@ -899,7 +899,7 @@ $\\int x e^{x} dx = x e^{x} - \\int e^{x} dx$。
     category: "分部积分法",
     method: "递推分部积分"
   },
-  {
+{
     id: 37,
     type: "计算题",
     title: "三角函数乘积",
@@ -913,7 +913,7 @@ $[x\\sin x]_0^{\\pi} - \\int_{0}^{\\pi} \\sin x dx = 0 - 2 = -2$。`,
     category: "分部积分法",
     method: "分部积分法"
   },
-  {
+{
     id: 38,
     type: "计算题",
     title: "含对数的分部积分",
@@ -929,7 +929,7 @@ $[(1+x)\\ln(1+x)]_0^1 - \\int_{0}^{1} 1 dx = 2\\ln 2 - 1$。`,
     category: "分部积分法",
     method: "分部积分法"
   },
-  {
+{
     id: 39,
     type: "计算题",
     title: "重复分部积分",
@@ -943,7 +943,7 @@ $[-\\frac{x}{2}\\cos 2x]_0^{\\pi/2} + \\frac{1}{2}\\int_{0}^{\\pi/2} \\cos 2x dx
     category: "分部积分法",
     method: "分部积分法"
   },
-  {
+{
     id: 40,
     type: "计算题",
     title: "分部积分求反三角",
@@ -959,7 +959,7 @@ $[x \\arctan x]_0^1 - \\int_{0}^{1} \\frac{x}{1+x^{2}} dx = \\frac{\\pi}{4} - \\
     category: "分部积分法",
     method: "分部积分法"
   },
-  {
+{
     id: 41,
     type: "计算题",
     title: "指数与三角分部积分",
@@ -975,7 +975,7 @@ $\\int e^{x} \\sin x dx = \\frac{1}{2} e^{x} (\\sin x - \\cos x)$。
     category: "分部积分法",
     method: "递推分部积分"
   },
-  {
+{
     id: 42,
     type: "计算题",
     title: "对数重复分部",
@@ -991,7 +991,7 @@ $\\left[\\frac{x^{3}}{3} \\ln x \\right]_0^1 - \\int_{0}^{1} \\frac{x^{3}}{3} \\
     category: "分部积分法",
     method: "分部积分法"
   },
-  {
+{
     id: 43,
     type: "计算题",
     title: "带参数分部积分",
@@ -1005,7 +1005,7 @@ $= \\left. \\frac{x \\sin bx}{b} \\right|_0^a - \\int_{0}^{a} \\frac{\\sin bx}{b
     category: "分部积分法",
     method: "分部积分法"
   },
-  {
+{
     id: 44,
     type: "计算题",
     title: "指数对数复合",
@@ -1021,7 +1021,7 @@ $\\left[\\frac{x^{2}}{2} \\ln x\\right]_1^e - \\int_{1}^{e} \\frac{x^{2}}{2} \\c
     category: "分部积分法",
     method: "分部积分法"
   },
-  {
+{
     id: 45,
     type: "应用题",
     title: "面积计算基础",
@@ -1035,7 +1035,7 @@ $\int_{0}^{1} (x - x^{2}) dx = \left[\frac{x^{2}}{2} - \frac{x^{3}}{3}\right]_0^
     category: "定积分应用",
     method: "区域面积公式"
   },
-  {
+{
     id: 46,
     type: "应用题",
     title: "旋转体体积",
@@ -1049,7 +1049,7 @@ $= \pi \left[\frac{x^{2}}{2}\right]_0^4 = 8\pi$。`,
     category: "定积分应用",
     method: "旋转体体积公式"
   },
-  {
+{
     id: 47,
     type: "应用题",
     title: "弧长计算",
@@ -1065,7 +1065,7 @@ $L = \int_{0}^{1} \sqrt{1 + x^{2}} dx$。
     category: "定积分应用",
     method: "弧长公式"
   },
-  {
+{
     id: 48,
     type: "应用题",
     title: "函数平均值",
@@ -1079,7 +1079,7 @@ $\bar{f} = \frac{1}{\pi} \int_{0}^{\pi} \cos x dx$。
     category: "定积分应用",
     method: "平均值公式"
   },
-  {
+{
     id: 49,
     type: "应用题",
     title: "物理量计算",
@@ -1093,7 +1093,7 @@ $= [x^{2} + x]_0^2 = 6$ kg。`,
     category: "定积分应用",
     method: "物体质量计算"
   },
-  {
+{
     id: 50,
     type: "应用题",
     title: "功的计算",
@@ -1107,7 +1107,7 @@ $= [x^{3}]_0^2 = 8$。`,
     category: "定积分应用",
     method: "功的计算"
   },
-  {
+{
     id: 51,
     type: "应用题",
     title: "概率密度验证",
@@ -1121,7 +1121,7 @@ $\int_{-1}^{1} \frac{3}{8} x^{2} dx = \frac{3}{4} \int_{0}^{1} x^{2} dx = \frac{
     category: "定积分应用",
     method: "概率密度检验"
   },
-  {
+{
     id: 52,
     type: "应用题",
     title: "质心坐标",
@@ -1135,7 +1135,7 @@ $\frac{1/3}{1/2} = \frac{2}{3}$。`,
     category: "定积分应用",
     method: "质心公式"
   },
-  {
+{
     id: 53,
     type: "计算题",
     title: "广义积分收敛",
@@ -1149,7 +1149,7 @@ $[-\\frac{1}{x}]_1^{b} = 1 - \\frac{1}{b} \\to 1$。`,
     category: "广义积分",
     method: "p-型积分"
   },
-  {
+{
     id: 54,
     type: "计算题",
     title: "广义积分发散",
@@ -1163,7 +1163,7 @@ $\\lim_{b\\to+\\infty} \\ln b = +\\infty$。
     category: "广义积分",
     method: "p-型积分"
   },
-  {
+{
     id: 55,
     type: "计算题",
     title: "端点瑕积分",
@@ -1175,7 +1175,7 @@ $\\lim_{a\\to0^{+}} \\int_{a}^{1} x^{-1/2} dx = 2$。`,
     category: "广义积分",
     method: "p-型积分"
   },
-  {
+{
     id: 56,
     type: "计算题",
     title: "无穷区间指数积分",
@@ -1189,7 +1189,7 @@ $-\\frac{1}{3} e^{-3x}$。
     category: "广义积分",
     method: "指数型广义积分"
   },
-  {
+{
     id: 57,
     type: "计算题",
     title: "三角衰减积分",
@@ -1203,7 +1203,7 @@ $\\int_{0}^{+\\infty} e^{-ax} \\sin bx dx = \\frac{b}{a^{2}+b^{2}}$。
     category: "广义积分",
     method: "傅里叶型积分"
   },
-  {
+{
     id: 58,
     type: "计算题",
     title: "瑕积分与换元",
@@ -1217,7 +1217,7 @@ $dx = 2t dt$。
     category: "广义积分",
     method: "换元+分部"
   },
-  {
+{
     id: 59,
     type: "计算题",
     title: "对数发散积分",
@@ -1231,7 +1231,7 @@ $dx = 2t dt$。
     category: "广义积分",
     method: "比较判别"
   },
-  {
+{
     id: 60,
     type: "计算题",
     title: "广义积分综合题",

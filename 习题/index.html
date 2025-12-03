@@ -492,21 +492,8 @@
     function loadChapter(index) {
         if (index < 0 || index >= chapters.length) return;
         
-        currentIndex = index;
-        const chapter = chapters[index];
-        const frame = document.getElementById('contentFrame');
-        const container = document.getElementById('frameContainer');
-        const overlay = document.getElementById('chapterOverlay');
-        
-        // 设置内容
-        frame.src = chapter.url;
-        
-        // UI 状态变更
-        overlay.classList.remove('active');
-        container.classList.add('active');
-        
-        // 更新顶部标题
-        document.querySelector('.nav-brand h1').textContent = `第${index+1}章 ${chapter.title}`;
+        // 在新标签页打开
+        window.open(chapters[index].url, '_blank');
     }
 
     function goPrev() {

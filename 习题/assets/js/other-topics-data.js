@@ -31,7 +31,7 @@
     }
   ],
   exercises: [
-    {
+{
       id: 1,
       type: "选择题",
       title: "复数的模",
@@ -44,7 +44,7 @@ $$|z| = \\sqrt{3^2 + 4^2} = \\sqrt{9 + 16} = \\sqrt{25} = 5$$`,
       category: "复数",
       method: "公式法"
     },
-    {
+{
       id: 2,
       type: "选择题",
       title: "复数的共轭",
@@ -57,7 +57,7 @@ $z = 2 - 3i$ 的共轭复数 $\\bar{z} = 2 + 3i$`,
       category: "复数",
       method: "定义"
     },
-    {
+{
       id: 3,
       type: "选择题",
       title: "拉普拉斯变换",
@@ -70,7 +70,7 @@ $$\\mathcal{L}\\{1\\} = \\int_0^{\\infty} e^{-st} \\cdot 1 \\, dt = \\frac{1}{s}
       category: "积分变换",
       method: "定义"
     },
-    {
+{
       id: 4,
       type: "选择题",
       title: "傅里叶变换",
@@ -83,7 +83,7 @@ $$\\mathcal{L}\\{1\\} = \\int_0^{\\infty} e^{-st} \\cdot 1 \\, dt = \\frac{1}{s}
       category: "积分变换",
       method: "概念"
     },
-    {
+{
       id: 5,
       type: "选择题",
       title: "极坐标",
@@ -97,7 +97,7 @@ $$y = 2\\sin\\frac{\\pi}{3} = 2 \\cdot \\frac{\\sqrt{3}}{2} = \\sqrt{3}$$`,
       category: "坐标系",
       method: "转换公式"
     },
-    {
+{
       id: 6,
       type: "选择题",
       title: "参数方程",
@@ -111,7 +111,7 @@ $$x^2 + y^2 = \\cos^2 t + \\sin^2 t = 1$$
       category: "参数方程",
       method: "消参法"
     },
-    {
+{
       id: 7,
       type: "选择题",
       title: "曲率",
@@ -124,7 +124,7 @@ $$x^2 + y^2 = \\cos^2 t + \\sin^2 t = 1$$
       category: "曲率",
       method: "定义"
     },
-    {
+{
       id: 8,
       type: "选择题",
       title: "曲线积分类型",
@@ -138,7 +138,7 @@ $$x^2 + y^2 = \\cos^2 t + \\sin^2 t = 1$$
       category: "曲线积分",
       method: "定义"
     },
-    {
+{
       id: 9,
       type: "选择题",
       title: "格林公式",
@@ -152,7 +152,7 @@ $$\\oint_L Pdx + Qdy = \\iint_D (\\frac{\\partial Q}{\\partial x} - \\frac{\\par
       category: "积分定理",
       method: "概念"
     },
-    {
+{
       id: 10,
       type: "选择题",
       title: "数值分析方法",
@@ -166,7 +166,7 @@ $$\\oint_L Pdx + Qdy = \\iint_D (\\frac{\\partial Q}{\\partial x} - \\frac{\\par
       category: "数值方法",
       method: "定理"
     },
-    {
+{
       id: 11,
       type: "选择题",
       title: "牛顿迭代法",
@@ -180,7 +180,7 @@ $$x_{n+1} = x_n - \\frac{f(x_n)}{f'(x_n)}$$
       category: "数值方法",
       method: "公式"
     },
-    {
+{
       id: 12,
       type: "选择题",
       title: "梯形公式",
@@ -194,7 +194,7 @@ $$\\int_a^b f(x)dx \\approx \\frac{b-a}{2}[f(a) + f(b)]$$
       category: "数值积分",
       method: "精度分析"
     },
-    {
+{
       id: 13,
       type: "计算题",
       title: "条件概率",
@@ -209,7 +209,7 @@ $$P(B|A) = \\frac{4}{7}$$`,
       category: "概率",
       method: "条件概率"
     },
-    {
+{
       id: 14,
       type: "计算题",
       title: "全概率公式",
@@ -223,7 +223,7 @@ $$= \\frac{1}{2} \\times \\frac{3}{5} + \\frac{1}{2} \\times \\frac{2}{5} = \\fr
       category: "概率",
       method: "全概率公式"
     },
-    {
+{
       id: 15,
       type: "计算题",
       title: "独立事件概率",
@@ -236,7 +236,7 @@ $$P(AB) = P(A) \\cdot P(B) = 0.6 \\times 0.5 = 0.3$$`,
       category: "概率",
       method: "独立事件"
     },
-    {
+{
       id: 16,
       type: "计算题",
       title: "互斥事件概率",
@@ -249,7 +249,7 @@ $$P(A+B) = P(A) + P(B) = 0.3 + 0.4 = 0.7$$`,
       category: "概率",
       method: "互斥事件"
     },
-    {
+{
       id: 17,
       type: "计算题",
       title: "对立事件概率",
@@ -262,7 +262,7 @@ $$P(\\bar{A}) = 1 - P(A) = 1 - 0.35 = 0.65$$`,
       category: "概率",
       method: "对立事件"
     },
-    {
+{
       id: 18,
       type: "计算题",
       title: "概率加法公式",
@@ -276,7 +276,7 @@ $$= 0.5 + 0.6 - 0.3 = 0.8$$`,
       category: "概率",
       method: "加法公式"
     },
-    {
+{
       id: 19,
       type: "计算题",
       title: "概率乘法公式",
@@ -289,7 +289,7 @@ $$P(AB) = P(A)P(B|A) = 0.6 \\times 0.5 = 0.3$$`,
       category: "概率",
       method: "乘法公式"
     },
-    {
+{
       id: 20,
       type: "计算题",
       title: "德摩根定律",
@@ -305,7 +305,7 @@ $$P(\\overline{A+B}) = 1 - P(A+B) = 1 - 0.8 = 0.2$$`,
       category: "概率",
       method: "德摩根定律"
     },
-    {
+{
       id: 21,
       type: "计算题",
       title: "几何概型-长度",
@@ -318,7 +318,7 @@ $$P = \\frac{有利区域长度}{总区域长度} = \\frac{5-2}{10-0} = \\frac{3
       category: "概率",
       method: "几何概型"
     },
-    {
+{
       id: 22,
       type: "计算题",
       title: "几何概型-面积",
@@ -335,7 +335,7 @@ $$P = \\frac{\\pi}{4}$$`,
       category: "概率",
       method: "几何概型"
     },
-    {
+{
       id: 23,
       type: "计算题",
       title: "超几何分布",
@@ -349,7 +349,7 @@ $$= \\frac{3 \\times 35}{210} = \\frac{105}{210} = \\frac{1}{2}$$`,
       category: "概率",
       method: "超几何分布"
     },
-    {
+{
       id: 24,
       type: "选择题",
       title: "最小二乘法",
@@ -362,7 +362,7 @@ $$= \\frac{3 \\times 35}{210} = \\frac{105}{210} = \\frac{1}{2}$$`,
       category: "数值方法",
       method: "概念"
     },
-    {
+{
       id: 25,
       type: "选择题",
       title: "辛普森公式",
@@ -376,7 +376,7 @@ $$\\int_a^b f(x)dx \\approx \\frac{b-a}{6}[f(a) + 4f(\\frac{a+b}{2}) + f(b)]$$
       category: "数值积分",
       method: "精度分析"
     },
-    {
+{
       id: 26,
       type: "选择题",
       title: "欧拉方法",
@@ -390,7 +390,7 @@ $$y_{n+1} = y_n + hf(x_n, y_n)$$
       category: "常微分方程数值解",
       method: "分类"
     },
-    {
+{
       id: 27,
       type: "选择题",
       title: "插值多项式",
@@ -403,7 +403,7 @@ $$y_{n+1} = y_n + hf(x_n, y_n)$$
       category: "插值",
       method: "定理"
     },
-    {
+{
       id: 28,
       type: "选择题",
       title: "龙格现象",
@@ -417,7 +417,7 @@ $$y_{n+1} = y_n + hf(x_n, y_n)$$
       category: "插值",
       method: "概念"
     },
-    {
+{
       id: 29,
       type: "选择题",
       title: "误差传播",
@@ -431,7 +431,7 @@ $$y_{n+1} = y_n + hf(x_n, y_n)$$
       category: "数值分析",
       method: "误差理论"
     },
-    {
+{
       id: 30,
       type: "选择题",
       title: "收敛阶",
@@ -445,5 +445,5 @@ $p=1$为线性收敛，$p=2$为二阶收敛（平方收敛）`,
       category: "数值方法",
       method: "定义"
     }
-  ]
+]
 };

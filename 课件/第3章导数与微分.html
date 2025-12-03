@@ -2916,45 +2916,7 @@
                     </div>
                     <div class="right-visual"
                         style="width: 100%; flex: 1; height: 100vh; padding: 0; overflow: hidden;">
-                        <iframe src="../网页资源/lab 3-1.html" title="导数概念实验室" loading="lazy"></iframe>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 实验室内嵌：导数几何意义 -->
-            <div class="slide">
-                <div class="slide-container">
-                    <div class="left-content tex2jax_process">
-                        <h2>实验室：导数的几何意义</h2>
-                        <p>结合动画理解切线、法线与曲率，观察导数在图像上的几何表现。</p>
-                        <ul>
-                            <li>拖动点，实时显示切线与法线</li>
-                            <li>图形、数值同时反馈，帮助建立几何直觉</li>
-                            <li>支持多函数切换，比较不同曲线的变化</li>
-                        </ul>
-                    </div>
-                    <div class="right-visual"
-                        style="width: 100%; flex: 1; height: 100vh; padding: 0; overflow: hidden;">
-                        <iframe src="../网页资源/lab 3-2.html" title="导数几何意义实验室" loading="lazy"></iframe>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 实验室内嵌：导数运算法则 -->
-            <div class="slide">
-                <div class="slide-container">
-                    <div class="left-content tex2jax_process">
-                        <h2>实验室：导数运算法则</h2>
-                        <p>在交互画布上复习加法、乘法、商法则和链式法则，立即看到计算结果与图像变化。</p>
-                        <ul>
-                            <li>选择不同组合函数，查看规则对应的导数</li>
-                            <li>同步展示原函数、导函数图像，强化符号与图形的对应</li>
-                            <li>配合课堂例题，快速验证计算</li>
-                        </ul>
-                    </div>
-                    <div class="right-visual"
-                        style="width: 100%; flex: 1; height: 100vh; padding: 0; overflow: hidden;">
-                        <iframe src="../网页资源/lab 3-3.html" title="导数运算法则实验室" loading="lazy"></iframe>
+                        <iframe data-src="../网页资源/lab 3-1.html" title="导数概念实验室" loading="lazy"></iframe>
                     </div>
                 </div>
             </div>
@@ -3646,6 +3608,27 @@
 
                 // 运行当前页的可视化
                 runVisualization(currentSlide);
+
+                // iframe 懒加载 - 只加载当前幻灯片的 iframe
+                const currentSlideEl = slides[index];
+                const iframes = currentSlideEl.querySelectorAll('iframe[data-src]');
+                iframes.forEach(iframe => {
+                    if (!iframe.src || iframe.src === 'about:blank') {
+                        iframe.src = iframe.dataset.src;
+                    }
+                });
+                
+                // 卸载非当前幻灯片的 iframe 以释放内存
+                slides.forEach((slide, i) => {
+                    if (i !== index) {
+                        const otherIframes = slide.querySelectorAll('iframe[data-src]');
+                        otherIframes.forEach(iframe => {
+                            if (iframe.src && iframe.src !== 'about:blank') {
+                                iframe.src = 'about:blank';
+                            }
+                        });
+                    }
+                });
 
                 // 强制重新渲染当前页的MathJax
                 if (mathjaxReady && typeof MathJax.typesetPromise === 'function') {

@@ -201,9 +201,7 @@ window.exerciseData = {
   };
   
   window.exerciseData.exercises = [
-    // 极限章节题目
-    // 选择题 - 极限部分
-    {
+{
       id: 1,
       type: "直接代入法",
       title: "极限性质综合判断",
@@ -236,7 +234,7 @@ window.exerciseData = {
       category: "极限概念和定理",
       method: "极限性质判断"
     },
-    {
+{
       id: 2,
       type: "左右极限法",
       title: "判断极限存在",
@@ -260,7 +258,7 @@ window.exerciseData = {
       category: "极限概念和定理",
       method: "左右极限相等"
     },
-    {
+{
       id: 3,
       type: "直接代入法",
       title: "直接代入法",
@@ -278,7 +276,7 @@ window.exerciseData = {
       category: "极限基础运算",
       method: "直接代入法"
     },
-    {
+{
       id: 4,
       type: "0/0型-因式分解",
       title: "因式分解法",
@@ -303,7 +301,7 @@ window.exerciseData = {
       category: "极限基础运算",
       method: "因式分解法"
     },
-    {
+{
       id: 5,
       type: "连续性判断",
       title: "间断点类型",
@@ -328,7 +326,7 @@ window.exerciseData = {
       category: "连续性与间断点",
       method: "连续性判断"
     },
-    {
+{
       id: 6,
       type: "1^∞型",
       title: "重要极限",
@@ -348,7 +346,7 @@ window.exerciseData = {
       category: "两个重要极限",
       method: "第二重要极限"
     },
-    {
+{
       id: 7,
       type: "间断点判断",
       title: "间断点类型",
@@ -368,9 +366,7 @@ window.exerciseData = {
       category: "连续性与间断点",
       method: "间断点分类"
     },
-  
-    // 填空题部分
-    {
+{
       id: 8,
       type: "左右极限法",
       title: "分段函数极限",
@@ -392,7 +388,7 @@ window.exerciseData = {
       category: "极限基础运算",
       method: "左右极限相等"
     },
-    {
+{
       id: 9,
       type: "直接代入法",
       title: "直接代入法",
@@ -405,7 +401,7 @@ window.exerciseData = {
       category: "极限基础运算",
       method: "连续性"
     },
-    {
+{
       id: 10,
       type: "直接代入法",
       title: "直接代入法",
@@ -418,7 +414,7 @@ window.exerciseData = {
       category: "极限基础运算",
       method: "直接代入"
     },
-    {
+{
       id: 11,
       type: "0/0型-等价无穷小",
       title: "等价无穷小",
@@ -437,7 +433,7 @@ window.exerciseData = {
       category: "等价无穷小",
       method: "极限比值法"
     },
-    {
+{
       id: 12,
       type: "0/0型-第一重要极限",
       title: "第一重要极限求参数",
@@ -453,7 +449,7 @@ window.exerciseData = {
       category: "两个重要极限",
       method: "第一重要极限"
     },
-    {
+{
       id: 13,
       type: "0/0型-等价无穷小",
       title: "等价无穷小",
@@ -471,8 +467,7 @@ window.exerciseData = {
       category: "极限概念和定理",
       method: "等价无穷小"
     },
-  
-    {
+{
       id: 14,
       type: "连续性判断",
       title: "分段函数连续性",
@@ -492,7 +487,7 @@ window.exerciseData = {
       category: "连续性与间断点",
       method: "连续性条件"
     },
-    {
+{
       id: 15,
       type: "极限概念",
       title: "极限求参数",
@@ -511,9 +506,7 @@ window.exerciseData = {
       category: "极限概念和定理",
       method: "系数比较"
     },
-  
-    // 计算题部分
-    {
+{
       id: 16,
       type: "0/0型-等价无穷小",
       title: "等价无穷小",
@@ -532,9 +525,7 @@ window.exerciseData = {
       category: "等价无穷小",
       method: "等价无穷小替换"
     },
-   
-  
-    {
+{
       id: 17,
       type: "∞-∞型",
       title: "通分法处理无穷减无穷",
@@ -556,10 +547,7 @@ window.exerciseData = {
       category: "极限基础运算",
       method: "通分法"
     },
-  
-    // 新增的高职版极限练习题
-    // 第二部分：基础计算题 (共4题)
-    {
+{
       id: 18,
       type: "0/0型-因式分解",
       title: "因式分解法",
@@ -584,7 +572,7 @@ window.exerciseData = {
       category: "极限基础运算",
       method: "因式分解法"
     },
-    {
+{
       id: 19,
       type: "0/0型-有理化",
       title: "有理化法",
@@ -609,9 +597,7 @@ window.exerciseData = {
       category: "极限基础运算",
       method: "有理化法"
     },
-  
-    // 第三部分：进阶计算题 (共4题)
-    {
+{
       id: 20,
       type: "0/0型-第一重要极限",
       title: "第一重要极限",
@@ -629,7 +615,7 @@ window.exerciseData = {
       category: "两个重要极限",
       method: "第一重要极限"
     },
-    {
+{
       id: 21,
       type: "0/0型-等价无穷小",
       title: "等价无穷小替换",
@@ -649,7 +635,7 @@ window.exerciseData = {
       category: "等价无穷小",
       method: "等价无穷小替换"
     },
-    {
+{
       id: 22,
       type: "0/0型-等价无穷小",
       title: "等价无穷小",
@@ -669,9 +655,7 @@ window.exerciseData = {
       category: "等价无穷小",
       method: "等价无穷小替换"
     },
-  
-    // 第四部分：应用判断题 (共2题)
-    {
+{
       id: 23,
       type: "连续性判断",
       title: "判断连续性",
@@ -693,7 +677,7 @@ window.exerciseData = {
       category: "连续性与间断点",
       method: "连续性判断"
     },
-    {
+{
       id: 24,
       type: "连续性判断",
       title: "求参数使函数连续",
@@ -716,10 +700,7 @@ window.exerciseData = {
       category: "连续性与间断点",
       method: "求参数使函数连续"
     },
-  
-    // 高职版极限最终版练习题
-    // 第一部分：计算技巧综合题 (共5题)
-    {
+{
       id: 25,
       type: "b/0型",
       title: "单侧极限无穷大判断",
@@ -739,7 +720,7 @@ window.exerciseData = {
       category: "极限基础运算",
       method: "非0/0型分析"
     },
-    {
+{
         id: 26,
       type: "∞-∞型",
       title: "通分法处理∞-∞型",
@@ -760,7 +741,7 @@ window.exerciseData = {
       category: "极限基础运算",
       method: "通分法"
     },
-    {
+{
       id: 27,
       type: "0/0型-因式分解",
       title: "复杂因式分解",
@@ -782,7 +763,7 @@ window.exerciseData = {
       category: "极限基础运算",
       method: "复杂因式分解"
     },
-    {
+{
       id: 28,
       type: "∞/∞型",
       title: "无穷比无穷型-抓大头法",
@@ -803,7 +784,7 @@ window.exerciseData = {
       category: "极限基础运算",
       method: "抓大头法"
     },
-    {
+{
       id: 29,
       type: "0/0型-有理化",
       title: "根式有理化处理无穷极限",
@@ -827,9 +808,7 @@ window.exerciseData = {
       category: "极限基础运算",
       method: "根式有理化"
     },
-  
-    // 第二部分：等价无穷小 (共5题)
-    {
+{
       id: 30,
       type: "0/0型-等价无穷小",
       title: "第一重要极限变形",
@@ -847,7 +826,7 @@ window.exerciseData = {
       category: "等价无穷小",
       method: "等价无穷小替换"
     },
-    {
+{
       id: 31,
       type: "0/0型-等价无穷小",
       title: "等价无穷小替换",
@@ -867,9 +846,7 @@ window.exerciseData = {
       category: "等价无穷小",
       method: "等价无穷小替换"
     },
-  
-    // 第三部分：间断点判断 (共1题)
-    {
+{
       id: 32,
       type: "间断点判断",
       title: "判断间断点类型",
@@ -892,8 +869,7 @@ window.exerciseData = {
       category: "连续性与间断点",
       method: "因式分解法"
     },
-  
-  {
+{
     id: 33,
     type: "0/0型-第一重要极限",
     title: "第一重要极限-sin2x/x型",
@@ -912,8 +888,7 @@ window.exerciseData = {
     category: "两个重要极限",
     method: "第一重要极限"
   },
-  
-  {
+{
     id: 34,
     type: "0/0型-第一重要极限",
     title: "第一重要极限-sin3x/5x型",
@@ -931,7 +906,7 @@ window.exerciseData = {
     category: "两个重要极限",
     method: "第一重要极限"
   },
-  {
+{
         id: 35,
     type: "0/0型-第一重要极限",
     title: "余弦形式",
@@ -948,8 +923,7 @@ window.exerciseData = {
     category: "两个重要极限",
     method: "三角公式"
   },
-  
-  {
+{
     id: 36,
     type: "0/0型-第一重要极限",
     title: "乘积形式",
@@ -967,8 +941,7 @@ window.exerciseData = {
     category: "两个重要极限",
     method: "倒数形式"
   },
-  
-  {
+{
     id: 37,
     type: "0/0型-第一重要极限",
     title: "平方形式",
@@ -986,8 +959,7 @@ window.exerciseData = {
     category: "两个重要极限",
     method: "平方形式"
   },
-  
-    {
+{
       id: 38,
       type: "1^∞型",
       title: "第二重要极限",
@@ -1010,8 +982,7 @@ window.exerciseData = {
     category: "两个重要极限",
     method: "第二重要极限"
   },
-  
-  {
+{
     id: 39,
     type: "1^∞型",
     title: "第二重要极限",
@@ -1035,8 +1006,7 @@ window.exerciseData = {
     category: "两个重要极限",
     method: "换元法"
   },
-  
-  {
+{
     id: 40,
     type: "1^∞型",
     title: "第二重要极限",
@@ -1060,8 +1030,7 @@ window.exerciseData = {
     category: "两个重要极限",
     method: "换元法"
   },
-  
-  {
+{
         id: 41,
     type: "1^∞型",
     title: "第二重要极限",
@@ -1088,8 +1057,7 @@ window.exerciseData = {
     category: "两个重要极限",
     method: "换元法"
   },
-  
-  {
+{
     id: 42,
     type: "1^∞型",
     title: "第二重要极限",
@@ -1110,8 +1078,7 @@ window.exerciseData = {
     category: "两个重要极限",
     method: "换元法"
   },
-  
-  {
+{
     id: 43,
     type: "1^∞型",
     title: "第二重要极限",
@@ -1135,8 +1102,7 @@ window.exerciseData = {
     category: "两个重要极限",
     method: "换元法"
   },
-  
-  {
+{
     id: 44,
     type: "1^∞型",
     title: "第二重要极限",
@@ -1163,8 +1129,7 @@ window.exerciseData = {
     category: "两个重要极限",
     method: "换元法"
   },
-  
-  {
+{
     id: 45,
     type: "1^∞型",
     title: "第二重要极限",
@@ -1188,7 +1153,7 @@ window.exerciseData = {
     category: "两个重要极限",
     method: "换元法"
   },
-  {
+{
       id: 46,
     type: "1^∞型",
     title: "第二重要极限",
@@ -1212,8 +1177,7 @@ window.exerciseData = {
     category: "两个重要极限",
     method: "换元法"
   },
-  
-  {
+{
     id: 47,
     type: "1^∞型",
     title: "第二重要极限",
@@ -1237,8 +1201,7 @@ window.exerciseData = {
     category: "两个重要极限",
     method: "换元法"
   },
-  
-  {
+{
     id: 48,
     type: "1^∞型",
     title: "第二重要极限",
@@ -1262,8 +1225,7 @@ window.exerciseData = {
     category: "两个重要极限",
     method: "换元法"
   },
-  
-  {
+{
       id: 49,
     type: "1^∞型",
     title: "第二重要极限",
@@ -1287,8 +1249,7 @@ window.exerciseData = {
     category: "两个重要极限",
     method: "换元法"
   },
-  
-  {
+{
       id: 50,
     type: "0/0型-等价无穷小",
     title: "等价无穷小",
@@ -1304,8 +1265,7 @@ window.exerciseData = {
     category: "等价无穷小",
     method: "基本等价无穷小"
   },
-  
-  {
+{
     id: 51,
     type: "0/0型-等价无穷小",
     title: "等价无穷小",
@@ -1321,8 +1281,7 @@ window.exerciseData = {
     category: "等价无穷小",
     method: "基本等价无穷小"
   },
-  
-  {
+{
     id: 52,
     type: "0/0型-等价无穷小",
     title: "等价无穷小",
@@ -1338,8 +1297,7 @@ window.exerciseData = {
     category: "等价无穷小",
     method: "基本等价无穷小"
   },
-  
-  {
+{
     id: 53,
     type: "0/0型-等价无穷小",
     title: "等价无穷小",
@@ -1355,8 +1313,7 @@ window.exerciseData = {
     category: "等价无穷小",
     method: "基本等价无穷小"
   },
-  
-  {
+{
     id: 54,
     type: "0/0型-等价无穷小",
     title: "等价无穷小",
@@ -1372,8 +1329,7 @@ window.exerciseData = {
     category: "等价无穷小",
     method: "基本等价无穷小"
   },
-  
-  {
+{
     id: 55,
     type: "0/0型-等价无穷小",
     title: "等价无穷小",
@@ -1389,10 +1345,7 @@ window.exerciseData = {
     category: "等价无穷小",
     method: "基本等价无穷小"
   },
-  
-  
-  
-  {
+{
       id: 56,
     type: "0/0型-等价无穷小",
     title: "等价无穷小",
@@ -1408,8 +1361,7 @@ window.exerciseData = {
     category: "等价无穷小",
     method: "等价无穷小替换"
   },
-  
-  {
+{
     id: 57,
     type: "0/0型-等价无穷小",
     title: "等价无穷小",
@@ -1425,8 +1377,7 @@ window.exerciseData = {
     category: "等价无穷小",
     method: "等价无穷小替换"
   },
-  
-  {
+{
       id: 58,
     type: "0/0型-等价无穷小",
     title: "等价无穷小",
@@ -1442,8 +1393,7 @@ window.exerciseData = {
     category: "等价无穷小",
     method: "等价无穷小替换"
   },
-  
-  {
+{
     id: 59,
     type: "0/0型-等价无穷小",
     title: "等价无穷小",
@@ -1459,8 +1409,7 @@ window.exerciseData = {
     category: "等价无穷小",
     method: "等价无穷小替换"
   },
-  
-  {
+{
         id: 60,
     type: "0/0型-等价无穷小",
     title: "等价无穷小",
@@ -1481,8 +1430,7 @@ window.exerciseData = {
     category: "等价无穷小",
     method: "等价无穷小替换"
   },
-  
-  {
+{
     id: 61,
     type: "0/0型-等价无穷小",
     title: "等价无穷小",
@@ -1503,8 +1451,7 @@ window.exerciseData = {
     category: "等价无穷小",
     method: "组合等价无穷小"
   },
-  
-  {
+{
       id: 62,
     type: "0/0型-等价无穷小",
     title: "等价无穷小",
@@ -1522,8 +1469,7 @@ window.exerciseData = {
     category: "等价无穷小",
     method: "乘积等价无穷小"
   },
-  
-  {
+{
         id: 63,
     type: "0/0型-等价无穷小",
     title: "等价无穷小",
@@ -1541,10 +1487,7 @@ window.exerciseData = {
     category: "等价无穷小",
     method: "等价无穷小替换"
   },
-  
-  
-  
-  {
+{
     id: 64,
     type: "0/0型-等价无穷小",
     title: "等价无穷小",
@@ -1562,8 +1505,7 @@ window.exerciseData = {
     category: "等价无穷小",
     method: "等价无穷小替换"
   },
-  
-  {
+{
     id: 65,
     type: "0/0型-等价无穷小",
     title: "等价无穷小",
@@ -1581,7 +1523,7 @@ window.exerciseData = {
     category: "等价无穷小",
     method: "等价无穷小替换"
   },
-  {
+{
       id: 66,
     type: "连续性判断",
     title: "连续点判断",
@@ -1598,8 +1540,7 @@ window.exerciseData = {
     category: "连续性与间断点",
     method: "连续性判断"
   },
-  
-  {
+{
     id: 67,
     type: "间断点判断",
     title: "可去间断点",
@@ -1617,8 +1558,7 @@ window.exerciseData = {
     category: "连续性与间断点",
     method: "间断点分类"
   },
-  
-  {
+{
     id: 68,
     type: "间断点判断",
     title: "跳跃间断点",
@@ -1640,8 +1580,7 @@ window.exerciseData = {
     category: "连续性与间断点",
     method: "间断点分类"
   },
-  
-  {
+{
     id: 69,
     type: "间断点判断",
     title: "无穷间断点",
@@ -1660,8 +1599,7 @@ window.exerciseData = {
     category: "连续性与间断点",
     method: "间断点分类"
   },
-  
-  {
+{
       id: 70,
     type: "连续区间",
     title: "初等函数连续性",
@@ -1680,8 +1618,7 @@ window.exerciseData = {
     category: "连续性与间断点",
     method: "连续区间"
   },
-  
-  {
+{
       id: 71,
     type: "分段函数连续性",
     title: "分段函数连续",
@@ -1702,8 +1639,7 @@ window.exerciseData = {
     category: "连续性与间断点",
     method: "分段函数连续性"
   },
-  
-  {
+{
         id: 72,
     type: "初等函数连续性",
     title: "初等函数连续性",
@@ -1724,8 +1660,7 @@ window.exerciseData = {
     category: "连续性与间断点",
     method: "有理函数连续性"
   },
-  
-  {
+{
     id: 73,
     type: "初等函数连续性",
     title: "初等函数连续性",
@@ -1742,8 +1677,7 @@ window.exerciseData = {
     category: "连续性与间断点",
     method: "三角函数连续性"
   },
-  
-  {
+{
     id: 74,
     type: "初等函数连续性",
     title: "初等函数连续性",
@@ -1759,8 +1693,7 @@ window.exerciseData = {
     category: "连续性与间断点",
     method: "指数函数连续性"
   },
-  
-  {
+{
     id: 75,
     type: "初等函数连续性",
     title: "初等函数连续性",
@@ -1779,8 +1712,7 @@ window.exerciseData = {
     category: "连续性与间断点",
     method: "对数函数连续性"
   },
-  
-  {
+{
         id: 76,
     type: "初等函数连续性",
     title: "初等函数连续性",
@@ -1799,11 +1731,7 @@ window.exerciseData = {
     category: "连续性与间断点",
     method: "根式函数连续性"
   },
-  
-  
-  
-  
-  {
+{
       id: 77,
   
       type: "0/0型-等价无穷小",
@@ -1825,8 +1753,7 @@ window.exerciseData = {
       method: "等价无穷小"
   
     },
-  
-  {
+{
       id: 78,
   
       type: "0/0型-等价无穷小",
@@ -1848,8 +1775,7 @@ window.exerciseData = {
       method: "等价无穷小"
   
     },
-  
-  {
+{
         id: 79,
   
       type: "间断点判断",
@@ -1871,8 +1797,7 @@ window.exerciseData = {
       method: "间断点分类"
   
     },
-  
-  {
+{
       id: 80,
   
       type: "间断点判断",
@@ -1894,8 +1819,7 @@ window.exerciseData = {
       method: "间断点分类"
   
     },
-  
-  {
+{
       id: 81,
   
       type: "无穷小性质",
@@ -1917,8 +1841,7 @@ window.exerciseData = {
       method: "无穷小性质"
   
     },
-  
-  {
+{
       id: 82,
   
       type: "连续性判断",
@@ -1940,8 +1863,7 @@ window.exerciseData = {
       method: "连续性判断"
   
     },
-  
-  {
+{
       id: 83,
   
       type: "直接代入法",
@@ -1963,8 +1885,7 @@ window.exerciseData = {
       method: "直接代入法"
   
     },
-  
-  {
+{
       id: 84,
   
       type: "直接代入法",
@@ -1986,8 +1907,7 @@ window.exerciseData = {
       method: "直接代入法"
   
     },
-  
-  {
+{
           id: 85,
   
       type: "直接代入法",
@@ -2009,8 +1929,7 @@ window.exerciseData = {
       method: "直接代入法"
   
     },
-  
-  {
+{
       id: 86,
   
       type: "直接代入法",
@@ -2032,7 +1951,7 @@ window.exerciseData = {
       method: "直接代入法"
   
     },
-  {
+{
       id: 87,
       type: "左右极限法",
       title: "分段函数极限",
@@ -2060,7 +1979,7 @@ window.exerciseData = {
       category: "极限基础运算",
       method: "左右极限法"
     },
-  {
+{
       id: 88,
       type: "左右极限法",
       title: "分段函数极限",
@@ -2090,8 +2009,7 @@ window.exerciseData = {
       category: "极限基础运算",
       method: "分段函数极限"
     },
-  
-  {
+{
       id: 89,
       type: "极限概念",
       title: "无穷小量与无穷大量的判断（四小题）",
@@ -2129,8 +2047,7 @@ window.exerciseData = {
       category: "极限概念和定理",
       method: "极限判别法"
     },
-  
-  {
+{
           id: 90,
       type: "左右极限法",
       title: "绝对值函数的极限存在性",
@@ -2158,8 +2075,7 @@ window.exerciseData = {
       category: "极限基础运算",
       method: "左右极限法"
     },
-  
-  {
+{
       id: 91,
       type: "直接代入法",
       title: "直接代入法",
@@ -2175,8 +2091,7 @@ window.exerciseData = {
       category: "极限基础运算",
       method: "直接代入法"
     },
-  
-  {
+{
       id: 92,
       type: "直接代入法",
       title: "直接代入法",
@@ -2192,8 +2107,7 @@ window.exerciseData = {
       category: "极限基础运算",
       method: "直接代入法"
     },
-  
-  {
+{
       id: 93,
       type: "0/0型-因式分解",
       title: "0/0型极限：因式分解",
@@ -2223,8 +2137,7 @@ window.exerciseData = {
       category: "极限基础运算",
       method: "因式分解法"
     },
-  
-  {
+{
       id: 94,
       type: "∞-∞型",
       title: "通分化简求极限",
@@ -2248,8 +2161,7 @@ window.exerciseData = {
       category: "极限基础运算",
       method: "通分化简法"
     },
-  
-  {
+{
       id: 95,
       type: "∞/∞型",
       title: "无穷比无穷型-抓大头法",
@@ -2268,8 +2180,7 @@ window.exerciseData = {
       category: "极限基础运算",
       method: "抓大头法"
     },
-  
-  {
+{
       id: 96,
           type: "左右极限法",
           title: "分段函数极限",
@@ -2297,8 +2208,7 @@ window.exerciseData = {
       category: "极限基础运算",
       method: "左右极限法"
     },
-  
-  {
+{
           id: 97,
      type: "0/0型-因式分解",
      title: "通分化简求极限",
@@ -2318,8 +2228,7 @@ window.exerciseData = {
      category: "极限基础运算",
      method: "因式分解法"
    },
-  
-  {
+{
       id: 98,
      type: "直接代入法",
      title: "无穷比无穷型-分子次数低",
@@ -2333,8 +2242,7 @@ window.exerciseData = {
      category: "极限基础运算",
      method: "直接代入法"
    },
-  
-  {
+{
       id: 99, 
      type: "抓大头",
      title: "无穷比无穷型",
@@ -2348,9 +2256,7 @@ window.exerciseData = {
      category: "极限基础运算",
      method: "抓大头法"
    },
-  
-  
-  {
+{
         id: 100,
       type: "极限概念",
       title: "反正切函数在无穷处的极限",
@@ -2374,8 +2280,7 @@ window.exerciseData = {
       category: "极限基础运算",
       method: "无穷极限判别"
     },
-  
-  {
+{
       id: 101,
       type: "极限概念",
       title: "极限运算性质判断（有极限+无极限）",
@@ -2387,8 +2292,7 @@ window.exerciseData = {
       category: "极限概念和定理",
       method: "反证法"
     },
-  
-  {
+{
       id: 102,
       type: "极限概念",
       title: "极限运算性质判断（无极限+无极限）",
@@ -2400,8 +2304,7 @@ window.exerciseData = {
       category: "极限概念和定理",
       method: "举反例"
     },
-  
-  {
+{
       id: 103,
       type: "极限概念",
       title: "极限运算性质判断（有极限×无极限）",
@@ -2413,8 +2316,7 @@ window.exerciseData = {
       category: "极限概念和定理",
       method: "举反例"
     },
-  
-  {
+{
       id: 104,
       type: "极限概念",
       title: "极限运算性质判断（无极限×无极限）",
@@ -2426,8 +2328,7 @@ window.exerciseData = {
       category: "极限概念和定理",
       method: "举反例"
     },
-  
-  {
+{
         id: 105,
       type: "极限概念",
       title: "极限商的存在性",
@@ -2439,7 +2340,7 @@ window.exerciseData = {
       category: "极限概念和定理",
       method: "分类讨论"
     },
-  {
+{
       id: 106,
       type: "极限概念",
       title: "极限运算法则误用（sin 1/x）",
@@ -2451,8 +2352,7 @@ window.exerciseData = {
       category: "极限概念和定理",
       method: "法则适用条件"
     },
-  
-  {
+{
       id: 107,
       type: "极限概念",
       title: "极限运算法则误用（∞-∞）",
@@ -2464,8 +2364,7 @@ window.exerciseData = {
       category: "极限概念和定理",
       method: "法则适用条件"
     },
-  
-  {
+{
       id: 108,
       type: "0/0型-第一重要极限",
       title: "重要极限公式误用",
@@ -2477,8 +2376,7 @@ window.exerciseData = {
       category: "极限概念和定理",
       method: "重要极限公式"
     },
-  
-  {
+{
       id: 109,
       type: "0/0型-第一重要极限",
       title: "第二重要极限公式误用",
@@ -2490,8 +2388,7 @@ window.exerciseData = {
       category: "极限概念和定理",
       method: "重要极限公式"
     },
-  
-  {
+{
       id: 110,
       type: "无穷小性质",
       title: "有界函数与无穷小的乘积",
@@ -2509,8 +2406,7 @@ window.exerciseData = {
       category: "极限概念和定理",
       method: "无穷小性质"
     },
-  
-  {
+{
         id: 111,
       type: "连续性判断",
       title: "分段函数极限",
@@ -2534,8 +2430,7 @@ window.exerciseData = {
       category: "连续性与间断点",
       method: "连续性判断"
     },
-  
-  {
+{
       id: 112,
       type: "0/0型-有理化",
       title: "分母有理化求极限",
@@ -2551,8 +2446,7 @@ window.exerciseData = {
       category: "极限基础运算",
       method: "分母有理化"
     },
-  
-  {
+{
       id: 113,
       type: "直接代入法",
       title: "无穷比无穷型-同次幂",
@@ -2566,8 +2460,7 @@ window.exerciseData = {
       category: "极限基础运算",
       method: "直接代入法"
     },
-  
-  {
+{
         id: 114,
       type: "∞/∞型",
       title: "无穷比无穷型-分子次数低",
@@ -2579,8 +2472,7 @@ window.exerciseData = {
       category: "极限基础运算",
       method: "次数比较法"
     },
-  
-  {
+{
       id: 115,
       type: "∞/∞型",
       title: "无穷比无穷型-分子次数高",
@@ -2592,8 +2484,7 @@ window.exerciseData = {
       category: "极限基础运算",
       method: "次数比较法"
     },
-  
-  {
+{
       id: 116,
       type: "综合题",
       title: "盐水浓度极限问题",
@@ -2613,7 +2504,7 @@ window.exerciseData = {
       category: "极限概念和定理",
       method: "建模求极限"
     },
-  {
+{
         id: 117,
       type: "洛必达法则",
       title: "洛必达法则",
@@ -2658,8 +2549,7 @@ window.exerciseData = {
       method: "洛必达法则"
   
     },
-  
-  {
+{
       id: 118,
       type: "洛必达法则",
       title: "洛必达法则-三角函数",
@@ -2700,8 +2590,7 @@ window.exerciseData = {
       method: "洛必达法则"
   
     },
-  
-  {
+{
       id: 119,
       type: "洛必达法则",
       title: "洛必达法则",
@@ -2746,7 +2635,7 @@ window.exerciseData = {
       method: "洛必达法则"
   
     },
-  {
+{
           id: 120,
   
       type: "左右极限法",
@@ -2798,8 +2687,7 @@ window.exerciseData = {
       method: "左右极限法"
   
     },
-  
-  {
+{
       id: 121,
   
       type: "左右极限法",
@@ -2845,8 +2733,7 @@ window.exerciseData = {
       method: "左右极限法"
   
     },
-  
-  {
+{
       id: 122,
   
       type: "间断点判断",
@@ -2898,8 +2785,7 @@ window.exerciseData = {
       method: "间断点分类"
   
     },
-  
-  {
+{
         id: 123,
   
       type: "直接代入法",
@@ -2947,5 +2833,4 @@ window.exerciseData = {
       method: "初等函数连续性"
   
     }
-  
-  ];
+];

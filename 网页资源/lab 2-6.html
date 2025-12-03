@@ -1,1311 +1,988 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>重要极限实验室</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>重要极限可视化实验室</title>
+        
+        <!-- 本地化资源 -->
+        <link rel="stylesheet" href="../common-assets/css/tailwind.css">
+        <link rel="stylesheet" href="../common-assets/css/lab1-material-symbols.css">
+        <link rel="stylesheet" href="../common-assets/css/mathjax-chtml-fallback.css">
+        
+        <!-- MathJax 本地化 -->
+        <script>
+            window.MathJax = {
+                tex: {
+                    inlineMath: [['$', '$'], ['\\(', '\\)']],
+                    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                    processEscapes: true
+                },
+                svg: {
+                    fontCache: 'global'
+                }
+            };
+        </script>
+        <script id="MathJax-script" async src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js"></script>
     
-    <!-- MathJax配置 -->
-    <script>
-        window.MathJax = {
-            tex: {
-                inlineMath: [['$', '$'], ['\\(', '\\)']],
-                displayMath: [['$$', '$$'], ['\\[', '\\]']],
-                processEscapes: true
-            },
-            startup: {
-                pageReady: () => {
-                    return MathJax.startup.defaultPageReady().then(() => {
-                        console.log('MathJax加载完成');
+        <style>
+            /* Custom scrollbar for webkit */
+            ::-webkit-scrollbar {
+                width: 6px;
+                height: 6px;
+            }
+            ::-webkit-scrollbar-track {
+                background: #f1f1f1; 
+            }
+            ::-webkit-scrollbar-thumb {
+                background: #c7c7c7; 
+                border-radius: 3px;
+            }
+            ::-webkit-scrollbar-thumb:hover {
+                background: #a8a8a8; 
+            }
+            
+            .math-display {
+                overflow-x: auto;
+                overflow-y: hidden;
+            }
+            
+            canvas {
+                touch-action: none;
+            }
+        </style>
+    <style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.pointer-events-none{pointer-events:none}.fixed{position:fixed}.absolute{position:absolute}.relative{position:relative}.bottom-0{bottom:0px}.bottom-2{bottom:0.5rem}.left-0{left:0px}.right-0{right:0px}.right-2{right:0.5rem}.z-10{z-index:10}.z-20{z-index:20}.z-50{z-index:50}.mx-auto{margin-left:auto;margin-right:auto}.my-3{margin-top:0.75rem;margin-bottom:0.75rem}.mb-1{margin-bottom:0.25rem}.mb-2{margin-bottom:0.5rem}.mb-3{margin-bottom:0.75rem}.mb-4{margin-bottom:1rem}.mt-2{margin-top:0.5rem}.mt-4{margin-top:1rem}.mt-auto{margin-top:auto}.block{display:block}.flex{display:flex}.grid{display:grid}.hidden{display:none}.aspect-\[16\/10\]{aspect-ratio:16/10}.aspect-\[2\/1\]{aspect-ratio:2/1}.h-16{height:4rem}.h-2{height:0.5rem}.h-full{height:100%}.h-screen{height:100vh}.w-64{width:16rem}.w-full{width:100%}.min-w-full{min-width:100%}.max-w-4xl{max-width:56rem}.max-w-7xl{max-width:80rem}.flex-1{flex:1 1 0%}.flex-none{flex:none}.-translate-x-1\/2{--tw-translate-x:-50%;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.-translate-y-full{--tw-translate-y:-100%;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.transform{transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.cursor-crosshair{cursor:crosshair}.cursor-pointer{cursor:pointer}.select-none{-webkit-user-select:none;user-select:none}.appearance-none{-webkit-appearance:none;appearance:none}.grid-cols-1{grid-template-columns:repeat(1, minmax(0, 1fr))}.flex-col{flex-direction:column}.items-start{align-items:flex-start}.items-center{align-items:center}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.justify-around{justify-content:space-around}.gap-1{gap:0.25rem}.gap-2{gap:0.5rem}.gap-3{gap:0.75rem}.gap-6{gap:1.5rem}.space-y-2 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.5rem * var(--tw-space-y-reverse))}.space-y-4 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1rem * var(--tw-space-y-reverse))}.space-y-6 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.5rem * var(--tw-space-y-reverse))}.divide-y > :not([hidden]) ~ :not([hidden]){--tw-divide-y-reverse:0;border-top-width:calc(1px * calc(1 - var(--tw-divide-y-reverse)));border-bottom-width:calc(1px * var(--tw-divide-y-reverse))}.divide-gray-100 > :not([hidden]) ~ :not([hidden]){--tw-divide-opacity:1;border-color:rgb(243 244 246 / var(--tw-divide-opacity, 1))}.divide-gray-200 > :not([hidden]) ~ :not([hidden]){--tw-divide-opacity:1;border-color:rgb(229 231 235 / var(--tw-divide-opacity, 1))}.overflow-hidden{overflow:hidden}.overflow-y-auto{overflow-y:auto}.rounded{border-radius:0.25rem}.rounded-lg{border-radius:0.5rem}.rounded-xl{border-radius:0.75rem}.border{border-width:1px}.border-b{border-bottom-width:1px}.border-l-4{border-left-width:4px}.border-r{border-right-width:1px}.border-t{border-top-width:1px}.border-blue-500{--tw-border-opacity:1;border-color:rgb(59 130 246 / var(--tw-border-opacity, 1))}.border-gray-100{--tw-border-opacity:1;border-color:rgb(243 244 246 / var(--tw-border-opacity, 1))}.border-gray-200{--tw-border-opacity:1;border-color:rgb(229 231 235 / var(--tw-border-opacity, 1))}.border-gray-300{--tw-border-opacity:1;border-color:rgb(209 213 219 / var(--tw-border-opacity, 1))}.border-green-100{--tw-border-opacity:1;border-color:rgb(220 252 231 / var(--tw-border-opacity, 1))}.bg-black\/80{background-color:rgb(0 0 0 / 0.8)}.bg-blue-100{--tw-bg-opacity:1;background-color:rgb(219 234 254 / var(--tw-bg-opacity, 1))}.bg-blue-50{--tw-bg-opacity:1;background-color:rgb(239 246 255 / var(--tw-bg-opacity, 1))}.bg-blue-600{--tw-bg-opacity:1;background-color:rgb(37 99 235 / var(--tw-bg-opacity, 1))}.bg-gray-100{--tw-bg-opacity:1;background-color:rgb(243 244 246 / var(--tw-bg-opacity, 1))}.bg-gray-200{--tw-bg-opacity:1;background-color:rgb(229 231 235 / var(--tw-bg-opacity, 1))}.bg-gray-50{--tw-bg-opacity:1;background-color:rgb(249 250 251 / var(--tw-bg-opacity, 1))}.bg-green-50{--tw-bg-opacity:1;background-color:rgb(240 253 244 / var(--tw-bg-opacity, 1))}.bg-purple-50{--tw-bg-opacity:1;background-color:rgb(250 245 255 / var(--tw-bg-opacity, 1))}.bg-white{--tw-bg-opacity:1;background-color:rgb(255 255 255 / var(--tw-bg-opacity, 1))}.p-2{padding:0.5rem}.p-3{padding:0.75rem}.p-4{padding:1rem}.p-6{padding:1.5rem}.px-3{padding-left:0.75rem;padding-right:0.75rem}.px-4{padding-left:1rem;padding-right:1rem}.px-6{padding-left:1.5rem;padding-right:1.5rem}.py-1{padding-top:0.25rem;padding-bottom:0.25rem}.py-2{padding-top:0.5rem;padding-bottom:0.5rem}.py-3{padding-top:0.75rem;padding-bottom:0.75rem}.pb-2{padding-bottom:0.5rem}.pb-20{padding-bottom:5rem}.text-left{text-align:left}.text-center{text-align:center}.font-mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}.font-sans{font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"}.text-3xl{font-size:1.875rem;line-height:2.25rem}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:0.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:0.75rem;line-height:1rem}.font-bold{font-weight:700}.font-medium{font-weight:500}.tracking-wide{letter-spacing:0.025em}.text-blue-600{--tw-text-opacity:1;color:rgb(37 99 235 / var(--tw-text-opacity, 1))}.text-blue-700{--tw-text-opacity:1;color:rgb(29 78 216 / var(--tw-text-opacity, 1))}.text-blue-800{--tw-text-opacity:1;color:rgb(30 64 175 / var(--tw-text-opacity, 1))}.text-gray-400{--tw-text-opacity:1;color:rgb(156 163 175 / var(--tw-text-opacity, 1))}.text-gray-500{--tw-text-opacity:1;color:rgb(107 114 128 / var(--tw-text-opacity, 1))}.text-gray-600{--tw-text-opacity:1;color:rgb(75 85 99 / var(--tw-text-opacity, 1))}.text-gray-700{--tw-text-opacity:1;color:rgb(55 65 81 / var(--tw-text-opacity, 1))}.text-gray-800{--tw-text-opacity:1;color:rgb(31 41 55 / var(--tw-text-opacity, 1))}.text-green-500{--tw-text-opacity:1;color:rgb(34 197 94 / var(--tw-text-opacity, 1))}.text-green-600{--tw-text-opacity:1;color:rgb(22 163 74 / var(--tw-text-opacity, 1))}.text-purple-800{--tw-text-opacity:1;color:rgb(107 33 168 / var(--tw-text-opacity, 1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.text-green-800{--tw-text-opacity:1;color:rgb(22 101 52 / var(--tw-text-opacity, 1))}.accent-blue-600{accent-color:#2563eb}.accent-purple-600{accent-color:#9333ea}.opacity-90{opacity:0.9}.shadow-md{--tw-shadow:0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 4px 6px -1px var(--tw-shadow-color), 0 2px 4px -2px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-sm{--tw-shadow:0 1px 2px 0 rgb(0 0 0 / 0.05);--tw-shadow-colored:0 1px 2px 0 var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.transition-colors{transition-property:color, background-color, border-color, fill, stroke, -webkit-text-decoration-color;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, -webkit-text-decoration-color;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-shadow{transition-property:box-shadow;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.hover\:bg-blue-100:hover{--tw-bg-opacity:1;background-color:rgb(219 234 254 / var(--tw-bg-opacity, 1))}.hover\:bg-blue-200:hover{--tw-bg-opacity:1;background-color:rgb(191 219 254 / var(--tw-bg-opacity, 1))}.hover\:bg-gray-100:hover{--tw-bg-opacity:1;background-color:rgb(243 244 246 / var(--tw-bg-opacity, 1))}.hover\:bg-gray-200:hover{--tw-bg-opacity:1;background-color:rgb(229 231 235 / var(--tw-bg-opacity, 1))}.hover\:bg-gray-50:hover{--tw-bg-opacity:1;background-color:rgb(249 250 251 / var(--tw-bg-opacity, 1))}.hover\:underline:hover{-webkit-text-decoration-line:underline;text-decoration-line:underline}.hover\:shadow-md:hover{--tw-shadow:0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 4px 6px -1px var(--tw-shadow-color), 0 2px 4px -2px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}@media (min-width: 640px){.sm\:block{display:block}.sm\:p-6{padding:1.5rem}.sm\:px-6{padding-left:1.5rem;padding-right:1.5rem}}@media (min-width: 768px){.md\:flex{display:flex}.md\:hidden{display:none}.md\:w-1\/3{width:33.333333%}.md\:w-2\/3{width:66.666667%}.md\:grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.md\:flex-row{flex-direction:row}.md\:pb-6{padding-bottom:1.5rem}}@media (min-width: 1024px){.lg\:grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.lg\:px-8{padding-left:2rem;padding-right:2rem}}</style></head>
+    <body class="bg-gray-100 text-gray-800 font-sans h-screen flex flex-col overflow-hidden">
+    
+        <!-- Header -->
+        <header class="bg-blue-600 text-white shadow-md z-10 flex-none">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-3xl">functions</span>
+                    <h1 class="text-xl font-bold tracking-wide">重要极限可视化实验室</h1>
+                </div>
+                <div class="text-sm opacity-90 hidden sm:block">高等数学可视化辅助教学工具</div>
+            </div>
+        </header>
+    
+        <!-- Main Layout -->
+        <div class="flex flex-1 overflow-hidden max-w-7xl mx-auto w-full">
+            
+            <!-- Sidebar Navigation -->
+            <nav class="w-64 bg-white border-r border-gray-200 flex-none flex flex-col shadow-sm hidden md:flex">
+                <div class="p-4 space-y-2">
+                    <button onclick="switchTab('limit1')" class="nav-item w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 transition-colors bg-blue-50 text-blue-700 font-medium hover:bg-blue-100" data-tab="limit1">
+                        <span class="material-symbols-outlined">filter_1</span>
+                        第一重要极限
+                    </button>
+                    <button onclick="switchTab('limit2')" class="nav-item w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 transition-colors text-gray-600 hover:bg-gray-100" data-tab="limit2">
+                        <span class="material-symbols-outlined">filter_2</span>
+                        第二重要极限
+                    </button>
+                    <button onclick="switchTab('extensions')" class="nav-item w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 transition-colors text-gray-600 hover:bg-gray-100" data-tab="extensions">
+                        <span class="material-symbols-outlined">extension</span>
+                        推广形式
+                    </button>
+                    <button onclick="switchTab('practice')" class="nav-item w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 transition-colors text-gray-600 hover:bg-gray-100" data-tab="practice">
+                        <span class="material-symbols-outlined">quiz</span>
+                        计算练习
+                    </button>
+                </div>
+                <div class="mt-auto p-4 border-t border-gray-100">
+                    <div class="bg-blue-50 rounded p-3 text-xs text-blue-800">
+                        <p class="font-bold mb-1">小贴士</p>
+                        <p id="tip-content">鼠标悬停在图表上可查看具体数值点。</p>
+                    </div>
+                </div>
+            </nav>
+    
+            <!-- Mobile Navigation (Bottom) -->
+            <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around p-2 z-50">
+                <button onclick="switchTab('limit1')" class="mobile-nav-item flex flex-col items-center p-2 text-blue-600" data-tab="limit1">
+                    <span class="material-symbols-outlined">filter_1</span>
+                    <span class="text-xs">极限一</span>
+                </button>
+                <button onclick="switchTab('limit2')" class="mobile-nav-item flex flex-col items-center p-2 text-gray-500" data-tab="limit2">
+                    <span class="material-symbols-outlined">filter_2</span>
+                    <span class="text-xs">极限二</span>
+                </button>
+                <button onclick="switchTab('extensions')" class="mobile-nav-item flex flex-col items-center p-2 text-gray-500" data-tab="extensions">
+                    <span class="material-symbols-outlined">extension</span>
+                    <span class="text-xs">推广</span>
+                </button>
+                <button onclick="switchTab('practice')" class="mobile-nav-item flex flex-col items-center p-2 text-gray-500" data-tab="practice">
+                    <span class="material-symbols-outlined">quiz</span>
+                    <span class="text-xs">练习</span>
+                </button>
+            </nav>
+    
+            <!-- Content Area -->
+            <main class="flex-1 overflow-y-auto bg-gray-50 p-4 sm:p-6 pb-20 md:pb-6 relative">
+                
+                <!-- Tab 1: First Limit -->
+                <div id="limit1-content" class="tab-content grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Left Column: Theory & Data -->
+                    <div class="space-y-6">
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                            <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                                <span class="material-symbols-outlined text-blue-600">science</span>
+                                核心公式
+                            </h2>
+                            <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded mb-4 text-center">
+                                <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" display="true" tabindex="0" ctxtmenu_counter="0" style="font-size: 122.1%; position: relative;"><mjx-math display="true" class="MJX-TEX" aria-hidden="true" style="margin-left: 0px; margin-right: 0px;"><mjx-munder><mjx-row><mjx-base style="padding-left: 0.038em;"><mjx-mo class="mjx-n"><mjx-c class="mjx-c6C"></mjx-c><mjx-c class="mjx-c69"></mjx-c><mjx-c class="mjx-c6D"></mjx-c></mjx-mo></mjx-base></mjx-row><mjx-row><mjx-under style="padding-top: 0.167em;"><mjx-texatom size="s" texclass="ORD"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c2192"></mjx-c></mjx-mo><mjx-mn class="mjx-n"><mjx-c class="mjx-c30"></mjx-c></mjx-mn></mjx-texatom></mjx-under></mjx-row></mjx-munder><mjx-mfrac space="2"><mjx-frac type="d"><mjx-num><mjx-nstrut type="d"></mjx-nstrut><mjx-mrow><mjx-mi class="mjx-n"><mjx-c class="mjx-c73"></mjx-c><mjx-c class="mjx-c69"></mjx-c><mjx-c class="mjx-c6E"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c2061"></mjx-c></mjx-mo><mjx-mi class="mjx-i" space="2"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi></mjx-mrow></mjx-num><mjx-dbox><mjx-dtable><mjx-line type="d"></mjx-line><mjx-row><mjx-den><mjx-dstrut type="d"></mjx-dstrut><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi></mjx-den></mjx-row></mjx-dtable></mjx-dbox></mjx-frac></mjx-mfrac><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-mn class="mjx-n" space="4"><mjx-c class="mjx-c31"></mjx-c></mjx-mn></mjx-math><mjx-assistive-mml unselectable="on" display="block"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><munder><mo data-mjx-texclass="OP" movablelimits="true">lim</mo><mrow data-mjx-texclass="ORD"><mi>x</mi><mo accent="false" stretchy="false">→</mo><mn>0</mn></mrow></munder><mfrac><mrow><mi>sin</mi><mo data-mjx-texclass="NONE">⁡</mo><mi>x</mi></mrow><mi>x</mi></mfrac><mo>=</mo><mn>1</mn></math></mjx-assistive-mml></mjx-container>
+                            </div>
+                            <ul class="space-y-2 text-sm text-gray-600">
+                                <li class="flex items-start gap-2">
+                                    <span class="material-symbols-outlined text-green-500 text-lg">check_circle</span>
+                                    <span><strong>0/0 型不定式：</strong> 当 <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="1" style="font-size: 122%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c2192"></mjx-c></mjx-mo><mjx-mn class="mjx-n" space="4"><mjx-c class="mjx-c30"></mjx-c></mjx-mn></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mi>x</mi><mo accent="false" stretchy="false">→</mo><mn>0</mn></math></mjx-assistive-mml></mjx-container> 时，<mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="2" style="font-size: 122%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mi class="mjx-n"><mjx-c class="mjx-c73"></mjx-c><mjx-c class="mjx-c69"></mjx-c><mjx-c class="mjx-c6E"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c2061"></mjx-c></mjx-mo><mjx-mi class="mjx-i" space="2"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c2192"></mjx-c></mjx-mo><mjx-mn class="mjx-n" space="4"><mjx-c class="mjx-c30"></mjx-c></mjx-mn></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mi>sin</mi><mo data-mjx-texclass="NONE">⁡</mo><mi>x</mi><mo accent="false" stretchy="false">→</mo><mn>0</mn></math></mjx-assistive-mml></mjx-container> 且 <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="3" style="font-size: 122%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c2192"></mjx-c></mjx-mo><mjx-mn class="mjx-n" space="4"><mjx-c class="mjx-c30"></mjx-c></mjx-mn></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mi>x</mi><mo accent="false" stretchy="false">→</mo><mn>0</mn></math></mjx-assistive-mml></mjx-container>。</span>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <span class="material-symbols-outlined text-green-500 text-lg">check_circle</span>
+                                    <span><strong>几何意义：</strong> 在单位圆中，当角 <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="4" style="font-size: 122%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mi>x</mi></math></mjx-assistive-mml></mjx-container> 很小时，弧长与弦长近似相等。</span>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <span class="material-symbols-outlined text-green-500 text-lg">check_circle</span>
+                                    <span><strong>注意：</strong> <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="5" style="font-size: 122%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mi>x</mi></math></mjx-assistive-mml></mjx-container> 必须是弧度制。</span>
+                                </li>
+                            </ul>
+                        </div>
+    
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                            <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                                <span class="material-symbols-outlined text-blue-600">table_chart</span>
+                                数值逼近验证
+                            </h2>
+                            <div class="overflow-hidden rounded-lg border border-gray-200">
+                                <table class="min-w-full divide-y divide-gray-200 text-sm">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th class="px-4 py-3 text-left font-medium text-gray-500">x (弧度)</th>
+                                            <th class="px-4 py-3 text-left font-medium text-gray-500">sin(x)</th>
+                                            <th class="px-4 py-3 text-left font-medium text-blue-600">sin(x)/x</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white divide-y divide-gray-200" id="table-limit1">
+                                        <!-- Populated by JS -->
+                                    
+                        <tr>
+                            <td class="px-4 py-2 font-mono text-gray-600">±0.5</td>
+                            <td class="px-4 py-2 font-mono text-gray-600">±0.479426</td>
+                            <td class="px-4 py-2 font-mono font-bold text-blue-600">0.958851</td>
+                        </tr>
+                    
+                        <tr>
+                            <td class="px-4 py-2 font-mono text-gray-600">±0.1</td>
+                            <td class="px-4 py-2 font-mono text-gray-600">±0.099833</td>
+                            <td class="px-4 py-2 font-mono font-bold text-blue-600">0.998334</td>
+                        </tr>
+                    
+                        <tr>
+                            <td class="px-4 py-2 font-mono text-gray-600">±0.01</td>
+                            <td class="px-4 py-2 font-mono text-gray-600">±0.010000</td>
+                            <td class="px-4 py-2 font-mono font-bold text-blue-600">0.999983</td>
+                        </tr>
+                    
+                        <tr>
+                            <td class="px-4 py-2 font-mono text-gray-600">±0.001</td>
+                            <td class="px-4 py-2 font-mono text-gray-600">±0.001000</td>
+                            <td class="px-4 py-2 font-mono font-bold text-blue-600">1.000000</td>
+                        </tr>
+                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+    
+                    <!-- Right Column: Visualization -->
+                    <div class="space-y-6">
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                            <div class="flex justify-between items-center mb-4">
+                                <h2 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-blue-600">monitoring</span>
+                                    函数图像可视化
+                                </h2>
+                                <div class="flex gap-2">
+                                    <button onclick="animateGraph1()" class="px-3 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors flex items-center gap-1">
+                                        <span class="material-symbols-outlined text-sm">play_arrow</span> 演示
+                                    </button>
+                                    <button onclick="resetGraph1()" class="px-3 py-1 text-xs bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors flex items-center gap-1">
+                                        <span class="material-symbols-outlined text-sm">restart_alt</span> 重置
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="relative w-full aspect-[16/10] bg-gray-50 rounded-lg border border-gray-200 overflow-hidden cursor-crosshair group">
+                                <canvas id="canvas-limit1" class="w-full h-full block"></canvas>
+                                <!-- Tooltip for Canvas -->
+                                <div id="tooltip-limit1" class="absolute hidden bg-black/80 text-white text-xs p-2 rounded pointer-events-none transform -translate-x-1/2 -translate-y-full z-20"></div>
+                                <div class="absolute bottom-2 right-2 text-xs text-gray-400 select-none">滚动缩放 • 悬停查看</div>
+                            </div>
+    
+                            <div class="mt-4 space-y-4">
+                                <div>
+                                    <label class="flex justify-between text-sm text-gray-600 mb-1">
+                                        <span>X轴 逼近过程 (x: <span id="val-x1" class="font-mono text-blue-600">1.00</span>)</span>
+                                        <span id="res-y1" class="font-mono text-green-600 font-bold">0.8415</span>
+                                    </label>
+                                    <input type="range" id="slider-x1" min="-3.2" max="3.2" step="0.01" value="1.0" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600">
+                                </div>
+                                <div class="flex justify-between text-xs text-gray-500">
+                                    <span>-π</span>
+                                    <span>0</span>
+                                    <span>+π</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+    
+                <!-- Tab 2: Second Limit -->
+                <div id="limit2-content" class="tab-content hidden grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="space-y-6">
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                            <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                                <span class="material-symbols-outlined text-blue-600">science</span>
+                                核心公式
+                            </h2>
+                            <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded mb-4 text-center">
+                                <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" display="true" tabindex="0" ctxtmenu_counter="6" style="font-size: 113.1%; position: relative;"><mjx-math display="true" class="MJX-TEX" aria-hidden="true" style="margin-left: 0px; margin-right: 0px;"><mjx-munder><mjx-row><mjx-base style="padding-left: 0.215em;"><mjx-mo class="mjx-n"><mjx-c class="mjx-c6C"></mjx-c><mjx-c class="mjx-c69"></mjx-c><mjx-c class="mjx-c6D"></mjx-c></mjx-mo></mjx-base></mjx-row><mjx-row><mjx-under style="padding-top: 0.239em;"><mjx-texatom size="s" texclass="ORD"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c2192"></mjx-c></mjx-mo><mjx-mi class="mjx-n"><mjx-c class="mjx-c221E"></mjx-c></mjx-mi></mjx-texatom></mjx-under></mjx-row></mjx-munder><mjx-msup space="2"><mjx-mrow><mjx-mo class="mjx-s3"><mjx-c class="mjx-c28 TEX-S3"></mjx-c></mjx-mo><mjx-mn class="mjx-n"><mjx-c class="mjx-c31"></mjx-c></mjx-mn><mjx-mo class="mjx-n" space="3"><mjx-c class="mjx-c2B"></mjx-c></mjx-mo><mjx-mfrac space="3"><mjx-frac type="d"><mjx-num><mjx-nstrut type="d"></mjx-nstrut><mjx-mn class="mjx-n"><mjx-c class="mjx-c31"></mjx-c></mjx-mn></mjx-num><mjx-dbox><mjx-dtable><mjx-line type="d"></mjx-line><mjx-row><mjx-den><mjx-dstrut type="d"></mjx-dstrut><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi></mjx-den></mjx-row></mjx-dtable></mjx-dbox></mjx-frac></mjx-mfrac><mjx-mo class="mjx-s3"><mjx-c class="mjx-c29 TEX-S3"></mjx-c></mjx-mo></mjx-mrow><mjx-script style="vertical-align: 1.177em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msup><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-mi class="mjx-i" space="4"><mjx-c class="mjx-c1D452 TEX-I"></mjx-c></mjx-mi></mjx-math><mjx-assistive-mml unselectable="on" display="block"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><munder><mo data-mjx-texclass="OP" movablelimits="true">lim</mo><mrow data-mjx-texclass="ORD"><mi>x</mi><mo accent="false" stretchy="false">→</mo><mi mathvariant="normal">∞</mi></mrow></munder><msup><mrow data-mjx-texclass="INNER"><mo data-mjx-texclass="OPEN">(</mo><mn>1</mn><mo>+</mo><mfrac><mn>1</mn><mi>x</mi></mfrac><mo data-mjx-texclass="CLOSE">)</mo></mrow><mi>x</mi></msup><mo>=</mo><mi>e</mi></math></mjx-assistive-mml></mjx-container>
+                            </div>
+                            <ul class="space-y-2 text-sm text-gray-600">
+                                <li class="flex items-start gap-2">
+                                    <span class="material-symbols-outlined text-green-500 text-lg">check_circle</span>
+                                    <span><strong><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="7" style="font-size: 113.1%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-msup><mjx-mn class="mjx-n"><mjx-c class="mjx-c31"></mjx-c></mjx-mn><mjx-script style="vertical-align: 0.363em;"><mjx-mi class="mjx-n" size="s"><mjx-c class="mjx-c221E"></mjx-c></mjx-mi></mjx-script></mjx-msup></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><msup><mn>1</mn><mi mathvariant="normal">∞</mi></msup></math></mjx-assistive-mml></mjx-container> 型不定式：</strong> 底数 <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="8" style="font-size: 113.1%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mo class="mjx-n"><mjx-c class="mjx-c2192"></mjx-c></mjx-mo><mjx-mn class="mjx-n" space="4"><mjx-c class="mjx-c31"></mjx-c></mjx-mn></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mo accent="false" stretchy="false">→</mo><mn>1</mn></math></mjx-assistive-mml></mjx-container>，指数 <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="9" style="font-size: 113.1%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mo class="mjx-n"><mjx-c class="mjx-c2192"></mjx-c></mjx-mo><mjx-mi class="mjx-n" space="4"><mjx-c class="mjx-c221E"></mjx-c></mjx-mi></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mo accent="false" stretchy="false">→</mo><mi mathvariant="normal">∞</mi></math></mjx-assistive-mml></mjx-container>。</span>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <span class="material-symbols-outlined text-green-500 text-lg">check_circle</span>
+                                    <span><strong>自然常数 <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="10" style="font-size: 113.1%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D452 TEX-I"></mjx-c></mjx-mi></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mi>e</mi></math></mjx-assistive-mml></mjx-container>：</strong> 约等于 2.7182818...</span>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <span class="material-symbols-outlined text-green-500 text-lg">check_circle</span>
+                                    <span><strong>应用：</strong> 连续复利计算、增长模型。</span>
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                            <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                                <span class="material-symbols-outlined text-blue-600">table_chart</span>
+                                数值验证
+                            </h2>
+                            <div class="overflow-hidden rounded-lg border border-gray-200">
+                                <table class="min-w-full divide-y divide-gray-200 text-sm">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th class="px-4 py-3 text-left font-medium text-gray-500">x</th>
+                                            <th class="px-4 py-3 text-left font-medium text-gray-500">1 + 1/x</th>
+                                            <th class="px-4 py-3 text-left font-medium text-blue-600">(1 + 1/x)^x</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white divide-y divide-gray-200" id="table-limit2">
+                        <tr>
+                            <td class="px-4 py-2 font-mono text-gray-600">10</td>
+                            <td class="px-4 py-2 font-mono text-gray-600">1.10000</td>
+                            <td class="px-4 py-2 font-mono font-bold text-blue-600">2.59374</td>
+                        </tr>
+                    
+                        <tr>
+                            <td class="px-4 py-2 font-mono text-gray-600">100</td>
+                            <td class="px-4 py-2 font-mono text-gray-600">1.01000</td>
+                            <td class="px-4 py-2 font-mono font-bold text-blue-600">2.70481</td>
+                        </tr>
+                    
+                        <tr>
+                            <td class="px-4 py-2 font-mono text-gray-600">1000</td>
+                            <td class="px-4 py-2 font-mono text-gray-600">1.00100</td>
+                            <td class="px-4 py-2 font-mono font-bold text-blue-600">2.71692</td>
+                        </tr>
+                    
+                        <tr>
+                            <td class="px-4 py-2 font-mono text-gray-600">10000</td>
+                            <td class="px-4 py-2 font-mono text-gray-600">1.00010</td>
+                            <td class="px-4 py-2 font-mono font-bold text-blue-600">2.71815</td>
+                        </tr>
+                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+    
+                    <div class="space-y-6">
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                            <div class="flex justify-between items-center mb-4">
+                                <h2 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-blue-600">monitoring</span>
+                                    趋势可视化
+                                </h2>
+                                <div class="flex gap-2">
+                                    <button onclick="animateGraph2()" class="px-3 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors flex items-center gap-1">
+                                        <span class="material-symbols-outlined text-sm">play_arrow</span> 演示
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="relative w-full aspect-[16/10] bg-gray-50 rounded-lg border border-gray-200 overflow-hidden cursor-crosshair">
+                                <canvas id="canvas-limit2" class="w-full h-full block"></canvas>
+                                <div id="tooltip-limit2" class="absolute hidden bg-black/80 text-white text-xs p-2 rounded pointer-events-none transform -translate-x-1/2 -translate-y-full z-20"></div>
+                            </div>
+    
+                            <div class="mt-4 space-y-4">
+                                <div>
+                                    <label class="flex justify-between text-sm text-gray-600 mb-1">
+                                        <span>X轴 增大 (x: <span id="val-x2" class="font-mono text-blue-600">1.0</span>)</span>
+                                        <span id="res-y2" class="font-mono text-green-600 font-bold">2.0000</span>
+                                    </label>
+                                    <input type="range" id="slider-x2" min="1" max="50" step="0.1" value="1" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+    
+                <!-- Tab 3: Extensions -->
+                <div id="extensions-content" class="tab-content hidden space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Extension 1 -->
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+                            <h3 class="font-bold text-gray-800 mb-3 text-lg border-b pb-2">重要极限一的推广</h3>
+                            <div class="text-gray-600 mb-4 text-sm">
+                                <p class="mb-2">只要 <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="11" style="font-size: 113.1%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D6FC TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c2192"></mjx-c></mjx-mo><mjx-mn class="mjx-n" space="4"><mjx-c class="mjx-c30"></mjx-c></mjx-mn></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mi>α</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mo accent="false" stretchy="false">→</mo><mn>0</mn></math></mjx-assistive-mml></mjx-container> (当 <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="12" style="font-size: 113.1%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c2192"></mjx-c></mjx-mo><mjx-msub space="4"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c30"></mjx-c></mjx-mn></mjx-script></mjx-msub></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mi>x</mi><mo accent="false" stretchy="false">→</mo><msub><mi>x</mi><mn>0</mn></msub></math></mjx-assistive-mml></mjx-container> 时)，公式即成立。</p>
+                                <div class="bg-gray-50 p-3 rounded border border-gray-100 text-center my-3">
+                                    <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" display="true" tabindex="0" ctxtmenu_counter="13" style="font-size: 113.1%; position: relative;"><mjx-math display="true" class="MJX-TEX" aria-hidden="true" style="margin-left: 0px; margin-right: 0px;"><mjx-munder><mjx-row><mjx-base style="padding-left: 0.539em;"><mjx-mo class="mjx-n"><mjx-c class="mjx-c6C"></mjx-c><mjx-c class="mjx-c69"></mjx-c><mjx-c class="mjx-c6D"></mjx-c></mjx-mo></mjx-base></mjx-row><mjx-row><mjx-under style="padding-top: 0.167em;"><mjx-texatom size="s" texclass="ORD"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D6FC TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo><mjx-mo class="mjx-n"><mjx-c class="mjx-c2192"></mjx-c></mjx-mo><mjx-mn class="mjx-n"><mjx-c class="mjx-c30"></mjx-c></mjx-mn></mjx-texatom></mjx-under></mjx-row></mjx-munder><mjx-mfrac space="2"><mjx-frac type="d"><mjx-num><mjx-nstrut type="d"></mjx-nstrut><mjx-mrow><mjx-mi class="mjx-n"><mjx-c class="mjx-c73"></mjx-c><mjx-c class="mjx-c69"></mjx-c><mjx-c class="mjx-c6E"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c2061"></mjx-c></mjx-mo><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D6FC TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo></mjx-mrow></mjx-num><mjx-dbox><mjx-dtable><mjx-line type="d"></mjx-line><mjx-row><mjx-den><mjx-dstrut type="d"></mjx-dstrut><mjx-mrow><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D6FC TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo></mjx-mrow></mjx-den></mjx-row></mjx-dtable></mjx-dbox></mjx-frac></mjx-mfrac><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-mn class="mjx-n" space="4"><mjx-c class="mjx-c31"></mjx-c></mjx-mn></mjx-math><mjx-assistive-mml unselectable="on" display="block"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><munder><mo data-mjx-texclass="OP" movablelimits="true">lim</mo><mrow data-mjx-texclass="ORD"><mi>α</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mo accent="false" stretchy="false">→</mo><mn>0</mn></mrow></munder><mfrac><mrow><mi>sin</mi><mo data-mjx-texclass="NONE">⁡</mo><mo stretchy="false">(</mo><mi>α</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mo stretchy="false">)</mo></mrow><mrow><mi>α</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo></mrow></mfrac><mo>=</mo><mn>1</mn></math></mjx-assistive-mml></mjx-container>
+                                </div>
+                                <p class="text-xs text-gray-500">注意：<mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="14" style="font-size: 113.1%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D6FC TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mi>α</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo></math></mjx-assistive-mml></mjx-container> 必须整体作为正弦的参数和分母。</p>
+                            </div>
+                            <div class="space-y-2">
+                                <div class="flex items-center justify-between bg-blue-50 p-3 rounded text-sm">
+                                    <span><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" display="true" tabindex="0" ctxtmenu_counter="15" style="font-size: 113.1%; position: relative;"><mjx-math display="true" class="MJX-TEX" aria-hidden="true" style="margin-left: 0px; margin-right: 0px;"><mjx-munder><mjx-row><mjx-base style="padding-left: 0.038em;"><mjx-mo class="mjx-n"><mjx-c class="mjx-c6C"></mjx-c><mjx-c class="mjx-c69"></mjx-c><mjx-c class="mjx-c6D"></mjx-c></mjx-mo></mjx-base></mjx-row><mjx-row><mjx-under style="padding-top: 0.167em;"><mjx-texatom size="s" texclass="ORD"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c2192"></mjx-c></mjx-mo><mjx-mn class="mjx-n"><mjx-c class="mjx-c30"></mjx-c></mjx-mn></mjx-texatom></mjx-under></mjx-row></mjx-munder><mjx-mfrac space="2"><mjx-frac type="d"><mjx-num><mjx-nstrut type="d"></mjx-nstrut><mjx-mrow><mjx-mi class="mjx-n"><mjx-c class="mjx-c73"></mjx-c><mjx-c class="mjx-c69"></mjx-c><mjx-c class="mjx-c6E"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c2061"></mjx-c></mjx-mo><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mn class="mjx-n"><mjx-c class="mjx-c33"></mjx-c></mjx-mn><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo></mjx-mrow></mjx-num><mjx-dbox><mjx-dtable><mjx-line type="d"></mjx-line><mjx-row><mjx-den><mjx-dstrut type="d"></mjx-dstrut><mjx-mrow><mjx-mn class="mjx-n"><mjx-c class="mjx-c33"></mjx-c></mjx-mn><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi></mjx-mrow></mjx-den></mjx-row></mjx-dtable></mjx-dbox></mjx-frac></mjx-mfrac></mjx-math><mjx-assistive-mml unselectable="on" display="block"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><munder><mo data-mjx-texclass="OP" movablelimits="true">lim</mo><mrow data-mjx-texclass="ORD"><mi>x</mi><mo accent="false" stretchy="false">→</mo><mn>0</mn></mrow></munder><mfrac><mrow><mi>sin</mi><mo data-mjx-texclass="NONE">⁡</mo><mo stretchy="false">(</mo><mn>3</mn><mi>x</mi><mo stretchy="false">)</mo></mrow><mrow><mn>3</mn><mi>x</mi></mrow></mfrac></math></mjx-assistive-mml></mjx-container></span>
+                                    <span class="font-bold text-blue-600">= 1</span>
+                                </div>
+                                <div class="flex items-center justify-between bg-blue-50 p-3 rounded text-sm">
+                                    <span><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" display="true" tabindex="0" ctxtmenu_counter="16" style="font-size: 113.1%; position: relative;"><mjx-math display="true" class="MJX-TEX" aria-hidden="true" style="margin-left: 0px; margin-right: 0px;"><mjx-munder><mjx-row><mjx-base style="padding-left: 0.038em;"><mjx-mo class="mjx-n"><mjx-c class="mjx-c6C"></mjx-c><mjx-c class="mjx-c69"></mjx-c><mjx-c class="mjx-c6D"></mjx-c></mjx-mo></mjx-base></mjx-row><mjx-row><mjx-under style="padding-top: 0.167em;"><mjx-texatom size="s" texclass="ORD"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c2192"></mjx-c></mjx-mo><mjx-mn class="mjx-n"><mjx-c class="mjx-c30"></mjx-c></mjx-mn></mjx-texatom></mjx-under></mjx-row></mjx-munder><mjx-mfrac space="2"><mjx-frac type="d"><mjx-num><mjx-nstrut type="d"></mjx-nstrut><mjx-mrow><mjx-mi class="mjx-n"><mjx-c class="mjx-c74"></mjx-c><mjx-c class="mjx-c61"></mjx-c><mjx-c class="mjx-c6E"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c2061"></mjx-c></mjx-mo><mjx-mi class="mjx-i" space="2"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi></mjx-mrow></mjx-num><mjx-dbox><mjx-dtable><mjx-line type="d"></mjx-line><mjx-row><mjx-den><mjx-dstrut type="d"></mjx-dstrut><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi></mjx-den></mjx-row></mjx-dtable></mjx-dbox></mjx-frac></mjx-mfrac></mjx-math><mjx-assistive-mml unselectable="on" display="block"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><munder><mo data-mjx-texclass="OP" movablelimits="true">lim</mo><mrow data-mjx-texclass="ORD"><mi>x</mi><mo accent="false" stretchy="false">→</mo><mn>0</mn></mrow></munder><mfrac><mrow><mi>tan</mi><mo data-mjx-texclass="NONE">⁡</mo><mi>x</mi></mrow><mi>x</mi></mfrac></math></mjx-assistive-mml></mjx-container></span>
+                                    <span class="font-bold text-blue-600">= 1</span>
+                                </div>
+                            </div>
+                        </div>
+    
+                        <!-- Extension 2 -->
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+                            <h3 class="font-bold text-gray-800 mb-3 text-lg border-b pb-2">重要极限二的推广</h3>
+                            <div class="text-gray-600 mb-4 text-sm">
+                                <p class="mb-2">只要 <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="17" style="font-size: 113.1%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D6FC TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c2192"></mjx-c></mjx-mo><mjx-mi class="mjx-n" space="4"><mjx-c class="mjx-c221E"></mjx-c></mjx-mi></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mi>α</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mo accent="false" stretchy="false">→</mo><mi mathvariant="normal">∞</mi></math></mjx-assistive-mml></mjx-container> (当 <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="18" style="font-size: 113.1%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c2192"></mjx-c></mjx-mo><mjx-msub space="4"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c30"></mjx-c></mjx-mn></mjx-script></mjx-msub></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mi>x</mi><mo accent="false" stretchy="false">→</mo><msub><mi>x</mi><mn>0</mn></msub></math></mjx-assistive-mml></mjx-container> 时)，公式即成立。</p>
+                                <div class="bg-gray-50 p-3 rounded border border-gray-100 text-center my-3">
+                                    <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" display="true" tabindex="0" ctxtmenu_counter="19" style="font-size: 113.1%; position: relative;"><mjx-math display="true" class="MJX-TEX" aria-hidden="true" style="margin-left: 0px; margin-right: 0px;"><mjx-munder><mjx-row><mjx-base style="padding-left: 0.716em;"><mjx-mo class="mjx-n"><mjx-c class="mjx-c6C"></mjx-c><mjx-c class="mjx-c69"></mjx-c><mjx-c class="mjx-c6D"></mjx-c></mjx-mo></mjx-base></mjx-row><mjx-row><mjx-under style="padding-top: 0.167em;"><mjx-texatom size="s" texclass="ORD"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D6FC TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo><mjx-mo class="mjx-n"><mjx-c class="mjx-c2192"></mjx-c></mjx-mo><mjx-mi class="mjx-n"><mjx-c class="mjx-c221E"></mjx-c></mjx-mi></mjx-texatom></mjx-under></mjx-row></mjx-munder><mjx-msup space="2"><mjx-mrow><mjx-mo class="mjx-s3"><mjx-c class="mjx-c28 TEX-S3"></mjx-c></mjx-mo><mjx-mn class="mjx-n"><mjx-c class="mjx-c31"></mjx-c></mjx-mn><mjx-mo class="mjx-n" space="3"><mjx-c class="mjx-c2B"></mjx-c></mjx-mo><mjx-mfrac space="3"><mjx-frac type="d"><mjx-num><mjx-nstrut type="d"></mjx-nstrut><mjx-mn class="mjx-n"><mjx-c class="mjx-c31"></mjx-c></mjx-mn></mjx-num><mjx-dbox><mjx-dtable><mjx-line type="d"></mjx-line><mjx-row><mjx-den><mjx-dstrut type="d"></mjx-dstrut><mjx-mrow><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D6FC TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo></mjx-mrow></mjx-den></mjx-row></mjx-dtable></mjx-dbox></mjx-frac></mjx-mfrac><mjx-mo class="mjx-s3"><mjx-c class="mjx-c29 TEX-S3"></mjx-c></mjx-mo></mjx-mrow><mjx-script style="vertical-align: 1.177em;"><mjx-texatom size="s" texclass="ORD"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D6FC TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo></mjx-texatom></mjx-script></mjx-msup><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-mi class="mjx-i" space="4"><mjx-c class="mjx-c1D452 TEX-I"></mjx-c></mjx-mi></mjx-math><mjx-assistive-mml unselectable="on" display="block"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><munder><mo data-mjx-texclass="OP" movablelimits="true">lim</mo><mrow data-mjx-texclass="ORD"><mi>α</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mo accent="false" stretchy="false">→</mo><mi mathvariant="normal">∞</mi></mrow></munder><msup><mrow data-mjx-texclass="INNER"><mo data-mjx-texclass="OPEN">(</mo><mn>1</mn><mo>+</mo><mfrac><mn>1</mn><mrow><mi>α</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo></mrow></mfrac><mo data-mjx-texclass="CLOSE">)</mo></mrow><mrow data-mjx-texclass="ORD"><mi>α</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo></mrow></msup><mo>=</mo><mi>e</mi></math></mjx-assistive-mml></mjx-container>
+                                </div>
+                                <p class="text-xs text-gray-500">核心特征：<mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="20" style="font-size: 113.1%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mtext class="mjx-n"><mjx-utext variant="normal" style="font-size: 88.4%; padding: 0.848em 0px 0.226em; font-family: MJXZERO, serif;">底</mjx-utext><mjx-utext variant="normal" style="font-size: 88.4%; padding: 0.848em 0px 0.226em; font-family: MJXZERO, serif;">数</mjx-utext></mjx-mtext><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c2192"></mjx-c></mjx-mo><mjx-mn class="mjx-n" space="4"><mjx-c class="mjx-c31"></mjx-c></mjx-mn><mjx-mo class="mjx-n"><mjx-c class="mjx-c2C"></mjx-c></mjx-mo><mjx-mtext class="mjx-n" space="2"><mjx-utext variant="normal" style="font-size: 88.4%; padding: 0.848em 0px 0.226em; font-family: MJXZERO, serif;">指</mjx-utext><mjx-utext variant="normal" style="font-size: 88.4%; padding: 0.848em 0px 0.226em; font-family: MJXZERO, serif;">数</mjx-utext></mjx-mtext><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c2192"></mjx-c></mjx-mo><mjx-mi class="mjx-n" space="4"><mjx-c class="mjx-c221E"></mjx-c></mjx-mi></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mtext>底数</mtext><mo accent="false" stretchy="false">→</mo><mn>1</mn><mo>,</mo><mtext>指数</mtext><mo accent="false" stretchy="false">→</mo><mi mathvariant="normal">∞</mi></math></mjx-assistive-mml></mjx-container>。</p>
+                            </div>
+                            <div class="space-y-2">
+                                <div class="flex items-center justify-between bg-green-50 p-3 rounded text-sm">
+                                    <span><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" display="true" tabindex="0" ctxtmenu_counter="21" style="font-size: 113.1%; position: relative;"><mjx-math display="true" class="MJX-TEX" aria-hidden="true" style="margin-left: 0px; margin-right: 0px;"><mjx-munder><mjx-row><mjx-base style="padding-left: 0.038em;"><mjx-mo class="mjx-n"><mjx-c class="mjx-c6C"></mjx-c><mjx-c class="mjx-c69"></mjx-c><mjx-c class="mjx-c6D"></mjx-c></mjx-mo></mjx-base></mjx-row><mjx-row><mjx-under style="padding-top: 0.167em;"><mjx-texatom size="s" texclass="ORD"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c2192"></mjx-c></mjx-mo><mjx-mn class="mjx-n"><mjx-c class="mjx-c30"></mjx-c></mjx-mn></mjx-texatom></mjx-under></mjx-row></mjx-munder><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mn class="mjx-n"><mjx-c class="mjx-c31"></mjx-c></mjx-mn><mjx-mo class="mjx-n" space="3"><mjx-c class="mjx-c2B"></mjx-c></mjx-mo><mjx-mi class="mjx-i" space="3"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-msup><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo><mjx-script style="vertical-align: 0.413em;"><mjx-texatom size="s" texclass="ORD"><mjx-mfrac><mjx-frac><mjx-num><mjx-nstrut></mjx-nstrut><mjx-mn class="mjx-n" style="font-size: 71.4%;"><mjx-c class="mjx-c31"></mjx-c></mjx-mn></mjx-num><mjx-dbox><mjx-dtable><mjx-line></mjx-line><mjx-row><mjx-den><mjx-dstrut></mjx-dstrut><mjx-mi class="mjx-i" style="font-size: 71.4%;"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi></mjx-den></mjx-row></mjx-dtable></mjx-dbox></mjx-frac></mjx-mfrac></mjx-texatom></mjx-script></mjx-msup></mjx-math><mjx-assistive-mml unselectable="on" display="block"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><munder><mo data-mjx-texclass="OP" movablelimits="true">lim</mo><mrow data-mjx-texclass="ORD"><mi>x</mi><mo accent="false" stretchy="false">→</mo><mn>0</mn></mrow></munder><mo stretchy="false">(</mo><mn>1</mn><mo>+</mo><mi>x</mi><msup><mo stretchy="false">)</mo><mrow data-mjx-texclass="ORD"><mfrac><mn>1</mn><mi>x</mi></mfrac></mrow></msup></math></mjx-assistive-mml></mjx-container></span>
+                                    <span class="font-bold text-green-600">= e</span>
+                                </div>
+                                <div class="flex items-center justify-between bg-green-50 p-3 rounded text-sm">
+                                    <span><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" display="true" tabindex="0" ctxtmenu_counter="22" style="font-size: 113.1%; position: relative;"><mjx-math display="true" class="MJX-TEX" aria-hidden="true" style="margin-left: 0px; margin-right: 0px;"><mjx-munder><mjx-row><mjx-base style="padding-left: 0.215em;"><mjx-mo class="mjx-n"><mjx-c class="mjx-c6C"></mjx-c><mjx-c class="mjx-c69"></mjx-c><mjx-c class="mjx-c6D"></mjx-c></mjx-mo></mjx-base></mjx-row><mjx-row><mjx-under style="padding-top: 0.239em;"><mjx-texatom size="s" texclass="ORD"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c2192"></mjx-c></mjx-mo><mjx-mi class="mjx-n"><mjx-c class="mjx-c221E"></mjx-c></mjx-mi></mjx-texatom></mjx-under></mjx-row></mjx-munder><mjx-msup space="2"><mjx-mrow><mjx-mo class="mjx-s3"><mjx-c class="mjx-c28 TEX-S3"></mjx-c></mjx-mo><mjx-mn class="mjx-n"><mjx-c class="mjx-c31"></mjx-c></mjx-mn><mjx-mo class="mjx-n" space="3"><mjx-c class="mjx-c2212"></mjx-c></mjx-mo><mjx-mfrac space="3"><mjx-frac type="d"><mjx-num><mjx-nstrut type="d"></mjx-nstrut><mjx-mn class="mjx-n"><mjx-c class="mjx-c31"></mjx-c></mjx-mn></mjx-num><mjx-dbox><mjx-dtable><mjx-line type="d"></mjx-line><mjx-row><mjx-den><mjx-dstrut type="d"></mjx-dstrut><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi></mjx-den></mjx-row></mjx-dtable></mjx-dbox></mjx-frac></mjx-mfrac><mjx-mo class="mjx-s3"><mjx-c class="mjx-c29 TEX-S3"></mjx-c></mjx-mo></mjx-mrow><mjx-script style="vertical-align: 1.177em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msup></mjx-math><mjx-assistive-mml unselectable="on" display="block"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><munder><mo data-mjx-texclass="OP" movablelimits="true">lim</mo><mrow data-mjx-texclass="ORD"><mi>x</mi><mo accent="false" stretchy="false">→</mo><mi mathvariant="normal">∞</mi></mrow></munder><msup><mrow data-mjx-texclass="INNER"><mo data-mjx-texclass="OPEN">(</mo><mn>1</mn><mo>−</mo><mfrac><mn>1</mn><mi>x</mi></mfrac><mo data-mjx-texclass="CLOSE">)</mo></mrow><mi>x</mi></msup></math></mjx-assistive-mml></mjx-container></span>
+                                    <span class="font-bold text-green-600">= 1/e</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Interactive Visualization for Extensions -->
+                     <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                        <h3 class="font-bold text-gray-800 mb-4">参数变化演示 <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="23" style="font-size: 113.1%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-munder limits="false"><mjx-mo class="mjx-n"><mjx-c class="mjx-c6C"></mjx-c><mjx-c class="mjx-c69"></mjx-c><mjx-c class="mjx-c6D"></mjx-c></mjx-mo><mjx-script style="vertical-align: -0.15em;"><mjx-texatom size="s" texclass="ORD"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c2192"></mjx-c></mjx-mo><mjx-mn class="mjx-n"><mjx-c class="mjx-c30"></mjx-c></mjx-mn></mjx-texatom></mjx-script></mjx-munder><mjx-mfrac space="2"><mjx-frac><mjx-num><mjx-nstrut></mjx-nstrut><mjx-mrow size="s"><mjx-mi class="mjx-n"><mjx-c class="mjx-c73"></mjx-c><mjx-c class="mjx-c69"></mjx-c><mjx-c class="mjx-c6E"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c2061"></mjx-c></mjx-mo><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D458 TEX-I"></mjx-c></mjx-mi><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo></mjx-mrow></mjx-num><mjx-dbox><mjx-dtable><mjx-line></mjx-line><mjx-row><mjx-den><mjx-dstrut></mjx-dstrut><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi></mjx-den></mjx-row></mjx-dtable></mjx-dbox></mjx-frac></mjx-mfrac><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-mi class="mjx-i" space="4"><mjx-c class="mjx-c1D458 TEX-I"></mjx-c></mjx-mi></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><munder><mo data-mjx-texclass="OP" movablelimits="true">lim</mo><mrow data-mjx-texclass="ORD"><mi>x</mi><mo accent="false" stretchy="false">→</mo><mn>0</mn></mrow></munder><mfrac><mrow><mi>sin</mi><mo data-mjx-texclass="NONE">⁡</mo><mo stretchy="false">(</mo><mi>k</mi><mi>x</mi><mo stretchy="false">)</mo></mrow><mi>x</mi></mfrac><mo>=</mo><mi>k</mi></math></mjx-assistive-mml></mjx-container></h3>
+                        <div class="flex flex-col md:flex-row gap-6">
+                            <div class="w-full md:w-2/3 aspect-[2/1] bg-gray-50 rounded border border-gray-200 relative">
+                                 <canvas id="canvas-ext" class="w-full h-full block"></canvas>
+                            </div>
+                            <div class="w-full md:w-1/3 flex flex-col justify-center space-y-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">参数 k 值: <span id="val-k" class="text-blue-600 font-bold">1.0</span></label>
+                                    <input type="range" id="slider-k" min="0.5" max="5" step="0.1" value="1" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-purple-600">
+                                </div>
+                                <div class="p-4 bg-purple-50 rounded-lg text-sm text-purple-800">
+                                    <p class="mb-2 font-bold">结论：</p>
+                                    <p>当系数变大时，函数图像振荡更剧烈。</p>
+                                    <p class="mt-2"><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" display="true" tabindex="0" ctxtmenu_counter="24" style="font-size: 113.1%; position: relative;"><mjx-math display="true" class="MJX-TEX" aria-hidden="true" style="margin-left: 0px; margin-right: 0px;"><mjx-munder><mjx-row><mjx-base style="padding-left: 0.038em;"><mjx-mo class="mjx-n"><mjx-c class="mjx-c6C"></mjx-c><mjx-c class="mjx-c69"></mjx-c><mjx-c class="mjx-c6D"></mjx-c></mjx-mo></mjx-base></mjx-row><mjx-row><mjx-under style="padding-top: 0.167em;"><mjx-texatom size="s" texclass="ORD"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c2192"></mjx-c></mjx-mo><mjx-mn class="mjx-n"><mjx-c class="mjx-c30"></mjx-c></mjx-mn></mjx-texatom></mjx-under></mjx-row></mjx-munder><mjx-mfrac space="2"><mjx-frac type="d"><mjx-num><mjx-nstrut type="d"></mjx-nstrut><mjx-mrow><mjx-mi class="mjx-n"><mjx-c class="mjx-c73"></mjx-c><mjx-c class="mjx-c69"></mjx-c><mjx-c class="mjx-c6E"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c2061"></mjx-c></mjx-mo><mjx-mi class="mjx-i" space="2"><mjx-c class="mjx-c1D458 TEX-I"></mjx-c></mjx-mi><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi></mjx-mrow></mjx-num><mjx-dbox><mjx-dtable><mjx-line type="d"></mjx-line><mjx-row><mjx-den><mjx-dstrut type="d"></mjx-dstrut><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi></mjx-den></mjx-row></mjx-dtable></mjx-dbox></mjx-frac></mjx-mfrac><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-mi class="mjx-i" space="4"><mjx-c class="mjx-c1D458 TEX-I"></mjx-c></mjx-mi></mjx-math><mjx-assistive-mml unselectable="on" display="block"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><munder><mo data-mjx-texclass="OP" movablelimits="true">lim</mo><mrow data-mjx-texclass="ORD"><mi>x</mi><mo accent="false" stretchy="false">→</mo><mn>0</mn></mrow></munder><mfrac><mrow><mi>sin</mi><mo data-mjx-texclass="NONE">⁡</mo><mi>k</mi><mi>x</mi></mrow><mi>x</mi></mfrac><mo>=</mo><mi>k</mi></math></mjx-assistive-mml></mjx-container></p>
+                                </div>
+                            </div>
+                        </div>
+                     </div>
+                </div>
+    
+                <!-- Tab 4: Practice -->
+                <div id="practice-content" class="tab-content hidden max-w-4xl mx-auto">
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                        <div class="p-6 border-b border-gray-100 flex justify-between items-center">
+                            <h2 class="text-xl font-bold text-gray-800">极限计算挑战</h2>
+                            <div class="text-sm text-gray-500">已完成: <span id="score" class="font-bold text-blue-600">0</span>/5</div>
+                        </div>
+                        
+                        <div class="divide-y divide-gray-100" id="quiz-container">
+                    <div class="p-6 transition-colors hover:bg-gray-50" id="q-1">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="text-lg font-mono bg-white border border-gray-200 px-3 py-1 rounded">
+                                <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" display="true" tabindex="0" ctxtmenu_counter="25" style="font-size: 113.1%; position: relative;"><mjx-math display="true" class="MJX-TEX" aria-hidden="true" style="margin-left: 0px; margin-right: 0px;"><mjx-munder><mjx-row><mjx-base style="padding-left: 0.038em;"><mjx-mo class="mjx-n"><mjx-c class="mjx-c6C"></mjx-c><mjx-c class="mjx-c69"></mjx-c><mjx-c class="mjx-c6D"></mjx-c></mjx-mo></mjx-base></mjx-row><mjx-row><mjx-under style="padding-top: 0.167em;"><mjx-texatom size="s" texclass="ORD"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c2192"></mjx-c></mjx-mo><mjx-mn class="mjx-n"><mjx-c class="mjx-c30"></mjx-c></mjx-mn></mjx-texatom></mjx-under></mjx-row></mjx-munder><mjx-mfrac space="2"><mjx-frac type="d"><mjx-num><mjx-nstrut type="d"></mjx-nstrut><mjx-mrow><mjx-mi class="mjx-n"><mjx-c class="mjx-c73"></mjx-c><mjx-c class="mjx-c69"></mjx-c><mjx-c class="mjx-c6E"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c2061"></mjx-c></mjx-mo><mjx-mn class="mjx-n" space="2"><mjx-c class="mjx-c35"></mjx-c></mjx-mn><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi></mjx-mrow></mjx-num><mjx-dbox><mjx-dtable><mjx-line type="d"></mjx-line><mjx-row><mjx-den><mjx-dstrut type="d"></mjx-dstrut><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi></mjx-den></mjx-row></mjx-dtable></mjx-dbox></mjx-frac></mjx-mfrac><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-mo class="mjx-n"><mjx-c class="mjx-c3F"></mjx-c></mjx-mo></mjx-math><mjx-assistive-mml unselectable="on" display="block"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><munder><mo data-mjx-texclass="OP" movablelimits="true">lim</mo><mrow data-mjx-texclass="ORD"><mi>x</mi><mo accent="false" stretchy="false">→</mo><mn>0</mn></mrow></munder><mfrac><mrow><mi>sin</mi><mo data-mjx-texclass="NONE">⁡</mo><mn>5</mn><mi>x</mi></mrow><mi>x</mi></mfrac><mo>=</mo><mo>?</mo></math></mjx-assistive-mml></mjx-container>
+                            </div>
+                            <button onclick="toggleAnswer(1)" class="text-sm text-blue-600 hover:underline">
+                                查看答案
+                            </button>
+                        </div>
+                        <div id="a-1" class="hidden mt-4 bg-green-50 p-4 rounded-lg border border-green-100">
+                            <p class="font-bold text-green-800 mb-1">答案：5</p>
+                            <p class="text-sm text-green-600"><span class="font-bold">解析：</span>配凑系数：乘以 5 除以 5</p>
+                        </div>
+                    </div>
+                
+                    <div class="p-6 transition-colors hover:bg-gray-50" id="q-2">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="text-lg font-mono bg-white border border-gray-200 px-3 py-1 rounded">
+                                <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" display="true" tabindex="0" ctxtmenu_counter="26" style="font-size: 113.1%; position: relative;"><mjx-math display="true" class="MJX-TEX" aria-hidden="true" style="margin-left: 0px; margin-right: 0px;"><mjx-munder><mjx-row><mjx-base style="padding-left: 0.215em;"><mjx-mo class="mjx-n"><mjx-c class="mjx-c6C"></mjx-c><mjx-c class="mjx-c69"></mjx-c><mjx-c class="mjx-c6D"></mjx-c></mjx-mo></mjx-base></mjx-row><mjx-row><mjx-under style="padding-top: 0.239em;"><mjx-texatom size="s" texclass="ORD"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c2192"></mjx-c></mjx-mo><mjx-mi class="mjx-n"><mjx-c class="mjx-c221E"></mjx-c></mjx-mi></mjx-texatom></mjx-under></mjx-row></mjx-munder><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mn class="mjx-n"><mjx-c class="mjx-c31"></mjx-c></mjx-mn><mjx-mo class="mjx-n" space="3"><mjx-c class="mjx-c2B"></mjx-c></mjx-mo><mjx-mfrac space="3"><mjx-frac type="d"><mjx-num><mjx-nstrut type="d"></mjx-nstrut><mjx-mn class="mjx-n"><mjx-c class="mjx-c31"></mjx-c></mjx-mn></mjx-num><mjx-dbox><mjx-dtable><mjx-line type="d"></mjx-line><mjx-row><mjx-den><mjx-dstrut type="d"></mjx-dstrut><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi></mjx-den></mjx-row></mjx-dtable></mjx-dbox></mjx-frac></mjx-mfrac><mjx-msup><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo><mjx-script style="vertical-align: 0.413em;"><mjx-texatom size="s" texclass="ORD"><mjx-mn class="mjx-n"><mjx-c class="mjx-c32"></mjx-c></mjx-mn><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi></mjx-texatom></mjx-script></mjx-msup><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-mo class="mjx-n"><mjx-c class="mjx-c3F"></mjx-c></mjx-mo></mjx-math><mjx-assistive-mml unselectable="on" display="block"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><munder><mo data-mjx-texclass="OP" movablelimits="true">lim</mo><mrow data-mjx-texclass="ORD"><mi>x</mi><mo accent="false" stretchy="false">→</mo><mi mathvariant="normal">∞</mi></mrow></munder><mo stretchy="false">(</mo><mn>1</mn><mo>+</mo><mfrac><mn>1</mn><mi>x</mi></mfrac><msup><mo stretchy="false">)</mo><mrow data-mjx-texclass="ORD"><mn>2</mn><mi>x</mi></mrow></msup><mo>=</mo><mo>?</mo></math></mjx-assistive-mml></mjx-container>
+                            </div>
+                            <button onclick="toggleAnswer(2)" class="text-sm text-blue-600 hover:underline">
+                                查看答案
+                            </button>
+                        </div>
+                        <div id="a-2" class="hidden mt-4 bg-green-50 p-4 rounded-lg border border-green-100">
+                            <p class="font-bold text-green-800 mb-1">答案：e^2</p>
+                            <p class="text-sm text-green-600"><span class="font-bold">解析：</span>利用第二重要极限，指数提取系数</p>
+                        </div>
+                    </div>
+                
+                    <div class="p-6 transition-colors hover:bg-gray-50" id="q-3">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="text-lg font-mono bg-white border border-gray-200 px-3 py-1 rounded">
+                                <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" display="true" tabindex="0" ctxtmenu_counter="27" style="font-size: 113.1%; position: relative;"><mjx-math display="true" class="MJX-TEX" aria-hidden="true" style="margin-left: 0px; margin-right: 0px;"><mjx-munder><mjx-row><mjx-base style="padding-left: 0.038em;"><mjx-mo class="mjx-n"><mjx-c class="mjx-c6C"></mjx-c><mjx-c class="mjx-c69"></mjx-c><mjx-c class="mjx-c6D"></mjx-c></mjx-mo></mjx-base></mjx-row><mjx-row><mjx-under style="padding-top: 0.167em;"><mjx-texatom size="s" texclass="ORD"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c2192"></mjx-c></mjx-mo><mjx-mn class="mjx-n"><mjx-c class="mjx-c30"></mjx-c></mjx-mn></mjx-texatom></mjx-under></mjx-row></mjx-munder><mjx-mfrac space="2"><mjx-frac type="d"><mjx-num><mjx-nstrut type="d"></mjx-nstrut><mjx-mrow><mjx-mi class="mjx-n"><mjx-c class="mjx-c74"></mjx-c><mjx-c class="mjx-c61"></mjx-c><mjx-c class="mjx-c6E"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c2061"></mjx-c></mjx-mo><mjx-mi class="mjx-i" space="2"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi></mjx-mrow></mjx-num><mjx-dbox><mjx-dtable><mjx-line type="d"></mjx-line><mjx-row><mjx-den><mjx-dstrut type="d"></mjx-dstrut><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi></mjx-den></mjx-row></mjx-dtable></mjx-dbox></mjx-frac></mjx-mfrac><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-mo class="mjx-n"><mjx-c class="mjx-c3F"></mjx-c></mjx-mo></mjx-math><mjx-assistive-mml unselectable="on" display="block"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><munder><mo data-mjx-texclass="OP" movablelimits="true">lim</mo><mrow data-mjx-texclass="ORD"><mi>x</mi><mo accent="false" stretchy="false">→</mo><mn>0</mn></mrow></munder><mfrac><mrow><mi>tan</mi><mo data-mjx-texclass="NONE">⁡</mo><mi>x</mi></mrow><mi>x</mi></mfrac><mo>=</mo><mo>?</mo></math></mjx-assistive-mml></mjx-container>
+                            </div>
+                            <button onclick="toggleAnswer(3)" class="text-sm text-blue-600 hover:underline">
+                                查看答案
+                            </button>
+                        </div>
+                        <div id="a-3" class="hidden mt-4 bg-green-50 p-4 rounded-lg border border-green-100">
+                            <p class="font-bold text-green-800 mb-1">答案：1</p>
+                            <p class="text-sm text-green-600"><span class="font-bold">解析：</span>tan x = sin x / cos x</p>
+                        </div>
+                    </div>
+                
+                    <div class="p-6 transition-colors hover:bg-gray-50" id="q-4">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="text-lg font-mono bg-white border border-gray-200 px-3 py-1 rounded">
+                                <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" display="true" tabindex="0" ctxtmenu_counter="28" style="font-size: 113.1%; position: relative;"><mjx-math display="true" class="MJX-TEX" aria-hidden="true" style="margin-left: 0px; margin-right: 0px;"><mjx-munder><mjx-row><mjx-base style="padding-left: 0.215em;"><mjx-mo class="mjx-n"><mjx-c class="mjx-c6C"></mjx-c><mjx-c class="mjx-c69"></mjx-c><mjx-c class="mjx-c6D"></mjx-c></mjx-mo></mjx-base></mjx-row><mjx-row><mjx-under style="padding-top: 0.239em;"><mjx-texatom size="s" texclass="ORD"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c2192"></mjx-c></mjx-mo><mjx-mi class="mjx-n"><mjx-c class="mjx-c221E"></mjx-c></mjx-mi></mjx-texatom></mjx-under></mjx-row></mjx-munder><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mn class="mjx-n"><mjx-c class="mjx-c31"></mjx-c></mjx-mn><mjx-mo class="mjx-n" space="3"><mjx-c class="mjx-c2212"></mjx-c></mjx-mo><mjx-mfrac space="3"><mjx-frac type="d"><mjx-num><mjx-nstrut type="d"></mjx-nstrut><mjx-mn class="mjx-n"><mjx-c class="mjx-c31"></mjx-c></mjx-mn></mjx-num><mjx-dbox><mjx-dtable><mjx-line type="d"></mjx-line><mjx-row><mjx-den><mjx-dstrut type="d"></mjx-dstrut><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi></mjx-den></mjx-row></mjx-dtable></mjx-dbox></mjx-frac></mjx-mfrac><mjx-msup><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo><mjx-script style="vertical-align: 0.413em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msup><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-mo class="mjx-n"><mjx-c class="mjx-c3F"></mjx-c></mjx-mo></mjx-math><mjx-assistive-mml unselectable="on" display="block"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><munder><mo data-mjx-texclass="OP" movablelimits="true">lim</mo><mrow data-mjx-texclass="ORD"><mi>x</mi><mo accent="false" stretchy="false">→</mo><mi mathvariant="normal">∞</mi></mrow></munder><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><mfrac><mn>1</mn><mi>x</mi></mfrac><msup><mo stretchy="false">)</mo><mi>x</mi></msup><mo>=</mo><mo>?</mo></math></mjx-assistive-mml></mjx-container>
+                            </div>
+                            <button onclick="toggleAnswer(4)" class="text-sm text-blue-600 hover:underline">
+                                查看答案
+                            </button>
+                        </div>
+                        <div id="a-4" class="hidden mt-4 bg-green-50 p-4 rounded-lg border border-green-100">
+                            <p class="font-bold text-green-800 mb-1">答案：1/e</p>
+                            <p class="text-sm text-green-600"><span class="font-bold">解析：</span>变形为 (1 + (-1/x))^x</p>
+                        </div>
+                    </div>
+                
+                    <div class="p-6 transition-colors hover:bg-gray-50" id="q-5">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="text-lg font-mono bg-white border border-gray-200 px-3 py-1 rounded">
+                                <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" display="true" tabindex="0" ctxtmenu_counter="29" style="font-size: 113.1%; position: relative;"><mjx-math display="true" class="MJX-TEX" aria-hidden="true" style="margin-left: 0px; margin-right: 0px;"><mjx-munder><mjx-row><mjx-base style="padding-left: 0.038em;"><mjx-mo class="mjx-n"><mjx-c class="mjx-c6C"></mjx-c><mjx-c class="mjx-c69"></mjx-c><mjx-c class="mjx-c6D"></mjx-c></mjx-mo></mjx-base></mjx-row><mjx-row><mjx-under style="padding-top: 0.167em;"><mjx-texatom size="s" texclass="ORD"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c2192"></mjx-c></mjx-mo><mjx-mn class="mjx-n"><mjx-c class="mjx-c30"></mjx-c></mjx-mn></mjx-texatom></mjx-under></mjx-row></mjx-munder><mjx-mfrac space="2"><mjx-frac type="d"><mjx-num><mjx-nstrut type="d"></mjx-nstrut><mjx-mrow><mjx-mn class="mjx-n"><mjx-c class="mjx-c31"></mjx-c></mjx-mn><mjx-mo class="mjx-n" space="3"><mjx-c class="mjx-c2212"></mjx-c></mjx-mo><mjx-mi class="mjx-n" space="3"><mjx-c class="mjx-c63"></mjx-c><mjx-c class="mjx-c6F"></mjx-c><mjx-c class="mjx-c73"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c2061"></mjx-c></mjx-mo><mjx-mi class="mjx-i" space="2"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi></mjx-mrow></mjx-num><mjx-dbox><mjx-dtable><mjx-line type="d"></mjx-line><mjx-row><mjx-den><mjx-dstrut type="d"></mjx-dstrut><mjx-msup><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: 0.289em;"><mjx-mn class="mjx-n" size="s"><mjx-c class="mjx-c32"></mjx-c></mjx-mn></mjx-script></mjx-msup></mjx-den></mjx-row></mjx-dtable></mjx-dbox></mjx-frac></mjx-mfrac><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-mo class="mjx-n"><mjx-c class="mjx-c3F"></mjx-c></mjx-mo></mjx-math><mjx-assistive-mml unselectable="on" display="block"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><munder><mo data-mjx-texclass="OP" movablelimits="true">lim</mo><mrow data-mjx-texclass="ORD"><mi>x</mi><mo accent="false" stretchy="false">→</mo><mn>0</mn></mrow></munder><mfrac><mrow><mn>1</mn><mo>−</mo><mi>cos</mi><mo data-mjx-texclass="NONE">⁡</mo><mi>x</mi></mrow><msup><mi>x</mi><mn>2</mn></msup></mfrac><mo>=</mo><mo>?</mo></math></mjx-assistive-mml></mjx-container>
+                            </div>
+                            <button onclick="toggleAnswer(5)" class="text-sm text-blue-600 hover:underline">
+                                查看答案
+                            </button>
+                        </div>
+                        <div id="a-5" class="hidden mt-4 bg-green-50 p-4 rounded-lg border border-green-100">
+                            <p class="font-bold text-green-800 mb-1">答案：1/2</p>
+                            <p class="text-sm text-green-600"><span class="font-bold">解析：</span>利用二倍角公式 1-cos x = 2sin²(x/2)</p>
+                        </div>
+                    </div>
+                </div>
+                        
+                        <div class="p-6 bg-gray-50 flex justify-center">
+                             <button onclick="resetQuiz()" class="px-6 py-2 bg-white border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-100 transition-colors shadow-sm">
+                                重新开始
+                             </button>
+                        </div>
+                    </div>
+                </div>
+    
+            </main>
+        </div>
+    
+        <!-- Scripts -->
+        <script>
+            // --- State Management ---
+            const state = {
+                currentTab: 'limit1',
+                limit1: { x: 1.0, scale: 60 }, // scale: pixels per unit
+                limit2: { x: 1.0, scaleX: 15, scaleY: 60 },
+                ext: { k: 1.0, scale: 50 },
+                quiz: { completed: new Set() }
+            };
+    
+            // --- Constants ---
+            const COLORS = {
+                primary: '#2563eb', // blue-600
+                secondary: '#16a34a', // green-600
+                accent: '#9333ea', // purple-600
+                grid: '#e5e7eb',
+                text: '#374151',
+                axis: '#1f2937'
+            };
+    
+            // --- Initialization ---
+            document.addEventListener('DOMContentLoaded', () => {
+                initTables();
+                initQuiz();
+                
+                // Initial render
+                resizeCanvases();
+                window.addEventListener('resize', () => {
+                    resizeCanvases();
+                    renderAllGraphs();
+                });
+    
+                // Input listeners
+                document.getElementById('slider-x1').addEventListener('input', (e) => {
+                    state.limit1.x = parseFloat(e.target.value);
+                    // Avoid exactly 0
+                    if (Math.abs(state.limit1.x) < 0.001) state.limit1.x = 0.001;
+                    updateLimit1UI();
+                    drawGraph1();
+                });
+    
+                document.getElementById('slider-x2').addEventListener('input', (e) => {
+                    state.limit2.x = parseFloat(e.target.value);
+                    updateLimit2UI();
+                    drawGraph2();
+                });
+    
+                 document.getElementById('slider-k').addEventListener('input', (e) => {
+                    state.ext.k = parseFloat(e.target.value);
+                    document.getElementById('val-k').textContent = state.ext.k.toFixed(1);
+                    drawGraphExt();
+                });
+    
+                // Initial Draw
+                updateLimit1UI();
+                updateLimit2UI();
+                renderAllGraphs();
+            });
+    
+            // --- Tab Switching ---
+            function switchTab(tabId) {
+                // Update state
+                state.currentTab = tabId;
+                
+                // Update UI styling
+                document.querySelectorAll('.nav-item').forEach(btn => {
+                    if (btn.dataset.tab === tabId) {
+                        btn.classList.add('bg-blue-50', 'text-blue-700', 'font-medium');
+                        btn.classList.remove('text-gray-600');
+                    } else {
+                        btn.classList.remove('bg-blue-50', 'text-blue-700', 'font-medium');
+                        btn.classList.add('text-gray-600');
+                    }
+                });
+                
+                // Mobile nav styling
+                document.querySelectorAll('.mobile-nav-item').forEach(btn => {
+                    if (btn.dataset.tab === tabId) {
+                        btn.classList.add('text-blue-600');
+                        btn.classList.remove('text-gray-500');
+                    } else {
+                        btn.classList.remove('text-blue-600');
+                        btn.classList.add('text-gray-500');
+                    }
+                });
+    
+                // Show content
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.add('hidden');
+                });
+                document.getElementById(`${tabId}-content`).classList.remove('hidden');
+    
+                // Resize canvas (needed because hidden canvases have 0 size)
+                if (tabId === 'limit1' || tabId === 'limit2' || tabId === 'extensions') {
+                    requestAnimationFrame(() => {
+                        resizeCanvases();
+                        renderAllGraphs();
                     });
                 }
-            },
-            options: {
-                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
             }
-        };
-    </script>
-    <script defer src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js"></script>
     
-    <style>
-        :root {
-            --h1-size: 22px;      
-            --h2-size: 20px;      
-            --h3-size: 18px;      
-            --btn-size: 16px;     
-            --formula-size: 20px; 
-            --text-size: 16px;
-            
-            --primary: #4f46e5;
-            --primary-light: #6366f1;
-            --primary-dark: #3730a3;
-            --light: #ffffff;
-            --gray-50: #f9fafb;
-            --gray-100: #f3f4f6;
-            --gray-200: #e5e7eb;
-            --gray-600: #4b5563;
-            --gray-800: #1f2937;
-            --border: #e5e7eb;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --info: #3b82f6;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        *::-webkit-scrollbar {
-            width: 0;
-            background: transparent;
-        }
-        
-        * {
-            scrollbar-width: none;
-            -ms-overflow-style: none;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
-            font-size: var(--text-size);
-            line-height: 1.5;
-            background: var(--gray-50);
-            color: var(--gray-800);
-        }
-
-        .container {
-            width: 100%;
-            max-width: 1400px;
-            height: 100vh;
-            max-height: 700px;
-            margin: 0 auto;
-            display: flex;
-            flex-direction: column;
-            background: var(--light);
-        }
-
-        .header {
-            background: var(--primary);
-            color: var(--light);
-            padding: 8px 20px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-        }
-
-        .header h1 {
-            font-size: var(--h2-size);
-            margin: 0;
-        }
-
-        .main {
-            display: flex;
-            flex: 1;
-            overflow: hidden;
-        }
-
-        .sidebar {
-            width: 120px;
-            background: var(--gray-50);
-            border-right: 1px solid var(--border);
-            padding: 10px 8px;
-        }
-
-        .nav-btn {
-            width: 100%;
-            padding: 8px;
-            margin-bottom: 4px;
-            background: transparent;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: var(--text-size);
-            color: var(--gray-600);
-            text-align: left;
-            transition: all 0.2s;
-        }
-
-        .nav-btn:hover {
-            background: var(--gray-100);
-        }
-
-        .nav-btn.active {
-            background: var(--primary);
-            color: var(--light);
-        }
-
-        .content {
-            flex: 1;
-            display: none;
-            padding: 16px;
-            overflow-y: auto;
-        }
-
-        .content.active {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-        }
-
-        .column {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            overflow-y: auto;
-        }
-
-        .card {
-            background: var(--light);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 12px;
-        }
-
-        .card h3 {
-            font-size: var(--h3-size);
-            color: var(--primary);
-            margin-bottom: 8px;
-        }
-
-        .input-group {
-            margin-bottom: 8px;
-        }
-
-        .input-group label {
-            display: block;
-            margin-bottom: 4px;
-            font-size: var(--text-size);
-            font-weight: 500;
-        }
-
-        .input-group input,
-        .input-group select {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            font-size: var(--text-size);
-            background: var(--gray-50);
-        }
-
-        .btn {
-            padding: 8px 16px;
-            background: var(--primary);
-            color: var(--light);
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: var(--btn-size);
-            transition: all 0.2s;
-        }
-
-        .btn:hover {
-            background: var(--primary-dark);
-        }
-
-        .btn-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            margin-top: 8px;
-        }
-
-        .result {
-            background: var(--gray-50);
-            padding: 8px;
-            border-radius: 4px;
-            border: 1px solid var(--primary);
-            text-align: center;
-            font-size: var(--text-size);
-            margin: 8px 0;
-            min-height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .formula-box {
-            background: #f0f7ff;
-            padding: 8px 12px;
-            border-radius: 4px;
-            border-left: 3px solid var(--primary);
-            margin: 8px 0;
-            text-align: center;
-            font-size: var(--formula-size);
-        }
-
-        .info-box {
-            background: var(--gray-50);
-            padding: 8px;
-            border-radius: 4px;
-            margin: 6px 0;
-            font-size: var(--text-size);
-            text-align: center;
-        }
-
-        .steps {
-            background: #fff9e6;
-            padding: 10px;
-            border-radius: 4px;
-            border-left: 3px solid #f59e0b;
-            line-height: 1.6;
-            font-size: var(--text-size);
-        }
-
-        .canvas-container {
-            border: 1px solid var(--gray-200);
-            border-radius: 4px;
-            background: #fafafa;
-            padding: 10px;
-            min-height: 200px;
-            max-height: 400px;
-            overflow: hidden;
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .canvas-container canvas {
-            max-width: 100%;
-            max-height: 100%;
-            display: block;
-            margin: 0 auto;
-        }
-
-        .slider-group {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 10px;
-            background: var(--gray-50);
-            border-radius: 4px;
-            margin-top: 8px;
-        }
-
-        .slider-group label {
-            min-width: 60px;
-            font-size: var(--text-size);
-        }
-
-        .slider {
-            flex: 1;
-            height: 4px;
-            -webkit-appearance: none;
-            appearance: none;
-            background: var(--gray-200);
-            outline: none;
-        }
-
-        .slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            background: var(--primary);
-            cursor: pointer;
-        }
-
-        .slider-value {
-            min-width: 40px;
-            text-align: center;
-            font-weight: 600;
-            color: var(--primary);
-        }
-
-        .value-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 8px 0;
-        }
-
-        .value-table th,
-        .value-table td {
-            padding: 6px;
-            text-align: center;
-            border: 1px solid var(--border);
-        }
-
-        .value-table th {
-            background: var(--gray-100);
-            font-weight: 600;
-        }
-
-        .approach-display {
-            display: flex;
-            justify-content: space-around;
-            padding: 12px;
-            background: var(--gray-50);
-            border-radius: 4px;
-            margin: 8px 0;
-        }
-
-        .approach-item {
-            text-align: center;
-        }
-
-        .approach-label {
-            font-size: 14px;
-            color: var(--gray-600);
-            margin-bottom: 4px;
-        }
-
-        .approach-value {
-            font-size: 18px;
-            font-weight: bold;
-            color: var(--primary);
-        }
-
-        .problem-selector {
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            background: var(--gray-50);
-            max-height: 200px;
-            overflow-y: auto;
-        }
-
-        .problem-option {
-            padding: 12px;
-            border-bottom: 1px solid var(--border);
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .problem-option:last-child {
-            border-bottom: none;
-        }
-
-        .problem-option:hover {
-            background: var(--gray-100);
-        }
-
-        .problem-option.selected {
-            background: var(--primary);
-            color: var(--light);
-        }
-
-        .problem-option.selected .problem-formula {
-            color: var(--light);
-        }
-
-        .problem-text {
-            font-weight: 600;
-            min-width: 60px;
-        }
-
-        .problem-formula {
-            flex: 1;
-            font-size: var(--formula-size);
-            color: var(--primary);
-        }
-
-        @media (max-width: 768px) {
-            .main {
-                flex-direction: column;
+            // --- Canvas Helpers ---
+            function setupCanvas(canvasId) {
+                const canvas = document.getElementById(canvasId);
+                const ctx = canvas.getContext('2d');
+                const dpr = window.devicePixelRatio || 1;
+                const rect = canvas.getBoundingClientRect();
+                
+                canvas.width = rect.width * dpr;
+                canvas.height = rect.height * dpr;
+                ctx.scale(dpr, dpr);
+                
+                return { ctx, width: rect.width, height: rect.height };
             }
-
-            .sidebar {
-                width: 100%;
-                height: auto;
-                border-right: none;
-                border-bottom: 1px solid var(--border);
-                padding: 8px 16px;
-                display: flex;
-                flex-direction: row;
-                gap: 8px;
-                overflow-x: auto;
-                flex-shrink: 0;
-                justify-content: center;
+    
+            function drawAxes(ctx, width, height, originX, originY, scaleX, scaleY, xLabel = 'x', yLabel = 'y') {
+                ctx.beginPath();
+                ctx.strokeStyle = COLORS.grid;
+                ctx.lineWidth = 1;
+                
+                // Grid
+                const gridSize = 0.5; // unit
+                // Logic for grid lines omitted for brevity, keeping simple axes
+                
+                ctx.strokeStyle = COLORS.axis;
+                ctx.lineWidth = 1.5;
+                ctx.fillStyle = COLORS.axis;
+                ctx.font = '12px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+    
+                // X Axis
+                ctx.beginPath();
+                ctx.moveTo(0, originY);
+                ctx.lineTo(width, originY);
+                ctx.stroke();
+                
+                // X Arrow
+                ctx.beginPath();
+                ctx.moveTo(width, originY);
+                ctx.lineTo(width - 8, originY - 4);
+                ctx.lineTo(width - 8, originY + 4);
+                ctx.fill();
+                ctx.fillText(xLabel, width - 15, originY + 15);
+    
+                // Y Axis
+                ctx.beginPath();
+                ctx.moveTo(originX, height);
+                ctx.lineTo(originX, 0);
+                ctx.stroke();
+    
+                // Y Arrow
+                ctx.beginPath();
+                ctx.moveTo(originX, 0);
+                ctx.lineTo(originX - 4, 8);
+                ctx.lineTo(originX + 4, 8);
+                ctx.fill();
+                ctx.fillText(yLabel, originX + 15, 10);
+    
+                // Origin Label
+                ctx.fillText('O', originX - 10, originY + 10);
             }
-
-            .nav-btn {
-                min-width: 90px;
-                text-align: center;
-                margin-bottom: 0;
-                white-space: nowrap;
-                flex-shrink: 0;
+    
+            // --- Limit 1 Logic ---
+            function updateLimit1UI() {
+                const x = state.limit1.x;
+                const y = Math.sin(x) / x;
+                document.getElementById('slider-x1').value = x;
+                document.getElementById('val-x1').textContent = x.toFixed(4);
+                document.getElementById('res-y1').textContent = isNaN(y) ? '1.0000' : y.toFixed(4);
             }
-
-            .content.active {
-                grid-template-columns: 1fr;
-                gap: 16px;
-            }
-        }
-
-        .return-home-panel { position: fixed; bottom: 12px; right: 12px; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; z-index: 40; }
-        .return-toggle { width: 40px; height: 40px; border-radius: 50%; border: none; background: linear-gradient(135deg, rgba(79,70,229,0.96), rgba(99,102,241,0.9)); color: #fff; font-size: 20px; cursor: pointer; box-shadow: 0 10px 18px rgba(79,70,229,0.28); transition: transform 0.2s, box-shadow 0.2s; }
-        .return-toggle:hover { transform: translateY(-1px) scale(1.03); box-shadow: 0 14px 26px rgba(79,70,229,0.35); }
-        .return-links { display: none; flex-direction: column; gap: 6px; padding: 10px; border-radius: 10px; background: rgba(255,255,255,0.96); border: 1px solid rgba(79,70,229,0.18); box-shadow: 0 10px 30px rgba(15,23,42,0.14); opacity: 0; transition: opacity 0.16s; }
-        .return-link { text-decoration: none; font-size: 15px; color: var(--primary-dark); padding: 6px 12px; border-radius: 8px; background: rgba(99,102,241,0.12); transition: background 0.2s; }
-        .return-link:hover { background: rgba(79,70,229,0.18); }
-    </style>
-
-</head>
-<body>
-    <div class="return-home-panel"><button class="return-toggle" onclick="toggleReturnLinks()"><i class="fa-solid fa-house"></i></button><div class="return-links"><a class="return-link" href="index.html"><i class="fa-solid fa-arrow-left"></i> 返回目录</a><a class="return-link" href="../index.html"><i class="fa-solid fa-house"></i> 返回主站</a></div></div>
-    <div class="container">
-        <header class="header">
-            <h1>重要极限实验室</h1>
-        </header>
-
-        <div class="main">
-            <nav class="sidebar">
-                <button class="nav-btn active" onclick="switchPanel('first')">第一重要极限</button>
-                <button class="nav-btn" onclick="switchPanel('second')">第二重要极限</button>
-                <button class="nav-btn" onclick="switchPanel('extend')">推广形式</button>
-                <button class="nav-btn" onclick="switchPanel('practice')">计算练习</button>
-            </nav>
-
-            <!-- 第一重要极限页面 -->
-            <div class="content active" id="first">
-                <div class="column">
-                    <div class="card">
-                        <h3>第一重要极限</h3>
-                        <div class="formula-box">
-                            $\lim\limits_{x \to 0} \frac{\sin x}{x} = 1$
-                        </div>
-                        <div class="steps">
-                            <strong>理解要点：</strong><br>
-                            • 当 x 接近 0 时，sin x 和 x 几乎相等<br>
-                            • 这是 0/0 型不定式，但极限值为 1<br>
-                            • 在许多三角函数极限计算中都会用到
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <h3>数值验证</h3>
-                        <table class="value-table">
-                            <thead>
-                                <tr>
-                                    <th>x 值</th>
-                                    <th>sin x</th>
-                                    <th>sin x / x</th>
-                                </tr>
-                            </thead>
-                            <tbody id="valueTable">
-                                <tr><td>0.1</td><td>0.0998</td><td>0.9983</td></tr>
-                                <tr><td>0.01</td><td>0.0100</td><td>0.9998</td></tr>
-                                <tr><td>0.001</td><td>0.0010</td><td>1.0000</td></tr>
-                            </tbody>
-                        </table>
-                        <div class="info-box">
-                            x 越接近 0，sin x / x 越接近 1
-                        </div>
-                    </div>
-                </div>
-
-                <div class="column">
-                    <div class="card">
-                        <h3>函数图像</h3>
-                        <div class="canvas-container">
-                            <canvas id="basicGraph" width="600" height="350"></canvas>
-                        </div>
-                        <div class="slider-group">
-                            <label>缩放</label>
-                            <input type="range" class="slider" id="zoomSlider" 
-                                   min="0.5" max="3" step="0.1" value="1">
-                            <span class="slider-value" id="zoomValue">1.0</span>
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <h3>逼近过程</h3>
-                        <div class="approach-display">
-                            <div class="approach-item">
-                                <div class="approach-label">从左边</div>
-                                <div class="approach-value" id="leftApproach">0.9983</div>
-                            </div>
-                            <div class="approach-item">
-                                <div class="approach-label">极限值</div>
-                                <div class="approach-value" style="color: var(--success);">1</div>
-                            </div>
-                            <div class="approach-item">
-                                <div class="approach-label">从右边</div>
-                                <div class="approach-value" id="rightApproach">0.9983</div>
-                            </div>
-                        </div>
-                        <button class="btn" onclick="animateApproach()">动画演示</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 第二重要极限页面 -->
-            <div class="content" id="second">
-                <div class="column">
-                    <div class="card">
-                        <h3>第二重要极限</h3>
-                        <div class="formula-box">
-                            $\lim\limits_{x \to \infty} \left(1 + \frac{1}{x}\right)^x = e$
-                        </div>
-                        <div class="steps">
-                            <strong>理解要点：</strong><br>
-                            • 当 x 趋向无穷大时，底数趋向 1，指数趋向无穷大<br>
-                            • 这是 1^∞ 型不定式，但极限值为 e ≈ 2.71828<br>
-                            • 在复利计算、指数函数等中广泛应用
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <h3>数值验证</h3>
-                        <table class="value-table">
-                            <thead>
-                                <tr>
-                                    <th>x 值</th>
-                                    <th>1 + 1/x</th>
-                                    <th>(1 + 1/x)^x</th>
-                                </tr>
-                            </thead>
-                            <tbody id="secondValueTable">
-                                <tr><td>10</td><td>1.1</td><td>2.5937</td></tr>
-                                <tr><td>100</td><td>1.01</td><td>2.7048</td></tr>
-                                <tr><td>1000</td><td>1.001</td><td>2.7169</td></tr>
-                            </tbody>
-                        </table>
-                        <div class="info-box">
-                            x 越大，(1 + 1/x)^x 越接近 e ≈ 2.71828
-                        </div>
-                    </div>
-                </div>
-
-                <div class="column">
-                    <div class="card">
-                        <h3>函数图像</h3>
-                        <div class="canvas-container">
-                            <canvas id="secondGraph" width="600" height="350"></canvas>
-                        </div>
-                        <div class="slider-group">
-                            <label>缩放</label>
-                            <input type="range" class="slider" id="secondZoomSlider" 
-                                   min="0.5" max="3" step="0.1" value="1">
-                            <span class="slider-value" id="secondZoomValue">1.0</span>
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <h3>逼近过程</h3>
-                        <div class="approach-display">
-                            <div class="approach-item">
-                                <div class="approach-label">x = 10</div>
-                                <div class="approach-value" id="secondLeftApproach">2.5937</div>
-                            </div>
-                            <div class="approach-item">
-                                <div class="approach-label">极限值 e</div>
-                                <div class="approach-value" style="color: var(--success);">2.71828</div>
-                            </div>
-                            <div class="approach-item">
-                                <div class="approach-label">x = 1000</div>
-                                <div class="approach-value" id="secondRightApproach">2.7169</div>
-                            </div>
-                        </div>
-                        <button class="btn" onclick="animateSecondApproach()">动画演示</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 推广形式页面 -->
-            <div class="content" id="extend">
-                <div class="column">
-                    <div class="card">
-                        <h3>第一重要极限推广</h3>
-                        <div class="formula-box">
-                            若 $f(x) \to 0$，则 $\lim\limits_{f(x) \to 0} \frac{\sin[f(x)]}{f(x)} = 1$
-                        </div>
-                        <div class="steps">
-                            <strong>使用条件：</strong><br>
-                            • f(x) 必须趋向于 0<br>
-                            • f(x) 可以是任何趋向 0 的表达式<br>
-                            • 替换后公式形式不变
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <h3>第二重要极限推广</h3>
-                        <div class="formula-box">
-                            若 $f(x) \to \infty$，则 $\lim\limits_{f(x) \to \infty} \left(1 + \frac{1}{f(x)}\right)^{f(x)} = e$
-                        </div>
-                        <div class="steps">
-                            <strong>使用条件：</strong><br>
-                            • f(x) 必须趋向于无穷大<br>
-                            • f(x) 可以是任何趋向 ∞ 的表达式<br>
-                            • 底数形式为 1 + 1/f(x)
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <h3>第一重要极限例子</h3>
-                        <div class="info-box">
-                            例1：$\lim\limits_{x \to 1} \frac{\sin(x-1)}{x-1} = 1$
-                        </div>
-                        <div class="info-box">
-                            例2：$\lim\limits_{x \to 0} \frac{\sin 3x}{3x} = 1$
-                        </div>
-                        <div class="info-box">
-                            例3：$\lim\limits_{x \to 0} \frac{\sin 2x}{x} = 2$
-                        </div>
-                        <div class="steps">
-                            提示：例3需要变形为 $2 \cdot \frac{\sin 2x}{2x}$
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <h3>第二重要极限例子</h3>
-                        <div class="info-box">
-                            例1：$\lim\limits_{x \to 0} (1 + x)^{\frac{1}{x}} = e$
-                        </div>
-                        <div class="info-box">
-                            例2：$\lim\limits_{x \to \infty} \left(1 + \frac{2}{x}\right)^x = e^2$
-                        </div>
-                        <div class="info-box">
-                            例3：$\lim\limits_{x \to 0} (1 + 3x)^{\frac{1}{x}} = e^3$
-                        </div>
-                        <div class="steps">
-                            提示：需要凑成标准形式 $(1 + \frac{1}{f(x)})^{f(x)}$
-                        </div>
-                    </div>
-                </div>
-
-                <div class="column">
-                    <div class="card">
-                        <h3>推广形式演示</h3>
-                        <div class="input-group">
-                            <label>选择函数 f(x)</label>
-                            <select id="funcSelect" onchange="updateExtend()">
-                                <option value="x-1">x - 1 (x→1)</option>
-                                <option value="3x">3x (x→0)</option>
-                                <option value="x^2">x² (x→0)</option>
-                                <option value="2x">2x (x→0)</option>
-                            </select>
-                        </div>
-                        <div class="canvas-container">
-                            <canvas id="extendGraph" width="600" height="300"></canvas>
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <h3>计算结果</h3>
-                        <div class="result" id="extendResult">
-                            $\lim\limits_{x \to 1} \frac{\sin(x-1)}{x-1} = 1$
-                        </div>
-                        <div class="info-box" id="extendExplain">
-                            当 x→1 时，x-1→0，符合使用条件
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 计算练习页面 -->
-            <div class="content" id="practice">
-                <div class="column">
-                    <div class="card">
-                        <h3>练习题目</h3>
-                        <div class="input-group">
-                            <label>选择题目</label>
-                            <div class="problem-selector">
-                                <div class="problem-option" onclick="selectProblem('1')" data-value="1">
-                                    <span class="problem-text">题目1:</span>
-                                    <span class="problem-formula">$\lim\limits_{x \to 0} \frac{\sin 5x}{x}$</span>
-                                </div>
-                                <div class="problem-option" onclick="selectProblem('2')" data-value="2">
-                                    <span class="problem-text">题目2:</span>
-                                    <span class="problem-formula">$\lim\limits_{x \to 0} \frac{\sin 2x}{\sin 3x}$</span>
-                                </div>
-                                <div class="problem-option" onclick="selectProblem('3')" data-value="3">
-                                    <span class="problem-text">题目3:</span>
-                                    <span class="problem-formula">$\lim\limits_{x \to \infty} \left(1 + \frac{1}{x}\right)^x$</span>
-                                </div>
-                                <div class="problem-option" onclick="selectProblem('4')" data-value="4">
-                                    <span class="problem-text">题目4:</span>
-                                    <span class="problem-formula">$\lim\limits_{x \to 0} (1 + 2x)^{\frac{1}{x}}$</span>
-                                </div>
-                                <div class="problem-option" onclick="selectProblem('5')" data-value="5">
-                                    <span class="problem-text">题目5:</span>
-                                    <span class="problem-formula">$\lim\limits_{x \to \infty} \left(1 + \frac{3}{x}\right)^x$</span>
-                                </div>
-                                <div class="problem-option" onclick="selectProblem('6')" data-value="6">
-                                    <span class="problem-text">题目6:</span>
-                                    <span class="problem-formula">$\lim\limits_{x \to 0} \frac{\tan x}{x}$</span>
-                                </div>
-                            </div>
-                        </div>
-                        <button class="btn" onclick="solveProblem()">查看解答</button>
-                        <div class="result" id="problemAnswer" style="display: none;">
-                            答案将显示在这里
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <h3>解题步骤</h3>
-                        <div class="steps" id="solutionSteps">
-                            选择题目后，点击查看解答
-                        </div>
-                    </div>
-                </div>
-
-                <div class="column">
-                    <div class="card">
-                        <h3>常用技巧</h3>
-                        <div class="steps">
-                            <strong>1. 凑形式：</strong><br>
-                            将表达式变形为标准形式<br><br>
-                            <strong>2. 提取系数：</strong><br>
-                            $\frac{\sin kx}{x} = k \cdot \frac{\sin kx}{kx}$<br><br>
-                            <strong>3. 利用等价：</strong><br>
-                            当 x→0 时，sin x ~ x, tan x ~ x
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <h3>练习统计</h3>
-                        <div class="info-box">
-                            已完成：<span id="completed">0</span> / 6
-                        </div>
-                        <button class="btn" onclick="resetPractice()">重置练习</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        function renderMath() {
-            if (window.MathJax && MathJax.typesetPromise) {
-                MathJax.typesetPromise().catch(err => console.log('渲染错误:', err));
-            }
-        }
-
-        let zoomLevel = 1;
-        let animationId = null;
-        let completedProblems = new Set();
-
-        function switchPanel(panel) {
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
-            
-            event.target.classList.add('active');
-            document.getElementById(panel).classList.add('active');
-            
-            setTimeout(() => {
-                renderMath();
-                if (panel === 'first') {
-                    drawBasicGraph();
-                    updateValueTable();
-                } else if (panel === 'second') {
-                    drawSecondGraph();
-                    updateSecondValueTable();
-                } else if (panel === 'extend') {
-                    drawExtendGraph();
-                } else if (panel === 'practice') {
-                    updatePracticeStatus();
+    
+            function drawGraph1() {
+                const { ctx, width, height } = setupCanvas('canvas-limit1');
+                const originX = width / 2;
+                const originY = height * 0.8;
+                const scale = Math.min(width / 8, height / 2.5); // responsive scale
+    
+                ctx.clearRect(0, 0, width, height);
+                
+                // Axes
+                drawAxes(ctx, width, height, originX, originY, scale, scale);
+    
+                // Ticks
+                ctx.fillStyle = '#6b7280';
+                ctx.font = '10px sans-serif';
+                // X ticks: -PI, PI
+                const piPix = Math.PI * scale;
+                if (originX - piPix > 0) {
+                    ctx.fillText('-π', originX - piPix, originY + 15);
+                    ctx.fillRect(originX - piPix, originY - 2, 1, 4);
                 }
-            }, 50);
-        }
-
-        function drawBasicGraph() {
-            const canvas = document.getElementById('basicGraph');
-            if (!canvas) return;
-            
-            const ctx = canvas.getContext('2d');
-            const width = canvas.width;
-            const height = canvas.height;
-            
-            ctx.clearRect(0, 0, width, height);
-            
-            // 坐标轴
-            ctx.strokeStyle = '#374151';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(width/2, 30);
-            ctx.lineTo(width/2, height - 30);
-            ctx.moveTo(30, height/2);
-            ctx.lineTo(width - 30, height/2);
-            ctx.stroke();
-            
-            // 绘制坐标轴刻度
-            ctx.strokeStyle = '#6b7280';
-            ctx.lineWidth = 1;
-            ctx.font = '10px Arial';
-            ctx.fillStyle = '#374151';
-            
-            // x轴刻度
-            for(let i = -3; i <= 3; i++) {
-                if(i === 0) continue;
-                const px = width/2 + i * 50 * zoomLevel;
-                if(px > 30 && px < width - 30) {
-                    ctx.beginPath();
-                    ctx.moveTo(px, height/2 - 5);
-                    ctx.lineTo(px, height/2 + 5);
-                    ctx.stroke();
-                    ctx.fillText(i.toString(), px - 5, height/2 + 20);
+                if (originX + piPix < width) {
+                    ctx.fillText('π', originX + piPix, originY + 15);
+                    ctx.fillRect(originX + piPix, originY - 2, 1, 4);
                 }
-            }
-            
-            // y轴刻度
-            for(let i = -1; i <= 1; i += 0.5) {
-                if(i === 0) continue;
-                const py = height/2 - i * 100 * zoomLevel;
-                if(py > 30 && py < height - 30) {
-                    ctx.beginPath();
-                    ctx.moveTo(width/2 - 5, py);
-                    ctx.lineTo(width/2 + 5, py);
-                    ctx.stroke();
-                    ctx.fillText(i.toString(), width/2 + 10, py + 3);
-                }
-            }
-            
-            // 绘制 sin(x)/x
-            ctx.strokeStyle = '#4f46e5';
-            ctx.lineWidth = 2.5;
-            ctx.beginPath();
-            
-            let firstPoint = true;
-            for(let px = 30; px < width - 30; px++) {
-                const x = (px - width/2) / (50 * zoomLevel);
-                if(Math.abs(x) > 0.01) {
-                    const y = Math.sin(x) / x;
-                    const py = height/2 - y * 100 * zoomLevel;
+                // Y ticks: 1
+                const onePix = 1 * scale;
+                ctx.fillText('1', originX - 15, originY - onePix);
+                ctx.fillRect(originX - 4, originY - onePix, 8, 1);
+    
+                // Function: y = sin(x)/x
+                ctx.beginPath();
+                ctx.strokeStyle = COLORS.primary;
+                ctx.lineWidth = 2;
+                
+                for (let px = 0; px <= width; px+=2) {
+                    const x = (px - originX) / scale;
+                    let y;
+                    if (Math.abs(x) < 0.0001) y = 1;
+                    else y = Math.sin(x) / x;
                     
-                    if(firstPoint) {
-                        ctx.moveTo(px, py);
-                        firstPoint = false;
-                    } else {
-                        ctx.lineTo(px, py);
+                    const py = originY - y * scale;
+                    if (px === 0) ctx.moveTo(px, py);
+                    else ctx.lineTo(px, py);
+                }
+                ctx.stroke();
+    
+                // Hole at (0,1)
+                ctx.beginPath();
+                ctx.fillStyle = 'white';
+                ctx.strokeStyle = COLORS.primary;
+                ctx.arc(originX, originY - scale, 4, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+    
+                // Current point
+                const cx = state.limit1.x;
+                const cy = Math.sin(cx) / cx;
+                const cPx = originX + cx * scale;
+                const cPy = originY - cy * scale;
+    
+                ctx.beginPath();
+                ctx.fillStyle = COLORS.secondary;
+                ctx.arc(cPx, cPy, 5, 0, Math.PI * 2);
+                ctx.fill();
+    
+                // Dotted lines
+                ctx.beginPath();
+                ctx.setLineDash([4, 4]);
+                ctx.strokeStyle = '#9ca3af';
+                ctx.lineWidth = 1;
+                ctx.moveTo(cPx, originY);
+                ctx.lineTo(cPx, cPy);
+                ctx.lineTo(originX, cPy);
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+    
+            function animateGraph1() {
+                let x = 3.0;
+                const interval = setInterval(() => {
+                    x -= 0.05;
+                    if (x <= 0.01) {
+                        x = 0.01;
+                        clearInterval(interval);
                     }
-                } else {
-                    firstPoint = true;
-                }
+                    state.limit1.x = x;
+                    updateLimit1UI();
+                    drawGraph1();
+                }, 20);
             }
-            ctx.stroke();
-            
-            // 标记极限点（空心圆表示不连续）
-            ctx.strokeStyle = '#10b981';
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.arc(width/2, height/2 - 100 * zoomLevel, 6, 0, Math.PI * 2);
-            ctx.stroke();
-            
-            // 标注
-            ctx.fillStyle = '#374151';
-            ctx.font = '12px Arial';
-            ctx.fillText('y = sin(x)/x', width - 100, 50);
-            ctx.fillText('lim = 1', width/2 + 10, height/2 - 100 * zoomLevel - 10);
-            
-            // 坐标轴标签
-            ctx.font = '14px Arial';
-            ctx.fillText('x', width - 20, height/2 + 20);
-            ctx.fillText('y', width/2 - 20, 40);
-        }
-
-        function updateValueTable() {
-            const tbody = document.getElementById('valueTable');
-            const values = [0.1, 0.01, 0.001, -0.001, -0.01, -0.1];
-            
-            let html = '';
-            values.forEach(x => {
-                const sinx = Math.sin(x);
-                const ratio = sinx / x;
-                html += `
-                    <tr>
-                        <td>${x.toFixed(3)}</td>
-                        <td>${sinx.toFixed(4)}</td>
-                        <td style="color: var(--primary); font-weight: bold;">${ratio.toFixed(4)}</td>
-                    </tr>
-                `;
-            });
-            tbody.innerHTML = html;
-        }
-
-        function drawSecondGraph() {
-            const canvas = document.getElementById('secondGraph');
-            if (!canvas) return;
-            
-            const ctx = canvas.getContext('2d');
-            const width = canvas.width;
-            const height = canvas.height;
-            
-            ctx.clearRect(0, 0, width, height);
-            
-            // 坐标轴
-            ctx.strokeStyle = '#374151';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(50, height - 40);
-            ctx.lineTo(width - 30, height - 40);
-            ctx.moveTo(50, 30);
-            ctx.lineTo(50, height - 40);
-            ctx.stroke();
-            
-            // 绘制坐标轴刻度
-            ctx.strokeStyle = '#6b7280';
-            ctx.lineWidth = 1;
-            ctx.font = '10px Arial';
-            ctx.fillStyle = '#374151';
-            
-            // x轴刻度
-            for(let i = 1; i <= 10; i++) {
-                const px = 50 + (i - 1) * 20;
-                if(px < width - 30) {
-                    ctx.beginPath();
-                    ctx.moveTo(px, height - 40 - 5);
-                    ctx.lineTo(px, height - 40 + 5);
-                    ctx.stroke();
-                    ctx.fillText(i.toString(), px - 5, height - 40 + 20);
-                }
+    
+            function resetGraph1() {
+                state.limit1.x = 1.0;
+                updateLimit1UI();
+                drawGraph1();
             }
-            
-            // y轴刻度
-            for(let i = 1; i <= 3; i += 0.5) {
-                const py = height - 40 - (i - 1) * 100 * zoomLevel;
-                if(py > 30) {
-                    ctx.beginPath();
-                    ctx.moveTo(50 - 5, py);
-                    ctx.lineTo(50 + 5, py);
-                    ctx.stroke();
-                    ctx.fillText(i.toFixed(1), 50 + 10, py + 3);
-                }
+    
+            // --- Limit 2 Logic ---
+            function updateLimit2UI() {
+                const x = state.limit2.x;
+                const y = Math.pow(1 + 1/x, x);
+                document.getElementById('slider-x2').value = x;
+                document.getElementById('val-x2').textContent = x.toFixed(1);
+                document.getElementById('res-y2').textContent = y.toFixed(4);
             }
-            
-            // 绘制 (1 + 1/x)^x
-            ctx.strokeStyle = '#4f46e5';
-            ctx.lineWidth = 2.5;
-            ctx.beginPath();
-            
-            for(let px = 50; px < width - 30; px++) {
-                const x = (px - 50) / 20 + 1; // x从1开始
-                if(x > 0) {
+    
+            function drawGraph2() {
+                const { ctx, width, height } = setupCanvas('canvas-limit2');
+                const originX = 40;
+                const originY = height - 30;
+                const scaleX = (width - 60) / 50; // Show up to x=50
+                const scaleY = (height - 60) / 3; // Show up to y=3
+    
+                ctx.clearRect(0, 0, width, height);
+                drawAxes(ctx, width, height, originX, originY, scaleX, scaleY);
+    
+                // Asymptote y = e
+                const eY = originY - Math.E * scaleY;
+                ctx.beginPath();
+                ctx.strokeStyle = '#ef4444'; // red-500
+                ctx.setLineDash([5, 5]);
+                ctx.moveTo(0, eY);
+                ctx.lineTo(width, eY);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                ctx.fillStyle = '#ef4444';
+                ctx.fillText('y = e', width - 30, eY - 10);
+    
+                // Function y = (1+1/x)^x
+                ctx.beginPath();
+                ctx.strokeStyle = COLORS.primary;
+                ctx.lineWidth = 2;
+                for (let px = originX; px <= width; px++) {
+                    const x = (px - originX) / scaleX;
+                    if (x <= 0.1) continue; // undefined/volatile near 0
                     const y = Math.pow(1 + 1/x, x);
-                    const py = height - 40 - (y - 1) * 100 * zoomLevel;
+                    const py = originY - y * scaleY;
                     
-                    if(px === 50) {
-                        ctx.moveTo(px, py);
-                    } else {
-                        ctx.lineTo(px, py);
+                    if (px === originX) ctx.moveTo(px, py);
+                    else ctx.lineTo(px, py);
+                }
+                ctx.stroke();
+    
+                // Current point
+                const cx = state.limit2.x;
+                const cy = Math.pow(1 + 1/cx, cx);
+                const cPx = originX + cx * scaleX;
+                const cPy = originY - cy * scaleY;
+    
+                ctx.beginPath();
+                ctx.fillStyle = COLORS.secondary;
+                ctx.arc(cPx, cPy, 4, 0, Math.PI * 2);
+                ctx.fill();
+            }
+    
+            function animateGraph2() {
+                let x = 1;
+                const interval = setInterval(() => {
+                    x += 0.5;
+                    if (x >= 50) {
+                        x = 50;
+                        clearInterval(interval);
                     }
-                }
+                    state.limit2.x = x;
+                    updateLimit2UI();
+                    drawGraph2();
+                }, 20);
             }
-            ctx.stroke();
-            
-            // 标记极限线
-            ctx.strokeStyle = '#10b981';
-            ctx.lineWidth = 2;
-            ctx.setLineDash([5, 5]);
-            ctx.beginPath();
-            ctx.moveTo(50, height - 40 - (Math.E - 1) * 100 * zoomLevel);
-            ctx.lineTo(width - 30, height - 40 - (Math.E - 1) * 100 * zoomLevel);
-            ctx.stroke();
-            ctx.setLineDash([]);
-            
-            // 标注
-            ctx.fillStyle = '#374151';
-            ctx.font = '12px Arial';
-            ctx.fillText('y = (1 + 1/x)^x', width - 120, 50);
-            ctx.fillText('y = e ≈ 2.718', 50, height - 40 - (Math.E - 1) * 100 * zoomLevel - 10);
-            
-            // 坐标轴标签
-            ctx.font = '14px Arial';
-            ctx.fillText('x', width - 20, height - 40 + 20);
-            ctx.fillText('y', 50 - 20, 40);
-        }
-
-        function updateSecondValueTable() {
-            const tbody = document.getElementById('secondValueTable');
-            const values = [10, 100, 1000, 10000, 100000];
-            
-            let html = '';
-            values.forEach(x => {
-                const base = 1 + 1/x;
-                const result = Math.pow(base, x);
-                html += `
-                    <tr>
-                        <td>${x.toLocaleString()}</td>
-                        <td>${base.toFixed(6)}</td>
-                        <td style="color: var(--primary); font-weight: bold;">${result.toFixed(6)}</td>
-                    </tr>
-                `;
-            });
-            tbody.innerHTML = html;
-        }
-
-        function animateSecondApproach() {
-            let x = 10;
-            let direction = 1;
-            
-            function animate() {
-                x += 50 * direction;
-                if(x > 10000) {
-                    x = 10000;
-                    direction = -1;
-                } else if(x < 10) {
-                    x = 10;
-                    direction = 1;
+    
+            // --- Extension Graph Logic ---
+            function drawGraphExt() {
+                const { ctx, width, height } = setupCanvas('canvas-ext');
+                const originX = width / 2;
+                const originY = height / 2;
+                const scale = Math.min(width, height) / 4; 
+                const k = state.ext.k;
+    
+                ctx.clearRect(0, 0, width, height);
+                drawAxes(ctx, width, height, originX, originY, scale, scale);
+    
+                // Draw y = sin(kx)/x
+                ctx.beginPath();
+                ctx.strokeStyle = COLORS.accent;
+                ctx.lineWidth = 2;
+                
+                for (let px = 0; px <= width; px+=2) {
+                    const x = (px - originX) / scale;
+                    let y;
+                    if (Math.abs(x) < 0.0001) y = k; // Limit is k
+                    else y = Math.sin(k * x) / x;
+                    
+                    const py = originY - y * scale;
+                    if (px === 0) ctx.moveTo(px, py);
+                    else ctx.lineTo(px, py);
                 }
+                ctx.stroke();
+    
+                // Label Limit point
+                const kY = originY - k * scale;
+                ctx.beginPath();
+                ctx.fillStyle = 'white';
+                ctx.strokeStyle = COLORS.accent;
+                ctx.arc(originX, kY, 4, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
                 
-                const leftVal = Math.pow(1 + 1/10, 10);
-                const rightVal = Math.pow(1 + 1/x, x);
-                
-                document.getElementById('secondLeftApproach').textContent = leftVal.toFixed(4);
-                document.getElementById('secondRightApproach').textContent = rightVal.toFixed(4);
-                
-                animationId = requestAnimationFrame(animate);
+                ctx.fillStyle = COLORS.accent;
+                ctx.fillText(`k=${k.toFixed(1)}`, originX + 25, kY);
             }
-            
-            if(animationId) cancelAnimationFrame(animationId);
-            animate();
-        }
-
-        function animateApproach() {
-            let t = 0.1;
-            let direction = -1;
-            
-            function animate() {
-                t += 0.002 * direction;
-                if(t < 0.001) {
-                    t = 0.001;
-                    direction = 1;
-                } else if(t > 0.1) {
-                    t = 0.1;
-                    direction = -1;
-                }
-                
-                const leftVal = Math.sin(-t) / (-t);
-                const rightVal = Math.sin(t) / t;
-                
-                document.getElementById('leftApproach').textContent = leftVal.toFixed(4);
-                document.getElementById('rightApproach').textContent = rightVal.toFixed(4);
-                
-                animationId = requestAnimationFrame(animate);
+    
+            // --- Tables ---
+            function initTables() {
+                const tbody1 = document.getElementById('table-limit1');
+                [0.5, 0.1, 0.01, 0.001].forEach(val => {
+                    const y = Math.sin(val)/val;
+                    tbody1.innerHTML += `
+                        <tr>
+                            <td class="px-4 py-2 font-mono text-gray-600">±${val}</td>
+                            <td class="px-4 py-2 font-mono text-gray-600">±${Math.sin(val).toFixed(6)}</td>
+                            <td class="px-4 py-2 font-mono font-bold text-blue-600">${y.toFixed(6)}</td>
+                        </tr>
+                    `;
+                });
+    
+                const tbody2 = document.getElementById('table-limit2');
+                [10, 100, 1000, 10000].forEach(val => {
+                    const y = Math.pow(1+1/val, val);
+                    tbody2.innerHTML += `
+                        <tr>
+                            <td class="px-4 py-2 font-mono text-gray-600">${val}</td>
+                            <td class="px-4 py-2 font-mono text-gray-600">${(1+1/val).toFixed(5)}</td>
+                            <td class="px-4 py-2 font-mono font-bold text-blue-600">${y.toFixed(5)}</td>
+                        </tr>
+                    `;
+                });
             }
-            
-            if(animationId) cancelAnimationFrame(animationId);
-            animate();
-        }
-
-        function updateExtend() {
-            drawExtendGraph();
-            const funcSelect = document.getElementById('funcSelect').value;
-            const results = {
-                'x-1': '$\\lim\\limits_{x \\to 1} \\frac{\\sin(x-1)}{x-1} = 1$',
-                '3x': '$\\lim\\limits_{x \\to 0} \\frac{\\sin 3x}{3x} = 1$',
-                'x^2': '$\\lim\\limits_{x \\to 0} \\frac{\\sin(x^2)}{x^2} = 1$',
-                '2x': '$\\lim\\limits_{x \\to 0} \\frac{\\sin 2x}{2x} = 1$'
-            };
-            document.getElementById('extendResult').innerHTML = results[funcSelect];
-            renderMath();
-        }
-
-        function drawExtendGraph() {
-            const canvas = document.getElementById('extendGraph');
-            if (!canvas) return;
-            
-            const ctx = canvas.getContext('2d');
-            const width = canvas.width;
-            const height = canvas.height;
-            
-            ctx.clearRect(0, 0, width, height);
-            
-            // 坐标轴
-            ctx.strokeStyle = '#374151';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(50, height - 40);
-            ctx.lineTo(width - 30, height - 40);
-            ctx.moveTo(width/2, 30);
-            ctx.lineTo(width/2, height - 40);
-            ctx.stroke();
-            
-            // 绘制坐标轴刻度
-            ctx.strokeStyle = '#6b7280';
-            ctx.lineWidth = 1;
-            ctx.font = '10px Arial';
-            ctx.fillStyle = '#374151';
-            
-            // x轴刻度
-            for(let i = -2; i <= 2; i++) {
-                if(i === 0) continue;
-                const px = width/2 + i * 100;
-                if(px > 50 && px < width - 30) {
-                    ctx.beginPath();
-                    ctx.moveTo(px, height - 40 - 5);
-                    ctx.lineTo(px, height - 40 + 5);
-                    ctx.stroke();
-                    ctx.fillText(i.toString(), px - 5, height - 40 + 20);
-                }
-            }
-            
-            // y轴刻度
-            for(let i = -1; i <= 1; i += 0.5) {
-                if(i === 0) continue;
-                const py = height - 40 - i * 80;
-                if(py > 30 && py < height - 40) {
-                    ctx.beginPath();
-                    ctx.moveTo(width/2 - 5, py);
-                    ctx.lineTo(width/2 + 5, py);
-                    ctx.stroke();
-                    ctx.fillText(i.toString(), width/2 + 10, py + 3);
-                }
-            }
-            
-            const funcType = document.getElementById('funcSelect')?.value || 'x-1';
-            
-            // 绘制函数
-            ctx.strokeStyle = '#4f46e5';
-            ctx.lineWidth = 2.5;
-            ctx.beginPath();
-            
-            let firstPoint = true;
-            for(let px = 50; px < width - 30; px++) {
-                const x = (px - width/2) / 100;
-                let fx, y;
+    
+            // --- Quiz System ---
+            const questions = [
+                { id: 1, q: '\\lim_{x \\to 0} \\frac{\\sin 5x}{x}', a: 5, hint: '配凑系数：乘以 5 除以 5' },
+                { id: 2, q: '\\lim_{x \\to \\infty} (1+\\frac{1}{x})^{2x}', a: 'e^2', hint: '利用第二重要极限，指数提取系数' },
+                { id: 3, q: '\\lim_{x \\to 0} \\frac{\\tan x}{x}', a: 1, hint: 'tan x = sin x / cos x' },
+                { id: 4, q: '\\lim_{x \\to \\infty} (1-\\frac{1}{x})^x', a: '1/e', hint: '变形为 (1 + (-1/x))^x' },
+                { id: 5, q: '\\lim_{x \\to 0} \\frac{1-\\cos x}{x^2}', a: '1/2', hint: '利用二倍角公式 1-cos x = 2sin²(x/2)' }
+            ];
+    
+            function initQuiz() {
+                const container = document.getElementById('quiz-container');
+                container.innerHTML = questions.map(q => `
+                    <div class="p-6 transition-colors hover:bg-gray-50" id="q-${q.id}">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="text-lg font-mono bg-white border border-gray-200 px-3 py-1 rounded">
+                                $$ ${q.q} = ? $$
+                            </div>
+                            <button onclick="toggleAnswer(${q.id})" class="text-sm text-blue-600 hover:underline">
+                                查看答案
+                            </button>
+                        </div>
+                        <div id="a-${q.id}" class="hidden mt-4 bg-green-50 p-4 rounded-lg border border-green-100">
+                            <p class="font-bold text-green-800 mb-1">答案：${q.a}</p>
+                            <p class="text-sm text-green-600"><span class="font-bold">解析：</span>${q.hint}</p>
+                        </div>
+                    </div>
+                `).join('');
                 
-                switch(funcType) {
-                    case 'x-1':
-                        fx = x;
-                        if(Math.abs(fx) > 0.01) {
-                            y = Math.sin(fx) / fx;
-                        }
-                        break;
-                    case '3x':
-                        fx = 3 * x;
-                        if(Math.abs(fx) > 0.01) {
-                            y = Math.sin(fx) / fx;
-                        }
-                        break;
-                    case 'x^2':
-                        fx = x * x;
-                        if(Math.abs(fx) > 0.01) {
-                            y = Math.sin(fx) / fx;
-                        }
-                        break;
-                    case '2x':
-                        fx = 2 * x;
-                        if(Math.abs(fx) > 0.01) {
-                            y = Math.sin(fx) / fx;
-                        }
-                        break;
-                }
-                
-                if(y !== undefined) {
-                    const py = height - 40 - y * 80;
-                    if(firstPoint) {
-                        ctx.moveTo(px, py);
-                        firstPoint = false;
-                    } else {
-                        ctx.lineTo(px, py);
+                // Re-render mathjax for new content
+                if (window.MathJax) MathJax.typesetPromise();
+            }
+    
+            function toggleAnswer(id) {
+                const el = document.getElementById(`a-${id}`);
+                if (el.classList.contains('hidden')) {
+                    el.classList.remove('hidden');
+                    if (!state.quiz.completed.has(id)) {
+                        state.quiz.completed.add(id);
+                        document.getElementById('score').textContent = state.quiz.completed.size;
                     }
                 } else {
-                    firstPoint = true;
+                    el.classList.add('hidden');
                 }
             }
-            ctx.stroke();
+    
+            function resetQuiz() {
+                state.quiz.completed.clear();
+                document.getElementById('score').textContent = '0';
+                questions.forEach(q => {
+                    document.getElementById(`a-${q.id}`).classList.add('hidden');
+                });
+            }
+    
+            // --- Utilities ---
+            function resizeCanvases() {
+                // Force redraw of canvases based on current container size
+                if (document.getElementById('limit1-content').classList.contains('hidden') === false) drawGraph1();
+                if (document.getElementById('limit2-content').classList.contains('hidden') === false) drawGraph2();
+                if (document.getElementById('extensions-content').classList.contains('hidden') === false) drawGraphExt();
+            }
             
-            // 标记极限点（空心圆表示不连续）
-            ctx.strokeStyle = '#10b981';
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.arc(width/2, height - 40 - 80, 6, 0, Math.PI * 2);
-            ctx.stroke();
-            
-            // 标注
-            ctx.fillStyle = '#374151';
-            ctx.font = '12px Arial';
-            ctx.fillText('lim = 1', width/2 + 10, height - 40 - 80 - 10);
-            
-            // 坐标轴标签
-            ctx.font = '14px Arial';
-            ctx.fillText('x', width - 20, height - 40 + 20);
-            ctx.fillText('y', width/2 - 20, 40);
-        }
-
-        let selectedProblem = '1';
-
-        function selectProblem(problemId) {
-            // 移除所有选中状态
-            document.querySelectorAll('.problem-option').forEach(option => {
-                option.classList.remove('selected');
-            });
-            
-            // 添加选中状态到当前选项
-            document.querySelector(`[data-value="${problemId}"]`).classList.add('selected');
-            
-            selectedProblem = problemId;
-            loadProblem();
-        }
-
-        function loadProblem() {
-            document.getElementById('problemAnswer').style.display = 'none';
-            document.getElementById('solutionSteps').innerHTML = '选择题目后，点击查看解答';
-        }
-
-        function solveProblem() {
-            const problem = selectedProblem;
-            const answers = {
-                '1': '答案：5',
-                '2': '答案：2/3',
-                '3': '答案：e',
-                '4': '答案：e²',
-                '5': '答案：e³',
-                '6': '答案：1'
-            };
-            
-            const steps = {
-                '1': '解：$\\frac{\\sin 5x}{x} = 5 \\cdot \\frac{\\sin 5x}{5x} \\to 5 \\cdot 1 = 5$',
-                '2': '解：$\\frac{\\sin 2x}{\\sin 3x} = \\frac{\\sin 2x / 2x}{\\sin 3x / 3x} \\cdot \\frac{2x}{3x} \\to \\frac{1}{1} \\cdot \\frac{2}{3} = \\frac{2}{3}$',
-                '3': '解：$\\lim\\limits_{x \\to \\infty} \\left(1 + \\frac{1}{x}\\right)^x = e$（第二重要极限）',
-                '4': '解：$\\lim\\limits_{x \\to 0} (1 + 2x)^{\\frac{1}{x}} = \\lim\\limits_{x \\to 0} \\left(1 + \\frac{2x}{x}\\right)^{\\frac{1}{x}} = \\lim\\limits_{t \\to 0} \\left(1 + \\frac{2}{t}\\right)^t = e^2$',
-                '5': '解：$\\lim\\limits_{x \\to \\infty} \\left(1 + \\frac{3}{x}\\right)^x = \\lim\\limits_{x \\to \\infty} \\left(1 + \\frac{1}{x/3}\\right)^{x} = e^3$',
-                '6': '解：$\\frac{\\tan x}{x} = \\frac{\\sin x}{x \\cos x} = \\frac{\\sin x}{x} \\cdot \\frac{1}{\\cos x} \\to 1 \\cdot 1 = 1$'
-            };
-            
-            document.getElementById('problemAnswer').style.display = 'block';
-            document.getElementById('problemAnswer').innerHTML = answers[problem];
-            document.getElementById('solutionSteps').innerHTML = steps[problem];
-            
-            completedProblems.add(problem);
-            updatePracticeStatus();
-            renderMath();
-        }
-
-        function updatePracticeStatus() {
-            document.getElementById('completed').textContent = completedProblems.size;
-        }
-
-        function resetPractice() {
-            completedProblems.clear();
-            updatePracticeStatus();
-            document.getElementById('problemAnswer').style.display = 'none';
-            document.getElementById('solutionSteps').innerHTML = '选择题目后，点击查看解答';
-        }
-
-        document.getElementById('zoomSlider')?.addEventListener('input', function() {
-            zoomLevel = parseFloat(this.value);
-            document.getElementById('zoomValue').textContent = zoomLevel.toFixed(1);
-            drawBasicGraph();
-        });
-
-        document.getElementById('secondZoomSlider')?.addEventListener('input', function() {
-            zoomLevel = parseFloat(this.value);
-            document.getElementById('secondZoomValue').textContent = zoomLevel.toFixed(1);
-            drawSecondGraph();
-        });
-
-        window.addEventListener('DOMContentLoaded', function() {
-            setTimeout(() => {
-                drawBasicGraph();
-                updateValueTable();
-                drawSecondGraph();
-                updateSecondValueTable();
-                renderMath();
-                // 设置默认选中的题目
-                selectProblem('1');
-            }, 100);
-        });
-
-        function toggleReturnLinks() { const p = document.querySelector('.return-links'); if (!p) return; if (p.style.display === 'flex') { p.style.opacity = '0'; setTimeout(() => p.style.display = 'none', 160); } else { p.style.display = 'flex'; requestAnimationFrame(() => p.style.opacity = '1'); } }
-    </script>
-</body>
-</html>
+            function renderAllGraphs() {
+                 drawGraph1();
+                 drawGraph2();
+                 drawGraphExt();
+            }
+    
+        </script>
+    
+    
+    </body></html>

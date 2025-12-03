@@ -1,7 +1,6 @@
 window.exerciseData = {
   exercises: [
-    // 偏导数类题目
-    {
+{
       id: 1,
       type: "选择题",
       title: "偏导数基础",
@@ -22,7 +21,7 @@ $$= 2x + 3y$$
       category: "偏导数",
       method: "偏导数定义法"
     },
-    {
+{
       id: 2,
       type: "选择题",
       title: "高阶偏导数",
@@ -44,7 +43,7 @@ $$= (1 + xy)e^{xy}$$
       category: "高阶偏导数",
       method: "链式法则"
     },
-    {
+{
       id: 3,
       type: "选择题",
       title: "全微分",
@@ -68,7 +67,7 @@ $$dz = 2dx + 0 \\cdot dy = 2dx$$
       category: "全微分",
       method: "全微分公式"
     },
-    {
+{
       id: 4,
       type: "选择题",
       title: "复合函数求导",
@@ -91,7 +90,7 @@ $$\\frac{\\partial z}{\\partial x} = f_u \\cdot 1 + f_v \\cdot y = f_u + yf_v$$
       category: "复合函数",
       method: "链式法则"
     },
-    {
+{
       id: 5,
       type: "选择题",
       title: "隐函数求导",
@@ -112,7 +111,7 @@ $$\\frac{\\partial z}{\\partial x} = -\\frac{x}{z}$$
       category: "隐函数",
       method: "隐函数求导"
     },
-    {
+{
       id: 6,
       type: "选择题",
       title: "方向导数",
@@ -137,7 +136,7 @@ $$= 2 \\cdot \\frac{1}{\\sqrt{2}} + 2 \\cdot \\frac{1}{\\sqrt{2}} = \\frac{4}{\\
       category: "方向导数",
       method: "梯度法"
     },
-    {
+{
       id: 7,
       type: "选择题",
       title: "极值判定",
@@ -171,7 +170,7 @@ $$f_x(2,0) = 4 - 0 - 2 = 2 \\neq 0$$
       category: "极值",
       method: "海塞矩阵判定"
     },
-    {
+{
       id: 8,
       type: "选择题",
       title: "拉格朗日乘数法",
@@ -200,7 +199,7 @@ $$f(\\frac{1}{2}, \\frac{1}{2}) = \\frac{1}{2} \\cdot \\frac{1}{2} = \\frac{1}{4
       category: "条件极值",
       method: "拉格朗日乘数法"
     },
-    {
+{
       id: 9,
       type: "选择题",
       title: "偏导数存在性",
@@ -215,7 +214,7 @@ $$f_y(0,0) = \\lim_{h \\to 0}\\frac{|0 \\cdot h| - 0}{h} = 0$$
       category: "偏导数",
       method: "定义法"
     },
-    {
+{
       id: 10,
       type: "选择题",
       title: "可微性判断",
@@ -230,7 +229,7 @@ $$f_y(0,0) = \\lim_{h \\to 0}\\frac{|0 \\cdot h| - 0}{h} = 0$$
       category: "可微性",
       method: "概念"
     },
-    {
+{
       id: 11,
       type: "选择题",
       title: "梯度方向",
@@ -245,7 +244,7 @@ $$f_y(0,0) = \\lim_{h \\to 0}\\frac{|0 \\cdot h| - 0}{h} = 0$$
       category: "梯度",
       method: "概念"
     },
-    {
+{
       id: 12,
       type: "选择题",
       title: "链式法则应用",
@@ -258,7 +257,7 @@ $$\\frac{\\partial z}{\\partial x} = \\frac{dz}{du} \\cdot \\frac{\\partial u}{\
       category: "复合函数",
       method: "链式法则"
     },
-    {
+{
       id: 13,
       type: "选择题",
       title: "二阶混合偏导数",
@@ -272,7 +271,7 @@ $$\\frac{\\partial^2 f}{\\partial x \\partial y} = \\frac{\\partial^2 f}{\\parti
       category: "高阶偏导数",
       method: "定理"
     },
-    {
+{
       id: 14,
       type: "选择题",
       title: "全微分近似",
@@ -286,7 +285,7 @@ $$f(x+\\Delta x, y+\\Delta y) \\approx f(x,y) + f_x\\Delta x + f_y\\Delta y$$
       category: "全微分",
       method: "近似计算"
     },
-    {
+{
       id: 15,
       type: "选择题",
       title: "隐函数组求导",
@@ -300,7 +299,7 @@ $$\\frac{\\partial u}{\\partial x} = -\\frac{\\partial(F,G)/\\partial(x,v)}{\\pa
       category: "隐函数",
       method: "雅可比法"
     },
-    {
+{
       id: 16,
       type: "选择题",
       title: "极值点类型",
@@ -316,7 +315,7 @@ $$\\frac{\\partial u}{\\partial x} = -\\frac{\\partial(F,G)/\\partial(x,v)}{\\pa
       category: "极值",
       method: "海塞矩阵"
     },
-    {
+{
       id: 17,
       type: "选择题",
       title: "条件极值应用",
@@ -331,7 +330,7 @@ $$\\frac{\\partial u}{\\partial x} = -\\frac{\\partial(F,G)/\\partial(x,v)}{\\pa
       category: "条件极值",
       method: "拉格朗日法"
     },
-    {
+{
       id: 18,
       type: "选择题",
       title: "方向导数最大值",
@@ -345,7 +344,7 @@ $$\\frac{\\partial u}{\\partial x} = -\\frac{\\partial(F,G)/\\partial(x,v)}{\\pa
       category: "方向导数",
       method: "梯度性质"
     },
-    {
+{
       id: 19,
       type: "选择题",
       title: "偏导数符号",
@@ -361,7 +360,7 @@ $$f_x = 2x$$
       category: "偏导数",
       method: "符号分析"
     },
-    {
+{
       id: 20,
       type: "选择题",
       title: "全微分形式不变性",
@@ -375,7 +374,7 @@ $$f_x = 2x$$
       category: "全微分",
       method: "概念"
     },
-    {
+{
       id: 21,
       type: "选择题",
       title: "偏导数的几何意义",
@@ -389,7 +388,7 @@ $\\frac{\\partial f}{\\partial x}$ 是固定$y = y_0$
       category: "偏导数",
       method: "几何意义"
     },
-    {
+{
       id: 22,
       type: "选择题",
       title: "极值充分条件",
@@ -403,7 +402,7 @@ $\\frac{\\partial f}{\\partial x}$ 是固定$y = y_0$
       category: "极值",
       method: "充分条件"
     },
-    {
+{
       id: 23,
       type: "选择题",
       title: "多元泰勒公式",
@@ -417,7 +416,7 @@ $\\frac{\\partial f}{\\partial x}$ 是固定$y = y_0$
       category: "泰勒公式",
       method: "泰勒展开"
     },
-    {
+{
       id: 24,
       type: "选择题",
       title: "链式法则推广",
@@ -431,7 +430,7 @@ $$\\frac{\\partial z}{\\partial x} = \\frac{\\partial f}{\\partial u}\\frac{\\pa
       category: "复合函数",
       method: "链式法则"
     },
-    {
+{
       id: 25,
       type: "选择题",
       title: "等值线与梯度",
@@ -445,7 +444,7 @@ $$\\frac{\\partial z}{\\partial x} = \\frac{\\partial f}{\\partial u}\\frac{\\pa
       category: "梯度",
       method: "几何性质"
     },
-    {
+{
       id: 26,
       type: "选择题",
       title: "隐函数求导应用",
@@ -460,7 +459,7 @@ $$\\frac{\\partial z}{\\partial x} = -\\frac{yz}{xy} = -\\frac{z}{x}$$`,
       category: "隐函数",
       method: "隐函数求导"
     },
-    {
+{
       id: 27,
       type: "选择题",
       title: "条件极值例题",
@@ -475,7 +474,7 @@ $$f_{\\min} = (\\frac{1}{2})^2 + (\\frac{1}{2})^2 = \\frac{1}{2}$$`,
       category: "条件极值",
       method: "拉格朗日法"
     },
-    {
+{
       id: 28,
       type: "选择题",
       title: "可微的充分条件",
@@ -489,7 +488,7 @@ $$f_{\\min} = (\\frac{1}{2})^2 + (\\frac{1}{2})^2 = \\frac{1}{2}$$`,
       category: "可微性",
       method: "充分条件"
     },
-    {
+{
       id: 29,
       type: "选择题",
       title: "方向导数存在性",
@@ -503,7 +502,7 @@ $$\\frac{\\partial f}{\\partial \\vec{l}} = f_x\\cos\\alpha + f_y\\cos\\beta$$`,
       category: "方向导数",
       method: "可微性质"
     },
-    {
+{
       id: 30,
       type: "选择题",
       title: "极值综合题",
@@ -518,7 +517,7 @@ $$f_y = 2y = 0 \\Rightarrow y = 0$$
       category: "极值",
       method: "驻点求法"
     }
-  ],
+],
   knowledgePoints: [
     {
       title: "偏导数与全微分",
