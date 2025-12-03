@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>第3章导数与微分-学生笔记.html</title>
+    
+<style>
+    @page {
+        size: A4;
+        margin: 1cm;
+    }
+    body {
+        font-family: "Microsoft YaHei", "Segoe UI", sans-serif;
+        font-size: 10pt;
+        line-height: 1.4;
+        color: #2c3e50;
+        margin: 0;
+        padding: 0;
+        background-color: #fff;
+    }
+    
+    /* Headers */
+    h1 {
+        font-size: 16pt;
+        text-align: center;
+        margin: 15px 0;
+        padding: 10px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    h2 {
+        font-size: 13pt;
+        margin: 15px 0 8px 0;
+        padding: 5px 10px;
+        border-left: 5px solid #764ba2;
+        background-color: #f3f0ff;
+        color: #4a235a;
+        border-radius: 0 4px 4px 0;
+    }
+    h3 {
+        font-size: 11pt;
+        margin: 10px 0 5px 0;
+        color: #2980b9;
+        font-weight: bold;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 2px;
+    }
+    h4 {
+        font-size: 10pt;
+        margin: 8px 0 4px 0;
+        color: #16a085;
+        font-weight: bold;
+    }
+
+    /* Text & Lists */
+    p {
+        margin: 5px 0;
+        text-align: justify;
+    }
+    ul, ol {
+        margin: 5px 0;
+        padding-left: 20px;
+    }
+    li {
+        margin-bottom: 3px;
+    }
+    strong {
+        color: #c0392b;
+    }
+
+    /* Components */
+    blockquote {
+        margin: 10px 0;
+        padding: 8px 12px;
+        background-color: #e8f6f3;
+        border-left: 4px solid #1abc9c;
+        border-radius: 4px;
+        font-size: 9.5pt;
+        color: #0e6251;
+    }
+    
+    /* Tables */
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 10px 0;
+        font-size: 9pt;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        border-radius: 4px;
+        overflow: hidden;
+    }
+    th, td {
+        border: 1px solid #dcdde1;
+        padding: 6px;
+        text-align: left;
+        vertical-align: top;
+    }
+    th {
+        background-color: #34495e;
+        color: white;
+        text-align: center;
+        font-weight: 600;
+    }
+    tr:nth-child(even) {
+        background-color: #f8f9fa;
+    }
+    tr:hover {
+        background-color: #eaf2f8;
+    }
+
+    /* Lesson Header Box */
+    .lesson-header {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 15px;
+        font-size: 9pt;
+        border: 1px solid #a9dfbf;
+        padding: 10px;
+        background: #eafaf1;
+        border-radius: 6px;
+    }
+    .lesson-header div {
+        flex: 1 1 30%;
+    }
+    .section-title {
+        font-weight: bold;
+        color: #27ae60;
+        margin-right: 5px;
+    }
+
+    /* Examples/Exercises */
+    .example {
+        background-color: #fff8e1;
+        border: 1px solid #ffe082;
+        padding: 8px;
+        margin: 8px 0;
+        border-radius: 6px;
+        position: relative;
+    }
+    .example-title {
+        font-weight: bold;
+        color: #f39c12;
+        display: block;
+        margin-bottom: 4px;
+    }
+
+    /* Utilities */
+    .page-break {
+        page-break-after: always;
+    }
+    .formula {
+        text-align: center;
+        margin: 10px 0;
+        font-family: "Times New Roman", serif;
+        font-style: italic;
+        background: #f4f6f7;
+        padding: 8px;
+        border-radius: 4px;
+        border: 1px dashed #bdc3c7;
+    }
+    
+    /* Print Optimizations */
+    @media print {
+        body {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+    }
+</style>
+<!-- MathJax Configuration -->
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\(', '\)']],
+    displayMath: [['$$', '$$'], ['\[', '\]']],
+    processEscapes: true
+  },
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  }
+};
+</script>
+<script id="MathJax-script" async src="../common-assets/js/mathjax-tex-chtml.js"></script>
+
+</head>
+<body>
+<h1>第三章《导数与微分》讲义</h1>
+<blockquote><strong>学习目标</strong>：<br>1. 深入理解导数的概念和几何意义<br>2. 熟练掌握导数的计算方法<br>3. 掌握复合函数求导（链式法则）<br>4. 理解微分的概念和应用<br>5. 培养数学分析能力和逻辑推理能力</blockquote>
+<blockquote><strong>学习资源</strong>：<br>- 教材：《高等数学》第3章<br>- 课件：《第3章导数与微分》<br>- 实验：Lab3-1 至 Lab3-5 仿真实验<br>- 练习：题库导数与微分题</blockquote>
+<p>---</p>
+<div class="page-break"></div>
+<h1>第一讲：导数与微分</h1>
+<h2>1.1 导数的概念</h2>
+<h3>1.1.1 导数的定义</h3>
+<p><strong>定义1</strong>：设函数$y = f(x)$在点$x_0$的某个邻域内有定义，如果极限</p>
+<p>$\lim\limits_{\Delta x \to 0} \frac{f(x_0 + \Delta x) - f(x_0)}{\Delta x}$</p>
+<p>存在，则称此极限为函数$f(x)$在点$x_0$处的导数，记作$f'(x_0)$或$\frac{dy}{dx}\bigg|_{x = x_0}$。</p>
+<p><strong>导数的几何意义</strong>：导数$f'(x_0)$表示曲线$y = f(x)$在点$(x_0, f(x_0))$处的切线斜率。</p>
+<p><strong>导数的物理意义</strong>：导数表示函数在某点的瞬时变化率。</p>
+<h3>1.1.2 导数的计算方法</h3>
+<p><strong>方法1：定义法</strong></p>
+<p>直接使用导数定义计算</p>
+<p><strong>例题1</strong>：求函数$f(x) = x^2$在点$x = 1$处的导数。</p>
+<p><strong>解</strong>：$f'(1) = \lim\limits_{\Delta x \to 0} \frac{f(1 + \Delta x) - f(1)}{\Delta x}$</p>
+<p>$= \lim\limits_{\Delta x \to 0} \frac{(1 + \Delta x)^2 - 1}{\Delta x}$</p>
+<p>$= \lim\limits_{\Delta x \to 0} \frac{1 + 2\Delta x + (\Delta x)^2 - 1}{\Delta x}$</p>
+<p>$= \lim\limits_{\Delta x \to 0} \frac{2\Delta x + (\Delta x)^2}{\Delta x}$</p>
+<p>$= \lim\limits_{\Delta x \to 0} (2 + \Delta x) = 2$</p>
+<p><strong>例题2</strong>：求函数$f(x) = \sin x$在点$x = 0$处的导数。</p>
+<p><strong>解</strong>：$f'(0) = \lim\limits_{\Delta x \to 0} \frac{f(0 + \Delta x) - f(0)}{\Delta x}$</p>
+<p>$= \lim\limits_{\Delta x \to 0} \frac{\sin(\Delta x) - \sin 0}{\Delta x}$</p>
+<p>$= \lim\limits_{\Delta x \to 0} \frac{\sin(\Delta x)}{\Delta x} = 1$</p>
+<h2>1.2 基本导数公式</h2>
+<h3>1.2.1 基本初等函数的导数</h3>
+<p>1. $(x^n)' = nx^{n-1}$</p>
+<p>2. $(a^x)' = a^x \ln a$</p>
+<p>3. $(e^x)' = e^x$</p>
+<p>4. $(\log_a x)' = \frac{1}{x \ln a}$</p>
+<p>5. $(\ln x)' = \frac{1}{x}$</p>
+<p>6. $(\sin x)' = \cos x$</p>
+<p>7. $(\cos x)' = -\sin x$</p>
+<p>8. $(\tan x)' = \sec^2 x$</p>
+<p>9. $(\cot x)' = -\csc^2 x$</p>
+<p>10. $(\sec x)' = \sec x \tan x$</p>
+<p>11. $(\csc x)' = -\csc x \cot x$</p>
+<p>12. $(\arcsin x)' = \frac{1}{\sqrt{1-x^2}}$</p>
+<p>13. $(\arccos x)' = -\frac{1}{\sqrt{1-x^2}}$</p>
+<p>14. $(\arctan x)' = \frac{1}{1+x^2}$</p>
+<h3>1.2.2 导数的运算法则</h3>
+<p><strong>定理1</strong>：如果$u = u(x)$，$v = v(x)$都可导，则：</p>
+<p>1. $(u \pm v)' = u' \pm v'$</p>
+<p>2. $(uv)' = u'v + uv'$</p>
+<p>3. $(\frac{u}{v})' = \frac{u'v - uv'}{v^2}$（$v \neq 0$）</p>
+<p><strong>例题3</strong>：求函数$f(x) = x^3 + 2x^2 + 3x + 1$的导数。</p>
+<p><strong>解</strong>：$f'(x) = (x^3)' + (2x^2)' + (3x)' + (1)'$</p>
+<p>$= 3x^2 + 4x + 3 + 0 = 3x^2 + 4x + 3$</p>
+<p><strong>例题4</strong>：求函数$f(x) = x^2 \sin x$的导数。</p>
+<p><strong>解</strong>：$f'(x) = (x^2)' \sin x + x^2 (\sin x)'$</p>
+<p>$= 2x \sin x + x^2 \cos x$</p>
+<p><strong>例题5</strong>：求函数$f(x) = \frac{x^2 + 1}{x - 1}$的导数。</p>
+<p><strong>解</strong>：$f'(x) = \frac{(x^2 + 1)'(x - 1) - (x^2 + 1)(x - 1)'}{(x - 1)^2}$</p>
+<p>$= \frac{2x(x - 1) - (x^2 + 1) \cdot 1}{(x - 1)^2}$</p>
+<p>$= \frac{2x^2 - 2x - x^2 - 1}{(x - 1)^2} = \frac{x^2 - 2x - 1}{(x - 1)^2}$</p>
+<h2>1.3 复合函数求导</h2>
+<h3>1.3.1 链式法则</h3>
+<p><strong>定理2（链式法则）</strong>：如果$y = f(u)$，$u = g(x)$都可导，则</p>
+<p>$\frac{dy}{dx} = \frac{dy}{du} \cdot \frac{du}{dx}$</p>
+<h3>1.3.2 复合函数求导的步骤</h3>
+<p>1. 识别复合函数的结构</p>
+<p>2. 设中间变量</p>
+<p>3. 分别求导</p>
+<p>4. 相乘得到结果</p>
+<p><strong>例题6</strong>：求复合函数$y = \sin(x^2)$的导数。</p>
+<p><strong>解</strong>：设$u = x^2$，则$y = \sin u$</p>
+<p>$\frac{dy}{dx} = \frac{dy}{du} \cdot \frac{du}{dx} = \cos u \cdot 2x = 2x\cos(x^2)$</p>
+<p><strong>例题7</strong>：求复合函数$y = e^{x^2 + 1}$的导数。</p>
+<p><strong>解</strong>：设$u = x^2 + 1$，则$y = e^u$</p>
+<p>$\frac{dy}{dx} = \frac{dy}{du} \cdot \frac{du}{dx} = e^u \cdot 2x = 2xe^{x^2 + 1}$</p>
+<p><strong>例题8</strong>：求复合函数$y = \ln(\sin x)$的导数。</p>
+<p><strong>解</strong>：设$u = \sin x$，则$y = \ln u$</p>
+<p>$\frac{dy}{dx} = \frac{dy}{du} \cdot \frac{du}{dx} = \frac{1}{u} \cdot \cos x = \frac{\cos x}{\sin x} = \cot x$</p>
+<h3>1.3.3 复合函数求导的常见类型</h3>
+<p><strong>类型1</strong>：$y = [f(x)]^n$</p>
+<p>$\frac{dy}{dx} = n[f(x)]^{n-1} \cdot f'(x)$</p>
+<p><strong>类型2</strong>：$y = e^{f(x)}$</p>
+<p>$\frac{dy}{dx} = e^{f(x)} \cdot f'(x)$</p>
+<p><strong>类型3</strong>：$y = \ln[f(x)]$</p>
+<p>$\frac{dy}{dx} = \frac{f'(x)}{f(x)}$</p>
+<p><strong>类型4</strong>：$y = \sin[f(x)]$</p>
+<p>$\frac{dy}{dx} = \cos[f(x)] \cdot f'(x)$</p>
+<p><strong>类型5</strong>：$y = \cos[f(x)]$</p>
+<p>$\frac{dy}{dx} = -\sin[f(x)] \cdot f'(x)$</p>
+<h2>1.4 微分的概念</h2>
+<h3>1.4.1 微分的定义</h3>
+<p><strong>定义2</strong>：设函数$y = f(x)$在点$x_0$处可导，则$f'(x_0)\Delta x$称为函数$f(x)$在点$x_0$处的微分，记作$dy = f'(x_0)dx$。</p>
+<h3>1.4.2 微分的几何意义</h3>
+<p>微分$dy$表示函数$y = f(x)$在点$(x_0, f(x_0))$处的切线在$x$方向上的增量。</p>
+<h3>1.4.3 微分的性质</h3>
+<p>1. $d(c) = 0$（常数函数的微分为零）</p>
+<p>2. $d(cu) = c \cdot du$（常数倍的微分）</p>
+<p>3. $d(u \pm v) = du \pm dv$（和差的微分）</p>
+<p>4. $d(uv) = u \cdot dv + v \cdot du$（积的微分）</p>
+<p>5. $d(\frac{u}{v}) = \frac{v \cdot du - u \cdot dv}{v^2}$（商的微分）</p>
+<p><strong>例题9</strong>：求函数$y = x^2$在点$x = 1$处的微分。</p>
+<p><strong>解</strong>：$y' = 2x$，所以$dy = 2x \cdot dx$</p>
+<p>在点$x = 1$处，$dy = 2 \cdot 1 \cdot dx = 2dx$</p>
+<p><strong>例题10</strong>：求函数$y = e^x$在点$x = 0$处的微分。</p>
+<p><strong>解</strong>：$y' = e^x$，所以$dy = e^x \cdot dx$</p>
+<p>在点$x = 0$处，$dy = e^0 \cdot dx = dx$</p>
+<h2>1.5 微分的应用</h2>
+<h3>1.5.1 近似计算</h3>
+<p><strong>公式</strong>：$f(x_0 + \Delta x) \approx f(x_0) + f'(x_0)\Delta x$</p>
+<p><strong>例题11</strong>：计算$\sqrt{4.01}$的近似值。</p>
+<p><strong>解</strong>：设$f(x) = \sqrt{x}$，则$f'(x) = \frac{1}{2\sqrt{x}}$</p>
+<p>$f(4.01) \approx f(4) + f'(4) \cdot 0.01$</p>
+<p>$= 2 + \frac{1}{2 \cdot 2} \cdot 0.01 = 2 + 0.0025 = 2.0025$</p>
+<p><strong>例题12</strong>：计算$\sin 31°$的近似值。</p>
+<p><strong>解</strong>：设$f(x) = \sin x$，则$f'(x) = \cos x$</p>
+<p>$f(31°) \approx f(30°) + f'(30°) \cdot 1°$</p>
+<p>$= \sin 30° + \cos 30° \cdot \frac{\pi}{180}$</p>
+<p>$= \frac{1}{2} + \frac{\sqrt{3}}{2} \cdot \frac{\pi}{180} \approx 0.5 + 0.0151 = 0.5151$</p>
+<h3>1.5.2 误差估计</h3>
+<p><strong>绝对误差</strong>：$\Delta y \approx dy = f'(x)dx$</p>
+<p><strong>相对误差</strong>：$\frac{\Delta y}{y} \approx \frac{dy}{y} = \frac{f'(x)dx}{f(x)}$</p>
+<p><strong>例题13</strong>：测量圆的半径时，误差为$\Delta r = 0.01$，求面积误差。</p>
+<p><strong>解</strong>：设$S = \pi r^2$，则$S' = 2\pi r$</p>
+<p>$\Delta S \approx dS = S' \cdot \Delta r = 2\pi r \cdot 0.01 = 0.02\pi r$</p>
+<h2>1.6 典型例题</h2>
+<h3>例题14：导数计算综合</h3>
+<p>求函数$f(x) = x^2 \sin x$的导数。</p>
+<p><strong>解</strong>：$f'(x) = (x^2)' \sin x + x^2 (\sin x)'$</p>
+<p>$= 2x \sin x + x^2 \cos x$</p>
+<h3>例题15：复合函数求导</h3>
+<p>求复合函数$y = \sin(x^2)$的导数。</p>
+<p><strong>解</strong>：设$u = x^2$，则$y = \sin u$</p>
+<p>$\frac{dy}{dx} = \frac{dy}{du} \cdot \frac{du}{dx} = \cos u \cdot 2x = 2x\cos(x^2)$</p>
+<h3>例题16：微分应用</h3>
+<p>计算$\sqrt{4.01}$的近似值。</p>
+<p><strong>解</strong>：设$f(x) = \sqrt{x}$，则$f'(x) = \frac{1}{2\sqrt{x}}$</p>
+<p>$f(4.01) \approx f(4) + f'(4) \cdot 0.01$</p>
+<p>$= 2 + \frac{1}{2 \cdot 2} \cdot 0.01 = 2 + 0.0025 = 2.0025$</p>
+<p>---</p>
+<div class="page-break"></div>
+<h2>附录：常用公式汇总</h2>
+<h3>基本导数公式</h3>
+<ul>
+<li>$(x^n)' = nx^{n-1}$</li>
+<li>$(a^x)' = a^x \ln a$</li>
+<li>$(e^x)' = e^x$</li>
+<li>$(\log_a x)' = \frac{1}{x \ln a}$</li>
+<li>$(\ln x)' = \frac{1}{x}$</li>
+<li>$(\sin x)' = \cos x$</li>
+<li>$(\cos x)' = -\sin x$</li>
+<li>$(\tan x)' = \sec^2 x$</li>
+<li>$(\cot x)' = -\csc^2 x$</li>
+<li>$(\sec x)' = \sec x \tan x$</li>
+<li>$(\csc x)' = -\csc x \cot x$</li>
+<li>$(\arcsin x)' = \frac{1}{\sqrt{1-x^2}}$</li>
+<li>$(\arccos x)' = -\frac{1}{\sqrt{1-x^2}}$</li>
+<li>$(\arctan x)' = \frac{1}{1+x^2}$</li>
+</ul>
+<h3>导数的运算法则</h3>
+<ul>
+<li>$(u \pm v)' = u' \pm v'$</li>
+<li>$(uv)' = u'v + uv'$</li>
+<li>$(\frac{u}{v})' = \frac{u'v - uv'}{v^2}$</li>
+</ul>
+<h3>复合函数求导</h3>
+<ul>
+<li>链式法则：$\frac{dy}{dx} = \frac{dy}{du} \cdot \frac{du}{dx}$</li>
+</ul>
+<h3>微分的性质</h3>
+<ul>
+<li>$d(c) = 0$</li>
+<li>$d(cu) = c \cdot du$</li>
+<li>$d(u \pm v) = du \pm dv$</li>
+<li>$d(uv) = u \cdot dv + v \cdot du$</li>
+<li>$d(\frac{u}{v}) = \frac{v \cdot du - u \cdot dv}{v^2}$</li>
+</ul>
+<h3>微分应用</h3>
+<ul>
+<li>近似计算：$f(x_0 + \Delta x) \approx f(x_0) + f'(x_0)\Delta x$</li>
+<li>误差估计：$\Delta y \approx dy = f'(x)dx$</li>
+</ul>
+<h2>学习建议</h2>
+<p>1. <strong>理论学习</strong>：深入理解基本概念和计算方法，掌握导数的几何意义</p>
+<p>2. <strong>计算练习</strong>：多做典型例题和练习题，熟练掌握各种计算方法</p>
+<p>3. <strong>实验操作</strong>：使用Lab3系列仿真实验，通过可视化加深理解</p>
+<p>4. <strong>工程应用</strong>：结合实际案例进行练习，培养数学建模能力</p>
+<p>5. <strong>综合训练</strong>：提高解决复杂问题的能力，掌握导数和微分的综合运用</p>
+<p>6. <strong>记忆技巧</strong>：熟记基本导数公式和运算法则</p>
+<p>7. <strong>解题方法</strong>：掌握导数计算的基本方法和步骤</p>
+<h2>课后练习</h2>
+<p>1. 求下列函数的导数：</p>
+<p>- $f(x) = x^3 + 2x^2 + 3x + 1$</p>
+<p>- $f(x) = x^2 \sin x$</p>
+<p>- $f(x) = \frac{x^2 + 1}{x - 1}$</p>
+<p>- $f(x) = e^x \cos x$</p>
+<p>2. 求下列复合函数的导数：</p>
+<p>- $y = \sin(x^2)$</p>
+<p>- $y = e^{x^2 + 1}$</p>
+<p>- $y = \ln(\sin x)$</p>
+<p>- $y = \sqrt{x^2 + 1}$</p>
+<p>3. 求下列函数在指定点处的微分：</p>
+<p>- $y = x^2$在$x = 1$处</p>
+<p>- $y = e^x$在$x = 0$处</p>
+<p>- $y = \sin x$在$x = \frac{\pi}{2}$处</p>
+<p>- $y = \ln x$在$x = 1$处</p>
+<p>4. 计算下列近似值：</p>
+<p>- $\sqrt{4.01}$</p>
+<p>- $\sin 31°$</p>
+<p>- $e^{0.01}$</p>
+<p>- $\ln 1.01$</p>
+<p>5. 应用误差估计：</p>
+<p>- 测量圆的半径时，误差为$\Delta r = 0.01$，求面积误差</p>
+<p>- 测量正方形的边长时，误差为$\Delta x = 0.02$，求面积误差</p>
+<p>- 测量圆柱的半径时，误差为$\Delta r = 0.01$，求体积误差</p>
+</body>
+</html>

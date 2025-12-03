@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>函数智绘 - 语义可视化教学助手</title>
+    
+    <!-- 本地化资源 -->
+    <script src="../common-assets/js/tailwind.min.js"></script>
+    <link rel="stylesheet" href="../common-assets/css/lab1-material-symbols.css">
+    
+    <!-- Function Plot -->
+    <script src="../common-assets/js/function-plot.js"></script>
+    
+    <!-- MathJax (SVG渲染，离线友好) -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            svg: { scale: 1.3, fontCache: 'global' },
+            startup: { typeset: false }
+        };
+    </script>
+    <script src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js"></script>
+
+    <style>
+        /* 使用系统中文字体替代 Noto Sans SC */
+        * { font-family: 'Microsoft YaHei', 'PingFang SC', 'Hiragino Sans GB', -apple-system, sans-serif; }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 3px; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .function-plot .axis line { stroke: #e2e8f0; }
+        .function-plot .axis path { stroke: #94a3b8; stroke-width: 1.5px; }
+        .function-plot text { font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif !important; fill: #64748b !important; font-size: 12px !important; }
+        
+        mjx-container { font-size: 130% !important; }
+        mjx-container[display="true"] { margin: 0.5em 0 !important; font-size: 150% !important; }
+
+        .loading-dot { animation: bounce 1.4s infinite ease-in-out both; }
+        .loading-dot:nth-child(1) { animation-delay: -0.32s; }
+        .loading-dot:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+
+        .hidden-force { display: none !important; }
+        
+        .tool-btn {
+            transition: all 0.2s ease;
+        }
+        .tool-btn:hover {
+            transform: translateY(-1px);
+        }
+        .tool-btn.active {
+            background-color: #3b82f6 !important;
+            color: white !important;
+            border-color: #3b82f6 !important;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: #64748b;
+        }
+    </style>
+</head>
+<body class="bg-white h-screen flex flex-col overflow-hidden">
+
+    <!-- 顶部栏 -->
+    <header class="bg-white border-b border-gray-100 px-5 py-3 flex items-center justify-between flex-shrink-0">
+        <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center">
+                <span class="material-symbols-outlined text-blue-400 text-xl">ssid_chart</span>
+            </div>
+            <h1 class="font-medium text-gray-600 text-lg">函数智绘</h1>
+            <span class="text-xs text-gray-400 hidden sm:inline">高职数学可视化教学</span>
+        </div>
+        
+        <div class="flex items-center gap-3">
+            <div id="conn-status" class="flex items-center gap-1.5 text-sm text-gray-400">
+                <span class="w-2 h-2 rounded-full bg-gray-300"></span>
+                <span>未连接</span>
+            </div>
+            
+            <div class="relative">
+                <input type="password" id="api-input" 
+                    class="w-36 text-sm bg-gray-50 border border-gray-200 rounded-lg pl-3 pr-8 py-1.5 text-gray-600 focus:outline-none focus:border-blue-200 placeholder-gray-400"
+                    placeholder="密码 0828">
+                <button onclick="connect()" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-400">
+                    <span class="material-symbols-outlined text-lg">login</span>
+                </button>
+            </div>
+            
+            <button onclick="resetAll()" class="p-1.5 text-gray-400 hover:text-red-400 rounded-lg" title="重置">
+                <span class="material-symbols-outlined text-xl">refresh</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- 主内容 -->
+    <main class="flex-1 flex flex-col overflow-hidden">
+        
+        <!-- 输入区 -->
+        <div class="bg-white border-b border-gray-100 px-5 py-4">
+            <div class="max-w-6xl mx-auto">
+                <!-- 输入框 -->
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="flex-1 bg-gray-50 rounded-xl border border-gray-200 focus-within:border-blue-200 flex items-center">
+                        <span class="material-symbols-outlined text-gray-400 ml-4">edit</span>
+                        <input type="text" id="prompt-input" 
+                            class="flex-1 px-3 py-3 bg-transparent border-none focus:outline-none text-gray-700"
+                            placeholder="输入函数，如：x^2-2x+1、sin(x)/x、e^x..."
+                            onkeydown="if(event.key === 'Enter') generate()">
+                    </div>
+                    <button id="gen-btn" onclick="generate()" 
+                        class="px-5 py-3 bg-blue-400 hover:bg-blue-500 disabled:bg-gray-300 text-white rounded-xl flex items-center gap-2">
+                        <span class="material-symbols-outlined">auto_awesome</span>
+                        <span>分析</span>
+                    </button>
+                </div>
+                
+                <!-- 工具按钮组 -->
+                <div class="space-y-2">
+                    <!-- 第一行：基础函数 -->
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs text-gray-400 w-16 shrink-0">基础函数</span>
+                        <div class="flex gap-2 overflow-x-auto no-scrollbar flex-1">
+                            <button onclick="quickAnalysis('x^2', 'basic')" class="tool-btn flex-shrink-0 px-3 py-1.5 bg-gray-50 hover:bg-blue-50 text-gray-500 hover:text-blue-500 text-sm rounded-full border border-gray-200 hover:border-blue-200">
+                                x² 抛物线
+                            </button>
+                            <button onclick="quickAnalysis('sin(x)', 'basic')" class="tool-btn flex-shrink-0 px-3 py-1.5 bg-gray-50 hover:bg-blue-50 text-gray-500 hover:text-blue-500 text-sm rounded-full border border-gray-200 hover:border-blue-200">
+                                sin(x)
+                            </button>
+                            <button onclick="quickAnalysis('cos(x)', 'basic')" class="tool-btn flex-shrink-0 px-3 py-1.5 bg-gray-50 hover:bg-blue-50 text-gray-500 hover:text-blue-500 text-sm rounded-full border border-gray-200 hover:border-blue-200">
+                                cos(x)
+                            </button>
+                            <button onclick="quickAnalysis('exp(x)', 'basic')" class="tool-btn flex-shrink-0 px-3 py-1.5 bg-gray-50 hover:bg-blue-50 text-gray-500 hover:text-blue-500 text-sm rounded-full border border-gray-200 hover:border-blue-200">
+                                eˣ 指数
+                            </button>
+                            <button onclick="quickAnalysis('log(x)', 'basic')" class="tool-btn flex-shrink-0 px-3 py-1.5 bg-gray-50 hover:bg-blue-50 text-gray-500 hover:text-blue-500 text-sm rounded-full border border-gray-200 hover:border-blue-200">
+                                ln(x) 对数
+                            </button>
+                            <button onclick="quickAnalysis('1/x', 'basic')" class="tool-btn flex-shrink-0 px-3 py-1.5 bg-gray-50 hover:bg-blue-50 text-gray-500 hover:text-blue-500 text-sm rounded-full border border-gray-200 hover:border-blue-200">
+                                1/x 反比例
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- 第二行：间断点 -->
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs text-gray-400 w-16 shrink-0">间断点</span>
+                        <div class="flex gap-2 overflow-x-auto no-scrollbar flex-1">
+                            <button onclick="quickAnalysis('sin(x)/x', 'discontinuity')" class="tool-btn flex-shrink-0 px-3 py-1.5 bg-orange-50 hover:bg-orange-100 text-orange-600 text-sm rounded-full border border-orange-200 hover:border-orange-300">
+                                ⭕ sin(x)/x 可去间断
+                            </button>
+                            <button onclick="quickAnalysis('(x^2-1)/(x-1)', 'discontinuity')" class="tool-btn flex-shrink-0 px-3 py-1.5 bg-orange-50 hover:bg-orange-100 text-orange-600 text-sm rounded-full border border-orange-200 hover:border-orange-300">
+                                ⭕ (x²-1)/(x-1)
+                            </button>
+                            <button onclick="quickAnalysis('1/x', 'discontinuity')" class="tool-btn flex-shrink-0 px-3 py-1.5 bg-orange-50 hover:bg-orange-100 text-orange-600 text-sm rounded-full border border-orange-200 hover:border-orange-300">
+                                ∞ 1/x 无穷间断
+                            </button>
+                            <button onclick="quickAnalysis('tan(x)', 'discontinuity')" class="tool-btn flex-shrink-0 px-3 py-1.5 bg-orange-50 hover:bg-orange-100 text-orange-600 text-sm rounded-full border border-orange-200 hover:border-orange-300">
+                                ∞ tan(x) 无穷间断
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- 第三行：极值与单调性 -->
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs text-gray-400 w-16 shrink-0">极值单调</span>
+                        <div class="flex gap-2 overflow-x-auto no-scrollbar flex-1">
+                            <button onclick="quickAnalysis('x^3-3*x', 'extrema')" class="tool-btn flex-shrink-0 px-3 py-1.5 bg-green-50 hover:bg-green-100 text-green-600 text-sm rounded-full border border-green-200 hover:border-green-300">
+                                📍 x³-3x 极值点
+                            </button>
+                            <button onclick="quickAnalysis('x^4-2*x^2', 'extrema')" class="tool-btn flex-shrink-0 px-3 py-1.5 bg-green-50 hover:bg-green-100 text-green-600 text-sm rounded-full border border-green-200 hover:border-green-300">
+                                📍 x⁴-2x² 多极值
+                            </button>
+                            <button onclick="quickAnalysis('-x^2+4*x-3', 'extrema')" class="tool-btn flex-shrink-0 px-3 py-1.5 bg-green-50 hover:bg-green-100 text-green-600 text-sm rounded-full border border-green-200 hover:border-green-300">
+                                📈 -x²+4x-3 最大值
+                            </button>
+                            <button onclick="quickAnalysis('x^2-4*x+5', 'extrema')" class="tool-btn flex-shrink-0 px-3 py-1.5 bg-green-50 hover:bg-green-100 text-green-600 text-sm rounded-full border border-green-200 hover:border-green-300">
+                                📉 x²-4x+5 最小值
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- 第四行：凹凸性与拐点 -->
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs text-gray-400 w-16 shrink-0">凹凸拐点</span>
+                        <div class="flex gap-2 overflow-x-auto no-scrollbar flex-1">
+                            <button onclick="quickAnalysis('x^3', 'concavity')" class="tool-btn flex-shrink-0 px-3 py-1.5 bg-purple-50 hover:bg-purple-100 text-purple-600 text-sm rounded-full border border-purple-200 hover:border-purple-300">
+                                🔄 x³ 拐点
+                            </button>
+                            <button onclick="quickAnalysis('x^3-3*x^2+2', 'concavity')" class="tool-btn flex-shrink-0 px-3 py-1.5 bg-purple-50 hover:bg-purple-100 text-purple-600 text-sm rounded-full border border-purple-200 hover:border-purple-300">
+                                🔄 x³-3x²+2 凹凸性
+                            </button>
+                            <button onclick="quickAnalysis('sin(x)', 'concavity')" class="tool-btn flex-shrink-0 px-3 py-1.5 bg-purple-50 hover:bg-purple-100 text-purple-600 text-sm rounded-full border border-purple-200 hover:border-purple-300">
+                                🔄 sin(x) 多拐点
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- 第五行：定积分与面积 -->
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs text-gray-400 w-16 shrink-0">积分面积</span>
+                        <div class="flex gap-2 overflow-x-auto no-scrollbar flex-1">
+                            <button onclick="quickAnalysis('x^2 从0到2', 'integral')" class="tool-btn flex-shrink-0 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-600 text-sm rounded-full border border-blue-200 hover:border-blue-300">
+                                ∫ x² [0,2] 面积
+                            </button>
+                            <button onclick="quickAnalysis('sin(x) 从0到π', 'integral')" class="tool-btn flex-shrink-0 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-600 text-sm rounded-full border border-blue-200 hover:border-blue-300">
+                                ∫ sin(x) [0,π]
+                            </button>
+                            <button onclick="quickAnalysis('exp(x) 从0到1', 'integral')" class="tool-btn flex-shrink-0 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-600 text-sm rounded-full border border-blue-200 hover:border-blue-300">
+                                ∫ eˣ [0,1]
+                            </button>
+                            <button onclick="quickAnalysis('1/x 从1到e', 'integral')" class="tool-btn flex-shrink-0 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-600 text-sm rounded-full border border-blue-200 hover:border-blue-300">
+                                ∫ 1/x [1,e]
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- 第六行：极限演示 -->
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs text-gray-400 w-16 shrink-0">极限动画</span>
+                        <div class="flex gap-2 overflow-x-auto no-scrollbar flex-1">
+                            <button onclick="quickAnalysis('sin(x)/x 当x趋向0', 'limit')" class="tool-btn flex-shrink-0 px-3 py-1.5 bg-teal-50 hover:bg-teal-100 text-teal-600 text-sm rounded-full border border-teal-200 hover:border-teal-300">
+                                → lim sin(x)/x = 1
+                            </button>
+                            <button onclick="quickAnalysis('(1+1/x)^x 当x趋向无穷', 'limit')" class="tool-btn flex-shrink-0 px-3 py-1.5 bg-teal-50 hover:bg-teal-100 text-teal-600 text-sm rounded-full border border-teal-200 hover:border-teal-300">
+                                → lim (1+1/x)ˣ = e
+                            </button>
+                            <button onclick="quickAnalysis('(exp(x)-1)/x 当x趋向0', 'limit')" class="tool-btn flex-shrink-0 px-3 py-1.5 bg-teal-50 hover:bg-teal-100 text-teal-600 text-sm rounded-full border border-teal-200 hover:border-teal-300">
+                                → lim (eˣ-1)/x = 1
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- 第七行：渐近线与切线 -->
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs text-gray-400 w-16 shrink-0">渐近切线</span>
+                        <div class="flex gap-2 overflow-x-auto no-scrollbar flex-1">
+                            <button onclick="quickAnalysis('1/x 的渐近线', 'asymptote')" class="tool-btn flex-shrink-0 px-3 py-1.5 bg-pink-50 hover:bg-pink-100 text-pink-600 text-sm rounded-full border border-pink-200 hover:border-pink-300">
+                                ⋯ 1/x 渐近线
+                            </button>
+                            <button onclick="quickAnalysis('exp(x) 的渐近线', 'asymptote')" class="tool-btn flex-shrink-0 px-3 py-1.5 bg-pink-50 hover:bg-pink-100 text-pink-600 text-sm rounded-full border border-pink-200 hover:border-pink-300">
+                                ⋯ eˣ 水平渐近线
+                            </button>
+                            <button onclick="quickAnalysis('x^2 在x=1处的切线', 'tangent')" class="tool-btn flex-shrink-0 px-3 py-1.5 bg-pink-50 hover:bg-pink-100 text-pink-600 text-sm rounded-full border border-pink-200 hover:border-pink-300">
+                                📐 x² 切线(x=1)
+                            </button>
+                            <button onclick="quickAnalysis('sin(x) 在x=0处的切线', 'tangent')" class="tool-btn flex-shrink-0 px-3 py-1.5 bg-pink-50 hover:bg-pink-100 text-pink-600 text-sm rounded-full border border-pink-200 hover:border-pink-300">
+                                📐 sin(x) 切线(x=0)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 加载状态 -->
+        <div id="loading-bar" class="hidden-force bg-blue-50 border-b border-blue-100 px-5 py-3 flex items-center justify-center gap-3">
+            <div class="flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-blue-400 loading-dot"></span>
+                <span class="w-2 h-2 rounded-full bg-blue-400 loading-dot"></span>
+                <span class="w-2 h-2 rounded-full bg-blue-400 loading-dot"></span>
+            </div>
+            <span class="text-blue-500 text-sm">正在分析函数特征...</span>
+        </div>
+
+        <!-- 图像区 -->
+        <div class="flex-1 overflow-auto p-5 bg-gray-50">
+            
+            <!-- 空状态 -->
+            <div id="empty-state" class="h-full flex items-center justify-center">
+                <div class="text-center max-w-lg">
+                    <div class="w-20 h-20 mx-auto mb-4 rounded-2xl bg-gray-100 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-gray-300 text-4xl">functions</span>
+                    </div>
+                    <h3 class="text-xl font-medium text-gray-500 mb-2">选择工具按钮或输入函数</h3>
+                    <p class="text-gray-400 text-sm mb-4">支持间断点、极值点、凹凸性、积分面积等分析</p>
+                    <p class="text-gray-400 text-xs">请先输入密码 <strong class="text-gray-500">0828</strong> 连接</p>
+                    
+                    <!-- 图例 -->
+                    <div class="mt-6 flex flex-wrap items-center justify-center gap-4 text-xs">
+                        <div class="legend-item"><span class="w-3 h-3 rounded-full border-2 border-orange-400 bg-white"></span> 间断点</div>
+                        <div class="legend-item"><span class="w-3 h-3 rounded-full bg-red-400"></span> 极大值</div>
+                        <div class="legend-item"><span class="w-3 h-3 rounded-full bg-green-400"></span> 极小值</div>
+                        <div class="legend-item"><span class="w-3 h-3 rounded-full bg-purple-400"></span> 拐点</div>
+                        <div class="legend-item"><span class="w-3 h-3 bg-blue-200"></span> 积分区域</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 分析结果区 -->
+            <div id="result-view" class="hidden-force max-w-5xl mx-auto">
+                <!-- 公式与说明 -->
+                <div class="bg-white rounded-xl border border-gray-100 p-5 mb-4">
+                    <div id="formula-display" class="text-2xl text-gray-700 text-center mb-3"></div>
+                    <div id="analysis-info" class="text-sm text-gray-600 space-y-1"></div>
+                </div>
+                
+                <!-- 主图 -->
+                <div class="bg-white rounded-xl border border-gray-100 overflow-hidden mb-4">
+                    <div class="px-4 py-3 border-b border-gray-50 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-blue-400"></span>
+                            <span class="font-medium text-gray-600">函数图像</span>
+                        </div>
+                        <div id="graph-legend" class="flex items-center gap-3 text-xs"></div>
+                    </div>
+                    <div id="main-plot" class="h-96"></div>
+                </div>
+                
+                <!-- 导数图（可选） -->
+                <div id="derivative-section" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div class="bg-white rounded-xl border border-gray-100 overflow-hidden">
+                        <div class="px-4 py-3 border-b border-gray-50 flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-green-400"></span>
+                            <span class="font-medium text-gray-600">一阶导数</span>
+                            <span id="tex-d1" class="ml-auto text-green-500 text-sm"></span>
+                        </div>
+                        <div id="plot-d1" class="h-64"></div>
+                    </div>
+                    <div class="bg-white rounded-xl border border-gray-100 overflow-hidden">
+                        <div class="px-4 py-3 border-b border-gray-50 flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-purple-400"></span>
+                            <span class="font-medium text-gray-600">二阶导数</span>
+                            <span id="tex-d2" class="ml-auto text-purple-500 text-sm"></span>
+                        </div>
+                        <div id="plot-d2" class="h-64"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 极限动画区 -->
+            <div id="limit-view" class="hidden-force max-w-4xl mx-auto">
+                <div class="bg-white rounded-xl border border-gray-100 p-6 mb-4 text-center">
+                    <div id="limit-formula" class="text-3xl text-gray-700 mb-3"></div>
+                    <div id="limit-value" class="text-lg text-blue-500 font-mono"></div>
+                </div>
+                
+                <div class="bg-white rounded-xl border border-gray-100 overflow-hidden mb-4">
+                    <div id="plot-limit" class="h-80"></div>
+                </div>
+                
+                <div class="bg-white rounded-xl border border-gray-100 p-4 flex items-center justify-center gap-6">
+                    <button id="anim-btn" onclick="toggleAnim()" class="px-6 py-2.5 bg-blue-400 hover:bg-blue-500 text-white rounded-full flex items-center gap-2">
+                        <span class="material-symbols-outlined" id="anim-icon">play_arrow</span>
+                        <span id="anim-text">开始演示</span>
+                    </button>
+                    <div class="flex items-center gap-3 bg-gray-50 rounded-full px-4 py-2 w-56">
+                        <span class="text-xs text-gray-500">x =</span>
+                        <input type="range" id="limit-slider" class="flex-1 accent-blue-400" step="0.01" oninput="manualSlide(this.value)">
+                        <span id="slider-val" class="text-xs text-gray-500 font-mono w-10 text-right">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // ========== 配置 ==========
+        const CONFIG = {
+            password: "0828",
+            api: {
+                key: "sk-eb1e9427a3624b48b706015c771d08b5",
+                url: "https://api.deepseek.com/chat/completions",
+                model: "deepseek-chat"
+            }
+        };
+
+        const state = {
+            connected: false,
+            currentData: null,
+            animating: false,
+            animFrame: null,
+            limitData: null
+        };
+
+        const $ = id => document.getElementById(id);
+
+        // ========== 连接 ==========
+        function connect() {
+            const input = $('api-input').value.trim();
+            if (input === CONFIG.password || (input.startsWith('sk-') && input.length > 20)) {
+                if (input.startsWith('sk-')) CONFIG.api.key = input;
+                state.connected = true;
+                $('conn-status').innerHTML = '<span class="w-2 h-2 rounded-full bg-green-400"></span><span class="text-green-500">已连接</span>';
+                $('api-input').value = '';
+                $('api-input').placeholder = '已连接';
+            } else {
+                $('api-input').classList.add('border-red-300');
+                setTimeout(() => $('api-input').classList.remove('border-red-300'), 1500);
+            }
+        }
+        $('api-input').addEventListener('keydown', e => { if (e.key === 'Enter') connect(); });
+
+        // ========== 快捷分析 ==========
+        function quickAnalysis(expr, type) {
+            $('prompt-input').value = expr;
+            generate(type);
+        }
+
+        // ========== 主生成函数 ==========
+        async function generate(analysisType = 'auto') {
+            const prompt = $('prompt-input').value.trim();
+            if (!prompt) return;
+            if (!state.connected) { alert('请先输入密码连接'); return; }
+
+            $('loading-bar').classList.remove('hidden-force');
+            $('empty-state').classList.add('hidden-force');
+            $('result-view').classList.add('hidden-force');
+            $('limit-view').classList.add('hidden-force');
+            $('gen-btn').disabled = true;
+            stopAnim();
+
+            const systemPrompt = `你是高职数学可视化教学助手。分析用户输入的函数，返回JSON。
+
+【分析类型判断】
+- basic: 基础函数图像 + 导数
+- discontinuity: 重点分析间断点
+- extrema: 重点分析极值点、最值、单调区间
+- concavity: 重点分析凹凸性、拐点
+- integral: 定积分、面积计算
+- limit: 极限动画演示
+- asymptote: 渐近线分析
+- tangent: 切线分析
+
+用户请求类型提示: ${analysisType}
+
+【返回JSON格式】
+{
+    "mode": "analysis" 或 "limit",
+    "function": {
+        "tex": "f(x)=x^2",
+        "plot": "x^2",
+        "description": "二次函数，开口向上的抛物线"
+    },
+    "derivative1": {"tex": "f'(x)=2x", "plot": "2*x"},
+    "derivative2": {"tex": "f''(x)=2", "plot": "2"},
+    "domain": [-5, 5],
+    "yRange": [-2, 10],
+    
+    "discontinuities": [
+        {"x": 0, "type": "removable", "limitValue": 1, "description": "可去间断点，极限为1"}
+    ],
+    
+    "extrema": [
+        {"x": 1, "y": -2, "type": "minimum", "description": "极小值点"},
+        {"x": -1, "y": 2, "type": "maximum", "description": "极大值点"}
+    ],
+    
+    "monotonicity": [
+        {"interval": "(-∞, -1)", "type": "increasing"},
+        {"interval": "(-1, 1)", "type": "decreasing"}
+    ],
+    
+    "concavity": [
+        {"interval": "(-∞, 0)", "type": "concave_down", "description": "凹（上凸）"},
+        {"interval": "(0, +∞)", "type": "concave_up", "description": "凸（下凸）"}
+    ],
+    
+    "inflectionPoints": [
+        {"x": 0, "y": 0, "description": "拐点"}
+    ],
+    
+    "integral": {
+        "from": 0, "to": 2,
+        "value": 2.667,
+        "tex": "\\\\int_0^2 x^2 dx = \\\\frac{8}{3}",
+        "description": "定积分值为8/3"
+    },
+    
+    "asymptotes": [
+        {"type": "vertical", "equation": "x=0"},
+        {"type": "horizontal", "equation": "y=0"}
+    ],
+    
+    "tangent": {
+        "atX": 1,
+        "slope": 2,
+        "equation": "y=2x-1",
+        "plot": "2*x-1",
+        "tex": "y=2x-1"
+    },
+    
+    "limit": {
+        "target": 0,
+        "result": 1,
+        "tex": "\\\\lim_{x \\\\to 0}\\\\frac{\\\\sin x}{x}=1"
+    },
+    
+    "analysis_summary": [
+        "这是一个二次函数",
+        "在x=0处取得最小值0",
+        "函数在整个定义域上是凹的"
+    ]
+}
+
+【plot格式规则】
+- 乘法用*: 2*x
+- 指数用exp(x)
+- 对数用log(x)
+- 幂运算用^: x^2
+- 圆周率用pi: 3.14159
+
+【重要】
+1. 间断点一定要准确识别！sin(x)/x在x=0无定义但极限为1
+2. 极值点要通过导数为0求出
+3. 拐点要通过二阶导数为0求出
+4. 积分区域如用户未指定，给出合理默认区间`;
+
+            try {
+                const response = await fetch(CONFIG.api.url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${CONFIG.api.key}`
+                    },
+                    body: JSON.stringify({
+                        model: CONFIG.api.model,
+                        messages: [
+                            { role: 'system', content: systemPrompt },
+                            { role: 'user', content: prompt }
+                        ],
+                        temperature: 0.1,
+                        response_format: { type: 'json_object' }
+                    })
+                });
+
+                if (!response.ok) throw new Error(`请求失败 (${response.status})`);
+                const data = await response.json();
+                const result = JSON.parse(data.choices[0].message.content);
+                console.log('分析结果:', result);
+                state.currentData = result;
+
+                if (result.mode === 'limit' || result.limit) {
+                    renderLimitMode(result);
+                } else {
+                    renderAnalysisMode(result);
+                }
+            } catch (err) {
+                console.error(err);
+                alert('分析失败: ' + err.message);
+                $('empty-state').classList.remove('hidden-force');
+            } finally {
+                $('loading-bar').classList.add('hidden-force');
+                $('gen-btn').disabled = false;
+            }
+        }
+
+        // ========== 渲染分析结果 ==========
+        function renderAnalysisMode(data) {
+            $('result-view').classList.remove('hidden-force');
+            
+            // 公式
+            setMath('formula-display', `$${data.function.tex}$`);
+            
+            // 分析说明
+            const infoEl = $('analysis-info');
+            infoEl.innerHTML = '';
+            
+            if (data.analysis_summary) {
+                data.analysis_summary.forEach(text => {
+                    infoEl.innerHTML += `<p>• ${text}</p>`;
+                });
+            }
+            
+            // 间断点信息
+            if (data.discontinuities?.length) {
+                data.discontinuities.forEach(d => {
+                    infoEl.innerHTML += `<p class="text-orange-600">⭕ ${d.description || `x=${d.x} 是${d.type === 'removable' ? '可去' : d.type === 'infinite' ? '无穷' : ''}间断点`}</p>`;
+                });
+            }
+            
+            // 极值信息
+            if (data.extrema?.length) {
+                data.extrema.forEach(e => {
+                    const icon = e.type === 'maximum' ? '🔴' : '🟢';
+                    const text = e.type === 'maximum' ? '极大值' : '极小值';
+                    infoEl.innerHTML += `<p class="text-green-600">${icon} 在 x=${e.x} 处取得${text} ${e.y}</p>`;
+                });
+            }
+            
+            // 拐点信息
+            if (data.inflectionPoints?.length) {
+                data.inflectionPoints.forEach(p => {
+                    infoEl.innerHTML += `<p class="text-purple-600">🔄 在 x=${p.x} 处有拐点</p>`;
+                });
+            }
+            
+            // 积分信息
+            if (data.integral) {
+                infoEl.innerHTML += `<p class="text-blue-600">∫ ${data.integral.description || `从${data.integral.from}到${data.integral.to}的定积分 = ${data.integral.value}`}</p>`;
+            }
+
+            // 绑图
+            setTimeout(() => {
+                drawMainPlot(data);
+                
+                // 导数图
+                if (data.derivative1 && data.derivative2) {
+                    $('derivative-section').classList.remove('hidden');
+                    setMath('tex-d1', `$${data.derivative1.tex}$`);
+                    setMath('tex-d2', `$${data.derivative2.tex}$`);
+                    drawSimplePlot('plot-d1', data.derivative1.plot, data.domain, '#4ade80');
+                    drawSimplePlot('plot-d2', data.derivative2.plot, data.domain, '#c084fc');
+                } else {
+                    $('derivative-section').classList.add('hidden');
+                }
+            }, 100);
+        }
+
+        // ========== 主图绑制 ==========
+        function drawMainPlot(data) {
+            const container = $('main-plot');
+            const domain = data.domain || [-5, 5];
+            const yRange = data.yRange || [-6, 6];
+            
+            const plotData = [
+                {
+                    fn: data.function.plot,
+                    color: '#3b82f6',
+                    graphType: 'polyline',
+                    nSamples: 1000
+                }
+            ];
+
+            // 积分区域填充
+            if (data.integral) {
+                plotData.unshift({
+                    fn: data.function.plot,
+                    range: [data.integral.from, data.integral.to],
+                    closed: true,
+                    color: 'rgba(59, 130, 246, 0.2)'
+                });
+            }
+
+            // 间断点（空心圆）
+            if (data.discontinuities) {
+                data.discontinuities.forEach(d => {
+                    if (d.type === 'removable' && d.limitValue !== undefined) {
+                        plotData.push({
+                            points: [[d.x, d.limitValue]],
+                            fnType: 'points',
+                            graphType: 'scatter',
+                            color: '#f97316',
+                            attr: { r: 7, 'stroke-width': 2.5, stroke: '#f97316', fill: 'white' }
+                        });
+                    }
+                });
+            }
+
+            // 极值点
+            if (data.extrema) {
+                data.extrema.forEach(e => {
+                    const color = e.type === 'maximum' ? '#ef4444' : '#22c55e';
+                    plotData.push({
+                        points: [[e.x, e.y]],
+                        fnType: 'points',
+                        graphType: 'scatter',
+                        color: color,
+                        attr: { r: 7 }
+                    });
+                });
+            }
+
+            // 拐点
+            if (data.inflectionPoints) {
+                data.inflectionPoints.forEach(p => {
+                    plotData.push({
+                        points: [[p.x, p.y]],
+                        fnType: 'points',
+                        graphType: 'scatter',
+                        color: '#a855f7',
+                        attr: { r: 7 }
+                    });
+                });
+            }
+
+            // 切线
+            if (data.tangent) {
+                plotData.push({
+                    fn: data.tangent.plot,
+                    color: '#f43f5e',
+                    graphType: 'polyline',
+                    nSamples: 100
+                });
+                plotData.push({
+                    points: [[data.tangent.atX, evalExpr(data.function.plot, data.tangent.atX)]],
+                    fnType: 'points',
+                    graphType: 'scatter',
+                    color: '#f43f5e',
+                    attr: { r: 6 }
+                });
+            }
+
+            // 渐近线
+            if (data.asymptotes) {
+                data.asymptotes.forEach(a => {
+                    if (a.type === 'horizontal') {
+                        const y = parseFloat(a.equation.replace('y=', ''));
+                        plotData.push({
+                            fn: `${y}`,
+                            color: '#94a3b8',
+                            graphType: 'polyline',
+                            nSamples: 2
+                        });
+                    }
+                });
+            }
+
+            try {
+                functionPlot({
+                    target: '#main-plot',
+                    width: container.clientWidth,
+                    height: container.clientHeight || 380,
+                    xAxis: { domain: domain, label: 'x' },
+                    yAxis: { domain: yRange, label: 'y' },
+                    grid: true,
+                    data: plotData
+                });
+            } catch (e) {
+                console.error('绑图失败:', e);
+            }
+        }
+
+        function drawSimplePlot(id, expr, domain, color) {
+            const container = $(id);
+            try {
+                functionPlot({
+                    target: '#' + id,
+                    width: container.clientWidth,
+                    height: container.clientHeight || 250,
+                    xAxis: { domain: domain || [-5, 5] },
+                    yAxis: { domain: [-6, 6] },
+                    grid: true,
+                    data: [{ fn: expr, color: color, graphType: 'polyline' }]
+                });
+            } catch (e) {
+                container.innerHTML = '<div class="flex items-center justify-center h-full text-red-400 text-sm">绘图失败</div>';
+            }
+        }
+
+        function evalExpr(expr, x) {
+            try {
+                const safeExpr = expr.replace(/sin/g,'Math.sin').replace(/cos/g,'Math.cos').replace(/tan/g,'Math.tan')
+                    .replace(/exp/g,'Math.exp').replace(/log/g,'Math.log').replace(/sqrt/g,'Math.sqrt')
+                    .replace(/pi/g,'Math.PI').replace(/\^/g,'**');
+                return new Function('x', `return ${safeExpr}`)(x);
+            } catch { return 0; }
+        }
+
+        // ========== 极限模式 ==========
+        function renderLimitMode(data) {
+            $('limit-view').classList.remove('hidden-force');
+            state.limitData = data;
+            
+            const limitInfo = data.limit || data;
+            setMath('limit-formula', `$$${limitInfo.tex || data.function?.tex}$$`);
+
+            const target = limitInfo.target ?? 0;
+            const domain = data.domain || [target - 5, target + 5];
+            const slider = $('limit-slider');
+            slider.min = domain[0];
+            slider.max = domain[1];
+            slider.value = domain[0];
+
+            updateLimitPlot(parseFloat(slider.value));
+            setTimeout(() => toggleAnim(true), 500);
+        }
+
+        function updateLimitPlot(xVal) {
+            const data = state.limitData;
+            const expr = data.function?.plot || data.expression?.plot;
+            const target = data.limit?.target ?? data.target ?? 0;
+            const result = data.limit?.result ?? data.result ?? 1;
+            const domain = data.domain || [target - 5, target + 5];
+
+            const yVal = evalExpr(expr, xVal);
+            $('limit-value').textContent = `x = ${xVal.toFixed(3)} → f(x) ≈ ${isFinite(yVal) ? yVal.toFixed(4) : '未定义'}`;
+            $('slider-val').textContent = xVal.toFixed(2);
+
+            const plotData = [
+                { fn: expr, color: '#3b82f6', graphType: 'polyline', nSamples: 1000 },
+                { points: [[xVal, yVal]], fnType: 'points', graphType: 'scatter', color: '#f97316', attr: { r: 8 } },
+                { fn: `${result}`, color: '#94a3b8', graphType: 'polyline', nSamples: 2 }
+            ];
+
+            // 间断点
+            if (data.discontinuities) {
+                data.discontinuities.forEach(d => {
+                    if (d.limitValue !== undefined) {
+                        plotData.push({
+                            points: [[d.x, d.limitValue]],
+                            fnType: 'points', graphType: 'scatter', color: '#f97316',
+                            attr: { r: 6, 'stroke-width': 2, stroke: '#f97316', fill: 'white' }
+                        });
+                    }
+                });
+            }
+
+            try {
+                functionPlot({
+                    target: '#plot-limit',
+                    width: $('plot-limit').clientWidth,
+                    height: 320,
+                    xAxis: { domain: domain },
+                    yAxis: { domain: [-2, 3] },
+                    grid: true,
+                    data: plotData
+                });
+            } catch (e) { console.error(e); }
+        }
+
+        function toggleAnim(forceStart = false) {
+            if (state.animating && !forceStart) { stopAnim(); } 
+            else { startAnim(); }
+        }
+
+        function startAnim() {
+            state.animating = true;
+            $('anim-text').textContent = '暂停';
+            $('anim-icon').textContent = 'pause';
+            const slider = $('limit-slider');
+            const max = parseFloat(slider.max), min = parseFloat(slider.min);
+            const animate = () => {
+                if (!state.animating) return;
+                let val = parseFloat(slider.value) + 0.02;
+                if (val > max) val = min;
+                slider.value = val;
+                updateLimitPlot(val);
+                state.animFrame = requestAnimationFrame(animate);
+            };
+            animate();
+        }
+
+        function stopAnim() {
+            state.animating = false;
+            if (state.animFrame) cancelAnimationFrame(state.animFrame);
+            $('anim-text').textContent = '开始演示';
+            $('anim-icon').textContent = 'play_arrow';
+        }
+
+        function manualSlide(val) { stopAnim(); updateLimitPlot(parseFloat(val)); }
+
+        function setMath(id, tex) {
+            $(id).innerHTML = tex;
+            if (window.MathJax?.typesetPromise) MathJax.typesetPromise([$(id)]).catch(()=>{});
+        }
+
+        function resetAll() { location.reload(); }
+    </script>
+</body>
+</html>

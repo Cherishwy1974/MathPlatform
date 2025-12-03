@@ -1,0 +1,1405 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>高等数学·谁是卧底 (Calculus Edition)</title>
+    
+    <!-- 本地化字体资源 -->
+    <link rel="stylesheet" href="../../common-assets/css/lab1-google-fonts.css">
+    <link rel="stylesheet" href="../../common-assets/css/lab1-material-symbols.css">
+    
+    <style>
+        /* ============================================
+           1. CSS VARIABLES & RESET
+        ============================================ */
+        :root {
+            --bg-primary: #1a1d24;
+            --bg-secondary: #242830;
+            --bg-card: #2d323c;
+            --bg-elevated: #363c4a;
+            
+            --text-primary: #e8eaed;
+            --text-secondary: #9aa0a6;
+            --text-muted: #5f6368;
+            
+            --accent-green: #34a853;
+            --accent-green-dark: #1e7e34;
+            --accent-red: #ea4335;
+            --accent-red-dark: #b31412;
+            --accent-amber: #fbbc04;
+            --accent-blue: #4285f4;
+            --accent-purple: #a855f7;
+            
+            --border-color: rgba(255,255,255,0.1);
+            --shadow: 0 8px 32px rgba(0,0,0,0.3);
+            
+            --font-display: 'Ma Shan Zheng', cursive;
+            --font-body: 'Noto Serif SC', serif;
+            --font-fun: 'ZCOOL QingKe HuangYou', cursive;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: var(--font-body);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        
+        /* ============================================
+           2. LAYOUT & CONTAINER
+        ============================================ */
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 1rem;
+            padding-bottom: 100px;
+        }
+        
+        .hidden { display: none !important; }
+        
+        /* ============================================
+           3. HEADER
+        ============================================ */
+        .header {
+            text-align: center;
+            padding: 1.5rem 0;
+            margin-bottom: 1rem;
+        }
+        
+        .header h1 {
+            font-family: var(--font-display);
+            font-size: 2.8rem;
+            color: var(--text-primary);
+            text-shadow: 0 4px 20px rgba(52, 168, 83, 0.3);
+            letter-spacing: 0.15em;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: linear-gradient(135deg, var(--accent-green-dark), var(--accent-green));
+            padding: 0.4rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: white;
+        }
+        
+        /* ============================================
+           4. CARD BASE STYLES
+        ============================================ */
+        .card {
+            background: var(--bg-card);
+            border-radius: 1rem;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+        
+        .card-header {
+            background: var(--bg-elevated);
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .card-header h2 {
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--accent-amber);
+        }
+        
+        .card-body { padding: 1.25rem; }
+        
+        /* ============================================
+           5. BUTTONS
+        ============================================ */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            font-family: var(--font-body);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+        }
+        
+        .btn:active { transform: scale(0.97); }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-green), var(--accent-green-dark));
+            color: white;
+            width: 100%;
+            padding: 1rem;
+            font-size: 1.15rem;
+        }
+        
+        .btn-primary:hover { filter: brightness(1.1); }
+        
+        .btn-secondary {
+            background: var(--bg-elevated);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+        }
+        
+        .btn-danger {
+            background: var(--accent-red-dark);
+            color: white;
+            border: 1px solid var(--accent-red);
+        }
+        
+        .btn-small {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.8rem;
+            border-radius: 0.5rem;
+        }
+        
+        /* ============================================
+           6. FORM ELEMENTS
+        ============================================ */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+        
+        .form-label .value {
+            font-family: var(--font-fun);
+            font-size: 1.5rem;
+            color: var(--accent-green);
+        }
+        
+        .form-label .value.red { color: var(--accent-red); }
+        
+        /* Range Slider */
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            background: var(--bg-elevated);
+            border-radius: 4px;
+            appearance: none;
+            cursor: pointer;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            background: var(--accent-green);
+            border-radius: 50%;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        
+        /* Button Group */
+        .btn-group {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .btn-group .btn {
+            flex: 1;
+            padding: 0.6rem;
+            background: var(--bg-elevated);
+            color: var(--text-secondary);
+            border: 2px solid transparent;
+        }
+        
+        .btn-group .btn.active {
+            background: var(--accent-red-dark);
+            color: white;
+            border-color: var(--accent-red);
+        }
+        
+        /* Pack Grid */
+        .pack-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+        }
+        
+        .pack-btn {
+            padding: 1rem 0.5rem;
+            background: var(--bg-elevated);
+            border: 2px solid transparent;
+            border-radius: 0.75rem;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.3rem;
+            transition: all 0.2s;
+        }
+        
+        .pack-btn .material-symbols-outlined {
+            font-size: 1.8rem;
+        }
+        
+        .pack-btn:hover { background: rgba(255,255,255,0.08); }
+        
+        .pack-btn.active {
+            border-color: var(--accent-blue);
+            background: rgba(66, 133, 244, 0.15);
+            color: var(--text-primary);
+        }
+        
+        /* ============================================
+           7. COLLAPSIBLE SECTION
+        ============================================ */
+        .collapsible {
+            cursor: pointer;
+        }
+        
+        .collapsible .icon {
+            transition: transform 0.3s;
+        }
+        
+        .collapsible.open .icon {
+            transform: rotate(180deg);
+        }
+        
+        .collapsible-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        
+        .collapsible-content.open {
+            max-height: 500px;
+        }
+        
+        /* ============================================
+           8. PASS VIEW
+        ============================================ */
+        .pass-view {
+            text-align: center;
+            padding: 3rem 2rem;
+        }
+        
+        .pass-view .icon {
+            font-size: 4rem;
+            color: var(--accent-amber);
+            animation: bounce 1s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(-10%); }
+            50% { transform: translateY(0); }
+        }
+        
+        .pass-view .player-num {
+            font-family: var(--font-display);
+            font-size: 4rem;
+            color: var(--accent-green);
+            margin: 1rem 0 2rem;
+        }
+        
+        /* ============================================
+           9. FLIP CARD
+        ============================================ */
+        .flip-card {
+            width: 220px;
+            height: 280px;
+            perspective: 1000px;
+            cursor: pointer;
+            margin: 0 auto 1.5rem;
+        }
+        
+        .flip-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        
+        .flip-card.flipped .flip-card-inner {
+            transform: rotateY(180deg);
+        }
+        
+        .flip-card-front, .flip-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        
+        .flip-card-front {
+            background: linear-gradient(145deg, #3b4252, #2e3440);
+            border: 2px solid rgba(129, 140, 248, 0.3);
+        }
+        
+        .flip-card-front .material-symbols-outlined {
+            font-size: 3.5rem;
+            color: var(--accent-blue);
+            margin-bottom: 1rem;
+        }
+        
+        .flip-card-back {
+            transform: rotateY(180deg);
+            background: linear-gradient(145deg, #2d4a3e, #1e3932);
+            border: 2px solid var(--accent-green);
+        }
+        
+        .flip-card-back .word {
+            font-family: var(--font-display);
+            font-size: 2.5rem;
+            color: white;
+            word-break: break-all;
+        }
+        
+        .flip-card-back .label {
+            font-size: 0.75rem;
+            color: var(--accent-green);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(52, 168, 83, 0.3);
+        }
+        
+        /* ============================================
+           10. PLAYER LIST
+        ============================================ */
+        .player-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .player-item:last-child { border-bottom: none; }
+        
+        .player-item.dead {
+            opacity: 0.4;
+            background: rgba(0,0,0,0.2);
+        }
+        
+        .player-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .player-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--accent-blue);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+        
+        .player-item.dead .player-avatar {
+            background: var(--text-muted);
+        }
+        
+        .player-role {
+            font-size: 0.8rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 0.25rem;
+            margin-left: 0.5rem;
+        }
+        
+        .player-role.spy {
+            background: rgba(234, 67, 53, 0.2);
+            color: var(--accent-red);
+        }
+        
+        .player-role.civ {
+            background: rgba(52, 168, 83, 0.2);
+            color: var(--accent-green);
+        }
+        
+        /* ============================================
+           11. GOD VIEW (上帝视角)
+        ============================================ */
+        .god-view {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border: 2px solid var(--accent-purple);
+            border-radius: 1rem;
+            margin-bottom: 1rem;
+            overflow: hidden;
+        }
+        
+        .god-view-header {
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(139, 92, 246, 0.1));
+            padding: 1rem 1.25rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            border-bottom: 1px solid rgba(168, 85, 247, 0.3);
+        }
+        
+        .god-view-header h3 {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--accent-purple);
+            font-size: 1rem;
+        }
+        
+        .god-view-body {
+            padding: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .god-view-body.open {
+            padding: 1.25rem;
+            max-height: 1000px;
+        }
+        
+        .word-pair {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.25rem;
+        }
+        
+        .word-box {
+            background: rgba(255,255,255,0.05);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            text-align: center;
+        }
+        
+        .word-box.civ { border: 1px solid rgba(52, 168, 83, 0.4); }
+        .word-box.spy { border: 1px solid rgba(234, 67, 53, 0.4); }
+        
+        .word-box .label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.5rem;
+        }
+        
+        .word-box.civ .label { color: var(--accent-green); }
+        .word-box.spy .label { color: var(--accent-red); }
+        
+        .word-box .word {
+            font-family: var(--font-display);
+            font-size: 1.8rem;
+            color: white;
+        }
+        
+        .word-box .def {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+        }
+        
+        /* 教学要点 */
+        .teaching-section {
+            background: rgba(255,255,255,0.03);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .teaching-section h4 {
+            color: var(--accent-amber);
+            font-size: 0.9rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .teaching-section p {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+        
+        .teaching-section .highlight {
+            color: var(--accent-amber);
+            font-weight: 600;
+        }
+        
+        .teaching-section .formula {
+            display: inline-block;
+            background: rgba(66, 133, 244, 0.15);
+            padding: 0.15rem 0.5rem;
+            border-radius: 0.25rem;
+            font-family: 'Courier New', monospace;
+            color: var(--accent-blue);
+            font-size: 0.8rem;
+        }
+        
+        .tips-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .tips-list li {
+            position: relative;
+            padding-left: 1.5rem;
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+        
+        .tips-list li::before {
+            content: "💡";
+            position: absolute;
+            left: 0;
+            font-size: 0.9rem;
+        }
+        
+        /* ============================================
+           12. END VIEW
+        ============================================ */
+        .result-banner {
+            text-align: center;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, rgba(52, 168, 83, 0.2), rgba(52, 168, 83, 0.05));
+            border: 1px solid rgba(52, 168, 83, 0.4);
+            border-radius: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .result-banner h2 {
+            font-family: var(--font-display);
+            font-size: 2rem;
+            color: white;
+        }
+        
+        .final-words {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .final-word-box {
+            background: var(--bg-elevated);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            text-align: center;
+        }
+        
+        .final-word-box .label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+        
+        .final-word-box .word {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            margin: 0.5rem 0;
+        }
+        
+        .final-word-box.civ .word { color: var(--accent-green); }
+        .final-word-box.spy .word { color: var(--accent-red); }
+        
+        .final-word-box .def {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+        
+        .end-player-list {
+            background: var(--bg-elevated);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .end-player-list li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9rem;
+        }
+        
+        .end-player-list li:last-child { border-bottom: none; }
+        
+        /* ============================================
+           13. FIXED BOTTOM BAR
+        ============================================ */
+        .bottom-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+            padding: 1rem;
+            z-index: 100;
+        }
+        
+        .bottom-bar .btn {
+            width: 100%;
+        }
+        
+        /* ============================================
+           14. UTILITIES
+        ============================================ */
+        .text-center { text-align: center; }
+        .mb-1 { margin-bottom: 0.5rem; }
+        .mb-2 { margin-bottom: 1rem; }
+        .mt-2 { margin-top: 1rem; }
+        .text-muted { color: var(--text-muted); }
+        .text-sm { font-size: 0.85rem; }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- ==================== HEADER ==================== -->
+        <header class="header">
+            <h1>谁是卧底</h1>
+            <div class="badge">
+                <span class="material-symbols-outlined">school</span>
+                高等数学特别版
+            </div>
+        </header>
+
+        <!-- ==================== RULES SECTION ==================== -->
+        <div class="card">
+            <div class="card-header collapsible" onclick="toggleRules()">
+                <h2>
+                    <span class="material-symbols-outlined">help_outline</span>
+                    玩法说明
+                </h2>
+                <span class="material-symbols-outlined icon">expand_more</span>
+            </div>
+            <div class="collapsible-content" id="rules-content">
+                <div class="card-body">
+                    <p class="text-sm" style="color: var(--text-secondary); line-height: 1.8;">
+                        <strong style="color: var(--text-primary);">游戏流程：</strong><br>
+                        1️⃣ 每人拿到一个高数名词，卧底的词与大家不同但相似<br>
+                        2️⃣ 轮流用一句话描述自己的词（不能直接说出词语）<br>
+                        3️⃣ 描述完后投票淘汰一人<br>
+                        4️⃣ 平民找出所有卧底则胜，卧底存活至最后则胜
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== 1. SETUP VIEW ==================== -->
+        <div id="view-setup">
+            <div class="card">
+                <div class="card-body">
+                    <!-- 玩家人数 -->
+                    <div class="form-group">
+                        <div class="form-label">
+                            <span>玩家人数</span>
+                            <span class="value" id="player-count-display">6</span>
+                        </div>
+                        <input type="range" id="player-slider" min="4" max="12" value="6">
+                    </div>
+
+                    <!-- 卧底人数 -->
+                    <div class="form-group">
+                        <div class="form-label">
+                            <span>卧底人数</span>
+                            <span class="value red" id="spy-count-display">1</span>
+                        </div>
+                        <div class="btn-group">
+                            <button class="btn active" data-spy="1" onclick="setSpyCount(1)">1</button>
+                            <button class="btn" data-spy="2" onclick="setSpyCount(2)">2</button>
+                            <button class="btn" data-spy="3" onclick="setSpyCount(3)">3</button>
+                        </div>
+                    </div>
+
+                    <!-- 词库选择 -->
+                    <div class="form-group">
+                        <div class="form-label">
+                            <span>选择词库</span>
+                        </div>
+                        <div class="pack-grid">
+                            <button class="pack-btn active" data-pack="limits" onclick="selectPack('limits')">
+                                <span class="material-symbols-outlined">all_inclusive</span>
+                                极限与连续
+                            </button>
+                            <button class="pack-btn" data-pack="derivatives" onclick="selectPack('derivatives')">
+                                <span class="material-symbols-outlined">show_chart</span>
+                                导数与微分
+                            </button>
+                            <button class="pack-btn" data-pack="applications" onclick="selectPack('applications')">
+                                <span class="material-symbols-outlined">function</span>
+                                导数应用
+                            </button>
+                            <button class="pack-btn" data-pack="integrals" onclick="selectPack('integrals')">
+                                <span class="material-symbols-outlined">area_chart</span>
+                                积分专题
+                            </button>
+                            <button class="pack-btn" data-pack="mixed" onclick="selectPack('mixed')">
+                                <span class="material-symbols-outlined">shuffle</span>
+                                全题型混合
+                            </button>
+                            <button class="pack-btn" data-pack="classic" onclick="selectPack('classic')">
+                                <span class="material-symbols-outlined">celebration</span>
+                                经典题目
+                            </button>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-primary" onclick="startGame()">
+                        <span class="material-symbols-outlined">play_circle</span>
+                        开始发牌
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== 2. PASS VIEW ==================== -->
+        <div id="view-pass" class="hidden">
+            <div class="card">
+                <div class="pass-view">
+                    <span class="material-symbols-outlined icon">smartphone</span>
+                    <h2 class="mb-1">请传递给</h2>
+                    <div class="player-num" id="pass-player-num">1号</div>
+                    <button class="btn btn-secondary" onclick="enterReveal()" style="width: 100%;">
+                        我是 <span id="btn-pass-num">1号</span>，点击看词
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== 3. REVEAL VIEW ==================== -->
+        <div id="view-reveal" class="hidden">
+            <div class="card">
+                <div class="card-header">
+                    <span id="reveal-player-id" style="color: var(--text-secondary); font-family: monospace;">PLAYER 1</span>
+                    <span style="color: var(--accent-amber); font-size: 0.8rem;">🔒 注意保密</span>
+                </div>
+                <div class="card-body text-center">
+                    <div class="flip-card" id="card-element" onclick="flipCard()">
+                        <div class="flip-card-inner">
+                            <div class="flip-card-front">
+                                <span class="material-symbols-outlined">touch_app</span>
+                                <h3>点击翻牌</h3>
+                                <p class="text-sm text-muted mt-2">查看你的关键词</p>
+                            </div>
+                            <div class="flip-card-back">
+                                <div class="label">你的词语</div>
+                                <div class="word" id="word-display">加载中...</div>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary hidden" id="btn-next-player" onclick="nextPlayer()">
+                        记住了，传给下一位
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== 4. GAME VIEW ==================== -->
+        <div id="view-game" class="hidden">
+            <!-- 上帝视角面板 -->
+            <div class="god-view" id="god-view">
+                <div class="god-view-header" onclick="toggleGodView()">
+                    <h3>
+                        <span class="material-symbols-outlined">visibility</span>
+                        上帝视角 · 教学要点
+                    </h3>
+                    <span class="material-symbols-outlined icon" id="god-view-icon">expand_more</span>
+                </div>
+                <div class="god-view-body" id="god-view-body">
+                    <!-- 词语对比 -->
+                    <div class="word-pair">
+                        <div class="word-box civ">
+                            <div class="label">平民词</div>
+                            <div class="word" id="god-word-civ">--</div>
+                            <div class="def" id="god-def-civ">--</div>
+                        </div>
+                        <div class="word-box spy">
+                            <div class="label">卧底词</div>
+                            <div class="word" id="god-word-spy">--</div>
+                            <div class="def" id="god-def-spy">--</div>
+                        </div>
+                    </div>
+                    
+                    <!-- 核心区别 -->
+                    <div class="teaching-section">
+                        <h4>
+                            <span class="material-symbols-outlined">compare</span>
+                            核心区别
+                        </h4>
+                        <p id="god-difference">--</p>
+                    </div>
+                    
+                    <!-- 形象比喻 -->
+                    <div class="teaching-section">
+                        <h4>
+                            <span class="material-symbols-outlined">lightbulb</span>
+                            形象比喻
+                        </h4>
+                        <p id="god-analogy">--</p>
+                    </div>
+                    
+                    <!-- 描述提示 -->
+                    <div class="teaching-section">
+                        <h4>
+                            <span class="material-symbols-outlined">emoji_objects</span>
+                            描述思路提示
+                        </h4>
+                        <ul class="tips-list" id="god-tips">
+                            <li>--</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- 考点提醒 -->
+                    <div class="teaching-section">
+                        <h4>
+                            <span class="material-symbols-outlined">school</span>
+                            考点提醒
+                        </h4>
+                        <p id="god-exam">--</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 玩家列表 -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>
+                        <span class="material-symbols-outlined">group</span>
+                        存活玩家
+                    </h2>
+                    <span class="text-sm text-muted" id="alive-count">6/6</span>
+                </div>
+                <div id="player-list">
+                    <!-- 动态生成 -->
+                </div>
+            </div>
+
+            <!-- 底部操作栏 -->
+            <div class="bottom-bar">
+                <button class="btn btn-danger" onclick="endGame()">
+                    结束游戏 & 揭晓谜底
+                </button>
+            </div>
+        </div>
+
+        <!-- ==================== 5. END VIEW ==================== -->
+        <div id="view-end" class="hidden">
+            <div class="card">
+                <div class="card-body">
+                    <div class="result-banner" id="result-banner">
+                        <h2 id="winner-text">游戏结束</h2>
+                    </div>
+
+                    <div class="final-words">
+                        <div class="final-word-box civ">
+                            <div class="label">平民词</div>
+                            <div class="word" id="end-word-civ">--</div>
+                            <div class="def" id="end-def-civ">--</div>
+                        </div>
+                        <div class="final-word-box spy">
+                            <div class="label">卧底词</div>
+                            <div class="word" id="end-word-spy">--</div>
+                            <div class="def" id="end-def-spy">--</div>
+                        </div>
+                    </div>
+
+                    <div class="end-player-list">
+                        <ul id="end-player-list">
+                            <!-- 动态生成 -->
+                        </ul>
+                    </div>
+
+                    <button class="btn btn-primary" onclick="resetGame()">
+                        再来一局
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== JAVASCRIPT ==================== -->
+    <script>
+    // ============================================
+    // 1. WORD PACKS DATA (含详细教学描述)
+    // ============================================
+    const wordPacks = {
+        limits: [
+            {
+                civ: "无穷小", spy: "零",
+                civ_def: "极限为0的变量",
+                spy_def: "绝对的无，一个确定的数",
+                difference: "无穷小是一个<span class='highlight'>过程</span>，是趋向于0的变量（如1/n当n→∞）；而零是一个<span class='highlight'>结果</span>，是确定的数值0。无穷小可以参与运算比较阶数，但0只是0。",
+                analogy: "无穷小像一个「正在下山的人」——虽然越来越接近山脚，但还在路上；零就是「已经站在山脚」的人。",
+                tips: ["可以说「我是变化的」「我有阶数之分」", "避免说「我等于0」"],
+                exam: "常考：无穷小的阶数比较、等价无穷小替换、无穷小×有界=无穷小"
+            },
+            {
+                civ: "连续", spy: "可导",
+                civ_def: "图像不断开",
+                spy_def: "图像光滑无尖点",
+                difference: "<span class='highlight'>可导必连续，连续不一定可导！</span>连续只要求函数图像「不断开」（左极限=右极限=函数值）；可导还要求图像「光滑」（左导数=右导数）。",
+                analogy: "连续像「一笔画」——笔不离纸就行；可导像「丝绸般顺滑」——不能有尖角、折痕。y=|x|在x=0处连续但不可导。",
+                tips: ["可以说「不断开」「极限等于函数值」", "可导的人可以说「我更光滑」「没有尖点」"],
+                exam: "常考：判断分段函数在分界点的连续性和可导性"
+            },
+            {
+                civ: "无穷大", spy: "无界",
+                civ_def: "趋向于无穷",
+                spy_def: "范围没有限制，但未必趋向无穷",
+                difference: "无穷大是<span class='highlight'>确定的趋势</span>（如n→∞时，n²→+∞）；无界只是说「没有上界/下界」，但可能振荡（如(-1)ⁿ·n无界但不是无穷大）。",
+                analogy: "无穷大像「火箭升空」——方向明确，越来越远；无界像「弹簧」——虽然能弹得很高，但会落回来，没有固定方向。",
+                tips: ["无穷大：「我有方向」「我趋向一个极端」", "无界：「我只是没有限制」"],
+                exam: "常考：证明数列无界但不是无穷大"
+            },
+            {
+                civ: "收敛", spy: "有界",
+                civ_def: "趋于一个确定的值",
+                spy_def: "有范围限制，但未必趋于某值",
+                difference: "<span class='highlight'>收敛必有界，有界不一定收敛！</span>收敛是「最终稳定」，有界只是「不会跑太远」。如(-1)ⁿ有界但不收敛（振荡）。",
+                analogy: "收敛像「回家」——最终会到达目的地；有界像「在操场里跑」——虽然不会跑出围墙，但可能一直在转圈。",
+                tips: ["收敛：「我有归宿」「最终稳定」", "有界：「我有范围」「但可能在晃」"],
+                exam: "常考：证明收敛→有界；有界+单调→收敛"
+            }
+        ],
+        derivatives: [
+            {
+                civ: "导数", spy: "微分",
+                civ_def: "变化率，是一个数值",
+                spy_def: "改变量的近似，dy = f'(x)dx",
+                difference: "导数<span class='formula'>f'(x)</span>是<span class='highlight'>比值的极限</span>，回答「变化有多快」；微分<span class='formula'>dy = f'(x)dx</span>是<span class='highlight'>线性主部</span>，回答「变化了多少」。导数是标量，微分是关于dx的表达式。",
+                analogy: "导数像「车速表上的数字」——告诉你每小时跑多少公里；微分像「这一小时实际跑的路程」——需要乘以时间。",
+                tips: ["导数：「我是变化率」「我是比值」", "微分：「我是变化量」「我要乘dx」"],
+                exam: "常考：利用微分近似计算、全微分、一阶微分形式不变性"
+            },
+            {
+                civ: "切线", spy: "割线",
+                civ_def: "极限状态下的直线",
+                spy_def: "穿过曲线上两点的直线",
+                difference: "割线连接曲线上<span class='highlight'>两个点</span>；当这两点无限接近时，割线的极限位置就是<span class='highlight'>切线</span>。切线斜率就是导数的几何意义。",
+                analogy: "割线像「两城之间的公路」——连接两个明确的地点；切线像「汽车行驶的瞬时方向」——只在一点有意义。",
+                tips: ["割线：「我穿过两点」「我有两个交点」", "切线：「我只碰一点」「我是极限位置」"],
+                exam: "常考：导数的几何意义、切线方程、法线方程"
+            },
+            {
+                civ: "驻点", spy: "极值点",
+                civ_def: "一阶导数为0的点",
+                spy_def: "函数取得局部最值的点",
+                difference: "<span class='highlight'>极值点一定是驻点或不可导点，但驻点不一定是极值点！</span>如y=x³在x=0是驻点但不是极值点。",
+                analogy: "驻点像「山路上的平台」——暂时走平了，但可能继续上山也可能下山；极值点像「山顶或山谷」——真正的转折点。",
+                tips: ["驻点：「我的导数是0」「我是水平的」", "极值点：「我是局部最高/最低」"],
+                exam: "常考：判断驻点是否为极值点、极值的充分条件"
+            },
+            {
+                civ: "拐点", spy: "极值点",
+                civ_def: "凹凸性改变的点",
+                spy_def: "单调性改变的点",
+                difference: "拐点看<span class='highlight'>二阶导</span>变号（凹凸性改变）；极值点看<span class='highlight'>一阶导</span>变号（单调性改变）。拐点在曲线上，极值点是函数值。",
+                analogy: "拐点像「方向盘从左打到右」——弯曲方向变了；极值点像「从上坡变下坡」——高低趋势变了。",
+                tips: ["拐点：「我让曲线从凹变凸」「二阶导变号」", "极值点：「我让函数从增变减」"],
+                exam: "常考：判断拐点、利用二阶导判断凹凸性"
+            }
+        ],
+        applications: [
+            {
+                civ: "洛必达法则", spy: "泰勒展开",
+                civ_def: "求不定式极限的求导法则",
+                spy_def: "函数的多项式逼近",
+                difference: "洛必达是<span class='highlight'>求极限的技巧</span>（对0/0或∞/∞型反复求导）；泰勒是<span class='highlight'>展开的方法</span>（用多项式逼近函数）。有时泰勒比洛必达更快！",
+                analogy: "洛必达像「暴力拆解」——导一次不行就再导；泰勒像「翻译成简单语言」——把复杂函数变成多项式。",
+                tips: ["洛必达：「我是求极限的」「我用求导」", "泰勒：「我是展开函数的」「我用多项式」"],
+                exam: "常考：何时用洛必达、何时用泰勒更简便"
+            },
+            {
+                civ: "凹函数", spy: "凸函数",
+                civ_def: "弦在弧上方（教材定义，f''(x)>0）",
+                spy_def: "弦在弧下方",
+                difference: "注意：<span class='highlight'>国内外定义相反！</span>国内教材：f''(x)>0是凹函数（开口朝上）；国外：f''(x)>0是convex（凸函数）。考试以教材为准。",
+                analogy: "凹函数像「碗」——可以盛水；凸函数像「倒扣的碗」——水会流走。记住：能盛水的是凹！",
+                tips: ["凹：「我能盛水」「二阶导>0」「开口朝上」", "凸：「我像山丘」「二阶导<0」"],
+                exam: "常考：判断凹凸性、利用凹凸性证明不等式"
+            },
+            {
+                civ: "最大值", spy: "极大值",
+                civ_def: "全局最高",
+                spy_def: "局部最高",
+                difference: "最大值是<span class='highlight'>全局冠军</span>，在整个区间上最大；极大值是<span class='highlight'>局部冠军</span>，只在邻域内最大。一个函数可以有多个极大值，但只有一个最大值。",
+                analogy: "极大值像「村里的首富」——只是当地最有钱；最大值像「全国首富」——整体最有钱。",
+                tips: ["极大值：「我只是附近最高」「可能有好几个」", "最大值：「我是整体最高」「只有一个」"],
+                exam: "常考：闭区间上求最值（比较端点和驻点）"
+            },
+            {
+                civ: "渐近线", spy: "切线",
+                civ_def: "曲线无限接近但不相交的直线",
+                spy_def: "与曲线相切的直线",
+                difference: "渐近线是<span class='highlight'>趋势性的</span>（x或y→∞时曲线靠近的直线）；切线是<span class='highlight'>局部的</span>（在某点与曲线相切）。",
+                analogy: "渐近线像「远方的地平线」——越走越近但永远到不了；切线像「此刻脚踩的路」——就在当下这一点。",
+                tips: ["渐近线：「我在无穷远」「曲线向我靠近」", "切线：「我在某一点」「曲线从我经过」"],
+                exam: "常考：求水平/垂直/斜渐近线"
+            }
+        ],
+        integrals: [
+            {
+                civ: "不定积分", spy: "定积分",
+                civ_def: "原函数的全体，含+C",
+                spy_def: "曲边梯形的面积，是一个数",
+                difference: "不定积分是<span class='highlight'>求原函数</span>，结果是函数族（+C）；定积分是<span class='highlight'>算面积</span>，结果是一个数值。虽然计算技巧相似，但本质不同！",
+                analogy: "不定积分像「找到所有可能的父母」——是一个家族（+C）；定积分像「算出一块田的面积」——是个确定的数字。",
+                tips: ["不定积分：「我是函数」「我有+C」", "定积分：「我是数值」「我有上下限」"],
+                exam: "常考：求不定积分、用定积分求面积/体积"
+            },
+            {
+                civ: "原函数", spy: "积分上限函数",
+                civ_def: "导数等于原来函数的函数",
+                spy_def: "上限是变量的定积分",
+                difference: "原函数F(x)满足<span class='formula'>F'(x)=f(x)</span>；积分上限函数是<span class='formula'>∫₀ˣf(t)dt</span>，是原函数的一个特例（下限为常数时）。",
+                analogy: "原函数像「所有通往终点的路」——有无穷多条（相差常数）；积分上限函数像「从起点出发的那条路」——起点固定后路唯一。",
+                tips: ["原函数：「我是一族函数」「相差常数」", "积分上限函数：「我的下限是常数」「导数是被积函数」"],
+                exam: "常考：变限积分求导、原函数存在性定理"
+            },
+            {
+                civ: "换元积分", spy: "分部积分",
+                civ_def: "用替换变量简化积分",
+                spy_def: "把积分拆成两部分",
+                difference: "换元是<span class='highlight'>换个角度看</span>（令u=g(x)）；分部是<span class='highlight'>拆解转移</span>（把导数从一个函数转到另一个：∫udv=uv-∫vdu）。",
+                analogy: "换元像「换一副眼镜看问题」——本质没变，视角变了；分部像「接力赛交接棒」——把积分的负担从一边转到另一边。",
+                tips: ["换元：「我是变量替换」「凑微分」", "分部：「我是乘积的积分」「∫udv」"],
+                exam: "常考：根号用换元、指数×三角用分部"
+            },
+            {
+                civ: "反常积分", spy: "定积分",
+                civ_def: "积分区间无穷或被积函数无界",
+                spy_def: "有限区间上有界函数的积分",
+                difference: "定积分在<span class='highlight'>有限区间</span>上，被积函数有界；反常积分有<span class='highlight'>「无穷」</span>——要么区间无穷，要么函数有瑕点。反常积分要判断收敛性！",
+                analogy: "定积分像「算一块田的面积」——边界清楚；反常积分像「算无边的草原」——可能无穷大，也可能收敛到有限值。",
+                tips: ["定积分：「我区间有限」「函数有界」", "反常积分：「我有无穷」「要判断收敛」"],
+                exam: "常考：判断反常积分收敛性、计算反常积分"
+            }
+        ],
+        mixed: [], // 将在初始化时填充
+        classic: [
+            {
+                civ: "苹果", spy: "梨",
+                civ_def: "红色圆形水果",
+                spy_def: "黄绿色的水果",
+                difference: "苹果通常是圆形，果皮颜色多为红色或青色；梨是葫芦形，通常黄绿色，口感更脆。",
+                analogy: "苹果像「小球」——圆滚滚的；梨像「小葫芦」——上小下大。",
+                tips: ["苹果：「我是圆的」「我常见红色」", "梨：「我是葫芦形」「我很脆」"],
+                exam: "这是经典款，放松一下！"
+            },
+            {
+                civ: "咖啡", spy: "茶",
+                civ_def: "来自咖啡豆的饮品",
+                spy_def: "来自茶叶的饮品",
+                difference: "咖啡来自烘焙的咖啡豆，味道苦浓；茶来自茶叶，更清淡雅致。",
+                analogy: "咖啡像「浓烈的摇滚乐」——刺激提神；茶像「悠扬的古典乐」——清幽宁静。",
+                tips: ["咖啡：「我是豆子做的」「我很苦」", "茶：「我是叶子做的」「我清香」"],
+                exam: "这是经典款，放松一下！"
+            },
+            {
+                civ: "手机", spy: "电话",
+                civ_def: "可随身携带的通讯设备",
+                spy_def: "固定位置的通讯设备",
+                difference: "手机可以带着走，功能丰富；电话（座机）固定在某处，功能单一。",
+                analogy: "手机像「随身助手」——跟着你到处走；电话像「家里的门卫」——只在一个地方守着。",
+                tips: ["手机：「我能带走」「我功能多」", "电话：「我在家里」「我有线」"],
+                exam: "这是经典款，放松一下！"
+            },
+            {
+                civ: "电影", spy: "电视剧",
+                civ_def: "时长较短的影视作品",
+                spy_def: "多集连续的影视作品",
+                difference: "电影通常2小时左右，完整讲述一个故事；电视剧多集连播，故事可以更长更细致。",
+                analogy: "电影像「短篇小说」——精炼浓缩；电视剧像「长篇小说」——细水长流。",
+                tips: ["电影：「我一次看完」「我在电影院」", "电视剧：「我分很多集」「我在家看」"],
+                exam: "这是经典款，放松一下！"
+            }
+        ]
+    };
+
+    // 初始化混合词库
+    wordPacks.mixed = [
+        ...wordPacks.limits,
+        ...wordPacks.derivatives,
+        ...wordPacks.applications,
+        ...wordPacks.integrals
+    ];
+
+    // ============================================
+    // 2. GAME STATE
+    // ============================================
+    const state = {
+        totalPlayers: 6,
+        spyCount: 1,
+        packName: 'limits',
+        currentWords: null,
+        players: [],
+        currentIdx: 0,
+        godViewOpen: false
+    };
+
+    // ============================================
+    // 3. VIEW MANAGEMENT
+    // ============================================
+    function showView(viewId) {
+        ['view-setup', 'view-pass', 'view-reveal', 'view-game', 'view-end']
+            .forEach(id => document.getElementById(id).classList.add('hidden'));
+        document.getElementById(viewId).classList.remove('hidden');
+    }
+
+    // ============================================
+    // 4. SETUP FUNCTIONS
+    // ============================================
+    // Player slider
+    const slider = document.getElementById('player-slider');
+    slider.addEventListener('input', (e) => {
+        state.totalPlayers = parseInt(e.target.value);
+        document.getElementById('player-count-display').textContent = state.totalPlayers;
+        // Auto-adjust spy count if needed
+        if (state.totalPlayers < 6 && state.spyCount > 1) setSpyCount(1);
+    });
+
+    // Spy count buttons
+    function setSpyCount(n) {
+        state.spyCount = n;
+        document.getElementById('spy-count-display').textContent = n;
+        document.querySelectorAll('.btn-group .btn').forEach(btn => {
+            btn.classList.toggle('active', parseInt(btn.dataset.spy) === n);
+        });
+    }
+
+    // Pack selection
+    function selectPack(pack) {
+        state.packName = pack;
+        document.querySelectorAll('.pack-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.pack === pack);
+        });
+    }
+
+    // ============================================
+    // 5. GAME FLOW
+    // ============================================
+    function startGame() {
+        // Select random word pair
+        const pool = wordPacks[state.packName];
+        state.currentWords = pool[Math.floor(Math.random() * pool.length)];
+
+        // Assign roles
+        let roles = Array(state.spyCount).fill('spy');
+        while (roles.length < state.totalPlayers) roles.push('civ');
+        roles.sort(() => Math.random() - 0.5);
+
+        // Create player data
+        state.players = roles.map((role, i) => ({
+            id: i + 1,
+            role: role,
+            word: role === 'civ' ? state.currentWords.civ : state.currentWords.spy,
+            status: 'alive'
+        }));
+
+        state.currentIdx = 0;
+        updatePassView();
+        showView('view-pass');
+    }
+
+    function updatePassView() {
+        const num = state.players[state.currentIdx].id;
+        document.getElementById('pass-player-num').textContent = num + '号';
+        document.getElementById('btn-pass-num').textContent = num + '号';
+    }
+
+    function enterReveal() {
+        const player = state.players[state.currentIdx];
+        document.getElementById('reveal-player-id').textContent = `PLAYER ${player.id}`;
+        document.getElementById('word-display').textContent = player.word;
+        
+        // Reset card
+        document.getElementById('card-element').classList.remove('flipped');
+        document.getElementById('btn-next-player').classList.add('hidden');
+        
+        showView('view-reveal');
+    }
+
+    function flipCard() {
+        const card = document.getElementById('card-element');
+        if (!card.classList.contains('flipped')) {
+            card.classList.add('flipped');
+            setTimeout(() => {
+                document.getElementById('btn-next-player').classList.remove('hidden');
+            }, 400);
+        }
+    }
+
+    function nextPlayer() {
+        state.currentIdx++;
+        if (state.currentIdx < state.totalPlayers) {
+            updatePassView();
+            showView('view-pass');
+        } else {
+            initGameView();
+            showView('view-game');
+        }
+    }
+
+    // ============================================
+    // 6. GAME VIEW (含上帝视角)
+    // ============================================
+    function initGameView() {
+        renderPlayers();
+        updateGodView();
+        state.godViewOpen = false;
+        document.getElementById('god-view-body').classList.remove('open');
+        document.getElementById('god-view-icon').style.transform = '';
+    }
+
+    function renderPlayers(showRoles = false) {
+        const list = document.getElementById('player-list');
+        list.innerHTML = '';
+        
+        let alive = 0;
+        state.players.forEach(p => {
+            if (p.status === 'alive') alive++;
+            
+            const item = document.createElement('div');
+            item.className = `player-item ${p.status === 'dead' ? 'dead' : ''}`;
+            
+            let roleHtml = '';
+            if (showRoles) {
+                const roleClass = p.role === 'spy' ? 'spy' : 'civ';
+                const roleText = p.role === 'spy' ? '卧底' : '平民';
+                roleHtml = `<span class="player-role ${roleClass}">${roleText}: ${p.word}</span>`;
+            }
+            
+            item.innerHTML = `
+                <div class="player-info">
+                    <div class="player-avatar">${p.id}</div>
+                    <div>
+                        <div>玩家 ${p.id} ${p.status === 'dead' ? '<span style="color:var(--accent-red);font-size:0.8rem;">(已出局)</span>' : ''}</div>
+                        ${roleHtml}
+                    </div>
+                </div>
+                ${p.status === 'alive' && !showRoles ? `
+                    <button class="btn btn-small btn-danger" onclick="killPlayer(${p.id})">淘汰</button>
+                ` : ''}
+            `;
+            list.appendChild(item);
+        });
+        
+        document.getElementById('alive-count').textContent = `${alive}/${state.totalPlayers}`;
+    }
+
+    function updateGodView() {
+        const w = state.currentWords;
+        document.getElementById('god-word-civ').textContent = w.civ;
+        document.getElementById('god-def-civ').textContent = w.civ_def;
+        document.getElementById('god-word-spy').textContent = w.spy;
+        document.getElementById('god-def-spy').textContent = w.spy_def;
+        document.getElementById('god-difference').innerHTML = w.difference;
+        document.getElementById('god-analogy').innerHTML = w.analogy;
+        document.getElementById('god-exam').innerHTML = w.exam;
+        
+        const tipsList = document.getElementById('god-tips');
+        tipsList.innerHTML = w.tips.map(t => `<li>${t}</li>`).join('');
+    }
+
+    function toggleGodView() {
+        state.godViewOpen = !state.godViewOpen;
+        document.getElementById('god-view-body').classList.toggle('open', state.godViewOpen);
+        document.getElementById('god-view-icon').style.transform = state.godViewOpen ? 'rotate(180deg)' : '';
+    }
+
+    function killPlayer(id) {
+        if (!confirm(`确认淘汰 ${id} 号玩家？`)) return;
+        state.players.find(p => p.id === id).status = 'dead';
+        renderPlayers();
+        checkWinner();
+    }
+
+    function checkWinner() {
+        const liveSpies = state.players.filter(p => p.role === 'spy' && p.status === 'alive').length;
+        const liveCivs = state.players.filter(p => p.role === 'civ' && p.status === 'alive').length;
+        
+        if (liveSpies === 0) {
+            endGame('🎉 平民胜利！');
+        } else if (liveSpies >= liveCivs) {
+            endGame('🕵️ 卧底胜利！');
+        }
+    }
+
+    // ============================================
+    // 7. END GAME
+    // ============================================
+    function endGame(msg) {
+        if (!msg && !confirm('确定直接结束游戏？')) return;
+        msg = msg || '游戏结束';
+        
+        document.getElementById('winner-text').textContent = msg;
+        
+        const w = state.currentWords;
+        document.getElementById('end-word-civ').textContent = w.civ;
+        document.getElementById('end-def-civ').textContent = w.civ_def;
+        document.getElementById('end-word-spy').textContent = w.spy;
+        document.getElementById('end-def-spy').textContent = w.spy_def;
+        
+        const endList = document.getElementById('end-player-list');
+        endList.innerHTML = '';
+        state.players.forEach(p => {
+            const li = document.createElement('li');
+            const color = p.role === 'spy' ? 'var(--accent-red)' : 'var(--accent-green)';
+            const roleText = p.role === 'spy' ? '卧底' : '平民';
+            li.innerHTML = `玩家 ${p.id}: <strong style="color:${color}">${roleText}</strong> <span style="color:var(--text-muted);">(${p.word})</span>`;
+            endList.appendChild(li);
+        });
+        
+        showView('view-end');
+    }
+
+    function resetGame() {
+        showView('view-setup');
+    }
+
+    // ============================================
+    // 8. UTILITIES
+    // ============================================
+    function toggleRules() {
+        const content = document.getElementById('rules-content');
+        const header = content.previousElementSibling;
+        content.classList.toggle('open');
+        header.classList.toggle('open');
+    }
+    </script>
+</body>
+</html>

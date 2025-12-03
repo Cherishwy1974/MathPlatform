@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>第12章向量代数与空间解析几何-学生笔记.html</title>
+    
+<style>
+    @page {
+        size: A4;
+        margin: 1cm;
+    }
+    body {
+        font-family: "Microsoft YaHei", "Segoe UI", sans-serif;
+        font-size: 10pt;
+        line-height: 1.4;
+        color: #2c3e50;
+        margin: 0;
+        padding: 0;
+        background-color: #fff;
+    }
+    
+    /* Headers */
+    h1 {
+        font-size: 16pt;
+        text-align: center;
+        margin: 15px 0;
+        padding: 10px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    h2 {
+        font-size: 13pt;
+        margin: 15px 0 8px 0;
+        padding: 5px 10px;
+        border-left: 5px solid #764ba2;
+        background-color: #f3f0ff;
+        color: #4a235a;
+        border-radius: 0 4px 4px 0;
+    }
+    h3 {
+        font-size: 11pt;
+        margin: 10px 0 5px 0;
+        color: #2980b9;
+        font-weight: bold;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 2px;
+    }
+    h4 {
+        font-size: 10pt;
+        margin: 8px 0 4px 0;
+        color: #16a085;
+        font-weight: bold;
+    }
+
+    /* Text & Lists */
+    p {
+        margin: 5px 0;
+        text-align: justify;
+    }
+    ul, ol {
+        margin: 5px 0;
+        padding-left: 20px;
+    }
+    li {
+        margin-bottom: 3px;
+    }
+    strong {
+        color: #c0392b;
+    }
+
+    /* Components */
+    blockquote {
+        margin: 10px 0;
+        padding: 8px 12px;
+        background-color: #e8f6f3;
+        border-left: 4px solid #1abc9c;
+        border-radius: 4px;
+        font-size: 9.5pt;
+        color: #0e6251;
+    }
+    
+    /* Tables */
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 10px 0;
+        font-size: 9pt;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        border-radius: 4px;
+        overflow: hidden;
+    }
+    th, td {
+        border: 1px solid #dcdde1;
+        padding: 6px;
+        text-align: left;
+        vertical-align: top;
+    }
+    th {
+        background-color: #34495e;
+        color: white;
+        text-align: center;
+        font-weight: 600;
+    }
+    tr:nth-child(even) {
+        background-color: #f8f9fa;
+    }
+    tr:hover {
+        background-color: #eaf2f8;
+    }
+
+    /* Lesson Header Box */
+    .lesson-header {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 15px;
+        font-size: 9pt;
+        border: 1px solid #a9dfbf;
+        padding: 10px;
+        background: #eafaf1;
+        border-radius: 6px;
+    }
+    .lesson-header div {
+        flex: 1 1 30%;
+    }
+    .section-title {
+        font-weight: bold;
+        color: #27ae60;
+        margin-right: 5px;
+    }
+
+    /* Examples/Exercises */
+    .example {
+        background-color: #fff8e1;
+        border: 1px solid #ffe082;
+        padding: 8px;
+        margin: 8px 0;
+        border-radius: 6px;
+        position: relative;
+    }
+    .example-title {
+        font-weight: bold;
+        color: #f39c12;
+        display: block;
+        margin-bottom: 4px;
+    }
+
+    /* Utilities */
+    .page-break {
+        page-break-after: always;
+    }
+    .formula {
+        text-align: center;
+        margin: 10px 0;
+        font-family: "Times New Roman", serif;
+        font-style: italic;
+        background: #f4f6f7;
+        padding: 8px;
+        border-radius: 4px;
+        border: 1px dashed #bdc3c7;
+    }
+    
+    /* Print Optimizations */
+    @media print {
+        body {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+    }
+</style>
+<!-- MathJax Configuration -->
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\(', '\)']],
+    displayMath: [['$$', '$$'], ['\[', '\]']],
+    processEscapes: true
+  },
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  }
+};
+</script>
+<script id="MathJax-script" async src="../common-assets/js/mathjax-tex-chtml.js"></script>
+
+</head>
+<body>
+<h1>第十二章《向量代数与空间解析几何》讲义</h1>
+<blockquote><strong>学习目标</strong>：<br>1. 掌握空间直角坐标系的建立和点的坐标<br>2. 理解空间向量的概念及其坐标表示<br>3. 掌握空间向量的线性运算、数量积与向量积<br>4. 掌握平面点法式方程与一般式方程<br>5. 掌握空间直线点向式方程、参数式方程与一般式方程<br>6. 了解常见的空间曲面、曲线及其方程<br>7. 能够运用数学软件进行向量的运算</blockquote>
+<blockquote><strong>学习资源</strong>：<br>- 教材：《高等数学》第12章<br>- 课件：《第12章向量代数与空间解析几何》<br>- 实验：Lab12-1 至 Lab12-8 仿真实验<br>- 练习：题库向量题、空间几何题</blockquote>
+<p>---</p>
+<div class="page-break"></div>
+<h1>第一讲：向量基础与运算</h1>
+<h2>1.1 空间直角坐标系</h2>
+<h3>1.1.1 空间直角坐标系的建立</h3>
+<p><strong>定义</strong>：在空间中，过定点O作三条互相垂直的数轴，分别称为x轴、y轴、z轴，统称为坐标轴。三条坐标轴的交点O称为坐标原点，这样就建立了空间直角坐标系Oxyz。</p>
+<p><strong>坐标轴的方向</strong>：</p>
+<ul>
+<li>右手法则：右手握住z轴，四指从x轴转向y轴，拇指指向z轴正方向</li>
+</ul>
+<h3>1.1.2 点的坐标</h3>
+<p><strong>定义</strong>：空间中任意一点P，过P作三个坐标轴的垂线，垂足分别为A、B、C，则点P的坐标为P(x,y,z)，其中x、y、z分别是A、B、C在对应坐标轴上的坐标。</p>
+<p><strong>坐标轴上的点</strong>：</p>
+<ul>
+<li>x轴上的点：(x, 0, 0)</li>
+<li>y轴上的点：(0, y, 0)</li>
+<li>z轴上的点：(0, 0, z)</li>
+</ul>
+<p><strong>坐标平面上的点</strong>：</p>
+<ul>
+<li>xOy平面上的点：(x, y, 0)</li>
+<li>yOz平面上的点：(0, y, z)</li>
+<li>xOz平面上的点：(x, 0, z)</li>
+</ul>
+<h2>1.2 向量的概念</h2>
+<h3>1.2.1 向量的定义</h3>
+<p><strong>定义</strong>：既有大小又有方向的量称为向量。</p>
+<ul>
+<li>向量 = 大小 + 方向</li>
+</ul>
+<h3>1.2.2 向量的表示方法</h3>
+<p><strong>几何表示</strong>：用有向线段表示</p>
+<p><strong>坐标表示</strong>：在空间内 $\vec{a} = (a_1, a_2, a_3)$</p>
+<h3>1.2.3 向量的模</h3>
+<p><strong>定义</strong>：$|\vec{a}| = \sqrt{a_1^2 + a_2^2 + a_3^2}$</p>
+<h3>1.2.4 单位向量</h3>
+<p><strong>定义</strong>：$\vec{e} = \frac{\vec{a}}{|\vec{a}|}$</p>
+<h3>1.2.5 特殊向量</h3>
+<p><strong>零向量</strong>：模为0的向量，记作$\vec{0}$</p>
+<p><strong>相等向量</strong>：大小相等、方向相同的向量</p>
+<h2>1.3 向量的线性运算</h2>
+<h3>1.3.1 向量加法</h3>
+<p><strong>定义</strong>：$\vec{a} + \vec{b} = (a_1 + b_1, a_2 + b_2, a_3 + b_3)$</p>
+<p><strong>几何意义</strong>：平行四边形法则或三角形法则</p>
+<h3>1.3.2 向量减法</h3>
+<p><strong>定义</strong>：$\vec{a} - \vec{b} = (a_1 - b_1, a_2 - b_2, a_3 - b_3)$</p>
+<p><strong>几何意义</strong>：$\vec{a} - \vec{b} = \vec{a} + (-\vec{b})$</p>
+<h3>1.3.3 向量数乘</h3>
+<p><strong>定义</strong>：$k\vec{a} = (ka_1, ka_2, ka_3)$</p>
+<p><strong>几何意义</strong>：向量的伸缩和反向</p>
+<h3>1.3.4 运算性质</h3>
+<p>1. $\vec{a} + \vec{b} = \vec{b} + \vec{a}$（交换律）</p>
+<p>2. $(\vec{a} + \vec{b}) + \vec{c} = \vec{a} + (\vec{b} + \vec{c})$（结合律）</p>
+<p>3. $k(\vec{a} + \vec{b}) = k\vec{a} + k\vec{b}$（分配律）</p>
+<h2>1.4 典型例题</h2>
+<h3>例题1：空间直角坐标系</h3>
+<p>在空间直角坐标系中，标出点A(1,2,3)、B(-1,0,2)、C(0,3,-1)的位置。</p>
+<p><strong>解</strong>：根据坐标的定义，在坐标系中标出各点位置。</p>
+<h3>例题2：向量的模</h3>
+<p>已知向量$\vec{a} = (3, 4, 5)$，求$|\vec{a}|$和单位向量。</p>
+<p><strong>解</strong>：</p>
+<ul>
+<li>$|\vec{a}| = \sqrt{3^2 + 4^2 + 5^2} = \sqrt{50} = 5\sqrt{2}$</li>
+<li>单位向量：$\vec{e} = \frac{1}{5\sqrt{2}}(3, 4, 5) = (\frac{3}{5\sqrt{2}}, \frac{4}{5\sqrt{2}}, \frac{5}{5\sqrt{2}})$</li>
+</ul>
+<h3>例题3：向量运算</h3>
+<p>已知$\vec{a} = (1, 2, 3)$，$\vec{b} = (4, 5, 6)$，求$\vec{a} + \vec{b}$和$2\vec{a} - 3\vec{b}$。</p>
+<p><strong>解</strong>：</p>
+<ul>
+<li>$\vec{a} + \vec{b} = (1+4, 2+5, 3+6) = (5, 7, 9)$</li>
+<li>$2\vec{a} - 3\vec{b} = 2(1, 2, 3) - 3(4, 5, 6) = (2, 4, 6) - (12, 15, 18) = (-10, -11, -12)$</li>
+</ul>
+<p>---</p>
+<div class="page-break"></div>
+<h1>第二讲：向量积与平面方程</h1>
+<h2>2.1 向量的数量积</h2>
+<h3>2.1.1 数量积的定义</h3>
+<p><strong>定义</strong>：两个向量$\vec{a}$和$\vec{b}$的数量积（点积）定义为：</p>
+<p>$\vec{a} \cdot \vec{b} = |\vec{a}||\vec{b}|\cos\theta$</p>
+<p>其中$\theta$是两向量的夹角</p>
+<h3>2.1.2 数量积的坐标表示</h3>
+<p>$\vec{a} \cdot \vec{b} = a_1b_1 + a_2b_2 + a_3b_3$</p>
+<h3>2.1.3 数量积的性质</h3>
+<p>1. $\vec{a} \cdot \vec{b} = \vec{b} \cdot \vec{a}$（交换律）</p>
+<p>2. $(k\vec{a}) \cdot \vec{b} = k(\vec{a} \cdot \vec{b})$（数乘结合律）</p>
+<p>3. $\vec{a} \cdot (\vec{b} + \vec{c}) = \vec{a} \cdot \vec{b} + \vec{a} \cdot \vec{c}$（分配律）</p>
+<p>4. $\vec{a} \cdot \vec{a} = |\vec{a}|^2$</p>
+<h3>2.1.4 数量积的几何意义</h3>
+<ul>
+<li>$\vec{a} \cdot \vec{b} > 0$：两向量夹角 < 90°（同向）</li>
+<li>$\vec{a} \cdot \vec{b} = 0$：两向量垂直</li>
+<li>$\vec{a} \cdot \vec{b} < 0$：两向量夹角 > 90°（反向）</li>
+</ul>
+<h2>2.2 向量的向量积</h2>
+<h3>2.2.1 向量积的定义</h3>
+<p><strong>定义</strong>：两个向量$\vec{a}$和$\vec{b}$的向量积（叉积）定义为：</p>
+<p>$\vec{a} \times \vec{b} = |\vec{a}||\vec{b}|\sin\theta \vec{n}$</p>
+<p>其中$\vec{n}$是垂直于$\vec{a}$和$\vec{b}$的单位向量，方向由右手法则确定</p>
+<h3>2.2.2 向量积的坐标表示</h3>
+<p>$\vec{a} \times \vec{b} = \begin{vmatrix} \vec{i} & \vec{j} & \vec{k} \\ a_1 & a_2 & a_3 \\ b_1 & b_2 & b_3 \end{vmatrix}$</p>
+<p>$= (a_2b_3 - a_3b_2, a_3b_1 - a_1b_3, a_1b_2 - a_2b_1)$</p>
+<h3>2.2.3 向量积的性质</h3>
+<p>1. $\vec{a} \times \vec{b} = -\vec{b} \times \vec{a}$（反交换律）</p>
+<p>2. $(k\vec{a}) \times \vec{b} = k(\vec{a} \times \vec{b})$（数乘结合律）</p>
+<p>3. $\vec{a} \times (\vec{b} + \vec{c}) = \vec{a} \times \vec{b} + \vec{a} \times \vec{c}$（分配律）</p>
+<p>4. $\vec{a} \times \vec{a} = \vec{0}$</p>
+<h3>2.2.4 向量积的几何意义</h3>
+<p>1. $|\vec{a} \times \vec{b}| = |\vec{a}||\vec{b}|\sin\theta$（平行四边形的面积）</p>
+<p>2. $\vec{a} \times \vec{b}$垂直于$\vec{a}$和$\vec{b}$</p>
+<p>3. $\vec{a} \times \vec{b} = \vec{0}$当且仅当$\vec{a}$和$\vec{b}$平行</p>
+<h2>2.3 平面方程</h2>
+<h3>2.3.1 平面的点法式方程</h3>
+<p><strong>定义</strong>：过点$P_0(x_0, y_0, z_0)$且法向量为$\vec{n} = (A, B, C)$的平面方程为：</p>
+<p>$A(x - x_0) + B(y - y_0) + C(z - z_0) = 0$</p>
+<h3>2.3.2 平面的一般式方程</h3>
+<p>$Ax + By + Cz + D = 0$</p>
+<p>其中$\vec{n} = (A, B, C)$是平面的法向量</p>
+<h3>2.3.3 特殊位置的平面方程</h3>
+<p><strong>过原点的平面</strong>：$Ax + By + Cz = 0$</p>
+<p><strong>平行于坐标轴的平面</strong>：</p>
+<ul>
+<li>平行于x轴：$By + Cz + D = 0$</li>
+<li>平行于y轴：$Ax + Cz + D = 0$</li>
+<li>平行于z轴：$Ax + By + D = 0$</li>
+</ul><strong>坐标平面</strong>：
+<ul>
+<li>xOy平面：$z = 0$</li>
+<li>yOz平面：$x = 0$</li>
+<li>xOz平面：$y = 0$</li>
+</ul>
+<h2>2.4 典型例题</h2>
+<h3>例题4：数量积计算</h3>
+<p>已知$\vec{a} = (1, 2, 3)$，$\vec{b} = (2, 1, 4)$，求$\vec{a} \cdot \vec{b}$和两向量的夹角。</p>
+<p><strong>解</strong>：</p>
+<ul>
+<li>$\vec{a} \cdot \vec{b} = 1 \times 2 + 2 \times 1 + 3 \times 4 = 2 + 2 + 12 = 16$</li>
+<li>$|\vec{a}| = \sqrt{1^2 + 2^2 + 3^2} = \sqrt{14}$</li>
+<li>$|\vec{b}| = \sqrt{2^2 + 1^2 + 4^2} = \sqrt{21}$</li>
+<li>$\cos\theta = \frac{\vec{a} \cdot \vec{b}}{|\vec{a}||\vec{b}|} = \frac{16}{\sqrt{14} \times \sqrt{21}} = \frac{16}{7\sqrt{6}}$</li>
+</ul>
+<h3>例题5：向量积计算</h3>
+<p>已知$\vec{a} = (1, 2, 3)$，$\vec{b} = (2, 1, 4)$，求$\vec{a} \times \vec{b}$。</p>
+<p><strong>解</strong>：</p>
+<p>$\vec{a} \times \vec{b} = \begin{vmatrix} \vec{i} & \vec{j} & \vec{k} \\ 1 & 2 & 3 \\ 2 & 1 & 4 \end{vmatrix}$</p>
+<p>$= (2 \times 4 - 3 \times 1)\vec{i} - (1 \times 4 - 3 \times 2)\vec{j} + (1 \times 1 - 2 \times 2)\vec{k}$</p>
+<p>$= (8 - 3)\vec{i} - (4 - 6)\vec{j} + (1 - 4)\vec{k}$</p>
+<p>$= 5\vec{i} + 2\vec{j} - 3\vec{k} = (5, 2, -3)$</p>
+<h3>例题6：平面方程</h3>
+<p>求过点$P(1, 2, 3)$且法向量为$\vec{n} = (2, -1, 3)$的平面方程。</p>
+<p><strong>解</strong>：点法式方程：$2(x - 1) - 1(y - 2) + 3(z - 3) = 0$</p>
+<p>展开得：$2x - 2 - y + 2 + 3z - 9 = 0$</p>
+<p>即：$2x - y + 3z - 9 = 0$</p>
+<p>---</p>
+<div class="page-break"></div>
+<h1>第三讲：空间直线与曲面</h1>
+<h2>3.1 空间直线方程</h2>
+<h3>3.1.1 空间直线的点向式方程</h3>
+<p><strong>定义</strong>：过点$P_0(x_0, y_0, z_0)$且方向向量为$\vec{s} = (m, n, p)$的直线方程为：</p>
+<p>$\frac{x - x_0}{m} = \frac{y - y_0}{n} = \frac{z - z_0}{p}$</p>
+<h3>3.1.2 空间直线的参数式方程</h3>
+<p>$\begin{cases} x = x_0 + mt \\ y = y_0 + nt \\ z = z_0 + pt \end{cases}$</p>
+<p>其中$t$为参数</p>
+<h3>3.1.3 空间直线的一般式方程</h3>
+<p>直线可以表示为两个平面的交线：</p>
+<p>$\begin{cases} A_1x + B_1y + C_1z + D_1 = 0 \\ A_2x + B_2y + C_2z + D_2 = 0 \end{cases}$</p>
+<h3>3.1.4 直线与平面的位置关系</h3>
+<p>1. <strong>直线在平面内</strong>：$\vec{s} \cdot \vec{n} = 0$且直线上一点在平面内</p>
+<p>2. <strong>直线与平面平行</strong>：$\vec{s} \cdot \vec{n} = 0$且直线上一点不在平面内</p>
+<p>3. <strong>直线与平面相交</strong>：$\vec{s} \cdot \vec{n} \neq 0$</p>
+<h2>3.2 常见空间曲面</h2>
+<h3>3.2.1 球面方程</h3>
+<p><strong>定义</strong>：以点$C(a, b, c)$为球心，半径为$R$的球面方程为：</p>
+<p>$(x - a)^2 + (y - b)^2 + (z - c)^2 = R^2$</p>
+<p>特别地，以原点为球心的球面方程为：$x^2 + y^2 + z^2 = R^2$</p>
+<h3>3.2.2 圆柱面方程</h3>
+<ul>
+<li>以z轴为轴的圆柱面：$x^2 + y^2 = R^2$</li>
+<li>以x轴为轴的圆柱面：$y^2 + z^2 = R^2$</li>
+<li>以y轴为轴的圆柱面：$x^2 + z^2 = R^2$</li>
+</ul>
+<h3>3.2.3 椭球面方程</h3>
+<p>$\frac{x^2}{a^2} + \frac{y^2}{b^2} + \frac{z^2}{c^2} = 1$</p>
+<p>当$a = b = c$时，椭球面退化为球面</p>
+<h3>3.2.4 抛物面方程</h3>
+<p>1. <strong>椭圆抛物面</strong>：$\frac{x^2}{a^2} + \frac{y^2}{b^2} = 2z$</p>
+<p>2. <strong>双曲抛物面</strong>：$\frac{x^2}{a^2} - \frac{y^2}{b^2} = 2z$</p>
+<h3>3.2.5 双曲面方程</h3>
+<p>1. <strong>单叶双曲面</strong>：$\frac{x^2}{a^2} + \frac{y^2}{b^2} - \frac{z^2}{c^2} = 1$</p>
+<p>2. <strong>双叶双曲面</strong>：$\frac{x^2}{a^2} + \frac{y^2}{b^2} - \frac{z^2}{c^2} = -1$</p>
+<h2>3.3 典型例题</h2>
+<h3>例题7：空间直线方程</h3>
+<p>求过点$P(1, 2, 3)$且方向向量为$\vec{s} = (2, -1, 3)$的直线方程。</p>
+<p><strong>解</strong>：</p>
+<ul>
+<li>点向式方程：$\frac{x - 1}{2} = \frac{y - 2}{-1} = \frac{z - 3}{3}$</li>
+<li>参数式方程：$\begin{cases} x = 1 + 2t \\ y = 2 - t \\ z = 3 + 3t \end{cases}$</li>
+</ul>
+<h3>例题8：球面方程</h3>
+<p>求以点$C(1, 2, 3)$为球心，半径为4的球面方程。</p>
+<p><strong>解</strong>：$(x - 1)^2 + (y - 2)^2 + (z - 3)^2 = 16$</p>
+<h3>例题9：椭球面</h3>
+<p>求椭球面$\frac{x^2}{4} + \frac{y^2}{9} + \frac{z^2}{16} = 1$与坐标平面的交线。</p>
+<p><strong>解</strong>：</p>
+<ul>
+<li>与xOy平面（z=0）的交线：$\frac{x^2}{4} + \frac{y^2}{9} = 1$（椭圆）</li>
+<li>与yOz平面（x=0）的交线：$\frac{y^2}{9} + \frac{z^2}{16} = 1$（椭圆）</li>
+<li>与xOz平面（y=0）的交线：$\frac{x^2}{4} + \frac{z^2}{16} = 1$（椭圆）</li>
+</ul>
+<h3>例题10：工程应用</h3>
+<p>某建筑物的屋顶采用抛物面设计，方程为$z = \frac{x^2}{4} + \frac{y^2}{4}$，高度限制为$z \leq 9$。求屋顶的边界曲线方程和投影面积。</p>
+<p><strong>解</strong>：</p>
+<ul>
+<li>边界曲线：$\begin{cases} z = \frac{x^2}{4} + \frac{y^2}{4} \\ z = 9 \end{cases}$</li>
+</ul>  即：$x^2 + y^2 = 36$（圆）
+<ul>
+<li>投影面积 = $\pi \times 6^2 = 36\pi$</li>
+</ul>
+<p>---</p>
+<div class="page-break"></div>
+<h2>附录：常用公式汇总</h2>
+<h3>向量运算公式</h3>
+<ul>
+<li>向量模：$|\vec{a}| = \sqrt{a_1^2 + a_2^2 + a_3^2}$</li>
+<li>数量积：$\vec{a} \cdot \vec{b} = a_1b_1 + a_2b_2 + a_3b_3$</li>
+<li>向量积：$\vec{a} \times \vec{b} = (a_2b_3 - a_3b_2, a_3b_1 - a_1b_3, a_1b_2 - a_2b_1)$</li>
+</ul>
+<h3>平面方程公式</h3>
+<ul>
+<li>点法式：$A(x - x_0) + B(y - y_0) + C(z - z_0) = 0$</li>
+<li>一般式：$Ax + By + Cz + D = 0$</li>
+</ul>
+<h3>直线方程公式</h3>
+<ul>
+<li>点向式：$\frac{x - x_0}{m} = \frac{y - y_0}{n} = \frac{z - z_0}{p}$</li>
+<li>参数式：$\begin{cases} x = x_0 + mt \\ y = y_0 + nt \\ z = z_0 + pt \end{cases}$</li>
+</ul>
+<h3>常见曲面方程</h3>
+<ul>
+<li>球面：$(x - a)^2 + (y - b)^2 + (z - c)^2 = R^2$</li>
+<li>椭球面：$\frac{x^2}{a^2} + \frac{y^2}{b^2} + \frac{z^2}{c^2} = 1$</li>
+<li>椭圆抛物面：$\frac{x^2}{a^2} + \frac{y^2}{b^2} = 2z$</li>
+</ul>
+<h2>学习建议</h2>
+<p>1. <strong>理论学习</strong>：掌握基本概念和公式</p>
+<p>2. <strong>计算练习</strong>：多做典型例题和练习题</p>
+<p>3. <strong>实验操作</strong>：使用Lab12系列仿真实验</p>
+<p>4. <strong>工程应用</strong>：结合实际案例进行练习</p>
+<p>5. <strong>综合训练</strong>：提高解决复杂问题的能力</p>
+</body>
+</html>

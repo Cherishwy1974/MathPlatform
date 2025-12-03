@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能出题宝</title>
+    
+    <!-- 本地化资源 -->
+    <script src="../common-assets/js/tailwind.min.js"></script>
+    <link rel="stylesheet" href="../common-assets/css/lab1-material-symbols.css">
+    
+    <!-- MathJax (SVG渲染，离线友好) -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true,
+                tags: 'ams'
+            },
+            svg: {
+                scale: 1.2,
+                minScale: 0.8,
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js"></script>
+    <script src="../common-assets/js/marked.min.js"></script>
+
+    <style>
+        * { font-family: 'Microsoft YaHei', 'PingFang SC', 'Hiragino Sans GB', -apple-system, sans-serif; }
+        
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 3px; }
+        
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* 普通模式字体 */
+        .prose {
+            font-size: 1.25rem;
+            line-height: 2;
+        }
+        .prose p { margin-bottom: 1em; }
+        .prose ul, .prose ol { margin: 0.75em 0; padding-left: 1.75em; }
+        .prose li { margin: 0.5em 0; }
+        .prose h3 { 
+            font-size: 1.4rem; 
+            font-weight: 600; 
+            margin-top: 1.5em; 
+            margin-bottom: 0.75em;
+            color: #374151;
+        }
+        .prose strong { color: #1f2937; }
+        .prose code {
+            background: #f9fafb;
+            padding: 0.2em 0.5em;
+            border-radius: 4px;
+            font-size: 0.95em;
+            color: #dc2626;
+            border: 1px solid #f3f4f6;
+        }
+        .prose pre {
+            background: #f9fafb;
+            color: #374151;
+            padding: 1.25em;
+            border-radius: 10px;
+            overflow-x: auto;
+            margin: 1em 0;
+            border: 1px solid #f3f4f6;
+        }
+        .prose pre code { background: none; border: none; color: inherit; padding: 0; }
+        .prose hr { border-color: #e5e7eb; margin: 1.5em 0; }
+
+        /* 展示模式 - 超大字体 */
+        .presentation-mode .prose {
+            font-size: 1.75rem;
+            line-height: 2.2;
+        }
+        .presentation-mode .prose h3 {
+            font-size: 2rem;
+        }
+        .presentation-mode mjx-container svg {
+            transform: scale(1.3);
+            transform-origin: left center;
+        }
+        .presentation-mode .question-card {
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+        }
+
+        /* 加载动画 */
+        .typing-dot {
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0.5); opacity: 0.3; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+        
+        /* 消息动画 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .msg-in { animation: fadeIn 0.25s ease-out; }
+
+        /* 题目卡片 */
+        .question-card {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+        .question-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        /* 解析区域 */
+        .solution-area {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease, padding 0.3s ease, opacity 0.3s ease;
+            opacity: 0;
+        }
+        .solution-area.expanded {
+            max-height: 2000px;
+            opacity: 1;
+            padding-top: 1rem;
+            margin-top: 1rem;
+            border-top: 1px dashed #cbd5e1;
+        }
+
+        /* 展示模式过渡 */
+        .header-area, .footer-area {
+            transition: all 0.4s ease;
+        }
+        .presentation-mode .header-area {
+            transform: translateY(-100%);
+            opacity: 0;
+            height: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        .presentation-mode .footer-area {
+            transform: translateY(100%);
+            opacity: 0;
+            height: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        /* 展示模式浮动控制栏 */
+        .presentation-controls {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            gap: 8px;
+            z-index: 100;
+            opacity: 0.3;
+            transition: opacity 0.3s ease;
+        }
+        .presentation-controls:hover {
+            opacity: 1;
+        }
+        .presentation-controls button {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: rgba(59, 130, 246, 0.9);
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transition: all 0.2s ease;
+        }
+        .presentation-controls button:hover {
+            transform: scale(1.1);
+            background: rgba(37, 99, 235, 1);
+        }
+
+        /* 展开所有解析按钮 */
+        .expand-all-btn {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+        }
+        .expand-all-btn:hover {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+        }
+    </style>
+</head>
+<body class="bg-white h-screen flex flex-col overflow-hidden">
+
+    <!-- 顶部栏 -->
+    <header class="header-area bg-white border-b border-gray-100 px-5 py-3 flex items-center justify-between flex-shrink-0">
+        <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center">
+                <span class="material-symbols-outlined text-blue-400 text-xl">school</span>
+            </div>
+            <h1 class="font-medium text-gray-600 text-lg">智能出题宝</h1>
+        </div>
+        
+        <div class="flex items-center gap-3">
+            <!-- 连接状态 -->
+            <div id="connection-status" class="flex items-center gap-1.5 text-sm text-gray-400">
+                <span class="w-2 h-2 rounded-full bg-gray-300"></span>
+                <span>未连接</span>
+            </div>
+            
+            <!-- 展示模式按钮 -->
+            <button onclick="togglePresentationMode()" class="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-600 text-sm rounded-lg border border-amber-200 transition-colors" title="课堂展示模式">
+                <span class="material-symbols-outlined text-lg">present_to_all</span>
+                <span>展示模式</span>
+            </button>
+            
+            <!-- 模型选择 -->
+            <select id="model-select" class="text-sm bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 text-gray-500 focus:outline-none focus:border-blue-200">
+                <option value="deepseek">DeepSeek</option>
+                <option value="kimi">Kimi</option>
+            </select>
+            
+            <!-- 密码/API输入 -->
+            <div class="relative">
+                <input 
+                    type="password" 
+                    id="api-input" 
+                    class="w-48 text-sm bg-gray-50 border border-gray-200 rounded-lg pl-3 pr-9 py-1.5 text-gray-600 focus:outline-none focus:border-blue-200 placeholder-gray-400"
+                    placeholder="密码或API Key"
+                >
+                <button onclick="connect()" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-400 transition-colors">
+                    <span class="material-symbols-outlined text-lg">login</span>
+                </button>
+            </div>
+            
+            <!-- 清空 -->
+            <button onclick="clearChat()" class="p-1.5 text-gray-400 hover:text-red-400 rounded-lg transition-colors" title="清空对话">
+                <span class="material-symbols-outlined text-xl">delete</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- 聊天区域 -->
+    <main id="chat-area" class="flex-1 overflow-y-auto px-5 py-6">
+        <div id="messages" class="max-w-4xl mx-auto space-y-6">
+            
+            <!-- 欢迎消息 -->
+            <div class="flex gap-4 msg-in">
+                <div class="flex-shrink-0 w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-blue-400">smart_toy</span>
+                </div>
+                <div class="flex-1 bg-gray-50 rounded-2xl rounded-tl-md p-6">
+                    <div class="prose max-w-none text-gray-600">
+                        <p class="!mt-0"><strong class="text-gray-700">👋 您好！</strong>我是智能出题助手，可以帮您：</p>
+                        <ul class="!my-3">
+                            <li>生成极限、求导、积分等计算题</li>
+                            <li>提供详细的解题步骤</li>
+                            <li>支持自然语言（如"x趋向于0"会自动转为公式）</li>
+                        </ul>
+                        <p class="!mb-0 text-gray-400 text-base">💡 请先在右上角输入密码 <strong class="text-gray-500">####</strong> 或 API Key 连接</p>
+                        <p class="!mb-0 text-gray-400 text-base mt-2">🖥️ 点击右上角<strong class="text-amber-500">「展示模式」</strong>可全屏放大题目，适合课堂投影</p>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </main>
+
+    <!-- 输入区域 -->
+    <footer class="footer-area bg-white border-t border-gray-100 p-4 flex-shrink-0">
+        <div class="max-w-4xl mx-auto space-y-3">
+            
+            <!-- 快捷按钮 -->
+            <div class="flex gap-2 overflow-x-auto no-scrollbar">
+                <button onclick="quickPrompt('帮我出5道求极限的计算题，难度适中，附详细解析')" class="flex-shrink-0 px-4 py-2 bg-gray-50 hover:bg-blue-50 text-gray-500 hover:text-blue-500 text-sm rounded-full border border-gray-200 hover:border-blue-200 transition-colors">
+                    极限计算
+                </button>
+                <button onclick="quickPrompt('出5道基础求导题，包含幂函数、三角函数，附解析')" class="flex-shrink-0 px-4 py-2 bg-gray-50 hover:bg-blue-50 text-gray-500 hover:text-blue-500 text-sm rounded-full border border-gray-200 hover:border-blue-200 transition-colors">
+                    求导计算
+                </button>
+                <button onclick="quickPrompt('出5道不定积分计算题，基础难度，附解析')" class="flex-shrink-0 px-4 py-2 bg-gray-50 hover:bg-blue-50 text-gray-500 hover:text-blue-500 text-sm rounded-full border border-gray-200 hover:border-blue-200 transition-colors">
+                    不定积分
+                </button>
+                <button onclick="quickPrompt('出5道定积分计算题，附答案和解析')" class="flex-shrink-0 px-4 py-2 bg-gray-50 hover:bg-blue-50 text-gray-500 hover:text-blue-500 text-sm rounded-full border border-gray-200 hover:border-blue-200 transition-colors">
+                    定积分
+                </button>
+                <button onclick="quickPrompt('出5道判断间断点类型的题目，附解析')" class="flex-shrink-0 px-4 py-2 bg-gray-50 hover:bg-blue-50 text-gray-500 hover:text-blue-500 text-sm rounded-full border border-gray-200 hover:border-blue-200 transition-colors">
+                    间断点
+                </button>
+                <button onclick="quickPrompt('出3道用定积分求面积的应用题，附解析')" class="flex-shrink-0 px-4 py-2 bg-gray-50 hover:bg-blue-50 text-gray-500 hover:text-blue-500 text-sm rounded-full border border-gray-200 hover:border-blue-200 transition-colors">
+                    积分应用
+                </button>
+            </div>
+
+            <!-- 输入框 -->
+            <div class="flex items-end gap-3">
+                <div class="flex-1 bg-gray-50 rounded-2xl border border-gray-200 focus-within:border-blue-200 transition-colors">
+                    <textarea 
+                        id="user-input" 
+                        rows="1" 
+                        class="w-full px-5 py-3.5 bg-transparent border-none focus:outline-none text-gray-700 resize-none max-h-36 text-base"
+                        placeholder="输入您的需求，如：帮我出10道求极限的计算题..."
+                    ></textarea>
+                </div>
+                <button 
+                    id="send-btn" 
+                    onclick="sendMessage()" 
+                    class="flex-shrink-0 w-12 h-12 bg-blue-400 hover:bg-blue-500 disabled:bg-gray-300 text-white rounded-xl transition-colors flex items-center justify-center disabled:cursor-not-allowed"
+                >
+                    <span class="material-symbols-outlined">send</span>
+                </button>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 展示模式浮动控制栏 -->
+    <div id="presentation-controls" class="presentation-controls hidden">
+        <button onclick="toggleAllSolutions()" class="expand-all-btn" title="展开/收起所有解析">
+            <span class="material-symbols-outlined">fact_check</span>
+        </button>
+        <button onclick="togglePresentationMode()" title="退出展示模式">
+            <span class="material-symbols-outlined">close_fullscreen</span>
+        </button>
+    </div>
+
+    <script>
+        // ========== 配置 ==========
+        const CONFIG = {
+            password: "0828",
+            apis: {
+                deepseek: {
+                    key: "sk-eb1e9427a3624b48b706015c771d08b5",
+                    url: "https://api.deepseek.com/chat/completions",
+                    model: "deepseek-chat"
+                },
+                kimi: {
+                    key: "sk-SxAdShW4CUBvBNQxt4aJkqRsx7eTfgSimJbHcIX9c2PMa8wZ",
+                    url: "https://api.moonshot.cn/v1/chat/completions",
+                    model: "moonshot-v1-8k"
+                }
+            }
+        };
+
+        // ========== 状态 ==========
+        const state = {
+            connected: false,
+            loading: false,
+            model: "deepseek",
+            history: [],
+            presentationMode: false,
+            allSolutionsExpanded: false
+        };
+
+        // 系统提示词 - 要求结构化输出
+        const SYSTEM_PROMPT = `你是一个专业的高职数学出题助手，专门为高职院校学生设计题目。请严格遵循以下规则：
+
+【重要：高职学情要求】
+1. 只出计算题，不要证明题
+2. 不涉及泰勒展开、级数、多元微积分等内容
+3. 难度适中，侧重基础计算能力
+4. 题型范围：极限计算、导数计算、不定积分、定积分、间断点判断、简单应用题
+
+【公式渲染规则 - 必须遵守】
+1. 所有数学公式必须使用 LaTeX
+2. 行内公式：$...$
+3. 独立公式：$$...$$（重要公式用这个，更大更清晰）
+4. 分数必须用 \\frac{分子}{分母}，禁止用 a/b
+5. 极限格式：
+   - 行内：$\\lim\\limits_{x \\to a} f(x)$
+   - 独立：$$\\lim_{x \\to a} f(x)$$
+6. 积分：\\int_{a}^{b} 或 \\int\\limits_{a}^{b}
+7. 求和：\\sum\\limits_{i=1}^{n}
+8. 无穷：\\infty
+9. 微分：\\mathrm{d}x
+
+【重要：输出格式要求 - 必须严格遵守】
+为了方便系统解析，请使用以下特殊标记格式输出：
+
+每道题使用这个格式：
+[QUESTION_START]
+**第X题** 题目内容...
+$$公式$$
+[SOLUTION_START]
+解析内容...
+**答案：xxx**
+[SOLUTION_END]
+[QUESTION_END]
+
+示例：
+[QUESTION_START]
+**第1题** 求极限：
+$$\\lim_{x \\to 0} \\frac{\\sin 2x}{x}$$
+[SOLUTION_START]
+利用重要极限 $\\lim\\limits_{x \\to 0}\\frac{\\sin x}{x} = 1$
+
+$$\\lim_{x \\to 0} \\frac{\\sin 2x}{x} = \\lim_{x \\to 0} \\frac{\\sin 2x}{2x} \\cdot 2 = 1 \\times 2 = 2$$
+
+**答案：2**
+[SOLUTION_END]
+[QUESTION_END]
+
+[QUESTION_START]
+**第2题** 求极限：
+$$\\lim_{x \\to \\infty} \\frac{3x-1}{2x+1}$$
+[SOLUTION_START]
+分子分母同除以 $x$：
+
+$$\\lim_{x \\to \\infty} \\frac{3x-1}{2x+1} = \\lim_{x \\to \\infty} \\frac{3-\\frac{1}{x}}{2+\\frac{1}{x}} = \\frac{3}{2}$$
+
+**答案：$\\frac{3}{2}$**
+[SOLUTION_END]
+[QUESTION_END]
+
+【题目难度参考】
+- 极限：$\\lim\\limits_{x \\to 0}\\frac{\\sin 3x}{x}$、$\\lim\\limits_{x \\to \\infty}\\frac{2x+1}{3x-1}$ 这类
+- 求导：$y = x^3 + 2x^2 - 5$、$y = \\sin x \\cdot \\cos x$、$y = e^{2x}$ 这类
+- 积分：$\\int x^2 \\mathrm{d}x$、$\\int \\sin x \\mathrm{d}x$、$\\int e^x \\mathrm{d}x$ 这类
+- 定积分：$\\int_0^1 x^2 \\mathrm{d}x$、$\\int_0^{\\pi} \\sin x \\mathrm{d}x$ 这类`;
+
+        // ========== DOM ==========
+        const $ = id => document.getElementById(id);
+        const els = {
+            apiInput: $('api-input'),
+            modelSelect: $('model-select'),
+            status: $('connection-status'),
+            chatArea: $('chat-area'),
+            messages: $('messages'),
+            userInput: $('user-input'),
+            sendBtn: $('send-btn'),
+            presentationControls: $('presentation-controls')
+        };
+
+        // ========== 展示模式 ==========
+        function togglePresentationMode() {
+            state.presentationMode = !state.presentationMode;
+            document.body.classList.toggle('presentation-mode', state.presentationMode);
+            els.presentationControls.classList.toggle('hidden', !state.presentationMode);
+            
+            if (state.presentationMode) {
+                // 进入展示模式时滚动到顶部
+                els.chatArea.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        // 展开/收起所有解析
+        function toggleAllSolutions() {
+            state.allSolutionsExpanded = !state.allSolutionsExpanded;
+            const solutions = document.querySelectorAll('.solution-area');
+            solutions.forEach(sol => {
+                sol.classList.toggle('expanded', state.allSolutionsExpanded);
+            });
+            
+            // 更新所有按钮文字
+            const buttons = document.querySelectorAll('.toggle-solution-btn');
+            buttons.forEach(btn => {
+                btn.innerHTML = state.allSolutionsExpanded 
+                    ? '<span class="material-symbols-outlined text-base">visibility_off</span> 隐藏解析'
+                    : '<span class="material-symbols-outlined text-base">visibility</span> 显示解析';
+            });
+            
+            // 重新渲染公式
+            MathJax.typesetPromise().catch(() => {});
+        }
+
+        // 切换单个解析
+        function toggleSolution(id) {
+            const solution = document.getElementById('solution-' + id);
+            const btn = document.getElementById('btn-' + id);
+            
+            if (solution && btn) {
+                const isExpanded = solution.classList.toggle('expanded');
+                btn.innerHTML = isExpanded 
+                    ? '<span class="material-symbols-outlined text-base">visibility_off</span> 隐藏解析'
+                    : '<span class="material-symbols-outlined text-base">visibility</span> 显示解析';
+                
+                // 渲染公式
+                if (isExpanded) {
+                    MathJax.typesetPromise([solution]).catch(() => {});
+                }
+            }
+        }
+
+        // ========== 连接 ==========
+        function connect() {
+            const input = els.apiInput.value.trim();
+            
+            if (input === CONFIG.password) {
+                state.connected = true;
+                updateStatus(true);
+                els.apiInput.value = '';
+                els.apiInput.placeholder = '已连接';
+            } else if (input.startsWith('sk-') && input.length > 20) {
+                CONFIG.apis[state.model].key = input;
+                state.connected = true;
+                updateStatus(true);
+                els.apiInput.value = '';
+                els.apiInput.placeholder = '已连接 (自定义Key)';
+            } else {
+                els.apiInput.classList.add('border-red-300', 'bg-red-50');
+                setTimeout(() => {
+                    els.apiInput.classList.remove('border-red-300', 'bg-red-50');
+                }, 1500);
+            }
+        }
+
+        function updateStatus(connected) {
+            if (connected) {
+                els.status.innerHTML = `
+                    <span class="w-2 h-2 rounded-full bg-green-400"></span>
+                    <span class="text-green-500">已连接</span>
+                `;
+            } else {
+                els.status.innerHTML = `
+                    <span class="w-2 h-2 rounded-full bg-gray-300"></span>
+                    <span>未连接</span>
+                `;
+            }
+        }
+
+        els.apiInput.addEventListener('keydown', e => {
+            if (e.key === 'Enter') connect();
+        });
+
+        els.modelSelect.addEventListener('change', e => {
+            state.model = e.target.value;
+        });
+
+        // ========== 解析内容 ==========
+        function parseQuestions(content) {
+            // 检查是否包含特殊标记
+            if (!content.includes('[QUESTION_START]')) {
+                // 没有标记，返回原始内容
+                return { hasQuestions: false, html: renderMD(content) };
+            }
+
+            const questions = [];
+            const regex = /\[QUESTION_START\]([\s\S]*?)\[QUESTION_END\]/g;
+            let match;
+
+            while ((match = regex.exec(content)) !== null) {
+                const questionBlock = match[1];
+                
+                // 分离题目和解析
+                const solutionMatch = questionBlock.match(/\[SOLUTION_START\]([\s\S]*?)\[SOLUTION_END\]/);
+                
+                let questionPart = questionBlock;
+                let solutionPart = '';
+                
+                if (solutionMatch) {
+                    questionPart = questionBlock.substring(0, questionBlock.indexOf('[SOLUTION_START]')).trim();
+                    solutionPart = solutionMatch[1].trim();
+                }
+
+                questions.push({
+                    question: questionPart,
+                    solution: solutionPart
+                });
+            }
+
+            if (questions.length === 0) {
+                return { hasQuestions: false, html: renderMD(content) };
+            }
+
+            // 生成带折叠的HTML
+            let html = '';
+            questions.forEach((q, idx) => {
+                const qId = Date.now() + '-' + idx;
+                html += `
+                    <div class="question-card">
+                        <div class="prose max-w-none text-gray-700">
+                            ${renderMD(q.question)}
+                        </div>
+                        ${q.solution ? `
+                            <button 
+                                id="btn-${qId}" 
+                                onclick="toggleSolution('${qId}')" 
+                                class="toggle-solution-btn mt-4 flex items-center gap-1.5 px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 text-sm rounded-lg border border-blue-200 transition-colors"
+                            >
+                                <span class="material-symbols-outlined text-base">visibility</span> 显示解析
+                            </button>
+                            <div id="solution-${qId}" class="solution-area">
+                                <div class="prose max-w-none text-gray-600">
+                                    ${renderMD(q.solution)}
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            });
+
+            return { hasQuestions: true, html };
+        }
+
+        // ========== 聊天 ==========
+        function quickPrompt(text) {
+            els.userInput.value = text;
+            els.userInput.focus();
+            autoResize();
+        }
+
+        function autoResize() {
+            const ta = els.userInput;
+            ta.style.height = 'auto';
+            ta.style.height = Math.min(ta.scrollHeight, 144) + 'px';
+        }
+
+        els.userInput.addEventListener('input', autoResize);
+        els.userInput.addEventListener('keydown', e => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        async function sendMessage() {
+            const text = els.userInput.value.trim();
+            if (!text || state.loading) return;
+
+            if (!state.connected) {
+                alert('请先输入密码或API Key连接服务');
+                els.apiInput.focus();
+                return;
+            }
+
+            addMessage('user', text);
+            state.history.push({ role: 'user', content: text });
+
+            els.userInput.value = '';
+            els.userInput.style.height = 'auto';
+            setLoading(true);
+
+            const botId = 'bot-' + Date.now();
+            addBotPlaceholder(botId);
+
+            try {
+                const api = CONFIG.apis[state.model];
+                const messages = [
+                    { role: 'system', content: SYSTEM_PROMPT },
+                    ...state.history
+                ];
+
+                const res = await fetch(api.url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${api.key}`
+                    },
+                    body: JSON.stringify({
+                        model: api.model,
+                        messages,
+                        temperature: 0.7,
+                        stream: false
+                    })
+                });
+
+                if (!res.ok) throw new Error(`请求失败 (${res.status})`);
+
+                const data = await res.json();
+                const content = data.choices[0].message.content;
+
+                state.history.push({ role: 'assistant', content });
+                updateBotMessage(botId, content);
+
+            } catch (err) {
+                updateBotMessage(botId, `**请求出错：** ${err.message}\n\n请检查网络或切换模型重试。`);
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        function addMessage(role, content) {
+            const div = document.createElement('div');
+            div.className = `flex gap-4 msg-in ${role === 'user' ? 'flex-row-reverse' : ''}`;
+
+            const avatar = document.createElement('div');
+            avatar.className = `flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center ${
+                role === 'user' ? 'bg-blue-100' : 'bg-blue-50'
+            }`;
+            avatar.innerHTML = `<span class="material-symbols-outlined text-blue-400">${role === 'user' ? 'person' : 'smart_toy'}</span>`;
+
+            const bubble = document.createElement('div');
+            if (role === 'user') {
+                bubble.className = 'max-w-[80%] bg-blue-100 text-gray-700 rounded-2xl rounded-tr-md px-5 py-3.5 text-lg';
+                bubble.textContent = content;
+            } else {
+                bubble.className = 'flex-1 bg-gray-50 rounded-2xl rounded-tl-md p-6 prose max-w-none text-gray-600';
+                bubble.innerHTML = renderMD(content);
+            }
+
+            div.appendChild(avatar);
+            div.appendChild(bubble);
+            els.messages.appendChild(div);
+            scrollBottom();
+
+            if (role !== 'user') {
+                MathJax.typesetPromise([bubble]).catch(() => {});
+            }
+        }
+
+        function addBotPlaceholder(id) {
+            const div = document.createElement('div');
+            div.id = id;
+            div.className = 'flex gap-4 msg-in';
+            div.innerHTML = `
+                <div class="flex-shrink-0 w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-blue-400">smart_toy</span>
+                </div>
+                <div class="bg-gray-50 rounded-2xl rounded-tl-md p-6 min-w-[100px]">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-blue-300 typing-dot"></span>
+                        <span class="w-2.5 h-2.5 rounded-full bg-blue-300 typing-dot"></span>
+                        <span class="w-2.5 h-2.5 rounded-full bg-blue-300 typing-dot"></span>
+                    </div>
+                </div>
+            `;
+            els.messages.appendChild(div);
+            scrollBottom();
+        }
+
+        function updateBotMessage(id, content) {
+            const div = document.getElementById(id);
+            if (!div) return;
+
+            const bubble = div.querySelector('div:last-child');
+            bubble.className = 'flex-1 bg-gray-50 rounded-2xl rounded-tl-md p-6 max-w-none text-gray-600';
+            
+            // 解析内容
+            const parsed = parseQuestions(content);
+            
+            if (parsed.hasQuestions) {
+                bubble.innerHTML = parsed.html;
+                // 只渲染题目部分的公式，解析部分等展开时再渲染
+                const questionParts = bubble.querySelectorAll('.question-card > .prose');
+                MathJax.typesetPromise(Array.from(questionParts)).then(scrollBottom).catch(() => {});
+            } else {
+                bubble.classList.add('prose');
+                bubble.innerHTML = parsed.html;
+                MathJax.typesetPromise([bubble]).then(scrollBottom).catch(() => {});
+            }
+        }
+
+        function renderMD(text) {
+            marked.setOptions({ breaks: true, gfm: true, headerIds: false, mangle: false });
+            return marked.parse(text);
+        }
+
+        function setLoading(loading) {
+            state.loading = loading;
+            els.sendBtn.disabled = loading;
+            els.userInput.disabled = loading;
+            if (!loading) els.userInput.focus();
+        }
+
+        function scrollBottom() {
+            els.chatArea.scrollTo({ top: els.chatArea.scrollHeight, behavior: 'smooth' });
+        }
+
+        function clearChat() {
+            if (!confirm('确定清空所有对话？')) return;
+            const welcome = els.messages.firstElementChild;
+            els.messages.innerHTML = '';
+            els.messages.appendChild(welcome);
+            state.history = [];
+            state.allSolutionsExpanded = false;
+        }
+
+        // ESC退出展示模式
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape' && state.presentationMode) {
+                togglePresentationMode();
+            }
+        });
+    </script>
+</body>
+</html>

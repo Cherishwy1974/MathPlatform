@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>趣味课堂 - 高等应用数学在线课堂</title>
+    
+    <!-- 本地化资源 -->
+    <link rel="stylesheet" href="../../common-assets/css/tailwind.css">
+    <link rel="stylesheet" href="../../common-assets/css/material-icons.local.css">
+    
+    <style>
+        @font-face {
+            font-family: 'WDXLubrifontSC';
+            src: url('../../common-assets/fonts/WD-XLLubrifontSC-Regular.otf') format('opentype');
+            font-display: swap;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'WDXLubrifontSC', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 50%, #ede9fe 100%);
+            color: #1e293b;
+        }
+
+        /* 顶部导航 */
+        .nav-header {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(168, 85, 247, 0.1);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #7c3aed;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+        }
+
+        .back-btn:hover {
+            background: rgba(124, 58, 237, 0.1);
+        }
+
+        .page-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .page-title h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .page-title .icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #a855f7, #7c3aed);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        /* 主内容区 */
+        .main-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .intro-section {
+            text-align: center;
+            margin-bottom: 3rem;
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .intro-section h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 0.75rem;
+        }
+
+        .intro-section p {
+            font-size: 1rem;
+            color: #64748b;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* 游戏卡片网格 */
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .game-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+            animation: fadeInUp 0.6s ease-out backwards;
+        }
+
+        .game-card:nth-child(1) { animation-delay: 0.1s; }
+        .game-card:nth-child(2) { animation-delay: 0.2s; }
+        .game-card:nth-child(3) { animation-delay: 0.3s; }
+        .game-card:nth-child(4) { animation-delay: 0.4s; }
+        .game-card:nth-child(5) { animation-delay: 0.5s; }
+        .game-card:nth-child(6) { animation-delay: 0.6s; }
+
+        .game-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .card-header {
+            padding: 2rem 1.5rem 1.5rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .card-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.3s;
+        }
+
+        .card-icon .material-icons-round {
+            font-size: 2rem;
+        }
+
+        .game-card:hover .card-icon {
+            transform: scale(1.1) rotate(-5deg);
+        }
+
+        .card-info {
+            flex: 1;
+        }
+
+        .card-info h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 0.25rem;
+        }
+
+        .card-info .subtitle {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .card-body {
+            padding: 0 1.5rem 1.5rem;
+            flex: 1;
+        }
+
+        .card-body p {
+            font-size: 0.9rem;
+            color: #64748b;
+            line-height: 1.6;
+        }
+
+        .card-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .tags {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .tag {
+            font-size: 0.7rem;
+            padding: 0.25rem 0.6rem;
+            border-radius: 100px;
+            font-weight: 500;
+        }
+
+        .play-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .game-card:hover .play-btn {
+            transform: translateX(4px);
+        }
+
+        /* 谁是卧底 - 深蓝主题 */
+        .card-spy .card-icon {
+            background: linear-gradient(135deg, #3b4252, #2e3440);
+            color: #81a1c1;
+        }
+        .card-spy .tag {
+            background: #e0f2fe;
+            color: #0369a1;
+        }
+        .card-spy .play-btn {
+            color: #3b4252;
+        }
+
+        /* 连续识别 - 翠绿主题 */
+        .card-continuous .card-icon {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+        .card-continuous .tag {
+            background: #d1fae5;
+            color: #047857;
+        }
+        .card-continuous .play-btn {
+            color: #059669;
+        }
+
+        /* 你画我猜 - 橙色主题 */
+        .card-sketch .card-icon {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+        }
+        .card-sketch .tag {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        .card-sketch .play-btn {
+            color: #d97706;
+        }
+
+        /* 高职数学狼人杀 - 红色主题 */
+        .card-werewolf .card-icon {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+        }
+        .card-werewolf .tag {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        .card-werewolf .play-btn {
+            color: #dc2626;
+        }
+
+        /* 更多游戏 - 灰色占位 */
+        .card-coming {
+            background: #f8fafc;
+            border: 2px dashed #e2e8f0;
+        }
+        .card-coming .card-icon {
+            background: #f1f5f9;
+            color: #94a3b8;
+        }
+        .card-coming .card-info h3 {
+            color: #94a3b8;
+        }
+        .card-coming .card-body p {
+            color: #cbd5e1;
+        }
+        .card-coming:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .nav-header {
+                padding: 0.75rem 1rem;
+            }
+            .main-content {
+                padding: 1rem;
+            }
+            .intro-section h2 {
+                font-size: 1.5rem;
+            }
+            .games-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航 -->
+    <nav class="nav-header">
+        <div class="nav-inner">
+            <a href="../../index.html" class="back-btn">
+                <span class="material-icons-round">arrow_back</span>
+                返回首页
+            </a>
+            <div class="page-title">
+                <div class="icon">
+                    <span class="material-icons-round">sports_esports</span>
+                </div>
+                <h1>趣味课堂</h1>
+            </div>
+            <div style="width: 100px;"></div>
+        </div>
+    </nav>
+
+    <!-- 主内容 -->
+    <main class="main-content">
+        <section class="intro-section">
+            <h2>寓教于乐，轻松学数学</h2>
+            <p>通过互动游戏巩固知识点，让枯燥的公式变得生动有趣。适合课堂破冰、复习巩固或课后互动。</p>
+        </section>
+
+        <div class="games-grid">
+            <!-- 谁是卧底 -->
+            <a href="谁是卧底.html" class="game-card card-spy">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <span class="material-icons-round">psychology</span>
+                    </div>
+                    <div class="card-info">
+                        <h3>谁是卧底</h3>
+                        <span class="subtitle">Calculus Edition</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <p>高等数学版"谁是卧底"，用导数、极限、微分等概念进行词语对决。考验你对相似概念的理解与表达能力！</p>
+                </div>
+                <div class="card-footer">
+                    <div class="tags">
+                        <span class="tag">4-12人</span>
+                        <span class="tag">课堂互动</span>
+                    </div>
+                    <span class="play-btn">
+                        开始游戏
+                        <span class="material-icons-round" style="font-size:1.125rem;">arrow_forward</span>
+                    </span>
+                </div>
+            </a>
+
+            <!-- 连续识别 -->
+            <a href="连续识别.html" class="game-card card-continuous">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <span class="material-icons-round">timeline</span>
+                    </div>
+                    <div class="card-info">
+                        <h3>连续识别</h3>
+                        <span class="subtitle">Continuity Challenge</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <p>快速判断函数在指定点的连续性！训练你对函数连续性定义的直觉判断，提升解题速度。</p>
+                </div>
+                <div class="card-footer">
+                    <div class="tags">
+                        <span class="tag">单人挑战</span>
+                        <span class="tag">计时模式</span>
+                    </div>
+                    <span class="play-btn">
+                        开始挑战
+                        <span class="material-icons-round" style="font-size:1.125rem;">arrow_forward</span>
+                    </span>
+                </div>
+            </a>
+
+            <!-- 你画我猜 -->
+            <a href="你画我猜.html" class="game-card card-sketch">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <span class="material-icons-round">brush</span>
+                    </div>
+                    <div class="card-info">
+                        <h3>你画我猜</h3>
+                        <span class="subtitle">MathSketch</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <p>用画笔描绘数学概念和公式！通过绘画表达对数学知识的理解，培养空间想象力和表达能力。</p>
+                </div>
+                <div class="card-footer">
+                    <div class="tags">
+                        <span class="tag">多人协作</span>
+                        <span class="tag">创意表达</span>
+                    </div>
+                    <span class="play-btn">
+                        开始游戏
+                        <span class="material-icons-round" style="font-size:1.125rem;">arrow_forward</span>
+                    </span>
+                </div>
+            </a>
+
+            <!-- 高职数学狼人杀 -->
+            <a href="高职数学狼人杀v2.html" class="game-card card-werewolf">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <span class="material-icons-round">token</span>
+                    </div>
+                    <div class="card-info">
+                        <h3>高职数学狼人杀</h3>
+                        <span class="subtitle">Math Werewolf</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <p>沉浸式数学对战平台！通过角色扮演和策略推理，在解决数学问题的过程中体验紧张刺激的对战乐趣。</p>
+                </div>
+                <div class="card-footer">
+                    <div class="tags">
+                        <span class="tag">多人对战</span>
+                        <span class="tag">策略推理</span>
+                    </div>
+                    <span class="play-btn">
+                        开始对战
+                        <span class="material-icons-round" style="font-size:1.125rem;">arrow_forward</span>
+                    </span>
+                </div>
+            </a>
+
+            <!-- 更多游戏占位 -->
+            <div class="game-card card-coming">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <span class="material-icons-round">add</span>
+                    </div>
+                    <div class="card-info">
+                        <h3>更多游戏</h3>
+                        <span class="subtitle">Coming Soon</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <p>更多趣味数学游戏正在开发中，敬请期待...</p>
+                </div>
+                <div class="card-footer">
+                    <div class="tags"></div>
+                    <span class="play-btn" style="color: #94a3b8;">
+                        敬请期待
+                    </span>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>
+

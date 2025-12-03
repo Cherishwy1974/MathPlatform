@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>教学资源中心 - 高等应用数学在线课堂</title>
+    
+    <style>
+        :root {
+            /* === 白色学术主题变量 === */
+            --bg-base: #ffffff;
+            --bg-subtle: #f8fafc;
+            --bg-glass: rgba(255, 255, 255, 0.95);
+            
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --text-accent: #2563eb;    /* 皇家蓝 */
+            --text-accent-hover: #1d4ed8;
+            
+            /* 教案专用色 - 暖橙 */
+            --teacher-color: #ea580c;
+            --teacher-bg: #fff7ed;
+            
+            /* 笔记专用色 - 青绿 */
+            --student-color: #0d9488;
+            --student-bg: #f0fdfa;
+            
+            --border-color: #e2e8f0;
+            
+            /* 阴影系统 */
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-float: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
+            
+            --transition-smooth: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @font-face {
+            font-family: 'WDXLubrifontSC';
+            src: url('../common-assets/fonts/WD-XLLubrifontSC-Regular.otf') format('opentype');
+            font-display: swap;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'WDXLubrifontSC', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-primary);
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* === 1. 顶部导航 (Glassmorphism) === */
+        .top-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 70px;
+            background: var(--bg-glass);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 30px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .nav-brand {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .nav-brand h1 {
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            background: linear-gradient(120deg, #2563eb, #0891b2);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .nav-brand span {
+            font-size: 10px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .nav-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .nav-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border: 1px solid var(--border-color);
+            background: #fff;
+            color: var(--text-secondary);
+            border-radius: 8px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            text-decoration: none;
+        }
+
+        .nav-btn:hover {
+            border-color: var(--text-accent);
+            color: var(--text-accent);
+            background: #eff6ff;
+            transform: translateY(-1px);
+        }
+
+        .nav-btn svg { width: 14px; height: 14px; fill: currentColor; }
+
+        .btn-primary {
+            background: var(--text-accent);
+            color: white;
+            border-color: var(--text-accent);
+        }
+        .btn-primary:hover {
+            background: var(--text-accent-hover);
+            color: white;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+        }
+
+        /* === 2. 背景层 === */
+        #geo-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.5;
+        }
+
+        /* === 3. 欢迎封面 === */
+        .welcome-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            z-index: 10;
+            transition: opacity 0.4s ease;
+        }
+
+        .welcome-title {
+            font-size: 64px;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 10px;
+            letter-spacing: -2px;
+        }
+
+        .welcome-subtitle {
+            font-size: 18px;
+            color: var(--text-secondary);
+            font-weight: 300;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        .start-btn {
+            padding: 16px 48px;
+            font-size: 18px;
+            background: var(--text-primary);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            box-shadow: var(--shadow-float);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .start-btn:hover {
+            transform: scale(1.05);
+            background: var(--text-accent);
+        }
+
+        /* === 4. 目录覆盖层 (Split View) === */
+        .directory-overlay {
+            position: fixed;
+            top: 70px;
+            left: 0;
+            width: 100%;
+            height: calc(100% - 70px);
+            background: var(--bg-glass);
+            backdrop-filter: blur(8px);
+            z-index: 50;
+            display: flex;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition-smooth);
+        }
+
+        .directory-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* 左侧：分类导航 */
+        .dir-sidebar {
+            width: 280px;
+            border-right: 1px solid var(--border-color);
+            padding: 30px 20px;
+            overflow-y: auto;
+            background: rgba(255,255,255,0.5);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .sidebar-title {
+            font-size: 12px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+            padding-left: 15px;
+        }
+
+        .category-btn {
+            width: 100%;
+            text-align: left;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid transparent;
+            background: transparent;
+            color: var(--text-secondary);
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .category-btn:hover {
+            background: white;
+            color: var(--text-primary);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .category-btn.active {
+            background: white;
+            border-color: var(--border-color);
+            font-weight: 600;
+            box-shadow: var(--shadow-float);
+        }
+
+        .category-btn.teacher.active {
+            color: var(--teacher-color);
+            border-left: 4px solid var(--teacher-color);
+        }
+
+        .category-btn.student.active {
+            color: var(--student-color);
+            border-left: 4px solid var(--student-color);
+        }
+
+        .category-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .category-btn.teacher .category-icon {
+            background: var(--teacher-bg);
+            color: var(--teacher-color);
+        }
+
+        .category-btn.student .category-icon {
+            background: var(--student-bg);
+            color: var(--student-color);
+        }
+
+        .category-info h3 {
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+
+        .category-info span {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        /* 右侧：章节网格 */
+        .dir-content {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+            background: linear-gradient(to bottom right, #fff, #f8fafc);
+        }
+
+        .dir-header {
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+        .dir-header h2 { font-size: 24px; color: var(--text-primary); }
+        .dir-header p { font-size: 14px; color: var(--text-secondary); margin-top: 5px; }
+
+        .chapter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+        }
+
+        .chapter-card {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 24px;
+            transition: var(--transition-smooth);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chapter-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-float);
+        }
+
+        .chapter-card.teacher:hover {
+            border-color: var(--teacher-color);
+        }
+
+        .chapter-card.student:hover {
+            border-color: var(--student-color);
+        }
+
+        .chapter-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            margin-bottom: 16px;
+        }
+
+        .chapter-num {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .chapter-card.teacher .chapter-num {
+            background: var(--teacher-bg);
+            color: var(--teacher-color);
+        }
+
+        .chapter-card.student .chapter-num {
+            background: var(--student-bg);
+            color: var(--student-color);
+        }
+
+        .chapter-title {
+            flex: 1;
+        }
+
+        .chapter-title h3 {
+            font-size: 16px;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+            line-height: 1.4;
+        }
+
+        .chapter-title span {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .chapter-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 12px 16px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-subtle);
+            color: var(--text-secondary);
+            font-size: 13px;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            text-decoration: none;
+        }
+
+        .action-btn:hover {
+            background: white;
+            border-color: var(--text-accent);
+            color: var(--text-accent);
+            transform: translateY(-1px);
+        }
+
+        .action-btn.view-btn.teacher:hover {
+            border-color: var(--teacher-color);
+            color: var(--teacher-color);
+        }
+
+        .action-btn.view-btn.student:hover {
+            border-color: var(--student-color);
+            color: var(--student-color);
+        }
+
+        .action-btn.download-btn:hover {
+            background: var(--text-accent);
+            border-color: var(--text-accent);
+            color: white;
+        }
+
+        /* === 5. 内容 Iframe === */
+        .iframe-container {
+            position: fixed;
+            top: 70px;
+            left: 0;
+            width: 100%;
+            height: calc(100% - 70px);
+            background: white;
+            z-index: 40;
+            transform: translateX(100%);
+            transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .iframe-container.active {
+            transform: translateX(0);
+        }
+
+        iframe { width: 100%; height: 100%; border: none; }
+
+        /* 加载条 */
+        .loading-bar {
+            position: fixed;
+            top: 69px;
+            left: 0;
+            height: 2px;
+            background: var(--text-accent);
+            width: 0%;
+            z-index: 200;
+            transition: width 0.3s ease;
+        }
+
+        /* 响应式 */
+        @media (max-width: 900px) {
+            .directory-overlay { flex-direction: column; }
+            .dir-sidebar { 
+                width: 100%; 
+                height: auto; 
+                border-right: none; 
+                border-bottom: 1px solid var(--border-color);
+                flex-direction: row;
+                padding: 15px;
+                gap: 10px;
+            }
+            .sidebar-title { display: none; }
+            .category-btn { padding: 15px; }
+            .category-info span { display: none; }
+            .dir-content { padding: 20px; }
+            .chapter-grid { grid-template-columns: 1fr; }
+            .nav-brand span, .nav-controls span { display: none; }
+            .welcome-title { font-size: 42px; }
+        }
+    </style>
+    <!-- 引入 FontAwesome 用于图标 (本地化) -->
+    <link rel="stylesheet" href="../common-assets/css/fontawesome.min.css">
+    <link rel="stylesheet" href="../common-assets/css/solid.min.css">
+</head>
+<body>
+
+    <div class="loading-bar" id="loadingBar"></div>
+
+    <!-- 1. 顶部导航 -->
+    <nav class="top-nav">
+        <div class="nav-brand">
+            <h1>教学资源中心</h1>
+            <span>Teaching Resources / Digital Classroom</span>
+        </div>
+        <div class="nav-controls">
+            <button class="nav-btn" onclick="toggleDirectory()" title="目录">
+                <i class="fas fa-list"></i>
+                <span>资源目录</span>
+            </button>
+            <div style="width:1px; height:20px; background:var(--border-color); margin:0 5px;"></div>
+            <a href="../index.html" class="nav-btn btn-primary" title="返回主站">
+                <i class="fas fa-home"></i>
+                <span>主页</span>
+            </a>
+        </div>
+    </nav>
+
+    <!-- 2. 背景动画 -->
+    <canvas id="geo-canvas"></canvas>
+
+    <!-- 3. 欢迎页 -->
+    <div class="welcome-screen" id="welcomeScreen">
+        <h1 class="welcome-title">Resources</h1>
+        <p class="welcome-subtitle">
+            高等应用数学 · 教学资源中心<br>
+            Teacher's guides and student notes for every chapter
+        </p>
+        <button class="start-btn" onclick="toggleDirectory()">
+            <span>浏览资源</span>
+            <i class="fas fa-arrow-right"></i>
+        </button>
+    </div>
+
+    <!-- 4. 目录覆盖层 (双栏布局) -->
+    <div class="directory-overlay" id="directoryOverlay">
+        <!-- 左侧分类 -->
+        <div class="dir-sidebar">
+            <div class="sidebar-title">资源分类</div>
+            <button class="category-btn teacher active" onclick="switchCategory('teacher')">
+                <div class="category-icon">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                </div>
+                <div class="category-info">
+                    <h3>教师教案</h3>
+                    <span>Teacher's Guide</span>
+                </div>
+            </button>
+            <button class="category-btn student" onclick="switchCategory('student')">
+                <div class="category-icon">
+                    <i class="fas fa-book-reader"></i>
+                </div>
+                <div class="category-info">
+                    <h3>学生笔记</h3>
+                    <span>Student Notes</span>
+                </div>
+            </button>
+        </div>
+        <!-- 右侧章节网格 -->
+        <div class="dir-content">
+            <div class="dir-header">
+                <div>
+                    <h2 id="currentCategoryTitle">教师教案</h2>
+                    <p id="currentCategoryDesc">共 13 章教学资源，含在线阅读与 PDF 下载</p>
+                </div>
+            </div>
+            <div class="chapter-grid" id="chapterGrid">
+                <!-- JS 生成 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 5. 内容区域 -->
+    <div class="iframe-container" id="iframeContainer">
+        <iframe id="contentFrame" src="about:blank"></iframe>
+    </div>
+
+<script>
+    // === 1. 章节数据 ===
+    const chapters = [
+        { num: 1, title: "函数与初等函数", subtitle: "Functions & Elementary Functions" },
+        { num: 2, title: "极限与连续", subtitle: "Limits & Continuity" },
+        { num: 3, title: "导数与微分", subtitle: "Derivatives & Differentials" },
+        { num: 4, title: "导数应用", subtitle: "Applications of Derivatives" },
+        { num: 5, title: "不定积分", subtitle: "Indefinite Integrals" },
+        { num: 6, title: "定积分", subtitle: "Definite Integrals" },
+        { num: 7, title: "常微分方程", subtitle: "Ordinary Differential Equations" },
+        { num: 8, title: "多元函数微分学", subtitle: "Multivariable Calculus" },
+        { num: 9, title: "多元函数积分学初步", subtitle: "Multiple Integrals" },
+        { num: 10, title: "线性代数", subtitle: "Linear Algebra" },
+        { num: 11, title: "无穷级数", subtitle: "Infinite Series" },
+        { num: 12, title: "向量代数与空间解析几何", subtitle: "Vector Algebra & Analytic Geometry" },
+        { num: 13, title: "概率与统计", subtitle: "Probability & Statistics" }
+    ];
+
+    // 文件名映射
+    const fileMap = {
+        teacher: {
+            html: (ch) => `第${ch.num}章${ch.title}-教师教案.html`,
+            pdf: (ch) => `第${ch.num}章${ch.title}-教师教案-紧凑版.pdf`
+        },
+        student: {
+            html: (ch) => `第${ch.num}章${ch.title}-学生笔记.html`,
+            pdf: (ch) => `第${ch.num}章${ch.title}-学生笔记-紧凑版.pdf`
+        }
+    };
+
+    let currentCategory = 'teacher';
+
+    // === 2. 初始化与交互 ===
+    function init() {
+        renderChapters('teacher');
+        initGeoAnimation();
+        
+        // 自动打开目录
+        setTimeout(toggleDirectory, 500);
+    }
+
+    function switchCategory(category) {
+        currentCategory = category;
+        
+        // 更新按钮高亮
+        document.querySelectorAll('.category-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        document.querySelector(`.category-btn.${category}`).classList.add('active');
+        
+        // 更新标题
+        if (category === 'teacher') {
+            document.getElementById('currentCategoryTitle').textContent = '教师教案';
+            document.getElementById('currentCategoryDesc').textContent = '共 13 章教学资源，含在线阅读与 PDF 下载';
+        } else {
+            document.getElementById('currentCategoryTitle').textContent = '学生笔记';
+            document.getElementById('currentCategoryDesc').textContent = '共 13 章学习笔记，含在线阅读与 PDF 下载';
+        }
+        
+        renderChapters(category);
+    }
+
+    function renderChapters(category) {
+        const grid = document.getElementById('chapterGrid');
+        grid.innerHTML = '';
+        
+        chapters.forEach(ch => {
+            const card = document.createElement('div');
+            card.className = `chapter-card ${category}`;
+            
+            const htmlFile = fileMap[category].html(ch);
+            const pdfFile = fileMap[category].pdf(ch);
+            
+            card.innerHTML = `
+                <div class="chapter-header">
+                    <div class="chapter-num">${ch.num}</div>
+                    <div class="chapter-title">
+                        <h3>第${ch.num}章 ${ch.title}</h3>
+                        <span>${ch.subtitle}</span>
+                    </div>
+                </div>
+                <div class="chapter-actions">
+                    <button class="action-btn view-btn ${category}" onclick="loadContent('${htmlFile}', '第${ch.num}章 ${ch.title}')">
+                        <i class="fas fa-eye"></i>
+                        在线阅读
+                    </button>
+                    <a class="action-btn download-btn" href="${pdfFile}" download title="下载PDF">
+                        <i class="fas fa-download"></i>
+                        下载PDF
+                    </a>
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+    }
+
+    // === 3. 核心功能 ===
+    function toggleDirectory() {
+        const overlay = document.getElementById('directoryOverlay');
+        const iframeContainer = document.getElementById('iframeContainer');
+        const welcome = document.getElementById('welcomeScreen');
+
+        if(iframeContainer.classList.contains('active')) {
+            // 从内容返回
+            iframeContainer.classList.remove('active');
+            document.querySelector('.nav-brand h1').textContent = '教学资源中心';
+            overlay.classList.add('active');
+            // 重置 iframe
+            setTimeout(() => { document.getElementById('contentFrame').src = 'about:blank'; }, 500);
+        } else if (overlay.classList.contains('active')) {
+            // 从目录关闭 (去欢迎页)
+            overlay.classList.remove('active');
+            welcome.style.opacity = '1';
+        } else {
+            // 打开目录
+            welcome.style.opacity = '0';
+            setTimeout(() => { overlay.classList.add('active'); }, 200);
+        }
+    }
+
+    function loadContent(url, title) {
+        // 在新标签页打开
+        window.open(url, '_blank');
+    }
+
+    // === 4. 背景动画 (极简几何) ===
+    function initGeoAnimation() {
+        const canvas = document.getElementById('geo-canvas');
+        const ctx = canvas.getContext('2d');
+        let w, h;
+        const shapes = [];
+        const colors = ['rgba(37, 99, 235, 0.04)', 'rgba(234, 88, 12, 0.04)', 'rgba(13, 148, 136, 0.04)'];
+
+        function resize() {
+            w = canvas.width = window.innerWidth;
+            h = canvas.height = window.innerHeight;
+        }
+
+        class Shape {
+            constructor() { this.init(); }
+            init() {
+                this.x = Math.random() * w;
+                this.y = Math.random() * h;
+                this.vx = (Math.random() - 0.5) * 0.4;
+                this.vy = (Math.random() - 0.5) * 0.4;
+                this.size = Math.random() * 50 + 25;
+                this.type = Math.floor(Math.random() * 3);
+                this.color = colors[Math.floor(Math.random() * colors.length)];
+                this.angle = Math.random() * Math.PI * 2;
+                this.vAngle = (Math.random() - 0.5) * 0.008;
+            }
+            update() {
+                this.x += this.vx; this.y += this.vy; this.angle += this.vAngle;
+                if(this.x<-100||this.x>w+100||this.y<-100||this.y>h+100) this.init();
+            }
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.angle);
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                if(this.type===0) ctx.arc(0,0,this.size,0,Math.PI*2);
+                else if(this.type===1) ctx.rect(-this.size,-this.size,this.size*2,this.size*2);
+                else { ctx.moveTo(0,-this.size); ctx.lineTo(this.size,this.size); ctx.lineTo(-this.size,this.size); }
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        for(let i=0; i<12; i++) shapes.push(new Shape());
+        
+        function animate() {
+            ctx.clearRect(0,0,w,h);
+            shapes.forEach(s => { s.update(); s.draw(); });
+            requestAnimationFrame(animate);
+        }
+
+        window.addEventListener('resize', resize);
+        resize();
+        animate();
+    }
+
+    window.addEventListener('DOMContentLoaded', init);
+
+</script>
+</body>
+</html>
+

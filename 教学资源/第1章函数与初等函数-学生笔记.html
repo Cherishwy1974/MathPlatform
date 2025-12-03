@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>第1章函数与初等函数-学生笔记.html</title>
+    
+<style>
+    @page {
+        size: A4;
+        margin: 1cm;
+    }
+    body {
+        font-family: "Microsoft YaHei", "Segoe UI", sans-serif;
+        font-size: 10pt;
+        line-height: 1.4;
+        color: #2c3e50;
+        margin: 0;
+        padding: 0;
+        background-color: #fff;
+    }
+    
+    /* Headers */
+    h1 {
+        font-size: 16pt;
+        text-align: center;
+        margin: 15px 0;
+        padding: 10px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    h2 {
+        font-size: 13pt;
+        margin: 15px 0 8px 0;
+        padding: 5px 10px;
+        border-left: 5px solid #764ba2;
+        background-color: #f3f0ff;
+        color: #4a235a;
+        border-radius: 0 4px 4px 0;
+    }
+    h3 {
+        font-size: 11pt;
+        margin: 10px 0 5px 0;
+        color: #2980b9;
+        font-weight: bold;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 2px;
+    }
+    h4 {
+        font-size: 10pt;
+        margin: 8px 0 4px 0;
+        color: #16a085;
+        font-weight: bold;
+    }
+
+    /* Text & Lists */
+    p {
+        margin: 5px 0;
+        text-align: justify;
+    }
+    ul, ol {
+        margin: 5px 0;
+        padding-left: 20px;
+    }
+    li {
+        margin-bottom: 3px;
+    }
+    strong {
+        color: #c0392b;
+    }
+
+    /* Components */
+    blockquote {
+        margin: 10px 0;
+        padding: 8px 12px;
+        background-color: #e8f6f3;
+        border-left: 4px solid #1abc9c;
+        border-radius: 4px;
+        font-size: 9.5pt;
+        color: #0e6251;
+    }
+    
+    /* Tables */
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 10px 0;
+        font-size: 9pt;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        border-radius: 4px;
+        overflow: hidden;
+    }
+    th, td {
+        border: 1px solid #dcdde1;
+        padding: 6px;
+        text-align: left;
+        vertical-align: top;
+    }
+    th {
+        background-color: #34495e;
+        color: white;
+        text-align: center;
+        font-weight: 600;
+    }
+    tr:nth-child(even) {
+        background-color: #f8f9fa;
+    }
+    tr:hover {
+        background-color: #eaf2f8;
+    }
+
+    /* Lesson Header Box */
+    .lesson-header {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 15px;
+        font-size: 9pt;
+        border: 1px solid #a9dfbf;
+        padding: 10px;
+        background: #eafaf1;
+        border-radius: 6px;
+    }
+    .lesson-header div {
+        flex: 1 1 30%;
+    }
+    .section-title {
+        font-weight: bold;
+        color: #27ae60;
+        margin-right: 5px;
+    }
+
+    /* Examples/Exercises */
+    .example {
+        background-color: #fff8e1;
+        border: 1px solid #ffe082;
+        padding: 8px;
+        margin: 8px 0;
+        border-radius: 6px;
+        position: relative;
+    }
+    .example-title {
+        font-weight: bold;
+        color: #f39c12;
+        display: block;
+        margin-bottom: 4px;
+    }
+
+    /* Utilities */
+    .page-break {
+        page-break-after: always;
+    }
+    .formula {
+        text-align: center;
+        margin: 10px 0;
+        font-family: "Times New Roman", serif;
+        font-style: italic;
+        background: #f4f6f7;
+        padding: 8px;
+        border-radius: 4px;
+        border: 1px dashed #bdc3c7;
+    }
+    
+    /* Print Optimizations */
+    @media print {
+        body {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+    }
+</style>
+<!-- MathJax Configuration -->
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\(', '\)']],
+    displayMath: [['$$', '$$'], ['\[', '\]']],
+    processEscapes: true
+  },
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  }
+};
+</script>
+<script id="MathJax-script" async src="../common-assets/js/mathjax-tex-chtml.js"></script>
+
+</head>
+<body>
+<h1>第一章《函数与初等函数》讲义</h1>
+<blockquote><strong>学习目标</strong>：<br>1. 深入理解函数的概念和表示方法<br>2. 熟练掌握函数的基本性质<br>3. 掌握基本初等函数的性质和图像<br>4. 理解复合函数的概念和求导<br>5. 培养数学抽象能力和逻辑推理能力</blockquote>
+<blockquote><strong>学习资源</strong>：<br>- 教材：《高等数学》第1章<br>- 课件：《第1章函数与初等函数》<br>- 实验：Lab1-1 至 Lab1-4 仿真实验<br>- 练习：题库函数与初等函数题</blockquote>
+<p>---</p>
+<div class="page-break"></div>
+<h1>第一讲：函数与初等函数</h1>
+<h2>1.1 函数的概念</h2>
+<h3>1.1.1 函数的定义</h3>
+<p><strong>定义1</strong>：设$D$是实数集$R$的一个子集，如果对于$D$中的每一个数$x$，按照某种对应法则$f$，都有唯一确定的实数$y$与之对应，则称$f$是定义在$D$上的函数，记作$y = f(x)$。</p>
+<p><strong>函数的三要素</strong>：</p>
+<p>1. <strong>定义域</strong>：$D$，自变量的取值范围</p>
+<p>2. <strong>值域</strong>：$f(D) = \{y | y = f(x), x \in D\}$，因变量的取值范围</p>
+<p>3. <strong>对应法则</strong>：$f$，从$x$到$y$的对应关系</p>
+<p><strong>函数的表示方法</strong>：</p>
+<p>1. <strong>解析法</strong>：用数学表达式表示，如$y = x^2 + 2x + 1$</p>
+<p>2. <strong>图像法</strong>：用图形表示，如平面上的曲线</p>
+<p>3. <strong>表格法</strong>：用表格表示，如实验数据</p>
+<p>4. <strong>描述法</strong>：用文字描述，如"温度随时间的变化"</p>
+<h3>1.1.2 函数的判定</h3>
+<p><strong>函数判定标准</strong>：对于定义域内的每一个$x$，都有唯一确定的$y$与之对应。</p>
+<p><strong>例题1</strong>：判断下列关系是否为函数：</p>
+<p>（1）$y = x^2$</p>
+<p>（2）$x^2 + y^2 = 1$</p>
+<p>（3）$y = \pm\sqrt{x}$</p>
+<p><strong>解</strong>：</p>
+<p>（1）是函数，因为对于每个$x \in R$，都有唯一的$y = x^2 \geq 0$与之对应</p>
+<p>（2）不是函数，因为对于$x = 0$，有$y = \pm 1$两个值</p>
+<p>（3）不是函数，因为对于$x > 0$，有$y = \pm\sqrt{x}$两个值</p>
+<h3>1.1.3 函数的定义域</h3>
+<p><strong>定义域求解方法</strong>：</p>
+<p>1. 分母不为零</p>
+<p>2. 偶次根号下非负</p>
+<p>3. 对数函数真数大于零</p>
+<p>4. 反三角函数值域限制</p>
+<p><strong>例题2</strong>：求函数$f(x) = \frac{1}{\sqrt{x-1}}$的定义域。</p>
+<p><strong>解</strong>：要使函数有意义，必须：</p>
+<p>1. $x - 1 > 0$，即$x > 1$</p>
+<p>2. $\sqrt{x-1} \neq 0$，即$x \neq 1$</p>
+<p>综合得定义域为$D = (1, +\infty)$</p>
+<h2>1.2 函数的基本性质</h2>
+<h3>1.2.1 有界性</h3>
+<p><strong>定义</strong>：如果存在常数$M$，使得$|f(x)| \leq M$对所有$x \in D$成立，则称$f(x)$有界。</p>
+<p><strong>有界性判定</strong>：</p>
+<ul>
+<li>有界：$|f(x)| \leq M$（存在上界和下界）</li>
+<li>无界：不存在这样的常数$M$</li>
+</ul>
+<p><strong>例题3</strong>：判断函数$f(x) = \sin x$的有界性。</p>
+<p><strong>解</strong>：由于$|\sin x| \leq 1$对所有$x \in R$成立，所以$f(x) = \sin x$是有界函数。</p>
+<h3>1.2.2 单调性</h3>
+<p><strong>定义</strong>：</p>
+<ul>
+<li>如果对于$x_1, x_2 \in D$，当$x_1 < x_2$时，有$f(x_1) < f(x_2)$，则称$f(x)$单调递增</li>
+<li>如果对于$x_1, x_2 \in D$，当$x_1 < x_2$时，有$f(x_1) > f(x_2)$，则称$f(x)$单调递减</li>
+</ul>
+<p><strong>单调性判定方法</strong>：</p>
+<p>1. 定义法：比较函数值大小</p>
+<p>2. 导数法：$f'(x) > 0$则单调递增，$f'(x) < 0$则单调递减</p>
+<p><strong>例题4</strong>：判断函数$f(x) = x^2$的单调性。</p>
+<p><strong>解</strong>：</p>
+<ul>
+<li>当$x < 0$时，$f(x) = x^2$单调递减</li>
+<li>当$x > 0$时，$f(x) = x^2$单调递增</li>
+</ul>
+<h3>1.2.3 奇偶性</h3>
+<p><strong>定义</strong>：</p>
+<ul>
+<li>如果$f(-x) = f(x)$对所有$x \in D$成立，则称$f(x)$为偶函数</li>
+<li>如果$f(-x) = -f(x)$对所有$x \in D$成立，则称$f(x)$为奇函数</li>
+</ul>
+<p><strong>奇偶性判定</strong>：</p>
+<p>1. 偶函数：$f(-x) = f(x)$，图像关于$y$轴对称</p>
+<p>2. 奇函数：$f(-x) = -f(x)$，图像关于原点对称</p>
+<p><strong>例题5</strong>：判断函数$f(x) = x^2$的奇偶性。</p>
+<p><strong>解</strong>：$f(-x) = (-x)^2 = x^2 = f(x)$，所以$f(x) = x^2$是偶函数。</p>
+<h3>1.2.4 周期性</h3>
+<p><strong>定义</strong>：如果存在常数$T > 0$，使得$f(x + T) = f(x)$对所有$x \in D$成立，则称$f(x)$为周期函数，$T$称为周期。</p>
+<p><strong>最小正周期</strong>：如果$T$是函数$f(x)$的周期，且$T$是所有周期中最小的正数，则称$T$为最小正周期。</p>
+<p><strong>例题6</strong>：判断函数$f(x) = \sin x$的周期性。</p>
+<p><strong>解</strong>：$f(x + 2\pi) = \sin(x + 2\pi) = \sin x = f(x)$，所以$f(x) = \sin x$是周期函数，周期为$2\pi$。</p>
+<h2>1.3 基本初等函数</h2>
+<h3>1.3.1 幂函数</h3>
+<p><strong>定义</strong>：$y = x^\alpha$（$\alpha$为常数）</p>
+<p><strong>性质</strong>：</p>
+<ul>
+<li>当$\alpha > 0$时，函数在$(0, +\infty)$上单调递增</li>
+<li>当$\alpha < 0$时，函数在$(0, +\infty)$上单调递减</li>
+<li>当$\alpha = 0$时，$y = 1$（常数函数）</li>
+</ul>
+<p><strong>常见幂函数</strong>：</p>
+<ul>
+<li>$y = x$（一次函数）</li>
+<li>$y = x^2$（二次函数）</li>
+<li>$y = x^3$（三次函数）</li>
+<li>$y = \sqrt{x} = x^{1/2}$（平方根函数）</li>
+<li>$y = \frac{1}{x} = x^{-1}$（反比例函数）</li>
+</ul>
+<h3>1.3.2 指数函数</h3>
+<p><strong>定义</strong>：$y = a^x$（$a > 0, a \neq 1$）</p>
+<p><strong>性质</strong>：</p>
+<ul>
+<li>定义域：$(-\infty, +\infty)$</li>
+<li>值域：$(0, +\infty)$</li>
+<li>当$a > 1$时，函数单调递增</li>
+<li>当$0 < a < 1$时，函数单调递减</li>
+<li>图像经过点$(0, 1)$</li>
+</ul>
+<p><strong>例题7</strong>：画出函数$y = 2^x$的图像并分析其性质。</p>
+<p><strong>解</strong>：$y = 2^x$是指数函数</p>
+<ul>
+<li>定义域为$(-\infty, +\infty)$</li>
+<li>值域为$(0, +\infty)$</li>
+<li>单调递增</li>
+<li>当$x \to -\infty$时，$y \to 0$；当$x \to +\infty$时，$y \to +\infty$</li>
+<li>图像经过点$(0, 1)$</li>
+</ul>
+<h3>1.3.3 对数函数</h3>
+<p><strong>定义</strong>：$y = \log_a x$（$a > 0, a \neq 1$）</p>
+<p><strong>性质</strong>：</p>
+<ul>
+<li>定义域：$(0, +\infty)$</li>
+<li>值域：$(-\infty, +\infty)$</li>
+<li>当$a > 1$时，函数单调递增</li>
+<li>当$0 < a < 1$时，函数单调递减</li>
+<li>图像经过点$(1, 0)$</li>
+</ul>
+<p><strong>例题8</strong>：求函数$y = \log_2(x-1)$的定义域和值域。</p>
+<p><strong>解</strong>：</p>
+<ul>
+<li>定义域：$x - 1 > 0$，即$x > 1$，所以$D = (1, +\infty)$</li>
+<li>值域：由于$\log_2(x-1)$可以取到所有实数值，所以值域为$R = (-\infty, +\infty)$</li>
+</ul>
+<h3>1.3.4 三角函数</h3>
+<p><strong>基本三角函数</strong>：</p>
+<ul>
+<li>$y = \sin x$：定义域$(-\infty, +\infty)$，值域$[-1, 1]$</li>
+<li>$y = \cos x$：定义域$(-\infty, +\infty)$，值域$[-1, 1]$</li>
+<li>$y = \tan x$：定义域$x \neq k\pi + \frac{\pi}{2}$，值域$(-\infty, +\infty)$</li>
+<li>$y = \cot x$：定义域$x \neq k\pi$，值域$(-\infty, +\infty)$</li>
+</ul>
+<p><strong>性质</strong>：</p>
+<ul>
+<li>$\sin x$和$\cos x$都是周期函数，周期为$2\pi$</li>
+<li>$\tan x$和$\cot x$都是周期函数，周期为$\pi$</li>
+<li>$\sin x$是奇函数，$\cos x$是偶函数</li>
+</ul>
+<h3>1.3.5 反三角函数</h3>
+<p><strong>基本反三角函数</strong>：</p>
+<ul>
+<li>$y = \arcsin x$：定义域$[-1, 1]$，值域$[-\frac{\pi}{2}, \frac{\pi}{2}]$</li>
+<li>$y = \arccos x$：定义域$[-1, 1]$，值域$[0, \pi]$</li>
+<li>$y = \arctan x$：定义域$(-\infty, +\infty)$，值域$(-\frac{\pi}{2}, \frac{\pi}{2})$</li>
+<li>$y = \text{arccot } x$：定义域$(-\infty, +\infty)$，值域$(0, \pi)$</li>
+</ul>
+<p><strong>性质</strong>：</p>
+<ul>
+<li>反三角函数都是单调函数</li>
+<li>$\arcsin x$是奇函数</li>
+<li>$\arccos x$既不是奇函数也不是偶函数</li>
+</ul>
+<h2>1.4 复合函数</h2>
+<h3>1.4.1 复合函数的定义</h3>
+<p><strong>定义</strong>：设$y = f(u)$，$u = g(x)$，则$y = f[g(x)]$称为复合函数。</p>
+<p>其中$u$称为中间变量。</p>
+<h3>1.4.2 复合函数的定义域</h3>
+<p>复合函数$y = f[g(x)]$的定义域是使得$g(x)$的值域包含在$f(u)$的定义域内的所有$x$的集合。</p>
+<p><strong>例题9</strong>：求复合函数$y = \ln(\sin x)$的定义域。</p>
+<p><strong>解</strong>：要使函数有意义，必须$\sin x > 0$</p>
+<p>所以定义域为$D = \{x | 2k\pi < x < (2k+1)\pi, k \in Z\}$</p>
+<h3>1.4.3 复合函数的求导</h3>
+<p><strong>链式法则</strong>：如果$y = f(u)$，$u = g(x)$都可导，则</p>
+<p>$\frac{dy}{dx} = \frac{dy}{du} \cdot \frac{du}{dx}$</p>
+<p><strong>例题10</strong>：求复合函数$y = \sin(x^2)$的导数。</p>
+<p><strong>解</strong>：设$u = x^2$，则$y = \sin u$</p>
+<p>$\frac{dy}{dx} = \frac{dy}{du} \cdot \frac{du}{dx} = \cos u \cdot 2x = 2x\cos(x^2)$</p>
+<p><strong>例题11</strong>：求复合函数$y = e^{x^2 + 1}$的导数。</p>
+<p><strong>解</strong>：设$u = x^2 + 1$，则$y = e^u$</p>
+<p>$\frac{dy}{dx} = \frac{dy}{du} \cdot \frac{du}{dx} = e^u \cdot 2x = 2xe^{x^2 + 1}$</p>
+<h2>1.5 典型例题</h2>
+<h3>例题12：函数性质综合</h3>
+<p>判断函数$f(x) = x^2$的性质。</p>
+<p><strong>解</strong>：</p>
+<p>1. <strong>有界性</strong>：在有限区间上有界，在无穷区间上无界</p>
+<p>2. <strong>单调性</strong>：在$(-\infty, 0]$上单调递减，在$[0, +\infty)$上单调递增</p>
+<p>3. <strong>奇偶性</strong>：$f(-x) = (-x)^2 = x^2 = f(x)$，所以是偶函数</p>
+<p>4. <strong>周期性</strong>：不是周期函数</p>
+<h3>例题13：复合函数求导</h3>
+<p>求复合函数$y = \sin(x^2)$的导数。</p>
+<p><strong>解</strong>：设$u = x^2$，则$y = \sin u$</p>
+<p>$\frac{dy}{dx} = \frac{dy}{du} \cdot \frac{du}{dx} = \cos u \cdot 2x = 2x\cos(x^2)$</p>
+<h3>例题14：定义域求解</h3>
+<p>求函数$f(x) = \frac{1}{\sqrt{x-1}}$的定义域。</p>
+<p><strong>解</strong>：要使函数有意义，必须：</p>
+<p>1. $x - 1 > 0$，即$x > 1$</p>
+<p>2. $\sqrt{x-1} \neq 0$，即$x \neq 1$</p>
+<p>综合得定义域为$D = (1, +\infty)$</p>
+<p>---</p>
+<div class="page-break"></div>
+<h2>附录：常用公式汇总</h2>
+<h3>函数性质</h3>
+<ul>
+<li>有界性：$|f(x)| \leq M$</li>
+<li>单调性：$x_1 < x_2 \Rightarrow f(x_1) < f(x_2)$（递增）</li>
+<li>奇偶性：$f(-x) = f(x)$（偶），$f(-x) = -f(x)$（奇）</li>
+<li>周期性：$f(x + T) = f(x)$</li>
+</ul>
+<h3>基本初等函数</h3>
+<ul>
+<li>幂函数：$y = x^\alpha$</li>
+<li>指数函数：$y = a^x$（$a > 0, a \neq 1$）</li>
+<li>对数函数：$y = \log_a x$（$a > 0, a \neq 1$）</li>
+<li>三角函数：$y = \sin x, \cos x, \tan x$</li>
+<li>反三角函数：$y = \arcsin x, \arccos x, \arctan x$</li>
+</ul>
+<h3>复合函数</h3>
+<ul>
+<li>定义：$y = f[g(x)]$</li>
+<li>求导：$\frac{dy}{dx} = \frac{dy}{du} \cdot \frac{du}{dx}$（链式法则）</li>
+</ul>
+<h3>常用导数公式</h3>
+<ul>
+<li>$(x^n)' = nx^{n-1}$</li>
+<li>$(a^x)' = a^x \ln a$</li>
+<li>$(e^x)' = e^x$</li>
+<li>$(\log_a x)' = \frac{1}{x \ln a}$</li>
+<li>$(\ln x)' = \frac{1}{x}$</li>
+<li>$(\sin x)' = \cos x$</li>
+<li>$(\cos x)' = -\sin x$</li>
+<li>$(\tan x)' = \sec^2 x$</li>
+</ul>
+<h2>学习建议</h2>
+<p>1. <strong>理论学习</strong>：深入理解基本概念和性质，掌握函数的三要素</p>
+<p>2. <strong>图像练习</strong>：多画函数图像，理解几何意义，培养空间想象能力</p>
+<p>3. <strong>实验操作</strong>：使用Lab1系列仿真实验，通过可视化加深理解</p>
+<p>4. <strong>工程应用</strong>：结合实际案例进行练习，培养数学建模能力</p>
+<p>5. <strong>综合训练</strong>：提高解决复杂问题的能力，掌握函数性质的综合运用</p>
+<p>6. <strong>记忆技巧</strong>：熟记基本初等函数的性质和图像特征</p>
+<p>7. <strong>解题方法</strong>：掌握函数性质判定的基本方法和步骤</p>
+<h2>课后练习</h2>
+<p>1. 判断下列关系是否为函数：</p>
+<p>- $y = x^2$</p>
+<p>- $x^2 + y^2 = 1$</p>
+<p>- $y = \pm\sqrt{x}$</p>
+<p>2. 求下列函数的定义域：</p>
+<p>- $f(x) = \frac{1}{\sqrt{x-1}}$</p>
+<p>- $f(x) = \ln(x-2)$</p>
+<p>- $f(x) = \arcsin(x-1)$</p>
+<p>3. 判断下列函数的奇偶性：</p>
+<p>- $f(x) = x^2$</p>
+<p>- $f(x) = x^3$</p>
+<p>- $f(x) = \sin x$</p>
+<p>- $f(x) = \cos x$</p>
+<p>4. 求下列复合函数的导数：</p>
+<p>- $y = \sin(x^2)$</p>
+<p>- $y = e^{x^2 + 1}$</p>
+<p>- $y = \ln(\sin x)$</p>
+<p>5. 画出下列函数的图像并分析其性质：</p>
+<p>- $y = 2^x$</p>
+<p>- $y = \log_2 x$</p>
+<p>- $y = \sin x$</p>
+</body>
+</html>

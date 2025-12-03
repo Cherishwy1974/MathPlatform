@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>极限与连续大师挑战</title>
+    <!-- 本地化资源 -->
+    <script src="../../common-assets/js/tailwind.min.js"></script>
+    <link rel="stylesheet" href="../../common-assets/css/lab1-material-symbols.css">
+    <script src="../../common-assets/js/mathjax-config.js"></script>
+    <script defer src="../../common-assets/js/mathjax-3.2.2-tex-svg.min.js"></script>
+    <link rel="stylesheet" href="../../网页资源/assets/lab2-13.css">
+</head>
+<body class="flex flex-col h-screen">
+
+<!-- Header -->
+<header class="header-panel h-16 flex items-center justify-between px-6 z-20 flex-none">
+    <div class="flex items-center gap-4">
+        <div class="p-2 bg-indigo-600 rounded-lg shadow-lg">
+            <span class="material-symbols-outlined text-white">school</span>
+        </div>
+        <div>
+            <h1 class="text-lg font-bold tracking-wide text-gray-800">极限大师</h1>
+            <div class="text-xs text-gray-500">挑战你的微积分直觉</div>
+        </div>
+    </div>
+    
+    <div class="flex items-center gap-8">
+        <div class="text-center">
+            <div class="text-xs text-gray-500 uppercase tracking-wider mb-0.5">关卡</div>
+            <div class="text-xl font-bold stat-indigo" id="level-display">1</div>
+        </div>
+        <div class="text-center">
+            <div class="text-xs text-gray-500 uppercase tracking-wider mb-0.5">进度</div>
+            <div class="text-xl font-bold stat-emerald">
+                <span id="score-display">0</span>
+                <span class="text-sm text-gray-400 font-normal mx-1">/</span>
+                <span id="total-display" class="text-gray-500 text-lg">6</span>
+            </div>
+        </div>
+    </div>
+    
+    <button onclick="game.showExitConfirm()" class="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-500 hover:text-gray-700">
+        <span class="material-symbols-outlined">logout</span>
+    </button>
+</header>
+
+<!-- Game Area -->
+<main class="flex-1 relative overflow-y-auto no-scrollbar flex items-center justify-center p-4 bg-gray-50" id="game-area">
+    <div class="game-grid" id="grid"></div>
+</main>
+
+<!-- Level Complete Overlay -->
+<div class="overlay fixed inset-0 z-50 flex items-center justify-center" id="level-overlay">
+    <div class="modal rounded-2xl p-8 max-w-sm w-full text-center">
+        <div class="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6 ring-4 ring-emerald-200">
+            <span class="material-symbols-outlined text-5xl text-emerald-600">emoji_events</span>
+        </div>
+        <h2 class="text-3xl font-bold text-gray-800 mb-2">关卡完成!</h2>
+        <p class="text-gray-500 mb-8">你已经掌握了本关的知识点。</p>
+        <button onclick="game.nextLevel()" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold text-lg shadow-lg transition-all hover:translate-y-0.5 active:translate-y-1">
+            下一关
+        </button>
+    </div>
+</div>
+
+<!-- Game Complete Overlay -->
+<div class="overlay fixed inset-0 z-50 flex items-center justify-center" id="end-overlay">
+    <div class="modal rounded-2xl p-8 max-w-sm w-full text-center border-2 border-amber-200">
+        <div class="w-24 h-24 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-6 ring-4 ring-amber-200">
+            <span class="material-symbols-outlined text-6xl text-amber-600">military_tech</span>
+        </div>
+        <h2 class="text-3xl font-bold text-gray-800 mb-2">通关大师!</h2>
+        <p class="text-gray-500 mb-8">你完成了所有挑战，是个真正的极限专家！</p>
+        <div class="grid grid-cols-2 gap-4">
+            <button onclick="game.restart()" class="py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-xl font-bold transition-colors">
+                重新开始
+            </button>
+            <button onclick="window.location.href='index.html'" class="py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold shadow-lg transition-colors">
+                返回游戏目录
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- 返回首页面板 -->
+<div class="return-home-panel" id="returnHomePanel">
+    <a href="index.html" class="return-home-btn">
+        <span class="material-symbols-outlined">home</span>
+        返回游戏目录
+    </a>
+</div>
+
+<script src="../../网页资源/assets/lab2-13.js"></script>
+</body>
+</html>

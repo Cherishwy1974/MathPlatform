@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>第7章常微分方程-学生笔记.html</title>
+    
+<style>
+    @page {
+        size: A4;
+        margin: 1cm;
+    }
+    body {
+        font-family: "Microsoft YaHei", "Segoe UI", sans-serif;
+        font-size: 10pt;
+        line-height: 1.4;
+        color: #2c3e50;
+        margin: 0;
+        padding: 0;
+        background-color: #fff;
+    }
+    
+    /* Headers */
+    h1 {
+        font-size: 16pt;
+        text-align: center;
+        margin: 15px 0;
+        padding: 10px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    h2 {
+        font-size: 13pt;
+        margin: 15px 0 8px 0;
+        padding: 5px 10px;
+        border-left: 5px solid #764ba2;
+        background-color: #f3f0ff;
+        color: #4a235a;
+        border-radius: 0 4px 4px 0;
+    }
+    h3 {
+        font-size: 11pt;
+        margin: 10px 0 5px 0;
+        color: #2980b9;
+        font-weight: bold;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 2px;
+    }
+    h4 {
+        font-size: 10pt;
+        margin: 8px 0 4px 0;
+        color: #16a085;
+        font-weight: bold;
+    }
+
+    /* Text & Lists */
+    p {
+        margin: 5px 0;
+        text-align: justify;
+    }
+    ul, ol {
+        margin: 5px 0;
+        padding-left: 20px;
+    }
+    li {
+        margin-bottom: 3px;
+    }
+    strong {
+        color: #c0392b;
+    }
+
+    /* Components */
+    blockquote {
+        margin: 10px 0;
+        padding: 8px 12px;
+        background-color: #e8f6f3;
+        border-left: 4px solid #1abc9c;
+        border-radius: 4px;
+        font-size: 9.5pt;
+        color: #0e6251;
+    }
+    
+    /* Tables */
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 10px 0;
+        font-size: 9pt;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        border-radius: 4px;
+        overflow: hidden;
+    }
+    th, td {
+        border: 1px solid #dcdde1;
+        padding: 6px;
+        text-align: left;
+        vertical-align: top;
+    }
+    th {
+        background-color: #34495e;
+        color: white;
+        text-align: center;
+        font-weight: 600;
+    }
+    tr:nth-child(even) {
+        background-color: #f8f9fa;
+    }
+    tr:hover {
+        background-color: #eaf2f8;
+    }
+
+    /* Lesson Header Box */
+    .lesson-header {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 15px;
+        font-size: 9pt;
+        border: 1px solid #a9dfbf;
+        padding: 10px;
+        background: #eafaf1;
+        border-radius: 6px;
+    }
+    .lesson-header div {
+        flex: 1 1 30%;
+    }
+    .section-title {
+        font-weight: bold;
+        color: #27ae60;
+        margin-right: 5px;
+    }
+
+    /* Examples/Exercises */
+    .example {
+        background-color: #fff8e1;
+        border: 1px solid #ffe082;
+        padding: 8px;
+        margin: 8px 0;
+        border-radius: 6px;
+        position: relative;
+    }
+    .example-title {
+        font-weight: bold;
+        color: #f39c12;
+        display: block;
+        margin-bottom: 4px;
+    }
+
+    /* Utilities */
+    .page-break {
+        page-break-after: always;
+    }
+    .formula {
+        text-align: center;
+        margin: 10px 0;
+        font-family: "Times New Roman", serif;
+        font-style: italic;
+        background: #f4f6f7;
+        padding: 8px;
+        border-radius: 4px;
+        border: 1px dashed #bdc3c7;
+    }
+    
+    /* Print Optimizations */
+    @media print {
+        body {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+    }
+</style>
+<!-- MathJax Configuration -->
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\(', '\)']],
+    displayMath: [['$$', '$$'], ['\[', '\]']],
+    processEscapes: true
+  },
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  }
+};
+</script>
+<script id="MathJax-script" async src="../common-assets/js/mathjax-tex-chtml.js"></script>
+
+</head>
+<body>
+<h1>第七章《常微分方程》讲义</h1>
+<blockquote><strong>学习目标</strong>：<br>1. 理解常微分方程的概念和分类<br>2. 掌握一阶微分方程的求解方法<br>3. 掌握二阶微分方程的求解方法<br>4. 了解微分方程的实际应用<br>5. 培养数学建模和工程应用能力</blockquote>
+<blockquote><strong>学习资源</strong>：<br>- 教材：《高等数学》第7章<br>- 课件：《第7章常微分方程》<br>- 实验：Lab7-1 至 Lab7-4 仿真实验<br>- 练习：题库常微分方程题</blockquote>
+<p>---</p>
+<div class="page-break"></div>
+<h1>第一讲：常微分方程</h1>
+<h2>1.1 常微分方程的概念</h2>
+<h3>1.1.1 微分方程的定义</h3>
+<p><strong>定义</strong>：含有未知函数及其导数的方程称为微分方程。如果未知函数是一元函数，则称为常微分方程。</p>
+<h3>1.1.2 微分方程的分类</h3>
+<p>1. <strong>按阶数分类</strong>：一阶、二阶、高阶微分方程</p>
+<p>2. <strong>按线性性分类</strong>：线性、非线性微分方程</p>
+<p>3. <strong>按齐次性分类</strong>：齐次、非齐次微分方程</p>
+<h3>1.1.3 微分方程的解</h3>
+<p>1. <strong>通解</strong>：含有任意常数的解</p>
+<p>2. <strong>特解</strong>：满足特定初始条件的解</p>
+<p>3. <strong>初值问题</strong>：给定初始条件的微分方程</p>
+<h2>1.2 一阶微分方程</h2>
+<h3>1.2.1 可分离变量方程</h3>
+<p><strong>定义</strong>：形如$\frac{dy}{dx} = f(x)g(y)$的微分方程称为可分离变量方程。</p>
+<p><strong>求解步骤</strong>：</p>
+<p>1. 分离变量：$\frac{dy}{g(y)} = f(x)dx$</p>
+<p>2. 两边积分：$\int \frac{dy}{g(y)} = \int f(x)dx$</p>
+<p>3. 求出通解</p>
+<h3>1.2.2 一阶线性微分方程</h3>
+<p><strong>定义</strong>：形如$y' + P(x)y = Q(x)$的微分方程称为一阶线性微分方程。</p>
+<p><strong>求解步骤</strong>：</p>
+<p>1. 求积分因子：$\mu(x) = e^{\int P(x)dx}$</p>
+<p>2. 方程两边乘以积分因子</p>
+<p>3. 左边写成$\frac{d}{dx}[\mu(x)y]$的形式</p>
+<p>4. 两边积分求解</p>
+<h2>1.3 二阶微分方程</h2>
+<h3>1.3.1 二阶线性微分方程</h3>
+<p><strong>定义</strong>：形如$y'' + P(x)y' + Q(x)y = R(x)$的微分方程称为二阶线性微分方程。</p>
+<h3>1.3.2 二阶常系数线性微分方程</h3>
+<p>当$P(x) = p$，$Q(x) = q$为常数时，方程为</p>
+<p>$y'' + py' + qy = R(x)$</p>
+<h3>1.3.3 齐次方程的通解</h3>
+<p>对于齐次方程$y'' + py' + qy = 0$：</p>
+<p>1. 写出特征方程：$r^2 + pr + q = 0$</p>
+<p>2. 求特征根：$r_1, r_2$</p>
+<p>3. 根据特征根的情况写出通解：</p>
+<p>- 两个不等实根：$y = C_1e^{r_1x} + C_2e^{r_2x}$</p>
+<p>- 两个相等实根：$y = (C_1 + C_2x)e^{rx}$</p>
+<p>- 共轭复根：$y = e^{\alpha x}(C_1\cos\beta x + C_2\sin\beta x)$</p>
+<h2>1.4 微分方程的应用</h2>
+<h3>1.4.1 人口增长模型</h3>
+<p>$\frac{dP}{dt} = kP$</p>
+<p>解：$P(t) = P_0e^{kt}$</p>
+<h3>1.4.2 放射性衰变</h3>
+<p>$\frac{dN}{dt} = -\lambda N$</p>
+<p>解：$N(t) = N_0e^{-\lambda t}$</p>
+<h3>1.4.3 弹簧振动</h3>
+<p>$m\frac{d^2x}{dt^2} + kx = 0$</p>
+<p>解：$x(t) = A\cos(\omega t + \phi)$，其中$\omega = \sqrt{\frac{k}{m}}$</p>
+<h3>1.4.4 电路分析</h3>
+<p>$L\frac{d^2q}{dt^2} + R\frac{dq}{dt} + \frac{q}{C} = E(t)$</p>
+<h2>1.5 典型例题</h2>
+<h3>例题1：可分离变量方程</h3>
+<p>求解微分方程$\frac{dy}{dx} = \frac{y}{x}$。</p>
+<p><strong>解</strong>：这是可分离变量方程</p>
+<p>分离变量：$\frac{dy}{y} = \frac{dx}{x}$</p>
+<p>两边积分：$\int \frac{dy}{y} = \int \frac{dx}{x}$</p>
+<p>$\ln|y| = \ln|x| + C_1$</p>
+<p>$|y| = e^{\ln|x| + C_1} = e^{C_1}|x|$</p>
+<p>所以$y = Cx$（$C = \pm e^{C_1}$）</p>
+<h3>例题2：一阶线性方程</h3>
+<p>求解微分方程$y' + 2y = e^x$。</p>
+<p><strong>解</strong>：这是一阶线性微分方程</p>
+<p>$P(x) = 2$，$Q(x) = e^x$</p>
+<p>积分因子：$\mu(x) = e^{\int 2dx} = e^{2x}$</p>
+<p>方程两边乘以$e^{2x}$：</p>
+<p>$e^{2x}y' + 2e^{2x}y = e^{3x}$</p>
+<p>左边：$\frac{d}{dx}[e^{2x}y] = e^{3x}$</p>
+<p>两边积分：$e^{2x}y = \int e^{3x}dx = \frac{1}{3}e^{3x} + C$</p>
+<p>所以$y = \frac{1}{3}e^x + Ce^{-2x}$</p>
+<h3>例题3：二阶齐次方程</h3>
+<p>求解微分方程$y'' - 3y' + 2y = 0$。</p>
+<p><strong>解</strong>：这是二阶常系数线性齐次方程</p>
+<p>特征方程：$r^2 - 3r + 2 = 0$</p>
+<p>$(r - 1)(r - 2) = 0$</p>
+<p>特征根：$r_1 = 1$，$r_2 = 2$</p>
+<p>通解：$y = C_1e^x + C_2e^{2x}$</p>
+<h3>例题4：重根情况</h3>
+<p>求解微分方程$y'' + 4y' + 4y = 0$。</p>
+<p><strong>解</strong>：特征方程：$r^2 + 4r + 4 = 0$</p>
+<p>$(r + 2)^2 = 0$</p>
+<p>特征根：$r_1 = r_2 = -2$（重根）</p>
+<p>通解：$y = (C_1 + C_2x)e^{-2x}$</p>
+<h3>例题5：共轭复根</h3>
+<p>求解微分方程$y'' + 2y' + 5y = 0$。</p>
+<p><strong>解</strong>：特征方程：$r^2 + 2r + 5 = 0$</p>
+<p>$r = \frac{-2 \pm \sqrt{4 - 20}}{2} = \frac{-2 \pm 4i}{2} = -1 \pm 2i$</p>
+<p>特征根：$r_1 = -1 + 2i$，$r_2 = -1 - 2i$（共轭复根）</p>
+<p>通解：$y = e^{-x}(C_1\cos 2x + C_2\sin 2x)$</p>
+<h3>例题6：人口增长模型</h3>
+<p>某城市人口增长率为2%，初始人口为100万，求人口增长模型。</p>
+<p><strong>解</strong>：设人口为$P(t)$，增长率为$k = 0.02$</p>
+<p>微分方程：$\frac{dP}{dt} = 0.02P$</p>
+<p>初始条件：$P(0) = 100$</p>
+<p>求解：$\frac{dP}{P} = 0.02dt$</p>
+<p>$\int \frac{dP}{P} = \int 0.02dt$</p>
+<p>$\ln P = 0.02t + C$</p>
+<p>$P = Ce^{0.02t}$</p>
+<p>由$P(0) = 100$得$C = 100$</p>
+<p>所以$P(t) = 100e^{0.02t}$</p>
+<p>---</p>
+<div class="page-break"></div>
+<h2>附录：常用公式汇总</h2>
+<h3>一阶微分方程公式</h3>
+<ul>
+<li>可分离变量：$\frac{dy}{dx} = f(x)g(y) \Rightarrow \int \frac{dy}{g(y)} = \int f(x)dx$</li>
+<li>一阶线性：$y' + P(x)y = Q(x) \Rightarrow y = e^{-\int P(x)dx}\left[\int Q(x)e^{\int P(x)dx}dx + C\right]$</li>
+</ul>
+<h3>二阶微分方程公式</h3>
+<ul>
+<li>特征方程：$r^2 + pr + q = 0$</li>
+<li>通解形式：</li>
+</ul>  - 不等实根：$y = C_1e^{r_1x} + C_2e^{r_2x}$
+<p>- 相等实根：$y = (C_1 + C_2x)e^{rx}$</p>
+<p>- 共轭复根：$y = e^{\alpha x}(C_1\cos\beta x + C_2\sin\beta x)$</p>
+<h3>应用模型公式</h3>
+<ul>
+<li>人口增长：$P(t) = P_0e^{kt}$</li>
+<li>放射性衰变：$N(t) = N_0e^{-\lambda t}$</li>
+<li>弹簧振动：$x(t) = A\cos(\omega t + \phi)$</li>
+</ul>
+<h2>学习建议</h2>
+<p>1. <strong>理论学习</strong>：掌握基本概念和求解方法</p>
+<p>2. <strong>计算练习</strong>：多做典型例题和练习题</p>
+<p>3. <strong>实验操作</strong>：使用Lab7系列仿真实验</p>
+<p>4. <strong>工程应用</strong>：结合实际案例进行练习</p>
+<p>5. <strong>综合训练</strong>：提高解决复杂问题的能力</p>
+</body>
+</html>

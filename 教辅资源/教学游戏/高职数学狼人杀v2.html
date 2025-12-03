@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="dark">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>高职数学狼人杀 v6.0</title>
+    <!-- 本地化资源 -->
+    <script src="./assets/vendor/tailwindcss.min.js"></script>
+    <style>
+        * { box-sizing: border-box; }
+        body { 
+            font-family: system-ui, -apple-system, sans-serif; 
+            overflow: hidden; 
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .perspective-1000 { perspective: 1000px; }
+        .transform-style-3d { transform-style: preserve-3d; }
+        .backface-hidden { backface-visibility: hidden; }
+        .rotate-y-180 { transform: rotateY(180deg); }
+        .missing-slot {
+            display: inline-block;
+            min-width: 40px;
+            padding: 2px 8px;
+            margin: 0 2px;
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            border-radius: 4px;
+            color: #1a1a2e;
+            font-weight: bold;
+            text-align: center;
+            vertical-align: middle;
+        }
+        .missing-slot.filled { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+        .missing-slot.wolf-deleted { background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); }
+        .missing-slot.witch-restored { background: linear-gradient(135deg, #ec4899 0%, #db2777 100%); }
+        .step-reveal { opacity: 0; transform: translateY(20px); transition: all 0.5s ease-out; }
+        .step-reveal.active { opacity: 1; transform: translateY(0); }
+        .wolf-eye-anim { animation: wolf-pulse 3s infinite ease-in-out; }
+        @keyframes wolf-pulse {
+            0%, 100% { text-shadow: 0 0 10px #ef4444; transform: scale(1); }
+            50% { text-shadow: 0 0 30px #ef4444; transform: scale(1.1); }
+        }
+        .question-card {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.95) 100%);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.1);
+        }
+        .math-content { font-size: 1.2em; line-height: 2; }
+        .math-content mjx-container { display: inline !important; }
+        /* 高亮显示MathJax渲染后的占位符 */
+        .math-content mjx-container mjx-mtext:has-text("[???]"),
+        .math-content mjx-container mjx-mtext:has-text("[已删]") {
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #1a1a2e;
+            font-weight: bold;
+        }
+        /* 使用属性选择器作为备选方案 */
+        .math-content mjx-container mjx-mtext[data-placeholder="missing"] {
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #1a1a2e;
+            font-weight: bold;
+        }
+        .god-section { background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); }
+        body.projection-mode #controlSidebar { display: none !important; }
+        body.projection-mode #mainStage { width: 100% !important; }
+        body.projection-mode header { display: none !important; }
+    </style>
+</head>
+<body class="h-screen flex flex-col text-gray-200">
+
+<header class="h-12 bg-gray-900/80 border-b border-gray-800 flex items-center justify-between px-4 z-50">
+    <div class="flex items-center gap-2">
+        <span class="text-amber-500 text-xl">🧠</span>
+        <h1 class="text-base font-bold text-gray-100">高职数学狼人杀</h1>
+        <span class="text-xs text-gray-500">v6.0</span>
+            </div>
+    <div class="flex items-center gap-2">
+        <div class="px-2 py-1 rounded-full bg-amber-900/50 text-amber-200 text-xs font-bold" id="headerPhaseBadge">⚙️ 准备</div>
+        <button class="bg-purple-700 hover:bg-purple-600 text-white px-2 py-1 rounded text-xs" onclick="Game.toggleProjection()">📺</button>
+        </div>
+    </header>
+
+    <main class="flex-1 flex overflow-hidden">
+        <section class="w-3/4 relative flex flex-col p-6 overflow-hidden" id="mainStage">
+            <div class="w-full h-full flex flex-col items-center justify-center" id="setupView">
+            <h2 class="text-4xl font-bold opacity-50 animate-pulse text-amber-500/50">等待配置游戏...</h2>
+                <div class="hidden w-full h-full flex-col items-center justify-center" id="cardDrawArea">
+                <h3 class="text-2xl text-amber-500 mb-8 font-bold">请玩家依次查看身份</h3>
+                <div class="perspective-1000 w-56 h-80 cursor-pointer" onclick="Game.revealCard()">
+                        <div class="relative w-full h-full transition-transform duration-700 transform-style-3d shadow-2xl" id="gameCard">
+                        <div class="absolute w-full h-full bg-gradient-to-br from-slate-800 to-black rounded-xl border-4 border-amber-700 flex flex-col items-center justify-center backface-hidden">
+                            <span class="text-6xl text-amber-800 opacity-50 mb-4">❓</span>
+                            <div class="text-amber-600 font-bold text-sm">点击翻牌</div>
+                            </div>
+                        <div class="absolute w-full h-full bg-white rounded-xl border-4 flex flex-col items-center justify-center backface-hidden rotate-y-180 text-gray-900" id="cardFace">
+                            <span class="text-5xl mb-3" id="cardIcon">🎴</span>
+                            <h2 class="text-3xl font-bold mb-2" id="cardRoleName">身份</h2>
+                            <p class="text-sm text-gray-600 px-4 text-center" id="cardDesc">...</p>
+                            <button class="mt-4 px-4 py-1.5 bg-gray-900 text-white rounded text-sm" onclick="Game.hideCard(event)">记住了</button>
+                            </div>
+                        </div>
+                    </div>
+                <p class="mt-8 text-gray-500">玩家 <span class="text-amber-500 font-bold text-xl" id="drawIndexDisplay">1</span></p>
+                </div>
+            </div>
+
+            <div class="hidden w-full h-full flex flex-col relative" id="gameView">
+                <div class="absolute inset-0 bg-black/95 z-40 flex flex-col items-center justify-center transition-opacity duration-1000 opacity-0 pointer-events-none" id="nightOverlay">
+                <span class="text-7xl text-red-700 wolf-eye-anim">👁️</span>
+                <h2 class="text-5xl font-bold text-gray-200 mt-8 tracking-widest">天黑请闭眼</h2>
+                <p class="text-xl text-red-500 mt-4 animate-pulse" id="nightActionText">...</p>
+                </div>
+
+                <div class="flex-1 flex flex-col relative z-10 overflow-hidden" id="dayContent">
+                <div class="flex justify-between items-center mb-2 pb-2 border-b border-gray-700/50">
+                        <div>
+                        <span class="text-xs text-gray-500" id="displayChapter">章节</span>
+                        <h2 class="text-lg font-bold text-white" id="displayTitle">等待发题...</h2>
+                        </div>
+                    <div class="flex gap-1">
+                        <span class="px-2 py-0.5 rounded bg-slate-800 text-slate-400 text-xs" id="displayType">TYPE</span>
+                        <span class="px-2 py-0.5 rounded text-xs" id="displayDiff">DIFF</span>
+                        <span class="px-2 py-0.5 rounded bg-amber-900/50 text-amber-300 text-xs" id="missingCount">缺失:0</span>
+                        </div>
+                    </div>
+
+                <div class="question-card rounded-lg p-4 mb-2">
+                    <div class="leading-relaxed text-slate-100 math-content" id="displayQuestion">
+                            <span class="text-gray-500 italic">(请上帝发题)</span>
+                        </div>
+                    </div>
+                    
+                <div class="bg-gray-800/50 rounded-lg p-2 mb-2 border border-gray-700 hidden" id="fillArea">
+                    <h4 class="text-amber-400 text-xs font-bold mb-2">✏️ 填充缺失部分</h4>
+                    <div class="grid grid-cols-3 gap-2" id="fillInputs"></div>
+                    <button class="mt-2 w-full bg-amber-600 hover:bg-amber-500 text-white py-1.5 rounded font-bold text-sm" onclick="Game.submitFill()">✅ 提交</button>
+                    </div>
+
+                <div class="flex-1 overflow-y-auto pr-2 space-y-2 pb-16 no-scrollbar" id="displaySteps"></div>
+                </div>
+            </div>
+        </section>
+
+    <aside class="w-1/4 bg-gray-900/90 border-l border-gray-800 flex flex-col z-50 text-sm" id="controlSidebar">
+            <div class="flex border-b border-gray-800 bg-gray-900">
+            <button class="flex-1 py-2 text-xs font-bold text-amber-400 border-b-2 border-amber-500 bg-gray-800" id="tab-setup" onclick="Game.switchTab('setup')">配置</button>
+            <button class="flex-1 py-2 text-xs font-bold text-gray-500" id="tab-flow" onclick="Game.switchTab('flow')">流程</button>
+            <button class="flex-1 py-2 text-xs font-bold text-gray-500" id="tab-skills" onclick="Game.switchTab('skills')">技能</button>
+            <button class="flex-1 py-2 text-xs font-bold text-gray-500" id="tab-god" onclick="Game.switchTab('god')">上帝</button>
+            </div>
+
+        <div class="flex-1 p-2 overflow-y-auto no-scrollbar" id="panel-setup">
+            <div class="grid grid-cols-2 gap-1 mb-2">
+                <div class="bg-gray-800 p-1.5 rounded"><label class="text-xs text-red-400 block">🐺狼人</label><input class="w-full bg-gray-900 text-white text-center rounded p-1 text-sm" id="wolfCount" type="number" value="0" min="0" oninput="Game.updateTotal()"></div>
+                <div class="bg-gray-800 p-1.5 rounded"><label class="text-xs text-blue-400 block">🔮预言家</label><input class="w-full bg-gray-900 text-white text-center rounded p-1 text-sm" id="seerCount" type="number" value="0" min="0" oninput="Game.updateTotal()"></div>
+                <div class="bg-gray-800 p-1.5 rounded"><label class="text-xs text-purple-400 block">🧪女巫</label><input class="w-full bg-gray-900 text-white text-center rounded p-1 text-sm" id="witchCount" type="number" value="0" min="0" oninput="Game.updateTotal()"></div>
+                <div class="bg-gray-800 p-1.5 rounded"><label class="text-xs text-green-400 block">🧑村民</label><input class="w-full bg-gray-900 text-white text-center rounded p-1 text-sm" id="villagerCount" type="number" value="0" min="0" oninput="Game.updateTotal()"></div>
+                        </div>
+            <div class="bg-gray-800 px-2 py-1 rounded flex justify-between items-center mb-2">
+                <span class="text-xs text-gray-400">总人数</span>
+                <span class="text-lg font-bold text-white" id="totalCountDisplay">0</span>
+                        </div>
+            <button class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 rounded text-sm" onclick="Game.generateRoles()">🔀 生成角色并抽牌</button>
+            <div class="hidden mt-2" id="playerList">
+                <div class="space-y-0.5 max-h-28 overflow-y-auto no-scrollbar" id="playerListContent"></div>
+                        </div>
+                </div>
+                
+        <div class="hidden flex-1 p-2 overflow-y-auto no-scrollbar flex flex-col" id="panel-flow">
+            <div class="bg-gray-800/50 rounded p-2 mb-2 border border-gray-700">
+                <div class="grid grid-cols-2 gap-1">
+                    <button class="col-span-2 bg-gray-700 hover:bg-gray-600 text-white py-1 rounded text-xs" onclick="Game.night('close')">天黑请闭眼</button>
+                    <button class="bg-red-900/40 text-red-200 py-1 rounded text-xs" onclick="Game.night('wolf')">狼人睁眼</button>
+                    <button class="bg-blue-900/40 text-blue-200 py-1 rounded text-xs" onclick="Game.night('seer')">预言家睁眼</button>
+                    <button class="bg-purple-900/40 text-purple-200 py-1 rounded text-xs" onclick="Game.night('witch')">女巫睁眼</button>
+                    <button class="col-span-2 bg-amber-600 text-white py-1 rounded text-xs font-bold" onclick="Game.night('open')">天亮了</button>
+                </div>
+            </div>
+            <div class="bg-gray-800/50 rounded p-2 mb-2 border border-gray-700">
+                <div class="text-xl font-mono text-white text-center" id="timerDisplay">03:00</div>
+                <div class="flex justify-center gap-1 mt-1">
+                    <button class="px-2 py-0.5 bg-gray-700 text-gray-400 text-xs rounded" onclick="Game.setTimer(180)">3m</button>
+                    <button class="px-2 py-0.5 bg-gray-700 text-gray-400 text-xs rounded" onclick="Game.setTimer(60)">1m</button>
+                    <button class="px-2 py-0.5 bg-green-700 text-white text-xs rounded" id="timerBtn" onclick="Game.toggleTimer()">START</button>
+                    </div>
+                </div>
+            <div class="space-y-1">
+                <button class="w-full bg-blue-600 hover:bg-blue-500 text-white py-1.5 rounded font-bold text-xs" onclick="Game.nextStep()">⏭️ 下一步</button>
+                <button class="w-full bg-green-600 hover:bg-green-500 text-white py-1.5 rounded font-bold text-xs" onclick="Game.revealAnswer()">✅ 公布答案</button>
+                <button class="w-full bg-gray-700 text-gray-300 py-1 rounded text-xs" onclick="Game.revealAll()">👁️ 显示全解</button>
+                    </div>
+                </div>
+
+        <div class="hidden flex-1 p-2 overflow-y-auto no-scrollbar" id="panel-skills">
+            <div class="bg-red-900/20 rounded p-2 mb-2 border border-red-900/30">
+                <h4 class="text-red-400 text-xs font-bold mb-1">🐺 狼人 - 删除条件</h4>
+                <select class="w-full bg-gray-900 text-white p-1 rounded text-xs mb-1" id="wolfDeleteSelect"><option value="">选择...</option></select>
+                <button class="w-full bg-red-700 text-white py-1 rounded text-xs font-bold" onclick="Game.wolfDelete()">🔪 删除</button>
+                    </div>
+            <div class="bg-blue-900/20 rounded p-2 mb-2 border border-blue-900/30">
+                <h4 class="text-blue-400 text-xs font-bold mb-1">🔮 预言家 - 查看完整</h4>
+                <button class="w-full bg-blue-700 text-white py-1 rounded text-xs font-bold" onclick="Game.seerView()">👁️ 查看</button>
+                </div>
+            <div class="bg-purple-900/20 rounded p-2 border border-purple-900/30">
+                <h4 class="text-purple-400 text-xs font-bold mb-1">🧪 女巫 - 还原条件</h4>
+                <select class="w-full bg-gray-900 text-white p-1 rounded text-xs mb-1" id="witchRestoreSelect"><option value="">选择...</option></select>
+                <button class="w-full bg-purple-700 text-white py-1 rounded text-xs font-bold" onclick="Game.witchRestore()">💊 还原</button>
+            </div>
+                </div>
+                
+        <div class="hidden flex-1 p-2 overflow-y-auto no-scrollbar" id="panel-god">
+            <div class="mb-2">
+                <label class="text-xs text-gray-500">章节</label>
+                <select class="w-full bg-gray-800 text-white p-1 rounded text-xs" id="chapterSelect">
+                    <option value="all">全部章节</option>
+                    <option value="ch1">第1章 函数</option>
+                    <option value="ch2">第2章 极限</option>
+                    <option value="ch3">第3章 导数与微分</option>
+                    <option value="ch4">第4章 导数应用</option>
+                    <option value="ch5">第5章 不定积分</option>
+                    <option value="ch6">第6章 定积分</option>
+                    <option value="ch7">第7章 微分方程</option>
+                    </select>
+                </div>
+            <div class="mb-2">
+                <label class="text-xs text-gray-500">难度</label>
+                <select class="w-full bg-gray-800 text-white p-1 rounded text-xs" id="missingLevelSelect">
+                    <option value="2">简单（2个缺失）</option>
+                    <option value="3" selected>中等（3个缺失）</option>
+                    <option value="4">困难（4个缺失）</option>
+                    </select>
+                </div>
+            <button class="w-full bg-gradient-to-r from-amber-600 to-orange-600 text-white font-bold py-2 rounded mb-2" onclick="Game.distribute()">🎲 发 牌</button>
+            
+            <div class="god-section p-2 rounded mb-2">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs text-green-400 font-bold">👁️ 上帝视角</span>
+                    <button class="text-xs text-gray-500" onclick="Game.toggleGodView()">展开</button>
+                </div>
+                <div class="text-xs text-gray-300 hidden mt-1" id="godViewContent"><span class="text-gray-600">等待发题...</span></div>
+                </div>
+                
+            <div class="p-1.5 bg-gray-800/50 rounded border border-gray-700 text-xs">
+                <div class="text-gray-500 mb-1">题库统计：</div>
+                <div id="bankStats" class="text-gray-400"></div>
+                </div>
+            </div>
+        </aside>
+    </main>
+
+<div class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center" id="seerModal">
+    <div class="bg-gray-900 rounded-xl p-5 max-w-xl w-full mx-4 border border-blue-500/30">
+        <div class="flex items-center justify-between mb-3">
+            <h3 class="text-lg font-bold text-blue-400">🔮 预言家视角</h3>
+            <button class="text-gray-500 hover:text-white" onclick="Game.closeSeerModal()">✖</button>
+            </div>
+        <div class="bg-black/30 rounded-lg p-3 border border-blue-500/20">
+            <div class="text-base text-white leading-relaxed" id="seerModalContent"></div>
+            </div>
+        <div class="mt-3 text-center">
+            <button class="bg-blue-600 hover:bg-blue-500 text-white px-5 py-1.5 rounded font-bold" onclick="Game.closeSeerModal()">我记住了</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+window.MathJax = {
+    tex: { 
+        inlineMath: [['$', '$'], ['\\(', '\\)']], 
+        displayMath: [['$$', '$$'], ['\\[', '\\]']], 
+        processEscapes: true,
+        processEnvironments: true
+    },
+    svg: { fontCache: 'global' },
+    startup: {
+        ready: () => {
+            MathJax.startup.defaultReady();
+            MathJax.startup.document.state(0);
+            window.mathJaxReady = true;
+            console.log('MathJax ready');
+        }
+    }
+};
+</script>
+<!-- MathJax 本地化 -->
+<script src="./assets/vendor/mathjax/tex-svg.js" id="MathJax-script" async></script>
+
+<script>
+const QB = {
+// ========== 第1章 函数 ==========
+ch1: [
+    { id:"F01", title:"函数定义域", ch:"第1章 函数", diff:"easy", full:"求函数 $y=\\sqrt{x-1}$ 的定义域", logic:"根号内≥0 ⟹ x-1≥0 ⟹ x≥1", slots:[{id:"s1",label:"根号内",value:"x-1"},{id:"s2",label:"不等式",value:"x-1\\geq 0"},{id:"s3",label:"定义域",value:"[1,+\\infty)"}], tpl:"求函数 $y=\\sqrt{[s1]}$ 的定义域", ans:"[1,+∞)", steps:["根号内必须≥0：$x-1\\geq 0$","解得：$x\\geq 1$","定义域：$[1,+\\infty)$"] },
+    { id:"F02", title:"函数定义域", ch:"第1章 函数", diff:"easy", full:"求函数 $y=\\frac{1}{x-2}$ 的定义域", logic:"分母≠0 ⟹ x-2≠0 ⟹ x≠2", slots:[{id:"s1",label:"分母",value:"x-2"},{id:"s2",label:"限制条件",value:"x\\neq 2"},{id:"s3",label:"定义域",value:"(-\\infty,2)\\cup(2,+\\infty)"}], tpl:"求函数 $y=\\frac{1}{[s1]}$ 的定义域", ans:"(-∞,2)∪(2,+∞)", steps:["分母不能为0：$x-2\\neq 0$","解得：$x\\neq 2$","定义域：$(-\\infty,2)\\cup(2,+\\infty)$"] },
+    { id:"F03", title:"函数定义域", ch:"第1章 函数", diff:"medium", full:"求函数 $y=\\frac{\\sqrt{x-1}}{x-3}$ 的定义域", logic:"根号内≥0且分母≠0 ⟹ x≥1且x≠3", slots:[{id:"s1",label:"根号内",value:"x-1"},{id:"s2",label:"分母",value:"x-3"},{id:"s3",label:"定义域",value:"[1,3)\\cup(3,+\\infty)"}], tpl:"求函数 $y=\\frac{\\sqrt{[s1]}}{[s2]}$ 的定义域", ans:"[1,3)∪(3,+∞)", steps:["根号内≥0：$x-1\\geq 0$ ⟹ $x\\geq 1$","分母≠0：$x-3\\neq 0$ ⟹ $x\\neq 3$","定义域：$[1,3)\\cup(3,+\\infty)$"] },
+    { id:"F04", title:"复合函数", ch:"第1章 函数", diff:"medium", full:"设 $f(x)=x^2$，$g(x)=x+1$，求 $f(g(x))$", logic:"f(g(x))=f(x+1)=(x+1)²", slots:[{id:"s1",label:"f(x)",value:"x^2"},{id:"s2",label:"g(x)",value:"x+1"},{id:"s3",label:"f(g(x))",value:"(x+1)^2"}], tpl:"设 $f(x)=[s1]$，$g(x)=[s2]$，求 $f(g(x))$", ans:"(x+1)²", steps:["$g(x)=x+1$","$f(g(x))=f(x+1)=(x+1)^2$"] },
+    { id:"F05", title:"反函数", ch:"第1章 函数", diff:"medium", full:"求 $y=2x+1$ 的反函数", logic:"y=2x+1 ⟹ x=(y-1)/2 ⟹ y⁻¹=(x-1)/2", slots:[{id:"s1",label:"原函数",value:"2x+1"},{id:"s2",label:"解出x",value:"\\frac{y-1}{2}"},{id:"s3",label:"反函数",value:"\\frac{x-1}{2}"}], tpl:"求 $y=[s1]$ 的反函数", ans:"y=(x-1)/2", steps:["由 $y=2x+1$ 解出 $x$","$2x=y-1$ ⟹ $x=\\frac{y-1}{2}$","反函数：$y=\\frac{x-1}{2}$"] },
+    { id:"F06", title:"奇偶性", ch:"第1章 函数", diff:"easy", full:"判断 $f(x)=x^3$ 的奇偶性", logic:"f(-x)=(-x)³=-x³=-f(x) ⟹ 奇函数", slots:[{id:"s1",label:"f(x)",value:"x^3"},{id:"s2",label:"f(-x)",value:"-x^3"},{id:"s3",label:"结论",value:"奇函数"}], tpl:"判断 $f(x)=[s1]$ 的奇偶性", ans:"奇函数", steps:["$f(-x)=(-x)^3=-x^3$","$f(-x)=-f(x)$","所以是奇函数"] },
+    { id:"F07", title:"奇偶性", ch:"第1章 函数", diff:"easy", full:"判断 $f(x)=x^2+1$ 的奇偶性", logic:"f(-x)=(-x)²+1=x²+1=f(x) ⟹ 偶函数", slots:[{id:"s1",label:"f(x)",value:"x^2+1"},{id:"s2",label:"f(-x)",value:"x^2+1"},{id:"s3",label:"结论",value:"偶函数"}], tpl:"判断 $f(x)=[s1]$ 的奇偶性", ans:"偶函数", steps:["$f(-x)=(-x)^2+1=x^2+1$","$f(-x)=f(x)$","所以是偶函数"] },
+],
+// ========== 第2章 极限 ==========
+ch2: [
+    { id:"L01", title:"极限计算", ch:"第2章 极限", diff:"easy", full:"求 $\\lim\\limits_{x\\to 2}(3x+1)$", logic:"直接代入：3×2+1=7", slots:[{id:"s1",label:"x趋近",value:"2"},{id:"s2",label:"表达式",value:"3x+1"},{id:"s3",label:"极限值",value:"7"}], tpl:"求 $\\lim\\limits_{x\\to [s1]}([s2])$", ans:"7", steps:["直接代入 $x=2$","$3\\times 2+1=7$"] },
+    { id:"L02", title:"极限计算", ch:"第2章 极限", diff:"easy", full:"求 $\\lim\\limits_{x\\to 0}\\frac{\\sin 4x}{2x}$", logic:"sin4x~4x ⟹ 4x/2x=2", slots:[{id:"s1",label:"sin内系数",value:"4"},{id:"s2",label:"分母系数",value:"2"},{id:"s3",label:"极限值",value:"2"}], tpl:"求 $\\lim\\limits_{x\\to 0}\\frac{\\sin [s1]x}{[s2]x}$", ans:"2", steps:["等价无穷小：$\\sin 4x\\sim 4x$","$\\frac{4x}{2x}=2$"] },
+    { id:"L03", title:"极限计算", ch:"第2章 极限", diff:"easy", full:"求 $\\lim\\limits_{x\\to 0}\\frac{\\sin 3x}{x}$", logic:"sin3x~3x ⟹ 3x/x=3", slots:[{id:"s1",label:"sin内系数",value:"3"},{id:"s2",label:"分母",value:"x"},{id:"s3",label:"极限值",value:"3"}], tpl:"求 $\\lim\\limits_{x\\to 0}\\frac{\\sin [s1]x}{[s2]}$", ans:"3", steps:["等价无穷小：$\\sin 3x\\sim 3x$","$\\frac{3x}{x}=3$"] },
+    { id:"L04", title:"极限计算", ch:"第2章 极限", diff:"easy", full:"求 $\\lim\\limits_{x\\to 0}\\frac{\\tan 2x}{x}$", logic:"tan2x~2x ⟹ 2x/x=2", slots:[{id:"s1",label:"tan内系数",value:"2"},{id:"s2",label:"分母",value:"x"},{id:"s3",label:"极限值",value:"2"}], tpl:"求 $\\lim\\limits_{x\\to 0}\\frac{\\tan [s1]x}{[s2]}$", ans:"2", steps:["等价无穷小：$\\tan 2x\\sim 2x$","$\\frac{2x}{x}=2$"] },
+    { id:"L05", title:"极限计算", ch:"第2章 极限", diff:"medium", full:"求 $\\lim\\limits_{x\\to 0}\\frac{e^{2x}-1}{3x}$", logic:"e^2x-1~2x ⟹ 2x/3x=2/3", slots:[{id:"s1",label:"指数系数",value:"2"},{id:"s2",label:"分母系数",value:"3"},{id:"s3",label:"极限值",value:"\\frac{2}{3}"}], tpl:"求 $\\lim\\limits_{x\\to 0}\\frac{e^{[s1]x}-1}{[s2]x}$", ans:"2/3", steps:["等价无穷小：$e^{2x}-1\\sim 2x$","$\\frac{2x}{3x}=\\frac{2}{3}$"] },
+    { id:"L06", title:"极限计算", ch:"第2章 极限", diff:"medium", full:"求 $\\lim\\limits_{x\\to 0}\\frac{\\ln(1+3x)}{2x}$", logic:"ln(1+3x)~3x ⟹ 3x/2x=3/2", slots:[{id:"s1",label:"ln内系数",value:"3"},{id:"s2",label:"分母系数",value:"2"},{id:"s3",label:"极限值",value:"\\frac{3}{2}"}], tpl:"求 $\\lim\\limits_{x\\to 0}\\frac{\\ln(1+[s1]x)}{[s2]x}$", ans:"3/2", steps:["等价无穷小：$\\ln(1+3x)\\sim 3x$","$\\frac{3x}{2x}=\\frac{3}{2}$"] },
+    { id:"L07", title:"极限计算", ch:"第2章 极限", diff:"medium", full:"求 $\\lim\\limits_{x\\to\\infty}(1+\\frac{2}{x})^{3x}$", logic:"(1+2/x)^3x=[(1+2/x)^(x/2)]^6→e^6", slots:[{id:"s1",label:"分子",value:"2"},{id:"s2",label:"指数系数",value:"3"},{id:"s3",label:"极限值",value:"e^6"}], tpl:"求 $\\lim\\limits_{x\\to\\infty}\\left(1+\\frac{[s1]}{x}\\right)^{[s2]x}$", ans:"e⁶", steps:["配凑：$[(1+\\frac{2}{x})^{x/2}]^6$","第二重要极限：内层→$e$","结果：$e^6$"] },
+    { id:"L08", title:"极限计算", ch:"第2章 极限", diff:"medium", full:"求 $\\lim\\limits_{x\\to\\infty}(1+\\frac{3}{x})^{2x}$", logic:"(1+3/x)^2x→e^6", slots:[{id:"s1",label:"分子",value:"3"},{id:"s2",label:"指数系数",value:"2"},{id:"s3",label:"极限值",value:"e^6"}], tpl:"求 $\\lim\\limits_{x\\to\\infty}\\left(1+\\frac{[s1]}{x}\\right)^{[s2]x}$", ans:"e⁶", steps:["$(1+\\frac{3}{x})^{2x}=[(1+\\frac{3}{x})^{x/3}]^6$","→$e^6$"] },
+    { id:"L09", title:"极限计算", ch:"第2章 极限", diff:"medium", full:"求 $\\lim\\limits_{x\\to 1}\\frac{x^2-1}{x-1}$", logic:"x²-1=(x+1)(x-1) ⟹ 约分得x+1→2", slots:[{id:"s1",label:"趋近点",value:"1"},{id:"s2",label:"分子",value:"x^2-1"},{id:"s3",label:"极限值",value:"2"}], tpl:"求 $\\lim\\limits_{x\\to [s1]}\\frac{[s2]}{x-[s1]}$", ans:"2", steps:["因式分解：$x^2-1=(x+1)(x-1)$","约分：$\\frac{(x+1)(x-1)}{x-1}=x+1$","代入：$1+1=2$"] },
+    { id:"L10", title:"极限计算", ch:"第2章 极限", diff:"medium", full:"求 $\\lim\\limits_{x\\to 2}\\frac{x^2-4}{x-2}$", logic:"x²-4=(x+2)(x-2) ⟹ x+2→4", slots:[{id:"s1",label:"趋近点",value:"2"},{id:"s2",label:"分子常数",value:"4"},{id:"s3",label:"极限值",value:"4"}], tpl:"求 $\\lim\\limits_{x\\to [s1]}\\frac{x^2-[s2]}{x-[s1]}$", ans:"4", steps:["因式分解：$x^2-4=(x+2)(x-2)$","约分得 $x+2$","代入：$2+2=4$"] },
+    { id:"L11", title:"连续性", ch:"第2章 极限", diff:"medium", full:"设 $f(x)=\\begin{cases}\\frac{\\sin 2x}{x},&x\\neq 0\\\\a,&x=0\\end{cases}$ 在 $x=0$ 连续，求 $a$", logic:"lim(sin2x/x)=2 ⟹ a=2", slots:[{id:"s1",label:"sin内系数",value:"2"},{id:"s2",label:"连续点",value:"0"},{id:"s3",label:"a的值",value:"2"}], tpl:"设 $f(x)=\\begin{cases}\\frac{\\sin [s1]x}{x},&x\\neq [s2]\\\\a,&x=[s2]\\end{cases}$ 在 $x=[s2]$ 连续，求 $a$", ans:"a=2", steps:["连续条件：$\\lim\\limits_{x\\to 0}f(x)=f(0)=a$","$\\lim\\limits_{x\\to 0}\\frac{\\sin 2x}{x}=2$","所以 $a=2$"] },
+    { id:"L12", title:"连续性", ch:"第2章 极限", diff:"medium", full:"设 $f(x)=\\begin{cases}x+a,&x<1\\\\2x,&x\\geq 1\\end{cases}$ 在 $x=1$ 连续，求 $a$", logic:"左极限1+a=右极限2 ⟹ a=1", slots:[{id:"s1",label:"分界点",value:"1"},{id:"s2",label:"右函数在分界点值",value:"2"},{id:"s3",label:"a的值",value:"1"}], tpl:"设 $f(x)=\\begin{cases}x+a,&x<[s1]\\\\2x,&x\\geq [s1]\\end{cases}$ 在 $x=[s1]$ 连续，求 $a$", ans:"a=1", steps:["左极限：$1+a$","右极限：$2\\times 1=2$","连续：$1+a=2$ ⟹ $a=1$"] },
+],
+// ========== 第3章 导数与微分 ==========
+ch3: [
+    { id:"D01", title:"导数计算", ch:"第3章 导数与微分", diff:"easy", full:"求 $y=x^4$ 的导数", logic:"(x^n)'=nx^(n-1) ⟹ 4x³", slots:[{id:"s1",label:"指数",value:"4"},{id:"s2",label:"导数",value:"4x^3"}], tpl:"求 $y=x^{[s1]}$ 的导数", ans:"y'=4x³", steps:["公式：$(x^n)'=nx^{n-1}$","$y'=4x^3$"] },
+    { id:"D02", title:"导数计算", ch:"第3章 导数与微分", diff:"easy", full:"求 $y=3x^2$ 的导数", logic:"(ax^n)'=anx^(n-1) ⟹ 6x", slots:[{id:"s1",label:"系数",value:"3"},{id:"s2",label:"指数",value:"2"},{id:"s3",label:"导数",value:"6x"}], tpl:"求 $y=[s1]x^{[s2]}$ 的导数", ans:"y'=6x", steps:["$y'=3\\times 2x=6x$"] },
+    { id:"D03", title:"导数计算", ch:"第3章 导数与微分", diff:"easy", full:"求 $y=e^x$ 的导数", logic:"(e^x)'=e^x", slots:[{id:"s1",label:"函数",value:"e^x"},{id:"s2",label:"导数",value:"e^x"}], tpl:"求 $y=[s1]$ 的导数", ans:"y'=eˣ", steps:["$(e^x)'=e^x$"] },
+    { id:"D04", title:"导数计算", ch:"第3章 导数与微分", diff:"easy", full:"求 $y=\\ln x$ 的导数", logic:"(ln x)'=1/x", slots:[{id:"s1",label:"函数",value:"\\ln x"},{id:"s2",label:"导数",value:"\\frac{1}{x}"}], tpl:"求 $y=[s1]$ 的导数", ans:"y'=1/x", steps:["$(\\ln x)'=\\frac{1}{x}$"] },
+    { id:"D05", title:"导数计算", ch:"第3章 导数与微分", diff:"easy", full:"求 $y=\\sin x$ 的导数", logic:"(sin x)'=cos x", slots:[{id:"s1",label:"函数",value:"\\sin x"},{id:"s2",label:"导数",value:"\\cos x"}], tpl:"求 $y=[s1]$ 的导数", ans:"y'=cos x", steps:["$(\\sin x)'=\\cos x$"] },
+    { id:"D06", title:"导数计算", ch:"第3章 导数与微分", diff:"easy", full:"求 $y=\\cos x$ 的导数", logic:"(cos x)'=-sin x", slots:[{id:"s1",label:"函数",value:"\\cos x"},{id:"s2",label:"导数",value:"-\\sin x"}], tpl:"求 $y=[s1]$ 的导数", ans:"y'=-sin x", steps:["$(\\cos x)'=-\\sin x$"] },
+    { id:"D07", title:"复合函数求导", ch:"第3章 导数与微分", diff:"medium", full:"求 $y=e^{3x}$ 的导数", logic:"链式法则：e^3x × 3 = 3e^3x", slots:[{id:"s1",label:"指数系数",value:"3"},{id:"s2",label:"导数",value:"3e^{3x}"}], tpl:"求 $y=e^{[s1]x}$ 的导数", ans:"y'=3e^{3x}", steps:["链式法则：$(e^u)'=e^u\\cdot u'$","$y'=e^{3x}\\times 3=3e^{3x}$"] },
+    { id:"D08", title:"复合函数求导", ch:"第3章 导数与微分", diff:"medium", full:"求 $y=\\ln(2x)$ 的导数", logic:"(ln u)'=u'/u ⟹ 2/(2x)=1/x", slots:[{id:"s1",label:"ln内系数",value:"2"},{id:"s2",label:"导数",value:"\\frac{1}{x}"}], tpl:"求 $y=\\ln([s1]x)$ 的导数", ans:"y'=1/x", steps:["$(\\ln u)'=\\frac{u'}{u}$","$y'=\\frac{2}{2x}=\\frac{1}{x}$"] },
+    { id:"D09", title:"复合函数求导", ch:"第3章 导数与微分", diff:"medium", full:"求 $y=\\sin(2x)$ 的导数", logic:"链式法则：cos(2x)×2=2cos(2x)", slots:[{id:"s1",label:"系数",value:"2"},{id:"s2",label:"导数",value:"2\\cos(2x)"}], tpl:"求 $y=\\sin([s1]x)$ 的导数", ans:"y'=2cos(2x)", steps:["链式法则","$y'=\\cos(2x)\\times 2=2\\cos(2x)$"] },
+    { id:"D10", title:"复合函数求导", ch:"第3章 导数与微分", diff:"medium", full:"求 $y=(2x+1)^3$ 的导数", logic:"3(2x+1)²×2=6(2x+1)²", slots:[{id:"s1",label:"内层",value:"2x+1"},{id:"s2",label:"指数",value:"3"},{id:"s3",label:"导数",value:"6(2x+1)^2"}], tpl:"求 $y=([s1])^{[s2]}$ 的导数", ans:"y'=6(2x+1)²", steps:["$(u^n)'=nu^{n-1}\\cdot u'$","$y'=3(2x+1)^2\\times 2=6(2x+1)^2$"] },
+    { id:"D11", title:"乘法法则", ch:"第3章 导数与微分", diff:"medium", full:"求 $y=x\\cdot e^x$ 的导数", logic:"(uv)'=u'v+uv' ⟹ e^x+xe^x=(1+x)e^x", slots:[{id:"s1",label:"u",value:"x"},{id:"s2",label:"v",value:"e^x"},{id:"s3",label:"导数",value:"(1+x)e^x"}], tpl:"求 $y=[s1]\\cdot [s2]$ 的导数", ans:"y'=(1+x)eˣ", steps:["$(uv)'=u'v+uv'$","$y'=1\\cdot e^x+x\\cdot e^x=(1+x)e^x$"] },
+    { id:"D12", title:"乘法法则", ch:"第3章 导数与微分", diff:"medium", full:"求 $y=x^2\\cdot e^x$ 的导数", logic:"2xe^x+x²e^x=(x²+2x)e^x", slots:[{id:"s1",label:"u",value:"x^2"},{id:"s2",label:"v",value:"e^x"},{id:"s3",label:"导数",value:"(x^2+2x)e^x"}], tpl:"求 $y=[s1]\\cdot [s2]$ 的导数", ans:"y'=(x²+2x)eˣ", steps:["$y'=2x\\cdot e^x+x^2\\cdot e^x$","$=(x^2+2x)e^x$"] },
+    { id:"D13", title:"除法法则", ch:"第3章 导数与微分", diff:"medium", full:"求 $y=\\frac{x}{x+1}$ 的导数", logic:"(u/v)'=(u'v-uv')/v² ⟹ 1/(x+1)²", slots:[{id:"s1",label:"分子",value:"x"},{id:"s2",label:"分母",value:"x+1"},{id:"s3",label:"导数",value:"\\frac{1}{(x+1)^2}"}], tpl:"求 $y=\\frac{[s1]}{[s2]}$ 的导数", ans:"y'=1/(x+1)²", steps:["$(\\frac{u}{v})'=\\frac{u'v-uv'}{v^2}$","$y'=\\frac{1\\cdot(x+1)-x\\cdot 1}{(x+1)^2}=\\frac{1}{(x+1)^2}$"] },
+    { id:"D14", title:"微分", ch:"第3章 导数与微分", diff:"easy", full:"求 $y=x^3$ 的微分", logic:"dy=y'dx=3x²dx", slots:[{id:"s1",label:"函数",value:"x^3"},{id:"s2",label:"导数",value:"3x^2"},{id:"s3",label:"微分",value:"3x^2dx"}], tpl:"求 $y=[s1]$ 的微分", ans:"dy=3x²dx", steps:["$y'=3x^2$","$dy=y'dx=3x^2dx$"] },
+],
+// ========== 第4章 导数应用 ==========
+ch4: [
+    { id:"A01", title:"切线方程", ch:"第4章 导数应用", diff:"medium", full:"求 $y=x^2$ 在点 $(1,1)$ 处的切线斜率", logic:"y'=2x ⟹ k=y'(1)=2", slots:[{id:"s1",label:"函数",value:"x^2"},{id:"s2",label:"切点x",value:"1"},{id:"s3",label:"斜率",value:"2"}], tpl:"求 $y=[s1]$ 在点 $([s2],[s2]^2)$ 处的切线斜率", ans:"k=2", steps:["$y'=2x$","$k=y'(1)=2$"] },
+    { id:"A02", title:"切线方程", ch:"第4章 导数应用", diff:"medium", full:"求 $y=x^3$ 在点 $(1,1)$ 处的切线斜率", logic:"y'=3x² ⟹ k=3", slots:[{id:"s1",label:"函数",value:"x^3"},{id:"s2",label:"切点x",value:"1"},{id:"s3",label:"斜率",value:"3"}], tpl:"求 $y=[s1]$ 在点 $([s2],1)$ 处的切线斜率", ans:"k=3", steps:["$y'=3x^2$","$k=y'(1)=3$"] },
+    { id:"A03", title:"切线方程", ch:"第4章 导数应用", diff:"medium", full:"曲线 $y=x^2+ax+b$ 在点 $(1,2)$ 处切线斜率为 $3$，求 $a,b$", logic:"过点⟹1+a+b=2, 斜率⟹2+a=3 ⟹ a=1,b=0", slots:[{id:"s1",label:"切点x",value:"1"},{id:"s2",label:"切点y",value:"2"},{id:"s3",label:"斜率",value:"3"},{id:"s4",label:"a",value:"1"},{id:"s5",label:"b",value:"0"}], tpl:"曲线 $y=x^2+ax+b$ 在点 $([s1],[s2])$ 处切线斜率为 $[s3]$，求 $a,b$", ans:"a=1,b=0", steps:["过点：$1+a+b=2$ ⟹ $a+b=1$","斜率：$y'=2x+a$，$y'(1)=2+a=3$ ⟹ $a=1$","代入：$b=0$"] },
+    { id:"A04", title:"单调性", ch:"第4章 导数应用", diff:"medium", full:"求 $y=x^3-3x$ 的单调递增区间", logic:"y'=3x²-3=3(x+1)(x-1)>0 ⟹ x<-1或x>1", slots:[{id:"s1",label:"一次项系数",value:"3"},{id:"s2",label:"驻点",value:"\\pm 1"},{id:"s3",label:"递增区间",value:"(-\\infty,-1)\\cup(1,+\\infty)"}], tpl:"求 $y=x^3-[s1]x$ 的单调递增区间", ans:"(-∞,-1)∪(1,+∞)", steps:["$y'=3x^2-3=3(x+1)(x-1)$","令 $y'>0$：$x<-1$ 或 $x>1$"] },
+    { id:"A05", title:"单调性", ch:"第4章 导数应用", diff:"medium", full:"求 $y=x^3-6x^2+9x$ 的单调递减区间", logic:"y'=3x²-12x+9=3(x-1)(x-3)<0 ⟹ 1<x<3", slots:[{id:"s1",label:"驻点1",value:"1"},{id:"s2",label:"驻点2",value:"3"},{id:"s3",label:"递减区间",value:"(1,3)"}], tpl:"求 $y=x^3-6x^2+9x$ 的单调递减区间", ans:"(1,3)", steps:["$y'=3x^2-12x+9=3(x-1)(x-3)$","令 $y'<0$：$1<x<3$"] },
+    { id:"A06", title:"极值", ch:"第4章 导数应用", diff:"medium", full:"求 $y=x^3-3x$ 的极值", logic:"y'=3x²-3=0 ⟹ x=±1, 极大y(-1)=2, 极小y(1)=-2", slots:[{id:"s1",label:"极大值点",value:"-1"},{id:"s2",label:"极大值",value:"2"},{id:"s3",label:"极小值点",value:"1"},{id:"s4",label:"极小值",value:"-2"}], tpl:"求 $y=x^3-3x$ 的极值", ans:"极大值2，极小值-2", steps:["$y'=3x^2-3=0$ ⟹ $x=\\pm 1$","$y(-1)=-1+3=2$（极大）","$y(1)=1-3=-2$（极小）"] },
+    { id:"A07", title:"极值", ch:"第4章 导数应用", diff:"medium", full:"设 $f(x)=x^3-3x^2+a$ 的极小值为 $-4$，求 $a$", logic:"f'=3x²-6x=0 ⟹ x=0,2, 极小点x=2, f(2)=a-4=-4 ⟹ a=0", slots:[{id:"s1",label:"极小值",value:"-4"},{id:"s2",label:"极小点",value:"2"},{id:"s3",label:"a",value:"0"}], tpl:"设 $f(x)=x^3-3x^2+a$ 的极小值为 $[s1]$，求 $a$", ans:"a=0", steps:["$f'(x)=3x^2-6x=3x(x-2)=0$","极小点 $x=2$","$f(2)=8-12+a=a-4=-4$ ⟹ $a=0$"] },
+    { id:"A08", title:"极值", ch:"第4章 导数应用", diff:"medium", full:"设 $f(x)=x^3+ax^2+bx+1$ 在 $x=1$ 处有极值，且 $f(1)=0$，求 $a,b$", logic:"f(1)=0⟹a+b=-2, f'(1)=0⟹2a+b=-3 ⟹ a=-1,b=-1", slots:[{id:"s1",label:"极值点",value:"1"},{id:"s2",label:"f(1)",value:"0"},{id:"s3",label:"a",value:"-1"},{id:"s4",label:"b",value:"-1"}], tpl:"设 $f(x)=x^3+ax^2+bx+1$ 在 $x=[s1]$ 处有极值，且 $f([s1])=[s2]$，求 $a,b$", ans:"a=-1,b=-1", steps:["$f(1)=1+a+b+1=0$ ⟹ $a+b=-2$","$f'(x)=3x^2+2ax+b$","$f'(1)=3+2a+b=0$ ⟹ $2a+b=-3$","解得 $a=-1,b=-1$"] },
+    { id:"A09", title:"最值", ch:"第4章 导数应用", diff:"medium", full:"求 $y=x^3-3x$ 在 $[-2,2]$ 上的最大值", logic:"y'=0⟹x=±1, y(-2)=-2,y(-1)=2,y(1)=-2,y(2)=2 ⟹ max=2", slots:[{id:"s1",label:"区间",value:"[-2,2]"},{id:"s2",label:"最大值",value:"2"}], tpl:"求 $y=x^3-3x$ 在 $[s1]$ 上的最大值", ans:"最大值=2", steps:["$y'=3x^2-3=0$ ⟹ $x=\\pm 1$","$y(-2)=-2,y(-1)=2,y(1)=-2,y(2)=2$","最大值为 $2$"] },
+    { id:"A10", title:"最值", ch:"第4章 导数应用", diff:"medium", full:"求 $y=x^2-4x+5$ 在 $[0,3]$ 上的最小值", logic:"y'=2x-4=0⟹x=2, y(0)=5,y(2)=1,y(3)=2 ⟹ min=1", slots:[{id:"s1",label:"区间",value:"[0,3]"},{id:"s2",label:"驻点",value:"2"},{id:"s3",label:"最小值",value:"1"}], tpl:"求 $y=x^2-4x+5$ 在 $[s1]$ 上的最小值", ans:"最小值=1", steps:["$y'=2x-4=0$ ⟹ $x=2$","$y(0)=5,y(2)=1,y(3)=2$","最小值为 $1$"] },
+],
+// ========== 第5章 不定积分 ==========
+ch5: [
+    { id:"I01", title:"基本积分", ch:"第5章 不定积分", diff:"easy", full:"求 $\\int x^3 dx$", logic:"∫x^n dx=x^(n+1)/(n+1)+C", slots:[{id:"s1",label:"被积函数",value:"x^3"},{id:"s2",label:"积分结果",value:"\\frac{x^4}{4}+C"}], tpl:"求 $\\int [s1] dx$", ans:"x⁴/4+C", steps:["$\\int x^n dx=\\frac{x^{n+1}}{n+1}+C$","$\\int x^3 dx=\\frac{x^4}{4}+C$"] },
+    { id:"I02", title:"基本积分", ch:"第5章 不定积分", diff:"easy", full:"求 $\\int 2x dx$", logic:"∫2x dx=x²+C", slots:[{id:"s1",label:"系数",value:"2"},{id:"s2",label:"积分结果",value:"x^2+C"}], tpl:"求 $\\int [s1]x dx$", ans:"x²+C", steps:["$\\int 2x dx=2\\cdot\\frac{x^2}{2}+C=x^2+C$"] },
+    { id:"I03", title:"基本积分", ch:"第5章 不定积分", diff:"easy", full:"求 $\\int e^x dx$", logic:"∫e^x dx=e^x+C", slots:[{id:"s1",label:"被积函数",value:"e^x"},{id:"s2",label:"积分结果",value:"e^x+C"}], tpl:"求 $\\int [s1] dx$", ans:"eˣ+C", steps:["$\\int e^x dx=e^x+C$"] },
+    { id:"I04", title:"基本积分", ch:"第5章 不定积分", diff:"easy", full:"求 $\\int \\frac{1}{x} dx$", logic:"∫1/x dx=ln|x|+C", slots:[{id:"s1",label:"被积函数",value:"\\frac{1}{x}"},{id:"s2",label:"积分结果",value:"\\ln|x|+C"}], tpl:"求 $\\int [s1] dx$", ans:"ln|x|+C", steps:["$\\int \\frac{1}{x} dx=\\ln|x|+C$"] },
+    { id:"I05", title:"基本积分", ch:"第5章 不定积分", diff:"easy", full:"求 $\\int \\cos x dx$", logic:"∫cos x dx=sin x+C", slots:[{id:"s1",label:"被积函数",value:"\\cos x"},{id:"s2",label:"积分结果",value:"\\sin x+C"}], tpl:"求 $\\int [s1] dx$", ans:"sin x+C", steps:["$\\int \\cos x dx=\\sin x+C$"] },
+    { id:"I06", title:"基本积分", ch:"第5章 不定积分", diff:"easy", full:"求 $\\int \\sin x dx$", logic:"∫sin x dx=-cos x+C", slots:[{id:"s1",label:"被积函数",value:"\\sin x"},{id:"s2",label:"积分结果",value:"-\\cos x+C"}], tpl:"求 $\\int [s1] dx$", ans:"-cos x+C", steps:["$\\int \\sin x dx=-\\cos x+C$"] },
+    { id:"I07", title:"换元积分", ch:"第5章 不定积分", diff:"medium", full:"求 $\\int e^{2x} dx$", logic:"∫e^(2x) dx=(1/2)e^(2x)+C", slots:[{id:"s1",label:"指数系数",value:"2"},{id:"s2",label:"积分结果",value:"\\frac{1}{2}e^{2x}+C"}], tpl:"求 $\\int e^{[s1]x} dx$", ans:"(1/2)e^{2x}+C", steps:["$\\int e^{2x} dx=\\frac{1}{2}e^{2x}+C$"] },
+    { id:"I08", title:"换元积分", ch:"第5章 不定积分", diff:"medium", full:"求 $\\int \\frac{1}{2x+1} dx$", logic:"∫1/(2x+1) dx=(1/2)ln|2x+1|+C", slots:[{id:"s1",label:"分母系数",value:"2"},{id:"s2",label:"积分结果",value:"\\frac{1}{2}\\ln|2x+1|+C"}], tpl:"求 $\\int \\frac{1}{[s1]x+1} dx$", ans:"(1/2)ln|2x+1|+C", steps:["$\\int \\frac{1}{2x+1} dx=\\frac{1}{2}\\ln|2x+1|+C$"] },
+    { id:"I09", title:"换元积分", ch:"第5章 不定积分", diff:"medium", full:"求 $\\int \\cos(3x) dx$", logic:"∫cos(3x) dx=(1/3)sin(3x)+C", slots:[{id:"s1",label:"系数",value:"3"},{id:"s2",label:"积分结果",value:"\\frac{1}{3}\\sin(3x)+C"}], tpl:"求 $\\int \\cos([s1]x) dx$", ans:"(1/3)sin(3x)+C", steps:["$\\int \\cos(3x) dx=\\frac{1}{3}\\sin(3x)+C$"] },
+    { id:"I10", title:"换元积分", ch:"第5章 不定积分", diff:"medium", full:"求 $\\int (2x+1)^3 dx$", logic:"∫(2x+1)³ dx=(1/8)(2x+1)⁴+C", slots:[{id:"s1",label:"内层",value:"2x+1"},{id:"s2",label:"指数",value:"3"},{id:"s3",label:"积分结果",value:"\\frac{1}{8}(2x+1)^4+C"}], tpl:"求 $\\int ([s1])^{[s2]} dx$", ans:"(1/8)(2x+1)⁴+C", steps:["令 $u=2x+1$","$\\int u^3\\cdot\\frac{1}{2}du=\\frac{1}{8}u^4+C$"] },
+],
+// ========== 第6章 定积分 ==========
+ch6: [
+    { id:"J01", title:"定积分", ch:"第6章 定积分", diff:"easy", full:"计算 $\\int_0^1 x dx$", logic:"[x²/2]₀¹=1/2", slots:[{id:"s1",label:"下限",value:"0"},{id:"s2",label:"上限",value:"1"},{id:"s3",label:"积分值",value:"\\frac{1}{2}"}], tpl:"计算 $\\int_{[s1]}^{[s2]} x dx$", ans:"1/2", steps:["$\\int x dx=\\frac{x^2}{2}$","$[\\frac{x^2}{2}]_0^1=\\frac{1}{2}-0=\\frac{1}{2}$"] },
+    { id:"J02", title:"定积分", ch:"第6章 定积分", diff:"easy", full:"计算 $\\int_0^2 x dx$", logic:"[x²/2]₀²=2", slots:[{id:"s1",label:"下限",value:"0"},{id:"s2",label:"上限",value:"2"},{id:"s3",label:"积分值",value:"2"}], tpl:"计算 $\\int_{[s1]}^{[s2]} x dx$", ans:"2", steps:["$[\\frac{x^2}{2}]_0^2=2-0=2$"] },
+    { id:"J03", title:"定积分", ch:"第6章 定积分", diff:"easy", full:"计算 $\\int_0^1 x^2 dx$", logic:"[x³/3]₀¹=1/3", slots:[{id:"s1",label:"下限",value:"0"},{id:"s2",label:"上限",value:"1"},{id:"s3",label:"积分值",value:"\\frac{1}{3}"}], tpl:"计算 $\\int_{[s1]}^{[s2]} x^2 dx$", ans:"1/3", steps:["$[\\frac{x^3}{3}]_0^1=\\frac{1}{3}$"] },
+    { id:"J04", title:"定积分", ch:"第6章 定积分", diff:"medium", full:"计算 $\\int_0^{\\pi} \\sin x dx$", logic:"[-cos x]₀^π=2", slots:[{id:"s1",label:"下限",value:"0"},{id:"s2",label:"上限",value:"\\pi"},{id:"s3",label:"积分值",value:"2"}], tpl:"计算 $\\int_{[s1]}^{[s2]} \\sin x dx$", ans:"2", steps:["$[-\\cos x]_0^{\\pi}=-(-1)-(-1)=2$"] },
+    { id:"J05", title:"定积分", ch:"第6章 定积分", diff:"medium", full:"计算 $\\int_0^{\\frac{\\pi}{2}} \\cos x dx$", logic:"[sin x]₀^(π/2)=1", slots:[{id:"s1",label:"下限",value:"0"},{id:"s2",label:"上限",value:"\\frac{\\pi}{2}"},{id:"s3",label:"积分值",value:"1"}], tpl:"计算 $\\int_{[s1]}^{[s2]} \\cos x dx$", ans:"1", steps:["$[\\sin x]_0^{\\frac{\\pi}{2}}=1-0=1$"] },
+    { id:"J06", title:"定积分", ch:"第6章 定积分", diff:"medium", full:"计算 $\\int_1^e \\frac{1}{x} dx$", logic:"[ln x]₁^e=1", slots:[{id:"s1",label:"下限",value:"1"},{id:"s2",label:"上限",value:"e"},{id:"s3",label:"积分值",value:"1"}], tpl:"计算 $\\int_{[s1]}^{[s2]} \\frac{1}{x} dx$", ans:"1", steps:["$[\\ln x]_1^e=1-0=1$"] },
+    { id:"J07", title:"定积分求参数", ch:"第6章 定积分", diff:"medium", full:"若 $\\int_0^a x^2 dx=\\frac{8}{3}$，$a>0$，求 $a$", logic:"a³/3=8/3 ⟹ a=2", slots:[{id:"s1",label:"积分值",value:"\\frac{8}{3}"},{id:"s2",label:"a的值",value:"2"}], tpl:"若 $\\int_0^a x^2 dx=[s1]$，$a>0$，求 $a$", ans:"a=2", steps:["$\\frac{a^3}{3}=\\frac{8}{3}$","$a^3=8$ ⟹ $a=2$"] },
+    { id:"J08", title:"定积分求参数", ch:"第6章 定积分", diff:"medium", full:"若 $\\int_0^a x dx=2$，$a>0$，求 $a$", logic:"a²/2=2 ⟹ a=2", slots:[{id:"s1",label:"积分值",value:"2"},{id:"s2",label:"a的值",value:"2"}], tpl:"若 $\\int_0^a x dx=[s1]$，$a>0$，求 $a$", ans:"a=2", steps:["$\\frac{a^2}{2}=2$","$a^2=4$ ⟹ $a=2$"] },
+    { id:"J09", title:"定积分求面积", ch:"第6章 定积分", diff:"medium", full:"求 $y=x^2$ 与 $x$ 轴在 $[0,1]$ 上围成的面积", logic:"S=∫₀¹x²dx=1/3", slots:[{id:"s1",label:"曲线",value:"x^2"},{id:"s2",label:"区间",value:"[0,1]"},{id:"s3",label:"面积",value:"\\frac{1}{3}"}], tpl:"求 $y=[s1]$ 与 $x$ 轴在 $[s2]$ 上围成的面积", ans:"S=1/3", steps:["$S=\\int_0^1 x^2 dx=\\frac{1}{3}$"] },
+],
+// ========== 第7章 微分方程 ==========
+ch7: [
+    { id:"E01", title:"微分方程", ch:"第7章 微分方程", diff:"easy", full:"求 $y'=2x$ 的通解", logic:"y=∫2x dx=x²+C", slots:[{id:"s1",label:"y'",value:"2x"},{id:"s2",label:"通解",value:"x^2+C"}], tpl:"求 $y'=[s1]$ 的通解", ans:"y=x²+C", steps:["$y=\\int 2x dx=x^2+C$"] },
+    { id:"E02", title:"微分方程", ch:"第7章 微分方程", diff:"easy", full:"求 $y'=3x^2$ 的通解", logic:"y=∫3x² dx=x³+C", slots:[{id:"s1",label:"y'",value:"3x^2"},{id:"s2",label:"通解",value:"x^3+C"}], tpl:"求 $y'=[s1]$ 的通解", ans:"y=x³+C", steps:["$y=\\int 3x^2 dx=x^3+C$"] },
+    { id:"E03", title:"微分方程", ch:"第7章 微分方程", diff:"easy", full:"求 $y'=e^x$ 的通解", logic:"y=∫e^x dx=e^x+C", slots:[{id:"s1",label:"y'",value:"e^x"},{id:"s2",label:"通解",value:"e^x+C"}], tpl:"求 $y'=[s1]$ 的通解", ans:"y=eˣ+C", steps:["$y=\\int e^x dx=e^x+C$"] },
+    { id:"E04", title:"初值问题", ch:"第7章 微分方程", diff:"medium", full:"求 $y'=2x$，$y(0)=1$ 的特解", logic:"y=x²+C, y(0)=C=1 ⟹ y=x²+1", slots:[{id:"s1",label:"y'",value:"2x"},{id:"s2",label:"初值点",value:"0"},{id:"s3",label:"初值",value:"1"},{id:"s4",label:"特解",value:"x^2+1"}], tpl:"求 $y'=[s1]$，$y([s2])=[s3]$ 的特解", ans:"y=x²+1", steps:["通解：$y=x^2+C$","$y(0)=C=1$","特解：$y=x^2+1$"] },
+    { id:"E05", title:"初值问题", ch:"第7章 微分方程", diff:"medium", full:"求 $y'=3x^2$，$y(1)=2$ 的特解", logic:"y=x³+C, y(1)=1+C=2 ⟹ C=1, y=x³+1", slots:[{id:"s1",label:"y'",value:"3x^2"},{id:"s2",label:"初值点",value:"1"},{id:"s3",label:"初值",value:"2"},{id:"s4",label:"特解",value:"x^3+1"}], tpl:"求 $y'=[s1]$，$y([s2])=[s3]$ 的特解", ans:"y=x³+1", steps:["通解：$y=x^3+C$","$y(1)=1+C=2$ ⟹ $C=1$","特解：$y=x^3+1$"] },
+    { id:"E06", title:"初值问题", ch:"第7章 微分方程", diff:"medium", full:"求 $y'=2x$，$y(1)=3$ 后 $y(2)$ 的值", logic:"y=x²+C, y(1)=1+C=3⟹C=2, y(2)=4+2=6", slots:[{id:"s1",label:"初值点",value:"1"},{id:"s2",label:"初值",value:"3"},{id:"s3",label:"求值点",value:"2"},{id:"s4",label:"y(2)",value:"6"}], tpl:"求 $y'=2x$，$y([s1])=[s2]$ 后 $y([s3])$ 的值", ans:"y(2)=6", steps:["通解：$y=x^2+C$","$y(1)=1+C=3$ ⟹ $C=2$","$y(2)=4+2=6$"] },
+    { id:"E07", title:"可分离变量", ch:"第7章 微分方程", diff:"medium", full:"求 $y'=y$ 的通解", logic:"dy/y=dx ⟹ ln|y|=x+C₁ ⟹ y=Ce^x", slots:[{id:"s1",label:"方程",value:"y'=y"},{id:"s2",label:"通解",value:"Ce^x"}], tpl:"求 $[s1]$ 的通解", ans:"y=Ceˣ", steps:["分离变量：$\\frac{dy}{y}=dx$","积分：$\\ln|y|=x+C_1$","$y=Ce^x$"] },
+    { id:"E08", title:"可分离变量", ch:"第7章 微分方程", diff:"medium", full:"求 $y'=2y$，$y(0)=1$ 的特解", logic:"y=Ce^(2x), y(0)=C=1 ⟹ y=e^(2x)", slots:[{id:"s1",label:"方程系数",value:"2"},{id:"s2",label:"初值",value:"1"},{id:"s3",label:"特解",value:"e^{2x}"}], tpl:"求 $y'=[s1]y$，$y(0)=[s2]$ 的特解", ans:"y=e^{2x}", steps:["通解：$y=Ce^{2x}$","$y(0)=C=1$","特解：$y=e^{2x}$"] },
+]
+};
+
+QB.all = [...QB.ch1,...QB.ch2,...QB.ch3,...QB.ch4,...QB.ch5,...QB.ch6,...QB.ch7];
+
+const Game = (function() {
+    const S = { roles:[], currentQ:null, currentStep:0, timer:null, timeTotal:180, timeLeft:180, drawIndex:0, slotStates:{}, godViewVisible:false };
+    
+    function renderMath(el) {
+        if (!el) return Promise.resolve();
+        
+        // 如果MathJax已经准备好
+        if (window.MathJax && MathJax.typesetPromise) {
+            return MathJax.typesetPromise([el]).then(() => {
+                console.log('Math rendered for:', el.id || 'element');
+            }).catch(e => {
+                console.warn('MathJax render error:', e);
+                return Promise.resolve();
+            });
+        }
+        
+        // 如果MathJax正在加载
+        if (window.MathJax && MathJax.startup && MathJax.startup.promise) {
+            return MathJax.startup.promise.then(() => {
+                if (MathJax.typesetPromise) {
+                    return MathJax.typesetPromise([el]).catch(e => {
+                        console.warn(e);
+                        return Promise.resolve();
+                    });
+                }
+                return Promise.resolve();
+            }).catch(() => {
+                return new Promise(resolve => {
+                    setTimeout(() => {
+                        renderMath(el).then(resolve);
+                    }, 100);
+                });
+            });
+        }
+        
+        // 等待MathJax加载
+        return new Promise(resolve => {
+            setTimeout(() => {
+                renderMath(el).then(resolve);
+            }, 100);
+        });
+    }
+    
+    function updateTotal() {
+        const t = ['wolfCount','seerCount','witchCount','villagerCount'].reduce((s,id) => s + (parseInt(document.getElementById(id).value) || 0), 0);
+        document.getElementById('totalCountDisplay').innerText = t;
+    }
+    
+        function switchTab(tab) {
+        ['setup','flow','skills','god'].forEach(t => {
+                document.getElementById(`panel-${t}`).classList.add('hidden');
+            document.getElementById(`tab-${t}`).classList.remove('text-amber-400','border-b-2','border-amber-500','bg-gray-800');
+                document.getElementById(`tab-${t}`).classList.add('text-gray-500');
+            });
+            document.getElementById(`panel-${tab}`).classList.remove('hidden');
+            document.getElementById(`tab-${tab}`).classList.remove('text-gray-500');
+        document.getElementById(`tab-${tab}`).classList.add('text-amber-400','border-b-2','border-amber-500','bg-gray-800');
+        }
+        
+        function generateRoles() {
+        const counts = { wolf: +document.getElementById('wolfCount').value, seer: +document.getElementById('seerCount').value, witch: +document.getElementById('witchCount').value, villager: +document.getElementById('villagerCount').value };
+            let pool = [];
+        for (let r in counts) for (let i = 0; i < counts[r]; i++) pool.push(r);
+            pool.sort(() => Math.random() - 0.5);
+        S.roles = pool.map((r,i)=>({id:i+1,role:r,status:'alive'}));
+        renderPlayerList(); startDrawPhase();
+    }
+    
+        function renderPlayerList() {
+        const b = {wolf:'bg-red-900 text-red-200',villager:'bg-green-900 text-green-200',seer:'bg-blue-900 text-blue-200',witch:'bg-purple-900 text-purple-200'};
+        const n = {wolf:'狼',villager:'民',seer:'预',witch:'巫'};
+        document.getElementById('playerListContent').innerHTML = S.roles.map(p=>`<div class="flex items-center justify-between bg-gray-800 p-1 rounded text-xs"><span class="text-gray-500 w-3">${p.id}</span><span class="px-1 rounded ${b[p.role]} text-[10px]">${n[p.role]}</span><button onclick="Game.toggleLife(${p.id},this)" class="px-1 rounded bg-gray-700 text-gray-300 text-[10px]">存</button></div>`).join('');
+            document.getElementById('playerList').classList.remove('hidden');
+        }
+        
+    function toggleLife(id,btn) { const p=S.roles.find(r=>r.id===id); if(p.status==='alive'){p.status='dead';btn.innerText='亡';btn.className="px-1 rounded bg-red-900 text-red-300 text-[10px]";}else{p.status='alive';btn.innerText='存';btn.className="px-1 rounded bg-gray-700 text-gray-300 text-[10px]";} }
+    
+        function startDrawPhase() {
+            document.getElementById('setupView').classList.remove('hidden');
+            document.getElementById('gameView').classList.add('hidden');
+            document.querySelector('#setupView > h2').classList.add('hidden');
+            document.getElementById('cardDrawArea').classList.remove('hidden');
+            document.getElementById('cardDrawArea').classList.add('flex');
+        S.drawIndex = 0; updateDrawCardUI();
+        }
+        
+        function updateDrawCardUI() {
+        if(S.drawIndex >= S.roles.length) { document.getElementById('setupView').innerHTML = `<div class="text-center"><h2 class="text-2xl text-green-500 font-bold mb-3">身份分配完成！</h2><button onclick="Game.startGame()" class="px-6 py-2 bg-amber-600 text-white rounded font-bold">进入游戏</button></div>`; return; }
+        document.getElementById('drawIndexDisplay').innerText = S.drawIndex + 1;
+            document.getElementById('gameCard').classList.remove('rotate-y-180');
+        }
+        
+        function revealCard() {
+            const card = document.getElementById('gameCard');
+        if(card.classList.contains('rotate-y-180')) return;
+        const role = S.roles[S.drawIndex].role;
+        const d = { wolf:{icon:'🐺',name:'狼人',desc:'删除条件',color:'border-red-500'}, villager:{icon:'🧑',name:'村民',desc:'推理还原',color:'border-green-500'}, seer:{icon:'🔮',name:'预言家',desc:'查看完整',color:'border-blue-500'}, witch:{icon:'🧪',name:'女巫',desc:'还原条件',color:'border-purple-500'} };
+        const info = d[role];
+        document.getElementById('cardFace').className = `absolute w-full h-full bg-white rounded-xl border-4 ${info.color} flex flex-col items-center justify-center backface-hidden rotate-y-180 text-gray-900`;
+            document.getElementById('cardIcon').innerText = info.icon;
+            document.getElementById('cardRoleName').innerText = info.name;
+            document.getElementById('cardDesc').innerText = info.desc;
+            card.classList.add('rotate-y-180');
+        }
+        
+    function hideCard(e) { e.stopPropagation(); S.drawIndex++; updateDrawCardUI(); }
+    
+        function startGame() {
+            document.getElementById('setupView').classList.add('hidden');
+            document.getElementById('gameView').classList.remove('hidden');
+        switchTab('god'); night('open'); updateBankStats();
+    }
+    
+    function updateBankStats() {
+        const stats = Object.keys(QB).filter(k=>k!=='all').map(k=>`${k.replace('ch','第')}章: ${QB[k].length}题`).join('<br>');
+        document.getElementById('bankStats').innerHTML = stats + `<br><strong>总计: ${QB.all.length}题</strong>`;
+    }
+    
+    function night(type) {
+        const o = document.getElementById('nightOverlay');
+        const t = document.getElementById('nightActionText');
+        const b = document.getElementById('headerPhaseBadge');
+        if(type==='close') { o.style.opacity='1'; o.style.pointerEvents='auto'; t.innerText="狼人请睁眼..."; b.innerHTML='🌙 夜晚'; b.className="px-2 py-1 rounded-full bg-indigo-900/50 text-indigo-200 text-xs font-bold"; }
+        else if(type==='open') { o.style.opacity='0'; o.style.pointerEvents='none'; b.innerHTML='☀️ 白天'; b.className="px-2 py-1 rounded-full bg-amber-600/50 text-amber-100 text-xs font-bold"; }
+        else { const m={wolf:"狼人选择...",seer:"预言家查看...",witch:"女巫选择..."}; t.innerText=m[type]; }
+    }
+    
+    function distribute() {
+        const ch = document.getElementById('chapterSelect').value;
+        const ml = parseInt(document.getElementById('missingLevelSelect').value);
+        let pool = ch==='all' ? QB.all : QB[ch];
+        if(!pool||!pool.length) { alert('该章节暂无题目'); return; }
+        const q = pool[Math.floor(Math.random()*pool.length)];
+        S.currentQ = q; S.currentStep = 0; S.slotStates = {};
+        const shuffled = [...q.slots].sort(()=>Math.random()-0.5);
+        const hc = Math.min(ml, q.slots.length);
+        q.slots.forEach(slot => { S.slotStates[slot.id] = { hidden: shuffled.indexOf(slot)<hc, value:slot.value, filledValue:'', wolfDeleted:false, witchRestored:false, label:slot.label }; });
+        renderQuestion(); updateGodView(); updateSkillOptions(); switchTab('flow'); night('open');
+    }
+        
+        function renderQuestion() {
+        if(!S.currentQ) return;
+        const q = S.currentQ;
+        let html = q.tpl, hc = 0;
+            q.slots.forEach(slot => {
+            const s = S.slotStates[slot.id];
+            let r;
+            if(s.witchRestored) r = slot.value;
+            else if(s.wolfDeleted) { r = '\\text{[已删]}'; hc++; }
+            else if(s.hidden) { 
+                if(s.filledValue) {
+                    r = s.filledValue;
+                } else {
+                    r = '\\text{[???]}';
+                    hc++;
+                }
+            }
+            else r = slot.value;
+            html = html.replace(new RegExp(`\\[${slot.id}\\]`,'g'), r);
+        });
+        document.getElementById('displayChapter').innerText = q.ch;
+            document.getElementById('displayTitle').innerText = q.title;
+        document.getElementById('displayType').innerText = q.diff==='easy'?'基础':q.diff==='medium'?'中等':'困难';
+        const dc = {easy:'bg-green-900/50 text-green-300',medium:'bg-amber-900/50 text-amber-300',hard:'bg-red-900/50 text-red-300'};
+        document.getElementById('displayDiff').className = `px-2 py-0.5 rounded text-xs ${dc[q.diff]}`;
+        document.getElementById('displayDiff').innerText = q.diff==='easy'?'★':q.diff==='medium'?'★★':'★★★';
+        document.getElementById('missingCount').innerText = `缺失:${hc}`;
+        const qe = document.getElementById('displayQuestion');
+        qe.innerHTML = html;
+            document.getElementById('displaySteps').innerHTML = '';
+            renderFillInputs();
+        renderMath(qe);
+    }
+    
+        function renderFillInputs() {
+            if (!S.currentQ) return;
+            const fillArea = document.getElementById('fillArea');
+            const fillInputs = document.getElementById('fillInputs');
+            const hiddenSlots = S.currentQ.slots.filter(slot => {
+                const s = S.slotStates[slot.id];
+                return (s.hidden || s.wolfDeleted) && !s.witchRestored && !s.filledValue;
+            });
+        if (hiddenSlots.length === 0) { fillArea.classList.add('hidden'); return; }
+            fillArea.classList.remove('hidden');
+            fillInputs.innerHTML = hiddenSlots.map(slot => `
+            <div class="bg-gray-900/50 p-1.5 rounded border border-gray-700">
+                <label class="text-xs text-gray-500 block mb-1">${slot.label}</label>
+                <input type="text" class="w-full px-2 py-1 rounded bg-gray-800 text-white text-sm border border-gray-600 focus:border-amber-500 focus:outline-none" data-slot="${slot.id}" id="fill-${slot.id}">
+                </div>
+            `).join('');
+        }
+        
+        function submitFill() {
+            if (!S.currentQ) return;
+        document.querySelectorAll('#fillInputs input').forEach(input => {
+                const slotId = input.dataset.slot;
+            const val = input.value.trim();
+            if (val) S.slotStates[slotId].filledValue = val;
+        });
+            renderQuestion();
+    }
+    
+    function updateGodView() {
+        if (!S.currentQ) return;
+        const q = S.currentQ;
+        document.getElementById('godViewContent').innerHTML = `
+            <div class="mb-2 pb-2 border-b border-green-700/30">
+                <span class="text-green-400 font-bold text-xs">完整题目：</span><br>
+                <span class="text-white text-xs">${q.full}</span>
+            </div>
+            <div class="mb-2">
+                <span class="text-amber-400 font-bold text-xs">答案：</span>
+                <span class="text-white">${q.ans}</span>
+            </div>
+            <div class="p-2 bg-blue-900/30 rounded border border-blue-500/30">
+                <span class="text-blue-400 font-bold text-xs">🔗 逻辑链：</span>
+                <pre class="text-gray-300 text-xs mt-1 whitespace-pre-wrap">${q.logic}</pre>
+            </div>
+        `;
+        renderMath(document.getElementById('godViewContent'));
+    }
+    
+    function toggleGodView() {
+        const el = document.getElementById('godViewContent');
+        el.classList.toggle('hidden');
+        S.godViewVisible = !el.classList.contains('hidden');
+    }
+    
+        function updateSkillOptions() {
+            if (!S.currentQ) return;
+            const wolfSelect = document.getElementById('wolfDeleteSelect');
+            const visibleSlots = S.currentQ.slots.filter(s => !S.slotStates[s.id].hidden && !S.slotStates[s.id].wolfDeleted);
+        wolfSelect.innerHTML = '<option value="">选择...</option>' + visibleSlots.map(s => `<option value="${s.id}">${s.label}</option>`).join('');
+            const witchSelect = document.getElementById('witchRestoreSelect');
+        const hiddenSlots = S.currentQ.slots.filter(s => (S.slotStates[s.id].hidden || S.slotStates[s.id].wolfDeleted) && !S.slotStates[s.id].witchRestored);
+        witchSelect.innerHTML = '<option value="">选择...</option>' + hiddenSlots.map(s => `<option value="${s.id}">${s.label}</option>`).join('');
+    }
+    
+    function updateMissingStatus() {
+            if (!S.currentQ) return;
+        document.getElementById('missingStatusList').innerHTML = S.currentQ.slots.map(slot => {
+                const s = S.slotStates[slot.id];
+                let status, color;
+            if (s.witchRestored) { status = '已还原'; color = 'text-pink-400'; }
+            else if (s.wolfDeleted) { status = '被删除'; color = 'text-purple-400'; }
+            else if (s.hidden) { status = s.filledValue ? '已填充' : '缺失'; color = s.filledValue ? 'text-green-400' : 'text-amber-400'; }
+            else { status = '显示'; color = 'text-gray-500'; }
+                return `<div class="flex justify-between"><span class="text-gray-400">${slot.label}:</span><span class="${color}">${status}</span></div>`;
+        }).join('');
+        }
+        
+        function wolfDelete() {
+        const slotId = document.getElementById('wolfDeleteSelect').value;
+        if (!slotId) { alert('请选择'); return; }
+            S.slotStates[slotId].wolfDeleted = true;
+            renderQuestion();
+            updateSkillOptions();
+        alert('狼人已删除该条件！');
+        }
+        
+        function seerView() {
+        if (!S.currentQ) { alert('还没发题！'); return; }
+            const content = document.getElementById('seerModalContent');
+        content.innerHTML = `<div class="mb-3">${S.currentQ.full}</div><div class="pt-3 border-t border-blue-500/30"><span class="text-blue-400 font-bold">答案：</span><span class="text-white">${S.currentQ.ans}</span></div>`;
+        document.getElementById('seerModal').classList.remove('hidden');
+        renderMath(content);
+    }
+    
+    function closeSeerModal() { document.getElementById('seerModal').classList.add('hidden'); }
+    
+        function witchRestore() {
+        const slotId = document.getElementById('witchRestoreSelect').value;
+        if (!slotId) { alert('请选择'); return; }
+            S.slotStates[slotId].witchRestored = true;
+            S.slotStates[slotId].hidden = false;
+            S.slotStates[slotId].wolfDeleted = false;
+            renderQuestion();
+            updateSkillOptions();
+        alert('女巫已还原该条件！');
+        }
+        
+        function nextStep() {
+            if (!S.currentQ || S.currentStep >= S.currentQ.steps.length) return;
+            const container = document.getElementById('displaySteps');
+            const div = document.createElement('div');
+        div.className = "step-reveal bg-amber-900/20 border-l-4 border-amber-500 p-3 rounded text-gray-100 text-sm";
+        div.innerHTML = S.currentQ.steps[S.currentStep];
+            container.appendChild(div);
+        requestAnimationFrame(() => { div.classList.add('active'); container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' }); renderMath(div); });
+            S.currentStep++;
+        }
+        
+        function revealAnswer() {
+            if (!S.currentQ) return;
+        S.currentQ.slots.forEach(slot => { S.slotStates[slot.id].hidden = false; S.slotStates[slot.id].wolfDeleted = false; });
+            renderQuestion();
+            const container = document.getElementById('displaySteps');
+            const div = document.createElement('div');
+        div.className = "step-reveal bg-green-900/30 border-2 border-green-500 p-4 rounded-lg text-white text-lg";
+        div.innerHTML = `<div class="text-green-400 font-bold mb-1">✅ 正确答案</div><div>${S.currentQ.ans}</div>`;
+            container.appendChild(div);
+        requestAnimationFrame(() => { div.classList.add('active'); container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' }); });
+    }
+    
+    function revealAll() { while (S.currentQ && S.currentStep < S.currentQ.steps.length) nextStep(); }
+    
+    function setTimer(sec) { clearInterval(S.timer); S.timer = null; S.timeTotal = sec; S.timeLeft = sec; updateTimerUI(); document.getElementById('timerBtn').innerText = 'START'; }
+        
+        function toggleTimer() {
+            const btn = document.getElementById('timerBtn');
+        if (S.timer) { clearInterval(S.timer); S.timer = null; btn.innerText = 'RESUME'; }
+        else { btn.innerText = 'PAUSE'; S.timer = setInterval(() => { S.timeLeft--; updateTimerUI(); if (S.timeLeft <= 0) { clearInterval(S.timer); S.timer = null; btn.innerText = 'DONE'; } }, 1000); }
+    }
+    
+    function updateTimerUI() {
+            const m = Math.floor(S.timeLeft / 60).toString().padStart(2, '0');
+            const s = (S.timeLeft % 60).toString().padStart(2, '0');
+            document.getElementById('timerDisplay').innerText = `${m}:${s}`;
+    }
+    
+    function toggleProjection() { document.body.classList.toggle('projection-mode'); }
+    
+    updateTotal();
+    
+    return { updateTotal, switchTab, generateRoles, toggleLife, revealCard, hideCard, startGame, night, distribute, nextStep, revealAll, revealAnswer, setTimer, toggleTimer, toggleProjection, submitFill, wolfDelete, seerView, closeSeerModal, witchRestore, toggleGodView };
+})();
+
+// 确保MathJax加载完成后渲染页面中的公式
+(function() {
+    function checkMathJax() {
+        if (window.MathJax && MathJax.typesetPromise) {
+            // MathJax已加载，渲染页面中的公式
+            const mathElements = document.querySelectorAll('.math-content, #displayQuestion, #godViewContent, #seerModalContent');
+            mathElements.forEach(el => {
+                if (el.textContent && el.textContent.includes('$')) {
+                    MathJax.typesetPromise([el]).catch(e => console.warn('MathJax render error:', e));
+                }
+            });
+        } else if (window.MathJax && MathJax.startup && MathJax.startup.promise) {
+            MathJax.startup.promise.then(() => {
+                checkMathJax();
+            });
+            } else {
+            setTimeout(checkMathJax, 100);
+        }
+    }
+    
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', checkMathJax);
+    } else {
+        checkMathJax();
+    }
+    })();
+    </script>
+</body>
+</html>
