@@ -1,128 +1,33 @@
-﻿<!DOCTYPE html>
+﻿
+<!DOCTYPE html>
 <html lang="zh-CN">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>高等应用数学 | 在线课堂</title>
-
-    <!-- 字体预加载 -->
-    <link rel="preload" href="./common-assets/fonts/WD-XLLubrifontSC-Regular.otf" as="font" type="font/otf" crossorigin>
-
-    <!-- Three.js 本地引入 -->
     <script src="./common-assets/js/three-0.160.0.min.js"></script>
-
-    <!-- Material Icons 本地化 -->
-    <link rel="stylesheet" href="./common-assets/css/material-icons.local.css">
-
+    <link href="./common-assets/css/material-icons.local.css" rel="stylesheet">
     <style>
-        @font-face {
-            font-family: 'WDXLubrifontSC';
-            src: url('./common-assets/fonts/WD-XLLubrifontSC-Regular.otf') format('opentype');
-            font-weight: 400;
-            font-style: normal;
-            font-display: swap;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'WDXLubrifontSC', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        html, body {
+            height: 100vh;
             overflow: hidden;
-            background: #f1f5f9;
-            -webkit-font-smoothing: antialiased;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+            background: linear-gradient(135deg, #f0f4f8 0%, #e0e7ff 30%, #f1f5f9 100%);
         }
 
-        /* 3D背景 */
-        #canvas-container {
-            position: absolute;
-            inset: 0;
-            z-index: 0;
-            background: linear-gradient(to bottom, rgba(239, 246, 255, 0.5), rgba(241, 245, 249, 0.5));
-        }
+        #bg { position: fixed; inset: 0; z-index: 0; }
 
-        /* 主容器 */
-        .main-container {
+        .app {
             position: relative;
             z-index: 10;
             height: 100vh;
             display: flex;
             flex-direction: column;
-            padding: 1.5rem 2rem;
-            max-width: 1600px;
+            padding: 1.5vh 2vw;
+            max-width: 1500px;
             margin: 0 auto;
-        }
-
-        /* 玻璃面板 */
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.75);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-        }
-
-        .glass-panel-dark {
-            background: rgba(17, 24, 39, 0.85);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        /* 悬停效果 */
-        .hover-lift {
-            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease, background-color 0.3s ease;
-        }
-
-        .hover-lift:hover {
-            transform: translateY(-4px) scale(1.005);
-            box-shadow: 0 16px 20px -5px rgba(0, 0, 0, 0.08), 0 8px 8px -5px rgba(0, 0, 0, 0.03);
-            background-color: rgba(255, 255, 255, 0.9);
-        }
-
-        /* 图标动画 */
-        .icon-box {
-            transition: all 0.3s ease;
-        }
-
-        .card:hover .icon-box {
-            transform: scale(1.1);
-            background-color: #3b82f6;
-            color: white;
-        }
-
-        /* 入场动画 */
-        .fade-in-up {
-            animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-            opacity: 0;
-            transform: translateY(20px);
-        }
-
-        @keyframes fadeInUp {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .delay-100 { animation-delay: 100ms; }
-        .delay-200 { animation-delay: 200ms; }
-        .delay-300 { animation-delay: 300ms; }
-        .delay-400 { animation-delay: 400ms; }
-        .delay-500 { animation-delay: 500ms; }
-
-        /* 小标签悬停 */
-        .tag-hover {
-            transition: all 0.25s ease;
-        }
-
-        .tag-hover:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         /* Header */
@@ -130,810 +35,762 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1.25rem;
+            padding-bottom: 1.5vh;
+            flex-shrink: 0;
+            margin-bottom: 1rem;
+            position: relative;
         }
-
+        
         .brand h1 {
-            font-size: 2.25rem;
+            font-size: clamp(1.25rem, 2.5vw, 1.75rem);
             font-weight: 700;
-            color: #1e293b;
-            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, #1e293b 0%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
-
-        .brand span {
-            font-size: 0.75rem;
-            font-weight: 500;
-            color: #64748b;
-            letter-spacing: 0.2em;
-            text-transform: uppercase;
-            margin-top: 0.25rem;
-            display: block;
-        }
+        .brand span { font-size: 0.65rem; color: #64748b; letter-spacing: 0.15em; text-transform: uppercase; }
 
         .header-btn {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.625rem 1.25rem;
-            background: rgba(255, 255, 255, 0.8);
-            color: #475569;
-            font-weight: 600;
-            font-size: 0.875rem;
-            border-radius: 9999px;
-            border: 1px solid rgba(226, 232, 240, 0.6);
+            display: flex; align-items: center; gap: 0.4rem;
+            padding: 0.6rem 1.2rem;
+            background: rgba(255,255,255,0.75);
+            backdrop-filter: blur(12px) saturate(1.2);
+            border: 1px solid rgba(226,232,240,0.8);
+            border-radius: 2rem;
+            font-size: 0.8rem; font-weight: 600; color: #475569;
             cursor: pointer;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(8px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
         }
-
         .header-btn:hover {
-            background: white;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            background: rgba(255,255,255,0.95);
+            box-shadow: 0 6px 20px rgba(59,130,246,0.15);
+            transform: translateY(-2px);
+            border-color: rgba(59,130,246,0.3);
         }
+        .header-btn:active { transform: translateY(0); }
+        .header-btn .material-icons-round { font-size: 1.1rem; color: #3b82f6; transition: transform 0.3s; }
+        .header-btn:hover .material-icons-round { transform: scale(1.1); }
 
-        .header-btn .material-icons-round {
-            color: #3b82f6;
-            font-size: 1.25rem;
-            transition: transform 0.3s ease;
-        }
-
-        .header-btn:hover .material-icons-round {
-            transform: scale(1.1);
-        }
-
-        /* 主网格 */
-        .main-grid {
+        /* 主内容区 - 两行布局 */
+        .content {
             flex: 1;
-            display: grid;
-            grid-template-columns: 5fr 3fr 4fr;
-            gap: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
             min-height: 0;
-            margin-bottom: 1rem;
         }
-
-        /* 左列 */
-        .left-column {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        /* 课程中心卡片 */
-        .course-card {
+        
+        .main-scroll {
             flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding-right: 0.5rem;
+        }
+        
+        .main-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .main-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        .main-scroll::-webkit-scrollbar-thumb {
+            background: rgba(148,163,184,0.3);
+            border-radius: 3px;
+        }
+        
+        .main-scroll::-webkit-scrollbar-thumb:hover {
+            background: rgba(148,163,184,0.5);
+        }
+
+        /* 第一行：主卡片区 */
+        .row-main {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 1.5rem;
+            flex: 1.2;
+            min-height: 0;
+        }
+
+        .row-tools {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1.5rem;
+            flex: 0.8;
+            min-height: 0;
+        }
+
+        /* 通用卡片样式 */
+        .card {
+            background: rgba(255,255,255,0.75);
+            backdrop-filter: blur(16px) saturate(1.2);
+            border: 1px solid rgba(255,255,255,0.8);
             border-radius: 1.5rem;
-            padding: 1.5rem;
-            display: flex;
-            flex-direction: column;
+            padding: 1.25rem;
             text-decoration: none;
             color: inherit;
-            position: relative;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.4s cubic-bezier(0.34,1.56,0.64,1);
             overflow: hidden;
+            position: relative;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.06);
         }
-
-        .course-card .glow {
+        .card::before {
+            content: '';
             position: absolute;
             top: 0;
+            left: 0;
             right: 0;
-            width: 12rem;
-            height: 12rem;
-            background: rgba(191, 219, 254, 0.5);
-            border-radius: 9999px;
-            filter: blur(3rem);
-            transform: translate(50%, -50%);
-            pointer-events: none;
-            transition: background 0.5s ease;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(59,130,246,0.3), transparent);
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+        .card:hover::before {
+            opacity: 1;
+        }
+        .card:hover {
+            transform: translateY(-6px) scale(1.02);
+            box-shadow: 0 20px 40px -8px rgba(0,0,0,0.15);
+            background: rgba(255,255,255,0.98);
+            border-color: rgba(255,255,255,0.95);
         }
 
-        .course-card:hover .glow {
-            background: rgba(147, 197, 253, 0.6);
+        /* 主卡片 - 课程中心 */
+        .card.hero {
+            padding: 1.5rem;
         }
-
-        .course-card .icon-box {
-            width: 3.5rem;
-            height: 3.5rem;
-            border-radius: 1rem;
-            background: #eff6ff;
-            color: #3b82f6;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
-
-        .course-card:hover .icon-box {
-            background: #3b82f6;
-            color: white;
-        }
-
-        .course-card .content {
-            position: relative;
-            z-index: 10;
-            margin-top: 1rem;
-            flex: 1;
-        }
-
-        .course-card h2 {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #1e293b;
-            margin-bottom: 0.25rem;
-        }
-
-        .course-card .subtitle {
-            font-size: 0.8rem;
-            color: #64748b;
-            margin-bottom: 0.5rem;
-        }
-
-        .course-card .desc {
-            font-size: 0.875rem;
-            color: #475569;
-            line-height: 1.6;
-        }
-
-        .course-card .action {
-            display: flex;
-            align-items: center;
-            color: #3b82f6;
-            font-weight: 500;
-            font-size: 0.875rem;
-            margin-top: 0.75rem;
-            transition: transform 0.3s ease;
-        }
-
-        .course-card:hover .action {
-            transform: translateX(4px);
-        }
-
-        .arrow-icon {
+        .card.hero .glow {
             position: absolute;
-            top: 1.5rem;
-            right: 1.5rem;
-            color: #cbd5e1;
-            transition: color 0.3s ease;
+            top: -3rem; right: -3rem;
+            width: 12rem; height: 12rem;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.2), transparent);
+            border-radius: 50%;
+            filter: blur(3.5rem);
+            transition: all 0.6s ease-out;
+            animation: pulse 3s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 0.6; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.1); }
+        }
+        .card.hero:hover .glow {
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.35), transparent);
+            filter: blur(4rem);
         }
 
-        .course-card:hover .arrow-icon {
-            color: #3b82f6;
+        .card-icon {
+            width: 3.5rem; height: 3.5rem;
+            border-radius: 1.125rem;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.4s cubic-bezier(0.34,1.56,0.64,1);
+            flex-shrink: 0;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+            position: relative;
         }
+        .card-icon::after {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: inherit;
+            background: linear-gradient(135deg, rgba(255,255,255,0.5), transparent);
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+        .card:hover .card-icon::after {
+            opacity: 1;
+        }
+        .card.hero .card-icon { width: 3.5rem; height: 3.5rem; }
+        .card-icon .material-icons-round { font-size: 1.5rem; }
+        .card.hero .card-icon .material-icons-round { font-size: 1.75rem; }
+        .card:hover .card-icon { transform: scale(1.1); }
 
-        /* 小标签网格 */
-        .tags-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-            gap: 0.75rem;
-        }
-        
-        @media (min-width: 1024px) {
-            .tags-grid {
-                grid-template-columns: repeat(5, 1fr);
-            }
-        }
-
-        .tag-card {
-            border-radius: 1rem;
-            padding: 0.875rem;
+        .card-header {
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            text-decoration: none;
+            justify-content: space-between;
+            align-items: flex-start;
+            position: relative;
+            z-index: 2;
+        }
+        .card-arrow {
+            color: #cbd5e1;
+            font-size: 1.1rem !important;
+            transition: all 0.4s cubic-bezier(0.34,1.56,0.64,1);
+        }
+        .card:hover .card-arrow {
             color: inherit;
+            transform: translate(2px, -2px) scale(1.1);
         }
 
-        .tag-card .tag-icon {
+        .card-body { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; position: relative; z-index: 2; }
+        .card h2 { font-size: clamp(1.1rem, 1.6vw, 1.3rem); font-weight: 700; color: #1e293b; line-height: 1.3; }
+.card.hero h2 { font-size: clamp(1.4rem, 2.2vw, 1.8rem); }
+        .card .sub { font-size: 0.65rem; color: #94a3b8; margin-bottom: 0.25rem; letter-spacing: 0.05em; }
+        .card .desc { font-size: 0.75rem; color: #64748b; line-height: 1.5; margin-top: 0.25rem; }
+        .card.hero .desc { font-size: 0.85rem; margin-top: 0.5rem; }
+
+        .card .action {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            margin-top: 0.75rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: all 0.4s cubic-bezier(0.34,1.56,0.64,1);
+        }
+        .card:hover .action {
+            transform: translateX(6px);
+        }
+        .card .action .material-icons-round {
+            transition: transform 0.4s;
+        }
+        .card:hover .action .material-icons-round {
+            transform: translateX(2px);
+        }
+
+        /* 小工具卡片 */
+        .card.tool {
+            padding: 1rem;
+        }
+        .card.tool .card-icon {
             width: 2.5rem;
             height: 2.5rem;
-            border-radius: 0.75rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 0.5rem;
-            transition: all 0.3s ease;
         }
-
-        .tag-card:hover .tag-icon {
-            color: white;
+        .card.tool .card-icon .material-icons-round {
+            font-size: 1.25rem;
         }
-
-        .tag-card.orange .tag-icon { background: #fff7ed; color: #f97316; }
-        .tag-card.orange:hover .tag-icon { background: #f97316; }
-
-        .tag-card.green .tag-icon { background: #ecfdf5; color: #10b981; }
-        .tag-card.green:hover .tag-icon { background: #10b981; }
-
-        .tag-card.amber .tag-icon { background: #fffbeb; color: #f59e0b; }
-        .tag-card.amber:hover .tag-icon { background: #f59e0b; }
-
-        .tag-card.purple .tag-icon { background: #faf5ff; color: #a855f7; }
-        .tag-card.purple:hover .tag-icon { background: #a855f7; }
-
-        .tag-card.blue .tag-icon { background: #eff6ff; color: #3b82f6; }
-        .tag-card.blue:hover .tag-icon { background: #3b82f6; }
-
-        .tag-card h3 {
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: #334155;
+        .card.tool h2 {
+            font-size: 0.95rem;
+            transition: color 0.3s;
         }
-
-        .tag-card span {
-            font-size: 0.625rem;
-            color: #94a3b8;
-            margin-top: 0.125rem;
-        }
-
-        /* 中间列 */
-        .middle-column {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        /* 工具卡片 */
-        .tool-card {
-            flex: 1;
-            border-radius: 1.5rem;
-            padding: 1.25rem;
-            display: flex;
-            flex-direction: column;
-            text-decoration: none;
-            color: inherit;
-        }
-
-        .tool-card .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 0.75rem;
-        }
-
-        .tool-card .icon-box {
-            width: 2.75rem;
-            height: 2.75rem;
-            border-radius: 0.75rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .tool-card.indigo .icon-box { background: #eef2ff; color: #6366f1; }
-        .tool-card.indigo:hover .icon-box { background: #6366f1; color: white; }
-
-        .tool-card.teal .icon-box { background: #f0fdfa; color: #14b8a6; }
-        .tool-card.teal:hover .icon-box { background: #14b8a6; color: white; }
-
-        .tool-card .arrow {
-            color: #cbd5e1;
-            transition: color 0.3s ease;
-        }
-
-        .tool-card:hover .arrow {
-            color: inherit;
-        }
-
-        .tool-card.indigo:hover .arrow { color: #6366f1; }
-        .tool-card.teal:hover .arrow { color: #14b8a6; }
-
-        .tool-card .info {
-            margin-top: auto;
-        }
-
-        .tool-card h2 {
-            font-size: 1.125rem;
-            font-weight: 700;
-            color: #1e293b;
-        }
-
-        .tool-card .subtitle {
+        .card.tool .desc {
             font-size: 0.7rem;
-            color: #64748b;
-            margin-bottom: 0.25rem;
-        }
-
-        .tool-card .desc {
-            font-size: 0.75rem;
-            color: #475569;
-            line-height: 1.5;
             display: -webkit-box;
+            -webkit-box-orient: vertical;
             -webkit-line-clamp: 2;
             line-clamp: 2;
-            -webkit-box-orient: vertical;
             overflow: hidden;
+            transition: color 0.3s;
         }
-
-        /* 右列 */
-        .right-column {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        /* 画廊卡片 */
-        .gallery-card {
-            flex: 1;
-            border-radius: 1.5rem;
-            padding: 1.25rem;
-            display: flex;
-            flex-direction: column;
-            text-decoration: none;
+        .card.tool:hover h2,
+        .card.tool:hover .desc {
             color: inherit;
         }
 
-        .gallery-card .icon-box {
-            width: 2.75rem;
-            height: 2.75rem;
-            border-radius: 0.75rem;
-            background: #fdf4ff;
+        /* 颜色主题 */
+        .blue .card-icon {
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+            color: #3b82f6;
+        }
+        .blue:hover .card-icon {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: #fff;
+            box-shadow: 0 8px 24px rgba(59,130,246,0.3);
+        }
+        .blue .action, .blue:hover .card-arrow { color: #3b82f6; }
+
+        .teal .card-icon {
+            background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%);
+            color: #14b8a6;
+        }
+        .teal:hover .card-icon {
+            background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+            color: #fff;
+            box-shadow: 0 8px 24px rgba(20,184,166,0.3);
+        }
+        .teal .action, .teal:hover .card-arrow { color: #14b8a6; }
+
+        .pink .card-icon {
+            background: linear-gradient(135deg, #fdf4ff 0%, #fae8ff 100%);
             color: #d946ef;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 0.75rem;
         }
+        .pink:hover .card-icon {
+            background: linear-gradient(135deg, #d946ef 0%, #c026d3 100%);
+            color: #fff;
+            box-shadow: 0 8px 24px rgba(217,70,239,0.3);
+        }
+        .pink .action, .pink:hover .card-arrow { color: #d946ef; }
 
-        .gallery-card:hover .icon-box {
-            background: #d946ef;
-            color: white;
+        .indigo .card-icon {
+            background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
+            color: #6366f1;
         }
+        .indigo:hover .card-icon {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            color: #fff;
+            box-shadow: 0 8px 24px rgba(99,102,241,0.3);
+        }
+        .indigo .action, .indigo:hover .card-arrow { color: #6366f1; }
 
-        .gallery-card h2 {
-            font-size: 1.125rem;
-            font-weight: 700;
-            color: #1e293b;
+        .orange .card-icon {
+            background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+            color: #f97316;
         }
+        .orange:hover .card-icon {
+            background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+            color: #fff;
+            box-shadow: 0 8px 24px rgba(249,115,22,0.3);
+        }
+        .orange:hover .card-arrow { color: #f97316; }
 
-        .gallery-card .subtitle {
-            font-size: 0.7rem;
-            color: #64748b;
+        .green .card-icon {
+            background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+            color: #10b981;
         }
+        .green:hover .card-icon {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: #fff;
+            box-shadow: 0 8px 24px rgba(16,185,129,0.3);
+        }
+        .green:hover .card-arrow { color: #10b981; }
 
-        .gallery-card .desc {
-            font-size: 0.75rem;
-            color: #475569;
-            margin-top: 0.5rem;
-            line-height: 1.5;
+        .amber .card-icon {
+            background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+            color: #f59e0b;
         }
-        
-        .gallery-card .arrow {
+        .amber:hover .card-icon {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: #fff;
+            box-shadow: 0 8px 24px rgba(245,158,11,0.3);
+        }
+        .amber:hover .card-arrow { color: #f59e0b; }
+
+        .purple .card-icon {
+            background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
+            color: #a855f7;
+        }
+        .purple:hover .card-icon {
+            background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%);
+            color: #fff;
+            box-shadow: 0 8px 24px rgba(168,85,247,0.3);
+        }
+        .purple:hover .card-arrow { color: #a855f7; }
+
+        /* 深色AI卡片 */
+        .card.dark {
+            background: linear-gradient(135deg, rgba(17,24,39,0.85), rgba(30,41,59,0.85));
+            backdrop-filter: blur(16px) saturate(1.2);
+            border-color: rgba(255,255,255,0.15);
+        }
+        .card.dark:hover {
+            background: linear-gradient(135deg, rgba(17,24,39,0.95), rgba(30,41,59,0.95));
+            border-color: rgba(168,85,247,0.4);
+            box-shadow: 0 20px 40px -8px rgba(168,85,247,0.25);
+        }
+        .card.dark .glow {
             position: absolute;
-            top: 1.25rem;
-            right: 1.25rem;
-            color: #cbd5e1;
-            transition: color 0.3s ease;
+            bottom: -2rem; right: -2rem;
+            width: 10rem; height: 10rem;
+            background: radial-gradient(circle, rgba(168,85,247,0.25), transparent);
+            border-radius: 50%;
+            filter: blur(3.5rem);
+            transition: all 0.6s ease-out;
+            animation: pulseDark 3s ease-in-out infinite;
         }
-
-        .gallery-card:hover .arrow { color: #d946ef; }
-
-        /* 慧工坊卡片 */
-        .ai-card {
-            flex: 1.5;
-            border-radius: 1.5rem;
-            padding: 1.25rem;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            text-decoration: none;
-            color: inherit;
-            position: relative;
-            overflow: hidden;
+        @keyframes pulseDark {
+            0%, 100% { opacity: 0.7; transform: scale(1); }
+            50% { opacity: 0.9; transform: scale(1.15); }
         }
-
-        .ai-card .glow {
-            position: absolute;
-            bottom: -2rem;
-            right: -2rem;
-            width: 8rem;
-            height: 8rem;
-            background: rgba(168, 85, 247, 0.3);
-            border-radius: 9999px;
-            filter: blur(3rem);
-            transition: background 0.5s ease;
+        .card.dark:hover .glow {
+            background: radial-gradient(circle, rgba(168,85,247,0.4), transparent);
+            filter: blur(4rem);
         }
-
-        .ai-card:hover .glow {
-            background: rgba(168, 85, 247, 0.5);
-        }
-
-        .ai-card .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            position: relative;
-            z-index: 10;
-        }
-        
-        .ai-card .icon-box {
-            width: 2.75rem;
-            height: 2.75rem;
-            border-radius: 0.75rem;
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(8px);
-            transition: background 0.3s ease;
-        }
-
-        .ai-card:hover .icon-box {
-            background: #a855f7;
-        }
-
-        .ai-card .badge {
-            padding: 0.25rem 0.5rem;
-            background: rgba(168, 85, 247, 0.2);
+        .card.dark h2 { color: #fff; }
+        .card.dark .sub { color: #94a3b8; }
+        .card.dark .desc { color: #cbd5e1; }
+        .card.dark .card-icon { background: rgba(168,85,247,0.2); color: #c4b5fd; }
+        .card.dark:hover .card-icon { background: #a855f7; color: #fff; }
+        .card.dark .card-arrow { color: #64748b; }
+        .card.dark:hover .card-arrow { color: #a855f7; }
+        .card.dark .action { color: #c4b5fd; }
+        .card.dark:hover .action { color: #fff; }
+        .card.dark .badge {
+            padding: 0.2rem 0.5rem;
+            background: rgba(168,85,247,0.25);
             color: #e9d5ff;
-            font-size: 0.625rem;
+            font-size: 0.55rem;
             font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
             border-radius: 0.25rem;
-            border: 1px solid rgba(168, 85, 247, 0.3);
-        }
-
-        .ai-card .content {
-            position: relative;
-            z-index: 10;
-            margin-top: 1rem;
-        }
-
-        .ai-card h2 {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: white;
-            margin-bottom: 0.125rem;
-        }
-
-        .ai-card .subtitle {
-            font-size: 0.7rem;
-            color: #94a3b8;
-            margin-bottom: 0.5rem;
-        }
-
-        .ai-card .desc {
-            font-size: 0.75rem;
-            color: #cbd5e1;
-            line-height: 1.6;
-        }
-
-        .ai-card .action {
-            display: flex;
-            align-items: center;
-            color: #c4b5fd;
-            font-size: 0.875rem;
-            font-weight: 500;
-            margin-top: 0.75rem;
-            transition: color 0.3s ease;
-        }
-
-        .ai-card:hover .action {
-            color: white;
-        }
-
-        .ai-card .action .material-icons-round {
-            transition: transform 0.3s ease;
-        }
-
-        .ai-card:hover .action .material-icons-round {
-            transform: translateX(4px);
+            letter-spacing: 0.08em;
         }
 
         /* Footer */
         footer {
-            padding-top: 0.5rem;
+            padding-top: 1.5vh;
             text-align: center;
-        }
-
-        footer .inner {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 1.5rem;
-            font-size: 0.75rem;
+            font-size: 0.65rem;
             color: #94a3b8;
+            flex-shrink: 0;
+            opacity: 0.8;
+            transition: opacity 0.3s;
         }
-
-        footer .dot {
-            width: 4px;
-            height: 4px;
-            border-radius: 9999px;
-            background: #cbd5e1;
+        footer:hover {
+            opacity: 1;
         }
 
         /* 响应式 */
-        @media (max-width: 1024px) {
-            .main-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-            .right-column {
-                flex-direction: row;
-            }
-            .ai-card {
-                flex: 1;
-            }
+        @media (max-width: 1200px) {
+            .row-main { grid-template-columns: 1.8fr 1fr 1fr; }
+            .row-tools { grid-template-columns: repeat(6, 1fr); }
         }
 
-        @media (max-width: 768px) {
+        @media (max-width: 900px) {
+            .row-main { grid-template-columns: 1fr 1fr; }
+            .row-main .card.hero { grid-column: span 2; }
+            .row-tools { grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); }
+            .row-tools .card.dark { grid-column: span 1; }
             .main-container {
-                padding: 1rem;
+                position: relative;
+                z-index: 1;
+                padding: 16px;
+                border-radius: 24px;
             }
-            .main-grid {
-                grid-template-columns: 1fr;
+        }
+        @media (max-width: 600px) {
+            .app { padding: 1vh 3vw; }
+            .content { gap: 0.75rem; }
+            .row-main, .row-tools { gap: 0.75rem; }
+            .row-main { grid-template-columns: 1fr; flex: 1; }
+            .row-main .card.hero { grid-column: span 1; }
+            .row-tools { grid-template-columns: 1fr 1fr; flex: 1.5; }
+            .row-tools .card.dark { grid-column: span 2; }
+            .card { padding: 0.85rem; border-radius: 1rem; }
+            .card.hero { padding: 1rem; }
+        }
+
+        /* 动画 */
+        .fade-in {
+            animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
             }
-            .brand h1 {
-                font-size: 1.75rem;
-            }
-            .right-column {
-                flex-direction: column;
-            }
+        }
+        .d1 { animation-delay: 50ms; }
+        .d2 { animation-delay: 100ms; }
+        .d3 { animation-delay: 150ms; }
+        .d4 { animation-delay: 200ms; }
+        .d5 { animation-delay: 250ms; }
+        .d6 { animation-delay: 300ms; }
+        .d7 { animation-delay: 350ms; }
+        .d8 { animation-delay: 400ms; }
+        
+        /* 微光效果 */
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+        .card::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            opacity: 0;
+            transition: opacity 0.4s;
+            pointer-events: none;
+        }
+        .card:hover::after {
+            opacity: 1;
+            animation: shimmer 0.6s ease-out;
         }
     </style>
 </head>
-
 <body>
-
-    <!-- 3D 背景容器 -->
-    <div id="canvas-container"></div>
-
-    <!-- 主内容 -->
-    <div class="main-container">
-
-        <!-- Header -->
-        <header class="fade-in-up">
-            <div class="brand">
-                <h1>高等应用数学</h1>
-                <span>Advanced Applied Mathematics</span>
-            </div>
-            <button class="header-btn" onclick="window.location.href='成绩册.html'">
-                <span class="material-icons-round">assignment</span>
-                <span>成绩册</span>
-            </button>
-        </header>
-
-        <!-- 主网格 -->
-        <div class="main-grid">
-            
-            <!-- 左列：课程中心 + 三标签 -->
-            <div class="left-column">
-                <!-- 课程中心 -->
-                <a href="课件/index.html" class="card course-card glass-panel hover-lift fade-in-up delay-100">
-                    <div class="glow"></div>
-                    <div style="display:flex; justify-content:space-between; align-items:flex-start; position:relative; z-index:10;">
-                <div class="icon-box">
-                            <span class="material-icons-round" style="font-size:1.75rem;">school</span>
-                        </div>
-                        <span class="material-icons-round arrow-icon">open_in_new</span>
+    <div id="bg"></div>
+    
+    <div class="app">
+        <div class="main-container">
+            <header class="fade-in">
+                <div class="brand">
+                    <h1>高等应用数学</h1>
+                    <span>Advanced Applied Mathematics</span>
                 </div>
-                    <div class="content">
-                    <h2>课程中心</h2>
-                        <p class="subtitle">Core Curriculum</p>
-                        <p class="desc">访问所有核心课程资料，包括教学大纲、视频讲座和重点难点解析。</p>
+                <button class="header-btn" onclick="location.href='成绩册.html'">
+                    <span class="material-icons-round">assignment</span>
+                    <span>成绩册</span>
+                </button>
+            </header>
+
+            <div class="main-scroll">
+                <div class="content">
+                    <!-- 第一行：核心模块 -->
+                    <div class="row-main">
+                        <a href="课件/index.html" class="card hero blue fade-in d1">
+                            <div class="glow"></div>
+                            <div class="card-header">
+                                <div class="card-icon"><span class="material-icons-round">school</span></div>
+                                <span class="material-icons-round card-arrow">open_in_new</span>
+                            </div>
+                            <div class="card-body">
+                                <p class="sub">CORE CURRICULUM</p>
+                                <h2>课程中心</h2>
+                                <p class="desc">访问核心课程资料，包括教学大纲、视频讲座和重点难点解析</p>
+                                <div class="action">
+                                    <span>进入学习</span>
+                                    <span class="material-icons-round" style="font-size:1rem;">arrow_forward</span>
+                                </div>
+                            </div>
+                        </a>
+
+                        <a href="习题/index.html" class="card teal fade-in d2">
+                            <div class="card-header">
+                                <div class="card-icon"><span class="material-icons-round">quiz</span></div>
+                                <span class="material-icons-round card-arrow">open_in_new</span>
+                            </div>
+                            <div class="card-body">
+                                <p class="sub">SMART QUIZ</p>
+                                <h2>智能题库</h2>
+                                <p class="desc">自适应难度测试，实时反馈与错题分析</p>
+                                <div class="action">
+                                    <span>开始练习</span>
+                                    <span class="material-icons-round" style="font-size:1rem;">arrow_forward</span>
+                                </div>
+                            </div>
+                        </a>
+
+                        <a href="网页资源/index.html" class="card indigo fade-in d3">
+                            <div class="card-header">
+                                <div class="card-icon"><span class="material-icons-round">science</span></div>
+                                <span class="material-icons-round card-arrow">open_in_new</span>
+                            </div>
+                            <div class="card-body">
+                                <p class="sub">SIMULATION LAB</p>
+                                <h2>仿真实验</h2>
+                                <p class="desc">交互式模型</p>
+                                <div class="action">
+                                    <span>进入实验</span>
+                                    <span class="material-icons-round" style="font-size:1rem;">arrow_forward</span>
+                                </div>
+                            </div>
+                        </a>
                     </div>
-                    <div class="action">
-                        <span>进入学习</span>
-                        <span class="material-icons-round" style="font-size:1.125rem; margin-left:0.25rem;">arrow_forward</span>
-                </div>
-                </a>
 
-                <!-- 三个小标签 -->
-                <div class="tags-grid fade-in-up delay-200">
-                    <a href="教辅资源/出题宝.html" class="tag-card glass-panel tag-hover orange">
-                        <div class="tag-icon">
-                            <span class="material-icons-round" style="font-size:1.25rem;">lightbulb</span>
-                        </div>
-                        <h3>出题宝</h3>
-                        <span>AI出题</span>
-                    </a>
-                    <a href="教辅资源/语义函数图像.html" class="tag-card glass-panel tag-hover green">
-                        <div class="tag-icon">
-                            <span class="material-icons-round" style="font-size:1.25rem;">show_chart</span>
-                        </div>
-                        <h3>智绘函数</h3>
-                        <span>可视化</span>
-                    </a>
-                    <a href="教学资源/index.html" class="tag-card glass-panel tag-hover amber">
-                        <div class="tag-icon">
-                            <span class="material-icons-round" style="font-size:1.25rem;">folder_open</span>
-                        </div>
-                        <h3>教学资源</h3>
-                        <span>教案笔记</span>
-                    </a>
-                    <a href="教辅资源/教学游戏/index.html" class="tag-card glass-panel tag-hover purple">
-                        <div class="tag-icon">
-                            <span class="material-icons-round" style="font-size:1.25rem;">sports_esports</span>
-                        </div>
-                        <h3>趣味课堂</h3>
-                        <span>互动游戏</span>
-                    </a>
-                    <a href="高职数模工坊/index.html" class="tag-card glass-panel tag-hover blue">
-                        <div class="tag-icon">
-                            <span class="material-icons-round" style="font-size:1.25rem;">precision_manufacturing</span>
-                        </div>
-                        <h3>数模工坊</h3>
-                        <span>3D建模</span>
-                    </a>
-                </div>
-            </div>
+                    <!-- 第二行：工具 + AI -->
+                    <div class="row-tools">
+                        <a href="教辅资源/出题宝.html" class="card tool orange fade-in d4">
+                            <div class="card-header">
+                                <div class="card-icon"><span class="material-icons-round">lightbulb</span></div>
+                                <span class="material-icons-round card-arrow">open_in_new</span>
+                            </div>
+                            <div class="card-body">
+                                <h2>出题宝</h2>
+                                <p class="desc">AI智能出题</p>
+                            </div>
+                        </a>
 
-            <!-- 中间列：仿真实验 + 智能题库 -->
-            <div class="middle-column">
-                <a href="网页资源/index.html" class="card tool-card glass-panel hover-lift indigo fade-in-up delay-200">
-                    <div class="header">
-                        <div class="icon-box">
-                            <span class="material-icons-round" style="font-size:1.5rem;">science</span>
-                        </div>
-                        <span class="material-icons-round arrow">open_in_new</span>
+                        <a href="教辅资源/语义函数图像.html" class="card tool green fade-in d5">
+                            <div class="card-header">
+                                <div class="card-icon"><span class="material-icons-round">show_chart</span></div>
+                                <span class="material-icons-round card-arrow">open_in_new</span>
+                            </div>
+                            <div class="card-body">
+                                <h2>智绘函数</h2>
+                                <p class="desc">函数可视化</p>
+                            </div>
+                        </a>
+
+                        <a href="故事书/index.html" class="card tool pink fade-in d6">
+                            <div class="card-header">
+                                <div class="card-icon"><span class="material-icons-round">collections</span></div>
+                                <span class="material-icons-round card-arrow">open_in_new</span>
+                            </div>
+                            <div class="card-body">
+                                <h2>数学画廊</h2>
+                                <p class="desc">探索数学之美，阅览数学史话与视觉艺术</p>
+                            </div>
+                        </a>
+
+                        <a href="教辅资源/教学游戏/index.html" class="card tool purple fade-in d7">
+                            <div class="card-header">
+                                <div class="card-icon"><span class="material-icons-round">sports_esports</span></div>
+                                <span class="material-icons-round card-arrow">open_in_new</span>
+                            </div>
+                            <div class="card-body">
+                                <h2>趣味课堂</h2>
+                                <p class="desc">互动游戏</p>
+                            </div>
+                        </a>
+
+                        <a href="教学资源/index.html" class="card tool amber fade-in d8">
+                            <div class="card-header">
+                                <div class="card-icon"><span class="material-icons-round">menu_book</span></div>
+                                <span class="material-icons-round card-arrow">open_in_new</span>
+                            </div>
+                            <div class="card-body">
+                                <h2>教学资源</h2>
+                                <p class="desc">教案与学生笔记</p>
+                            </div>
+                        </a>
+                        
+                        <a href="高职数模工坊/index.html" class="card dark fade-in d8">
+                            <div class="glow"></div>
+                            <div class="card-header">
+                                <div class="card-icon"><span class="material-icons-round">analytics</span></div>
+                                <span class="material-icons-round card-arrow">open_in_new</span>
+                            </div>
+                            <div class="card-body">
+                                <p class="sub">MODELING LAB</p>
+                                <h2>数模工坊</h2>
+                                <p class="desc">开展数学建模实践，探索真实问题的建模与求解</p>
+                                <div class="action">
+                                    <span>打开工坊</span>
+                                    <span class="material-icons-round" style="font-size:1rem;">chevron_right</span>
+                                </div>
+                            </div>
+                        </a>
+
+                        <a href="https://ai.projectmath.xyz/project/index.html" target="_blank" class="card dark fade-in d8">
+                            <div class="glow"></div>
+                            <div class="card-header">
+                                <div class="card-icon"><span class="material-icons-round">psychology</span></div>
+                                <div style="display:flex;align-items:center;gap:0.5rem;">
+                                    <span class="badge">BETA</span>
+                                    <span class="material-icons-round card-arrow">open_in_new</span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <p class="sub">AI LABORATORY</p>
+                                <h2>慧工坊</h2>
+                                <p class="desc">基于AI的数学探索工坊，体验智能辅助解题</p>
+                                <div class="action">
+                                    <span>启动工作台</span>
+                                    <span class="material-icons-round" style="font-size:1rem;">chevron_right</span>
+                                </div>
+                            </div>
+                        </a>
                     </div>
-                    <div class="info">
-                    <h2>仿真实验</h2>
-                        <p class="subtitle">Simulation Lab</p>
-                        <p class="desc">交互式数学模型与物理仿真环境，可视化抽象概念。</p>
                 </div>
-            </a>
-
-                <a href="习题/index.html" class="card tool-card glass-panel hover-lift teal fade-in-up delay-300">
-                    <div class="header">
-                <div class="icon-box">
-                            <span class="material-icons-round" style="font-size:1.5rem;">quiz</span>
-                        </div>
-                        <span class="material-icons-round arrow">open_in_new</span>
-                </div>
-                    <div class="info">
-                    <h2>智能题库</h2>
-                        <p class="subtitle">Smart Quiz</p>
-                        <p class="desc">自适应难度测试，实时反馈与错题分析。</p>
-                </div>
-            </a>
             </div>
 
-            <!-- 右列：数学画廊 + 慧工坊 -->
-            <div class="right-column">
-                <a href="故事书/index.html" class="card gallery-card glass-panel hover-lift fade-in-up delay-400" style="position:relative;">
-                <div class="icon-box">
-                        <span class="material-icons-round" style="font-size:1.5rem;">collections</span>
-                </div>
-                    <div>
-                    <h2>数学画廊</h2>
-                        <p class="subtitle">Math Gallery</p>
-                        <p class="desc">探索数学之美，阅览数学史话与视觉艺术。</p>
-                </div>
-                    <span class="material-icons-round arrow">open_in_new</span>
-            </a>
-
-                <a href="https://ai.projectmath.xyz/project/index.html" target="_blank" class="card ai-card glass-panel-dark hover-lift fade-in-up delay-500">
-                    <div class="glow"></div>
-                    <div class="header">
-                <div class="icon-box">
-                            <span class="material-icons-round" style="font-size:1.5rem;">psychology</span>
-                        </div>
-                        <span class="badge">Beta</span>
-                </div>
-                    <div class="content">
-                    <h2>慧工坊</h2>
-                        <p class="subtitle">AI Project Laboratory</p>
-                        <p class="desc">基于人工智能的数学探索工坊。参与前沿项目，体验AI辅助解题与创新。</p>
-                    </div>
-                    <div class="action">
-                        <span>启动工作台</span>
-                        <span class="material-icons-round" style="font-size:1rem; margin-left:0.25rem;">chevron_right</span>
-                </div>
-            </a>
-            </div>
+            <footer class="fade-in">
+                <span>© 2024 高等应用数学在线课堂 · 专为高职教学设计</span>
+            </footer>
         </div>
-
-        <!-- Footer -->
-        <footer class="fade-in-up delay-500">
-            <div class="inner">
-                <span>© 2024 高等应用数学在线课堂</span>
-                <span class="dot"></span>
-                <span>专为高职教学设计</span>
-            </div>
-        </footer>
     </div>
 
-    <!-- 3D 渲染脚本 -->
     <script>
-        function initThreeJS() {
-            const container = document.getElementById('canvas-container');
-            const scene = new THREE.Scene();
-            
-            const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.set(0, 10, 20);
-            camera.lookAt(0, 0, 0);
-
-            const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setPixelRatio(window.devicePixelRatio);
-            container.appendChild(renderer.domElement);
-
-            const particlesGeometry = new THREE.BufferGeometry();
-            const count = 50 * 50;
-            const positions = new Float32Array(count * 3);
-            
-            let i = 0;
-            const size = 25;
-            const steps = 50;
-            const stepSize = size / steps;
-            
-            for (let x = 0; x < steps; x++) {
-                for (let z = 0; z < steps; z++) {
-                    positions[i] = (x * stepSize) - (size / 2);
-                    positions[i + 1] = 0;
-                    positions[i + 2] = (z * stepSize) - (size / 2);
-                    i += 3;
-                }
-            }
-            
-            particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-
-            const material = new THREE.PointsMaterial({
-                color: 0x93c5fd,
-                size: 0.12,
-                transparent: true,
-                opacity: 0.5
-            });
-
-            const particles = new THREE.Points(particlesGeometry, material);
-            scene.add(particles);
-
-            const gridHelper = new THREE.GridHelper(40, 40, 0xe2e8f0, 0xe2e8f0);
-            gridHelper.position.y = -2;
-            scene.add(gridHelper);
-
-            const clock = new THREE.Clock();
-
-            function animate() {
-                requestAnimationFrame(animate);
-                
-                const time = clock.getElapsedTime() * 0.4;
-                const positions = particles.geometry.attributes.position.array;
-
-                let i = 0;
-                for (let x = 0; x < steps; x++) {
-                    for (let z = 0; z < steps; z++) {
-                        const px = positions[i];
-                        const pz = positions[i + 2];
-                        const y = Math.sin(px * 0.25 + time) * 1.2 + Math.cos(pz * 0.2 + time) * 1.2;
-                        positions[i + 1] = y;
-                        i += 3;
-                    }
-                }
-                
-                particles.geometry.attributes.position.needsUpdate = true;
-                particles.rotation.y = time * 0.04;
-
-                renderer.render(scene, camera);
-            }
-
-            animate();
-
-            window.addEventListener('resize', () => {
-                camera.aspect = window.innerWidth / window.innerHeight;
-                camera.updateProjectionMatrix();
-                renderer.setSize(window.innerWidth, window.innerHeight);
-            });
+        const container = document.getElementById('bg');
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        container.appendChild(canvas);
+        
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
         }
+        resizeCanvas();
+        
+        // 创建柔和的渐变光斑
+        class Blob {
+            constructor() {
+                this.reset();
+                this.phase = Math.random() * Math.PI * 2;
+            }
+            
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.radius = 120 + Math.random() * 180;
+                this.baseRadius = this.radius;
+                this.vx = (Math.random() - 0.5) * 0.2;
+                this.vy = (Math.random() - 0.5) * 0.2;
+                this.hue = 210 + Math.random() * 50; // 蓝紫色范围
+                this.saturation = 12 + Math.random() * 8; // 低饱和度，更柔和
+                this.lightness = 88 + Math.random() * 8; // 高亮度，适合浅色背景
+                this.phase = Math.random() * Math.PI * 2;
+            }
+            
+            update() {
+                // 平滑移动
+                this.x += this.vx;
+                this.y += this.vy;
+                
+                // 呼吸效果
+                this.phase += 0.01;
+                this.radius = this.baseRadius + Math.sin(this.phase) * 20;
+                
+                // 边界处理 - 平滑循环
+                if (this.x < -this.radius * 2) {
+                    this.x = canvas.width + this.radius;
+                }
+                if (this.x > canvas.width + this.radius * 2) {
+                    this.x = -this.radius;
+                }
+                if (this.y < -this.radius * 2) {
+                    this.y = canvas.height + this.radius;
+                }
+                if (this.y > canvas.height + this.radius * 2) {
+                    this.y = -this.radius;
+                }
+            }
+            
+            draw() {
+                const gradient = ctx.createRadialGradient(
+                    this.x, this.y, 0,
+                    this.x, this.y, this.radius
+                );
+                // 更柔和的渐变
+                gradient.addColorStop(0, `hsla(${this.hue}, ${this.saturation}%, ${this.lightness}%, 0.35)`);
+                gradient.addColorStop(0.4, `hsla(${this.hue}, ${this.saturation}%, ${this.lightness}%, 0.2)`);
+                gradient.addColorStop(0.7, `hsla(${this.hue}, ${this.saturation}%, ${this.lightness}%, 0.08)`);
+                gradient.addColorStop(1, `hsla(${this.hue}, ${this.saturation}%, ${this.lightness}%, 0)`);
+                
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+        
+        // 创建多个光斑
+        const blobs = [];
+        const blobCount = 5;
+        for (let i = 0; i < blobCount; i++) {
+            blobs.push(new Blob());
+        }
+        
+        function animate() {
+            // 使用半透明清除，创造拖尾效果
+            ctx.fillStyle = 'rgba(241, 245, 249, 0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // 更新和绘制所有光斑
+            blobs.forEach(blob => {
+                blob.update();
+                blob.draw();
+            });
+            
+            requestAnimationFrame(animate);
+        }
+        
+        animate();
+        
+        // 响应窗口大小变化
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+            // 调整光斑位置
+            blobs.forEach(blob => {
+                if (blob.x > canvas.width) blob.x = canvas.width * 0.5;
+                if (blob.y > canvas.height) blob.y = canvas.height * 0.5;
+            });
+        });
+    </script>
 
-        document.addEventListener('DOMContentLoaded', initThreeJS);
-
-        // 键盘快捷键
-        document.addEventListener('keydown', (e) => {
-            const map = {
-                '1': '课件/index.html',
-                '2': '网页资源/index.html',
-                '3': '习题/index.html',
-                '4': '故事书/index.html',
-                '5': 'https://ai.projectmath.xyz/project/index.html',
-                '6': '教辅资源/出题宝.html',
-                '7': '教辅资源/语义函数图像.html',
-                '8': '教学资源/index.html',
-                '9': '高职数模工坊/index.html'
-            };
-            if(map[e.key]) window.location.href = map[e.key];
+        document.addEventListener('keydown', e => {
+            const m = {'1':'课件/index.html','2':'习题/index.html','3':'故事书/index.html','4':'教辅资源/出题宝.html','5':'教辅资源/语义函数图像.html','6':'网页资源/index.html','7':'教辅资源/教学游戏/index.html','8':'https://ai.projectmath.xyz/project/index.html'};
+            if(m[e.key]) location.href = m[e.key];
         });
     </script>
 </body>
-
 </html>
