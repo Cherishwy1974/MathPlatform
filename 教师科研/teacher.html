@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>国产大模型控制台 v3</title>
+  <script src="assets/js/tailwindcss.js"></script>
+  <link rel="stylesheet" href="assets/css/material-symbols.css">
+  <script src="assets/js/marked.min.js"></script>
+  <style>
+    *{font-family:system-ui,-apple-system,sans-serif}
+    ::-webkit-scrollbar{width:6px}
+    ::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:3px}
+    .provider-btn.active{background:#1e293b!important;color:#fff!important}
+    .mode-btn.active{background:#3b82f6!important;color:#fff!important}
+    .markdown-body pre{background:#1e293b;padding:1em;border-radius:8px;overflow-x:auto}
+    .markdown-body code{background:#f1f5f9;padding:2px 6px;border-radius:4px}
+    .markdown-body pre code{background:transparent;color:#e2e8f0}
+    .generated-image{max-width:100%;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,0.1);cursor:pointer;transition:transform 0.2s}
+    .generated-image:hover{transform:scale(1.02)}
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-40">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      <h1 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+        <span class="material-symbols-outlined text-blue-600">psychology</span>
+        国产大模型控制台 <span class="text-xs text-green-500 font-normal">v3.0</span>
+      </h1>
+      <div class="flex items-center gap-2">
+        <button class="mode-btn active text-xs py-1.5 px-3 rounded-lg border border-slate-200" data-mode="chat">
+          <span class="material-symbols-outlined text-sm align-middle">chat</span> 对话
+        </button>
+        <button class="mode-btn text-xs py-1.5 px-3 rounded-lg border border-slate-200 bg-slate-50" data-mode="image">
+          <span class="material-symbols-outlined text-sm align-middle">image</span> 生图
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <aside class="space-y-4">
+      <!-- 服务商选择 -->
+      <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+        <h2 class="text-sm font-bold text-slate-700 mb-3">服务商</h2>
+        <div id="providerBtns" class="grid grid-cols-3 gap-2 mb-4">
+          <button class="provider-btn active text-xs py-2 px-3 rounded-lg border border-slate-200" data-provider="deepseek">DeepSeek</button>
+          <button class="provider-btn text-xs py-2 px-3 rounded-lg border border-slate-200 bg-slate-50" data-provider="dashscope">通义千问</button>
+          <button class="provider-btn text-xs py-2 px-3 rounded-lg border border-slate-200 bg-slate-50" data-provider="kimi">Kimi</button>
+        </div>
+        <div class="space-y-3">
+          <div>
+            <label class="text-xs text-slate-600 block mb-1">API Key</label>
+            <input id="apiKey" type="password" placeholder="sk-..." class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+          </div>
+          <div>
+            <label class="text-xs text-slate-600 block mb-1">模型</label>
+            <select id="model" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"></select>
+          </div>
+          <button onclick="saveConfig()" class="w-full bg-slate-800 hover:bg-slate-700 text-white text-sm font-medium py-2.5 rounded-lg">保存配置</button>
+        </div>
+      </div>
+
+      <!-- 生图参数 -->
+      <div id="imageParams" class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm hidden">
+        <h2 class="text-sm font-bold text-slate-700 mb-3">生图参数</h2>
+        <div class="space-y-3">
+          <div>
+            <label class="text-xs text-slate-600 block mb-1">图片尺寸</label>
+            <select id="imageSize" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <option value="1024*1024">1024×1024 (1:1 方形)</option>
+              <option value="1280*1280">1280×1280 (1:1 高清)</option>
+              <option value="720*1280">720×1280 (9:16 竖版)</option>
+              <option value="1280*720">1280×720 (16:9 横版)</option>
+              <option value="960*1280">960×1280 (3:4 竖版)</option>
+              <option value="1280*960">1280×960 (4:3 横版)</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-xs text-slate-600 block mb-1">生成数量</label>
+            <select id="imageCount" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <option value="1">1 张</option>
+              <option value="2">2 张</option>
+              <option value="4">4 张</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-xs text-slate-600 block mb-1">智能改写提示词</label>
+            <select id="promptExtend" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <option value="true">开启（推荐）</option>
+              <option value="false">关闭</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-xs text-slate-600 block mb-1">反向提示词（可选）</label>
+            <input id="negativePrompt" type="text" placeholder="不希望出现的内容" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+          </div>
+        </div>
+      </div>
+
+      <!-- 帮助信息 -->
+      <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 text-xs text-slate-600">
+        <p class="font-semibold text-slate-800 mb-2">🔑 获取 API Key</p>
+        <ul class="space-y-1">
+          <li><a href="https://platform.deepseek.com/api_keys" target="_blank" class="text-blue-600 hover:underline">→ DeepSeek</a></li>
+          <li><a href="https://dashscope.console.aliyun.com/apiKey" target="_blank" class="text-blue-600 hover:underline">→ 通义千问（支持生图）</a></li>
+          <li><a href="https://platform.moonshot.cn/console/api-keys" target="_blank" class="text-blue-600 hover:underline">→ Kimi</a></li>
+        </ul>
+        <div class="mt-3 p-2 bg-green-50 border border-green-200 rounded-lg">
+          <p class="text-green-700 font-medium">🆕 最新更新</p>
+          <ul class="text-green-600 mt-1 space-y-0.5">
+            <li>• 万相 2.6 图像生成与编辑</li>
+            <li>• Kimi K2 Thinking 推理模型</li>
+          </ul>
+        </div>
+      </div>
+    </aside>
+
+    <section class="lg:col-span-2 flex flex-col bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden" style="height:calc(100vh - 160px)">
+      <div class="flex items-center justify-between px-4 py-2 border-b border-slate-100 bg-slate-50">
+        <span id="statusInfo" class="text-xs text-slate-500">DeepSeek · deepseek-chat · 对话模式</span>
+        <button onclick="clearChat()" class="text-xs text-red-500 hover:underline">清空内容</button>
+      </div>
+      <div id="chatlog" class="flex-1 overflow-y-auto p-4 space-y-4">
+        <div class="flex gap-3">
+          <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+            <span class="material-symbols-outlined text-white text-sm">smart_toy</span>
+          </div>
+          <div class="bg-slate-100 rounded-2xl rounded-tl-none px-4 py-3 text-sm text-slate-700 max-w-[80%]">
+            欢迎使用国产大模型控制台 v3.0！<br><br>
+            <span class="text-green-600">🆕 <b>最新模型已更新：</b></span><br>
+            • <b>万相 2.6</b> - 支持图像编辑、图文混合输出<br>
+            • <b>Kimi K2 Thinking</b> - 最强推理，支持200+工具调用<br><br>
+            <span class="text-amber-600">💡 切换到"生图"模式并选择通义千问，即可使用文生图功能。</span>
+          </div>
+        </div>
+      </div>
+      <div class="p-3 border-t border-slate-100">
+        <div class="flex gap-2">
+          <textarea id="input" placeholder="输入消息，按 Enter 发送..." class="flex-1 border border-slate-200 rounded-lg px-3 py-2 text-sm resize-none h-12 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+          <button onclick="send()" id="sendBtn" class="px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center gap-1">
+            <span class="material-symbols-outlined">send</span>
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+<script>
+// 配置信息 - 2025年12月最新模型
+const P = {
+  deepseek: { 
+    name: "DeepSeek", 
+    chatUrl: "https://api.deepseek.com/chat/completions", 
+    imageUrl: null,
+    chatModels: [
+      { id: "deepseek-chat", name: "DeepSeek-V3" }, 
+      { id: "deepseek-reasoner", name: "DeepSeek-R1 (推理)" }
+    ],
+    imageModels: [],
+    apiKey: "sk-91f13b8953f04ff1be1b81f0fc2975cf" 
+  },
+  dashscope: { 
+    name: "通义千问", 
+    chatUrl: "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions", 
+    // 文生图V2 API (万相2.5及以下)
+    imageUrlV2: "https://dashscope.aliyuncs.com/api/v1/services/aigc/text2image/image-synthesis",
+    // 万相2.6 API (新版)
+    imageUrl26: "https://dashscope.aliyuncs.com/api/v1/services/aigc/image-generation/generation",
+    imageTaskUrl: "https://dashscope.aliyuncs.com/api/v1/tasks/",
+    chatModels: [
+      { id: "qwen-max", name: "Qwen-Max (旗舰)" }, 
+      { id: "qwen-plus", name: "Qwen-Plus" }, 
+      { id: "qwen-turbo", name: "Qwen-Turbo (快速)" },
+      { id: "qwen3-235b-a22b", name: "Qwen3-235B (开源旗舰)" }
+    ],
+    // 最新的文生图模型列表
+    imageModels: [
+      { id: "wan2.6-image", name: "🆕 万相 2.6（最新推荐）", api: "v26" },
+      { id: "wan2.5-t2i-preview", name: "万相 2.5 Preview", api: "v2" },
+      { id: "wan2.2-t2i-flash", name: "万相 2.2 Flash（极速）", api: "v2" },
+      { id: "wan2.2-t2i-plus", name: "万相 2.2 Plus（专业）", api: "v2" },
+      { id: "wanx2.1-t2i-turbo", name: "万相 2.1 Turbo", api: "v2" }
+    ],
+    apiKey: "sk-c2d1035ff7504269b2f91d5015940a7d" 
+  },
+  kimi: { 
+    name: "Kimi", 
+    chatUrl: "https://api.moonshot.cn/v1/chat/completions", 
+    imageUrl: null,
+    chatModels: [
+      { id: "kimi-k2-thinking", name: "🆕 Kimi K2 Thinking（最强推理）" },
+      { id: "kimi-k2-0711-preview", name: "Kimi K2（万亿参数）" },
+      { id: "moonshot-v1-128k", name: "Moonshot 128k" },
+      { id: "moonshot-v1-32k", name: "Moonshot 32k" }, 
+      { id: "moonshot-v1-8k", name: "Moonshot 8k" }
+    ],
+    imageModels: [],
+    apiKey: "sk-AYgn7rfSo6IerhNhW45fj4QcSwQHfcC1yMOK2ilMxb1oERrq" 
+  }
+};
+
+let S = { 
+  provider: "deepseek", 
+  apiKey: "", 
+  model: "deepseek-chat", 
+  messages: [],
+  mode: "chat"
+};
+
+const $ = id => document.getElementById(id);
+
+// 初始化
+(function() {
+  try { 
+    const c = JSON.parse(localStorage.getItem("cfg")); 
+    if (c) S = { ...S, ...c, messages: [] }; 
+  } catch {}
+  
+  if (!localStorage.getItem("cfg") || !S.apiKey) {
+    S.apiKey = P[S.provider].apiKey;
+  }
+  $("apiKey").value = S.apiKey;
+  updateUI();
+  saveConfig();
+  
+  document.querySelectorAll(".provider-btn").forEach(b => b.onclick = () => { 
+    S.provider = b.dataset.provider; 
+    S.apiKey = P[S.provider].apiKey;
+    $("apiKey").value = S.apiKey;
+    updateUI();
+    saveConfig();
+    toast("已切换到 " + P[S.provider].name);
+  });
+  
+  document.querySelectorAll(".mode-btn").forEach(b => b.onclick = () => {
+    S.mode = b.dataset.mode;
+    updateUI();
+    if (S.mode === "image" && P[S.provider].imageModels.length === 0) {
+      toast("⚠️ " + P[S.provider].name + " 不支持生图，请切换到通义千问");
+    }
+  });
+  
+  $("input").onkeydown = e => { 
+    if (e.key === "Enter" && !e.shiftKey) { 
+      e.preventDefault(); 
+      send(); 
+    } 
+  };
+})();
+
+function updateUI() {
+  document.querySelectorAll(".provider-btn").forEach(b => 
+    b.classList.toggle("active", b.dataset.provider === S.provider)
+  );
+  document.querySelectorAll(".mode-btn").forEach(b => 
+    b.classList.toggle("active", b.dataset.mode === S.mode)
+  );
+  
+  const models = S.mode === "chat" ? P[S.provider].chatModels : P[S.provider].imageModels;
+  if (models.length === 0 && S.mode === "image") {
+    $("model").innerHTML = '<option value="">该服务商不支持生图</option>';
+  } else {
+    $("model").innerHTML = models.map(x => `<option value="${x.id}">${x.name}</option>`).join("");
+    if (models.find(x => x.id === S.model)) {
+      $("model").value = S.model;
+    } else if (models.length > 0) {
+      S.model = models[0].id;
+    }
+  }
+  
+  const modeText = S.mode === "chat" ? "对话模式" : "生图模式";
+  $("statusInfo").textContent = `${P[S.provider].name} · ${S.model || "无可用模型"} · ${modeText}`;
+  $("input").placeholder = S.mode === "chat" ? "输入消息，按 Enter 发送..." : "描述你想要生成的图片，按 Enter 生成...";
+  $("imageParams").classList.toggle("hidden", S.mode !== "image");
+}
+
+function saveConfig() {
+  S.apiKey = $("apiKey").value.trim();
+  S.model = $("model").value;
+  localStorage.setItem("cfg", JSON.stringify({ 
+    provider: S.provider, 
+    apiKey: S.apiKey, 
+    model: S.model,
+    mode: S.mode
+  }));
+  updateUI();
+  toast("已保存");
+}
+
+function clearChat() { 
+  $("chatlog").innerHTML = ""; 
+  S.messages = []; 
+}
+
+function toast(m) {
+  const d = document.createElement("div");
+  d.className = "fixed top-16 left-1/2 -translate-x-1/2 bg-slate-800 text-white px-4 py-2 rounded-full text-sm z-50";
+  d.textContent = m;
+  document.body.appendChild(d);
+  setTimeout(() => d.remove(), 2000);
+}
+
+function addMsg(role, content) {
+  const u = role === "user";
+  const d = document.createElement("div");
+  d.className = `flex gap-3 ${u ? "flex-row-reverse" : ""}`;
+  d.innerHTML = `
+    <div class="w-8 h-8 ${u ? "bg-slate-600" : "bg-blue-600"} rounded-full flex items-center justify-center flex-shrink-0">
+      <span class="material-symbols-outlined text-white text-sm">${u ? "person" : "smart_toy"}</span>
+    </div>
+    <div class="max-w-[80%]">
+      <div class="reason-box hidden mb-2 text-xs bg-amber-50 border border-amber-200 rounded-lg p-3 text-amber-800 max-h-40 overflow-y-auto"></div>
+      <div class="content ${u ? "bg-blue-600 text-white rounded-tr-none" : "bg-slate-100 text-slate-700 rounded-tl-none"} rounded-2xl px-4 py-3 text-sm markdown-body">${content || '<span class="animate-pulse">处理中...</span>'}</div>
+    </div>`;
+  $("chatlog").appendChild(d);
+  $("chatlog").scrollTop = $("chatlog").scrollHeight;
+  return d;
+}
+
+async function send() {
+  const c = $("input").value.trim();
+  if (!c) return;
+  if (!S.apiKey) { toast("请先填写 API Key"); return; }
+  
+  if (S.mode === "image") {
+    await generateImage(c);
+  } else {
+    await sendChat(c);
+  }
+}
+
+// 对话功能
+async function sendChat(content) {
+  addMsg("user", content);
+  $("input").value = "";
+  S.messages.push({ role: "user", content: content });
+  
+  const ai = addMsg("ai", "");
+  const el = ai.querySelector(".content");
+  const rb = ai.querySelector(".reason-box");
+  
+  try {
+    const res = await fetch(P[S.provider].chatUrl, {
+      method: "POST",
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${S.apiKey}`
+      },
+      body: JSON.stringify({ 
+        model: S.model, 
+        messages: S.messages, 
+        temperature: 0.7, 
+        max_tokens: 4096 
+      })
+    });
+    
+    if (!res.ok) {
+      const errText = await res.text();
+      throw new Error(`API 错误 ${res.status}: ${errText.substring(0, 100)}`);
+    }
+    
+    const j = await res.json();
+    const m = j.choices?.[0]?.message;
+    
+    if (m?.content) {
+      el.innerHTML = marked.parse(m.content);
+      S.messages.push({ role: "assistant", content: m.content });
+      // 支持 reasoning_content (DeepSeek) 和 reasoning (Kimi K2 Thinking)
+      const reasoning = m.reasoning_content || m.reasoning;
+      if (reasoning) { 
+        rb.classList.remove("hidden"); 
+        rb.innerHTML = "<b>💭 思考过程:</b><br>" + reasoning; 
+      }
+    } else {
+      throw new Error("无效响应");
+    }
+  } catch (e) {
+    el.innerHTML = `<span class="text-red-500">❌ ${e.message}</span>`;
+  }
+}
+
+// 获取当前选中模型的API版本
+function getSelectedModelInfo() {
+  const models = P[S.provider].imageModels;
+  return models.find(m => m.id === S.model) || models[0];
+}
+
+// 生图功能
+async function generateImage(prompt) {
+  if (P[S.provider].imageModels.length === 0) {
+    toast("⚠️ " + P[S.provider].name + " 不支持生图功能");
+    return;
+  }
+  
+  addMsg("user", "🎨 " + prompt);
+  $("input").value = "";
+  
+  const ai = addMsg("ai", "");
+  const el = ai.querySelector(".content");
+  
+  const modelInfo = getSelectedModelInfo();
+  
+  try {
+    el.innerHTML = '<span class="animate-pulse">🎨 正在提交生图任务...</span>';
+    
+    const size = $("imageSize").value;
+    const n = parseInt($("imageCount").value);
+    const promptExtend = $("promptExtend").value === "true";
+    const negativePrompt = $("negativePrompt").value.trim();
+    
+    let imageUrl, requestBody;
+    
+    // 根据模型版本选择不同的API
+    if (modelInfo.api === "v26") {
+      // 万相 2.6 API (新版 messages 格式)
+      imageUrl = P[S.provider].imageUrl26;
+      requestBody = {
+        model: S.model,
+        input: {
+          messages: [{
+            role: "user",
+            content: [{ text: prompt }]
+          }]
+        },
+        parameters: {
+          size: size,
+          n: n,
+          prompt_extend: promptExtend,
+          watermark: false,
+          negative_prompt: negativePrompt || undefined
+        }
+      };
+    } else {
+      // 万相 2.5 及以下 API (旧版格式)
+      imageUrl = P[S.provider].imageUrlV2;
+      requestBody = {
+        model: S.model,
+        input: {
+          prompt: prompt,
+          negative_prompt: negativePrompt || undefined
+        },
+        parameters: {
+          size: size,
+          n: n,
+          prompt_extend: promptExtend,
+          watermark: false
+        }
+      };
+    }
+    
+    // 步骤1：提交生图任务
+    const submitRes = await fetch(imageUrl, {
+      method: "POST",
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${S.apiKey}`,
+        "X-DashScope-Async": "enable"
+      },
+      body: JSON.stringify(requestBody)
+    });
+    
+    if (!submitRes.ok) {
+      const errText = await submitRes.text();
+      throw new Error(`提交任务失败 ${submitRes.status}: ${errText.substring(0, 200)}`);
+    }
+    
+    const submitData = await submitRes.json();
+    const taskId = submitData.output?.task_id;
+    
+    if (!taskId) {
+      throw new Error("未获取到任务ID: " + JSON.stringify(submitData));
+    }
+    
+    el.innerHTML = `<span class="animate-pulse">🎨 任务已提交 (${taskId.substring(0,8)}...)，正在生成...</span>`;
+    
+    // 步骤2：轮询获取结果
+    let attempts = 0;
+    const maxAttempts = 120;
+    
+    while (attempts < maxAttempts) {
+      await new Promise(r => setTimeout(r, 2000));
+      
+      const taskRes = await fetch(P[S.provider].imageTaskUrl + taskId, {
+        method: "GET",
+        headers: { "Authorization": `Bearer ${S.apiKey}` }
+      });
+      
+      if (!taskRes.ok) throw new Error(`查询任务失败 ${taskRes.status}`);
+      
+      const taskData = await taskRes.json();
+      const status = taskData.output?.task_status;
+      
+      if (status === "SUCCEEDED") {
+        // 根据API版本解析结果
+        let images = [];
+        
+        if (modelInfo.api === "v26") {
+          // 万相2.6返回格式
+          const choices = taskData.output?.choices || [];
+          choices.forEach(choice => {
+            const content = choice.message?.content || [];
+            content.forEach(item => {
+              if (item.image) images.push({ url: item.image });
+            });
+          });
+        } else {
+          // 万相2.5及以下返回格式
+          images = taskData.output?.results || [];
+        }
+        
+        if (images.length === 0) throw new Error("未获取到生成的图片");
+        
+        // 显示图片
+        let html = '<div class="space-y-3">';
+        images.forEach((img, idx) => {
+          if (img.url) {
+            html += `
+              <div class="space-y-2">
+                <img src="${img.url}" class="generated-image" alt="图片${idx+1}" onclick="window.open('${img.url}','_blank')">
+                <div class="flex gap-2 text-xs">
+                  <a href="${img.url}" target="_blank" class="text-blue-500 hover:underline">🔗 查看原图</a>
+                  <a href="${img.url}" download class="text-green-500 hover:underline">⬇️ 下载</a>
+                </div>
+                ${img.actual_prompt ? `<details class="text-xs text-slate-500"><summary class="cursor-pointer">查看优化后的提示词</summary><p class="mt-1 p-2 bg-slate-50 rounded">${img.actual_prompt}</p></details>` : ''}
+              </div>`;
+          }
+        });
+        html += `<p class="text-xs text-slate-400 mt-2">✅ 成功生成 ${images.length} 张图片 (链接24小时内有效)</p></div>`;
+        el.innerHTML = html;
+        return;
+        
+      } else if (status === "FAILED") {
+        throw new Error("生成失败: " + (taskData.output?.message || taskData.output?.code || "未知错误"));
+      } else if (status === "RUNNING") {
+        el.innerHTML = `<span class="animate-pulse">🎨 生成中... (${Math.floor(attempts * 2)}秒)</span>`;
+      } else {
+        el.innerHTML = `<span class="animate-pulse">⏳ 排队中... (${Math.floor(attempts * 2)}秒)</span>`;
+      }
+      
+      attempts++;
+    }
+    
+    throw new Error("生成超时，请重试");
+    
+  } catch (e) {
+    el.innerHTML = `<span class="text-red-500">❌ ${e.message}</span>`;
+    console.error("生图错误:", e);
+  }
+}
+</script>
+</body>
+</html>
