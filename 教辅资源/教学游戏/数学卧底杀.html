@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>数学卧底杀</title>
+    <!-- 本地化资源 -->
+    <script src="./assets/vendor/tailwindcss.min.js"></script>
+    <link rel="stylesheet" href="./assets/icons/material-symbols-outlined.css?v=2">
+    <style>
+        * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+        html, body, #app { width: 100%; height: 100%; overflow: hidden; position: fixed; top: 0; left: 0; }
+        body { font-family: system-ui, -apple-system, sans-serif; background: #fff; background-image: radial-gradient(#f1f5f9 1px, transparent 1px); background-size: 20px 20px; color: #1e293b; }
+
+        .app-container { display: flex; flex-direction: column; height: 100%; width: 100%; max-width: 500px; margin: 0 auto; background: rgba(255,255,255,0.95); }
+        .app-header { flex-shrink: 0; padding: 14px 20px; border-bottom: 1px solid #f1f5f9; }
+        .app-main { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 20px; -webkit-overflow-scrolling: touch; }
+        .app-footer { flex-shrink: 0; padding: 16px 20px; background: #fff; border-top: 1px solid #f1f5f9; padding-bottom: max(16px, env(safe-area-inset-bottom)); }
+
+        h1 { font-size: 22px; font-weight: 800; }
+        p, span, label, div { font-size: 16px; line-height: 1.5; }
+        
+        .card-wrap { perspective: 1000px; width: 260px; height: 360px; margin: 0 auto; }
+        .card-inner { position: relative; width: 100%; height: 100%; transition: transform 0.7s; transform-style: preserve-3d; cursor: pointer; }
+        .card-inner.flipped { transform: rotateY(180deg); }
+        .card-front, .card-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 20px; overflow: hidden; }
+        .card-front { background: linear-gradient(135deg, #1e293b, #0f172a); display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .card-back { transform: rotateY(180deg); background: #fff; border: 1px solid #e2e8f0; }
+
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in { animation: fadeUp 0.25s ease-out; }
+        
+        .btn { padding: 14px 20px; border-radius: 14px; font-weight: 700; border: none; cursor: pointer; transition: all 0.15s; font-size: 16px; display: flex; align-items: center; justify-content: center; gap: 6px; }
+        .btn:active { transform: scale(0.97); }
+        .btn-primary { background: #3b82f6; color: #fff; }
+        .btn-danger { background: #ef4444; color: #fff; }
+        .btn-gray { background: #f1f5f9; color: #475569; }
+        
+        .card { background: #fff; border-radius: 16px; border: 1px solid #f1f5f9; padding: 16px; }
+        .vote-card { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px 8px; background: #fff; border: 2px solid #e2e8f0; border-radius: 14px; cursor: pointer; transition: all 0.15s; }
+        .vote-card:active { transform: scale(0.95); }
+        .vote-card.selected { background: #eff6ff; border-color: #3b82f6; }
+        
+        .avatar { width: 52px; height: 52px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 22px; }
+        .avatar-lg { width: 72px; height: 72px; font-size: 30px; border-radius: 20px; }
+        
+        .progress-wrap { height: 10px; background: #f1f5f9; border-radius: 5px; overflow: hidden; width: 100%; max-width: 200px; }
+        .progress-bar { height: 100%; background: #3b82f6; transition: width 1s linear; }
+
+        .modal { position: fixed; inset: 0; background: rgba(255,255,255,0.9); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 20px; }
+        .modal-box { background: #fff; border-radius: 20px; padding: 24px; width: 100%; max-width: 320px; box-shadow: 0 20px 40px -10px rgba(0,0,0,0.1); }
+
+        .word-item { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-radius: 14px; cursor: pointer; transition: all 0.15s; border: 2px solid #f1f5f9; background: #fff; margin-bottom: 10px; }
+        .word-item:active { transform: scale(0.98); }
+        .word-item.selected { border-color: #3b82f6; background: #eff6ff; }
+    </style>
+</head>
+<body>
+    <div id="app"></div>
+
+    <script>
+    // ==================== 音效 ====================
+    let audioCtx = null;
+    function beep(freq = 600, dur = 0.1) {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + dur);
+        osc.start(); osc.stop(audioCtx.currentTime + dur);
+    }
+    const playWarn = () => beep(350, 0.15);
+    const playEnd = () => { beep(200, 0.3); setTimeout(() => beep(150, 0.3), 150); };
+    const playSuccess = () => { beep(523, 0.1); setTimeout(() => beep(659, 0.1), 80); setTimeout(() => beep(784, 0.15), 160); };
+
+    // ==================== 词库 ====================
+    const DEFAULT_WORDS = [
+        { civ: "无穷小", spy: "零", hint: "过程 vs 结果" },
+        { civ: "极限", spy: "函数值", hint: "趋近 vs 实际" },
+        { civ: "导数", spy: "微分", hint: "比值 vs 表达式" },
+        { civ: "连续", spy: "可导", hint: "范围大 vs 范围小" },
+        { civ: "切线", spy: "割线", hint: "一点 vs 两点" },
+        { civ: "驻点", spy: "极值点", hint: "导数为0 vs 峰谷" },
+        { civ: "拐点", spy: "极值点", hint: "凹凸变 vs 单调变" },
+        { civ: "凹函数", spy: "凸函数", hint: "盛水 vs 山丘" },
+        { civ: "最大值", spy: "极大值", hint: "全局 vs 局部" },
+        { civ: "渐近线", spy: "切线", hint: "无穷远 vs 某点" },
+        { civ: "不定积分", spy: "定积分", hint: "函数族 vs 数值" },
+        { civ: "泰勒公式", spy: "拉格朗日中值", hint: "逼近 vs 区间" }
+    ];
+
+    // ==================== 状态 ====================
+    const state = {
+        step: 'selectWord',  // selectWord -> config -> prep -> reveal -> night -> day -> speak -> vote -> eliminate -> end
+        words: [...DEFAULT_WORDS],
+        customWords: [],
+        selectedWordIndex: -1,
+        playerCount: 6,
+        spyCount: 1,
+        hasSeer: true,
+        hasWitch: true,
+        prepTime: 60,
+        speakTime: 20,
+        players: [],
+        currentWord: null,
+        dayCount: 0,
+        revealIndex: 0,
+        speakIndex: 0,
+        speakOrder: [],
+        nightAction: {},
+        witchPotions: { save: true, poison: true },
+        timer: null,
+        timeLeft: 0
+    };
+
+    const ROLES = {
+        CIVILIAN: { name: "平民", bg: "bg-blue-100", text: "text-blue-600" },
+        SPY: { name: "卧底", bg: "bg-red-100", text: "text-red-600" },
+        SEER: { name: "预言家", bg: "bg-purple-100", text: "text-purple-600" },
+        WITCH: { name: "女巫", bg: "bg-pink-100", text: "text-pink-600" }
+    };
+
+    // ==================== 渲染入口 ====================
+    function render() {
+        const app = document.getElementById('app');
+        const pages = { 
+            selectWord: renderSelectWord, 
+            config: renderConfig, 
+            prep: renderPrep, 
+            reveal: renderReveal, 
+            night: renderNight, 
+            day: renderDay, 
+            speak: renderSpeak, 
+            vote: renderVote, 
+            eliminate: renderEliminate, 
+            end: renderEnd 
+        };
+        if (pages[state.step]) pages[state.step](app);
+    }
+
+    // ==================== 第一步：选词 ====================
+    function renderSelectWord(app) {
+        const allWords = [...state.words, ...state.customWords];
+        app.innerHTML = `
+            <div class="app-container">
+                <div class="app-header flex items-center justify-between">
+                    <div>
+                        <h1 class="text-slate-800">数学卧底杀</h1>
+                        <p class="text-xs text-slate-400 font-bold">第1步：选择词组</p>
+                    </div>
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white">
+                        <span class="material-symbols-outlined" style="font-size:20px">function</span>
+                    </div>
+                </div>
+                
+                <div class="app-main fade-in">
+                    <div class="flex items-center justify-between mb-4">
+                        <p class="text-slate-600 font-bold">请选择本局词组</p>
+                        <button onclick="showAddWord()" class="text-blue-600 text-sm font-bold flex items-center gap-1">
+                            <span class="material-symbols-outlined" style="font-size:18px">add_circle</span> 自定义
+                        </button>
+                    </div>
+                    
+                    <div>
+                        ${allWords.map((w, i) => `
+                            <div onclick="selectWord(${i})" class="word-item ${state.selectedWordIndex === i ? 'selected' : ''}">
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-2">
+                                        <span class="font-bold text-slate-700">${w.civ}</span>
+                                        <span class="text-slate-300">/</span>
+                                        <span class="font-bold text-red-500">${w.spy}</span>
+                                    </div>
+                                    <p class="text-xs text-slate-400">${w.hint}</p>
+                                </div>
+                                ${state.selectedWordIndex === i ? '<span class="material-symbols-outlined text-blue-500">check_circle</span>' : '<div class="w-5 h-5 rounded-full border-2 border-slate-200"></div>'}
+                                ${i >= state.words.length ? `<button onclick="event.stopPropagation();deleteWord(${i - state.words.length})" class="ml-2 text-slate-300"><span class="material-symbols-outlined" style="font-size:18px">close</span></button>` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <div class="app-footer">
+                    <button class="btn btn-primary w-full ${state.selectedWordIndex < 0 ? 'opacity-50' : ''}" onclick="goToConfig()" ${state.selectedWordIndex < 0 ? 'disabled' : ''}>
+                        下一步 <span class="material-symbols-outlined">arrow_forward</span>
+                    </button>
+                </div>
+            </div>
+            <div id="modal"></div>`;
+    }
+
+    function selectWord(i) { state.selectedWordIndex = i; render(); }
+    
+    function goToConfig() {
+        if (state.selectedWordIndex < 0) return;
+        const allWords = [...state.words, ...state.customWords];
+        state.currentWord = allWords[state.selectedWordIndex];
+        state.step = 'config';
+        render();
+    }
+
+    function showAddWord() {
+        document.getElementById('modal').innerHTML = `
+            <div class="modal" onclick="if(event.target===this)closeModal()">
+                <div class="modal-box fade-in">
+                    <h3 class="text-lg font-black text-slate-800 text-center mb-4">添加自定义词组</h3>
+                    <div class="space-y-3">
+                        <input id="inp-civ" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold" placeholder="平民词（多数人看到）">
+                        <input id="inp-spy" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold" placeholder="卧底词（少数人看到）">
+                        <input id="inp-hint" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3" placeholder="提示（可选）">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3 mt-5">
+                        <button class="btn btn-gray" onclick="closeModal()">取消</button>
+                        <button class="btn btn-primary" onclick="addWord()">添加</button>
+                    </div>
+                </div>
+            </div>`;
+    }
+    function closeModal() { document.getElementById('modal').innerHTML = ''; }
+    function addWord() {
+        const c = document.getElementById('inp-civ').value.trim(), s = document.getElementById('inp-spy').value.trim(), h = document.getElementById('inp-hint').value.trim();
+        if (c && s) { 
+            state.customWords.push({ civ: c, spy: s, hint: h || '自定义' }); 
+            state.selectedWordIndex = state.words.length + state.customWords.length - 1; 
+            closeModal(); 
+            render(); 
+        }
+    }
+    function deleteWord(i) { 
+        state.customWords.splice(i, 1); 
+        if (state.selectedWordIndex >= state.words.length) state.selectedWordIndex = -1; 
+        render(); 
+    }
+
+    // ==================== 第二步：配置 ====================
+    function renderConfig(app) {
+        app.innerHTML = `
+            <div class="app-container">
+                <div class="app-header flex items-center justify-between">
+                    <button onclick="state.step='selectWord';render()" class="text-blue-600 font-bold flex items-center gap-1">
+                        <span class="material-symbols-outlined" style="font-size:18px">arrow_back</span> 返回
+                    </button>
+                    <p class="text-xs text-slate-400 font-bold">第2步：游戏设置</p>
+                </div>
+                
+                <div class="app-main space-y-5 fade-in">
+                    <!-- 已选词组 -->
+                    <div class="card bg-blue-50 border-blue-100">
+                        <p class="text-xs text-blue-400 font-bold mb-2">本局词组</p>
+                        <div class="flex items-center justify-center gap-4">
+                            <div class="text-center">
+                                <p class="text-xs text-slate-400">平民词</p>
+                                <p class="text-lg font-black text-slate-800">${state.currentWord.civ}</p>
+                            </div>
+                            <div class="w-px h-8 bg-blue-200"></div>
+                            <div class="text-center">
+                                <p class="text-xs text-red-400">卧底词</p>
+                                <p class="text-lg font-black text-red-500">${state.currentWord.spy}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 人数 -->
+                    <div class="card">
+                        <p class="text-xs text-slate-400 font-bold mb-4">人数配置</p>
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="font-bold text-slate-700">总玩家</span>
+                            <div class="flex items-center gap-3 bg-slate-50 p-1 rounded-xl">
+                                <button class="w-9 h-9 rounded-lg bg-white flex items-center justify-center text-slate-600" onclick="updateConfig('p',-1)"><span class="material-symbols-outlined">remove</span></button>
+                                <span class="text-xl font-black text-slate-800 w-6 text-center">${state.playerCount}</span>
+                                <button class="w-9 h-9 rounded-lg bg-white flex items-center justify-center text-slate-600" onclick="updateConfig('p',1)"><span class="material-symbols-outlined">add</span></button>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="font-bold text-red-500">卧底数</span>
+                            <div class="flex items-center gap-3 bg-slate-50 p-1 rounded-xl">
+                                <button class="w-9 h-9 rounded-lg bg-white flex items-center justify-center text-slate-600" onclick="updateConfig('s',-1)"><span class="material-symbols-outlined">remove</span></button>
+                                <span class="text-xl font-black text-red-500 w-6 text-center">${state.spyCount}</span>
+                                <button class="w-9 h-9 rounded-lg bg-white flex items-center justify-center text-slate-600" onclick="updateConfig('s',1)"><span class="material-symbols-outlined">add</span></button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 角色 -->
+                    <div class="card">
+                        <p class="text-xs text-slate-400 font-bold mb-4">特殊角色</p>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div onclick="toggleRole('seer')" class="p-3 rounded-xl border-2 cursor-pointer flex items-center gap-2 ${state.hasSeer ? 'border-purple-400 bg-purple-50' : 'border-slate-100 opacity-50'}">
+                                <span class="material-symbols-outlined text-purple-500">visibility</span>
+                                <span class="font-bold text-slate-700 text-sm">预言家</span>
+                            </div>
+                            <div onclick="toggleRole('witch')" class="p-3 rounded-xl border-2 cursor-pointer flex items-center gap-2 ${state.hasWitch ? 'border-pink-400 bg-pink-50' : 'border-slate-100 opacity-50'}">
+                                <span class="material-symbols-outlined text-pink-500">science</span>
+                                <span class="font-bold text-slate-700 text-sm">女巫</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 时间 -->
+                    <div class="card">
+                        <p class="text-xs text-slate-400 font-bold mb-4">时间设置</p>
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="font-bold text-slate-700">复习时间</span>
+                            <select onchange="state.prepTime=+this.value" class="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 font-bold">
+                                <option value="0" ${state.prepTime===0?'selected':''}>跳过</option>
+                                <option value="30" ${state.prepTime===30?'selected':''}>30秒</option>
+                                <option value="60" ${state.prepTime===60?'selected':''}>1分钟</option>
+                                <option value="90" ${state.prepTime===90?'selected':''}>1分30秒</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="font-bold text-slate-700">发言时间</span>
+                            <select onchange="state.speakTime=+this.value" class="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 font-bold">
+                                <option value="15" ${state.speakTime===15?'selected':''}>15秒</option>
+                                <option value="20" ${state.speakTime===20?'selected':''}>20秒</option>
+                                <option value="30" ${state.speakTime===30?'selected':''}>30秒</option>
+                                <option value="45" ${state.speakTime===45?'selected':''}>45秒</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="app-footer">
+                    <button class="btn btn-primary w-full" onclick="startGame()">
+                        <span class="material-symbols-outlined">play_arrow</span> 开始游戏
+                    </button>
+                </div>
+            </div>`;
+    }
+
+    function updateConfig(t, d) {
+        if (t === 'p') { 
+            state.playerCount = Math.max(4, Math.min(12, state.playerCount + d)); 
+            state.spyCount = Math.min(state.spyCount, Math.floor(state.playerCount / 2) - 1); 
+        } else { 
+            state.spyCount = Math.max(1, Math.min(Math.floor(state.playerCount / 2) - 1, state.spyCount + d)); 
+        }
+        render();
+    }
+    function toggleRole(r) { 
+        if (r === 'seer') state.hasSeer = !state.hasSeer; 
+        else state.hasWitch = !state.hasWitch; 
+        render(); 
+    }
+
+    // ==================== 开始游戏 ====================
+    function startGame() {
+        let roles = Array(state.spyCount).fill('SPY');
+        if (state.hasSeer) roles.push('SEER');
+        if (state.hasWitch) roles.push('WITCH');
+        while (roles.length < state.playerCount) roles.push('CIVILIAN');
+        roles.sort(() => Math.random() - 0.5);
+        
+        state.players = roles.map((r, i) => ({ 
+            id: i, num: i + 1, role: r, 
+            word: r === 'SPY' ? state.currentWord.spy : state.currentWord.civ, 
+            alive: true 
+        }));
+        state.witchPotions = { save: true, poison: true };
+        state.dayCount = 0;
+        
+        state.step = state.prepTime > 0 ? 'prep' : 'reveal';
+        if (state.step === 'reveal') state.revealIndex = 0;
+        render();
+    }
+
+    // ==================== 复习阶段 ====================
+    function renderPrep(app) {
+        state.timeLeft = state.prepTime;
+        app.innerHTML = `
+            <div class="app-container">
+                <div class="app-header text-center bg-yellow-50"><h1 class="text-yellow-600">📱 复习时间</h1></div>
+                <div class="app-main flex flex-col items-center justify-center text-center fade-in">
+                    <p class="text-slate-500 mb-4">本局涉及的数学概念</p>
+                    <div class="bg-slate-100 px-6 py-3 rounded-xl mb-6">
+                        <span class="font-black text-slate-800">${state.currentWord.civ}</span>
+                        <span class="text-slate-400 mx-2">/</span>
+                        <span class="font-black text-red-500">${state.currentWord.spy}</span>
+                    </div>
+                    <p class="text-slate-400 text-sm mb-6">可以查手机复习相关概念</p>
+                    <div id="timer" class="text-6xl font-black text-slate-800 mb-6">${state.timeLeft}</div>
+                    <div class="progress-wrap"><div id="bar" class="progress-bar bg-yellow-500" style="width:100%"></div></div>
+                </div>
+                <div class="app-footer"><button class="btn btn-gray w-full" onclick="skipPrep()">跳过复习</button></div>
+            </div>`;
+        startTimer(skipPrep);
+    }
+    function skipPrep() { 
+        clearInterval(state.timer); 
+        state.revealIndex = 0; 
+        state.step = 'reveal'; 
+        render(); 
+    }
+
+    // ==================== 身份确认 ====================
+    function renderReveal(app) {
+        const p = state.players[state.revealIndex], role = ROLES[p.role];
+        const teammates = state.players.filter(x => x.role === 'SPY' && x.id !== p.id);
+        app.innerHTML = `
+            <div class="app-container">
+                <div class="app-header text-center"><h1 class="text-slate-800">身份确认 ${state.revealIndex + 1}/${state.playerCount}</h1></div>
+                <div class="app-main flex flex-col items-center justify-center fade-in">
+                    <p class="text-slate-400 text-sm mb-2">请递给</p>
+                    <div class="bg-slate-100 px-5 py-2 rounded-full mb-5"><span class="text-2xl font-black text-slate-800">${p.num}号</span></div>
+                    
+                    <div class="card-wrap" onclick="flipCard()">
+                        <div id="card" class="card-inner">
+                            <div class="card-front">
+                                <span class="material-symbols-outlined text-white/50 text-5xl mb-3">touch_app</span>
+                                <span class="text-white/70 font-bold text-sm">点击查看身份</span>
+                            </div>
+                            <div class="card-back flex flex-col items-center justify-center p-5">
+                                <div class="px-3 py-1 rounded-full ${role.bg} ${role.text} text-xs font-bold mb-3">${role.name}</div>
+                                <p class="text-xs text-slate-400 mb-1">你的关键词</p>
+                                <div class="text-2xl font-black text-slate-800 py-3 border-b-2 border-slate-100 w-full text-center mb-4">${p.word}</div>
+                                ${p.role === 'SPY' && teammates.length ? `<div class="bg-red-50 p-2 rounded-lg w-full text-center text-red-600 text-sm font-bold mb-4">队友: ${teammates.map(t => t.num + '号').join(', ')}</div>` : ''}
+                                <p class="text-xs text-slate-400 mb-2">自动关闭 <span id="rtimer" class="font-bold">10</span>s</p>
+                                <button class="btn btn-gray w-full text-sm py-3" onclick="event.stopPropagation();nextReveal()">记住了</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+    }
+    function flipCard() {
+        const card = document.getElementById('card');
+        if (!card.classList.contains('flipped')) {
+            card.classList.add('flipped'); 
+            playSuccess();
+            let t = 10;
+            state.timer = setInterval(() => { 
+                t--; 
+                const el = document.getElementById('rtimer'); 
+                if (el) el.innerText = t; 
+                if (t <= 0) { clearInterval(state.timer); nextReveal(); } 
+            }, 1000);
+        }
+    }
+    function nextReveal() { 
+        clearInterval(state.timer); 
+        if (++state.revealIndex < state.playerCount) render(); 
+        else { state.dayCount = 1; state.step = 'night'; state.nightAction = {}; render(); } 
+    }
+
+    // ==================== 夜晚阶段 ====================
+    function getNightPhase() {
+        if (!state.nightAction.spyDone) return 'spy';
+        if (state.hasSeer && state.players.find(p => p.role === 'SEER' && p.alive) && !state.nightAction.seerDone) return 'seer';
+        if (state.hasWitch && state.players.find(p => p.role === 'WITCH' && p.alive) && !state.nightAction.witchDone) return 'witch';
+        return 'done';
+    }
+    function renderNight(app) {
+        const phase = getNightPhase();
+        if (phase === 'done') { finishNight(); return; }
+        const cfg = { 
+            spy: ['卧底行动', '选择目标淘汰', 'nights_stay', 'text-red-500'], 
+            seer: ['预言家查验', '查看玩家身份', 'visibility', 'text-purple-500'], 
+            witch: ['女巫回合', '使用药物', 'science', 'text-pink-500'] 
+        };
+        const [title, sub, icon, color] = cfg[phase];
+        app.innerHTML = `
+            <div class="app-container">
+                <div class="app-main flex flex-col items-center justify-center text-center fade-in h-full">
+                    <div class="p-5 rounded-full bg-slate-900 mb-6"><span class="material-symbols-outlined text-5xl ${color}">${icon}</span></div>
+                    <h2 class="text-2xl font-black text-slate-800 mb-2">${title}</h2>
+                    <p class="text-slate-500 mb-8">${sub}</p>
+                    <button class="btn btn-primary px-8" onclick="startNightAction('${phase}')">确认身份</button>
+                </div>
+            </div>`;
+    }
+
+    let selTarget = null, witchSave = false, witchPoison = null;
+    function startNightAction(phase) {
+        const app = document.getElementById('app');
+        if (phase === 'spy') {
+            const spies = state.players.filter(p => p.role === 'SPY' && p.alive);
+            const targets = state.players.filter(p => p.alive);
+            app.innerHTML = `
+                <div class="app-container">
+                    <div class="app-header text-center bg-red-50"><h1 class="text-red-600">🔪 卧底行动</h1></div>
+                    <div class="app-main fade-in">
+                        <div class="bg-red-50 p-3 rounded-xl mb-5 text-center"><span class="text-red-600 font-bold">队友: ${spies.map(s => s.num + '号').join(' ')}</span></div>
+                        <p class="text-xs text-slate-400 font-bold mb-3">选择淘汰目标</p>
+                        <div class="grid grid-cols-4 gap-3">${targets.map(p => `<div onclick="pickTarget(${p.id},this)" class="vote-card ${p.role === 'SPY' ? 'opacity-40' : ''}"><div class="avatar bg-slate-100 text-slate-600">${p.num}</div></div>`).join('')}</div>
+                    </div>
+                    <div class="app-footer"><button id="cfm" class="btn btn-danger w-full" disabled onclick="confirmNight('spy')">确认</button></div>
+                </div>`;
+        } else if (phase === 'seer') {
+            const targets = state.players.filter(p => p.alive && p.role !== 'SEER');
+            app.innerHTML = `
+                <div class="app-container">
+                    <div class="app-header text-center bg-purple-50"><h1 class="text-purple-600">👁 预言家查验</h1></div>
+                    <div class="app-main fade-in">
+                        <p class="text-xs text-slate-400 font-bold mb-3">选择查验目标</p>
+                        <div class="grid grid-cols-4 gap-3">${targets.map(p => `<div onclick="pickTarget(${p.id},this)" class="vote-card"><div class="avatar bg-purple-50 text-purple-600">${p.num}</div></div>`).join('')}</div>
+                    </div>
+                    <div class="app-footer"><button id="cfm" class="btn btn-primary w-full" disabled onclick="confirmNight('seer')">确认</button></div>
+                </div>`;
+        } else if (phase === 'witch') {
+            const victim = state.players.find(p => p.id === state.nightAction.spyTarget);
+            const canSave = state.witchPotions.save && victim;
+            const targets = state.players.filter(p => p.alive && p.id !== state.nightAction.spyTarget);
+            app.innerHTML = `
+                <div class="app-container">
+                    <div class="app-header text-center bg-pink-50"><h1 class="text-pink-600">🧪 女巫</h1></div>
+                    <div class="app-main fade-in">
+                        ${victim ? `<div class="card mb-4 flex items-center justify-between bg-red-50 border-red-100">
+                            <div><p class="text-xs text-red-400">今晚死者</p><p class="text-xl font-black text-red-600">${victim.num}号</p></div>
+                            ${canSave ? `<button id="saveBtn" onclick="toggleSave()" class="btn btn-primary bg-green-500 text-sm px-4 py-2">解药</button>` : `<span class="text-xs text-slate-400">${state.witchPotions.save ? '-' : '已用'}</span>`}
+                        </div>` : '<div class="p-4 text-center text-slate-400 mb-4">平安夜</div>'}
+                        <div class="card ${!state.witchPotions.poison ? 'opacity-50' : ''}">
+                            <p class="font-bold text-slate-700 mb-3">毒药 ${state.witchPotions.poison ? '' : '(已用)'}</p>
+                            ${state.witchPotions.poison ? `<div class="flex flex-wrap gap-2">${targets.map(p => `<div onclick="pickPoison(${p.id},this)" class="avatar bg-slate-50 border border-slate-200 cursor-pointer pBtn">${p.num}</div>`).join('')}</div>` : ''}
+                        </div>
+                    </div>
+                    <div class="app-footer"><button class="btn btn-primary w-full" onclick="confirmNight('witch')">结束</button></div>
+                </div>`;
+        }
+    }
+    function pickTarget(id, el) { 
+        selTarget = id; 
+        document.querySelectorAll('.vote-card').forEach(c => { 
+            c.classList.remove('selected'); 
+            c.querySelector('.avatar').classList.remove('bg-blue-600', 'text-white'); 
+        }); 
+        el.classList.add('selected'); 
+        el.querySelector('.avatar').classList.add('bg-blue-600', 'text-white'); 
+        document.getElementById('cfm').disabled = false; 
+    }
+    function toggleSave() { 
+        witchSave = !witchSave; 
+        const btn = document.getElementById('saveBtn'); 
+        btn.innerText = witchSave ? '已选' : '解药'; 
+        btn.className = witchSave ? 'btn btn-gray text-sm px-4 py-2' : 'btn btn-primary bg-green-500 text-sm px-4 py-2'; 
+    }
+    function pickPoison(id, el) { 
+        witchPoison = witchPoison === id ? null : id; 
+        document.querySelectorAll('.pBtn').forEach(b => b.classList.remove('bg-purple-600', 'text-white')); 
+        if (witchPoison !== null) el.classList.add('bg-purple-600', 'text-white'); 
+    }
+
+    function confirmNight(phase) {
+        if (phase === 'spy') { 
+            state.nightAction.spyTarget = selTarget; 
+            state.nightAction.spyDone = true; 
+            selTarget = null; 
+            renderNight(document.getElementById('app')); 
+        } else if (phase === 'seer') {
+            const t = state.players.find(p => p.id === selTarget), isSpy = t.role === 'SPY';
+            state.nightAction.seerDone = true; 
+            selTarget = null;
+            document.getElementById('app').innerHTML = `
+                <div class="app-container" onclick="renderNight(document.getElementById('app'))">
+                    <div class="app-main flex flex-col items-center justify-center text-center fade-in h-full bg-slate-900 text-white">
+                        <p class="text-slate-400 mb-4">查验结果</p>
+                        <div class="avatar-lg ${isSpy ? 'bg-red-500' : 'bg-green-500'} text-white mb-4">${t.num}</div>
+                        <h2 class="text-3xl font-black ${isSpy ? 'text-red-400' : 'text-green-400'}">${isSpy ? '卧底' : '好人'}</h2>
+                        <p class="text-slate-500 text-sm mt-6">点击继续</p>
+                    </div>
+                </div>`;
+        } else if (phase === 'witch') {
+            state.nightAction.witchSave = witchSave; 
+            state.nightAction.witchPoison = witchPoison;
+            if (witchSave) state.witchPotions.save = false;
+            if (witchPoison !== null) state.witchPotions.poison = false;
+            state.nightAction.witchDone = true; 
+            witchSave = false; 
+            witchPoison = null;
+            renderNight(document.getElementById('app'));
+        }
+    }
+    function finishNight() {
+        let dead = [];
+        if (state.nightAction.spyTarget != null && !state.nightAction.witchSave) dead.push(state.nightAction.spyTarget);
+        if (state.nightAction.witchPoison != null) dead.push(state.nightAction.witchPoison);
+        dead.forEach(id => { const p = state.players.find(x => x.id === id); if (p) p.alive = false; });
+        state.nightDeaths = dead; 
+        state.nightAction = {}; 
+        state.step = 'day'; 
+        render();
+    }
+
+    // ==================== 白天阶段 ====================
+    function renderDay(app) {
+        if (checkWin()) return;
+        const deadMsg = state.nightDeaths.length 
+            ? `<span class="text-red-500 font-bold">${state.nightDeaths.map(id => state.players.find(p => p.id === id).num + '号').join('、')}</span>` 
+            : `<span class="text-green-500 font-bold">平安夜</span>`;
+        app.innerHTML = `
+            <div class="app-container">
+                <div class="app-header flex items-center justify-between">
+                    <h1 class="text-slate-800">☀️ 第${state.dayCount}天</h1>
+                    <span class="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded-full font-bold">存活${state.players.filter(p => p.alive).length}人</span>
+                </div>
+                <div class="app-main fade-in">
+                    <div class="card text-center mb-5">
+                        <p class="text-xs text-slate-400 mb-1">昨夜</p>
+                        <div class="text-lg">${deadMsg}</div>
+                    </div>
+                    <div class="grid grid-cols-5 gap-2 mb-5">
+                        ${state.players.map(p => `
+                            <div class="avatar ${p.alive ? 'bg-white border-2 border-slate-200 text-slate-700' : 'bg-slate-100 text-slate-300'} relative">
+                                ${p.num}
+                                ${!p.alive ? '<span class="absolute -top-1 -right-1 material-symbols-outlined text-red-500 text-xs bg-white rounded-full">close</span>' : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="bg-blue-50 p-4 rounded-xl">
+                        <p class="text-blue-800 font-bold text-sm mb-1">📢 发言阶段</p>
+                        <p class="text-xs text-blue-600">轮流描述概念，禁止直接说名称</p>
+                    </div>
+                </div>
+                <div class="app-footer"><button class="btn btn-primary w-full" onclick="startSpeak()">开始发言</button></div>
+            </div>`;
+    }
+    function startSpeak() { 
+        state.speakOrder = state.players.filter(p => p.alive).map(p => p.id); 
+        state.speakIndex = 0; 
+        state.step = 'speak'; 
+        render(); 
+    }
+
+    function renderSpeak(app) {
+        const p = state.players.find(x => x.id === state.speakOrder[state.speakIndex]);
+        state.timeLeft = state.speakTime;
+        app.innerHTML = `
+            <div class="app-container">
+                <div class="app-header text-center"><h1 class="text-slate-800">发言</h1></div>
+                <div class="app-main flex flex-col items-center justify-center fade-in">
+                    <div class="avatar-lg bg-blue-500 text-white mb-4">${p.num}</div>
+                    <div id="timer" class="text-6xl font-black text-slate-800 mb-4">${state.timeLeft}</div>
+                    <div class="progress-wrap mb-6"><div id="bar" class="progress-bar" style="width:100%"></div></div>
+                    <div class="flex gap-1 flex-wrap justify-center">
+                        ${state.speakOrder.map((id, i) => { 
+                            const pl = state.players.find(x => x.id === id); 
+                            let cls = 'w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold '; 
+                            if (i === state.speakIndex) cls += 'bg-blue-500 text-white'; 
+                            else if (i < state.speakIndex) cls += 'bg-slate-100 text-slate-400'; 
+                            else cls += 'bg-white border border-slate-200 text-slate-600'; 
+                            return `<div class="${cls}">${pl.num}</div>`; 
+                        }).join('')}
+                    </div>
+                </div>
+                <div class="app-footer"><button class="btn btn-primary w-full" onclick="nextSpeak()">下一位</button></div>
+            </div>`;
+        startTimer(nextSpeak);
+    }
+    function nextSpeak() { 
+        clearInterval(state.timer); 
+        if (++state.speakIndex < state.speakOrder.length) render(); 
+        else { state.step = 'vote'; render(); } 
+    }
+
+    // ==================== 投票阶段 ====================
+    function renderVote(app) {
+        app.innerHTML = `
+            <div class="app-container">
+                <div class="app-header text-center"><h1 class="text-red-500">🗳️ 投票</h1></div>
+                <div class="app-main fade-in">
+                    <p class="text-center text-slate-400 text-sm mb-4">点击头像投票</p>
+                    <div class="grid grid-cols-4 gap-3">
+                        ${state.players.filter(p => p.alive).map(p => `
+                            <div onclick="clickVote(${p.id})" class="vote-card">
+                                <div class="avatar bg-white border border-slate-200 text-slate-700">${p.num}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                <div class="app-footer"><button class="btn btn-gray w-full" onclick="skipVote()">弃票</button></div>
+            </div>`;
+    }
+    function clickVote(id) {
+        const p = state.players.find(x => x.id === id);
+        document.getElementById('app').innerHTML += `
+            <div class="modal" onclick="if(event.target===this)render()">
+                <div class="modal-box text-center fade-in">
+                    <div class="avatar-lg bg-red-50 text-red-500 border-2 border-red-100 mx-auto mb-4">${p.num}</div>
+                    <h3 class="text-lg font-bold text-slate-800 mb-4">确认淘汰 ${p.num}号？</h3>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button class="btn btn-gray" onclick="render()">取消</button>
+                        <button class="btn btn-danger" onclick="doEliminate(${id})">确认</button>
+                    </div>
+                </div>
+            </div>`;
+    }
+    function skipVote() { 
+        if (!checkWin()) { 
+            state.dayCount++; 
+            state.step = 'night'; 
+            state.nightAction = {}; 
+            render(); 
+        } 
+    }
+    function doEliminate(id) { 
+        state.eliminatedId = id; 
+        state.step = 'eliminate'; 
+        render(); 
+    }
+
+    function renderEliminate(app) {
+        const p = state.players.find(x => x.id === state.eliminatedId); 
+        p.alive = false;
+        const isSpy = p.role === 'SPY';
+        app.innerHTML = `
+            <div class="app-container">
+                <div class="app-main flex flex-col items-center justify-center text-center fade-in h-full">
+                    <div class="w-20 h-20 rounded-full ${isSpy ? 'bg-red-100 text-red-500' : 'bg-blue-100 text-blue-500'} flex items-center justify-center mb-4">
+                        <span class="material-symbols-outlined text-4xl">${isSpy ? 'gavel' : 'sentiment_dissatisfied'}</span>
+                    </div>
+                    <h2 class="text-3xl font-black text-slate-800 mb-2">${p.num}号 出局</h2>
+                    <div class="px-4 py-1 rounded-full text-sm font-bold ${isSpy ? 'bg-red-50 text-red-500' : 'bg-blue-50 text-blue-500'} mb-6">${isSpy ? '卧底' : '好人'}</div>
+                    <p class="text-slate-400">${isSpy ? '抓到卧底！' : '错杀好人...'}</p>
+                </div>
+                <div class="app-footer"><button class="btn btn-primary w-full" onclick="postElim()">继续</button></div>
+            </div>`;
+    }
+    function postElim() { 
+        if (!checkWin()) { 
+            state.dayCount++; 
+            state.step = 'night'; 
+            state.nightAction = {}; 
+            render(); 
+        } 
+    }
+
+    // ==================== 胜负判定 ====================
+    function checkWin() {
+        const spies = state.players.filter(p => p.role === 'SPY' && p.alive).length;
+        const good = state.players.filter(p => p.role !== 'SPY' && p.alive).length;
+        if (spies === 0) { state.winner = 'good'; state.step = 'end'; render(); return true; }
+        if (spies >= good) { state.winner = 'spy'; state.step = 'end'; render(); return true; }
+        return false;
+    }
+    function renderEnd(app) {
+        const isGood = state.winner === 'good';
+        app.innerHTML = `
+            <div class="app-container">
+                <div class="app-header text-center"><h1 class="text-slate-800">游戏结束</h1></div>
+                <div class="app-main fade-in">
+                    <div class="text-center mb-6">
+                        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full ${isGood ? 'bg-blue-100 text-blue-500' : 'bg-red-100 text-red-500'} mb-3">
+                            <span class="material-symbols-outlined text-3xl">emoji_events</span>
+                        </div>
+                        <h2 class="text-2xl font-black ${isGood ? 'text-blue-600' : 'text-red-600'}">${isGood ? '平民胜利' : '卧底胜利'}</h2>
+                    </div>
+                    <div class="card mb-5">
+                        <p class="text-center text-xs text-slate-400 mb-3">本局词汇</p>
+                        <div class="flex items-center justify-center gap-6">
+                            <div class="text-center">
+                                <p class="text-blue-500 text-xs font-bold">平民词</p>
+                                <p class="text-lg font-black text-slate-800">${state.currentWord.civ}</p>
+                            </div>
+                            <div class="w-px h-8 bg-slate-200"></div>
+                            <div class="text-center">
+                                <p class="text-red-500 text-xs font-bold">卧底词</p>
+                                <p class="text-lg font-black text-slate-800">${state.currentWord.spy}</p>
+                            </div>
+                        </div>
+                        <p class="text-center text-xs text-slate-400 mt-2">${state.currentWord.hint}</p>
+                    </div>
+                    <div class="space-y-2">
+                        ${state.players.map(p => { 
+                            const r = ROLES[p.role]; 
+                            return `
+                                <div class="flex items-center p-3 bg-white rounded-xl border border-slate-100">
+                                    <div class="w-9 h-9 rounded-lg ${r.bg} ${r.text} flex items-center justify-center font-bold mr-3 text-sm">${p.num}</div>
+                                    <div class="flex-1">
+                                        <span class="font-bold text-slate-700 text-sm">${r.name}</span>
+                                        ${!p.alive ? '<span class="text-xs bg-slate-100 text-slate-400 px-1 rounded ml-1">出局</span>' : ''}
+                                        <p class="text-xs text-slate-400">${p.word}</p>
+                                    </div>
+                                    ${p.role === 'SPY' ? '<span class="material-symbols-outlined text-red-400 text-sm">warning</span>' : ''}
+                                </div>
+                            `; 
+                        }).join('')}
+                    </div>
+                </div>
+                <div class="app-footer"><button class="btn btn-primary w-full" onclick="restart()">再来一局</button></div>
+            </div>`;
+    }
+
+    function restart() {
+        state.step = 'selectWord';
+        state.selectedWordIndex = -1;
+        state.players = [];
+        state.currentWord = null;
+        state.dayCount = 0;
+        state.revealIndex = 0;
+        state.nightAction = {};
+        state.witchPotions = { save: true, poison: true };
+        render();
+    }
+
+    // ==================== 计时器 ====================
+    function startTimer(cb) {
+        clearInterval(state.timer);
+        const total = state.timeLeft;
+        state.timer = setInterval(() => {
+            state.timeLeft--;
+            const t = document.getElementById('timer'), b = document.getElementById('bar');
+            if (t) t.innerText = state.timeLeft;
+            if (b) b.style.width = (state.timeLeft / total * 100) + '%';
+            if (state.timeLeft <= 5 && state.timeLeft > 0) playWarn();
+            if (state.timeLeft <= 0) { clearInterval(state.timer); playEnd(); cb(); }
+        }, 1000);
+    }
+
+    // ==================== 图标本地化 ====================
+    const iconMap = {
+        'function': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H4a2 2 0 0 0-2 2v4m18 0V5a2 2 0 0 0-2-2h-4m-6 12h.01M6 21h12a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2z"/></svg>',
+        'remove': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/></svg>',
+        'add': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
+        'visibility': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>',
+        'science': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 2v6l-3 3v8h12v-8l-3-3V2H9z"/><path d="M9 8h6"/></svg>',
+        'add_circle': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>',
+        'check_circle': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
+        'close': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
+        'play_arrow': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>',
+        'arrow_forward': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>',
+        'arrow_back': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>',
+        'touch_app': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11.24V7.5a2.5 2.5 0 0 1 5 0v3.74M11 18h2a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2z"/></svg>',
+        'nights_stay': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>',
+        'gavel': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>',
+        'sentiment_dissatisfied': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><circle cx="15.5" cy="9.5" r="1.5"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M12 14c-2.33 0-4.32 1.42-5.12 3.5h10.24c-.8-2.08-2.79-3.5-5.12-3.5z"/><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"/></svg>',
+        'emoji_events': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H7v2h10v-2h-4v-3.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z"/></svg>',
+        'warning': '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>'
+    };
+    
+    function replaceIcons() {
+        document.querySelectorAll('.material-symbols-outlined').forEach(el => {
+            const iconName = el.textContent.trim();
+            if (iconMap[iconName] && !el.querySelector('svg')) {
+                el.innerHTML = iconMap[iconName];
+                el.style.display = 'inline-flex';
+                el.style.alignItems = 'center';
+                el.style.justifyContent = 'center';
+                el.style.fontFamily = 'inherit';
+            }
+        });
+    }
+    
+    replaceIcons();
+    
+    const originalRender = render;
+    render = function() {
+        originalRender();
+        setTimeout(replaceIcons, 10);
+    };
+    
+    if (typeof MutationObserver !== 'undefined') {
+        const observer = new MutationObserver(replaceIcons);
+        observer.observe(document.body, { childList: true, subtree: true });
+    }
+    
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', replaceIcons);
+    } else {
+        replaceIcons();
+    }
+
+    render();
+    </script>
+</body>
+</html>

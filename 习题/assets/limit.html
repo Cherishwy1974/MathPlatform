@@ -1796,9 +1796,29 @@
         // 定位题目
         function locateProblem() {
             const input = document.getElementById('problem-number-input');
-            const problemNumber = parseInt(input.value);
-            if (isNaN(problemNumber) || problemNumber < 1) return;
-            const exerciseElement = document.getElementById(`exercise-${problemNumber}`);
+            const raw = (input.value || '').trim();
+            if (!raw) return;
+            const num = parseInt(raw, 10);
+            let exerciseElement = null;
+
+            // Determine source list: use filtered list if present, otherwise use full list
+            const sourceList = (currentFilteredExercises && currentFilteredExercises.length > 0) ? currentFilteredExercises : window.exerciseData.exercises;
+
+            if (!isNaN(num) && num >= 1) {
+                // First try: treat input as display sequence number within the current list
+                if (num <= sourceList.length) {
+                    const targetEx = sourceList[num - 1];
+                    exerciseElement = document.getElementById(`exercise-${targetEx.id}`);
+                }
+                // Second try: treat input as exercise.id
+                if (!exerciseElement) {
+                    exerciseElement = document.getElementById(`exercise-${num}`);
+                }
+            } else {
+                // Not a number -- no lookup supported
+                return;
+            }
+
             if (exerciseElement) {
                 exerciseElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 exerciseElement.classList.add('highlight');
@@ -1937,125 +1957,121 @@
                 }
             }
         }
-        // 准备逐步显示的内容
-        function prepareStepByStepContent() {
-            const explanation = document.getElementById('fullscreen-explanation');
-            const answer = document.getElementById('fullscreen-answer');
-            if (!explanation || !answer) return;
-            // 获取解析内容并分解成行
-            const explanationContent = explanation.querySelector('.explanation-content');
-            const answerContent = answer.querySelector('.answer-content');
-            if (!explanationContent || !answerContent) return;
-            // 将内容分解成步骤
-            solutionLines = [];
-            // 添加解题思路标题
+// 准备逐步显示的内容（更稳健的分块，避免拆散公式）
+function prepareStepByStepContent() {
+    const explanation = document.getElementById('fullscreen-explanation');
+    const answer = document.getElementById('fullscreen-answer');
+    if (!explanation || !answer) return;
+
+    const explanationContent = explanation.querySelector('.explanation-content');
+    const answerContent = answer.querySelector('.answer-content');
+    if (!explanationContent || !answerContent) return;
+
+    solutionLines = [];
+
+    // 添加解题思路标题
+    solutionLines.push({
+        type: 'title',
+        content: '<h4>解题思路</h4>',
+        target: 'explanation'
+    });
+
+    // 获取解析 HTML，按 <strong> 标记或显式段落进行保守分割，避免拆分公式
+    const explanationHTML = explanationContent.innerHTML;
+    // 先按 <strong>...</strong> 保留标题块，再按换行或段落分割剩余内容
+    const blocks = explanationHTML.split(/(<strong[^>]*>.*?<\/strong>)/gi).filter(b => b && b.trim());
+
+    blocks.forEach(block => {
+        // 步骤标题（例如：<strong>第一步：...</strong>）
+        if (/^<strong[^>]*>.*第[一二三四五六七八九十\d]+步.*<\/strong>/i.test(block.trim())) {
             solutionLines.push({
-                type: 'title',
-                content: '<h4>解题思路</h4>',
+                type: 'step-title',
+                content: block,
                 target: 'explanation'
             });
-            // 分解解题思路内容
-            const explanationHTML = explanationContent.innerHTML;
-            const stepPattern = /<strong>第[一二三四五六七八九十\d]+步[:：]?([^<]*)<\/strong>/g;
-            const steps = [];
-            let match;
-            while ((match = stepPattern.exec(explanationHTML)) !== null) {
-                steps.push({
-                    type: 'step-title',
-                    content: match[0],
-                    target: 'explanation'
-                });
-                const stepStart = match.index + match[0].length;
-                const nextMatch = stepPattern.exec(explanationHTML);
-                const stepEnd = nextMatch ? nextMatch.index : explanationHTML.length;
-                stepPattern.lastIndex = stepStart;
-                const stepContent = explanationHTML.substring(stepStart, stepEnd).trim();
-                if (stepContent) {
-                    const contentParts = stepContent.split(/(\$\$[^$]*\$\$|\$[^$]*\$)/).filter(part => part.trim());
-                    contentParts.forEach(part => {
-                        if (part.trim()) {
-                            steps.push({
-                                type: 'step-content',
-                                content: part,
-                                target: 'explanation'
-                            });
-                        }
-                    });
-                }
-            }
-            if (steps.length === 0) {
-                const paragraphs = explanationHTML.split(/<\/p>|<br\s*\/?>|\n/).filter(p => p.trim());
-                paragraphs.forEach(paragraph => {
-                    if (paragraph.trim()) {
-                        solutionLines.push({
-                            type: 'content',
-                            content: paragraph.replace(/<p[^>]*>/g, '').trim(),
-                            target: 'explanation'
-                        });
-                    }
-                });
-            } else {
-                solutionLines.push(...steps);
-            }
-            // 添加答案标题
+        } else if (block.trim()) {
+            // 内容块：不进一步拆分，保留公式完整性
             solutionLines.push({
-                type: 'title',
-                content: '<h4>答案</h4>',
-                target: 'answer'
+                type: 'step-content',
+                content: block,
+                target: 'explanation'
             });
-            // 添加答案内容
-            solutionLines.push({
-                type: 'content',
-                content: answerContent.innerHTML,
-                target: 'answer'
-            });
-            // 清空内容容器
-            explanationContent.innerHTML = '';
-            answerContent.innerHTML = '';
-            currentLineIndex = 0;
         }
-        // 显示下一行
-        function showNextLine() {
-            if (currentLineIndex >= solutionLines.length) return;
-            const hint = document.querySelector('.fullscreen-click-hint');
-            const explanation = document.getElementById('fullscreen-explanation');
-            const answer = document.getElementById('fullscreen-answer');
-            // 隐藏提示
-            if (currentLineIndex === 0) {
-                hint.style.display = 'none';
-            }
-            const currentLine = solutionLines[currentLineIndex];
-            // 显示对应的容器
-            if (currentLine.target === 'explanation') {
-                explanation.style.display = 'block';
-                const content = explanation.querySelector('.explanation-content');
-                // 创建新的行元素
-                const lineElement = document.createElement('div');
-                lineElement.className = 'step-by-step-line';
-                if (currentLine.type === 'step-title') {
-                    lineElement.className += ' step-title';
-                } else {
-                    lineElement.className += ' step-content';
-                }
-                lineElement.innerHTML = currentLine.content;
-                content.appendChild(lineElement);
-            } else if (currentLine.target === 'answer') {
-                answer.style.display = 'block';
-                const content = answer.querySelector('.answer-content');
-                // 创建新的行元素
-                const lineElement = document.createElement('div');
-                lineElement.className = 'step-by-step-line step-content';
-                lineElement.innerHTML = currentLine.content;
-                content.appendChild(lineElement);
-            }
-            currentLineIndex++;
-            // 重新渲染数学公式
+    });
+
+    // 如果没有识别到步骤格式，则把整个内容作为一个块
+    if (solutionLines.length <= 1) {
+        solutionLines.push({
+            type: 'content',
+            content: explanationHTML,
+            target: 'explanation'
+        });
+    }
+
+    // 添加答案标题与内容（同样保留完整）
+    solutionLines.push({
+        type: 'title',
+        content: '<h4>答案</h4>',
+        target: 'answer'
+    });
+    solutionLines.push({
+        type: 'content',
+        content: answerContent.innerHTML,
+        target: 'answer'
+    });
+
+    // 清空原容器内容并重置索引
+    explanationContent.innerHTML = '';
+    answerContent.innerHTML = '';
+    currentLineIndex = 0;
+}
+// 显示下一行（只渲染新加入的元素，延迟 MathJax 渲染以确保 DOM 已更新）
+function showNextLine() {
+    if (currentLineIndex >= solutionLines.length) return;
+
+    const hint = document.querySelector('.fullscreen-click-hint');
+    const explanation = document.getElementById('fullscreen-explanation');
+    const answer = document.getElementById('fullscreen-answer');
+
+    // 隐藏初始提示
+    if (currentLineIndex === 0 && hint) {
+        hint.style.display = 'none';
+    }
+
+    const currentLine = solutionLines[currentLineIndex];
+    let targetContent = null;
+
+    if (currentLine.target === 'explanation') {
+        explanation.style.display = 'block';
+        targetContent = explanation.querySelector('.explanation-content');
+    } else if (currentLine.target === 'answer') {
+        answer.style.display = 'block';
+        targetContent = answer.querySelector('.answer-content');
+    }
+
+    if (targetContent) {
+        // 创建新的行元素并加入到对应容器
+        const lineElement = document.createElement('div');
+        lineElement.className = 'step-by-step-line';
+        if (currentLine.type === 'step-title') {
+            lineElement.className += ' step-title';
+        } else if (currentLine.type === 'step-content' || currentLine.type === 'content') {
+            lineElement.className += ' step-content';
+        }
+        lineElement.innerHTML = currentLine.content;
+        targetContent.appendChild(lineElement);
+
+        // 延迟渲染 MathJax，只渲染新增元素，避免拆分公式与性能问题
+        setTimeout(() => {
             if (window.MathJax && window.MathJax.typesetPromise) {
-                MathJax.typesetPromise([explanation, answer]).catch(console.error);
+                MathJax.typesetPromise([lineElement]).catch(console.error);
             }
-            // 更新提示信息
-            updateNavigationHint();
-        }
+        }, 50);
+    }
+
+    currentLineIndex++;
+    updateNavigationHint();
+}
         // 显示上一行
         function showPreviousLine() {
             if (currentLineIndex <= 0) return;

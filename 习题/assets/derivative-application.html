@@ -1915,7 +1915,8 @@
                 if (filter === 'all') {
                     count = exercises.length;
                 } else {
-                    count = exercises.filter(e => e.category === filter).length;
+                    // 使用包含匹配，处理相似分类名称
+                    count = exercises.filter(e => e.category.includes(filter) || e.category === filter).length;
                 }
 
                 const countEl = btn.querySelector('.count');
@@ -1938,7 +1939,8 @@
 
                 const filteredExercises = window.exerciseData.exercises.filter(exercise => {
                     if (filter === 'all') return true;
-                    return exercise.category === filter;
+                    // 使用包含匹配，处理相似分类名称
+                    return exercise.category.includes(filter) || exercise.category === filter;
                 });
 
                 filteredExercises.forEach(exercise => {
@@ -2937,20 +2939,35 @@
                     <button class="filter-btn active" data-filter="all">
                         全部题目 <span class="count">0</span>
                     </button>
-                    <button class="filter-btn" data-filter="单调性">
-                        单调性 <span class="count">0</span>
+                    <button class="filter-btn" data-filter="洛必达法则">
+                        洛必达法则 <span class="count">0</span>
+                    </button>
+                    <button class="filter-btn" data-filter="最值">
+                        最值 <span class="count">0</span>
                     </button>
                     <button class="filter-btn" data-filter="极值">
                         极值 <span class="count">0</span>
                     </button>
-                    <button class="filter-btn" data-filter="凹凸性">
-                        凹凸性 <span class="count">0</span>
+                    <button class="filter-btn" data-filter="导数应用">
+                        导数应用 <span class="count">0</span>
                     </button>
-                    <button class="filter-btn" data-filter="渐近线">
-                        渐近线 <span class="count">0</span>
+                    <button class="filter-btn" data-filter="单调性">
+                        单调性 <span class="count">0</span>
                     </button>
-                    <button class="filter-btn" data-filter="最值应用">
-                        最值应用 <span class="count">0</span>
+                    <button class="filter-btn" data-filter="求导">
+                        求导 <span class="count">0</span>
+                    </button>
+                    <button class="filter-btn" data-filter="函数的单调性与极值">
+                        函数的单调性与极值 <span class="count">0</span>
+                    </button>
+                    <button class="filter-btn" data-filter="函数的最值">
+                        函数的最值 <span class="count">0</span>
+                    </button>
+                    <button class="filter-btn" data-filter="切线问题">
+                        切线问题 <span class="count">0</span>
+                    </button>
+                    <button class="filter-btn" data-filter="导数的应用">
+                        导数的应用 <span class="count">0</span>
                     </button>
                 </div>
             </div>

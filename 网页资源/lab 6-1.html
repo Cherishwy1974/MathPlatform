@@ -3,904 +3,414 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lab 6.1 定积分概念与黎曼和实验室</title>
+    <title>Lab 6.1 定积分概念：从分割到求和</title>
+    <!-- 本地化资源 -->
+    <script src="../common-assets/js/tailwind.min.js"></script>
+    <link rel="stylesheet" href="../common-assets/css/lab1-material-symbols.css">
     <script>
-        window.MathJax = {
-            tex: {
-                inlineMath: [['$', '$'], ['\\(', '\\)']],
-                displayMath: [['$$', '$$'], ['\\[', '\\]']],
-                processEscapes: true
-            },
-            startup: {
-                pageReady: () => {
-                    return MathJax.startup.defaultPageReady().then(() => {
-                        if (typeof window.scheduleMathRender === 'function') {
-                            window.scheduleMathRender();
-                        }
-                        console.log('MathJax加载完成');
-                    });
-                }
-            },
-            options: {
-                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
-            }
+        MathJax = {
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+            svg: { fontCache: 'global' }
         };
     </script>
-    <script defer src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js"></script>
-    <script defer src="../common-assets/js/lab-math-enhancer.js"></script>
+    <script id="MathJax-script" async src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js"></script>
     <style>
-        :root {
-            --h1-size: 22px;
-            --h2-size: 20px;
-            --h3-size: 18px;
-            --btn-size: 16px;
-            --formula-size: 20px;
-            --text-size: 16px;
-            --primary: #4f46e5;
-            --primary-light: #6366f1;
-            --primary-dark: #3730a3;
-            --success: #10b981;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --gray-50: #f9fafb;
-            --gray-100: #f3f4f6;
-            --gray-200: #e5e7eb;
-            --gray-300: #d1d5db;
-            --gray-500: #6b7280;
-            --gray-700: #374151;
-            --gray-800: #1f2937;
-            --border: #e5e7eb;
-            --card-radius: 14px;
+        body { font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif; }
+        input[type=range] { -webkit-appearance: none; background: transparent; }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none; height: 20px; width: 20px; border-radius: 50%;
+            background: #4f46e5; cursor: pointer; margin-top: -8px; box-shadow: 0 2px 6px rgba(0,0,0,0.2);
         }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%; height: 4px; cursor: pointer; background: #d1d5db; border-radius: 2px;
         }
-
-        *::-webkit-scrollbar {
-            width: 0;
-            background: transparent;
+        .active-tab { background-color: #e0e7ff; color: #4338ca; border-left: 4px solid #4f46e5; }
+        canvas { touch-action: none; }
+        
+        /* 修复 MathJax 在 Tailwind 下的显示问题 */
+        /* Tailwind 将 svg 设为 block，导致内联公式换行。这里强制设回 inline */
+        mjx-container[display="false"] svg { 
+            display: inline-block !important; 
+            vertical-align: middle !important; 
         }
-
-        * {
-            scrollbar-width: none;
-            -ms-overflow-style: none;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
-            background: var(--gray-50);
-            color: var(--gray-800);
-            font-size: var(--text-size);
-            line-height: 1.5;
-        }
-
-        .return-home-panel { position: fixed; bottom: 12px; right: 12px; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; z-index: 40; }
-        .return-toggle { width: 40px; height: 40px; border-radius: 50%; border: none; background: linear-gradient(135deg, rgba(79,70,229,0.96), rgba(99,102,241,0.9)); color: #fff; font-size: 20px; cursor: pointer; box-shadow: 0 10px 18px rgba(79,70,229,0.28); transition: transform 0.2s, box-shadow 0.2s; }
-        .return-toggle:hover { transform: translateY(-1px) scale(1.03); box-shadow: 0 14px 26px rgba(79,70,229,0.35); }
-        .return-links { display: none; flex-direction: column; gap: 6px; padding: 10px; border-radius: 10px; background: rgba(255,255,255,0.96); border: 1px solid rgba(79,70,229,0.18); box-shadow: 0 10px 30px rgba(15,23,42,0.14); opacity: 0; transition: opacity 0.16s; }
-        .return-link { text-decoration: none; font-size: 15px; color: var(--primary-dark); padding: 6px 12px; border-radius: 8px; background: rgba(99,102,241,0.12); transition: background 0.2s; }
-        .return-link:hover { background: rgba(79,70,229,0.18); }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 24px 24px 32px;
-        }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 18px;
-        }
-
-        .header h1 {
-            font-size: var(--h2-size);
-            color: var(--primary-dark);
-        }
-
-        .main {
-            display: flex;
-            gap: 18px;
-            min-height: 620px;
-        }
-
-        .sidebar {
-            width: 120px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .nav-btn {
-            padding: 12px 10px;
-            border-radius: 4px;
-            margin-bottom: 4px;
-            border: 1px solid var(--border);
-            background: #ffffff;
-            color: var(--gray-700);
-            font-size: var(--btn-size);
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .nav-btn:hover,
-        .nav-btn.active {
-            background: linear-gradient(135deg, rgba(79, 70, 229, 0.95), rgba(99, 102, 241, 0.88));
-            color: #ffffff;
-            border-color: transparent;
-            box-shadow: 0 12px 20px rgba(79, 70, 229, 0.2);
-        }
-
-        .content {
-            flex: 1;
-            display: none;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 18px;
-        }
-
-        .content.active {
-            display: grid;
-        }
-
-        .column {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            max-height: 640px;
-            overflow-y: auto;
-            padding-right: 4px;
-        }
-
-        .card {
-            background: #ffffff;
-            border-radius: var(--card-radius);
-            border: 1px solid var(--gray-200);
-            padding: 16px;
-            box-shadow: 0 10px 20px rgba(15, 23, 42, 0.08);
-        }
-
-        .card h3 {
-            font-size: var(--h3-size);
-            color: var(--primary-dark);
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .info-box {
-            background: rgba(79, 70, 229, 0.08);
-            border: 1px solid rgba(79, 70, 229, 0.18);
-            border-radius: 12px;
-            padding: 12px;
-            color: var(--primary-dark);
-        }
-
-        .control-group {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .control-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-        }
-
-        label {
-            font-weight: 600;
-            color: var(--gray-700);
-        }
-
-        input[type="range"] {
-            width: 100%;
-        }
-
-        .toggle-group,
-        .pill-group {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .pill {
-            border-radius: 999px;
-            border: 1px solid var(--border);
-            padding: 6px 14px;
-            font-size: 15px;
-            background: var(--gray-100);
-            color: var(--gray-700);
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .pill.active {
-            background: rgba(79, 70, 229, 0.12);
-            border-color: rgba(79, 70, 229, 0.4);
-            color: var(--primary-dark);
-            font-weight: 600;
-        }
-
-        .canvas-wrapper {
-            position: relative;
-            background: linear-gradient(180deg, rgba(99, 102, 241, 0.08), rgba(99, 102, 241, 0));
-            border-radius: var(--card-radius);
-            border: 1px solid var(--gray-200);
-            padding: 12px;
-        }
-
-        canvas {
-            width: 100%;
-            height: 360px;
-            border-radius: 10px;
-            background: #ffffff;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 8px;
-        }
-
-        th, td {
-            padding: 8px 10px;
-            border-bottom: 1px solid var(--gray-200);
-            text-align: left;
-        }
-
-        th {
-            color: var(--gray-600);
-            font-weight: 600;
-        }
-
-        .status-tag {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            border-radius: 999px;
-            padding: 6px 12px;
-            font-size: 14px;
-            font-weight: 600;
-            color: #ffffff;
-        }
-
-        .status-tag.success {
-            background: rgba(16, 185, 129, 0.18);
-            color: var(--success);
-        }
-
-        .status-tag.warning {
-            background: rgba(245, 158, 11, 0.18);
-            color: var(--warning);
-        }
-
-        .status-tag.danger {
-            background: rgba(239, 68, 68, 0.18);
-            color: var(--danger);
-        }
-
-        .action-btn {
-            padding: 10px 16px;
-            border: none;
-            border-radius: 12px;
-            font-size: var(--btn-size);
-            font-weight: 600;
-            background: linear-gradient(135deg, rgba(79, 70, 229, 0.95), rgba(129, 140, 248, 0.9));
-            color: #ffffff;
-            cursor: pointer;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .action-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 14px 30px rgba(79, 70, 229, 0.28);
-        }
-
-        .mini-chart {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .metric-card {
-            flex: 1;
-            background: rgba(236, 233, 255, 0.7);
-            border-radius: 12px;
-            padding: 12px;
-            border: 1px solid rgba(99, 102, 241, 0.2);
-        }
-
-        .metric-card strong {
-            color: var(--primary-dark);
-            font-size: 17px;
-        }
-
-        .step-list {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .step-item {
-            border: 1px dashed rgba(79, 70, 229, 0.3);
-            border-radius: 12px;
-            padding: 10px 12px;
-            background: rgba(79, 70, 229, 0.04);
-        }
-
-        .step-item.active {
-            border-color: var(--primary);
-            background: rgba(79, 70, 229, 0.12);
-        }
-
-        .inline-math {
-            font-size: var(--formula-size);
-            color: var(--primary-dark);
-        }
-
-        @media (max-width: 1024px) {
-            .main {
-                flex-direction: column;
-            }
-
-            .sidebar {
-                flex-direction: row;
-                width: 100%;
-                overflow-x: auto;
-            }
-
-            .content {
-                grid-template-columns: 1fr;
-            }
-
-            canvas {
-                height: 300px;
-            }
+        mjx-container[display="false"] {
+            display: inline-block !important;
         }
     </style>
 </head>
-<body>
-    <div class="container">
-        <header class="header">
-            <h1>Lab 6.1 定积分概念与黎曼和实验室</h1>
-        </header>
-
-        <div class="main">
-            <nav class="sidebar">
-                <button class="nav-btn active"  data-panel="intro"onclick="switchPanel('intro')">概念引入</button>
-                <button class="nav-btn"  data-panel="riemann"onclick="switchPanel('riemann')">黎曼和演示</button>
-                <button class="nav-btn"  data-panel="error"onclick="switchPanel('error')">误差分析</button>
-            </nav>
-
-            <div class="content active" id="intro">
-                <div class="column">
-                    <div class="card">
-                        <h3>为什么要分割？</h3>
-                        <div class="info-box">
-                            目标函数取 $f(x)=0.5x+1$，在区间 $[0,4]$ 上围成的曲边梯形面积对应定积分 $\int_0^4 f(x)\,dx$。用矩形近似面积求和，即得到黎曼和。分割越细，近似越准确。
-                        </div>
-                    </div>
-                    <div class="card">
-                        <h3>分割与取点方式</h3>
-                        <div class="control-group">
-                            <div class="control-row">
-                                <label for="introN">矩形数量 n</label>
-                                <span id="introNValue">12</span>
-                            </div>
-                            <input id="introN" type="range" min="4" max="60" step="1" value="12" oninput="updateRiemann(parseInt(this.value))">
-                            <div class="pill-group" role="radiogroup" aria-label="取点方式">
-                                <button class="pill active" data-sample="left" onclick="setSample(event, 'left')">左端点</button>
-                                <button class="pill" data-sample="mid" onclick="setSample(event, 'mid')">中点</button>
-                                <button class="pill" data-sample="right" onclick="setSample(event, 'right')">右端点</button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card">
-                        <h3>观察要点</h3>
-                        <ul class="step-list">
-                            <li class="step-item active">① 记录每个矩形的宽度 $\Delta x=\frac{b-a}{n}$。</li>
-                            <li class="step-item">② 选择取样点（左、中、右），取样点决定矩形高度。</li>
-                            <li class="step-item">③ 将所有矩形面积相加，得到黎曼和 $S_n$。</li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="column">
-                    <div class="card canvas-wrapper">
-                        <canvas id="riemannCanvas" width="640" height="360" aria-label="黎曼和可视化"></canvas>
-                    </div>
-                    <div class="card">
-                        <h3>当前计算</h3>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>参数</th>
-                                    <th>取值</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>$\Delta x$</td>
-                                    <td id="deltaX">0.333</td>
-                                </tr>
-                                <tr>
-                                    <td>黎曼和 $S_n$</td>
-                                    <td id="riemannValue">8.22</td>
-                                </tr>
-                                <tr>
-                                    <td>真值 $\int_0^4 f(x)dx$</td>
-                                    <td id="trueValue">8.00</td>
-                                </tr>
-                                <tr>
-                                    <td>误差</td>
-                                    <td id="errorValue">0.22</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <div class="content" id="riemann">
-                <div class="column">
-                    <div class="card">
-                        <h3>动画演示</h3>
-                        <div class="info-box">点击按钮，系统将从 $n=4$ 开始逐渐增加矩形数量，实时看到黎曼和如何逼近真值。观察曲边区域被矩形填满的速度。</div>
-                        <button class="action-btn" onclick="playAnimation()">▶ 开始演示</button>
-                    </div>
-                    <div class="card">
-                        <h3>三种取样比较</h3>
-                        <div class="control-group">
-                            <div class="mini-chart">
-                                <div class="metric-card">
-                                    <div>左端点 $S_n^{(L)}$</div>
-                                    <strong id="leftMetric">8.22</strong>
-                                </div>
-                                <div class="metric-card">
-                                    <div>中点 $S_n^{(M)}$</div>
-                                    <strong id="midMetric">8.00</strong>
-                                </div>
-                                <div class="metric-card">
-                                    <div>右端点 $S_n^{(R)}$</div>
-                                    <strong id="rightMetric">7.78</strong>
-                                </div>
-                            </div>
-                            <div class="info-box">对于单调递增函数，左端点法高估，右端点法低估，中点法最接近真值。</div>
-                        </div>
-                    </div>
-                    <div class="card">
-                        <h3>关键公式</h3>
-                        <div class="info-box">黎曼和表达式：$S_n=\sum_{k=1}^{n} f(x_k^*) \Delta x$，其中 $x_k^*$ 为每个小区间内选取的样本点。</div>
-                    </div>
-                </div>
-                <div class="column">
-                    <div class="card canvas-wrapper">
-                        <canvas id="animationCanvas" width="640" height="360" aria-label="黎曼和动画"></canvas>
-                    </div>
-                    <div class="card">
-                        <h3>演示进度</h3>
-                        <table>
-                            <tbody>
-                                <tr>
-                                    <td>当前矩形数量</td>
-                                    <td id="animN">4</td>
-                                </tr>
-                                <tr>
-                                    <td>黎曼和 $S_n$</td>
-                                    <td id="animSum">7.33</td>
-                                </tr>
-                                <tr>
-                                    <td>误差百分比</td>
-                                    <td id="animError">8.4%</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <div class="content" id="error">
-                <div class="column">
-                    <div class="card">
-                        <h3>误差趋势观察</h3>
-                        <div class="info-box">通过选择不同的 $n$，观察误差 $|S_n-I|$ 的变化。理论上 $n$ 越大，误差越小。中点法误差收敛最快。</div>
-                        <div class="control-group">
-                            <div class="control-row">
-                                <label for="errorN">矩形数量 n</label>
-                                <span id="errorNValue">20</span>
-                            </div>
-                            <input id="errorN" type="range" min="4" max="120" value="20" oninput="updateErrorAnalysis(parseInt(this.value))">
-                        </div>
-                    </div>
-                    <div class="card">
-                        <h3>误差数据</h3>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>取样方式</th>
-                                    <th>黎曼和</th>
-                                    <th>误差</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>左端点</td>
-                                    <td id="errLeft">8.07</td>
-                                    <td id="errLeftDiff">+0.07</td>
-                                </tr>
-                                <tr>
-                                    <td>中点</td>
-                                    <td id="errMid">8.00</td>
-                                    <td id="errMidDiff">≈0</td>
-                                </tr>
-                                <tr>
-                                    <td>右端点</td>
-                                    <td id="errRight">7.93</td>
-                                    <td id="errRightDiff">-0.07</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                <div class="column">
-                    <div class="card canvas-wrapper">
-                        <canvas id="errorCanvas" width="640" height="360" aria-label="误差趋势"></canvas>
-                    </div>
-                    <div class="card">
-                        <h3>误差提示</h3>
-                        <div class="info-box" id="errorHint">当 $n=20$ 时，中点法的误差不足 $0.01$，满足课堂练习所需精度。</div>
-                    </div>
-                </div>
+<body class="h-screen flex flex-col overflow-hidden text-gray-800 bg-gray-100">
+    <header class="bg-white shadow-sm z-10 flex-none h-16 flex items-center px-6 justify-between">
+        <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-indigo-600 text-3xl">functions</span>
+            <div>
+                <h1 class="text-xl font-bold text-gray-800">定积分概念实验室</h1>
+                <p class="text-xs text-gray-500">Lab 6.1 曲边梯形与黎曼和</p>
             </div>
         </div>
+        <div class="text-sm text-gray-600 bg-gray-100 px-3 py-1 rounded-full hidden md:block">
+            <span class="font-bold text-indigo-600">目标：</span> 理解"分割、近似、求和、取极限"的思想
+        </div>
+    </header>
+
+    <div class="flex flex-1 overflow-hidden">
+        <nav class="w-64 bg-white border-r border-gray-200 flex-none flex-col py-4 overflow-y-auto hidden md:flex">
+            <div class="px-4 mb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">学习步骤</div>
+            <button onclick="setStep('scenario')" id="btn-scenario" class="w-full text-left px-6 py-4 hover:bg-gray-50 transition-colors border-l-4 flex items-center gap-3 active-tab">
+                <span class="material-symbols-outlined">landscape</span>
+                <div><div class="font-medium">1. 问题引入</div><div class="text-xs text-gray-500">不规则图形怎么算面积？</div></div>
+            </button>
+            <button onclick="setStep('definition')" id="btn-definition" class="w-full text-left px-6 py-4 hover:bg-gray-50 transition-colors border-l-4 border-transparent flex items-center gap-3">
+                <span class="material-symbols-outlined">architecture</span>
+                <div><div class="font-medium">2. 什么是曲边梯形</div><div class="text-xs text-gray-500">几何特征与边界定义</div></div>
+            </button>
+            <button onclick="setStep('experiment')" id="btn-experiment" class="w-full text-left px-6 py-4 hover:bg-gray-50 transition-colors border-l-4 border-transparent flex items-center gap-3">
+                <span class="material-symbols-outlined">bar_chart</span>
+                <div><div class="font-medium">3. 黎曼和实验</div><div class="text-xs text-gray-500">以直代曲，逼近真值</div></div>
+            </button>
+            <button onclick="setStep('limit')" id="btn-limit" class="w-full text-left px-6 py-4 hover:bg-gray-50 transition-colors border-l-4 border-transparent flex items-center gap-3">
+                <span class="material-symbols-outlined">all_inclusive</span>
+                <div><div class="font-medium">4. 从近似到精确</div><div class="text-xs text-gray-500">极限与定积分定义</div></div>
+            </button>
+        </nav>
+
+        <main class="flex-1 bg-gray-50 p-6 overflow-y-auto relative">
+            <!-- 场景 1: 问题引入 -->
+            <div id="view-scenario" class="max-w-5xl mx-auto space-y-6">
+                <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-yellow-500">lightbulb</span> 工程问题：计算草坪面积
+                    </h2>
+                    <p class="text-lg text-gray-600 mb-6 leading-relaxed">
+                        学校计划在图书馆前铺设一块形状不规则的草坪（如下图深绿色区域）。这块地的一边是直的（路边），另一边是弯曲的景观线。
+                        <br>作为工程造价员，<strong>我们没有直接计算这种"弯曲形状"面积的公式</strong>。
+                        <br>你能想到什么办法来估算它的面积，以便采购草皮吗？
+                    </p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                        <!-- FIX: Added absolute positioning here for safety too -->
+                        <div class="relative bg-gray-100 rounded-xl overflow-hidden shadow-inner border border-gray-200 aspect-video flex items-center justify-center">
+                            <canvas id="scenarioCanvas" class="absolute top-0 left-0 w-full h-full"></canvas>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="p-4 bg-indigo-50 rounded-xl border border-indigo-100">
+                                <h3 class="font-bold text-indigo-700 mb-2">思考方向</h3>
+                                <ul class="list-disc list-inside text-gray-700 space-y-2">
+                                    <li>如果是矩形，我们会算：$\text{长} \times \text{宽}$。</li>
+                                    <li>如果是三角形，我们也会算。</li>
+                                    <li>但这有一条边是<strong>曲线</strong>。</li>
+                                    <li><strong>思路：</strong>能不能把它切成我们熟悉的长条形？</li>
+                                </ul>
+                            </div>
+                            <button onclick="setStep('definition')" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold shadow-lg transition-transform active:scale-95 flex items-center justify-center gap-2">
+                                下一步：将图形数学化 <span class="material-symbols-outlined">arrow_forward</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 场景 2: 曲边梯形定义 -->
+            <div id="view-definition" class="max-w-5xl mx-auto space-y-6 hidden">
+                <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">数学抽象：曲边梯形</h2>
+                    <p class="text-gray-600 mb-6">我们将刚才的草坪放入直角坐标系中。这个图形在数学上有一个专门的名字，叫<strong>曲边梯形</strong>。它由四条线围成：</p>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="col-span-2 bg-white border border-gray-200 rounded-xl p-2 shadow-inner relative" style="min-height:300px">
+                             <!-- FIX: Added absolute positioning here for safety too -->
+                            <canvas id="defCanvas" class="absolute top-0 left-0 w-full h-full"></canvas>
+                        </div>
+                        <div class="flex flex-col gap-3 justify-center">
+                            <div class="group p-3 rounded-lg border border-transparent hover:bg-blue-50 hover:border-blue-200 transition-all cursor-pointer" onmouseover="highlightBorder('top')" onmouseout="highlightBorder('none')">
+                                <div class="flex items-center gap-2"><span class="w-4 h-4 rounded-full bg-blue-500"></span><span class="font-bold text-gray-700">上底 (曲边)</span></div>
+                                <div class="text-sm text-gray-500 pl-6">函数 $y = f(x)$</div>
+                            </div>
+                            <div class="group p-3 rounded-lg border border-transparent hover:bg-gray-100 hover:border-gray-300 transition-all cursor-pointer" onmouseover="highlightBorder('bottom')" onmouseout="highlightBorder('none')">
+                                <div class="flex items-center gap-2"><span class="w-4 h-4 rounded-full bg-gray-800"></span><span class="font-bold text-gray-700">下底 (直边)</span></div>
+                                <div class="text-sm text-gray-500 pl-6">x轴区间 $[a, b]$</div>
+                            </div>
+                            <div class="group p-3 rounded-lg border border-transparent hover:bg-red-50 hover:border-red-200 transition-all cursor-pointer" onmouseover="highlightBorder('sides')" onmouseout="highlightBorder('none')">
+                                <div class="flex items-center gap-2"><span class="w-4 h-4 rounded-full bg-red-500"></span><span class="font-bold text-gray-700">两侧 (垂线)</span></div>
+                                <div class="text-sm text-gray-500 pl-6">直线 $x=a$ 和 $x=b$</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4 text-center">
+                        <button onclick="setStep('experiment')" class="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold shadow-lg transition-transform active:scale-95 inline-flex items-center gap-2">
+                            开始求解面积 <span class="material-symbols-outlined">arrow_forward</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 场景 3: 黎曼和实验 -->
+            <div id="view-experiment" class="max-w-6xl mx-auto space-y-4 hidden">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <div class="lg:col-span-4 space-y-4">
+                        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                            <h3 class="font-bold text-lg mb-4 text-gray-800 border-b pb-2">1. 分割 (Partition)</h3>
+                            <p class="text-sm text-gray-600 mb-4">把底边 $[a, b]$ 切成 $n$ 个小段，用矩形来代替曲边梯形。</p>
+                            <div class="mb-6">
+                                <div class="flex justify-between mb-2">
+                                    <label class="font-semibold text-gray-700">矩形数量 (n)</label>
+                                    <span class="bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded text-sm font-bold" id="n-display">5</span>
+                                </div>
+                                <input type="range" id="n-slider" min="2" max="50" step="1" value="5" class="w-full">
+                                <div class="flex justify-between text-xs text-gray-400 mt-1"><span>粗糙</span><span>精细</span></div>
+                            </div>
+                            <h3 class="font-bold text-lg mb-4 text-gray-800 border-b pb-2">2. 近似 (Approx)</h3>
+                            <p class="text-sm text-gray-600 mb-3">矩形的高度怎么定？</p>
+                            <div class="flex gap-2 mb-2">
+                                <button onclick="setMethod('left')" class="method-btn flex-1 py-2 text-sm border rounded-lg bg-indigo-50 border-indigo-200 text-indigo-700 font-medium">左端点</button>
+                                <button onclick="setMethod('right')" class="method-btn flex-1 py-2 text-sm border rounded-lg bg-white border-gray-200 text-gray-600 hover:bg-gray-50">右端点</button>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                            <h3 class="font-bold text-lg mb-3 text-gray-800 flex items-center gap-2">
+                                <span class="material-symbols-outlined text-green-500">calculate</span> 数据分析
+                            </h3>
+                            <div class="space-y-3 text-sm">
+                                <div class="flex justify-between items-center border-b border-gray-100 pb-2">
+                                    <span class="text-gray-500">每个矩形宽度 ($\Delta x$)</span>
+                                    <span class="font-mono font-bold" id="data-dx">0.00</span>
+                                </div>
+                                <div class="flex justify-between items-center border-b border-gray-100 pb-2">
+                                    <span class="text-gray-500">所有矩形面积和 ($S_n$)</span>
+                                    <span class="font-mono font-bold text-indigo-600 text-lg" id="data-sum">0.00</span>
+                                </div>
+                                <div class="flex justify-between items-center bg-red-50 p-2 rounded">
+                                    <span class="text-red-600">误差 (Error)</span>
+                                    <span class="font-mono font-bold text-red-600" id="data-error">0.00</span>
+                                </div>
+                            </div>
+                            <p class="text-xs text-gray-400 mt-3">* 真实面积约为 11.333</p>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-8 space-y-4">
+                        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 h-full flex flex-col">
+                            <div class="flex justify-between items-center mb-2">
+                                <h3 class="font-bold text-gray-700">图形演示</h3>
+                                <div class="flex items-center gap-4 text-xs">
+                                    <div class="flex items-center gap-1"><span class="w-3 h-3 bg-indigo-200 border border-indigo-400"></span> 矩形近似面积</div>
+                                    <div class="flex items-center gap-1"><span class="w-3 h-3 bg-red-400"></span> 误差区域</div>
+                                </div>
+                            </div>
+                            <!-- MAJOR FIX: Added 'absolute top-0 left-0' to canvas to prevent infinite growth loop -->
+                            <div class="flex-1 relative bg-white border rounded-lg overflow-hidden w-full" style="min-height:400px">
+                                <canvas id="mainCanvas" class="absolute top-0 left-0 w-full h-full"></canvas>
+                                <div id="overlay-msg" class="absolute top-4 left-4 bg-white/90 backdrop-blur px-4 py-2 rounded-lg shadow border border-gray-200 text-sm hidden pointer-events-none">
+                                    <span class="font-bold text-indigo-600">n 增大</span> → 矩形越瘦 → 误差越小
+                                </div>
+                            </div>
+                            <div class="mt-4 p-4 bg-yellow-50 text-yellow-800 rounded-lg text-sm flex items-start gap-3 flex-none">
+                                <span class="material-symbols-outlined text-yellow-600 shrink-0">info</span>
+                                <div><strong>核心发现：</strong>当分割的数量 $n$ 越来越多（$n \to \infty$）时，红色误差区域会越来越小，最后趋近于 0。</div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <button onclick="setStep('limit')" class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold shadow transition-colors inline-flex items-center gap-2">
+                                总结结论 <span class="material-symbols-outlined">arrow_forward</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 场景 4: 极限与定积分定义 -->
+            <div id="view-limit" class="max-w-4xl mx-auto space-y-6 hidden">
+                <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 text-center">
+                    <div class="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <span class="material-symbols-outlined text-indigo-600 text-3xl">done_all</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6">从"近似"到"精确"</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                        <div class="p-4 bg-gray-50 rounded-xl">
+                            <div class="text-gray-500 text-sm mb-2">第1步：分割</div>
+                            <div class="font-bold">$\Delta x = \dfrac{b-a}{n}$</div>
+                        </div>
+                        <div class="p-4 bg-gray-50 rounded-xl">
+                            <div class="text-gray-500 text-sm mb-2">第2步：求和</div>
+                            <div class="font-bold">$\sum_{i=1}^{n} f(\xi_i) \Delta x$</div>
+                        </div>
+                        <div class="p-4 bg-indigo-50 rounded-xl border border-indigo-100">
+                            <div class="text-indigo-600 text-sm mb-2">第3步：取极限</div>
+                            <div class="font-bold text-indigo-700">$\lim_{n \to \infty}$ <br><span class="text-xs font-normal text-indigo-500">(或 $\Delta x \to 0$)</span></div>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 mb-8">当分割无限细密（$n \to \infty$）时，所有矩形的面积之和，就是曲边梯形的<strong>精确面积</strong>。数学上用一个专用符号来表示这个极限值：</p>
+                    <div class="bg-gray-900 text-white p-8 rounded-2xl shadow-xl mb-8 relative overflow-hidden">
+                        <div class="absolute top-0 right-0 opacity-10 transform translate-x-10 -translate-y-10">
+                            <span class="material-symbols-outlined text-9xl">functions</span>
+                        </div>
+                        <div class="text-2xl md:text-3xl">
+                            $$\int_a^b f(x)\,dx = \lim_{n \to \infty} \sum_{i=1}^{n} f(\xi_i) \Delta x$$
+                        </div>
+                        <div class="mt-6 flex flex-wrap justify-center gap-6 text-sm text-gray-400 font-mono">
+                            <div>$\int$ : 拉长的S (Sum)</div>
+                            <div>$a, b$ : 积分上下限</div>
+                            <div>$f(x)$ : 被积函数</div>
+                            <div>$dx$ : 无穷小的底边</div>
+                        </div>
+                    </div>
+                    <button onclick="setStep('scenario')" class="px-6 py-2 border border-gray-300 hover:bg-gray-50 text-gray-700 rounded-lg transition-colors">返回重新开始</button>
+                </div>
+            </div>
+        </main>
     </div>
 
     <script>
-        function switchPanel(id, trigger) {
-            const activeButton = trigger instanceof HTMLElement ? trigger :
+        const config = { a: 0, b: 4, f: x => 0.1 * x * x + 1, F: x => (0.1/3) * Math.pow(x, 3) + x };
+        const trueArea = config.F(config.b) - config.F(config.a);
+        let state = { step: 'scenario', n: 5, method: 'left', highlightDef: 'none' };
 
-                (typeof event !== 'undefined' && event?.currentTarget instanceof HTMLElement ? event.currentTarget :
-
-                    document.querySelector(`.nav-btn[data-panel="${id}"]`) ||
-
-                    document.querySelector(`.nav-btn[data-target="${id}"]`) ||
-
-                    null);
-
-            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.content').forEach(panel => panel.classList.remove('active'));
-            const btn = document.querySelector(`.nav-btn[onclick="switchPanel('${id}')"]`);
-            const panel = document.getElementById(id);
-            if (btn && panel) {
-                btn.classList.add('active');
-                panel.classList.add('active');
-                scheduleMathRender();
-            }
-            resizeAllCanvases();
+        function setStep(stepId) {
+            state.step = stepId;
+            document.querySelectorAll('nav button').forEach(btn => { btn.classList.remove('active-tab'); btn.classList.add('border-transparent'); });
+            const activeBtn = document.getElementById(`btn-${stepId}`);
+            if (activeBtn) { activeBtn.classList.add('active-tab'); activeBtn.classList.remove('border-transparent'); }
+            ['scenario', 'definition', 'experiment', 'limit'].forEach(id => document.getElementById(`view-${id}`).classList.add('hidden'));
+            document.getElementById(`view-${stepId}`).classList.remove('hidden');
+            setTimeout(() => {
+                if (stepId === 'scenario') drawScenario();
+                if (stepId === 'definition') drawDefinition();
+                if (stepId === 'experiment') updateExperiment();
+                if (typeof MathJax !== 'undefined') MathJax.typeset();
+            }, 50);
         }
 
-        const config = {
-            a: 0,
-            b: 4,
-            function: x => 0.5 * x + 1,
-            antiderivative: x => 0.25 * x * x + x
-        };
-
-        const sampleMethod = {
-            current: 'left'
-        };
-
-        const canvases = {};
-
-        function resizeCanvas(canvas) {
-            const wrapper = canvas.parentElement;
-            const width = wrapper.clientWidth - 24;
-            const height = 340;
-            canvas.style.width = width + 'px';
-            canvas.style.height = height + 'px';
-            const ratio = window.devicePixelRatio || 1;
-            canvas.width = width * ratio;
-            canvas.height = height * ratio;
+        function setupCanvas(canvasId) {
+            const canvas = document.getElementById(canvasId);
             const ctx = canvas.getContext('2d');
-            ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
-            return ctx;
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.getBoundingClientRect();
+            // Set actual canvas size (pixels)
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            // Normalize coordinate system
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            return { ctx, width: rect.width, height: rect.height };
         }
 
-        function resizeAllCanvases() {
-            Object.keys(canvases).forEach(key => {
-                const ctx = resizeCanvas(canvases[key].canvas);
-                canvases[key].ctx = ctx;
-                canvases[key].draw();
-            });
+        function toCanvas(x, y, width, height) {
+            const margin = { left: 50, right: 30, top: 30, bottom: 40 };
+            const drawW = width - margin.left - margin.right, drawH = height - margin.top - margin.bottom;
+            const xMin = config.a - 0.5, xMax = config.b + 0.5, yMin = 0, yMax = config.f(config.b) + 0.5;
+            return { x: margin.left + ((x - xMin) / (xMax - xMin)) * drawW, y: height - margin.bottom - ((y - yMin) / (yMax - yMin)) * drawH };
         }
 
-        function drawAxis(ctx, width, height) {
+        function drawAxes(ctx, width, height) {
+            const origin = toCanvas(0, 0, width, height);
+            ctx.strokeStyle = '#9ca3af'; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(30, origin.y); ctx.lineTo(width - 20, origin.y); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(origin.x, height - 20); ctx.lineTo(origin.x, 20); ctx.stroke();
+            ctx.font = '14px sans-serif'; ctx.fillStyle = '#6b7280';
+            ctx.fillText('x', width - 20, origin.y + 15); ctx.fillText('y', origin.x - 20, 20);
+        }
+
+        function drawFunctionCurve(ctx, width, height, color = '#4f46e5', lineWidth = 2) {
+            ctx.beginPath(); ctx.strokeStyle = color; ctx.lineWidth = lineWidth;
+            for (let x = -0.5; x <= config.b + 0.5; x += 0.05) {
+                const pt = toCanvas(x, config.f(x), width, height);
+                x === -0.5 ? ctx.moveTo(pt.x, pt.y) : ctx.lineTo(pt.x, pt.y);
+            }
+            ctx.stroke();
+        }
+
+        function drawScenario() {
+            const { ctx, width, height } = setupCanvas('scenarioCanvas');
             ctx.clearRect(0, 0, width, height);
-            ctx.save();
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(0, 0, width, height);
-            ctx.strokeStyle = '#9ca3af';
-            ctx.lineWidth = 1;
-            const paddingLeft = 60;
-            const paddingBottom = 40;
+            ctx.fillStyle = '#f0fdf4'; ctx.fillRect(0, 0, width, height);
             ctx.beginPath();
-            ctx.moveTo(paddingLeft, 20);
-            ctx.lineTo(paddingLeft, height - paddingBottom);
-            ctx.lineTo(width - 20, height - paddingBottom);
-            ctx.stroke();
-            ctx.fillStyle = '#6b7280';
-            ctx.font = '14px "Microsoft YaHei"';
-            ctx.fillText('x', width - 28, height - paddingBottom - 6);
-            ctx.fillText('y', paddingLeft - 20, 30);
-            return { paddingLeft, paddingBottom };
+            const start = toCanvas(config.a, 0, width, height);
+            ctx.moveTo(start.x, start.y);
+            for (let x = config.a; x <= config.b; x += 0.05) ctx.lineTo(toCanvas(x, 0, width, height).x, toCanvas(x, 0, width, height).y);
+            ctx.lineTo(toCanvas(config.b, config.f(config.b), width, height).x, toCanvas(config.b, config.f(config.b), width, height).y);
+            for (let x = config.b; x >= config.a; x -= 0.05) ctx.lineTo(toCanvas(x, config.f(x), width, height).x, toCanvas(x, config.f(x), width, height).y);
+            ctx.closePath();
+            ctx.fillStyle = '#4ade80'; ctx.fill();
+            ctx.lineWidth = 2; ctx.strokeStyle = '#166534'; ctx.stroke();
+            ctx.fillStyle = '#166534'; ctx.font = '14px sans-serif';
+            ctx.fillText('路边 (直)', start.x + 20, start.y + 18);
+            ctx.fillText('景观线 (曲)', start.x + 40, start.y - 80);
+            ctx.fillText('?', start.x + 100, start.y - 40);
         }
 
-        function dataToCanvas(x, y, width, height, padding) {
-            const { a, b, function: f } = config;
-            const maxY = f(b) + 1;
-            const minY = 0;
-            const usableWidth = width - padding.paddingLeft - 40;
-            const usableHeight = height - padding.paddingBottom - 20;
-            const px = padding.paddingLeft + ((x - a) / (b - a)) * usableWidth;
-            const py = height - padding.paddingBottom - ((y - minY) / (maxY - minY)) * usableHeight;
-            return [px, py];
-        }
+        function drawDefinition() {
+            const { ctx, width, height } = setupCanvas('defCanvas');
+            ctx.clearRect(0, 0, width, height);
+            drawAxes(ctx, width, height);
+            const aPt0 = toCanvas(config.a, 0, width, height), bPt0 = toCanvas(config.b, 0, width, height);
+            const aPtTop = toCanvas(config.a, config.f(config.a), width, height), bPtTop = toCanvas(config.b, config.f(config.b), width, height);
+            ctx.beginPath(); ctx.moveTo(aPt0.x, aPt0.y); ctx.lineTo(bPt0.x, bPt0.y); ctx.lineTo(bPtTop.x, bPtTop.y);
+            for (let x = config.b; x >= config.a; x -= 0.05) ctx.lineTo(toCanvas(x, config.f(x), width, height).x, toCanvas(x, config.f(x), width, height).y);
+            ctx.closePath(); ctx.fillStyle = 'rgba(79, 70, 229, 0.1)'; ctx.fill();
 
-        function computeRiemann(n, method) {
-            const { a, b, function: f } = config;
-            const delta = (b - a) / n;
-            let sum = 0;
-            for (let i = 0; i < n; i++) {
-                let sampleX;
-                if (method === 'left') {
-                    sampleX = a + i * delta;
-                } else if (method === 'mid') {
-                    sampleX = a + (i + 0.5) * delta;
-                } else {
-                    sampleX = a + (i + 1) * delta;
-                }
-                sum += f(sampleX);
-            }
-            return { sum: sum * delta, delta };
-        }
+            ctx.beginPath(); ctx.moveTo(aPt0.x, aPt0.y); ctx.lineTo(bPt0.x, bPt0.y);
+            ctx.strokeStyle = state.highlightDef === 'bottom' ? '#1f2937' : 'rgba(0,0,0,0.2)'; ctx.lineWidth = state.highlightDef === 'bottom' ? 4 : 2; ctx.stroke();
+            ctx.fillStyle = '#374151'; ctx.font = 'bold 14px sans-serif'; ctx.fillText('a', aPt0.x - 5, aPt0.y + 20); ctx.fillText('b', bPt0.x - 5, bPt0.y + 20);
 
-        function drawRiemann() {
-            const canvas = canvases.riemann.canvas;
-            const ctx = canvases.riemann.ctx;
-            const width = canvas.clientWidth;
-            const height = canvas.clientHeight;
-            const padding = drawAxis(ctx, width, height);
-            const { a, b, function: f } = config;
-            const n = parseInt(document.getElementById('introN').value, 10);
-            const method = sampleMethod.current;
-            const { delta } = computeRiemann(n, method);
+            ctx.beginPath(); ctx.moveTo(aPt0.x, aPt0.y); ctx.lineTo(aPtTop.x, aPtTop.y); ctx.moveTo(bPt0.x, bPt0.y); ctx.lineTo(bPtTop.x, bPtTop.y);
+            ctx.strokeStyle = state.highlightDef === 'sides' ? '#ef4444' : 'rgba(0,0,0,0.2)'; ctx.lineWidth = state.highlightDef === 'sides' ? 4 : 2;
+            if (state.highlightDef === 'sides') ctx.setLineDash([5, 3]); ctx.stroke(); ctx.setLineDash([]);
 
-            // function curve
-            ctx.strokeStyle = '#4f46e5';
-            ctx.lineWidth = 2;
             ctx.beginPath();
-            for (let x = a; x <= b + 0.001; x += 0.05) {
-                const y = f(x);
-                const [px, py] = dataToCanvas(x, y, width, height, padding);
-                if (x === a) ctx.moveTo(px, py); else ctx.lineTo(px, py);
-            }
-            ctx.stroke();
-
-            // rectangles
-            for (let i = 0; i < n; i++) {
-                let sampleX;
-                if (method === 'left') sampleX = a + i * delta;
-                else if (method === 'mid') sampleX = a + (i + 0.5) * delta;
-                else sampleX = a + (i + 1) * delta;
-                const heightVal = f(sampleX);
-                const [rx, ry] = dataToCanvas(a + i * delta, heightVal, width, height, padding);
-                const [nextX] = dataToCanvas(a + (i + 1) * delta, 0, width, height, padding);
-                const rectWidth = nextX - rx;
-                const [baseX, baseY] = dataToCanvas(a + i * delta, 0, width, height, padding);
-                ctx.fillStyle = 'rgba(99, 102, 241, 0.22)';
-                ctx.fillRect(rx, ry, rectWidth, baseY - ry);
-                ctx.strokeStyle = 'rgba(99, 102, 241, 0.6)';
-                ctx.strokeRect(rx, ry, rectWidth, baseY - ry);
-            }
-
-            const result = computeRiemann(n, method);
-            const trueValue = config.antiderivative(config.b) - config.antiderivative(config.a);
-            document.getElementById('deltaX').textContent = result.delta.toFixed(3);
-            document.getElementById('riemannValue').textContent = result.sum.toFixed(3);
-            document.getElementById('trueValue').textContent = trueValue.toFixed(2);
-            document.getElementById('errorValue').textContent = (result.sum - trueValue).toFixed(3);
+            for (let x = config.a; x <= config.b; x += 0.05) { const pt = toCanvas(x, config.f(x), width, height); x === config.a ? ctx.moveTo(pt.x, pt.y) : ctx.lineTo(pt.x, pt.y); }
+            ctx.strokeStyle = state.highlightDef === 'top' ? '#3b82f6' : '#4f46e5'; ctx.lineWidth = state.highlightDef === 'top' ? 4 : 2; ctx.stroke();
         }
 
-        function drawAnimation() {
-            const canvas = canvases.animation.canvas;
-            const ctx = canvases.animation.ctx;
-            const width = canvas.clientWidth;
-            const height = canvas.clientHeight;
-            const padding = drawAxis(ctx, width, height);
-            const { a, b, function: f } = config;
-            const n = animationState.n;
-            const delta = (b - a) / n;
+        function highlightBorder(part) { state.highlightDef = part; drawDefinition(); }
 
-            ctx.strokeStyle = '#4f46e5';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            for (let x = a; x <= b + 0.001; x += 0.05) {
-                const y = f(x);
-                const [px, py] = dataToCanvas(x, y, width, height, padding);
-                if (x === a) ctx.moveTo(px, py); else ctx.lineTo(px, py);
-            }
-            ctx.stroke();
-
-            for (let i = 0; i < n; i++) {
-                const sampleX = a + (i + 0.5) * delta;
-                const heightVal = f(sampleX);
-                const [rx, ry] = dataToCanvas(a + i * delta, heightVal, width, height, padding);
-                const [nextX] = dataToCanvas(a + (i + 1) * delta, 0, width, height, padding);
-                const rectWidth = nextX - rx;
-                const [baseX, baseY] = dataToCanvas(a + i * delta, 0, width, height, padding);
-                const opacity = i < animationState.progress ? 0.28 : 0.1;
-                ctx.fillStyle = `rgba(99, 102, 241, ${opacity})`;
-                ctx.fillRect(rx, ry, rectWidth, baseY - ry);
-                ctx.strokeStyle = 'rgba(99, 102, 241, 0.5)';
-                ctx.strokeRect(rx, ry, rectWidth, baseY - ry);
-            }
-
-            const sum = computeRiemann(n, 'mid').sum;
-            const trueValue = config.antiderivative(config.b) - config.antiderivative(config.a);
-            document.getElementById('animN').textContent = String(n);
-            document.getElementById('animSum').textContent = sum.toFixed(3);
-            document.getElementById('animError').textContent = ((Math.abs(sum - trueValue) / trueValue) * 100).toFixed(1) + '%';
+        function setMethod(m) {
+            state.method = m;
+            document.querySelectorAll('.method-btn').forEach(btn => { btn.classList.remove('bg-indigo-50', 'text-indigo-700', 'border-indigo-200'); btn.classList.add('bg-white', 'text-gray-600', 'border-gray-200'); });
+            event.target.classList.remove('bg-white', 'text-gray-600', 'border-gray-200');
+            event.target.classList.add('bg-indigo-50', 'text-indigo-700', 'border-indigo-200');
+            updateExperiment();
         }
 
-        function drawError() {
-            const canvas = canvases.error.canvas;
-            const ctx = canvases.error.ctx;
-            const width = canvas.clientWidth;
-            const height = canvas.clientHeight;
-            drawAxis(ctx, width, height);
-            const padding = { paddingLeft: 60, paddingBottom: 40 };
-            const { a, b } = config;
-            const trueValue = config.antiderivative(b) - config.antiderivative(a);
-            const n = parseInt(document.getElementById('errorN').value, 10);
-            const methods = ['left', 'mid', 'right'];
-            const colors = ['#f97316', '#10b981', '#ef4444'];
-            const usableWidth = width - padding.paddingLeft - 40;
-            const usableHeight = height - padding.paddingBottom - 20;
-
-            const data = methods.map(method => {
-                const result = computeRiemann(n, method);
-                return { method, value: Math.abs(result.sum - trueValue), raw: result.sum };
-            });
-
-            const maxError = Math.max(...data.map(d => d.value)) * 1.2;
-
-            data.forEach((item, index) => {
-                const barWidth = usableWidth / methods.length - 30;
-                const x = padding.paddingLeft + index * (barWidth + 40) + 20;
-                const barHeight = (item.value / maxError) * usableHeight;
-                const y = height - padding.paddingBottom - barHeight;
-                ctx.fillStyle = colors[index];
-                ctx.globalAlpha = 0.75;
-                ctx.fillRect(x, y, barWidth, barHeight);
-                ctx.globalAlpha = 1;
-                ctx.fillStyle = '#1f2937';
-                ctx.font = '15px "Microsoft YaHei"';
-                ctx.fillText(item.method === 'mid' ? '中点法' : item.method === 'left' ? '左端点' : '右端点', x, height - padding.paddingBottom + 22);
-                ctx.fillStyle = colors[index];
-                ctx.fillText(item.value.toFixed(4), x, y - 8);
-            });
-
-            const hint = document.getElementById('errorHint');
-            const midError = data[1].value;
-            if (midError < 0.01) {
-                hint.textContent = `当 n=${n} 时，中点法误差仅为 ${midError.toFixed(4)}，完全满足日常作业的精度要求。`;
-            } else if (midError < 0.05) {
-                hint.textContent = `继续增加分割数 n 可以让误差降到 0.01 以下，目前中点法误差为 ${midError.toFixed(4)}。`;
-            } else {
-                hint.textContent = `当前误差较大（${midError.toFixed(3)}），建议至少取 n=40 以上才能看到误差快速下降。`;
-            }
-
-            document.getElementById('errLeft').textContent = data[0].raw.toFixed(3);
-            document.getElementById('errLeftDiff').textContent = formatError(data[0].raw - trueValue);
-            document.getElementById('errMid').textContent = data[1].raw.toFixed(3);
-            document.getElementById('errMidDiff').textContent = formatError(data[1].raw - trueValue);
-            document.getElementById('errRight').textContent = data[2].raw.toFixed(3);
-            document.getElementById('errRightDiff').textContent = formatError(data[2].raw - trueValue);
-        }
-
-        function formatError(value) {
-            if (Math.abs(value) < 1e-3) return '≈0';
-            return (value >= 0 ? '+' : '') + value.toFixed(3);
-        }
-
-        function setSample(event, type) {
-            event.preventDefault();
-            sampleMethod.current = type;
-            document.querySelectorAll('.pill').forEach(btn => btn.classList.remove('active'));
-            event.currentTarget.classList.add('active');
-            updateRiemann(parseInt(document.getElementById('introN').value, 10));
-        }
-
-        function updateRiemann(n) {
-            document.getElementById('introNValue').textContent = n;
-            drawRiemann();
-        }
-
-        const animationState = {
-            playing: false,
-            n: 4,
-            progress: 0,
-            frame: null
-        };
-
-        function playAnimation() {
-            animationState.playing = true;
-            animationState.n = 4;
-            animationState.progress = 0;
-            animate();
-        }
-
-        function animate() {
-            if (!animationState.playing) return;
-            animationState.progress += 1;
-            if (animationState.progress > animationState.n) {
-                animationState.progress = 0;
-                animationState.n += 2;
-                if (animationState.n > 80) {
-                    animationState.n = 80;
-                    animationState.playing = false;
-                }
-            }
-            drawAnimation();
-            if (animationState.playing) {
-                animationState.frame = requestAnimationFrame(animate);
-            }
-        }
-
-        function updateErrorAnalysis(n) {
-            document.getElementById('errorNValue').textContent = n;
-            drawError();
-        }
-
-        function scheduleMathRender() {
-            if (window.MathJax && MathJax.typesetPromise) {
-                MathJax.typesetPromise().catch(err => console.warn('MathJax 渲染异常', err));
-            }
-        }
-
-        function initMetrics() {
-            const left = computeRiemann(20, 'left').sum;
-            const mid = computeRiemann(20, 'mid').sum;
-            const right = computeRiemann(20, 'right').sum;
-            document.getElementById('leftMetric').textContent = left.toFixed(3);
-            document.getElementById('midMetric').textContent = mid.toFixed(3);
-            document.getElementById('rightMetric').textContent = right.toFixed(3);
-        }
-
-        window.addEventListener('DOMContentLoaded', () => {
-            canvases.riemann = { canvas: document.getElementById('riemannCanvas'), draw: drawRiemann };
-            canvases.animation = { canvas: document.getElementById('animationCanvas'), draw: drawAnimation };
-            canvases.error = { canvas: document.getElementById('errorCanvas'), draw: drawError };
-            resizeAllCanvases();
-            updateRiemann(parseInt(document.getElementById('introN').value, 10));
-            initMetrics();
-            drawAnimation();
-            drawError();
-            scheduleMathRender();
+        document.getElementById('n-slider').addEventListener('input', e => {
+            state.n = parseInt(e.target.value);
+            document.getElementById('n-display').innerText = state.n;
+            const msg = document.getElementById('overlay-msg'); msg.classList.remove('hidden'); setTimeout(() => msg.classList.add('hidden'), 1500);
+            updateExperiment();
         });
 
-        window.addEventListener('resize', resizeAllCanvases);
+        function updateExperiment() {
+            const { ctx, width, height } = setupCanvas('mainCanvas');
+            ctx.clearRect(0, 0, width, height);
+            drawAxes(ctx, width, height);
+            drawFunctionCurve(ctx, width, height, '#9ca3af', 1);
+            const dx = (config.b - config.a) / state.n;
+            let sumArea = 0;
+            for (let i = 0; i < state.n; i++) {
+                const xLeft = config.a + i * dx, xRight = xLeft + dx;
+                const xSample = state.method === 'left' ? xLeft : xRight;
+                const h = config.f(xSample);
+                sumArea += h * dx;
+                const p1 = toCanvas(xLeft, 0, width, height), p2 = toCanvas(xRight, h, width, height);
+                const rectW = p2.x - p1.x, rectH = p1.y - p2.y;
+                ctx.fillStyle = 'rgba(99, 102, 241, 0.2)'; ctx.fillRect(p1.x, p2.y, rectW, rectH);
+                ctx.strokeStyle = 'rgba(99, 102, 241, 0.8)'; ctx.lineWidth = 1; ctx.strokeRect(p1.x, p2.y, rectW, rectH);
+                ctx.beginPath(); ctx.fillStyle = 'rgba(239, 68, 68, 0.5)';
+                if (state.method === 'left') {
+                    ctx.moveTo(toCanvas(xLeft, h, width, height).x, toCanvas(xLeft, h, width, height).y);
+                    ctx.lineTo(toCanvas(xRight, h, width, height).x, toCanvas(xRight, h, width, height).y);
+                    ctx.lineTo(toCanvas(xRight, config.f(xRight), width, height).x, toCanvas(xRight, config.f(xRight), width, height).y);
+                    for (let x = xRight; x >= xLeft; x -= 0.05) ctx.lineTo(toCanvas(x, config.f(x), width, height).x, toCanvas(x, config.f(x), width, height).y);
+                } else {
+                    ctx.moveTo(toCanvas(xLeft, config.f(xLeft), width, height).x, toCanvas(xLeft, config.f(xLeft), width, height).y);
+                    ctx.lineTo(toCanvas(xLeft, h, width, height).x, toCanvas(xLeft, h, width, height).y);
+                    ctx.lineTo(toCanvas(xRight, h, width, height).x, toCanvas(xRight, h, width, height).y);
+                    for (let x = xRight; x >= xLeft; x -= 0.05) ctx.lineTo(toCanvas(x, config.f(x), width, height).x, toCanvas(x, config.f(x), width, height).y);
+                }
+                ctx.fill();
+            }
+            document.getElementById('data-dx').innerText = dx.toFixed(4);
+            document.getElementById('data-sum').innerText = sumArea.toFixed(4);
+            const error = sumArea - trueArea;
+            document.getElementById('data-error').innerText = (error > 0 ? "+" : "") + error.toFixed(4);
+        }
 
-        function toggleReturnLinks() { const p = document.querySelector('.return-links'); if (!p) return; if (p.style.display === 'flex') { p.style.opacity = '0'; setTimeout(() => p.style.display = 'none', 160); } else { p.style.display = 'flex'; requestAnimationFrame(() => p.style.opacity = '1'); } }
+        window.addEventListener('load', () => setStep('scenario'));
+        window.addEventListener('resize', () => { if (state.step === 'scenario') drawScenario(); if (state.step === 'definition') drawDefinition(); if (state.step === 'experiment') updateExperiment(); });
     </script>
-
-    <div class="return-home-panel"><button class="return-toggle" onclick="toggleReturnLinks()"><i class="fa-solid fa-house"></i></button><div class="return-links"><a class="return-link" href="index.html"><i class="fa-solid fa-arrow-left"></i> 返回目录</a><a class="return-link" href="../index.html"><i class="fa-solid fa-house"></i> 返回主站</a></div></div>
 </body>
 </html>

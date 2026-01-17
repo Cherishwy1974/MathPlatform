@@ -276,12 +276,22 @@ window.MathJax = {
         processEnvironments: true
     },
     svg: { fontCache: 'global' },
+    loader: {
+        // 禁用外部资源加载，确保完全本地化
+        load: ['[tex]/require', '[tex]/autoload', '[tex]/configmacros']
+    },
+    options: {
+        // 禁用外部资源请求
+        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+        ignoreHtmlClass: 'tex2jax_ignore',
+        processHtmlClass: 'tex2jax_process'
+    },
     startup: {
         ready: () => {
             MathJax.startup.defaultReady();
             MathJax.startup.document.state(0);
             window.mathJaxReady = true;
-            console.log('MathJax ready');
+            console.log('MathJax ready (localized)');
         }
     }
 };

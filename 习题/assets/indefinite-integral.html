@@ -1662,20 +1662,26 @@
                     <button class="filter-btn active" data-filter="all">
                         全部题目 <span class="count">0</span>
                     </button>
-                    <button class="filter-btn" data-filter="formula">
+                    <button class="filter-btn" data-filter="基本积分">
                         基本积分 <span class="count">0</span>
                     </button>
-                    <button class="filter-btn" data-filter="first-substitution">
-                        第一类换元 <span class="count">0</span>
+                    <button class="filter-btn" data-filter="换元积分">
+                        换元积分 <span class="count">0</span>
                     </button>
-                    <button class="filter-btn" data-filter="second-substitution">
-                        第二类换元 <span class="count">0</span>
-                    </button>
-                    <button class="filter-btn" data-filter="parts">
+                    <button class="filter-btn" data-filter="分部积分">
                         分部积分 <span class="count">0</span>
                     </button>
-                    <button class="filter-btn" data-filter="other">
-                        其他方法 <span class="count">0</span>
+                    <button class="filter-btn" data-filter="原函数">
+                        原函数 <span class="count">0</span>
+                    </button>
+                    <button class="filter-btn" data-filter="积分应用">
+                        积分应用 <span class="count">0</span>
+                    </button>
+                    <button class="filter-btn" data-filter="原函数性质">
+                        原函数性质 <span class="count">0</span>
+                    </button>
+                    <button class="filter-btn" data-filter="三角函数积分">
+                        三角函数积分 <span class="count">0</span>
                     </button>
                 </div>
             </div>
@@ -1943,18 +1949,9 @@
 
             container.innerHTML = '';
 
-            const categoryMap = {
-                'formula': '基本积分',
-                'first-substitution': '第一类换元',
-                'second-substitution': '第二类换元',
-                'parts': '分部积分',
-                'other': '其他'
-            };
-
             const filteredExercises = window.exerciseData.exercises.filter(exercise => {
                 if (filter === 'all') return true;
-                const targetCategory = categoryMap[filter] || filter;
-                return exercise.category.includes(targetCategory) || exercise.type === targetCategory;
+                return exercise.category.includes(filter);
             });
 
             currentFilteredExercises = filteredExercises;
@@ -1965,9 +1962,8 @@
                 if (btnFilter === 'all') {
                     btn.querySelector('.count').textContent = window.exerciseData.exercises.length;
                 } else {
-                    const targetCat = categoryMap[btnFilter] || btnFilter;
                     const count = window.exerciseData.exercises.filter(ex =>
-                        ex.category.includes(targetCat) || ex.type === targetCat
+                        ex.category.includes(btnFilter)
                     ).length;
                     btn.querySelector('.count').textContent = count;
                 }
@@ -1977,6 +1973,7 @@
                 const item = createExerciseItem(exercise, index + 1);
                 container.appendChild(item);
             });
+
 
             if (window.MathJax && window.MathJax.typesetPromise) {
                 window.MathJax.typesetPromise([container]).catch(err => console.warn('MathJax error:', err));

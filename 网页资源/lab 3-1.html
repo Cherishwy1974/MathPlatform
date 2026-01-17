@@ -1,216 +1,640 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="utf-8">
-    <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <title>导数定义与几何意义可视化</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab 3.1 导数概念：瞬间的变化</title>
     <!-- 本地化资源 -->
     <script src="../common-assets/js/tailwind.min.js"></script>
     <link rel="stylesheet" href="../common-assets/css/lab1-material-symbols.css">
-    <script src="../common-assets/js/mathjax-config.js"></script>
-    <script defer src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js"></script>
-    <link rel="stylesheet" href="assets/lab3-1.css">
+    <script>
+        MathJax = {
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+            svg: { fontCache: 'global' }
+        };
+    </script>
+    <script id="MathJax-script" async src="../common-assets/js/mathjax-3.2.2-tex-svg.min.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif; }
+        input[type=range] { -webkit-appearance: none; background: transparent; }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none; height: 20px; width: 20px; border-radius: 50%;
+            background: #4f46e5; cursor: pointer; margin-top: -8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2); transition: transform 0.1s;
+        }
+        input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.1); }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%; height: 4px; cursor: pointer; background: #d1d5db; border-radius: 2px;
+        }
+        .active-tab { background-color: #e0e7ff; color: #4338ca; border-left: 4px solid #4f46e5; }
+        canvas { touch-action: none; }
+
+        /* --- 核心修复：MathJax 公式防换行 --- */
+        mjx-container {
+            display: inline-block !important;
+            margin: 0 1px !important;
+        }
+        mjx-container[display="true"] {
+            display: block !important;
+            margin: 1em 0 !important;
+        }
+        mjx-container svg { 
+            display: inline-block !important; 
+            vertical-align: middle !important; 
+        }
+
+        /* 玻璃拟态卡片 */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.1);
+        }
+
+        /* 情境切换按钮样式 */
+        .mode-btn-active {
+            background: white;
+            color: #4338ca;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .mode-btn-inactive {
+            color: #64748b;
+        }
+        .mode-btn-inactive:hover {
+            color: #334155;
+        }
+    </style>
 </head>
-<body class="bg-gray-50 text-slate-800 h-screen flex flex-col overflow-hidden">
-    <!-- Header -->
-    <header class="bg-white border-b border-gray-200 h-16 flex-none flex items-center justify-between px-6 shadow-sm z-20">
+<body class="h-screen flex flex-col overflow-hidden text-gray-800 bg-gray-100">
+    <!-- 顶部导航 -->
+    <header class="bg-white shadow-sm z-10 flex-none h-16 flex items-center px-6 justify-between">
         <div class="flex items-center gap-3">
-            <div class="bg-indigo-600 p-2 rounded-lg text-white">
-                <span class="material-symbols-outlined text-2xl">functions</span>
+            <span class="material-symbols-outlined text-indigo-600 text-3xl">show_chart</span>
+            <div>
+                <h1 class="text-xl font-bold text-gray-800">导数定义实验室</h1>
+                <p class="text-xs text-gray-500">Lab 3.1 变化率与切线</p>
             </div>
-            <h1 class="text-xl font-bold text-gray-800 tracking-tight">导数定义实验室</h1>
         </div>
-        <div class="text-sm text-gray-500 hidden sm:block font-medium">
-            $f'(x) = \displaystyle\lim_{\Delta x \to 0} \dfrac{\Delta y}{\Delta x}$
+        <div class="text-sm text-gray-600 bg-gray-100 px-3 py-1 rounded-full hidden md:block">
+            <span class="font-bold text-indigo-600">核心：</span> 平均变化率 $\rightarrow$ 瞬时变化率
         </div>
     </header>
 
     <div class="flex flex-1 overflow-hidden">
-        <!-- Sidebar -->
-        <nav class="w-64 bg-white border-r border-gray-200 flex-none flex flex-col z-10 hidden md:flex">
-            <div class="p-4 space-y-2">
-                <button class="nav-btn w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 bg-indigo-50 text-indigo-700" id="btn-concept" onclick="switchTab('concept')">
-                    <span class="material-symbols-outlined">menu_book</span>
-                    基本概念
-                </button>
-                <button class="nav-btn w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 text-gray-600 hover:bg-gray-50" id="btn-limit" onclick="switchTab('limit')">
-                    <span class="material-symbols-outlined">trending_up</span>
-                    极限过程
-                </button>
-                <button class="nav-btn w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 text-gray-600 hover:bg-gray-50" id="btn-tangent" onclick="switchTab('tangent')">
-                    <span class="material-symbols-outlined">linear_scale</span>
-                    切线意义
-                </button>
-            </div>
-            <div class="mt-auto p-4 border-t border-gray-100">
-                <div class="bg-blue-50 rounded-lg p-4">
-                    <h4 class="text-xs font-bold text-blue-800 uppercase tracking-wider mb-2">要点</h4>
-                    <p class="text-xs text-blue-600 leading-relaxed">
-                        导数本质上是变化率的极限，几何上表现为切线的斜率。
-                    </p>
-                </div>
-            </div>
+        <!-- 左侧边栏导航 -->
+        <nav class="w-64 bg-white border-r border-gray-200 flex-none flex-col py-4 overflow-y-auto hidden md:flex">
+            <div class="px-4 mb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">学习路径</div>
+            <button class="w-full text-left px-6 py-4 hover:bg-gray-50 transition-colors border-l-4 active-tab flex items-center gap-3" id="btn-intro" onclick="setStep('intro')">
+                <span class="material-symbols-outlined">science</span>
+                <div><div class="font-medium">1. 问题引入</div><div class="text-xs text-gray-500">情境探索</div></div>
+            </button>
+            <button class="w-full text-left px-6 py-4 hover:bg-gray-50 transition-colors border-l-4 border-transparent flex items-center gap-3" id="btn-secant" onclick="setStep('secant')">
+                <span class="material-symbols-outlined">linear_scale</span>
+                <div><div class="font-medium">2. 割线与平均速度</div><div class="text-xs text-gray-500">两点定直线</div></div>
+            </button>
+            <button class="w-full text-left px-6 py-4 hover:bg-gray-50 transition-colors border-l-4 border-transparent flex items-center gap-3" id="btn-limit" onclick="setStep('limit')">
+                <span class="material-symbols-outlined">motion_photos_auto</span>
+                <div><div class="font-medium">3. 逼近切线</div><div class="text-xs text-gray-500">让 $\Delta x$ 趋近于 0</div></div>
+            </button>
+            <button class="w-full text-left px-6 py-4 hover:bg-gray-50 transition-colors border-l-4 border-transparent flex items-center gap-3" id="btn-def" onclick="setStep('def')">
+                <span class="material-symbols-outlined">functions</span>
+                <div><div class="font-medium">4. 导数定义</div><div class="text-xs text-gray-500">数学符号的表达</div></div>
+            </button>
         </nav>
 
-        <!-- Main Content -->
-        <main class="flex-1 overflow-y-auto bg-gray-50/50 p-4 md:p-8 relative scroll-smooth no-scrollbar">
-            <!-- Tab 1: Concept -->
-            <div class="tab-content space-y-6 max-w-5xl mx-auto" id="tab-concept">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="space-y-6">
-                        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-                            <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                                <span class="material-symbols-outlined text-indigo-600">school</span>
-                                导数定义
-                            </h2>
-                            <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-6 text-center mb-6">
-                                <div class="text-xl text-gray-800 mb-3 overflow-x-auto">
-                                    $$f'(x_0) = \lim_{\Delta x \to 0} \dfrac{f(x_0 + \Delta x) - f(x_0)}{\Delta x}$$
-                                </div>
-                                <p class="text-sm text-indigo-700">瞬时变化率 = 平均变化率的极限</p>
-                            </div>
-                            <div class="space-y-3">
-                                <p class="text-gray-600 text-sm leading-relaxed">
-                                    想象一辆汽车行驶，<strong>平均速度</strong>是总路程除以总时间。而<strong>瞬时速度</strong>（如速度表显示的）就是时间间隔 $\Delta t$ 趋近于 0 时的平均速度，即位置函数的导数。
-                                </p>
-                            </div>
+        <!-- 右侧内容区 -->
+        <main class="flex-1 bg-gray-50 p-4 md:p-6 overflow-y-auto relative">
+            <!-- 场景 1: 问题引入 (新版：情境切换) -->
+            <div class="max-w-5xl mx-auto space-y-6" id="view-intro">
+                <div class="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-100">
+                    <!-- 情境切换开关 -->
+                    <div class="flex justify-between items-start mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-indigo-500">experiment</span> 
+                            <span id="intro-title">情境探索：寻找"瞬间的斜率"</span>
+                        </h2>
+                        <div class="bg-slate-100 p-1 rounded-lg flex text-sm font-medium">
+                            <button onclick="setIntroMode('math')" id="btn-mode-math" class="px-3 py-1.5 rounded-md mode-btn-active transition-all">
+                                基础数学
+                            </button>
+                            <button onclick="setIntroMode('cnc')" id="btn-mode-cnc" class="px-3 py-1.5 rounded-md mode-btn-inactive transition-all flex items-center gap-1">
+                                <span class="material-symbols-outlined text-sm">precision_manufacturing</span> 
+                                数控加工
+                            </button>
                         </div>
                     </div>
-                    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col">
-                        <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                            <span class="material-symbols-outlined text-pink-600">image</span>
-                            几何直观
-                        </h2>
-                        <div class="relative flex-1 min-h-[300px] w-full bg-white rounded-xl overflow-hidden border border-gray-100">
-                            <canvas class="w-full h-full" id="conceptCanvas"></canvas>
+
+                    <!-- 数学模式内容 -->
+                    <div id="intro-math-content">
+                        <p class="text-lg text-gray-600 mb-6 leading-relaxed">
+                            给定一条曲线 <span class="font-bold text-indigo-600">$f(x) = 0.1x^3 - 0.3x^2 + 2$</span>，我们想知道：
+                            <br><br>
+                            <strong>曲线在某一点 P 处的"倾斜程度"（斜率）是多少？</strong>
+                            <br>
+                            <span class="text-sm text-gray-500">（直线的斜率容易算，但曲线上每个点的斜率都在变化，该怎么求？）</span>
+                        </p>
+                    </div>
+
+                    <!-- 数控加工模式内容 -->
+                    <div id="intro-cnc-content" class="hidden">
+                        <p class="text-lg text-gray-600 mb-6 leading-relaxed">
+                            在数控加工中，刀具沿着零件轮廓移动。轮廓曲线为 <span class="font-bold text-indigo-600">$f(x) = 0.1x^3 - 0.3x^2 + 2$</span>。
+                            <br><br>
+                            <strong>问题：刀具在每个位置的进给方向是什么？</strong>
+                            <br>
+                            <span class="text-sm text-gray-500">（如果方向不对，刀具会切入工件内部，造成废品！）</span>
+                        </p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                        <!-- 左侧：交互式预览画布 -->
+                        <div class="space-y-3">
+                            <div class="relative bg-slate-50 rounded-xl overflow-hidden shadow-inner border border-gray-200" style="height: 280px;">
+                                <canvas id="introCanvas" class="absolute top-0 left-0 w-full h-full"></canvas>
+                                <!-- 浮动斜率显示 -->
+                                <div class="absolute top-4 left-4 glass-panel p-3 rounded-lg">
+                                    <div class="text-xs text-slate-500 font-bold uppercase tracking-wider mb-1">当前斜率</div>
+                                    <div class="text-2xl font-mono font-bold text-slate-800" id="intro-slope">0.00</div>
+                                </div>
+                            </div>
+                            <div class="text-sm bg-white p-3 rounded shadow-sm text-left border border-gray-100">
+                                <div class="flex justify-between items-center mb-2">
+                                    <label class="font-semibold text-gray-700">增量 Δx</label>
+                                    <span class="bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded text-sm font-bold font-mono" id="intro-dx-val">1.50</span>
+                                </div>
+                                <input type="range" id="intro-dx-slider" min="0.01" max="2.00" step="0.01" value="1.50" class="w-full">
+                                <div class="flex justify-between text-xs text-gray-400 mt-1">
+                                    <span>趋近于0</span><span>较大间隔</span>
+                                </div>
+                            </div>
                         </div>
-                        <div class="mt-4 text-center text-sm text-gray-500">
-                            割线（蓝色）随 $\Delta x \to 0$ 逐渐逼近切线（红色）
+
+                        <!-- 右侧：解决思路 -->
+                        <div class="space-y-4">
+                            <div class="p-4 bg-indigo-50 rounded-xl border border-indigo-100" id="intro-hint-math">
+                                <h3 class="font-bold text-indigo-700 mb-2">解决思路</h3>
+                                <ul class="list-disc list-inside text-gray-700 space-y-2">
+                                    <li>虽然曲线上一点的斜率无法直接计算。</li>
+                                    <li>但我们可以取曲线上<strong>相近的两点</strong>，连成一条割线。</li>
+                                    <li>当两点<strong>无限靠近</strong>时，割线就趋近于切线，斜率趋近于真实值！</li>
+                                </ul>
+                            </div>
+                            <div class="p-4 bg-orange-50 rounded-xl border border-orange-100 hidden" id="intro-hint-cnc">
+                                <h3 class="font-bold text-orange-700 mb-2">工程意义</h3>
+                                <ul class="list-disc list-inside text-gray-700 space-y-2">
+                                    <li>刀具进给方向 = 曲线在该点的<strong>切线方向</strong>。</li>
+                                    <li>如果用两点连线（割线）近似，会产生<strong>加工误差</strong>。</li>
+                                    <li>Δx 越小，近似越精确，加工精度越高！</li>
+                                </ul>
+                            </div>
+                            
+                            <!-- 状态指示器 -->
+                            <div class="bg-slate-50 rounded-xl p-4 border border-slate-200">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <div class="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center shadow-sm">
+                                        <span class="material-symbols-outlined text-slate-400 text-sm" id="intro-icon-status">timeline</span>
+                                    </div>
+                                    <div>
+                                        <div class="text-xs text-slate-500">几何形态</div>
+                                        <div class="font-bold text-slate-800" id="intro-text-status">割线 (Secant)</div>
+                                    </div>
+                                </div>
+                                <div class="h-1.5 w-full bg-slate-200 rounded-full overflow-hidden">
+                                    <div id="intro-progress-bar" class="h-full bg-indigo-500 w-25 transition-all duration-100"></div>
+                                </div>
+                            </div>
+
+                            <button class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold shadow-lg transition-transform active:scale-95 flex items-center justify-center gap-2" onclick="setStep('secant')">
+                                深入理解割线 <span class="material-symbols-outlined">arrow_forward</span>
+                            </button>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Tab 2: Limit Process -->
-            <div class="tab-content hidden space-y-6 max-w-6xl mx-auto" id="tab-limit">
+            <!-- 场景 2: 割线 -->
+            <div class="max-w-5xl mx-auto space-y-6 hidden" id="view-secant">
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">平均变化率 = 割线斜率</h2>
+                    <p class="text-gray-600 mb-4">在函数图像上，平均变化率对应的是连接两点 $A$ 和 $B$ 的直线（称为<strong>割线</strong>）的斜率。</p>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="col-span-2 bg-white border border-gray-200 rounded-xl p-2 shadow-inner relative" style="height: 400px;">
+                            <canvas id="secantCanvas" class="absolute top-0 left-0 w-full h-full"></canvas>
+                        </div>
+                        <div class="flex flex-col gap-4">
+                            <div class="bg-blue-50 p-4 rounded-xl border border-blue-100">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="w-3 h-3 rounded-full bg-blue-600"></span>
+                                    <span class="font-bold text-blue-800">割线 (Secant)</span>
+                                </div>
+                                <div class="text-sm text-blue-700 space-y-1">
+                                    <div>经过点 A 和 点 B</div>
+                                    <div>斜率 $k = \dfrac{\Delta y}{\Delta x} = \dfrac{f(x+\Delta x)-f(x)}{\Delta x}$</div>
+                                </div>
+                            </div>
+                            <div class="p-4 bg-gray-50 rounded-xl border border-gray-200">
+                                <div class="text-sm font-bold text-gray-500 mb-2">当前状态</div>
+                                <div class="grid grid-cols-2 gap-2 text-sm">
+                                    <div>固定点 A:</div><div class="font-mono">x=1.5</div>
+                                    <div>移动点 B:</div><div class="font-mono">x=3.0</div>
+                                    <div>$\Delta x$:</div><div class="font-mono">1.5</div>
+                                </div>
+                            </div>
+                            <button class="mt-auto px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold shadow transition-colors flex items-center justify-center gap-2" onclick="setStep('limit')">
+                                让 B 向 A 靠近 <span class="material-symbols-outlined">arrow_forward</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 场景 3: 极限逼近 -->
+            <div class="max-w-6xl mx-auto space-y-4 hidden" id="view-limit">
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                    <!-- Controls -->
-                    <div class="lg:col-span-4 space-y-6">
-                        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-                            <h3 class="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
-                                <span class="material-symbols-outlined text-indigo-600">tune</span>
-                                实验控制台
+                    <div class="lg:col-span-4 space-y-4">
+                        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                            <h3 class="font-bold text-lg mb-4 text-gray-800 border-b pb-2 flex items-center gap-2">
+                                <span class="material-symbols-outlined text-indigo-600">settings</span> 实验控制
                             </h3>
-                            <div class="space-y-6">
-                                <div>
-                                    <label class="block text-xs font-semibold text-gray-500 uppercase mb-2 tracking-wider">选择函数 $f(x)$</label>
-                                    <div class="grid grid-cols-2 gap-2">
-                                        <button class="func-btn active px-3 py-2 rounded-lg border border-indigo-200 bg-indigo-50 text-indigo-700 text-sm font-medium transition-colors" onclick="setFunc('x^2')">$x^2$</button>
-                                        <button class="func-btn px-3 py-2 rounded-lg border border-gray-200 hover:bg-gray-50 text-gray-600 text-sm font-medium transition-colors" onclick="setFunc('x^3/3')">$\dfrac{x^3}{3}$</button>
-                                        <button class="func-btn px-3 py-2 rounded-lg border border-gray-200 hover:bg-gray-50 text-gray-600 text-sm font-medium transition-colors" onclick="setFunc('sin')">$\sin(x)$</button>
-                                        <button class="func-btn px-3 py-2 rounded-lg border border-gray-200 hover:bg-gray-50 text-gray-600 text-sm font-medium transition-colors" onclick="setFunc('exp')">$e^{0.5x}$</button>
-                                    </div>
+                            <div class="mb-6">
+                                <div class="flex justify-between mb-2 items-center">
+                                    <label class="font-semibold text-gray-700 text-sm">增量 $\Delta x$</label>
+                                    <span class="bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded text-sm font-bold font-mono" id="dx-display">1.50</span>
                                 </div>
-                                <div>
-                                    <label class="flex justify-between text-xs font-semibold text-gray-500 uppercase mb-2 tracking-wider">
-                                        <span>固定点 $x_0$</span>
-                                        <span class="text-indigo-600 font-mono" id="x0Val">1.0</span>
-                                    </label>
-                                    <input class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600" id="x0Slider" max="2" min="-2" step="0.1" type="range" value="1.0">
+                                <input type="range" id="dx-slider" min="0.01" max="2.00" step="0.01" value="1.50" class="w-full">
+                                <div class="flex justify-between text-xs text-gray-400 mt-1">
+                                    <span>趋近于0 (瞬间)</span><span>较大间隔</span>
                                 </div>
-                                <div>
-                                    <label class="flex justify-between text-xs font-semibold text-gray-500 uppercase mb-2 tracking-wider">
-                                        <span>增量 $\Delta x$</span>
-                                        <span class="text-indigo-600 font-mono" id="dxVal">1.50</span>
-                                    </label>
-                                    <input class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600" id="dxSlider" max="2" min="0.01" step="0.01" type="range" value="1.5">
+                            </div>
+                            <div class="bg-blue-50 p-4 rounded-lg border border-blue-100 mb-4">
+                                <div class="text-xs text-blue-600 uppercase font-bold mb-1">平均变化率 (割线斜率)</div>
+                                <div class="text-2xl font-mono font-bold text-blue-700" id="secant-slope">--</div>
+                            </div>
+                            <div class="bg-red-50 p-4 rounded-lg border border-red-100">
+                                <div class="text-xs text-red-600 uppercase font-bold mb-1">瞬时变化率 (切线斜率)</div>
+                                <div class="text-2xl font-mono font-bold text-red-700" id="tangent-slope">0.075</div>
+                                <div class="text-xs text-red-400 mt-1">目标值 (真值)</div>
+                            </div>
+                        </div>
+                        <div class="bg-yellow-50 p-4 rounded-xl border border-yellow-100 text-sm text-yellow-800">
+                            <div class="flex gap-2">
+                                <span class="material-symbols-outlined text-yellow-600 shrink-0">visibility</span>
+                                <div><strong>观察要点：</strong>拖动滑块向左，当 $\Delta x$ 越来越小时，蓝色的割线会逐渐与红色的切线重合。</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-8">
+                        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 h-full flex flex-col">
+                            <div class="flex justify-between items-center mb-2 border-b pb-2">
+                                <h3 class="font-bold text-gray-700">函数 $f(x)=0.1x^3 - 0.3x^2 + 2$ 在 $x=1.5$ 处</h3>
+                                <div class="flex gap-4 text-xs font-medium">
+                                    <div class="flex items-center gap-1"><span class="w-8 h-1 bg-blue-500 rounded"></span> 割线 (动)</div>
+                                    <div class="flex items-center gap-1"><span class="w-8 h-1 bg-red-500 rounded"></span> 切线 (定)</div>
                                 </div>
-                                <button class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-md transition-all active:scale-95 flex items-center justify-center gap-2" onclick="animateLimit()">
-                                    <span class="material-symbols-outlined">play_arrow</span>
-                                    动态逼近演示
+                            </div>
+                            <div class="flex-1 relative bg-white border rounded-lg w-full" style="min-height: 450px;">
+                                <canvas id="limitCanvas" class="absolute top-0 left-0 w-full h-full block"></canvas>
+                            </div>
+                            <div class="mt-4 flex justify-end">
+                                <button class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold shadow transition-colors inline-flex items-center gap-2" onclick="setStep('def')">
+                                    得出结论 <span class="material-symbols-outlined">arrow_forward</span>
                                 </button>
                             </div>
                         </div>
-                        <!-- Data Panel -->
-                        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 animate-fade-in">
-                            <h4 class="text-xs font-bold text-gray-500 uppercase mb-4 tracking-wider">实时数据</h4>
-                            <div class="space-y-3 font-mono text-sm">
-                                <div class="flex justify-between border-b border-gray-100 pb-2">
-                                    <span class="text-gray-600">平均变化率 $\dfrac{\Delta y}{\Delta x}$</span>
-                                    <span class="font-bold text-blue-600" id="avgRateVal">--</span>
-                                </div>
-                                <div class="flex justify-between pt-1">
-                                    <span class="text-red-600 font-bold">瞬时变化率 $f'(x_0)$</span>
-                                    <span class="font-bold text-red-600" id="instRateVal">--</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Canvas -->
-                    <div class="lg:col-span-8">
-                        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 h-full flex flex-col">
-                            <div class="flex items-center justify-between mb-4 border-b border-gray-100 pb-3">
-                                <h3 class="text-lg font-bold text-gray-800">割线逼近切线演示</h3>
-                                <div class="flex gap-4 text-xs font-medium">
-                                    <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-sm bg-blue-500"></span> 割线</span>
-                                    <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-sm bg-red-500"></span> 切线</span>
-                                </div>
-                            </div>
-                            <div class="relative flex-1 min-h-[450px] w-full bg-white rounded-xl overflow-hidden border border-gray-100">
-                                <canvas class="w-full h-full" id="limitCanvas"></canvas>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Tab 3: Tangent -->
-            <div class="tab-content hidden space-y-6 max-w-6xl mx-auto" id="tab-tangent">
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 h-full flex flex-col">
-                    <div class="flex items-center justify-between mb-4 border-b border-gray-100 pb-3">
-                        <h3 class="text-lg font-bold text-gray-800">导函数与切线斜率</h3>
-                        <div class="flex gap-4 text-xs font-medium">
-                            <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-sm bg-indigo-600"></span> $f(x)$</span>
-                            <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-sm bg-amber-500"></span> $f'(x)$</span>
+            <!-- 场景 4: 定义总结 -->
+            <div class="max-w-4xl mx-auto space-y-6 hidden" id="view-def">
+                <div class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 text-center">
+                    <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <span class="material-symbols-outlined text-green-600 text-3xl">verified</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6">导数 (Derivative)</h2>
+                    <p class="text-gray-600 mb-8 max-w-2xl mx-auto">
+                        通过刚才的实验，我们发现：当自变量的改变量 $\Delta x$ 趋向于 0 时，平均变化率（割线斜率）会无限逼近一个确定的值。这个值就是<strong>瞬时变化率</strong>，也就是<strong>导数</strong>。
+                    </p>
+                    <div class="bg-slate-900 text-white p-8 rounded-2xl shadow-xl mb-8 relative overflow-hidden">
+                        <div class="absolute top-0 right-0 opacity-10 transform translate-x-10 -translate-y-10">
+                            <span class="material-symbols-outlined text-9xl">function</span>
+                        </div>
+                        <div class="text-xl md:text-3xl">
+                            $$f'(x_0) = \lim_{\Delta x \to 0} \frac{f(x_0 + \Delta x) - f(x_0)}{\Delta x}$$
+                        </div>
+                        <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6 text-sm text-gray-400 font-mono text-left border-t border-gray-700 pt-6">
+                            <div><span class="text-indigo-400 font-bold block mb-1">f'(x₀)</span>导数符号<br>(瞬时变化率)</div>
+                            <div><span class="text-blue-400 font-bold block mb-1">Limit</span>极限过程<br>(无限逼近)</div>
+                            <div><span class="text-green-400 font-bold block mb-1">Fraction</span>平均变化率<br>(割线斜率)</div>
                         </div>
                     </div>
-                    <div class="relative flex-1 min-h-[500px] w-full bg-white rounded-xl overflow-hidden border border-gray-100 group cursor-crosshair">
-                        <canvas class="w-full h-full" id="tangentCanvas"></canvas>
-                        <div class="absolute top-4 left-4 bg-white/90 backdrop-blur p-3 rounded-lg shadow-sm border border-gray-200 text-xs pointer-events-none">
-                            <div class="mb-1"><span class="font-bold">移动鼠标/触摸</span> 改变切点位置</div>
-                            <div class="font-mono">x: <span id="tanX">0.00</span></div>
-                            <div class="font-mono">Slope: <span id="tanSlope">0.00</span></div>
-                        </div>
+                    <div class="flex justify-center gap-4">
+                        <button class="px-6 py-2 border border-gray-300 hover:bg-gray-50 text-gray-700 rounded-lg transition-colors" onclick="setStep('intro')">返回首页</button>
+                        <button class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors shadow" onclick="setStep('limit')">再玩一次演示</button>
                     </div>
                 </div>
             </div>
         </main>
-
-        <!-- Mobile Nav -->
-        <div class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around p-2 z-50">
-            <button class="mobile-nav-btn flex flex-col items-center p-2 text-indigo-600" data-target="concept" onclick="switchTab('concept')">
-                <span class="material-symbols-outlined">menu_book</span>
-                <span class="text-[10px] mt-1">概念</span>
-            </button>
-            <button class="mobile-nav-btn flex flex-col items-center p-2 text-gray-400" data-target="limit" onclick="switchTab('limit')">
-                <span class="material-symbols-outlined">trending_up</span>
-                <span class="text-[10px] mt-1">极限</span>
-            </button>
-            <button class="mobile-nav-btn flex flex-col items-center p-2 text-gray-400" data-target="tangent" onclick="switchTab('tangent')">
-                <span class="material-symbols-outlined">linear_scale</span>
-                <span class="text-[10px] mt-1">切线</span>
-            </button>
-        </div>
     </div>
 
-    <!-- 返回首页面板 -->
-    <div class="return-home-panel" id="returnHomePanel">
-        <a href="../index.html" class="return-home-btn">
-            <span class="material-symbols-outlined">home</span>
-            返回首页
-        </a>
+    <!-- 底部移动端导航 -->
+    <div class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around p-2 z-50">
+        <button class="flex flex-col items-center p-2 text-gray-500" onclick="setStep('intro')"><span class="material-symbols-outlined text-xl">science</span><span class="text-xs">引入</span></button>
+        <button class="flex flex-col items-center p-2 text-gray-500" onclick="setStep('limit')"><span class="material-symbols-outlined text-xl">motion_photos_auto</span><span class="text-xs">演示</span></button>
+        <button class="flex flex-col items-center p-2 text-gray-500" onclick="setStep('def')"><span class="material-symbols-outlined text-xl">functions</span><span class="text-xs">定义</span></button>
     </div>
 
-    <script src="assets/lab3-1.js"></script>
+    <script>
+        // 新版配置：使用三次函数
+        const config = { 
+            f: x => 0.1 * Math.pow(x, 3) - 0.3 * Math.pow(x, 2) + 2, 
+            df: x => 0.3 * Math.pow(x, 2) - 0.6 * x, 
+            x0: 1.5 
+        };
+        let state = { step: 'intro', dx: 1.5, introMode: 'math' };
+
+        // ========== 情境切换 ==========
+        function setIntroMode(mode) {
+            state.introMode = mode;
+            const btnMath = document.getElementById('btn-mode-math');
+            const btnCnc = document.getElementById('btn-mode-cnc');
+            const mathContent = document.getElementById('intro-math-content');
+            const cncContent = document.getElementById('intro-cnc-content');
+            const hintMath = document.getElementById('intro-hint-math');
+            const hintCnc = document.getElementById('intro-hint-cnc');
+            const title = document.getElementById('intro-title');
+
+            if (mode === 'math') {
+                btnMath.className = 'px-3 py-1.5 rounded-md mode-btn-active transition-all font-bold';
+                btnCnc.className = 'px-3 py-1.5 rounded-md mode-btn-inactive transition-all flex items-center gap-1';
+                mathContent.classList.remove('hidden');
+                cncContent.classList.add('hidden');
+                hintMath.classList.remove('hidden');
+                hintCnc.classList.add('hidden');
+                title.textContent = '情境探索：寻找"瞬间的斜率"';
+            } else {
+                btnCnc.className = 'px-3 py-1.5 rounded-md mode-btn-active transition-all font-bold flex items-center gap-1';
+                btnMath.className = 'px-3 py-1.5 rounded-md mode-btn-inactive transition-all';
+                mathContent.classList.add('hidden');
+                cncContent.classList.remove('hidden');
+                hintMath.classList.add('hidden');
+                hintCnc.classList.remove('hidden');
+                title.textContent = '情境探索：数控加工中的切线';
+            }
+            drawIntroCanvas();
+        }
+
+        // ========== 步骤切换 ==========
+        function setStep(stepId) {
+            state.step = stepId;
+            document.querySelectorAll('nav button').forEach(btn => {
+                btn.classList.remove('active-tab');
+                btn.classList.add('border-transparent');
+            });
+            const activeBtn = document.getElementById(`btn-${stepId}`);
+            if (activeBtn) { activeBtn.classList.add('active-tab'); activeBtn.classList.remove('border-transparent'); }
+            ['intro', 'secant', 'limit', 'def'].forEach(id => document.getElementById(`view-${id}`).classList.add('hidden'));
+            document.getElementById(`view-${stepId}`).classList.remove('hidden');
+            setTimeout(() => {
+                if (stepId === 'intro') drawIntroCanvas();
+                if (stepId === 'secant') drawSecantStatic();
+                if (stepId === 'limit') updateLimit();
+                if (typeof MathJax !== 'undefined') MathJax.typeset();
+            }, 50);
+        }
+
+        // ========== Canvas 通用设置 ==========
+        function setupCanvas(id) {
+            const canvas = document.getElementById(id);
+            if (!canvas) return null;
+            const ctx = canvas.getContext('2d');
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            return { ctx, width: rect.width, height: rect.height };
+        }
+
+        function toCanvas(x, y, width, height, xMin, xMax, yMin, yMax) {
+            const drawW = width - 80, drawH = height - 60;
+            return { 
+                x: 50 + ((x - xMin) / (xMax - xMin)) * drawW, 
+                y: height - 30 - ((y - yMin) / (yMax - yMin)) * drawH 
+            };
+        }
+
+        function drawAxes(ctx, width, height, xMin, xMax, yMin, yMax) {
+            const origin = toCanvas(0, 0, width, height, xMin, xMax, yMin, yMax);
+            ctx.strokeStyle = '#9ca3af'; ctx.lineWidth = 1.5;
+            // X轴
+            ctx.beginPath(); 
+            ctx.moveTo(20, origin.y); 
+            ctx.lineTo(width - 20, origin.y); 
+            ctx.stroke();
+            // Y轴
+            ctx.beginPath(); 
+            ctx.moveTo(origin.x, height - 10); 
+            ctx.lineTo(origin.x, 10); 
+            ctx.stroke();
+            ctx.fillStyle = '#6b7280'; ctx.font = '12px sans-serif';
+            ctx.fillText('x', width - 30, origin.y + 15); 
+            ctx.fillText('y', origin.x - 15, 20);
+        }
+
+        function drawCurve(ctx, width, height, xMin, xMax, yMin, yMax, isCnc) {
+            ctx.beginPath(); 
+            ctx.strokeStyle = isCnc ? '#64748b' : '#3b82f6'; 
+            ctx.lineWidth = 3;
+            for (let x = xMin; x <= xMax; x += 0.05) {
+                const pt = toCanvas(x, config.f(x), width, height, xMin, xMax, yMin, yMax);
+                x === xMin ? ctx.moveTo(pt.x, pt.y) : ctx.lineTo(pt.x, pt.y);
+            }
+            ctx.stroke();
+
+            // CNC模式填充
+            if (isCnc) {
+                ctx.fillStyle = 'rgba(100, 116, 139, 0.15)';
+                ctx.lineTo(toCanvas(xMax, 0, width, height, xMin, xMax, yMin, yMax).x, toCanvas(xMax, 0, width, height, xMin, xMax, yMin, yMax).y);
+                ctx.lineTo(toCanvas(xMin, 0, width, height, xMin, xMax, yMin, yMax).x, toCanvas(xMin, 0, width, height, xMin, xMax, yMin, yMax).y);
+                ctx.fill();
+            }
+        }
+
+        // ========== 首页交互画布 ==========
+        function drawIntroCanvas() {
+            const setup = setupCanvas('introCanvas');
+            if (!setup) return;
+            const { ctx, width, height } = setup;
+            const xMin = -1, xMax = 5, yMin = -0.5, yMax = 4;
+            const isCnc = state.introMode === 'cnc';
+            const dx = parseFloat(document.getElementById('intro-dx-slider').value);
+
+            ctx.clearRect(0, 0, width, height);
+
+            // 网格
+            ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 1;
+            ctx.beginPath();
+            for (let i = 0; i < width; i += 40) { ctx.moveTo(i, 0); ctx.lineTo(i, height); }
+            for (let i = 0; i < height; i += 40) { ctx.moveTo(0, i); ctx.lineTo(width, i); }
+            ctx.stroke();
+
+            drawAxes(ctx, width, height, xMin, xMax, yMin, yMax);
+            drawCurve(ctx, width, height, xMin, xMax, yMin, yMax, isCnc);
+
+            const xA = config.x0, xB = xA + dx;
+            const pA = toCanvas(xA, config.f(xA), width, height, xMin, xMax, yMin, yMax);
+            const pB = toCanvas(xB, config.f(xB), width, height, xMin, xMax, yMin, yMax);
+            const kSec = (config.f(xB) - config.f(xA)) / dx;
+            const kTan = config.df(xA);
+
+            // 切线（淡红色，作为参考）
+            const drawLine = (slope, color, lineWidth, dash) => {
+                ctx.beginPath(); ctx.strokeStyle = color; ctx.lineWidth = lineWidth;
+                ctx.setLineDash(dash);
+                const x1 = xMin, x2 = xMax;
+                const pt1 = toCanvas(x1, slope * (x1 - xA) + config.f(xA), width, height, xMin, xMax, yMin, yMax);
+                const pt2 = toCanvas(x2, slope * (x2 - xA) + config.f(xA), width, height, xMin, xMax, yMin, yMax);
+                ctx.moveTo(pt1.x, pt1.y); ctx.lineTo(pt2.x, pt2.y); ctx.stroke(); ctx.setLineDash([]);
+            };
+
+            drawLine(kTan, 'rgba(239, 68, 68, 0.3)', 3, []);
+            
+            // 割线
+            if (dx < 0.05) {
+                drawLine(kSec, '#ef4444', 2, []);
+            } else {
+                drawLine(kSec, '#eab308', 2, [6, 4]);
+            }
+
+            // 点 P
+            ctx.beginPath(); ctx.arc(pA.x, pA.y, 5, 0, Math.PI * 2); 
+            ctx.fillStyle = '#fff'; ctx.fill();
+            ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 2; ctx.stroke();
+            ctx.fillStyle = '#0f172a'; ctx.font = 'bold 12px sans-serif';
+            ctx.fillText(isCnc ? 'P(加工点)' : 'P(切点)', pA.x - 10, pA.y - 12);
+
+            // 点 Q
+            if (dx > 0.02) {
+                ctx.beginPath(); ctx.arc(pB.x, pB.y, 5, 0, Math.PI * 2);
+                ctx.fillStyle = isCnc ? '#ef4444' : '#3b82f6'; ctx.fill();
+                ctx.fillStyle = isCnc ? '#ef4444' : '#3b82f6';
+                ctx.fillText(isCnc ? 'Q(刀具预判)' : 'Q(动点)', pB.x + 8, pB.y - 8);
+            }
+
+            // 更新UI
+            document.getElementById('intro-dx-val').textContent = dx.toFixed(2);
+            document.getElementById('intro-slope').textContent = kSec.toFixed(4);
+
+            const isTangent = dx < 0.05;
+            const statusText = document.getElementById('intro-text-status');
+            const statusIcon = document.getElementById('intro-icon-status');
+            const progressBar = document.getElementById('intro-progress-bar');
+
+            progressBar.style.width = `${Math.max(0, 100 - dx * 50)}%`;
+
+            if (isTangent) {
+                statusText.textContent = isCnc ? '精加工 (误差极小)' : '切线状态 (极限)';
+                statusText.className = 'font-bold text-red-600';
+                statusIcon.textContent = 'check_circle';
+                statusIcon.className = 'material-symbols-outlined text-red-500 text-sm';
+            } else {
+                statusText.textContent = isCnc ? '粗加工 (存在误差)' : '割线状态 (近似)';
+                statusText.className = 'font-bold text-slate-800';
+                statusIcon.textContent = 'timeline';
+                statusIcon.className = 'material-symbols-outlined text-slate-400 text-sm';
+            }
+        }
+
+        document.getElementById('intro-dx-slider').addEventListener('input', drawIntroCanvas);
+
+        // ========== 割线静态图 ==========
+        function drawSecantStatic() {
+            const setup = setupCanvas('secantCanvas');
+            if (!setup) return;
+            const { ctx, width, height } = setup;
+            const xMin = -1, xMax = 5, yMin = -0.5, yMax = 4;
+
+            ctx.clearRect(0, 0, width, height);
+            drawAxes(ctx, width, height, xMin, xMax, yMin, yMax);
+            drawCurve(ctx, width, height, xMin, xMax, yMin, yMax, false);
+
+            const xA = 1.5, xB = 3.0;
+            const pA = toCanvas(xA, config.f(xA), width, height, xMin, xMax, yMin, yMax);
+            const pB = toCanvas(xB, config.f(xB), width, height, xMin, xMax, yMin, yMax);
+
+            ctx.beginPath(); ctx.arc(pA.x, pA.y, 6, 0, Math.PI * 2); ctx.fillStyle = '#ef4444'; ctx.fill();
+            ctx.fillStyle = '#374151'; ctx.font = '13px sans-serif';
+            ctx.fillText(`A(${xA}, ${config.f(xA).toFixed(2)})`, pA.x - 50, pA.y - 12);
+            ctx.beginPath(); ctx.arc(pB.x, pB.y, 6, 0, Math.PI * 2); ctx.fillStyle = '#3b82f6'; ctx.fill();
+            ctx.fillText('B', pB.x + 10, pB.y);
+
+            const k = (config.f(xB) - config.f(xA)) / (xB - xA);
+            ctx.beginPath(); ctx.strokeStyle = '#3b82f6'; ctx.lineWidth = 2; ctx.setLineDash([5, 5]);
+            const xStart = xMin, xEnd = xMax;
+            const ptStart = toCanvas(xStart, k * (xStart - xA) + config.f(xA), width, height, xMin, xMax, yMin, yMax);
+            const ptEnd = toCanvas(xEnd, k * (xEnd - xA) + config.f(xA), width, height, xMin, xMax, yMin, yMax);
+            ctx.moveTo(ptStart.x, ptStart.y); ctx.lineTo(ptEnd.x, ptEnd.y); ctx.stroke(); ctx.setLineDash([]);
+
+            const pCorner = toCanvas(xB, config.f(xA), width, height, xMin, xMax, yMin, yMax);
+            ctx.beginPath(); ctx.strokeStyle = '#9ca3af'; ctx.lineWidth = 1;
+            ctx.moveTo(pA.x, pA.y); ctx.lineTo(pCorner.x, pCorner.y); ctx.lineTo(pB.x, pB.y); ctx.stroke();
+            ctx.fillStyle = '#6b7280';
+            ctx.fillText('Δx', (pA.x + pCorner.x) / 2, pCorner.y + 15);
+            ctx.fillText('Δy', pCorner.x + 5, (pB.y + pCorner.y) / 2);
+        }
+
+        // ========== 极限逼近 ==========
+        function updateLimit() {
+            const setup = setupCanvas('limitCanvas');
+            if (!setup) return;
+            const { ctx, width, height } = setup;
+            const xMin = -1, xMax = 5, yMin = -0.5, yMax = 4;
+            const dx = parseFloat(document.getElementById('dx-slider').value);
+            const xA = config.x0, xB = xA + dx;
+
+            ctx.clearRect(0, 0, width, height);
+            drawAxes(ctx, width, height, xMin, xMax, yMin, yMax);
+            drawCurve(ctx, width, height, xMin, xMax, yMin, yMax, false);
+
+            const pA = toCanvas(xA, config.f(xA), width, height, xMin, xMax, yMin, yMax);
+            const pB = toCanvas(xB, config.f(xB), width, height, xMin, xMax, yMin, yMax);
+            const kTan = config.df(xA), kSec = (config.f(xB) - config.f(xA)) / dx;
+
+            const drawLine = (slope, color, w, dash) => {
+                ctx.beginPath(); ctx.strokeStyle = color; ctx.lineWidth = w;
+                ctx.setLineDash(dash ? [5, 5] : []);
+                const x1 = xMin, x2 = xMax;
+                const pt1 = toCanvas(x1, slope * (x1 - xA) + config.f(xA), width, height, xMin, xMax, yMin, yMax);
+                const pt2 = toCanvas(x2, slope * (x2 - xA) + config.f(xA), width, height, xMin, xMax, yMin, yMax);
+                ctx.moveTo(pt1.x, pt1.y); ctx.lineTo(pt2.x, pt2.y); ctx.stroke(); ctx.setLineDash([]);
+            };
+
+            drawLine(kTan, 'rgba(239, 68, 68, 0.4)', 4, false);
+            drawLine(kSec, '#3b82f6', 2, false);
+
+            ctx.beginPath(); ctx.arc(pA.x, pA.y, 5, 0, Math.PI * 2); ctx.fillStyle = '#ef4444'; ctx.fill();
+            ctx.beginPath(); ctx.arc(pB.x, pB.y, 5, 0, Math.PI * 2); ctx.fillStyle = '#3b82f6'; ctx.fill();
+            ctx.fillStyle = '#374151'; ctx.font = '14px sans-serif';
+            ctx.fillText('A', pA.x - 15, pA.y - 10); ctx.fillText('B', pB.x + 10, pB.y);
+
+            document.getElementById('dx-display').innerText = dx.toFixed(2);
+            document.getElementById('secant-slope').innerText = kSec.toFixed(4);
+            document.getElementById('tangent-slope').innerText = kTan.toFixed(4);
+            const slopeEl = document.getElementById('secant-slope');
+            slopeEl.classList.toggle('text-green-600', dx < 0.1);
+            slopeEl.classList.toggle('text-blue-700', dx >= 0.1);
+        }
+
+        document.getElementById('dx-slider').addEventListener('input', updateLimit);
+        window.addEventListener('resize', () => { 
+            if (state.step === 'intro') drawIntroCanvas();
+            if (state.step === 'secant') drawSecantStatic(); 
+            if (state.step === 'limit') updateLimit(); 
+        });
+
+        // 初始化
+        setTimeout(() => drawIntroCanvas(), 100);
+    </script>
 </body>
 </html>

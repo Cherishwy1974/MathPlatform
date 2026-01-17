@@ -248,8 +248,8 @@
       content: `
       <div style="padding: 8px 0; font-family: 'Microsoft YaHei', Arial, sans-serif;">
         <div style="border-left: 4px solid #59a14f; padding: 12px; background: #fff; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.08);">
-          <p><strong>要点1：</strong>面积公式 $S=\\int</p>
-          <p><strong>要点2：</strong>f-g</p>
+          <p><strong>要点1：</strong>面积公式 $S=\\int_a^b |f(x)-g(x)| dx$，表示两曲线之间的面积。</p>
+          <p><strong>要点2：</strong>当 $f(x) \\geq g(x)$ 时，$S=\\int_a^b [f(x)-g(x)] dx$，上函数减下函数。</p>
         </div>
       </div>
     `
@@ -613,21 +613,21 @@ $5 + (-1) = 4$。`,
   },
 {
     id: 19,
-    type: "性质题",
-    title: "积分换元对称性",
+    type: "计算题",
+    title: "有理函数积分",
     question: "19. 计算 $\\displaystyle \\int_{0}^{1} \\frac{x}{x+1} dx$。",
-    explanation: `<strong>第一步：利用对称替换</strong>
-令 $x = 1 - t$，得到同一积分。
-<strong>第二步：求和</strong>
-$I = \\int_{0}^{1} \\frac{x}{x+1} dx$，同理 $I = \\int_{0}^{1} \\frac{1-x}{2-x} dx$。
-<strong>第三步：两式相加</strong>
-$2I = \\int_{0}^{1} \\left(\\frac{x}{x+1} + \\frac{1-x}{2-x}\\right) dx = \\int_{0}^{1} 1 dx = 1$。
-<strong>第四步：结论</strong>
-$I = \\frac{1}{2}$。`,
-    answer: "$\\dfrac{1}{2}$",
+    explanation: `<strong>第一步：化简被积函数</strong>
+$$\\frac{x}{x+1} = \\frac{(x+1)-1}{x+1} = 1 - \\frac{1}{x+1}$$
+<strong>第二步：分别积分</strong>
+$$\\int_{0}^{1} \\left(1 - \\frac{1}{x+1}\\right) dx = \\int_{0}^{1} 1 dx - \\int_{0}^{1} \\frac{1}{x+1} dx$$
+<strong>第三步：计算各部分</strong>
+$$= [x]_0^1 - [\\ln(x+1)]_0^1 = [x - \\ln(x+1)]_0^1$$
+<strong>第四步：代入上下限</strong>
+$$= (1 - \\ln 2) - (0 - \\ln 1) = 1 - \\ln 2 - 0 = 1 - \\ln 2$$`,
+    answer: "$1 - \\ln 2$",
     difficulty: "medium",
-    category: "定积分定义与性质",
-    method: "对称变换"
+    category: "基本定积分计算",
+    method: "有理函数拆分"
   },
 {
     id: 20,
@@ -1246,5 +1246,3 @@ $\\frac{1}{2} \\int_{1}^{+\\infty} u^{-2} du = \\frac{1}{2}$。`,
     method: "换元积分"
   }
 ];
-
-

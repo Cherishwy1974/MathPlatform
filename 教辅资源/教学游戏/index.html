@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>趣味课堂 - 高等应用数学在线课堂</title>
+    <title>趣味课堂 - 高等应用数学游戏库</title>
     
-    <!-- 本地化资源 -->
+    <!-- 本地化资源 (保持与您原有路径一致) -->
     <link rel="stylesheet" href="../../common-assets/css/tailwind.css">
     <link rel="stylesheet" href="../../common-assets/css/material-icons.local.css">
     
@@ -21,312 +21,311 @@
         body {
             font-family: 'WDXLubrifontSC', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             min-height: 100vh;
-            background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 50%, #ede9fe 100%);
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
             color: #1e293b;
         }
 
+        /* 滚动条美化 */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
         /* 顶部导航 */
         .nav-header {
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(168, 85, 247, 0.1);
+            border-bottom: 1px solid rgba(148, 163, 184, 0.1);
             padding: 1rem 2rem;
             position: sticky;
             top: 0;
             z-index: 100;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
         }
 
         .nav-inner {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             display: flex;
             align-items: center;
             justify-content: space-between;
-        }
-
-        .back-btn {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: #7c3aed;
-            text-decoration: none;
-            font-weight: 500;
-            transition: all 0.2s;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-        }
-
-        .back-btn:hover {
-            background: rgba(124, 58, 237, 0.1);
+            flex-wrap: wrap;
+            gap: 1rem;
         }
 
         .page-title {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
+            gap: 1rem;
+        }
+
+        .page-title .icon {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3);
         }
 
         .page-title h1 {
             font-size: 1.5rem;
             font-weight: 700;
-            color: #1e293b;
+            color: #0f172a;
         }
 
-        .page-title .icon {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, #a855f7, #7c3aed);
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
+        .page-title .badge {
+            background: #dbeafe;
+            color: #1e40af;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        /* 搜索框 */
+        .search-container {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 2.75rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-family: inherit;
+            transition: all 0.2s;
+            background: #f8fafc;
+        }
+
+        .search-input:focus {
+            border-color: #3b82f6;
+            background: white;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            pointer-events: none;
         }
 
         /* 主内容区 */
         .main-content {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             padding: 2rem;
         }
 
-        .intro-section {
-            text-align: center;
+        /* 章节容器 */
+        .chapter-section {
             margin-bottom: 3rem;
-            animation: fadeInUp 0.6s ease-out;
-        }
-
-        .intro-section h2 {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #1e293b;
-            margin-bottom: 0.75rem;
-        }
-
-        .intro-section p {
-            font-size: 1rem;
-            color: #64748b;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        /* 游戏卡片网格 */
-        .games-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .game-card {
             background: white;
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-            text-decoration: none;
-            color: inherit;
-            display: flex;
-            flex-direction: column;
-            animation: fadeInUp 0.6s ease-out backwards;
+            border-radius: 24px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+            border: 1px solid #f1f5f9;
         }
 
-        .game-card:nth-child(1) { animation-delay: 0.1s; }
-        .game-card:nth-child(2) { animation-delay: 0.2s; }
-        .game-card:nth-child(3) { animation-delay: 0.3s; }
-        .game-card:nth-child(4) { animation-delay: 0.4s; }
-        .game-card:nth-child(5) { animation-delay: 0.5s; }
-        .game-card:nth-child(6) { animation-delay: 0.6s; }
-
-        .game-card:hover {
-            transform: translateY(-8px) scale(1.02);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-        }
-
-        .card-header {
-            padding: 2rem 1.5rem 1.5rem;
-            display: flex;
-            align-items: flex-start;
-            gap: 1rem;
-        }
-
-        .card-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            transition: all 0.3s;
-        }
-
-        .card-icon .material-icons-round {
-            font-size: 2rem;
-        }
-
-        .game-card:hover .card-icon {
-            transform: scale(1.1) rotate(-5deg);
-        }
-
-        .card-info {
-            flex: 1;
-        }
-
-        .card-info h3 {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: #1e293b;
-            margin-bottom: 0.25rem;
-        }
-
-        .card-info .subtitle {
-            font-size: 0.75rem;
-            color: #94a3b8;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .card-body {
-            padding: 0 1.5rem 1.5rem;
-            flex: 1;
-        }
-
-        .card-body p {
-            font-size: 0.9rem;
-            color: #64748b;
-            line-height: 1.6;
-        }
-
-        .card-footer {
-            padding: 1rem 1.5rem;
-            border-top: 1px solid #f1f5f9;
+        .chapter-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #f1f5f9;
         }
 
-        .tags {
+        .chapter-title {
             display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .chapter-num {
+            font-size: 3rem;
+            font-weight: 900;
+            opacity: 0.1;
+            line-height: 1;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .chapter-info h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .chapter-info p {
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+
+        /* 游戏网格 */
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        /* 游戏卡片 */
+        .game-card {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 1.25rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            color: inherit;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .game-card:hover {
+            transform: translateY(-4px);
+            border-color: transparent;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        /* 卡片顶部标签 */
+        .card-tag {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: #f1f5f9;
+            color: #64748b;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.25rem 0.75rem;
+            border-bottom-left-radius: 12px;
+        }
+
+        .game-card:hover .card-tag {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .card-content {
+            margin-top: 1rem;
+            flex: 1;
+        }
+
+        .card-icon-wrapper {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            background: #f8fafc;
+            color: #64748b;
+            transition: all 0.3s;
+        }
+
+        .game-card:hover .card-icon-wrapper {
+            transform: scale(1.1) rotate(-5deg);
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: #334155;
+            display: flex;
+            align-items: center;
             gap: 0.5rem;
         }
 
-        .tag {
-            font-size: 0.7rem;
-            padding: 0.25rem 0.6rem;
-            border-radius: 100px;
-            font-weight: 500;
+        .card-desc {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            line-height: 1.5;
+            margin-bottom: 1rem;
         }
 
-        .play-btn {
+        .card-footer {
+            margin-top: auto;
             display: flex;
             align-items: center;
-            gap: 0.25rem;
+            justify-content: space-between;
             font-size: 0.85rem;
             font-weight: 600;
+            color: #3b82f6;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s;
+        }
+
+        .game-card:hover .card-footer {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* 颜色主题类 */
+        /* 代数/基础 - 紫色 */
+        .theme-purple .chapter-num { color: #7c3aed; }
+        .theme-purple .game-card:hover { border-top: 4px solid #7c3aed; }
+        .theme-purple .game-card:hover .card-icon-wrapper { background: #f3e8ff; color: #7c3aed; }
+
+        /* 极限/微积分 - 蓝色 */
+        .theme-blue .chapter-num { color: #2563eb; }
+        .theme-blue .game-card:hover { border-top: 4px solid #2563eb; }
+        .theme-blue .game-card:hover .card-icon-wrapper { background: #dbeafe; color: #2563eb; }
+
+        /* 应用/几何 - 绿色 */
+        .theme-green .chapter-num { color: #059669; }
+        .theme-green .game-card:hover { border-top: 4px solid #059669; }
+        .theme-green .game-card:hover .card-icon-wrapper { background: #d1fae5; color: #059669; }
+
+        /* 统计/线性代数 - 橙色/红色 */
+        .theme-orange .chapter-num { color: #ea580c; }
+        .theme-orange .game-card:hover { border-top: 4px solid #ea580c; }
+        .theme-orange .game-card:hover .card-icon-wrapper { background: #ffedd5; color: #ea580c; }
+
+        /* 特别推荐 - 红色/高亮 */
+        .theme-hot { border: 2px solid #fecaca; background: #fffbff; }
+        .theme-hot .chapter-header { border-bottom-color: #fecaca; }
+        .theme-hot .chapter-num { color: #dc2626; opacity: 0.15; }
+        .theme-hot h2 { color: #dc2626; }
+        /* 狼人杀/红色卡片 */
+        .card-hot .game-card:hover { border-top: 4px solid #dc2626; }
+        .card-hot .game-card:hover .card-icon-wrapper { background: #fee2e2; color: #dc2626; }
+        .card-hot .game-card:hover .card-tag { background: #dc2626; color: white; }
+        .card-hot .game-card:hover .card-footer { color: #dc2626; }
+
+        /* 返回按钮 */
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #64748b;
+            text-decoration: none;
+            font-weight: 600;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
             transition: all 0.2s;
         }
+        .back-btn:hover { background: #f1f5f9; color: #1e293b; }
 
-        .game-card:hover .play-btn {
-            transform: translateX(4px);
-        }
-
-        /* 谁是卧底 - 深蓝主题 */
-        .card-spy .card-icon {
-            background: linear-gradient(135deg, #3b4252, #2e3440);
-            color: #81a1c1;
-        }
-        .card-spy .tag {
-            background: #e0f2fe;
-            color: #0369a1;
-        }
-        .card-spy .play-btn {
-            color: #3b4252;
-        }
-
-        /* 连续识别 - 翠绿主题 */
-        .card-continuous .card-icon {
-            background: linear-gradient(135deg, #10b981, #059669);
-            color: white;
-        }
-        .card-continuous .tag {
-            background: #d1fae5;
-            color: #047857;
-        }
-        .card-continuous .play-btn {
-            color: #059669;
-        }
-
-        /* 你画我猜 - 橙色主题 */
-        .card-sketch .card-icon {
-            background: linear-gradient(135deg, #f59e0b, #d97706);
-            color: white;
-        }
-        .card-sketch .tag {
-            background: #fef3c7;
-            color: #92400e;
-        }
-        .card-sketch .play-btn {
-            color: #d97706;
-        }
-
-        /* 高职数学狼人杀 - 红色主题 */
-        .card-werewolf .card-icon {
-            background: linear-gradient(135deg, #ef4444, #dc2626);
-            color: white;
-        }
-        .card-werewolf .tag {
-            background: #fee2e2;
-            color: #991b1b;
-        }
-        .card-werewolf .play-btn {
-            color: #dc2626;
-        }
-
-        /* 更多游戏 - 灰色占位 */
-        .card-coming {
-            background: #f8fafc;
-            border: 2px dashed #e2e8f0;
-        }
-        .card-coming .card-icon {
-            background: #f1f5f9;
-            color: #94a3b8;
-        }
-        .card-coming .card-info h3 {
-            color: #94a3b8;
-        }
-        .card-coming .card-body p {
-            color: #cbd5e1;
-        }
-        .card-coming:hover {
-            transform: none;
-            box-shadow: none;
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* 响应式 */
         @media (max-width: 768px) {
-            .nav-header {
-                padding: 0.75rem 1rem;
-            }
-            .main-content {
-                padding: 1rem;
-            }
-            .intro-section h2 {
-                font-size: 1.5rem;
-            }
-            .games-grid {
-                grid-template-columns: 1fr;
-            }
+            .nav-inner { justify-content: center; }
+            .search-container { margin-top: 1rem; max-width: 100%; }
+            .chapter-section { padding: 1.5rem; }
+            .chapter-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+            .chapter-num { display: none; }
         }
     </style>
 </head>
@@ -334,155 +333,644 @@
     <!-- 顶部导航 -->
     <nav class="nav-header">
         <div class="nav-inner">
-            <a href="../../index.html" class="back-btn">
-                <span class="material-icons-round">arrow_back</span>
-                返回首页
-            </a>
             <div class="page-title">
+                <a href="../../index.html" class="back-btn">
+                    <span class="material-icons-round">arrow_back</span>
+                </a>
                 <div class="icon">
-                    <span class="material-icons-round">sports_esports</span>
+                    <span class="material-icons-round">grid_view</span>
                 </div>
-                <h1>趣味课堂</h1>
+                <div>
+                    <h1>游戏索引库</h1>
+                    <span class="badge">共 13 章 / 72 个游戏</span>
+                </div>
             </div>
-            <div style="width: 100px;"></div>
+            
+            <div class="search-container">
+                <span class="material-icons-round search-icon">search</span>
+                <input type="text" class="search-input" placeholder="搜索知识点 (例如: 极限, 矩阵, 导数...)" id="gameSearch">
+            </div>
         </div>
     </nav>
 
-    <!-- 主内容 -->
     <main class="main-content">
-        <section class="intro-section">
-            <h2>寓教于乐，轻松学数学</h2>
-            <p>通过互动游戏巩固知识点，让枯燥的公式变得生动有趣。适合课堂破冰、复习巩固或课后互动。</p>
-        </section>
 
-        <div class="games-grid">
-            <!-- 谁是卧底 -->
-            <a href="谁是卧底.html" class="game-card card-spy">
-                <div class="card-header">
-                    <div class="card-icon">
-                        <span class="material-icons-round">psychology</span>
+        <!-- 置顶推荐：热门经典游戏 -->
+        <section class="chapter-section theme-hot card-hot">
+            <div class="chapter-header">
+                <div class="chapter-title">
+                    <span class="chapter-num">🔥</span>
+                    <div class="chapter-info">
+                        <h2>热门推荐</h2>
+                        <p>课堂互动与经典对战游戏（置顶）</p>
                     </div>
-                    <div class="card-info">
-                        <h3>谁是卧底</h3>
-                        <span class="subtitle">Calculus Edition</span>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <p>高等数学版"谁是卧底"，用导数、极限、微分等概念进行词语对决。考验你对相似概念的理解与表达能力！</p>
-                </div>
-                <div class="card-footer">
-                    <div class="tags">
-                        <span class="tag">4-12人</span>
-                        <span class="tag">课堂互动</span>
-                    </div>
-                    <span class="play-btn">
-                        开始游戏
-                        <span class="material-icons-round" style="font-size:1.125rem;">arrow_forward</span>
-                    </span>
-                </div>
-            </a>
-
-            <!-- 连续识别 -->
-            <a href="连续识别.html" class="game-card card-continuous">
-                <div class="card-header">
-                    <div class="card-icon">
-                        <span class="material-icons-round">timeline</span>
-                    </div>
-                    <div class="card-info">
-                        <h3>连续识别</h3>
-                        <span class="subtitle">Continuity Challenge</span>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <p>快速判断函数在指定点的连续性！训练你对函数连续性定义的直觉判断，提升解题速度。</p>
-                </div>
-                <div class="card-footer">
-                    <div class="tags">
-                        <span class="tag">单人挑战</span>
-                        <span class="tag">计时模式</span>
-                    </div>
-                    <span class="play-btn">
-                        开始挑战
-                        <span class="material-icons-round" style="font-size:1.125rem;">arrow_forward</span>
-                    </span>
-                </div>
-            </a>
-
-            <!-- 你画我猜 -->
-            <a href="你画我猜.html" class="game-card card-sketch">
-                <div class="card-header">
-                    <div class="card-icon">
-                        <span class="material-icons-round">brush</span>
-                    </div>
-                    <div class="card-info">
-                        <h3>你画我猜</h3>
-                        <span class="subtitle">MathSketch</span>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <p>用画笔描绘数学概念和公式！通过绘画表达对数学知识的理解，培养空间想象力和表达能力。</p>
-                </div>
-                <div class="card-footer">
-                    <div class="tags">
-                        <span class="tag">多人协作</span>
-                        <span class="tag">创意表达</span>
-                    </div>
-                    <span class="play-btn">
-                        开始游戏
-                        <span class="material-icons-round" style="font-size:1.125rem;">arrow_forward</span>
-                    </span>
-                </div>
-            </a>
-
-            <!-- 高职数学狼人杀 -->
-            <a href="高职数学狼人杀v2.html" class="game-card card-werewolf">
-                <div class="card-header">
-                    <div class="card-icon">
-                        <span class="material-icons-round">token</span>
-                    </div>
-                    <div class="card-info">
-                        <h3>高职数学狼人杀</h3>
-                        <span class="subtitle">Math Werewolf</span>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <p>沉浸式数学对战平台！通过角色扮演和策略推理，在解决数学问题的过程中体验紧张刺激的对战乐趣。</p>
-                </div>
-                <div class="card-footer">
-                    <div class="tags">
-                        <span class="tag">多人对战</span>
-                        <span class="tag">策略推理</span>
-                    </div>
-                    <span class="play-btn">
-                        开始对战
-                        <span class="material-icons-round" style="font-size:1.125rem;">arrow_forward</span>
-                    </span>
-                </div>
-            </a>
-
-            <!-- 更多游戏占位 -->
-            <div class="game-card card-coming">
-                <div class="card-header">
-                    <div class="card-icon">
-                        <span class="material-icons-round">add</span>
-                    </div>
-                    <div class="card-info">
-                        <h3>更多游戏</h3>
-                        <span class="subtitle">Coming Soon</span>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <p>更多趣味数学游戏正在开发中，敬请期待...</p>
-                </div>
-                <div class="card-footer">
-                    <div class="tags"></div>
-                    <span class="play-btn" style="color: #94a3b8;">
-                        敬请期待
-                    </span>
                 </div>
             </div>
-        </div>
+            <div class="games-grid">
+                <!-- 谁是卧底 -->
+                <a href="谁是卧底.html" class="game-card" data-keywords="卧底 词语 互动">
+                    <span class="card-tag">经典</span>
+                    <div class="card-content">
+                        <div class="card-icon-wrapper"><span class="material-icons-round">psychology</span></div>
+                        <h3 class="card-title">谁是卧底</h3>
+                        <p class="card-desc">高等数学版"谁是卧底"，用导数、极限等概念进行词语对决。</p>
+                    </div>
+                    <div class="card-footer">开始游戏 <span class="material-icons-round" style="font-size:16px">arrow_forward</span></div>
+                </a>
+
+                <!-- 连续识别 -->
+                <a href="连续识别.html" class="game-card" data-keywords="连续 图像 挑战">
+                    <span class="card-tag">挑战</span>
+                    <div class="card-content">
+                        <div class="card-icon-wrapper"><span class="material-icons-round">timeline</span></div>
+                        <h3 class="card-title">连续识别</h3>
+                        <p class="card-desc">快速判断函数在指定点的连续性！训练直觉判断。</p>
+                    </div>
+                    <div class="card-footer">开始挑战 <span class="material-icons-round" style="font-size:16px">arrow_forward</span></div>
+                </a>
+
+                <!-- 你画我猜 -->
+                <a href="你画我猜.html" class="game-card" data-keywords="画图 猜词 互动">
+                    <span class="card-tag">多人</span>
+                    <div class="card-content">
+                        <div class="card-icon-wrapper"><span class="material-icons-round">brush</span></div>
+                        <h3 class="card-title">你画我猜</h3>
+                        <p class="card-desc">用画笔描绘数学概念和公式，发挥你的想象力！</p>
+                    </div>
+                    <div class="card-footer">开始绘画 <span class="material-icons-round" style="font-size:16px">arrow_forward</span></div>
+                </a>
+
+                <!-- 高职数学狼人杀 -->
+                <a href="高职数学狼人杀v2.html" class="game-card" data-keywords="狼人杀 对战 策略">
+                    <span class="card-tag">策略</span>
+                    <div class="card-content">
+                        <div class="card-icon-wrapper"><span class="material-icons-round">token</span></div>
+                        <h3 class="card-title">高职数学狼人杀</h3>
+                        <p class="card-desc">沉浸式数学对战！角色扮演与策略推理的完美结合。</p>
+                    </div>
+                    <div class="card-footer">进入战场 <span class="material-icons-round" style="font-size:16px">arrow_forward</span></div>
+                </a>
+
+                 <!-- 数学卧底杀 -->
+                 <a href="数学卧底杀.html" class="game-card" data-keywords="卧底 淘汰 聚会">
+                    <span class="card-tag">聚会</span>
+                    <div class="card-content">
+                        <div class="card-icon-wrapper"><span class="material-icons-round">groups</span></div>
+                        <h3 class="card-title">数学卧底杀</h3>
+                        <p class="card-desc">移动端优化的数学推理游戏，支持预言家、女巫等角色。</p>
+                    </div>
+                    <div class="card-footer">开始组局 <span class="material-icons-round" style="font-size:16px">arrow_forward</span></div>
+                </a>
+            </div>
+        </section>
+        
+        <!-- 第一章：代数基础 -->
+        <section class="chapter-section theme-purple">
+            <div class="chapter-header">
+                <div class="chapter-title">
+                    <span class="chapter-num">01</span>
+                    <div class="chapter-info">
+                        <h2>第一章 代数基础知识</h2>
+                        <p>指数、对数与函数基础属性</p>
+                    </div>
+                </div>
+            </div>
+            <div class="games-grid">
+                <a href="#" class="game-card" data-keywords="指数 运算">
+                    <span class="card-tag">1.1</span>
+                    <div class="card-content">
+                        <div class="card-icon-wrapper"><span class="material-icons-round">north_east</span></div>
+                        <h3 class="card-title">指数运算挑战</h3>
+                        <p class="card-desc">快速计算指数表达式，掌握幂运算规则。</p>
+                    </div>
+                    <div class="card-footer">进入游戏 <span class="material-icons-round" style="font-size:16px">arrow_forward</span></div>
+                </a>
+                <a href="#" class="game-card" data-keywords="对数 运算 log">
+                    <span class="card-tag">1.2</span>
+                    <div class="card-content">
+                        <div class="card-icon-wrapper"><span class="material-icons-round">calculate</span></div>
+                        <h3 class="card-title">对数解密</h3>
+                        <p class="card-desc">通过对数变换解开密码锁，理解对数性质。</p>
+                    </div>
+                    <div class="card-footer">进入游戏 <span class="material-icons-round" style="font-size:16px">arrow_forward</span></div>
+                </a>
+                <a href="#" class="game-card" data-keywords="函数 性质 单调性 奇偶性">
+                    <span class="card-tag">1.3</span>
+                    <div class="card-content">
+                        <div class="card-icon-wrapper"><span class="material-icons-round">show_chart</span></div>
+                        <h3 class="card-title">函数性质分类器</h3>
+                        <p class="card-desc">快速判断图像的单调性、奇偶性与周期性。</p>
+                    </div>
+                    <div class="card-footer">进入游戏 <span class="material-icons-round" style="font-size:16px">arrow_forward</span></div>
+                </a>
+            </div>
+        </section>
+
+        <!-- 第二章：极限与连续 -->
+        <section class="chapter-section theme-blue">
+            <div class="chapter-header">
+                <div class="chapter-title">
+                    <span class="chapter-num">02</span>
+                    <div class="chapter-info">
+                        <h2>第二章 极限与连续</h2>
+                        <p>数列极限、函数极限与连续性判定</p>
+                    </div>
+                </div>
+            </div>
+            <div class="games-grid">
+                <a href="#" class="game-card" data-keywords="数列 极限">
+                    <span class="card-tag">2.1</span>
+                    <div class="card-content">
+                        <div class="card-icon-wrapper"><span class="material-icons-round">fast_forward</span></div>
+                        <h3 class="card-title">数列趋近赛</h3>
+                        <p class="card-desc">观察数列变化趋势，猜测最终归宿。</p>
+                    </div>
+                    <div class="card-footer">进入游戏 <span class="material-icons-round" style="font-size:16px">arrow_forward</span></div>
+                </a>
+                <a href="#" class="game-card" data-keywords="无穷小 无穷大">
+                    <span class="card-tag">2.2</span>
+                    <div class="card-content">
+                        <div class="card-icon-wrapper"><span class="material-icons-round">zoom_in_map</span></div>
+                        <h3 class="card-title">无穷小消消乐</h3>
+                        <p class="card-desc">匹配等价无穷小，消除屏幕上的气泡。</p>
+                    </div>
+                    <div class="card-footer">进入游戏 <span class="material-icons-round" style="font-size:16px">arrow_forward</span></div>
+                </a>
+                <a href="#" class="game-card" data-keywords="极限 运算法则">
+                    <span class="card-tag">2.3</span>
+                    <div class="card-content">
+                        <div class="card-icon-wrapper"><span class="material-icons-round">functions</span></div>
+                        <h3 class="card-title">极限拼图</h3>
+                        <p class="card-desc">使用四则运算法则拼接正确的极限步骤。</p>
+                    </div>
+                    <div class="card-footer">进入游戏 <span class="material-icons-round" style="font-size:16px">arrow_forward</span></div>
+                </a>
+                <a href="#" class="game-card" data-keywords="重要极限 sinx/x">
+                    <span class="card-tag">2.4</span>
+                    <div class="card-content">
+                        <div class="card-icon-wrapper"><span class="material-icons-round">star</span></div>
+                        <h3 class="card-title">两个重要极限</h3>
+                        <p class="card-desc">专门针对两个重要极限的变式训练。</p>
+                    </div>
+                    <div class="card-footer">进入游戏 <span class="material-icons-round" style="font-size:16px">arrow_forward</span></div>
+                </a>
+                <a href="连续识别.html" class="game-card" data-keywords="连续 间断点">
+                    <span class="card-tag">2.5</span>
+                    <div class="card-content">
+                        <div class="card-icon-wrapper"><span class="material-icons-round">gesture</span></div>
+                        <h3 class="card-title">连续性过山车</h3>
+                        <p class="card-desc">找出轨道(函数)的断裂处，修复间断点。</p>
+                    </div>
+                    <div class="card-footer">进入游戏 <span class="material-icons-round" style="font-size:16px">arrow_forward</span></div>
+                </a>
+            </div>
+        </section>
+
+        <!-- 第三章：导数与微分 -->
+        <section class="chapter-section theme-blue">
+            <div class="chapter-header">
+                <div class="chapter-title">
+                    <span class="chapter-num">03</span>
+                    <div class="chapter-info">
+                        <h2>第三章 导数与微分</h2>
+                        <p>切线斜率、变化率与求导法则</p>
+                    </div>
+                </div>
+            </div>
+            <div class="games-grid">
+                <a href="#" class="game-card" data-keywords="导数 定义 切线">
+                    <span class="card-tag">3.1</span>
+                    <div class="card-content">
+                        <div class="card-icon-wrapper"><span class="material-icons-round">linear_scale</span></div>
+                        <h3 class="card-title">切线射击</h3>
+                        <p class="card-desc">调整炮台角度(斜率)以匹配目标函数的切线。</p>
+                    </div>
+                    <div class="card-footer">进入游戏 <span class="material-icons-round" style="font-size:16px">arrow_forward</span></div>
+                </a>
+                <a href="#" class="game-card" data-keywords="求导 公式">
+                    <span class="card-tag">3.2</span>
+                    <div class="card-content">
+                        <div class="card-icon-wrapper"><span class="material-icons-round">bolt</span></div>
+                        <h3 class="card-title">极速求导</h3>
+                        <p class="card-desc">限时挑战！快速写出基本初等函数的导数。</p>
+                    </div>
+                    <div class="card-footer">进入游戏 <span class="material-icons-round" style="font-size:16px">arrow_forward</span></div>
+                </a>
+                <a href="#" class="game-card" data-keywords="复合函数 链式法则">
+                    <span class="card-tag">3.3</span>
+                    <div class="card-content">
+                        <div class="card-icon-wrapper"><span class="material-icons-round">link</span></div>
+                        <h3 class="card-title">链式法则工厂</h3>
+                        <p class="card-desc">像组装零件一样拆解和计算复合函数导数。</p>
+                    </div>
+                    <div class="card-footer">进入游戏 <span class="material-icons-round" style="font-size:16px">arrow_forward</span></div>
+                </a>
+                <a href="#" class="game-card" data-keywords="隐函数 微分">
+                    <span class="card-tag">3.4</span>
+                    <div class="card-content">
+                        <div class="card-icon-wrapper"><span class="material-icons-round">visibility_off</span></div>
+                        <h3 class="card-title">隐函数探秘</h3>
+                        <p class="card-desc">在方程中挖掘出隐藏的 y'。</p>
+                    </div>
+                    <div class="card-footer">进入游戏 <span class="material-icons-round" style="font-size:16px">arrow_forward</span></div>
+                </a>
+            </div>
+        </section>
+
+        <!-- 第四章：导数的应用 -->
+        <section class="chapter-section theme-green">
+            <div class="chapter-header">
+                <div class="chapter-title">
+                    <span class="chapter-num">04</span>
+                    <div class="chapter-info">
+                        <h2>第四章 导数的应用</h2>
+                        <p>洛必达法则、极值、最值与曲率</p>
+                    </div>
+                </div>
+            </div>
+            <div class="games-grid">
+                <a href="#" class="game-card" data-keywords="洛必达 极限">
+                    <span class="card-tag">4.1</span>
+                    <div class="card-content">
+                        <div class="card-icon-wrapper"><span class="material-icons-round">medical_services</span></div>
+                        <h3 class="card-title">洛必达急诊室</h3>
+                        <p class="card-desc">治疗"0/0"和"∞/∞"型的极限病患。</p>
+                    </div>
+                    <div class="card-footer">进入游戏 <span class="material-icons-round" style="font-size:16px">arrow_forward</span></div>
+                </a>
+                <a href="#" class="game-card" data-keywords="单调性 极值">
+                    <span class="card-tag">4.2</span>
+                    <div class="card-content">
+                        <div class="card-icon-wrapper"><span class="material-icons-round">terrain</span></div>
+                        <h3 class="card-title">极值登山队</h3>
+                        <p class="card-desc">利用导数正负号寻找山峰(极大值)和山谷。</p>
+                    </div>
+                    <div class="card-footer">进入游戏 <span class="material-icons-round" style="font-size:16px">arrow_forward</span></div>
+                </a>
+                <a href="#" class="game-card" data-keywords="最值 优化">
+                    <span class="card-tag">4.3</span>
+                    <div class="card-content">
+                        <div class="card-icon-wrapper"><span class="material-icons-round">emoji_events</span></div>
+                        <h3 class="card-title">最优化挑战</h3>
+                        <p class="card-desc">解决实际问题：用最少的材料做最大的盒子。</p>
+                    </div>
+                    <div class="card-footer">进入游戏 <span class="material-icons-round" style="font-size:16px">arrow_forward</span></div>
+                </a>
+            </div>
+        </section>
+
+        <!-- 第五章：不定积分 -->
+        <section class="chapter-section theme-blue">
+            <div class="chapter-header">
+                <div class="chapter-title">
+                    <span class="chapter-num">05</span>
+                    <div class="chapter-info">
+                        <h2>第五章 不定积分</h2>
+                        <p>原函数、换元法与分部积分</p>
+                    </div>
+                </div>
+            </div>
+            <div class="games-grid">
+                <a href="#" class="game-card" data-keywords="原函数 积分">
+                    <span class="card-tag">5.1</span>
+                    <div class="card-content">
+                        <div class="card-icon-wrapper"><span class="material-icons-round">history</span></div>
+                        <h3 class="card-title">原函数时光机</h3>
+                        <p class="card-desc">通过求导的逆运算，找回函数"原来的样子"。</p>
+                    </div>
+                    <div class="card-footer">进入游戏 <span class="material-icons-round" style="font-size:16px">arrow_forward</span></div>
+                </a>
+                <a href="#" class="game-card" data-keywords="换元法凑微分">
+                    <span class="card-tag">5.2</span>
+                    <div class="card-content">
+                        <div class="card-icon-wrapper"><span class="material-icons-round">transform</span></div>
+                        <h3 class="card-title">凑微分大师</h3>
+                        <p class="card-desc">寻找合适的 u，完成积分变量的华丽变身。</p>
+                    </div>
+                    <div class="card-footer">进入游戏 <span class="material-icons-round" style="font-size:16px">arrow_forward</span></div>
+                </a>
+            </div>
+        </section>
+
+        <!-- 第六章：定积分 -->
+        <section class="chapter-section theme-green">
+            <div class="chapter-header">
+                <div class="chapter-title">
+                    <span class="chapter-num">06</span>
+                    <div class="chapter-info">
+                        <h2>第六章 定积分应用</h2>
+                        <p>牛顿-莱布尼茨公式与面积体积</p>
+                    </div>
+                </div>
+            </div>
+            <div class="games-grid">
+                <a href="#" class="game-card" data-keywords="定积分 面积">
+                    <span class="card-tag">6.1</span>
+                    <div class="card-content">
+                        <div class="card-icon-wrapper"><span class="material-icons-round">format_paint</span></div>
+                        <h3 class="card-title">曲边梯形填色</h3>
+                        <p class="card-desc">计算曲线下方的面积，为图形正确填色。</p>
+                    </div>
+                    <div class="card-footer">进入游戏 <span class="material-icons-round" style="font-size:16px">arrow_forward</span></div>
+                </a>
+                <a href="#" class="game-card" data-keywords="牛顿 莱布尼茨">
+                    <span class="card-tag">6.2</span>
+                    <div class="card-content">
+                        <div class="card-icon-wrapper"><span class="material-icons-round">swap_vert</span></div>
+                        <h3 class="card-title">上下限接力</h3>
+                        <p class="card-desc">代入上下限，快速完成定积分计算。</p>
+                    </div>
+                    <div class="card-footer">进入游戏 <span class="material-icons-round" style="font-size:16px">arrow_forward</span></div>
+                </a>
+                <a href="#" class="game-card" data-keywords="广义积分">
+                    <span class="card-tag">6.3</span>
+                    <div class="card-content">
+                        <div class="card-icon-wrapper"><span class="material-icons-round">all_inclusive</span></div>
+                        <h3 class="card-title">无穷边界探索</h3>
+                        <p class="card-desc">判断广义积分是否收敛。</p>
+                    </div>
+                    <div class="card-footer">进入游戏 <span class="material-icons-round" style="font-size:16px">arrow_forward</span></div>
+                </a>
+            </div>
+        </section>
+
+        <!-- 第七章：微分方程 -->
+        <section class="chapter-section theme-purple">
+            <div class="chapter-header">
+                <div class="chapter-title">
+                    <span class="chapter-num">07</span>
+                    <div class="chapter-info">
+                        <h2>第七章 微分方程</h2>
+                        <p>一阶方程、二阶常系数方程与建模</p>
+                    </div>
+                </div>
+            </div>
+            <div class="games-grid">
+                <a href="#" class="game-card" data-keywords="微分方程 分离变量">
+                    <span class="card-tag">7.1</span>
+                    <div class="card-content">
+                        <div class="card-icon-wrapper"><span class="material-icons-round">call_split</span></div>
+                        <h3 class="card-title">变量分离术</h3>
+                        <p class="card-desc">将 x 和 y 分开，破解一阶微分方程。</p>
+                    </div>
+                    <div class="card-footer">进入游戏 <span class="material-icons-round" style="font-size:16px">arrow_forward</span></div>
+                </a>
+                <a href="#" class="game-card" data-keywords="二阶 线性">
+                    <span class="card-tag">7.2</span>
+                    <div class="card-content">
+                        <div class="card-icon-wrapper"><span class="material-icons-round">filter_2</span></div>
+                        <h3 class="card-title">特征根解码器</h3>
+                        <p class="card-desc">通过特征方程的根，写出二阶方程通解。</p>
+                    </div>
+                    <div class="card-footer">进入游戏 <span class="material-icons-round" style="font-size:16px">arrow_forward</span></div>
+                </a>
+            </div>
+        </section>
+
+        <!-- 第八章：多元函数 -->
+        <section class="chapter-section theme-blue">
+            <div class="chapter-header">
+                <div class="chapter-title">
+                    <span class="chapter-num">08</span>
+                    <div class="chapter-info">
+                        <h2>第八章 多元函数微分</h2>
+                        <p>空间曲面、偏导数与全微分</p>
+                    </div>
+                </div>
+            </div>
+            <div class="games-grid">
+                <a href="#" class="game-card" data-keywords="空间 曲面">
+                    <span class="card-tag">8.1</span>
+                    <div class="card-content">
+                        <div class="card-icon-wrapper"><span class="material-icons-round">language</span></div>
+                        <h3 class="card-title">空间曲面画廊</h3>
+                        <p class="card-desc">识别椭球面、双曲面等常见空间图形。</p>
+                    </div>
+                    <div class="card-footer">进入游戏 <span class="material-icons-round" style="font-size:16px">arrow_forward</span></div>
+                </a>
+                <a href="#" class="game-card" data-keywords="偏导数">
+                    <span class="card-tag">8.2</span>
+                    <div class="card-content">
+                        <div class="card-icon-wrapper"><span class="material-icons-round">cut</span></div>
+                        <h3 class="card-title">切片求导</h3>
+                        <p class="card-desc">固定一个变量，对另一个变量求导。</p>
+                    </div>
+                    <div class="card-footer">进入游戏 <span class="material-icons-round" style="font-size:16px">arrow_forward</span></div>
+                </a>
+            </div>
+        </section>
+
+        <!-- 第九章：二重积分 -->
+        <section class="chapter-section theme-green">
+            <div class="chapter-header">
+                <div class="chapter-title">
+                    <span class="chapter-num">09</span>
+                    <div class="chapter-info">
+                        <h2>第九章 二重积分</h2>
+                        <p>直角坐标与极坐标计算</p>
+                    </div>
+                </div>
+            </div>
+            <div class="games-grid">
+                <a href="#" class="game-card" data-keywords="二重积分 区域">
+                    <span class="card-tag">9.1</span>
+                    <div class="card-content">
+                        <div class="card-icon-wrapper"><span class="material-icons-round">grid_on</span></div>
+                        <h3 class="card-title">积分区域扫描</h3>
+                        <p class="card-desc">确定 X 和 Y 型区域的积分上下限。</p>
+                    </div>
+                    <div class="card-footer">进入游戏 <span class="material-icons-round" style="font-size:16px">arrow_forward</span></div>
+                </a>
+                <a href="#" class="game-card" data-keywords="极坐标">
+                    <span class="card-tag">9.2</span>
+                    <div class="card-content">
+                        <div class="card-icon-wrapper"><span class="material-icons-round">radar</span></div>
+                        <h3 class="card-title">极坐标雷达</h3>
+                        <p class="card-desc">在圆形区域下，将 dxdy 转换为 rdrdθ。</p>
+                    </div>
+                    <div class="card-footer">进入游戏 <span class="material-icons-round" style="font-size:16px">arrow_forward</span></div>
+                </a>
+            </div>
+        </section>
+
+        <!-- 第十章：线性代数 -->
+        <section class="chapter-section theme-orange">
+            <div class="chapter-header">
+                <div class="chapter-title">
+                    <span class="chapter-num">10</span>
+                    <div class="chapter-info">
+                        <h2>第十章 线性代数</h2>
+                        <p>矩阵、行列式与线性方程组</p>
+                    </div>
+                </div>
+            </div>
+            <div class="games-grid">
+                <a href="#" class="game-card" data-keywords="矩阵 乘法">
+                    <span class="card-tag">10.1</span>
+                    <div class="card-content">
+                        <div class="card-icon-wrapper"><span class="material-icons-round">grid_4x4</span></div>
+                        <h3 class="card-title">矩阵变换阵</h3>
+                        <p class="card-desc">掌握矩阵乘法规则，完成线性变换。</p>
+                    </div>
+                    <div class="card-footer">进入游戏 <span class="material-icons-round" style="font-size:16px">arrow_forward</span></div>
+                </a>
+                <a href="#" class="game-card" data-keywords="行列式 计算">
+                    <span class="card-tag">10.2</span>
+                    <div class="card-content">
+                        <div class="card-icon-wrapper"><span class="material-icons-round">apps</span></div>
+                        <h3 class="card-title">行列式对战</h3>
+                        <p class="card-desc">利用沙路法则和性质快速计算行列式值。</p>
+                    </div>
+                    <div class="card-footer">进入游戏 <span class="material-icons-round" style="font-size:16px">arrow_forward</span></div>
+                </a>
+                <a href="#" class="game-card" data-keywords="特征值">
+                    <span class="card-tag">10.3</span>
+                    <div class="card-content">
+                        <div class="card-icon-wrapper"><span class="material-icons-round">fingerprint</span></div>
+                        <h3 class="card-title">寻找特征值</h3>
+                        <p class="card-desc">解出 |λE - A| = 0，找到矩阵的指纹。</p>
+                    </div>
+                    <div class="card-footer">进入游戏 <span class="material-icons-round" style="font-size:16px">arrow_forward</span></div>
+                </a>
+            </div>
+        </section>
+
+        <!-- 第十一章：无穷级数 -->
+        <section class="chapter-section theme-purple">
+            <div class="chapter-header">
+                <div class="chapter-title">
+                    <span class="chapter-num">11</span>
+                    <div class="chapter-info">
+                        <h2>第十一章 无穷级数</h2>
+                        <p>常数项级数与幂级数展开</p>
+                    </div>
+                </div>
+            </div>
+            <div class="games-grid">
+                <a href="#" class="game-card" data-keywords="级数 收敛 发散">
+                    <span class="card-tag">11.1</span>
+                    <div class="card-content">
+                        <div class="card-icon-wrapper"><span class="material-icons-round">rule</span></div>
+                        <h3 class="card-title">收敛判别官</h3>
+                        <p class="card-desc">使用比值法、比较法判断级数是否收敛。</p>
+                    </div>
+                    <div class="card-footer">进入游戏 <span class="material-icons-round" style="font-size:16px">arrow_forward</span></div>
+                </a>
+                <a href="#" class="game-card" data-keywords="泰勒 展开">
+                    <span class="card-tag">11.2</span>
+                    <div class="card-content">
+                        <div class="card-icon-wrapper"><span class="material-icons-round">unfold_more</span></div>
+                        <h3 class="card-title">泰勒展开工坊</h3>
+                        <p class="card-desc">将复杂函数拆解为简单的多项式叠加。</p>
+                    </div>
+                    <div class="card-footer">进入游戏 <span class="material-icons-round" style="font-size:16px">arrow_forward</span></div>
+                </a>
+            </div>
+        </section>
+
+        <!-- 第十二章：向量代数 -->
+        <section class="chapter-section theme-green">
+            <div class="chapter-header">
+                <div class="chapter-title">
+                    <span class="chapter-num">12</span>
+                    <div class="chapter-info">
+                        <h2>第十二章 向量与解析几何</h2>
+                        <p>向量运算与空间直线平面</p>
+                    </div>
+                </div>
+            </div>
+            <div class="games-grid">
+                <a href="#" class="game-card" data-keywords="向量 点积 叉积">
+                    <span class="card-tag">12.1</span>
+                    <div class="card-content">
+                        <div class="card-icon-wrapper"><span class="material-icons-round">north_east</span></div>
+                        <h3 class="card-title">向量指挥官</h3>
+                        <p class="card-desc">运用点积和叉积计算角度与垂直关系。</p>
+                    </div>
+                    <div class="card-footer">进入游戏 <span class="material-icons-round" style="font-size:16px">arrow_forward</span></div>
+                </a>
+                <a href="#" class="game-card" data-keywords="平面 直线 方程">
+                    <span class="card-tag">12.2</span>
+                    <div class="card-content">
+                        <div class="card-icon-wrapper"><span class="material-icons-round">architecture</span></div>
+                        <h3 class="card-title">空间架构师</h3>
+                        <p class="card-desc">建立法向量，构建空间平面与直线方程。</p>
+                    </div>
+                    <div class="card-footer">进入游戏 <span class="material-icons-round" style="font-size:16px">arrow_forward</span></div>
+                </a>
+            </div>
+        </section>
+
+        <!-- 第十三章：概率统计 -->
+        <section class="chapter-section theme-orange">
+            <div class="chapter-header">
+                <div class="chapter-title">
+                    <span class="chapter-num">13</span>
+                    <div class="chapter-info">
+                        <h2>第十三章 概率与统计</h2>
+                        <p>随机事件、分布与数理统计</p>
+                    </div>
+                </div>
+            </div>
+            <div class="games-grid">
+                <a href="#" class="game-card" data-keywords="概率 随机">
+                    <span class="card-tag">13.1</span>
+                    <div class="card-content">
+                        <div class="card-icon-wrapper"><span class="material-icons-round">casino</span></div>
+                        <h3 class="card-title">概率赌场</h3>
+                        <p class="card-desc">计算古典概型与条件概率，做出最优决策。</p>
+                    </div>
+                    <div class="card-footer">进入游戏 <span class="material-icons-round" style="font-size:16px">arrow_forward</span></div>
+                </a>
+                <a href="#" class="game-card" data-keywords="正态分布 期望">
+                    <span class="card-tag">13.2</span>
+                    <div class="card-content">
+                        <div class="card-icon-wrapper"><span class="material-icons-round">bar_chart</span></div>
+                        <h3 class="card-title">分布模拟器</h3>
+                        <p class="card-desc">探索正态分布曲线，计算数学期望与方差。</p>
+                    </div>
+                    <div class="card-footer">进入游戏 <span class="material-icons-round" style="font-size:16px">arrow_forward</span></div>
+                </a>
+            </div>
+        </section>
+
     </main>
+
+    <script>
+        // 简单的搜索过滤功能
+        const searchInput = document.getElementById('gameSearch');
+        const gameCards = document.querySelectorAll('.game-card');
+        const chapters = document.querySelectorAll('.chapter-section');
+
+        searchInput.addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase();
+
+            gameCards.forEach(card => {
+                const title = card.querySelector('.card-title').textContent.toLowerCase();
+                const desc = card.querySelector('.card-desc').textContent.toLowerCase();
+                const keywords = card.getAttribute('data-keywords') || '';
+                const tag = card.querySelector('.card-tag').textContent;
+                
+                if (title.includes(term) || desc.includes(term) || keywords.includes(term) || tag.includes(term)) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            // 如果章节内没有显示的卡片，隐藏章节标题
+            chapters.forEach(chapter => {
+                const visibleCards = chapter.querySelectorAll('.game-card[style="display: flex;"]');
+                const defaultCards = chapter.querySelectorAll('.game-card:not([style*="display: none"])');
+                
+                // 检查是否有任何卡片可见 (搜索时或默认时)
+                if (visibleCards.length > 0 || (term === '' && defaultCards.length > 0)) {
+                    chapter.style.display = 'block';
+                } else {
+                    chapter.style.display = 'none';
+                }
+            });
+        });
+    </script>
 </body>
 </html>
-

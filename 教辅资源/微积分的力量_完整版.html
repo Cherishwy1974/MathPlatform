@@ -1,0 +1,1555 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="scroll-smooth">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>微积分的力量：无穷之旅 (完整版)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,1,0" rel="stylesheet">
+    
+    <style>
+        body { 
+            font-family: 'Noto Serif SC', serif; 
+            background-color: #fafafa; 
+            color: #1f2937; 
+        }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        
+        .canvas-container { 
+            position: relative; 
+            width: 100%; 
+            height: 350px; 
+            background: #fff; 
+            border-radius: 1rem; 
+            overflow: hidden; 
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); 
+            border: 1px solid #e5e7eb; 
+        }
+        
+        canvas { 
+            width: 100%; 
+            height: 100%; 
+            display: block; 
+        }
+        
+        .chapter-card { 
+            transition: transform 0.3s ease, box-shadow 0.3s ease; 
+        }
+        .chapter-card:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); 
+        }
+        
+        .nav-dot { 
+            width: 8px; 
+            height: 8px; 
+            border-radius: 50%; 
+            background-color: #d1d5db; 
+            transition: all 0.3s; 
+        }
+        .nav-dot.active { 
+            background-color: #111827; 
+            transform: scale(1.5); 
+        }
+        
+        .latex { 
+            font-family: 'Times New Roman', serif; 
+            font-style: italic; 
+        }
+        
+        /* 自定义滚动条 */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #888; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
+        
+        /* 动画效果 */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .animate-fade-in-up {
+            animation: fadeInUp 0.8s ease-out forwards;
+        }
+        
+        /* 引用框样式 */
+        .quote-box {
+            position: relative;
+            padding-left: 1.5rem;
+            border-left: 3px solid #6366f1;
+            font-style: italic;
+            color: #4b5563;
+        }
+        
+        .quote-box::before {
+            content: '"';
+            position: absolute;
+            left: -0.5rem;
+            top: -1rem;
+            font-size: 3rem;
+            color: #e5e7eb;
+            font-family: Georgia, serif;
+        }
+        
+        /* 人物卡片 */
+        .person-card {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        .person-card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        .person-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 2rem;
+            color: white;
+        }
+        
+        /* 时间线样式 */
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+        }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, #6366f1, #ec4899);
+        }
+        .timeline-item {
+            position: relative;
+            padding-bottom: 1.5rem;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -2.25rem;
+            top: 0.25rem;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #6366f1;
+            border: 3px solid white;
+            box-shadow: 0 0 0 2px #6366f1;
+        }
+    </style>
+</head>
+
+<body class="antialiased">
+    <!-- 侧边导航 -->
+    <nav class="fixed left-6 top-1/2 transform -translate-y-1/2 z-50 hidden lg:flex flex-col gap-4">
+        <a href="#intro" class="group flex items-center gap-3">
+            <div class="nav-dot active" id="dot-intro"></div>
+            <span class="opacity-0 group-hover:opacity-100 transition text-xs font-bold text-gray-500">序章</span>
+        </a>
+        <a href="#ch1-2" class="group flex items-center gap-3">
+            <div class="nav-dot" id="dot-ch1-2"></div>
+            <span class="opacity-0 group-hover:opacity-100 transition text-xs font-bold text-gray-500">Ch 1-2: 无穷</span>
+        </a>
+        <a href="#ch3-4" class="group flex items-center gap-3">
+            <div class="nav-dot" id="dot-ch3-4"></div>
+            <span class="opacity-0 group-hover:opacity-100 transition text-xs font-bold text-gray-500">Ch 3-4: 运动</span>
+        </a>
+        <a href="#ch5-6" class="group flex items-center gap-3">
+            <div class="nav-dot" id="dot-ch5-6"></div>
+            <span class="opacity-0 group-hover:opacity-100 transition text-xs font-bold text-gray-500">Ch 5-6: 变化</span>
+        </a>
+        <a href="#ch7-8" class="group flex items-center gap-3">
+            <div class="nav-dot" id="dot-ch7-8"></div>
+            <span class="opacity-0 group-hover:opacity-100 transition text-xs font-bold text-gray-500">Ch 7-8: 积分</span>
+        </a>
+        <a href="#ch9" class="group flex items-center gap-3">
+            <div class="nav-dot" id="dot-ch9"></div>
+            <span class="opacity-0 group-hover:opacity-100 transition text-xs font-bold text-gray-500">Ch 9: 宇宙</span>
+        </a>
+        <a href="#ch10" class="group flex items-center gap-3">
+            <div class="nav-dot" id="dot-ch10"></div>
+            <span class="opacity-0 group-hover:opacity-100 transition text-xs font-bold text-gray-500">Ch 10: 波</span>
+        </a>
+        <a href="#ch11" class="group flex items-center gap-3">
+            <div class="nav-dot" id="dot-ch11"></div>
+            <span class="opacity-0 group-hover:opacity-100 transition text-xs font-bold text-gray-500">Ch 11: 混沌</span>
+        </a>
+    </nav>
+
+    <!-- 英雄区域 -->
+    <header id="intro" class="min-h-screen flex flex-col justify-center items-center text-center px-4 relative bg-slate-900 text-white overflow-hidden">
+        <!-- 抽象背景 -->
+        <div class="absolute inset-0 opacity-30">
+            <canvas id="heroCanvas"></canvas>
+        </div>
+        
+        <div class="z-10 max-w-4xl animate-fade-in-up">
+            <p class="text-indigo-400 font-mono text-sm mb-4 tracking-widest">STEVEN STROGATZ</p>
+            <h1 class="text-5xl md:text-7xl font-bold mb-6 tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-blue-200 to-indigo-400">微积分的力量</h1>
+            <p class="text-xl md:text-2xl text-gray-300 font-light mb-4">Infinite Powers</p>
+            <p class="text-lg text-gray-400 mb-8">How Calculus Reveals the Secrets of the Universe</p>
+            <p class="max-w-2xl mx-auto text-gray-400 mb-10 leading-relaxed">
+                这是一场关于"无穷"的危险旅程。从阿基米德切分圆，到牛顿预测行星轨道，再到今天我们用它模拟气候变化和治疗疾病。微积分不仅是数学工具，它是<strong class="text-indigo-300">上帝的语言</strong>。
+            </p>
+            <div class="flex flex-wrap justify-center gap-4">
+                <a href="#ch1-2" class="inline-flex items-center px-8 py-3 border border-transparent text-base font-medium rounded-full shadow-sm text-slate-900 bg-white hover:bg-gray-100 transition duration-300">
+                    开始探索
+                    <span class="material-symbols-outlined ml-2">arrow_downward</span>
+                </a>
+                <a href="#timeline" class="inline-flex items-center px-8 py-3 border border-white/30 text-base font-medium rounded-full text-white hover:bg-white/10 transition duration-300">
+                    历史时间线
+                </a>
+            </div>
+        </div>
+        
+        <!-- 滚动提示 -->
+        <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce">
+            <span class="material-symbols-outlined text-gray-500">expand_more</span>
+        </div>
+    </header>
+
+    <!-- 核心概念介绍 -->
+    <section class="py-16 px-6 bg-white border-b border-gray-100">
+        <div class="max-w-4xl mx-auto text-center">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">本书的核心思想</h2>
+            <div class="quote-box text-left mb-8">
+                <p class="text-lg leading-relaxed">
+                    微积分的本质是一种将复杂问题切分为无穷多个简单问题的策略。解决每个简单问题，然后将答案重新组合，就能揭示原本不可见的真理。
+                </p>
+            </div>
+            <div class="grid md:grid-cols-3 gap-6 mt-8">
+                <div class="p-6 bg-blue-50 rounded-xl">
+                    <div class="text-3xl mb-3">∞</div>
+                    <h3 class="font-bold text-blue-900 mb-2">无穷</h3>
+                    <p class="text-sm text-blue-700">切分到无穷小，问题变得简单</p>
+                </div>
+                <div class="p-6 bg-purple-50 rounded-xl">
+                    <div class="text-3xl mb-3">∫</div>
+                    <h3 class="font-bold text-purple-900 mb-2">积分</h3>
+                    <p class="text-sm text-purple-700">将无穷多碎片重新组合</p>
+                </div>
+                <div class="p-6 bg-green-50 rounded-xl">
+                    <div class="text-3xl mb-3">d/dx</div>
+                    <h3 class="font-bold text-green-900 mb-2">微分</h3>
+                    <p class="text-sm text-green-700">捕捉瞬间的变化率</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 历史时间线 -->
+    <section id="timeline" class="py-16 px-6 bg-gray-50">
+        <div class="max-w-4xl mx-auto">
+            <h2 class="text-3xl font-bold text-gray-900 mb-12 text-center">微积分的历史长河</h2>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="font-mono text-sm text-indigo-600 mb-1">约公元前250年</div>
+                    <h3 class="font-bold text-lg">阿基米德 (Archimedes)</h3>
+                    <p class="text-gray-600">用穷竭法计算圆的面积和球的体积，开创了微积分的先河</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="font-mono text-sm text-indigo-600 mb-1">1609-1619</div>
+                    <h3 class="font-bold text-lg">开普勒 (Kepler)</h3>
+                    <p class="text-gray-600">发现行星运动三大定律，用"无穷小"方法计算椭圆面积</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="font-mono text-sm text-indigo-600 mb-1">1638</div>
+                    <h3 class="font-bold text-lg">伽利略 (Galileo)</h3>
+                    <p class="text-gray-600">发现自由落体定律，证明距离与时间的平方成正比</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="font-mono text-sm text-indigo-600 mb-1">1637</div>
+                    <h3 class="font-bold text-lg">笛卡尔 & 费马</h3>
+                    <p class="text-gray-600">创立解析几何，将代数与几何统一，费马发明求极值方法</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="font-mono text-sm text-indigo-600 mb-1">1665-1687</div>
+                    <h3 class="font-bold text-lg">牛顿 (Newton)</h3>
+                    <p class="text-gray-600">发明"流数法"，发现微积分基本定理，出版《原理》</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="font-mono text-sm text-indigo-600 mb-1">1684-1686</div>
+                    <h3 class="font-bold text-lg">莱布尼茨 (Leibniz)</h3>
+                    <p class="text-gray-600">独立发明微积分，创造了我们今天使用的符号 ∫ 和 d</p>
+                </div>
+                <div class="timeline-item">
+                    <div class="font-mono text-sm text-indigo-600 mb-1">19世纪</div>
+                    <h3 class="font-bold text-lg">柯西 & 魏尔斯特拉斯</h3>
+                    <p class="text-gray-600">用"极限"概念严格化微积分，驱逐了"无穷小的幽灵"</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 第1-2章：阿基米德与无穷 -->
+    <section id="ch1-2" class="py-24 px-6 max-w-6xl mx-auto border-b border-gray-200">
+        <div class="grid md:grid-cols-2 gap-16 items-start">
+            <div>
+                <div class="flex items-center gap-4 mb-6">
+                    <span class="text-4xl text-blue-600 font-bold">01</span>
+                    <div>
+                        <h2 class="text-3xl font-bold text-gray-900">无穷原则</h2>
+                        <p class="text-gray-500 font-mono text-sm">Chapter 1 & 2: Archimedes</p>
+                    </div>
+                </div>
+                <div class="prose text-gray-600 leading-relaxed">
+                    <p class="mb-4">
+                        一切始于一个看似悖论的想法：为了解决难题，我们必须将其切分为<strong>无穷多个</strong>简单的部分。
+                    </p>
+                    <p class="mb-4">
+                        阿基米德不仅是物理学家，更是第一位也是最伟大的微积分先驱。在公元前250年，面对"圆的面积"这一难题，他没有被曲线吓倒。他想象将圆像<strong>比萨</strong>一样切成无数个扇形。
+                    </p>
+                    <div class="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500 my-6">
+                        <h4 class="font-bold text-blue-900 mb-2">无穷原则 (The Infinity Principle)</h4>
+                        <p class="text-sm text-blue-800">
+                            通过将复杂的连续体（如圆、时间、运动）切分为无穷小的碎片，解决每一个碎片的问题，然后将答案重新组合，我们可以揭示原本不可见的真理。
+                        </p>
+                    </div>
+                    <p class="mb-4">
+                        当切分数量趋向无穷时，粗糙的锯齿状边缘奇迹般地变直了，圆变成了矩形。这就是积分学的第一次胜利。
+                    </p>
+                    <div class="bg-gray-100 p-4 rounded-lg mt-6">
+                        <h5 class="font-bold text-gray-800 mb-2">阿基米德的其他发现</h5>
+                        <ul class="text-sm text-gray-600 space-y-1">
+                            <li>• 球的体积是外切圆柱的 2/3</li>
+                            <li>• 抛物线弓形面积是内接三角形的 4/3</li>
+                            <li>• 杠杆原理与浮力原理</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 互动：切分圆 -->
+            <div class="bg-white p-6 rounded-2xl shadow-xl border border-gray-100 chapter-card">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-gray-800">互动：切分圆变矩形</h3>
+                    <div class="bg-gray-100 px-3 py-1 rounded-full text-xs font-mono">切片数: <span id="slice-val">4</span></div>
+                </div>
+                <div class="canvas-container mb-6">
+                    <canvas id="pizzaCanvas"></canvas>
+                </div>
+                <input type="range" min="4" max="100" step="2" value="4" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600" id="pizzaSlider">
+                <div class="mt-4 text-xs text-gray-500 flex justify-between">
+                    <span>← 多边形 (近似)</span>
+                    <span>矩形 (极限) →</span>
+                </div>
+                <p class="text-sm text-center mt-4 text-gray-600 bg-blue-50 p-3 rounded-lg">
+                    矩形面积 = 长 (<span class="latex">πr</span>) × 宽 (<span class="latex">r</span>) = <span class="latex font-bold text-blue-600">πr²</span>
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 第3-4章：运动与开普勒 -->
+    <section id="ch3-4" class="py-24 px-6 max-w-6xl mx-auto border-b border-gray-200">
+        <div class="grid md:grid-cols-2 gap-16 items-center">
+            <!-- 互动：轨道 -->
+            <div class="bg-slate-900 text-white p-6 rounded-2xl shadow-xl chapter-card order-2 md:order-1">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold">互动：开普勒第二定律</h3>
+                    <button id="toggle-trace" class="text-xs bg-blue-600 hover:bg-blue-500 px-3 py-1 rounded transition">显示扫过面积</button>
+                </div>
+                <div class="canvas-container bg-slate-800 border-slate-700 mb-4">
+                    <canvas id="orbitCanvas"></canvas>
+                </div>
+                <p class="text-xs text-gray-400 text-center">行星在靠近太阳时速度变快，远离时变慢，但在相同时间内扫过的面积相等。</p>
+                <div class="mt-4 grid grid-cols-2 gap-4 text-xs">
+                    <div class="bg-slate-800 p-3 rounded-lg">
+                        <div class="text-gray-400">当前距离</div>
+                        <div class="font-mono text-blue-400" id="orbit-dist">--</div>
+                    </div>
+                    <div class="bg-slate-800 p-3 rounded-lg">
+                        <div class="text-gray-400">角速度</div>
+                        <div class="font-mono text-green-400" id="orbit-speed">--</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="order-1 md:order-2">
+                <div class="flex items-center gap-4 mb-6">
+                    <span class="text-4xl text-indigo-600 font-bold">02</span>
+                    <div>
+                        <h2 class="text-3xl font-bold text-gray-900">运动的旋律</h2>
+                        <p class="text-gray-500 font-mono text-sm">Chapter 3 & 4: Galileo, Kepler, Fermat</p>
+                    </div>
+                </div>
+                <div class="prose text-gray-600 leading-relaxed">
+                    <p class="mb-4">
+                        世界不是静止的。阿基米德的几何学无法描述落叶、飞行的炮弹或行星的轨道。伽利略和开普勒通过观察数据，发现了隐藏在运动中的数学规律。
+                    </p>
+                    <p class="mb-4">
+                        开普勒发现行星在椭圆轨道上运行，且速度不断变化。这种<strong>不断变化的变化</strong>是旧数学无法处理的。他发现了一个惊人的守恒量：在相同时间内，行星扫过的面积是相等的。
+                    </p>
+                    
+                    <div class="bg-indigo-50 p-4 rounded-lg border-l-4 border-indigo-500 my-6">
+                        <h4 class="font-bold text-indigo-900 mb-2">开普勒三定律</h4>
+                        <ol class="text-sm text-indigo-800 space-y-2">
+                            <li><strong>1. 椭圆定律：</strong>行星轨道是椭圆，太阳在焦点</li>
+                            <li><strong>2. 面积定律：</strong>等时间扫过等面积</li>
+                            <li><strong>3. 调和定律：</strong>T² ∝ a³（周期与半长轴的关系）</li>
+                        </ol>
+                    </div>
+                    
+                    <p class="mb-4">
+                        与此同时，费马和笛卡儿通过将代数引入几何（解析几何），为微积分的诞生铺平了道路。费马更是发明了一种寻找"极值"的方法，这成为了后来求导数的雏形。
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 第5-6章：导数 -->
+    <section id="ch5-6" class="py-24 px-6 max-w-6xl mx-auto border-b border-gray-200">
+        <div class="grid md:grid-cols-2 gap-16 items-start">
+            <div>
+                <div class="flex items-center gap-4 mb-6">
+                    <span class="text-4xl text-purple-600 font-bold">03</span>
+                    <div>
+                        <h2 class="text-3xl font-bold text-gray-900">瞬间的变化</h2>
+                        <p class="text-gray-500 font-mono text-sm">Chapter 5 & 6: The Derivative</p>
+                    </div>
+                </div>
+                <div class="prose text-gray-600 leading-relaxed">
+                    <p class="mb-4">
+                        如果一辆车以变化的速度行驶，我们在某一"瞬间"的速度是多少？这听起来自相矛盾：瞬间没有持续时间，没有时间就没有运动，怎么会有速度？
+                    </p>
+                    <p class="mb-4">
+                        这是微积分的第一个核心支柱：<strong>导数 (Derivative)</strong>。它衡量的是事物在某一刻的变化率。通过观察两个极其接近的时间点之间的距离变化，并让这两个点无限接近，我们捕捉到了"瞬间"的幽灵。
+                    </p>
+                    <div class="bg-purple-50 p-4 rounded-lg border-l-4 border-purple-500 my-6">
+                        <h4 class="font-bold text-purple-900 mb-2">作为显微镜的导数</h4>
+                        <p class="text-sm text-purple-800">
+                            如果我们将曲线无限放大，在某一点它看起来就像是一条直线。这条直线的斜率，就是导数。它是函数在这一点的"DNA"，告诉我们它下一刻将去向何方。
+                        </p>
+                    </div>
+                    
+                    <div class="bg-gray-100 p-4 rounded-lg mt-6">
+                        <h5 class="font-bold text-gray-800 mb-2">常见导数公式</h5>
+                        <div class="grid grid-cols-2 gap-2 text-sm font-mono">
+                            <div>d/dx (xⁿ) = nxⁿ⁻¹</div>
+                            <div>d/dx (sin x) = cos x</div>
+                            <div>d/dx (eˣ) = eˣ</div>
+                            <div>d/dx (ln x) = 1/x</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 互动：导数可视化 -->
+            <div class="bg-white p-6 rounded-2xl shadow-xl border border-gray-100 chapter-card">
+                <h3 class="font-bold text-gray-800 mb-4">互动：切线与斜率</h3>
+                <div class="canvas-container mb-4 cursor-crosshair" id="deriv-container">
+                    <canvas id="derivCanvas"></canvas>
+                </div>
+                <div class="flex justify-between text-sm font-mono text-gray-600 bg-gray-50 p-3 rounded-lg">
+                    <span>x = <span id="deriv-x" class="text-purple-600">0.00</span></span>
+                    <span>f(x) = <span id="deriv-y" class="text-blue-600">0.00</span></span>
+                    <span>f'(x) = <span id="deriv-m" class="font-bold text-pink-600">0.00</span></span>
+                </div>
+                <p class="text-xs text-gray-400 mt-3 text-center">
+                    移动鼠标查看曲线 y = sin(x) + 0.5sin(2x) 上每一点的切线
+                </p>
+                <div class="mt-4 flex gap-2">
+                    <button id="deriv-func-1" class="text-xs px-3 py-1 bg-purple-100 text-purple-700 rounded-full hover:bg-purple-200 transition">sin(x)</button>
+                    <button id="deriv-func-2" class="text-xs px-3 py-1 bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200 transition">x²</button>
+                    <button id="deriv-func-3" class="text-xs px-3 py-1 bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200 transition">x³-x</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 第7-8章：积分与基本定理 -->
+    <section id="ch7-8" class="py-24 px-6 max-w-6xl mx-auto border-b border-gray-200">
+        <div class="grid md:grid-cols-2 gap-16 items-center">
+            <!-- 互动：积分 -->
+            <div class="bg-white p-6 rounded-2xl shadow-xl border border-gray-100 chapter-card order-2 md:order-1">
+                <h3 class="font-bold text-gray-800 mb-4">互动：积分即积累</h3>
+                <div class="canvas-container mb-4">
+                    <canvas id="integralCanvas"></canvas>
+                </div>
+                <div class="flex items-center gap-4 mb-4">
+                    <button id="btn-paint" class="bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded-lg text-sm transition flex items-center gap-2">
+                        <span class="material-symbols-outlined text-sm">play_arrow</span>
+                        开始积分
+                    </button>
+                    <button id="btn-reset-paint" class="text-gray-500 text-sm hover:text-gray-800 transition">重置</button>
+                </div>
+                <div class="bg-green-50 p-3 rounded-lg">
+                    <p class="text-sm text-green-800">
+                        累积面积 = <span id="integral-area" class="font-mono font-bold">0.00</span>
+                    </p>
+                </div>
+                <p class="text-xs text-gray-500 mt-3">
+                    曲线下的面积就是函数值的累积——这就是积分的几何意义。
+                </p>
+            </div>
+
+            <div class="order-1 md:order-2">
+                <div class="flex items-center gap-4 mb-6">
+                    <span class="text-4xl text-green-600 font-bold">04</span>
+                    <div>
+                        <h2 class="text-3xl font-bold text-gray-900">隐秘的源泉</h2>
+                        <p class="text-gray-500 font-mono text-sm">Chapter 7 & 8: The Fundamental Theorem</p>
+                    </div>
+                </div>
+                <div class="prose text-gray-600 leading-relaxed">
+                    <p class="mb-4">
+                        这是微积分历史上最伟大的时刻。牛顿和莱布尼茨独立发现了一个惊人的秘密：<strong>切分（微分）和重组（积分）是互逆的过程</strong>。
+                    </p>
+                    <p class="mb-4">
+                        就像加法与减法，乘法与除法。如果你知道一个量变化得有多快（速度），你可以通过积分算出它总量有多少（距离）。这被称为<strong>微积分基本定理</strong>。
+                    </p>
+                    
+                    <div class="bg-green-50 p-4 rounded-lg border-l-4 border-green-500 my-6">
+                        <h4 class="font-bold text-green-900 mb-2">微积分基本定理</h4>
+                        <p class="text-sm text-green-800 font-mono mb-2">
+                            ∫ₐᵇ f'(x)dx = f(b) - f(a)
+                        </p>
+                        <p class="text-sm text-green-700">
+                            导数的积分等于原函数的变化量。微分和积分互为逆运算。
+                        </p>
+                    </div>
+                    
+                    <p>
+                        在第8章中，我们看到虽然使用了"无穷小"这样看似荒谬的概念（贝克莱主教称其为"逝去量的幽灵"），但通过后来柯西和魏尔斯特拉斯建立的<strong>"极限"</strong>概念，微积分变得严丝合缝，无懈可击。
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 第9章：微分方程 -->
+    <section id="ch9" class="py-24 px-6 max-w-6xl mx-auto border-b border-gray-200">
+        <div class="text-center mb-12">
+            <span class="text-5xl text-amber-600 font-bold">05</span>
+            <h2 class="text-4xl font-bold text-gray-900 mb-4 mt-4">宇宙的逻辑</h2>
+            <p class="text-xl text-gray-500 font-mono">Chapter 9: Differential Equations</p>
+        </div>
+        
+        <div class="grid md:grid-cols-3 gap-8">
+            <div class="col-span-1 prose text-gray-600">
+                <p>
+                    牛顿不仅发明了微积分，他还用它重写了宇宙的法则。他的第二定律 <span class="latex font-bold">F=ma</span> 实际上是一个<strong>微分方程</strong>。
+                </p>
+                <p class="mt-4">
+                    微分方程不仅描述现状，它还能<strong>预测未来</strong>。只要知道当前的各种力（引力、弹力等）和初始状态，微积分就能一步步推算出物体下一刻的位置，直至无穷远的未来。
+                </p>
+                <p class="mt-4">
+                    这就是所谓"钟表宇宙"的数学基础——拉普拉斯的决定论：如果我们知道宇宙中所有粒子此刻的位置和速度，理论上可以预测一切。
+                </p>
+                
+                <div class="bg-amber-50 p-4 rounded-lg border-l-4 border-amber-500 mt-6">
+                    <h4 class="font-bold text-amber-900 mb-2">微分方程的应用</h4>
+                    <ul class="text-sm text-amber-800 space-y-1">
+                        <li>• 行星轨道预测</li>
+                        <li>• 放射性衰变</li>
+                        <li>• 人口增长模型</li>
+                        <li>• 电路分析</li>
+                        <li>• 热传导方程</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- 互动：弹簧系统 -->
+            <div class="col-span-2 bg-slate-50 p-6 rounded-2xl shadow-inner border border-gray-200">
+                <h3 class="font-bold text-gray-800 mb-4 text-center">模拟：预测弹簧运动 (谐振子)</h3>
+                <div class="flex gap-4 items-center justify-center mb-4 flex-wrap">
+                    <label class="text-sm flex items-center gap-2">
+                        弹性 (k): 
+                        <input type="range" id="spring-k" min="0.01" max="0.5" step="0.01" value="0.1" class="accent-red-500">
+                        <span id="spring-k-val" class="font-mono text-xs w-12">0.10</span>
+                    </label>
+                    <label class="text-sm flex items-center gap-2">
+                        阻尼 (b): 
+                        <input type="range" id="spring-b" min="0" max="0.1" step="0.001" value="0.01" class="accent-red-500">
+                        <span id="spring-b-val" class="font-mono text-xs w-12">0.010</span>
+                    </label>
+                </div>
+                <div class="canvas-container bg-white border border-gray-300">
+                    <canvas id="springCanvas"></canvas>
+                </div>
+                <p class="text-xs text-center text-gray-500 mt-3 font-mono">
+                    微分方程：m·d²x/dt² = -kx - b·dx/dt
+                </p>
+                <div class="flex justify-center mt-3">
+                    <button id="spring-reset" class="text-xs text-gray-500 hover:text-gray-800 transition">拖拽方块或点击重置</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 第10章：波与傅里叶 -->
+    <section id="ch10" class="py-24 px-6 max-w-6xl mx-auto border-b border-gray-200 bg-white">
+        <div class="grid md:grid-cols-2 gap-16 items-start">
+            <div>
+                <div class="flex items-center gap-4 mb-6">
+                    <span class="text-4xl text-teal-600 font-bold">06</span>
+                    <div>
+                        <h2 class="text-3xl font-bold text-gray-900">波与看见不可见</h2>
+                        <p class="text-gray-500 font-mono text-sm">Chapter 10: Waves, Microwaves, CT Scans</p>
+                    </div>
+                </div>
+                <div class="prose text-gray-600 leading-relaxed">
+                    <p class="mb-4">
+                        从吉他弦的振动到微波炉的加热，再到光的传播，一切皆是<strong>波</strong>。微积分通过<strong>偏微分方程</strong>描述了这些现象。
+                    </p>
+                    <p class="mb-4">
+                        傅里叶发现了一个惊人的事实：任何复杂的波形都可以分解为简单的正弦波之和。这也是"无穷原则"的体现——将复杂分解为简单。
+                    </p>
+                    
+                    <div class="bg-teal-50 p-4 rounded-lg border-l-4 border-teal-500 my-6">
+                        <h4 class="font-bold text-teal-900 mb-2">傅里叶的魔法</h4>
+                        <p class="text-sm text-teal-800">
+                            任何周期函数都可以写成：<br>
+                            <span class="font-mono">f(x) = a₀ + Σ(aₙcos(nx) + bₙsin(nx))</span>
+                        </p>
+                    </div>
+                    
+                    <p class="mb-4">
+                        最神奇的应用莫过于<strong>CT扫描</strong>。通过从不同角度发射X射线（获取积分数据），微积分可以反向推导出物体内部的结构（反拉东变换）。这就像通过看影子来重建物体本身。
+                    </p>
+                </div>
+            </div>
+
+            <!-- 互动：傅里叶级数 -->
+            <div class="bg-gray-900 p-6 rounded-2xl shadow-xl border border-gray-700 chapter-card">
+                <h3 class="font-bold text-white mb-4">互动：波的叠加 (傅里叶级数)</h3>
+                <div class="canvas-container mb-4 bg-black rounded-lg border-gray-800">
+                    <canvas id="waveCanvas"></canvas>
+                </div>
+                <div class="flex flex-col gap-3">
+                    <label class="text-xs font-mono text-gray-400 flex justify-between items-center">
+                        <span>谐波数 (N): <span id="wave-n-val" class="text-teal-400">1</span></span>
+                        <input type="range" id="wave-n" min="1" max="50" value="1" class="w-2/3 accent-teal-500">
+                    </label>
+                    <div class="flex gap-2">
+                        <button id="wave-square" class="text-xs px-3 py-1 bg-teal-600 text-white rounded hover:bg-teal-500 transition">方波</button>
+                        <button id="wave-saw" class="text-xs px-3 py-1 bg-gray-700 text-gray-300 rounded hover:bg-gray-600 transition">锯齿波</button>
+                        <button id="wave-triangle" class="text-xs px-3 py-1 bg-gray-700 text-gray-300 rounded hover:bg-gray-600 transition">三角波</button>
+                    </div>
+                    <p class="text-xs text-gray-500">增加谐波数，看无数个简单的正弦波如何叠加成复杂的波形。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 第11章：混沌 -->
+    <section id="ch11" class="py-24 px-6 max-w-6xl mx-auto">
+        <div class="text-center mb-12">
+            <span class="text-pink-600 font-bold tracking-widest text-sm uppercase">The Butterfly Effect</span>
+            <h2 class="text-4xl font-bold text-gray-900 mt-2 mb-4">微积分的未来：混沌</h2>
+            <p class="max-w-2xl mx-auto text-gray-600">
+                Chapter 11。牛顿的梦想遇到了挑战。微积分告诉我们，即使规则是确定的（决定论），结果也可能是不可预测的（混沌）。
+            </p>
+        </div>
+
+        <!-- 互动：洛伦兹吸引子 -->
+        <div class="relative w-full max-w-4xl mx-auto h-[500px] bg-black rounded-3xl shadow-2xl overflow-hidden border border-gray-800">
+            <canvas id="lorenzCanvas"></canvas>
+            <div class="absolute bottom-6 left-6 text-white/80 bg-black/60 p-4 rounded-xl backdrop-blur-sm pointer-events-none max-w-xs">
+                <h4 class="font-bold text-lg mb-1">洛伦兹吸引子</h4>
+                <p class="text-xs font-mono mb-2 text-gray-400">
+                    dx/dt = σ(y - x)<br>
+                    dy/dt = x(ρ - z) - y<br>
+                    dz/dt = xy - βz
+                </p>
+                <p class="text-xs text-pink-300">两条极度接近的轨迹(红/蓝)，<br>随着时间推移分道扬镳。</p>
+            </div>
+            <button id="restart-lorenz" class="absolute top-6 right-6 bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-full text-sm backdrop-blur transition flex items-center gap-2">
+                <span class="material-symbols-outlined text-sm">refresh</span>
+                重置模拟
+            </button>
+        </div>
+        
+        <div class="max-w-2xl mx-auto mt-12 text-center">
+            <div class="bg-pink-50 p-6 rounded-xl border border-pink-100">
+                <h4 class="font-bold text-pink-900 mb-3">蝴蝶效应</h4>
+                <p class="text-sm text-pink-800 leading-relaxed">
+                    气象学家洛伦兹发现，即使是最微小的初始差异（如一只蝴蝶扇动翅膀），也可能导致完全不同的结果（如一场飓风）。这不是因为方程有问题，而是某些系统天生对初始条件极其敏感。
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 结语 -->
+    <section class="py-24 px-6 bg-gradient-to-br from-slate-900 to-indigo-900 text-white">
+        <div class="max-w-4xl mx-auto text-center">
+            <h2 class="text-3xl font-bold mb-6">无穷的力量</h2>
+            <div class="quote-box text-left max-w-2xl mx-auto mb-8 border-indigo-400">
+                <p class="text-lg leading-relaxed text-gray-300">
+                    微积分不仅仅是数学。它是人类理解变化世界的终极工具。从预测日食到设计心脏起搏器，从GPS定位到人工智能，微积分无处不在。
+                </p>
+            </div>
+            <p class="text-gray-400 mb-8">
+                正如本书作者斯特罗加茨所说，微积分的故事还在继续。它将继续帮助我们揭示宇宙最深层的秘密。
+            </p>
+            <div class="flex flex-wrap justify-center gap-4 text-sm">
+                <span class="px-4 py-2 bg-white/10 rounded-full">物理学</span>
+                <span class="px-4 py-2 bg-white/10 rounded-full">工程学</span>
+                <span class="px-4 py-2 bg-white/10 rounded-full">经济学</span>
+                <span class="px-4 py-2 bg-white/10 rounded-full">医学成像</span>
+                <span class="px-4 py-2 bg-white/10 rounded-full">机器学习</span>
+                <span class="px-4 py-2 bg-white/10 rounded-full">气候建模</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="bg-slate-900 text-slate-400 py-12 text-center border-t border-slate-800">
+        <p class="font-mono text-lg mb-2 text-indigo-300">"Calculus is the language God speaks."</p>
+        <p class="text-sm mb-6">— 基于 Steven Strogatz《Infinite Powers》制作</p>
+        <p class="text-xs text-slate-600">本页面仅供学习交流使用 | 交互式可视化演示</p>
+    </footer>
+
+    <script>
+    // ==================== 工具函数 ====================
+    function resizeCanvas(canvas) {
+        const container = canvas.parentElement;
+        const dpr = window.devicePixelRatio || 1;
+        const rect = container.getBoundingClientRect();
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        const ctx = canvas.getContext('2d');
+        ctx.scale(dpr, dpr);
+        canvas.style.width = rect.width + 'px';
+        canvas.style.height = rect.height + 'px';
+        return { width: rect.width, height: rect.height, ctx };
+    }
+
+    // ==================== 英雄区域背景动画 ====================
+    (function initHeroCanvas() {
+        const canvas = document.getElementById('heroCanvas');
+        if (!canvas) return;
+        
+        const container = canvas.parentElement;
+        let width, height, ctx;
+        let particles = [];
+        
+        function resize() {
+            width = container.offsetWidth;
+            height = container.offsetHeight;
+            canvas.width = width;
+            canvas.height = height;
+            ctx = canvas.getContext('2d');
+            
+            // 重新生成粒子
+            particles = [];
+            for (let i = 0; i < 50; i++) {
+                particles.push({
+                    x: Math.random() * width,
+                    y: Math.random() * height,
+                    vx: (Math.random() - 0.5) * 0.5,
+                    vy: (Math.random() - 0.5) * 0.5,
+                    r: Math.random() * 2 + 1
+                });
+            }
+        }
+        
+        function draw() {
+            ctx.fillStyle = 'rgba(15, 23, 42, 0.1)';
+            ctx.fillRect(0, 0, width, height);
+            
+            ctx.fillStyle = 'rgba(99, 102, 241, 0.6)';
+            particles.forEach(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+                
+                if (p.x < 0 || p.x > width) p.vx *= -1;
+                if (p.y < 0 || p.y > height) p.vy *= -1;
+                
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            
+            // 连线
+            ctx.strokeStyle = 'rgba(99, 102, 241, 0.1)';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const dist = Math.sqrt(dx*dx + dy*dy);
+                    if (dist < 150) {
+                        ctx.beginPath();
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+            
+            requestAnimationFrame(draw);
+        }
+        
+        resize();
+        draw();
+        window.addEventListener('resize', resize);
+    })();
+
+    // ==================== 1. 阿基米德切分圆 ====================
+    (function initPizzaCanvas() {
+        const canvas = document.getElementById('pizzaCanvas');
+        const slider = document.getElementById('pizzaSlider');
+        if (!canvas || !slider) return;
+        
+        function draw() {
+            const { width: w, height: h, ctx } = resizeCanvas(canvas);
+            const n = parseInt(slider.value);
+            document.getElementById('slice-val').innerText = n;
+            
+            ctx.clearRect(0, 0, w, h);
+            
+            const cx = w * 0.25, cy = h / 2, r = Math.min(w * 0.15, 80);
+            
+            // 绘制原始圆
+            ctx.beginPath();
+            ctx.arc(cx, cy, r, 0, Math.PI * 2);
+            ctx.fillStyle = '#eff6ff';
+            ctx.fill();
+            ctx.strokeStyle = '#3b82f6';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            // 绘制切分线
+            ctx.strokeStyle = '#60a5fa';
+            for (let i = 0; i < n; i++) {
+                ctx.beginPath();
+                ctx.moveTo(cx, cy);
+                const angle = (i * 2 * Math.PI) / n;
+                ctx.lineTo(cx + r * Math.cos(angle), cy + r * Math.sin(angle));
+                ctx.stroke();
+            }
+            
+            // 箭头
+            ctx.font = "24px serif";
+            ctx.fillStyle = "#9ca3af";
+            ctx.fillText("→", w * 0.42, h / 2 + 8);
+            
+            // 绘制重排后的矩形
+            const rw = Math.PI * r;
+            const rx = w * 0.55;
+            const sliceW = rw / (n / 2);
+            
+            for (let i = 0; i < n; i++) {
+                const isUp = i % 2 === 0;
+                const x = rx + Math.floor(i / 2) * sliceW;
+                
+                ctx.beginPath();
+                ctx.fillStyle = '#dbeafe';
+                ctx.strokeStyle = '#60a5fa';
+                ctx.lineWidth = 1;
+                
+                if (isUp) {
+                    ctx.moveTo(x, cy + r / 2);
+                    ctx.lineTo(x + sliceW, cy + r / 2);
+                    ctx.lineTo(x + sliceW / 2, cy - r / 2);
+                } else {
+                    ctx.moveTo(x, cy - r / 2);
+                    ctx.lineTo(x + sliceW, cy - r / 2);
+                    ctx.lineTo(x + sliceW / 2, cy + r / 2);
+                }
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+            }
+            
+            // 标注
+            ctx.fillStyle = '#6b7280';
+            ctx.font = '12px sans-serif';
+            ctx.fillText('πr', rx + rw / 2 - 10, cy + r / 2 + 20);
+            ctx.fillText('r', rx + rw + 10, cy);
+        }
+        
+        slider.oninput = draw;
+        window.addEventListener('resize', draw);
+        setTimeout(draw, 100);
+    })();
+
+    // ==================== 2. 开普勒轨道 ====================
+    (function initOrbitCanvas() {
+        const canvas = document.getElementById('orbitCanvas');
+        const toggleBtn = document.getElementById('toggle-trace');
+        if (!canvas) return;
+        
+        let traceOrbit = false;
+        let orbitHistory = [];
+        let theta = 0;
+        
+        toggleBtn?.addEventListener('click', () => {
+            traceOrbit = !traceOrbit;
+            toggleBtn.textContent = traceOrbit ? '隐藏面积' : '显示扫过面积';
+            if (!traceOrbit) orbitHistory = [];
+        });
+        
+        function animate() {
+            const { width: w, height: h, ctx } = resizeCanvas(canvas);
+            const cx = w / 2, cy = h / 2;
+            const scale = Math.min(w, h) * 0.35;
+            const e = 0.6;
+            
+            ctx.fillStyle = '#1e293b';
+            ctx.fillRect(0, 0, w, h);
+            
+            // 太阳 (在焦点位置)
+            const c = scale * e; // 焦距
+            const sunX = cx + c * 0.5;
+            
+            ctx.beginPath();
+            ctx.arc(sunX, cy, 10, 0, Math.PI * 2);
+            ctx.fillStyle = '#fbbf24';
+            ctx.shadowBlur = 20;
+            ctx.shadowColor = '#fbbf24';
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            
+            // 椭圆轨道
+            ctx.beginPath();
+            ctx.ellipse(cx, cy, scale, scale * 0.6, 0, 0, Math.PI * 2);
+            ctx.strokeStyle = '#475569';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            
+            // 行星位置 (极坐标)
+            const p = scale * (1 - e * e);
+            const r = p / (1 + e * Math.cos(theta));
+            const px = sunX + r * Math.cos(theta + Math.PI);
+            const py = cy + r * Math.sin(theta + Math.PI);
+            
+            // 速度更新 (开普勒第二定律：等面积)
+            const dt = 0.03 / (r / scale);
+            theta += dt;
+            
+            // 更新显示
+            document.getElementById('orbit-dist').textContent = (r / scale).toFixed(2) + ' AU';
+            document.getElementById('orbit-speed').textContent = (1 / (r / scale)).toFixed(2) + ' ω';
+            
+            // 绘制扫过面积
+            if (traceOrbit) {
+                orbitHistory.push({ x: px, y: py });
+                if (orbitHistory.length > 40) orbitHistory.shift();
+                
+                ctx.beginPath();
+                ctx.moveTo(sunX, cy);
+                orbitHistory.forEach(pt => ctx.lineTo(pt.x, pt.y));
+                ctx.lineTo(sunX, cy);
+                ctx.fillStyle = 'rgba(59, 130, 246, 0.25)';
+                ctx.fill();
+            }
+            
+            // 行星
+            ctx.beginPath();
+            ctx.arc(px, py, 8, 0, Math.PI * 2);
+            ctx.fillStyle = '#60a5fa';
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = '#60a5fa';
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            
+            // 连线
+            ctx.beginPath();
+            ctx.moveTo(sunX, cy);
+            ctx.lineTo(px, py);
+            ctx.strokeStyle = 'rgba(96, 165, 250, 0.3)';
+            ctx.stroke();
+            
+            requestAnimationFrame(animate);
+        }
+        
+        animate();
+    })();
+
+    // ==================== 3. 导数可视化 ====================
+    (function initDerivCanvas() {
+        const canvas = document.getElementById('derivCanvas');
+        const container = document.getElementById('deriv-container');
+        if (!canvas || !container) return;
+        
+        let mouseX = null;
+        let currentFunc = 1;
+        
+        const funcs = {
+            1: { f: x => Math.sin(x) + 0.5 * Math.sin(2*x), df: x => Math.cos(x) + Math.cos(2*x), name: 'sin(x) + 0.5sin(2x)' },
+            2: { f: x => x * x / 4, df: x => x / 2, name: 'x²/4' },
+            3: { f: x => (x*x*x - 3*x) / 10, df: x => (3*x*x - 3) / 10, name: '(x³-3x)/10' }
+        };
+        
+        document.getElementById('deriv-func-1')?.addEventListener('click', () => { currentFunc = 1; updateButtons(); });
+        document.getElementById('deriv-func-2')?.addEventListener('click', () => { currentFunc = 2; updateButtons(); });
+        document.getElementById('deriv-func-3')?.addEventListener('click', () => { currentFunc = 3; updateButtons(); });
+        
+        function updateButtons() {
+            for (let i = 1; i <= 3; i++) {
+                const btn = document.getElementById(`deriv-func-${i}`);
+                if (btn) {
+                    btn.className = i === currentFunc 
+                        ? 'text-xs px-3 py-1 bg-purple-100 text-purple-700 rounded-full hover:bg-purple-200 transition'
+                        : 'text-xs px-3 py-1 bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200 transition';
+                }
+            }
+        }
+        
+        function draw() {
+            const { width: w, height: h, ctx } = resizeCanvas(canvas);
+            ctx.clearRect(0, 0, w, h);
+            
+            const { f, df } = funcs[currentFunc];
+            
+            // 坐标转换
+            const toMathX = px => (px - w / 2) / (w / 8);
+            const toScreenX = mx => mx * (w / 8) + w / 2;
+            const toScreenY = my => h / 2 - my * (h / 4);
+            
+            // 坐标轴
+            ctx.strokeStyle = '#e5e7eb';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(0, h / 2);
+            ctx.lineTo(w, h / 2);
+            ctx.moveTo(w / 2, 0);
+            ctx.lineTo(w / 2, h);
+            ctx.stroke();
+            
+            // 绘制曲线
+            ctx.beginPath();
+            ctx.strokeStyle = '#8b5cf6';
+            ctx.lineWidth = 3;
+            for (let px = 0; px <= w; px++) {
+                const mx = toMathX(px);
+                const my = f(mx);
+                if (px === 0) ctx.moveTo(px, toScreenY(my));
+                else ctx.lineTo(px, toScreenY(my));
+            }
+            ctx.stroke();
+            
+            // 切线
+            const mathX = mouseX !== null ? toMathX(mouseX) : 0;
+            const mathY = f(mathX);
+            const slope = df(mathX);
+            
+            const sx = toScreenX(mathX);
+            const sy = toScreenY(mathY);
+            
+            // 绘制切线
+            ctx.beginPath();
+            ctx.strokeStyle = '#f43f5e';
+            ctx.lineWidth = 2;
+            const x1 = mathX - 2, y1 = mathY - slope * 2;
+            const x2 = mathX + 2, y2 = mathY + slope * 2;
+            ctx.moveTo(toScreenX(x1), toScreenY(y1));
+            ctx.lineTo(toScreenX(x2), toScreenY(y2));
+            ctx.stroke();
+            
+            // 切点
+            ctx.beginPath();
+            ctx.arc(sx, sy, 6, 0, Math.PI * 2);
+            ctx.fillStyle = '#fff';
+            ctx.strokeStyle = '#f43f5e';
+            ctx.lineWidth = 2;
+            ctx.fill();
+            ctx.stroke();
+            
+            // 更新文本
+            document.getElementById('deriv-x').innerText = mathX.toFixed(2);
+            document.getElementById('deriv-y').innerText = mathY.toFixed(2);
+            document.getElementById('deriv-m').innerText = slope.toFixed(2);
+        }
+        
+        container.addEventListener('mousemove', e => {
+            const rect = canvas.getBoundingClientRect();
+            mouseX = e.clientX - rect.left;
+            requestAnimationFrame(draw);
+        });
+        
+        container.addEventListener('mouseleave', () => {
+            mouseX = null;
+            requestAnimationFrame(draw);
+        });
+        
+        window.addEventListener('resize', draw);
+        setTimeout(draw, 100);
+    })();
+
+    // ==================== 4. 积分可视化 ====================
+    (function initIntegralCanvas() {
+        const canvas = document.getElementById('integralCanvas');
+        const btnPaint = document.getElementById('btn-paint');
+        const btnReset = document.getElementById('btn-reset-paint');
+        const areaDisplay = document.getElementById('integral-area');
+        if (!canvas) return;
+        
+        let painting = false;
+        let paintX = 0;
+        let totalArea = 0;
+        
+        const f = x => 80 + 40 * Math.sin(x / 40) + 20 * Math.cos(x / 25);
+        
+        function draw() {
+            const { width: w, height: h, ctx } = resizeCanvas(canvas);
+            ctx.clearRect(0, 0, w, h);
+            
+            // 绘制填充区域
+            ctx.beginPath();
+            ctx.moveTo(0, h);
+            totalArea = 0;
+            for (let x = 0; x <= paintX && x <= w; x++) {
+                const fy = f(x);
+                ctx.lineTo(x, h - fy);
+                totalArea += fy;
+            }
+            ctx.lineTo(Math.min(paintX, w), h);
+            ctx.fillStyle = 'rgba(34, 197, 94, 0.3)';
+            ctx.fill();
+            
+            // 绘制曲线
+            ctx.beginPath();
+            ctx.strokeStyle = '#15803d';
+            ctx.lineWidth = 2;
+            for (let x = 0; x <= w; x++) {
+                const y = h - f(x);
+                if (x === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+            
+            // 滚轮指示器
+            if (paintX > 0 && paintX < w) {
+                const cy = h - f(paintX);
+                ctx.fillStyle = '#166534';
+                ctx.fillRect(paintX - 3, cy, 6, h - cy);
+                ctx.beginPath();
+                ctx.arc(paintX, cy, 5, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            // 更新面积显示
+            if (areaDisplay) {
+                areaDisplay.textContent = (totalArea / 100).toFixed(2);
+            }
+            
+            if (painting && paintX < w) {
+                paintX += 3;
+                requestAnimationFrame(draw);
+            }
+        }
+        
+        btnPaint?.addEventListener('click', () => {
+            painting = true;
+            draw();
+        });
+        
+        btnReset?.addEventListener('click', () => {
+            painting = false;
+            paintX = 0;
+            totalArea = 0;
+            draw();
+        });
+        
+        window.addEventListener('resize', draw);
+        setTimeout(draw, 100);
+    })();
+
+    // ==================== 5. 弹簧物理模拟 ====================
+    (function initSpringCanvas() {
+        const canvas = document.getElementById('springCanvas');
+        const sliderK = document.getElementById('spring-k');
+        const sliderB = document.getElementById('spring-b');
+        const resetBtn = document.getElementById('spring-reset');
+        if (!canvas) return;
+        
+        let sprX = 100, sprV = 0;
+        let isDragging = false;
+        let history = [];
+        
+        function reset() {
+            sprX = 100;
+            sprV = 0;
+            history = [];
+        }
+        
+        resetBtn?.addEventListener('click', reset);
+        
+        // 拖拽功能
+        canvas.addEventListener('mousedown', e => {
+            const rect = canvas.getBoundingClientRect();
+            const mx = e.clientX - rect.left;
+            const blockX = rect.width / 2 + sprX;
+            if (Math.abs(mx - blockX) < 30) {
+                isDragging = true;
+            }
+        });
+        
+        canvas.addEventListener('mousemove', e => {
+            if (isDragging) {
+                const rect = canvas.getBoundingClientRect();
+                sprX = e.clientX - rect.left - rect.width / 2;
+                sprX = Math.max(-150, Math.min(150, sprX));
+                sprV = 0;
+            }
+        });
+        
+        canvas.addEventListener('mouseup', () => isDragging = false);
+        canvas.addEventListener('mouseleave', () => isDragging = false);
+        
+        function animate() {
+            const { width: w, height: h, ctx } = resizeCanvas(canvas);
+            const k = parseFloat(sliderK?.value || 0.1);
+            const b = parseFloat(sliderB?.value || 0.01);
+            
+            // 更新显示值
+            document.getElementById('spring-k-val').textContent = k.toFixed(2);
+            document.getElementById('spring-b-val').textContent = b.toFixed(3);
+            
+            if (!isDragging) {
+                // 物理步进
+                const a = -k * sprX - b * sprV;
+                sprV += a;
+                sprX += sprV;
+            }
+            
+            // 记录历史
+            history.push(sprX);
+            if (history.length > 200) history.shift();
+            
+            ctx.clearRect(0, 0, w, h);
+            const cx = w / 2;
+            const cy = h / 2;
+            
+            // 墙
+            ctx.fillStyle = '#9ca3af';
+            ctx.fillRect(0, 30, 15, h - 60);
+            
+            // 弹簧
+            const blockX = cx + sprX;
+            ctx.beginPath();
+            ctx.strokeStyle = '#4b5563';
+            ctx.lineWidth = 2;
+            const coils = 12;
+            for (let i = 0; i <= coils; i++) {
+                const x = 15 + (i / coils) * (blockX - 40);
+                const y = cy + (i % 2 === 0 ? -10 : 10);
+                if (i === 0) ctx.moveTo(15, cy);
+                else ctx.lineTo(x, y);
+            }
+            ctx.lineTo(blockX - 25, cy);
+            ctx.stroke();
+            
+            // 方块
+            ctx.fillStyle = '#ef4444';
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = 'rgba(239, 68, 68, 0.3)';
+            ctx.fillRect(blockX - 25, cy - 25, 50, 50);
+            ctx.shadowBlur = 0;
+            
+            // 历史轨迹 (右侧图表)
+            const graphX = w - 180;
+            const graphW = 160;
+            const graphH = 80;
+            const graphY = h - 100;
+            
+            ctx.strokeStyle = '#e5e7eb';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(graphX, graphY, graphW, graphH);
+            
+            // 中线
+            ctx.beginPath();
+            ctx.moveTo(graphX, graphY + graphH / 2);
+            ctx.lineTo(graphX + graphW, graphY + graphH / 2);
+            ctx.strokeStyle = '#d1d5db';
+            ctx.stroke();
+            
+            // 绘制历史
+            ctx.beginPath();
+            ctx.strokeStyle = '#ef4444';
+            ctx.lineWidth = 1.5;
+            history.forEach((val, i) => {
+                const x = graphX + (i / history.length) * graphW;
+                const y = graphY + graphH / 2 - (val / 150) * (graphH / 2);
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            });
+            ctx.stroke();
+            
+            requestAnimationFrame(animate);
+        }
+        
+        animate();
+    })();
+
+    // ==================== 6. 傅里叶级数 ====================
+    (function initWaveCanvas() {
+        const canvas = document.getElementById('waveCanvas');
+        const sliderN = document.getElementById('wave-n');
+        if (!canvas) return;
+        
+        let waveType = 'square';
+        let t = 0;
+        
+        document.getElementById('wave-square')?.addEventListener('click', () => {
+            waveType = 'square';
+            updateWaveButtons();
+        });
+        document.getElementById('wave-saw')?.addEventListener('click', () => {
+            waveType = 'saw';
+            updateWaveButtons();
+        });
+        document.getElementById('wave-triangle')?.addEventListener('click', () => {
+            waveType = 'triangle';
+            updateWaveButtons();
+        });
+        
+        function updateWaveButtons() {
+            const types = ['square', 'saw', 'triangle'];
+            types.forEach(type => {
+                const btn = document.getElementById(`wave-${type}`);
+                if (btn) {
+                    btn.className = type === waveType
+                        ? 'text-xs px-3 py-1 bg-teal-600 text-white rounded hover:bg-teal-500 transition'
+                        : 'text-xs px-3 py-1 bg-gray-700 text-gray-300 rounded hover:bg-gray-600 transition';
+                }
+            });
+        }
+        
+        function getCoeffs(n, type) {
+            switch (type) {
+                case 'square':
+                    return { harm: 2 * n + 1, amp: 1 / (2 * n + 1) };
+                case 'saw':
+                    return { harm: n + 1, amp: (n % 2 === 0 ? 1 : -1) / (n + 1) };
+                case 'triangle':
+                    if (n % 2 !== 0) return { harm: 0, amp: 0 };
+                    const m = n / 2;
+                    return { harm: 2 * m + 1, amp: (m % 2 === 0 ? 1 : -1) / Math.pow(2 * m + 1, 2) };
+                default:
+                    return { harm: n + 1, amp: 1 / (n + 1) };
+            }
+        }
+        
+        function animate() {
+            const { width: w, height: h, ctx } = resizeCanvas(canvas);
+            const N = parseInt(sliderN?.value || 1);
+            document.getElementById('wave-n-val').innerText = N;
+            
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, w, h);
+            
+            // 圆形叠加 (左侧)
+            let cx = 80, cy = h / 2;
+            
+            for (let i = 0; i < N; i++) {
+                const { harm, amp } = getCoeffs(i, waveType);
+                if (harm === 0) continue;
+                
+                const radius = 40 * amp * (4 / Math.PI);
+                const prevX = cx, prevY = cy;
+                
+                // 圆
+                ctx.beginPath();
+                ctx.arc(prevX, prevY, Math.abs(radius), 0, Math.PI * 2);
+                ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+                
+                cx += radius * Math.cos(harm * t);
+                cy += radius * Math.sin(harm * t);
+                
+                // 半径线
+                ctx.beginPath();
+                ctx.moveTo(prevX, prevY);
+                ctx.lineTo(cx, cy);
+                ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+                ctx.stroke();
+            }
+            
+            // 波形 (右侧)
+            const startX = 180;
+            ctx.beginPath();
+            ctx.strokeStyle = '#14b8a6';
+            ctx.lineWidth = 2;
+            
+            for (let px = 0; px < w - startX; px++) {
+                let val = 0;
+                for (let i = 0; i < N; i++) {
+                    const { harm, amp } = getCoeffs(i, waveType);
+                    if (harm === 0) continue;
+                    val += amp * (4 / Math.PI) * 40 * Math.sin(harm * (px * 0.04 - t));
+                }
+                if (px === 0) ctx.moveTo(startX + px, h / 2 + val);
+                else ctx.lineTo(startX + px, h / 2 + val);
+            }
+            ctx.stroke();
+            
+            // 连接线
+            ctx.beginPath();
+            ctx.moveTo(cx, cy);
+            ctx.lineTo(startX, cy);
+            ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            
+            // 小点
+            ctx.beginPath();
+            ctx.arc(cx, cy, 4, 0, Math.PI * 2);
+            ctx.fillStyle = '#14b8a6';
+            ctx.fill();
+            
+            t += 0.03;
+            requestAnimationFrame(animate);
+        }
+        
+        animate();
+    })();
+
+    // ==================== 7. 洛伦兹吸引子 ====================
+    (function initLorenzCanvas() {
+        const canvas = document.getElementById('lorenzCanvas');
+        const resetBtn = document.getElementById('restart-lorenz');
+        if (!canvas) return;
+        
+        const sigma = 10, rho = 28, beta = 8 / 3;
+        const dt = 0.005;
+        
+        let points1 = [], points2 = [];
+        let x1 = 0.1, y1 = 0, z1 = 0;
+        let x2 = 0.101, y2 = 0, z2 = 0;
+        
+        function reset() {
+            points1 = [];
+            points2 = [];
+            x1 = 0.1; y1 = 0; z1 = 0;
+            x2 = 0.101; y2 = 0; z2 = 0;
+        }
+        
+        resetBtn?.addEventListener('click', reset);
+        
+        function step(x, y, z) {
+            const dx = sigma * (y - x) * dt;
+            const dy = (x * (rho - z) - y) * dt;
+            const dz = (x * y - beta * z) * dt;
+            return [x + dx, y + dy, z + dz];
+        }
+        
+        function animate() {
+            const container = canvas.parentElement;
+            const w = container.offsetWidth;
+            const h = container.offsetHeight;
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            
+            // 多步进
+            for (let i = 0; i < 5; i++) {
+                [x1, y1, z1] = step(x1, y1, z1);
+                [x2, y2, z2] = step(x2, y2, z2);
+                points1.push({ x: x1, y: y1, z: z1 });
+                points2.push({ x: x2, y: y2, z: z2 });
+            }
+            
+            const maxPoints = 3000;
+            if (points1.length > maxPoints) {
+                points1 = points1.slice(-maxPoints);
+                points2 = points2.slice(-maxPoints);
+            }
+            
+            // 淡出
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.08)';
+            ctx.fillRect(0, 0, w, h);
+            
+            const scale = 10;
+            const cx = w / 2;
+            const cy = h / 2 + 80;
+            
+            // 绘制轨迹1 (蓝)
+            ctx.beginPath();
+            ctx.strokeStyle = '#3b82f6';
+            ctx.lineWidth = 1;
+            points1.forEach((p, i) => {
+                const x = cx + p.x * scale;
+                const y = cy - p.z * scale;
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            });
+            ctx.stroke();
+            
+            // 绘制轨迹2 (粉)
+            ctx.beginPath();
+            ctx.strokeStyle = '#ec4899';
+            ctx.lineWidth = 1;
+            points2.forEach((p, i) => {
+                const x = cx + p.x * scale;
+                const y = cy - p.z * scale;
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            });
+            ctx.stroke();
+            
+            // 当前点
+            if (points1.length > 0) {
+                const last1 = points1[points1.length - 1];
+                const last2 = points2[points2.length - 1];
+                
+                ctx.beginPath();
+                ctx.arc(cx + last1.x * scale, cy - last1.z * scale, 3, 0, Math.PI * 2);
+                ctx.fillStyle = '#60a5fa';
+                ctx.fill();
+                
+                ctx.beginPath();
+                ctx.arc(cx + last2.x * scale, cy - last2.z * scale, 3, 0, Math.PI * 2);
+                ctx.fillStyle = '#f472b6';
+                ctx.fill();
+            }
+            
+            requestAnimationFrame(animate);
+        }
+        
+        animate();
+    })();
+
+    // ==================== 导航高亮 ====================
+    (function initNavHighlight() {
+        const sections = ['intro', 'ch1-2', 'ch3-4', 'ch5-6', 'ch7-8', 'ch9', 'ch10', 'ch11'];
+        
+        function updateNav() {
+            const scrollY = window.scrollY + window.innerHeight / 3;
+            
+            for (let id of sections) {
+                const el = document.getElementById(id);
+                if (!el) continue;
+                
+                const top = el.offsetTop;
+                const height = el.offsetHeight;
+                
+                if (scrollY >= top && scrollY < top + height) {
+                    document.querySelectorAll('.nav-dot').forEach(d => d.classList.remove('active'));
+                    document.getElementById('dot-' + id)?.classList.add('active');
+                    break;
+                }
+            }
+        }
+        
+        window.addEventListener('scroll', updateNav);
+        updateNav();
+    })();
+    </script>
+</body>
+</html>

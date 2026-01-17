@@ -819,23 +819,23 @@ $$这是该微分方程的通解，其中C为任意常数。$$`,
       id: 35,
       type: "计算题",
       title: "一阶线性微分方程",
-      question: "35.求解微分方程 $xy' - y = x^2$，$x > 0$",
+      question: "35.求解微分方程 $y' + 2xy = x$",
       explanation: `$$解：$$
-        $$1. 这是一阶线性微分方程，标准形式为 y' + P(x)y = Q(x)，$$
-          $$y' - \\frac{1}{x}y = x，其中 P(x) = -\\frac{1}{x}, Q(x) = x$$
-        $$2. 使用公式法求解线性微分方程：y = e^{-\\int P(x)dx} \\left(\\int Q(x)e^{\\int P(x)dx}dx + C\\right)$$
-        $$3. 代入积分：y = e^{-\\int -\\frac{1}{x} dx} \\left( \\int x e^{\\int -\\frac{1}{x} dx} dx + C \\right)$$
-        $$4. 计算积分（因为x>0，所以|x|=x）：$$
-        $$\\int -\\frac{1}{x} dx = -\\ln|x|$$
-        $$e^{-\\int -\\frac{1}{x} dx} = e^{\\ln|x|} = x$$
-        $$\\int x e^{\\int -\\frac{1}{x} dx} dx = \\int x e^{-\\ln|x|} dx = \\int x e^{\\ln|\\frac{1}{x}|} dx = \\int x \\cdot \\frac{1}{x} dx = \\int 1 dx = x+C$$
-        $$5. 代入积分结果：$$
-        $$y = x\\left( x + C \\right) = x^2 + Cx$$
-        $$这是该微分方程的通解，其中C为任意常数。$$`,
-        answer: "$y = x^2 + Cx$，其中C为任意常数",
-        difficulty: "medium",
-        category: "一阶线性微分方程",
-        method: "公式法"
+$$1. 这是一阶线性微分方程，标准形式为 y' + P(x)y = Q(x)$$
+$$其中 P(x) = 2x，Q(x) = x$$
+$$2. 使用公式法：y = e^{-\\int P(x)dx} \\left(\\int Q(x)e^{\\int P(x)dx}dx + C\\right)$$
+$$3. 计算积分因子：$$
+$$\\int P(x)dx = \\int 2x dx = x^2$$
+$$e^{\\int P(x)dx} = e^{x^2}$$
+$$e^{-\\int P(x)dx} = e^{-x^2}$$
+$$4. 计算积分：$$
+$$\\int x e^{x^2} dx = \\frac{1}{2}\\int e^{x^2} d(x^2) = \\frac{1}{2}e^{x^2} + C$$
+$$5. 代入得通解：$$
+$$y = e^{-x^2}\\left(\\frac{1}{2}e^{x^2} + C\\right) = \\frac{1}{2} + Ce^{-x^2}$$`,
+      answer: "$y = \\frac{1}{2} + Ce^{-x^2}$，其中C为任意常数",
+      difficulty: "medium",
+      category: "一阶线性微分方程",
+      method: "公式法"
     },
 {
       id: 36,
@@ -1184,7 +1184,7 @@ $$这是该微分方程的通解，其中C为任意常数。$$`,
       $$因此，y = 3y_1(x) - 2y_2(x)作为y_1和y_2的线性组合，也是原方程的解。$$`,
       answer: "对",
       difficulty: "easy",
-      category: "二阶常系数微分方程",
+      category: "二阶常系数线性微分方程",
       method: "性质判断"
     },
 {
@@ -1460,5 +1460,3 @@ $$这是该微分方程的通解，其中C为任意常数。$$`,
     }
 ]
     };
-
-
